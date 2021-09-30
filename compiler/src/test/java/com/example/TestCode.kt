@@ -2,10 +2,12 @@ package com.example
 
 import dagger.Binds
 import dagger.Component
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 interface SomeInterface {
     fun provide(): Int
@@ -15,6 +17,7 @@ class SomeImpl @Inject constructor() : SomeInterface {
     override fun provide() = 2
 }
 
+@Singleton
 class SomeObj @Inject constructor(
     i: SomeInterface
 ) {
@@ -43,6 +46,7 @@ interface TestModule {
 interface TestComponent {
     val hello: SomeObj
     val someInt: SomeInterface
+    val lazyHello: Lazy<SomeObj>
 
     @Component.Factory
     interface Factory {

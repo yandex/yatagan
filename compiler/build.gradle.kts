@@ -27,10 +27,10 @@ java {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":generator"))
 
     implementation(kotlin("stdlib"))
     implementation("com.google.devtools.ksp:symbol-processing-api:${Versions.Ksp}")
-    implementation("com.squareup:javapoet:${Versions.JavaPoet}")
 
     kspTest(project(":compiler"))
 }

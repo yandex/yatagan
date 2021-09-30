@@ -2,15 +2,37 @@ package com.yandex.dagger3.compiler
 
 import com.google.devtools.ksp.getConstructors
 import com.google.devtools.ksp.getDeclaredFunctions
+import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.isAnnotationPresent
-import com.google.devtools.ksp.symbol.*
-import com.yandex.dagger3.core.*
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSAnnotation
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSType
+import com.yandex.dagger3.core.AliasBinding
+import com.yandex.dagger3.core.Binding
+import com.yandex.dagger3.core.ComponentModel
+import com.yandex.dagger3.core.EntryPointModel
+import com.yandex.dagger3.core.FunctionNameModel
+import com.yandex.dagger3.core.ModuleModel
+import com.yandex.dagger3.core.NameModel
+import com.yandex.dagger3.core.NodeDependency
+import com.yandex.dagger3.core.NodeModel
+import com.yandex.dagger3.core.NodeQualifier
+import com.yandex.dagger3.core.NodeScope
+import com.yandex.dagger3.core.PropertyNameModel
+import com.yandex.dagger3.core.ProvisionBinding
 import dagger.Binds
 import dagger.Component
+import dagger.Lazy
 import dagger.Provides
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Qualifier
+import javax.inject.Scope
 import kotlin.reflect.KClass
 
 data class KspComponentModel(
@@ -34,30 +56,30 @@ data class KspComponentModel(
         list.mapTo(hashSetOf()) { KspComponentModel(it.declaration as KSClassDeclaration) }
     }
 
-    override val entryPoints: Set<Pair<String, NodeModel>> by lazy {
+    override val entryPoints: Set<EntryPointModel> by lazy {
         buildSet {
             for (function in node.getAllFunctions().filter { it.isAbstract }) {
-                add(
-                    function.simpleName.asString() to KspNodeModel(
-                        reference = function.returnType ?: continue,
+                this += EntryPointModel(
+                    dep = NodeDependency.resolveFromType(
+                        type = function.returnType?.resolve() ?: continue,
                         forQualifier = function,
-                    )
+                    ),
+                    getterName = function.simpleName.asString(),
                 )
             }
             for (prop in node.getAllProperties().filter { it.isAbstract() && !it.isMutable }) {
-                add(
-                    "get${prop.simpleName.asString().capitalize()}"  to KspNodeModel(
-                        reference = prop.type, forQualifier = prop
-                    )
+                this += EntryPointModel(
+                    dep = NodeDependency.resolveFromType(type = prop.type.resolve(), forQualifier = prop),
+                    getterName = "get${prop.simpleName.asString().capitalize()}",
                 )
             }
         }
     }
 }
 
-data class KspNodeQualifier(val tag: String) : NodeQualifier {
+data class KspAnnotationDescriptor(val tag: String) : NodeQualifier, NodeScope {
     companion object {
-        fun describe(annotation: KSAnnotation): KspNodeQualifier {
+        fun describe(annotation: KSAnnotation): KspAnnotationDescriptor {
             val descriptor = buildString {
                 append(annotation.annotationType.resolve().declaration.nameBestEffort)
                 append('(')
@@ -66,24 +88,32 @@ data class KspNodeQualifier(val tag: String) : NodeQualifier {
                 }
                 append(')')
             }
-            return KspNodeQualifier(descriptor)
+            return KspAnnotationDescriptor(descriptor)
         }
     }
+
+    override fun toString() = tag
 }
 
 data class KspNodeModel(
     val type: KSType,
-    override val qualifier: KspNodeQualifier?,
+    override val qualifier: KspAnnotationDescriptor?,
 ) : NodeModel {
     constructor(
-        reference: KSTypeReference,
+        type: KSType,
         forQualifier: KSAnnotated,
     ) : this(
-        type = reference.resolve(),
+        type = type,
         qualifier = forQualifier.annotations.find {
             it.annotationType.resolve().declaration.getAnnotation<Qualifier>() != null
-        }?.let { KspNodeQualifier.describe(it) }
+        }?.let(KspAnnotationDescriptor::describe)
     )
+
+    override val scope: NodeScope? by lazy {
+        type.declaration.annotations.find {
+            it.annotationType.resolve().declaration.getAnnotation<Scope>() != null
+        }?.let(KspAnnotationDescriptor::describe)
+    }
 
     override val defaultBinding: Binding? by lazy {
         if (qualifier != null) null
@@ -103,40 +133,74 @@ data class KspNodeModel(
     override val name: NameModel by lazy {
         type.declaration.nameModel
     }
+
+    override fun toString() = "${qualifier ?: ""} $name"
 }
 
-sealed class BaseBinding(
-    override val target: NodeModel,
-    override val dependencies: Set<NodeModel>,
-) : Binding
-
-class AliasBinding(
-    source: NodeModel,
+fun ProvisionBinding(
     target: NodeModel,
-) : BaseBinding(target = target, dependencies = setOf(source))
-
-class ProvisionBinding(
-    target: NodeModel,
-    val method: KSDeclaration,
-) : BaseBinding(
-    target = target, dependencies = when (method) {
-        is KSFunctionDeclaration -> method.parameters.map {
-            KspNodeModel(
-                reference = it.type,
-                forQualifier = it,
-            )
+    method: KSDeclaration,
+) = ProvisionBinding(
+    target = target,
+    provider = when (method) {
+        is KSFunctionDeclaration -> method.nameModel
+        is KSPropertyDeclaration -> method.nameModel
+        else -> throw IllegalArgumentException("invalid declaration for provision")
+    },
+    params = when (method) {
+        is KSFunctionDeclaration -> method.parameters.map { param ->
+            NodeDependency.resolveFromType(type = param.type.resolve(), forQualifier = param)
         }.toSet()
-        else -> emptySet()
+        is KSPropertyDeclaration -> emptySet()
+        else -> throw IllegalArgumentException("invalid declaration for provision")
     }
 )
+
+fun NodeDependency.Companion.resolveFromType(
+    type: KSType,
+    forQualifier: KSAnnotated,
+): NodeDependency {
+    val kind = when (type.declaration.qualifiedName?.asString()) {
+        Lazy::class.qualifiedName -> NodeDependency.Kind.Lazy
+        Provider::class.qualifiedName -> NodeDependency.Kind.Provider
+        else -> NodeDependency.Kind.Normal
+    }
+    return NodeDependency(
+        node = KspNodeModel(
+            type = when (kind) {
+                NodeDependency.Kind.Normal -> type
+                else -> type.arguments[0].type!!.resolve()
+            },
+            forQualifier = forQualifier,
+        ),
+        kind = kind,
+    )
+}
 
 data class KspModuleModel(
     val node: KSClassDeclaration,
 ) : ModuleModel {
     override val bindings: Collection<Binding> by lazy {
-        node.getDeclaredFunctions().mapNotNullTo(arrayListOf()) { method ->
+        val list = arrayListOf<Binding>()
+        node.getDeclaredProperties().mapNotNullTo(list) { prop ->
             val target = KspNodeModel(
-                reference = method.returnType ?: return@mapNotNullTo null,
+                type = prop.type.resolve(),
+                forQualifier = prop,
+            )
+            prop.annotations.forEach { ann ->
+                when {
+                    ann sameAs Provides::class -> ProvisionBinding(
+                        target = target,
+                        method = prop,
+                    )
+                    else -> null
+                }?.let { return@mapNotNullTo it }
+            }
+            null
+        }
+        node.getDeclaredFunctions().mapNotNullTo(list) { method ->
+            val target = KspNodeModel(
+                type = method.returnType?.resolve() ?: return@mapNotNullTo null,
                 forQualifier = method,
             )
             method.annotations.forEach { ann ->
@@ -144,7 +208,7 @@ data class KspModuleModel(
                     ann sameAs Binds::class -> AliasBinding(
                         target = target,
                         source = KspNodeModel(
-                            reference = method.parameters.single().type,
+                            type = method.parameters.single().type.resolve(),
                             forQualifier = method.parameters.single(),
                         ),
                     )
@@ -183,12 +247,20 @@ internal val KSDeclaration.nameBestEffort: String
 
 
 internal val KSDeclaration.nameModel: NameModel
-    get() = qualifiedName?.let {
-        NameModel(
-            packageName = it.getQualifier(),
-            name = it.getShortName(),
-        )
-    } ?: NameModel(
+    get() = NameModel(
         packageName = packageName.asString(),
+        qualifiedName = qualifiedName!!.asString(),
+        simpleName = simpleName.asString(),
+    )
+
+internal val KSFunctionDeclaration.nameModel: FunctionNameModel
+    get() = FunctionNameModel(
+        ownerName = (parentDeclaration as KSClassDeclaration).nameModel,
+        name = simpleName.asString(),
+    )
+
+internal val KSPropertyDeclaration.nameModel: PropertyNameModel
+    get() = PropertyNameModel(
+        ownerName = (parentDeclaration as KSClassDeclaration).nameModel,
         name = simpleName.asString(),
     )

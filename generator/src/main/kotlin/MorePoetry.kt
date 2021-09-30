@@ -1,16 +1,29 @@
 // Copyright 2020 Yandex LLC. All rights reserved.
 
-package com.yandex.dagger3.compiler
+package com.yandex.dagger3.generator
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.AnnotationSpec
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.JavaFile
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeSpec
+import com.yandex.dagger3.core.NameModel
 import javax.annotation.processing.Filer
-import javax.lang.model.element.*
+import javax.lang.model.element.AnnotationMirror
+import javax.lang.model.element.Element
+import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.Name
 import kotlin.reflect.KClass
 
 @DslMarker
-annotation class JavaPoetry
+internal annotation class JavaPoetry
 
-open class ExpressionBuilder {
+internal open class ExpressionBuilder {
     val impl: CodeBlock.Builder = CodeBlock.builder()
 
     operator fun CodeBlock.unaryPlus() {
@@ -21,9 +34,10 @@ open class ExpressionBuilder {
         impl.add(this)
     }
 
-    inline fun <T> join(seq: Sequence<T>,
-                        separator: String = ", ",
-                        crossinline block: ExpressionBuilder.(T) -> Unit
+    inline fun <T> join(
+        seq: Sequence<T>,
+        separator: String = ", ",
+        crossinline block: ExpressionBuilder.(T) -> Unit
     ) {
         impl.add(CodeBlock.join(seq.map { buildExpression { block(it) } }.asIterable(), separator))
     }
@@ -34,7 +48,7 @@ open class ExpressionBuilder {
 }
 
 @JavaPoetry
-open class CodeBuilder {
+internal open class CodeBuilder {
     val implCode: CodeBlock.Builder = CodeBlock.builder()
 
     operator fun CodeBlock.unaryPlus() {
@@ -62,14 +76,14 @@ open class CodeBuilder {
     }
 }
 
-interface AnnotatibleBuilder {
+internal interface AnnotatibleBuilder {
     fun annotation(mirror: AnnotationMirror)
 
     fun annotation(clazz: KClass<out Annotation>, block: AnnotationSpecBuilder.() -> Unit)
 }
 
 @JavaPoetry
-abstract class MethodSpecBuilder : CodeBuilder(), AnnotatibleBuilder {
+internal abstract class MethodSpecBuilder : CodeBuilder(), AnnotatibleBuilder {
     abstract val impl: MethodSpec.Builder
 
     fun implBuild(): MethodSpec {
@@ -77,8 +91,9 @@ abstract class MethodSpecBuilder : CodeBuilder(), AnnotatibleBuilder {
         return impl.build()
     }
 
-    inline fun parameter(type: TypeName, name: String,
-                         block: ParameterSpecBuilder.() -> Unit = {}
+    inline fun parameter(
+        type: TypeName, name: String,
+        block: ParameterSpecBuilder.() -> Unit = {}
     ) {
         impl.addParameter(ParameterSpecBuilder(type, name).apply(block).impl.build())
     }
@@ -100,8 +115,8 @@ abstract class MethodSpecBuilder : CodeBuilder(), AnnotatibleBuilder {
     }
 
     override fun annotation(
-            clazz: KClass<out Annotation>,
-            block: AnnotationSpecBuilder.() -> Unit,
+        clazz: KClass<out Annotation>,
+        block: AnnotationSpecBuilder.() -> Unit,
     ) {
         impl.addAnnotation(AnnotationSpecBuilder(clazz).apply(block).impl.build())
     }
@@ -120,7 +135,7 @@ abstract class MethodSpecBuilder : CodeBuilder(), AnnotatibleBuilder {
 }
 
 @JavaPoetry
-class FieldSpecBuilder(type: TypeName, name: String) {
+internal class FieldSpecBuilder(type: TypeName, name: String) {
     val impl: FieldSpec.Builder = FieldSpec.builder(type, name)
 
     fun modifiers(vararg modifiers: Modifier) {
@@ -137,11 +152,11 @@ class FieldSpecBuilder(type: TypeName, name: String) {
 }
 
 @JavaPoetry
-class ParameterSpecBuilder constructor(type: TypeName, name: String) : AnnotatibleBuilder {
+internal class ParameterSpecBuilder constructor(type: TypeName, name: String) : AnnotatibleBuilder {
     val impl: ParameterSpec.Builder = ParameterSpec.builder(type, name)
 
     inline fun <reified A : Annotation> annotation(
-            block: AnnotationSpecBuilder.() -> Unit = {}
+        block: AnnotationSpecBuilder.() -> Unit = {}
     ) {
         impl.addAnnotation(AnnotationSpecBuilder(A::class).apply(block).impl.build())
     }
@@ -151,15 +166,15 @@ class ParameterSpecBuilder constructor(type: TypeName, name: String) : Annotatib
     }
 
     override fun annotation(
-            clazz: KClass<out Annotation>,
-            block: AnnotationSpecBuilder.() -> Unit,
+        clazz: KClass<out Annotation>,
+        block: AnnotationSpecBuilder.() -> Unit,
     ) {
         impl.addAnnotation(AnnotationSpecBuilder(clazz).apply(block).impl.build())
     }
 }
 
 @JavaPoetry
-abstract class TypeSpecBuilder : AnnotatibleBuilder {
+internal abstract class TypeSpecBuilder : AnnotatibleBuilder {
     abstract val impl: TypeSpec.Builder
 
     inline fun method(name: String, block: MethodSpecBuilder.() -> Unit) {
@@ -187,8 +202,8 @@ abstract class TypeSpecBuilder : AnnotatibleBuilder {
     }
 
     override fun annotation(
-            clazz: KClass<out Annotation>,
-            block: AnnotationSpecBuilder.() -> Unit,
+        clazz: KClass<out Annotation>,
+        block: AnnotationSpecBuilder.() -> Unit,
     ) {
         impl.addAnnotation(AnnotationSpecBuilder(clazz).apply(block).impl.build())
     }
@@ -219,8 +234,8 @@ abstract class TypeSpecBuilder : AnnotatibleBuilder {
 }
 
 @JavaPoetry
-class AnnotationSpecBuilder(
-        clazz: KClass<out Annotation>
+internal class AnnotationSpecBuilder(
+    clazz: KClass<out Annotation>
 ) {
     val impl: AnnotationSpec.Builder = AnnotationSpec.builder(clazz.java)
 
@@ -249,52 +264,56 @@ class AnnotationSpecBuilder(
     }
 
     inline fun <reified A : Annotation> annotation(
-            block: AnnotationSpecBuilder.() -> Unit = {}
+        block: AnnotationSpecBuilder.() -> Unit = {}
     ): AnnotationSpec {
         return AnnotationSpecBuilder(A::class).apply(block).impl.build()
     }
 }
 
-class ClassTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
+internal class ClassTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
     override val impl: TypeSpec.Builder = TypeSpec.classBuilder(name)
 }
 
-class InterfaceTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
+internal class InterfaceTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
     override val impl: TypeSpec.Builder = TypeSpec.interfaceBuilder(name)
 }
 
-class AnnotationTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
+internal class AnnotationTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
     override val impl: TypeSpec.Builder = TypeSpec.annotationBuilder(name)
 }
 
-class MethodSpecBuilderImpl(name: String) : MethodSpecBuilder() {
+internal class MethodSpecBuilderImpl(name: String) : MethodSpecBuilder() {
     override val impl: MethodSpec.Builder = MethodSpec.methodBuilder(name)
 }
 
-class ConstructorSpecBuilder : MethodSpecBuilder() {
+internal class ConstructorSpecBuilder : MethodSpecBuilder() {
     override val impl: MethodSpec.Builder = MethodSpec.constructorBuilder()
 }
 
-class OverrideMethodSpecBuilder(base: ExecutableElement) : MethodSpecBuilder() {
+internal class OverrideMethodSpecBuilder(base: ExecutableElement) : MethodSpecBuilder() {
     override val impl: MethodSpec.Builder = MethodSpec.overriding(base)
 }
 
-inline fun buildInterface(
-        name: ClassName, block: TypeSpecBuilder.() -> Unit
+internal inline fun buildInterface(
+    name: ClassName, block: TypeSpecBuilder.() -> Unit
 ): TypeSpec = InterfaceTypeSpecBuilder(name).apply(block).impl.build()
 
-inline fun buildAnnotationClass(
-        name: ClassName, block: TypeSpecBuilder.() -> Unit
+internal inline fun buildAnnotationClass(
+    name: ClassName, block: TypeSpecBuilder.() -> Unit
 ): TypeSpec = AnnotationTypeSpecBuilder(name).apply(block).impl.build()
 
-inline fun buildClass(
-        name: ClassName, block: TypeSpecBuilder.() -> Unit
+internal inline fun buildClass(
+    name: ClassName, block: TypeSpecBuilder.() -> Unit
 ): TypeSpec = ClassTypeSpecBuilder(name).apply(block).impl.build()
 
-inline fun buildExpression(block: ExpressionBuilder.() -> Unit): CodeBlock {
+internal inline fun buildExpression(block: ExpressionBuilder.() -> Unit): CodeBlock {
     return ExpressionBuilder().apply(block).impl.build()
 }
 
-fun TypeSpec.writeToJavaFile(packageName: String, filer: Filer) {
+internal fun TypeSpec.writeToJavaFile(packageName: String, filer: Filer) {
     JavaFile.builder(packageName, this).build().writeTo(filer)
 }
+
+internal inline fun NameModel.asClassName(
+    transformName: (String) -> String = { it }
+) = ClassName.get(packageName, transformName(simpleName))
