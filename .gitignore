@@ -1,0 +1,9 @@
+# Build dirs
+/build/
+*/build/
+
+# Gradle local files
+.gradle
+
+# Local config files
+/local.properties
