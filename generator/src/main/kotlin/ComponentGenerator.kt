@@ -1,12 +1,14 @@
 package com.yandex.dagger3.generator
 
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec
 import com.yandex.dagger3.core.AliasBinding
 import com.yandex.dagger3.core.Binding
 import com.yandex.dagger3.core.BindingGraph
-import com.yandex.dagger3.core.NodeModel
+import com.yandex.dagger3.core.NodeDependency
 import com.yandex.dagger3.core.ProvisionBinding
+import com.yandex.dagger3.core.isScoped
 import javax.lang.model.element.Modifier
 
 interface GenerationLogger {
@@ -32,71 +34,210 @@ class ComponentGenerator(
 
     val targetLanguage: Language get() = Language.Java
 
-    private val nodes = hashSetOf<NodeModel>()
-
     fun generateTo(out: Appendable) {
         JavaFile.builder(targetPackageName, generate())
             .build()
             .writeTo(out)
     }
 
-    private fun resolveAlias(maybeAlias: Binding): Binding? {
+    private fun resolveAlias(maybeAlias: Binding): ProvisionBinding {
         var binding: Binding? = maybeAlias
-        while (binding is AliasBinding) {
+        while (when (binding) {
+                is AliasBinding -> true
+                is ProvisionBinding -> return binding
+                else -> throw IllegalStateException()
+            }
+        ) {
             binding = graph.resolve(binding.source)
         }
-        return binding
+        throw IllegalStateException("not reached")
     }
 
     private fun generate(): TypeSpec {
         return buildClass(_targetClassName) {
-            implements(graph.root.name.asClassName())
+            implements(graph.root.name.asTypeName())
+            modifiers(Modifier.FINAL)
+            annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes") }
 
             constructor {
                 modifiers(Modifier.PUBLIC)
             }
 
-            val nodes: Map<NodeModel, Binding?> = graph.resolveReachable()
+            val reachable = graph.resolveReachable()
+            val bindings = reachable.asSequence()
+                .onEach { (node, binding) ->
+                    if (binding == null) {
+                        logger.warning("Missing binding for $node")
+                    }
+                }.mapNotNull { (_, binding) -> binding }
+                .filterIsInstance<ProvisionBinding>()
+                .toList()
 
-            graph.root.entryPoints.forEach { (getterName, dep) ->
-                val (node, kind) = dep
-                method(getterName) {
-                    modifiers(Modifier.PUBLIC)
-                    annotation<Override>()
-                    returnType(node.name.asClassName())
-                    +"throw new RuntimeException()"
+            val internalProvisions = hashMapOf<NodeDependency, String>()
+            fun internalProvision(dep: NodeDependency): String {
+                // TODO(jeffset): reuse entry points to reduce method count
+                return internalProvisions.getOrPut(dep) {
+                    "_get${internalProvisions.size}"
                 }
             }
 
-            for ((node, binding) in nodes) {
-                if (binding == null) {
-                    logger.warning("Missing binding for $node")
-                    continue
+            method("_new") {
+                modifiers(Modifier.PRIVATE)
+                returnType(ClassName.OBJECT)
+                parameter(ClassName.INT, "i")
+                controlFlow("switch(i)") {
+                    bindings.forEachIndexed { index, binding ->
+                        +buildExpression {
+                            +"case $index: return "
+                            call(binding.provider, binding.params.asSequence()
+                                .map { dep -> internalProvision(dep) + "()" })
+                        }
+                    }
+                    +"default: throw new %T(%S)".formatCode(Names.AssertionError, "not reached")
+                }
+            }
+
+            val cachingProviderName = _targetClassName.nestedClass("CachingProvider")
+            var useCachingProvider = false
+
+            bindings
+                .zip(0..bindings.lastIndex)
+                .filter { (b, _) -> b.isScoped }
+                .forEach { (_, index) ->
+                    useCachingProvider = true
+                    field(cachingProviderName, "mProvider$index") {
+                        modifiers(Modifier.PRIVATE)
+                    }
+
+                    method("_provider$index") {
+                        returnType(cachingProviderName)
+                        +"%T local = mProvider$index".formatCode(cachingProviderName)
+                        controlFlow("if (local == null)") {
+                            +"local = new %T(this, $index)"
+                                .formatCode(cachingProviderName)
+                            +"mProvider$index = local"
+                        }
+                        +"return local"
+                    }
                 }
 
-                val resolved = resolveAlias(binding)
-                method(node.name.qualifiedName.replace('.', '_')) {
+            if (useCachingProvider) {
+                nestedType {
+                    buildClass(cachingProviderName) {
+                        implements(Names.Lazy)
+                        modifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                        field(_targetClassName, "mFactory") {
+                            modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                        }
+                        field(ClassName.INT, "mIndex") {
+                            modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                        }
+                        field(ClassName.OBJECT, "mValue") {
+                            modifiers(Modifier.PRIVATE)
+                        }
+                        constructor {
+                            parameter(_targetClassName, "factory")
+                            parameter(ClassName.INT, "index")
+                            +"mFactory = factory"
+                            +"mIndex = index"
+                        }
+
+                        method("get") {
+                            modifiers(Modifier.PUBLIC)
+                            annotation<Override>()
+                            returnType(ClassName.OBJECT)
+                            +"%T local = mValue".formatCode(ClassName.OBJECT)
+                            controlFlow("if (local == null)") {
+                                +"local = mFactory._new(mIndex)"
+                                +"mValue = local"
+                            }
+                            +"return local"
+                        }
+                    }
+                }
+            }
+
+            graph.root.entryPoints.forEach { (getter, dep) ->
+                method(getter.functionName()) {
+                    modifiers(Modifier.PUBLIC)
+                    annotation<Override>()
+                    returnType(dep.asTypeName())
+                    +"return %N()".formatCode(internalProvision(dep))
+                }
+            }
+
+            val factoryName = _targetClassName.nestedClass("Factory")
+            var useFactory = false
+
+            for ((dep, name) in internalProvisions) {
+                val binding = resolveAlias(graph.resolve(dep.node)!!)
+                val index = bindings.indexOf(binding)
+                method(name) {
                     modifiers(Modifier.PRIVATE)
-                    when (resolved) {
-                        is ProvisionBinding -> {
-                            returnType(resolved.target.name.asClassName())
-                            val name = resolved.provider.name
-                            if (name == "<init>") {
-                                +"return new %T()".formatCode(
-                                    resolved.provider.ownerName.asClassName(),
-                                )
+                    returnType(dep.asTypeName())
+                    when (dep.kind) {
+                        NodeDependency.Kind.Normal -> {
+                            if (binding.isScoped) {
+                                +"return (%T) _provider$index().get()".formatCode(dep.node.name.asTypeName())
                             } else {
-                                +"return %T.%N()".formatCode(
-                                    resolved.provider.ownerName.asClassName(),
-                                    resolved.provider.name,
-                                )
+                                +buildExpression {
+                                    +"return "
+                                    call(binding.provider, binding.params.asSequence()
+                                        .map { dep -> internalProvision(dep) + "()" })
+                                }
                             }
                         }
-                        else -> +"throw new RuntimeException()"
-                    }.let {/*exhaustive*/ }
+                        NodeDependency.Kind.Lazy -> {
+                            if (binding.isScoped) {
+                                +"return _provider$index()"
+                            } else {
+                                +buildExpression {
+                                    +"return new %T(this, $index)"
+                                        .formatCode(cachingProviderName)
+                                }
+                            }
+                        }
+                        NodeDependency.Kind.Provider -> {
+                            if (binding.isScoped) {
+                                +"return _provider$index()"
+                            } else {
+                                +buildExpression {
+                                    useFactory = true
+                                    +"return new %T(this, $index)"
+                                        .formatCode(factoryName)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (useFactory) {
+                nestedType {
+                    buildClass(factoryName) {
+                        implements(Names.Provider)
+                        modifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                        field(_targetClassName, "mFactory") {
+                            modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                        }
+                        field(ClassName.INT, "mIndex") {
+                            modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                        }
+                        constructor {
+                            parameter(_targetClassName, "factory")
+                            parameter(ClassName.INT, "index")
+                            +"mFactory = factory"
+                            +"mIndex = index"
+                        }
+                        method("get") {
+                            modifiers(Modifier.PUBLIC)
+                            annotation<Override>()
+                            returnType(ClassName.OBJECT)
+                            +"return mFactory._new(mIndex)"
+                        }
+                    }
                 }
             }
         }
     }
 }
-

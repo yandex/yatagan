@@ -33,4 +33,5 @@ dependencies {
     implementation("com.google.devtools.ksp:symbol-processing-api:${Versions.Ksp}")
 
     kspTest(project(":compiler"))
+    testImplementation(kotlin("test"))
 }

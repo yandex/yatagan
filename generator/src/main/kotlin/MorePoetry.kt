@@ -3,16 +3,24 @@
 package com.yandex.dagger3.generator
 
 import com.squareup.javapoet.AnnotationSpec
+import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
-import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.TypeVariableName
+import com.yandex.dagger3.core.CallableNameModel
+import com.yandex.dagger3.core.ConstructorNameModel
+import com.yandex.dagger3.core.FunctionNameModel
+import com.yandex.dagger3.core.MemberCallableNameModel
 import com.yandex.dagger3.core.NameModel
-import javax.annotation.processing.Filer
+import com.yandex.dagger3.core.NodeDependency
+import com.yandex.dagger3.core.NodeModel
+import com.yandex.dagger3.core.PropertyNameModel
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
@@ -231,6 +239,10 @@ internal abstract class TypeSpecBuilder : AnnotatibleBuilder {
     fun modifiers(vararg modifiers: Modifier) {
         impl.addModifiers(*modifiers)
     }
+
+    fun generic(vararg typeVars: TypeVariableName) {
+        typeVars.forEach(impl::addTypeVariable)
+    }
 }
 
 @JavaPoetry
@@ -261,6 +273,14 @@ internal class AnnotationSpecBuilder(
 
     fun stringValue(value: String, name: String = "value") {
         impl.addMember(name, buildExpression { +"%S".formatCode(value) })
+    }
+
+    fun stringValues(vararg values: String, name: String = "value") {
+        value(name) {
+            +"{"
+            join(values.asSequence()) { value -> +"%S".formatCode(value) }
+            +"}"
+        }
     }
 
     inline fun <reified A : Annotation> annotation(
@@ -310,10 +330,62 @@ internal inline fun buildExpression(block: ExpressionBuilder.() -> Unit): CodeBl
     return ExpressionBuilder().apply(block).impl.build()
 }
 
-internal fun TypeSpec.writeToJavaFile(packageName: String, filer: Filer) {
-    JavaFile.builder(packageName, this).build().writeTo(filer)
+internal inline fun NameModel.asClassName(
+    transformName: (String) -> String,
+): ClassName {
+    require(typeArguments.isEmpty())
+    return ClassName.get(packageName, transformName(simpleName))
 }
 
-internal inline fun NameModel.asClassName(
-    transformName: (String) -> String = { it }
-) = ClassName.get(packageName, transformName(simpleName))
+internal fun NameModel.asTypeName(): TypeName {
+    val className = ClassName.get(packageName, simpleName)
+    return if (typeArguments.isNotEmpty()) {
+        ParameterizedTypeName.get(className, *typeArguments.map(NameModel::asTypeName).toTypedArray())
+    } else className
+}
+
+internal fun NodeDependency.asTypeName(): TypeName {
+    val typeName = node.name.asTypeName()
+    return when (kind) {
+        NodeDependency.Kind.Normal -> typeName
+        NodeDependency.Kind.Lazy -> ParameterizedTypeName.get(Names.Lazy, typeName)
+        NodeDependency.Kind.Provider -> ParameterizedTypeName.get(Names.Provider, typeName)
+    }
+}
+
+internal fun NodeModel.asIdentifier() = name.qualifiedName.replace('.', '_') + (qualifier ?: "")
+
+internal fun MemberCallableNameModel.functionName() = when (this) {
+    is FunctionNameModel -> function
+    is PropertyNameModel -> "get${property.capitalize()}"
+}
+
+internal fun ExpressionBuilder.call(name: CallableNameModel, arguments: Sequence<Any>) {
+    when (name) {
+        is ConstructorNameModel -> +"new %T(".formatCode(name.type.asTypeName())
+        is MemberCallableNameModel -> +"%T.%N(".formatCode(
+            name.ownerName.asTypeName(),
+            name.functionName(),
+        )
+    }
+    join(arguments.asSequence()) { arg ->
+        +"%L".formatCode(arg)
+    }
+    +")"
+}
+
+internal operator fun ClassName.invoke(name: TypeName): ParameterizedTypeName {
+    return ParameterizedTypeName.get(this, name)
+}
+
+internal object ArrayName {
+    internal operator fun get(name: TypeName): ArrayTypeName {
+        return ArrayTypeName.of(name)
+    }
+}
+
+internal object Names {
+    val Lazy: ClassName = ClassName.get(dagger.Lazy::class.java)
+    val Provider: ClassName = ClassName.get(javax.inject.Provider::class.java)
+    val AssertionError = ClassName.get(java.lang.AssertionError::class.java)
+}

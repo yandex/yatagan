@@ -1,6 +1,10 @@
 package com.yandex.dagger3.rt
 
-import com.yandex.dagger3.core.*
+import com.yandex.dagger3.core.Binding
+import com.yandex.dagger3.core.ComponentModel
+import com.yandex.dagger3.core.EntryPointModel
+import com.yandex.dagger3.core.ModuleModel
+import com.yandex.dagger3.core.NameModel
 import dagger.Component
 import dagger.Module
 
@@ -9,7 +13,7 @@ data class RtComponentModel(
 ) : ComponentModel {
     override val name: NameModel
         get() = TODO("Not yet implemented")
-    override val entryPoints: Set<Pair<String, NodeModel>>
+    override val entryPoints: Set<EntryPointModel>
         get() = TODO("Not yet implemented")
 
 
