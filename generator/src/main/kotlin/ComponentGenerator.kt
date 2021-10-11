@@ -11,16 +11,6 @@ import com.yandex.dagger3.core.ProvisionBinding
 import com.yandex.dagger3.core.isScoped
 import javax.lang.model.element.Modifier
 
-interface GenerationLogger {
-    fun error(message: String)
-    fun warning(message: String)
-}
-
-enum class Language(val extension: String) {
-    Java("java"),
-    Kotlin("kt"),
-}
-
 class ComponentGenerator(
     private val logger: GenerationLogger,
     private val graph: BindingGraph,
