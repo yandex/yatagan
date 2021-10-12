@@ -9,6 +9,8 @@ interface ComponentModel {
 
     val dependencies: Set<ComponentModel>
     val entryPoints: Set<EntryPointModel>
+
+    val isRoot: Boolean
 }
 
 data class EntryPointModel(
@@ -20,6 +22,7 @@ data class EntryPointModel(
 
 interface ModuleModel {
     val bindings: Collection<Binding>
+    val subcomponents: Collection<ComponentModel>
 }
 
 interface NodeQualifier

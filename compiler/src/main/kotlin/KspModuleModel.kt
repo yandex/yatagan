@@ -6,17 +6,30 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.dagger3.core.AliasBinding
 import com.yandex.dagger3.core.Binding
+import com.yandex.dagger3.core.ComponentModel
 import com.yandex.dagger3.core.ModuleModel
 import dagger.Binds
+import dagger.Module
 import dagger.Provides
 import javax.inject.Scope
 
 data class KspModuleModel(
     val type: KSType,
 ) : ModuleModel {
+
+    private val declaration = type.declaration as KSClassDeclaration
+    private val impl = checkNotNull(declaration.getAnnotation<Module>()) {
+        "type $type can't represent a module"
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override val subcomponents: Collection<ComponentModel> by lazy {
+        val list = impl["subcomponents"] as? List<KSType> ?: return@lazy emptySet()
+        list.mapTo(hashSetOf()) { KspComponentModel(it.declaration as KSClassDeclaration) }
+    }
+
     override val bindings: Collection<Binding> by lazy {
         val list = arrayListOf<Binding>()
-        val declaration = type.declaration as KSClassDeclaration
         declaration.getDeclaredProperties().mapNotNullTo(list) { propertyDeclaration ->
             val propertyType = propertyDeclaration.asMemberOf(type)
             val target = KspNodeModel(
@@ -25,7 +38,7 @@ data class KspModuleModel(
             )
             propertyDeclaration.annotations.forEach { ann ->
                 when {
-                    ann sameAs Provides::class -> ProvisionBinding(
+                    ann hasType Provides::class -> ProvisionBinding(
                         target = target,
                         ownerType = type,
                         propertyDeclaration = propertyDeclaration,
@@ -43,7 +56,7 @@ data class KspModuleModel(
             )
             methodDeclaration.annotations.forEach { ann ->
                 when {
-                    ann sameAs Binds::class -> AliasBinding(
+                    ann hasType Binds::class -> AliasBinding(
                         target = target,
                         source = KspNodeModel(
                             type = methodDeclaration.parameters.single().type.resolve(),
@@ -51,7 +64,7 @@ data class KspModuleModel(
                         ),
                         scope = KspAnnotationDescriptor.describeIfAny<Scope>(methodDeclaration),
                     )
-                    ann sameAs Provides::class -> ProvisionBinding(
+                    ann hasType Provides::class -> ProvisionBinding(
                         target = target,
                         ownerType = type,
                         method = method,

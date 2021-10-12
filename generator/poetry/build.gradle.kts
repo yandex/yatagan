@@ -18,8 +18,7 @@ java {
 }
 
 dependencies {
-    implementation(project(":core"))
-
-    implementation(project("poetry"))
+    api("com.squareup:javapoet:${Versions.JavaPoet}")
+    implementation(project(":api"))
     implementation(kotlin("stdlib"))
 }

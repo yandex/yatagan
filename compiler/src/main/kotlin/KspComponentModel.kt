@@ -1,6 +1,7 @@
 package com.yandex.dagger3.compiler
 
 import com.google.devtools.ksp.isAbstract
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.dagger3.core.ComponentModel
@@ -8,15 +9,30 @@ import com.yandex.dagger3.core.EntryPointModel
 import com.yandex.dagger3.core.NameModel
 import com.yandex.dagger3.core.NodeDependency
 import dagger.Component
+import dagger.Subcomponent
 
 data class KspComponentModel(
     val componentDeclaration: KSClassDeclaration,
 ) : ComponentModel {
     override val name: NameModel = NameModel(componentDeclaration)
+    override val isRoot: Boolean
 
-    private val impl = requireNotNull(componentDeclaration.getAnnotation<Component>()) {
-        "declaration $componentDeclaration can't be represented by ComponentModel"
+    private val impl: KSAnnotation
+
+    init {
+        val componentAnnotation = componentDeclaration.getAnnotation<Component>()
+        impl = if (componentAnnotation != null) {
+            isRoot = true
+            componentAnnotation
+        } else {
+            val subcomponentAnnotation = requireNotNull(componentDeclaration.getAnnotation<Subcomponent>()) {
+                "declaration $componentDeclaration can't be represented by ComponentModel"
+            }
+            isRoot = false
+            subcomponentAnnotation
+        }
     }
+
 
     @Suppress("UNCHECKED_CAST")
     override val modules: Set<KspModuleModel> by lazy {

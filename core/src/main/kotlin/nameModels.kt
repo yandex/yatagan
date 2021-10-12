@@ -17,7 +17,7 @@ sealed interface MemberCallableNameModel : CallableNameModel {
 
 data class FunctionNameModel(
     override val ownerName: NameModel,
-    val function: String
+    val function: String,
 ) : MemberCallableNameModel {
     override fun toString() = "$ownerName.$function()"
 }

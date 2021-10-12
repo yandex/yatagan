@@ -34,4 +34,6 @@ dependencies {
 
     kspTest(project(":compiler"))
     testImplementation(kotlin("test"))
+    testImplementation(project(":generator:poetry"))  // MAYBE: remove this as we don't need it in tests.
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:${Versions.KotlinCompileTesting}")
 }

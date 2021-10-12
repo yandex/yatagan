@@ -11,7 +11,7 @@ import com.yandex.dagger3.core.NodeModel
 import javax.inject.Inject
 import javax.inject.Qualifier
 
-data class KspNodeModel(
+data class KspNodeModel (
     val type: KSType,
     override val qualifier: KspAnnotationDescriptor?,
 ) : NodeModel {
@@ -19,7 +19,7 @@ data class KspNodeModel(
         type: KSType,
         forQualifier: KSAnnotated,
     ) : this(
-        type = type,
+        type = type.makeNotNullable(),  // TODO(jeffset): nullability is forbidden anyway
         qualifier = KspAnnotationDescriptor.describeIfAny<Qualifier>(forQualifier)
     )
 

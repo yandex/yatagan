@@ -1,6 +1,7 @@
 package com.yandex.dagger3.rt
 
 import com.yandex.dagger3.core.Binding
+import com.yandex.dagger3.core.ComponentModel
 import com.yandex.dagger3.core.ModuleModel
 import dagger.Module
 
@@ -16,4 +17,7 @@ data class RtModuleModel(
             TODO("Implement")
         }
     }
+
+    override val subcomponents: Collection<ComponentModel>
+        get() = TODO("Not yet implemented")
 }

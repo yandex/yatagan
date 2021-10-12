@@ -18,6 +18,7 @@
             <option value="$PROJECT_DIR$/compiler/runtime-internals" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/generator" />
+            <option value="$PROJECT_DIR$/generator/poetry" />
             <option value="$PROJECT_DIR$/runtime" />
           </set>
         </option>

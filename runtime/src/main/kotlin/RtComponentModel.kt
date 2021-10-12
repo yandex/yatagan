@@ -23,4 +23,7 @@ data class RtComponentModel(
 
     override val dependencies: Set<RtComponentModel> = impl.dependencies.asSequence()
         .mapTo(hashSetOf()) { RtComponentModel(it.java) }
+
+    override val isRoot: Boolean
+        get() = TODO("Not yet implemented")
 }

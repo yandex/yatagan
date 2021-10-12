@@ -9,6 +9,9 @@ import com.yandex.dagger3.core.BindingGraph
 import com.yandex.dagger3.core.NodeDependency
 import com.yandex.dagger3.core.ProvisionBinding
 import com.yandex.dagger3.core.isScoped
+import com.yandex.dagger3.generator.poetry.Names
+import com.yandex.dagger3.generator.poetry.buildClass
+import com.yandex.dagger3.generator.poetry.buildExpression
 import javax.lang.model.element.Modifier
 
 class ComponentGenerator(
@@ -63,6 +66,7 @@ class ComponentGenerator(
                 .filterIsInstance<ProvisionBinding>()
                 .toList()
 
+            // TODO(jeffset): Extract this into a provision manager of some king
             val internalProvisions = hashMapOf<NodeDependency, String>()
             fun internalProvision(dep: NodeDependency): String {
                 // TODO(jeffset): reuse entry points to reduce method count
@@ -111,42 +115,6 @@ class ComponentGenerator(
                     }
                 }
 
-            if (useCachingProvider) {
-                nestedType {
-                    buildClass(cachingProviderName) {
-                        implements(Names.Lazy)
-                        modifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                        field(_targetClassName, "mFactory") {
-                            modifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        }
-                        field(ClassName.INT, "mIndex") {
-                            modifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        }
-                        field(ClassName.OBJECT, "mValue") {
-                            modifiers(Modifier.PRIVATE)
-                        }
-                        constructor {
-                            parameter(_targetClassName, "factory")
-                            parameter(ClassName.INT, "index")
-                            +"mFactory = factory"
-                            +"mIndex = index"
-                        }
-
-                        method("get") {
-                            modifiers(Modifier.PUBLIC)
-                            annotation<Override>()
-                            returnType(ClassName.OBJECT)
-                            +"%T local = mValue".formatCode(ClassName.OBJECT)
-                            controlFlow("if (local == null)") {
-                                +"local = mFactory._new(mIndex)"
-                                +"mValue = local"
-                            }
-                            +"return local"
-                        }
-                    }
-                }
-            }
-
             graph.root.entryPoints.forEach { (getter, dep) ->
                 method(getter.functionName()) {
                     modifiers(Modifier.PUBLIC)
@@ -182,6 +150,7 @@ class ComponentGenerator(
                                 +"return _provider$index()"
                             } else {
                                 +buildExpression {
+                                    useCachingProvider = true
                                     +"return new %T(this, $index)"
                                         .formatCode(cachingProviderName)
                                 }
@@ -224,6 +193,42 @@ class ComponentGenerator(
                             annotation<Override>()
                             returnType(ClassName.OBJECT)
                             +"return mFactory._new(mIndex)"
+                        }
+                    }
+                }
+
+                if (useCachingProvider) {
+                    nestedType {
+                        buildClass(cachingProviderName) {
+                            implements(Names.Lazy)
+                            modifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                            field(_targetClassName, "mFactory") {
+                                modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                            }
+                            field(ClassName.INT, "mIndex") {
+                                modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                            }
+                            field(ClassName.OBJECT, "mValue") {
+                                modifiers(Modifier.PRIVATE)
+                            }
+                            constructor {
+                                parameter(_targetClassName, "factory")
+                                parameter(ClassName.INT, "index")
+                                +"mFactory = factory"
+                                +"mIndex = index"
+                            }
+
+                            method("get") {
+                                modifiers(Modifier.PUBLIC)
+                                annotation<Override>()
+                                returnType(ClassName.OBJECT)
+                                +"%T local = mValue".formatCode(ClassName.OBJECT)
+                                controlFlow("if (local == null)") {
+                                    +"local = mFactory._new(mIndex)"
+                                    +"mValue = local"
+                                }
+                                +"return local"
+                            }
                         }
                     }
                 }
