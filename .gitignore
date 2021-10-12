@@ -1,6 +1,6 @@
 # Build dirs
 /build/
-*/build/
+**/build/
 
 # Gradle local files
 .gradle
