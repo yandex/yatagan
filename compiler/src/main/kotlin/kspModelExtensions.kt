@@ -10,8 +10,8 @@ import com.google.devtools.ksp.symbol.KSType
 import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.ConstructorNameModel
 import com.yandex.dagger3.core.FunctionNameModel
-import com.yandex.dagger3.core.NodeDependency
 import com.yandex.dagger3.core.NodeModel
+import com.yandex.dagger3.core.NodeModel.Dependency.Kind
 import com.yandex.dagger3.core.PropertyNameModel
 import com.yandex.dagger3.core.ProvisionBinding
 import dagger.Lazy
@@ -27,12 +27,12 @@ fun ProvisionBinding(
 ) = ProvisionBinding(
     target = target,
     provider = if (methodDeclaration.isConstructor()) {
-        ConstructorNameModel(NameModel(ownerType))
+        ConstructorNameModel(ClassNameModel(ownerType))
     } else FunctionNameModel(ownerType, methodDeclaration),
     params = method.parameterTypes
         .zip(methodDeclaration.parameters)
         .map { (paramType, param) ->
-            NodeDependency.resolveFromType(type = paramType!!, forQualifier = param)
+            resolveNodeDependency(type = paramType!!, forQualifier = param)
         },
     scope = KspAnnotationDescriptor.describeIfAny<Scope>(forScope),
 )
@@ -48,19 +48,19 @@ fun ProvisionBinding(
     scope = KspAnnotationDescriptor.describeIfAny<Scope>(propertyDeclaration),
 )
 
-fun NodeDependency.Companion.resolveFromType(
+internal fun resolveNodeDependency(
     type: KSType,
     forQualifier: KSAnnotated,
-): NodeDependency {
+): NodeModel.Dependency {
     val kind = when (type.declaration.qualifiedName?.asString()) {
-        Lazy::class.qualifiedName -> NodeDependency.Kind.Lazy
-        Provider::class.qualifiedName -> NodeDependency.Kind.Provider
-        else -> NodeDependency.Kind.Normal
+        Lazy::class.qualifiedName -> Kind.Lazy
+        Provider::class.qualifiedName -> Kind.Provider
+        else -> Kind.Direct
     }
-    return NodeDependency(
+    return NodeModel.Dependency(
         node = KspNodeModel(
             type = when (kind) {
-                NodeDependency.Kind.Normal -> type
+                Kind.Direct -> type
                 else -> type.arguments[0].type!!.resolve()
             },
             forQualifier = forQualifier,
@@ -69,7 +69,7 @@ fun NodeDependency.Companion.resolveFromType(
     )
 }
 
-internal fun NameModel(declaration: KSClassDeclaration): ClassNameModel {
+internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     val packageName = declaration.packageName.asString()
     // MAYBE: use KSName api instead of string manipulation.
     val names = requireNotNull(declaration.qualifiedName)
@@ -82,35 +82,35 @@ internal fun NameModel(declaration: KSClassDeclaration): ClassNameModel {
     )
 }
 
-internal fun NameModel(type: KSType): ClassNameModel {
-    return NameModel(type.declaration as KSClassDeclaration)
-        .copy(typeArguments = type.arguments.map { NameModel(it.type!!.resolve()) })
+internal fun ClassNameModel(type: KSType): ClassNameModel {
+    return ClassNameModel(type.declaration as KSClassDeclaration)
+        .copy(typeArguments = type.arguments.map { ClassNameModel(it.type!!.resolve()) })
 }
 
 internal fun FunctionNameModel(owner: KSType, function: KSFunctionDeclaration): FunctionNameModel {
     return FunctionNameModel(
-        ownerName = NameModel(owner),
+        ownerName = ClassNameModel(owner),
         function = function.simpleName.asString(),
     )
 }
 
 internal fun FunctionNameModel(owner: KSClassDeclaration, function: KSFunctionDeclaration): FunctionNameModel {
     return FunctionNameModel(
-        ownerName = NameModel(owner),
+        ownerName = ClassNameModel(owner),
         function = function.simpleName.asString(),
     )
 }
 
 internal fun PropertyNameModel(owner: KSType, property: KSPropertyDeclaration): PropertyNameModel {
     return PropertyNameModel(
-        ownerName = NameModel(owner),
+        ownerName = ClassNameModel(owner),
         property = property.simpleName.asString(),
     )
 }
 
 internal fun PropertyNameModel(owner: KSClassDeclaration, property: KSPropertyDeclaration): PropertyNameModel {
     return PropertyNameModel(
-        ownerName = NameModel(owner),
+        ownerName = ClassNameModel(owner),
         property = property.simpleName.asString(),
     )
 }

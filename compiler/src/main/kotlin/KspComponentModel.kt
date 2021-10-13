@@ -7,14 +7,11 @@ import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.dagger3.core.ClassNameModel
-import com.yandex.dagger3.core.ComponentDependency
+import com.yandex.dagger3.core.ComponentDependencyFactoryInput
 import com.yandex.dagger3.core.ComponentFactoryModel
 import com.yandex.dagger3.core.ComponentModel
-import com.yandex.dagger3.core.EntryPointModel
-import com.yandex.dagger3.core.FactoryInput
 import com.yandex.dagger3.core.InstanceBinding
-import com.yandex.dagger3.core.ModuleInstance
-import com.yandex.dagger3.core.NodeDependency
+import com.yandex.dagger3.core.ModuleInstanceFactoryInput
 import dagger.BindsInstance
 import dagger.Component
 
@@ -25,7 +22,7 @@ data class KspComponentModel(
         require(canRepresent(componentDeclaration))
     }
 
-    override val name: ClassNameModel = NameModel(componentDeclaration)
+    override val name: ClassNameModel = ClassNameModel(componentDeclaration)
 
     private val impl: KSAnnotation = componentDeclaration.getAnnotation<Component>()!!
     override val isRoot: Boolean = impl["isRoot"] as Boolean
@@ -40,16 +37,16 @@ data class KspComponentModel(
             ?: return@lazy null
 
         object : ComponentFactoryModel {
-            override val name = NameModel(factoryDeclaration)
-            override val inputs: Collection<FactoryInput> = factoryMethod.parameters.map {
+            override val name = ClassNameModel(factoryDeclaration)
+            override val inputs = factoryMethod.parameters.map {
                 val type = it.type.resolve()
                 val declaration = type.declaration as KSClassDeclaration
                 val name = it.name!!.asString()
                 when {
                     canRepresent(declaration) ->
-                        ComponentDependency(KspComponentModel(declaration), name)
+                        ComponentDependencyFactoryInput(KspComponentModel(declaration), name)
                     KspModuleModel.canRepresent(declaration) ->
-                        ModuleInstance(KspModuleModel(type), name)
+                        ModuleInstanceFactoryInput(KspModuleModel(type), name)
                     it.isAnnotationPresent(BindsInstance::class) ->
                         InstanceBinding(KspNodeModel(type, forQualifier = it), name)
                     else -> throw IllegalStateException("invalid factory method parameter")
@@ -70,11 +67,11 @@ data class KspComponentModel(
         list.mapTo(hashSetOf()) { KspComponentModel(it.declaration as KSClassDeclaration) }
     }
 
-    override val entryPoints: Set<EntryPointModel> by lazy {
+    override val entryPoints: Set<ComponentModel.EntryPoint> by lazy {
         buildSet {
             for (function in componentDeclaration.getAllFunctions().filter { it.isAbstract }) {
-                this += EntryPointModel(
-                    dep = NodeDependency.resolveFromType(
+                this += ComponentModel.EntryPoint(
+                    dep = resolveNodeDependency(
                         type = function.returnType?.resolve() ?: continue,
                         forQualifier = function,
                     ),
@@ -82,8 +79,8 @@ data class KspComponentModel(
                 )
             }
             for (prop in componentDeclaration.getAllProperties().filter { it.isAbstract() && !it.isMutable }) {
-                this += EntryPointModel(
-                    dep = NodeDependency.resolveFromType(type = prop.type.resolve(), forQualifier = prop),
+                this += ComponentModel.EntryPoint(
+                    dep = resolveNodeDependency(type = prop.type.resolve(), forQualifier = prop),
                     getter = PropertyNameModel(componentDeclaration, prop),
                 )
             }

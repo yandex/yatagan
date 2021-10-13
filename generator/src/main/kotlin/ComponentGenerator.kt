@@ -7,7 +7,7 @@ import com.yandex.dagger3.core.AliasBinding
 import com.yandex.dagger3.core.Binding
 import com.yandex.dagger3.core.BindingGraph
 import com.yandex.dagger3.core.InstanceBinding
-import com.yandex.dagger3.core.NodeDependency
+import com.yandex.dagger3.core.NodeModel
 import com.yandex.dagger3.core.NonAliasBinding
 import com.yandex.dagger3.core.ProvisionBinding
 import com.yandex.dagger3.core.isScoped
@@ -112,8 +112,8 @@ class ComponentGenerator(
                 .toList()
 
             // TODO(jeffset): Extract this into a provision manager of some king
-            val internalProvisions = hashMapOf<NodeDependency, String>()
-            fun internalProvision(dep: NodeDependency): String {
+            val internalProvisions = hashMapOf<NodeModel.Dependency, String>()
+            fun internalProvision(dep: NodeModel.Dependency): String {
                 // TODO(jeffset): reuse entry points to reduce method count
                 return internalProvisions.getOrPut(dep) {
                     "_get${internalProvisions.size}"
@@ -184,7 +184,7 @@ class ComponentGenerator(
                     }
 
                     when (dep.kind) {
-                        NodeDependency.Kind.Normal -> {
+                        DependencyKind.Direct -> {
                             if (binding.isScoped) {
                                 +"return (%T) _provider$index().get()".formatCode(dep.node.name.asTypeName())
                             } else {
@@ -199,7 +199,7 @@ class ComponentGenerator(
                                 }
                             }
                         }
-                        NodeDependency.Kind.Lazy -> {
+                        DependencyKind.Lazy -> {
                             if (binding.isScoped) {
                                 +"return _provider$index()"
                             } else {
@@ -210,7 +210,7 @@ class ComponentGenerator(
                                 }
                             }
                         }
-                        NodeDependency.Kind.Provider -> {
+                        DependencyKind.Provider -> {
                             if (binding.isScoped) {
                                 +"return _provider$index()"
                             } else {

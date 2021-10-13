@@ -82,7 +82,7 @@ data class KspModuleModel(
         }
     }
 
-    override val name: ClassNameModel by lazy { NameModel(type) }
+    override val name: ClassNameModel by lazy { ClassNameModel(type) }
 
     companion object {
         fun canRepresent(declaration: KSClassDeclaration): Boolean {

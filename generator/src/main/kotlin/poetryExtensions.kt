@@ -8,11 +8,12 @@ import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.ConstructorNameModel
 import com.yandex.dagger3.core.FunctionNameModel
 import com.yandex.dagger3.core.MemberCallableNameModel
-import com.yandex.dagger3.core.NodeDependency
+import com.yandex.dagger3.core.NodeModel
 import com.yandex.dagger3.core.PropertyNameModel
 import com.yandex.dagger3.generator.poetry.ExpressionBuilder
 import com.yandex.dagger3.generator.poetry.Names
 
+internal typealias DependencyKind = NodeModel.Dependency.Kind
 
 internal inline fun ClassNameModel.asClassName(
     transformName: (String) -> String,
@@ -35,12 +36,12 @@ internal fun ClassNameModel.asTypeName(): TypeName {
     } else className
 }
 
-internal fun NodeDependency.asTypeName(): TypeName {
+internal fun NodeModel.Dependency.asTypeName(): TypeName {
     val typeName = node.name.asTypeName()
     return when (kind) {
-        NodeDependency.Kind.Normal -> typeName
-        NodeDependency.Kind.Lazy -> ParameterizedTypeName.get(Names.Lazy, typeName)
-        NodeDependency.Kind.Provider -> ParameterizedTypeName.get(Names.Provider, typeName)
+        DependencyKind.Direct -> typeName
+        DependencyKind.Lazy -> ParameterizedTypeName.get(Names.Lazy, typeName)
+        DependencyKind.Provider -> ParameterizedTypeName.get(Names.Provider, typeName)
     }
 }
 

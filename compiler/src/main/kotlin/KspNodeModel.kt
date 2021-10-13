@@ -41,7 +41,7 @@ data class KspNodeModel (
     }
 
     override val name: ClassNameModel by lazy {
-        NameModel(type)
+        ClassNameModel(type)
     }
 
     override fun toString() = "${qualifier ?: ""} $name"
