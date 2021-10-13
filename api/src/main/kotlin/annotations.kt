@@ -26,32 +26,10 @@ annotation class Provides(
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
 annotation class Component(
+    val isRoot: Boolean = true,
     val modules: Array<KClass<*>> = [],
     val dependencies: Array<KClass<*>> = [],
 ) {
-    @MustBeDocumented
-    @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.CLASS)
-    annotation class Builder
-
-    @MustBeDocumented
-    @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.CLASS)
-    annotation class Factory
-}
-
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.CLASS)
-annotation class Subcomponent(
-    val modules: Array<KClass<*>> = [],
-    val dependencies: Array<KClass<*>> = [],
-) {
-    @MustBeDocumented
-    @Retention(AnnotationRetention.RUNTIME)
-    @Target(AnnotationTarget.CLASS)
-    annotation class Builder
-
     @MustBeDocumented
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS)

@@ -2,10 +2,12 @@ package com.yandex.dagger3.compiler
 
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getDeclaredProperties
+import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.dagger3.core.AliasBinding
 import com.yandex.dagger3.core.Binding
+import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.ComponentModel
 import com.yandex.dagger3.core.ModuleModel
 import dagger.Binds
@@ -18,9 +20,12 @@ data class KspModuleModel(
 ) : ModuleModel {
 
     private val declaration = type.declaration as KSClassDeclaration
-    private val impl = checkNotNull(declaration.getAnnotation<Module>()) {
-        "type $type can't represent a module"
+
+    init {
+        require(canRepresent(declaration))
     }
+
+    private val impl = declaration.getAnnotation<Module>()!!
 
     @Suppress("UNCHECKED_CAST")
     override val subcomponents: Collection<ComponentModel> by lazy {
@@ -74,6 +79,14 @@ data class KspModuleModel(
                 }?.let { return@mapNotNullTo it }
             }
             null
+        }
+    }
+
+    override val name: ClassNameModel by lazy { NameModel(type) }
+
+    companion object {
+        fun canRepresent(declaration: KSClassDeclaration): Boolean {
+            return declaration.isAnnotationPresent(Module::class)
         }
     }
 }

@@ -6,7 +6,9 @@ import com.squareup.javapoet.TypeSpec
 import com.yandex.dagger3.core.AliasBinding
 import com.yandex.dagger3.core.Binding
 import com.yandex.dagger3.core.BindingGraph
+import com.yandex.dagger3.core.InstanceBinding
 import com.yandex.dagger3.core.NodeDependency
+import com.yandex.dagger3.core.NonAliasBinding
 import com.yandex.dagger3.core.ProvisionBinding
 import com.yandex.dagger3.core.isScoped
 import com.yandex.dagger3.generator.poetry.Names
@@ -33,12 +35,13 @@ class ComponentGenerator(
             .writeTo(out)
     }
 
-    private fun resolveAlias(maybeAlias: Binding): ProvisionBinding {
+    private fun resolveAlias(maybeAlias: Binding?): NonAliasBinding? {
         var binding: Binding? = maybeAlias
         while (when (binding) {
                 is AliasBinding -> true
                 is ProvisionBinding -> return binding
-                else -> throw IllegalStateException()
+                is InstanceBinding -> return binding
+                null -> return null
             }
         ) {
             binding = graph.resolve(binding.source)
@@ -52,12 +55,54 @@ class ComponentGenerator(
             modifiers(Modifier.FINAL)
             annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes") }
 
-            constructor {
-                modifiers(Modifier.PUBLIC)
+            val factory = graph.root.factory
+            if (factory != null) {
+                factory.inputs.forEach { input ->
+                    field(input.target.name.asTypeName(), input.paramName) {
+                        modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                    }
+                }
+                constructor {
+                    modifiers(Modifier.PRIVATE)
+                    factory.inputs.forEach { input ->
+                        parameter(input.target.name.asTypeName(), input.paramName)
+                        +"this.%N = %N".formatCode(input.paramName, input.paramName)
+                    }
+                }
+                val factoryImplName = _targetClassName.nestedClass("ComponentFactoryImpl")
+                nestedType {
+                    buildClass(factoryImplName) {
+                        modifiers(Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
+                        implements(factory.name.asTypeName())
+
+                        method("create") {
+                            modifiers(Modifier.PUBLIC)
+                            annotation<Override>()
+                            returnType(graph.root.name.asTypeName())
+                            factory.inputs.forEach { input ->
+                                parameter(input.target.name.asTypeName(), input.paramName)
+                            }
+                            +buildExpression {
+                                +"return new %T(".formatCode(_targetClassName)
+                                join(factory.inputs.asSequence()) { +it.paramName }
+                                +")"
+                            }
+                        }
+                    }
+                }
+                method("factory") {
+                    modifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    returnType(factory.name.asTypeName())
+                    +"return new %T()".formatCode(factoryImplName)
+                }
+            } else {
+                constructor {
+                    modifiers(Modifier.PUBLIC)
+                }
             }
 
             val reachable = graph.resolveReachable()
-            val bindings = reachable.asSequence()
+            val provisionBindings = reachable.asSequence()
                 .onEach { (node, binding) ->
                     if (binding == null) {
                         logger.warning("Missing binding for $node")
@@ -80,7 +125,7 @@ class ComponentGenerator(
                 returnType(ClassName.OBJECT)
                 parameter(ClassName.INT, "i")
                 controlFlow("switch(i)") {
-                    bindings.forEachIndexed { index, binding ->
+                    provisionBindings.forEachIndexed { index, binding ->
                         +buildExpression {
                             +"case $index: return "
                             call(binding.provider, binding.params.asSequence()
@@ -94,9 +139,9 @@ class ComponentGenerator(
             val cachingProviderName = _targetClassName.nestedClass("CachingProvider")
             var useCachingProvider = false
 
-            bindings
-                .zip(0..bindings.lastIndex)
-                .filter { (b, _) -> b.isScoped }
+            provisionBindings
+                .zip(0..provisionBindings.lastIndex)
+                .filter { (binding, _) -> binding.isScoped } // fixme: not only provisions may be scoped - aliases too
                 .forEach { (_, index) ->
                     useCachingProvider = true
                     field(cachingProviderName, "mProvider$index") {
@@ -128,11 +173,16 @@ class ComponentGenerator(
             var useFactory = false
 
             for ((dep, name) in internalProvisions) {
-                val binding = resolveAlias(graph.resolve(dep.node)!!)
-                val index = bindings.indexOf(binding)
+                val binding: NonAliasBinding? = resolveAlias(graph.resolve(dep.node))
+                val index = provisionBindings.indexOf(binding)
                 method(name) {
                     modifiers(Modifier.PRIVATE)
                     returnType(dep.asTypeName())
+                    if (binding == null) {
+                        +"throw new %T(%S)".formatCode(Names.AssertionError, "missing binding")
+                        return@method
+                    }
+
                     when (dep.kind) {
                         NodeDependency.Kind.Normal -> {
                             if (binding.isScoped) {
@@ -140,8 +190,12 @@ class ComponentGenerator(
                             } else {
                                 +buildExpression {
                                     +"return "
-                                    call(binding.provider, binding.params.asSequence()
-                                        .map { dep -> internalProvision(dep) + "()" })
+                                    when (binding) {
+                                        is InstanceBinding -> +"this.%N".formatCode(binding.paramName)
+                                        is ProvisionBinding ->
+                                            call(binding.provider, binding.params.asSequence()
+                                                .map { dep -> internalProvision(dep) + "()" })
+                                    }.let { /*exhaustive*/ }
                                 }
                             }
                         }

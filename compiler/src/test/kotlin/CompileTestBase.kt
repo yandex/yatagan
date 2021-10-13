@@ -175,6 +175,7 @@ private val CommonImports = arrayOf(
     "javax.inject.Singleton",
     "dagger.Component",
     "dagger.Binds",
+    "dagger.BindsInstance",
     "dagger.Provides",
     "dagger.Lazy",
     "dagger.Module",

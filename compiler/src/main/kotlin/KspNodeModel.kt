@@ -6,7 +6,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.dagger3.core.Binding
-import com.yandex.dagger3.core.NameModel
+import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.NodeModel
 import javax.inject.Inject
 import javax.inject.Qualifier
@@ -40,7 +40,7 @@ data class KspNodeModel (
         }
     }
 
-    override val name: NameModel by lazy {
+    override val name: ClassNameModel by lazy {
         NameModel(type)
     }
 

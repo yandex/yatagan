@@ -63,5 +63,28 @@ class CoreBindingsKotlinTest : CompileTestBase() {
         }
     }
 
+    @Test
+    fun `basic component with factory - BindsInstance`() {
+        givenJavaSource("test.MyClass", """
+        public class MyClass {}
+        """)
+        givenKotlinSource("test.TestComponent", """
+        @Component
+        interface TestComponent {
+            fun get(): MyClass
+            
+            @Component.Factory
+            interface Factory {
+               fun create(@BindsInstance instance: MyClass): TestComponent 
+            }
+        }
+        """
+        )
+
+        assertCompilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
 }
 

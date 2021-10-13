@@ -7,9 +7,9 @@ import com.google.devtools.ksp.symbol.KSFunction
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.ConstructorNameModel
 import com.yandex.dagger3.core.FunctionNameModel
-import com.yandex.dagger3.core.NameModel
 import com.yandex.dagger3.core.NodeDependency
 import com.yandex.dagger3.core.NodeModel
 import com.yandex.dagger3.core.PropertyNameModel
@@ -69,18 +69,20 @@ fun NodeDependency.Companion.resolveFromType(
     )
 }
 
-internal fun NameModel(declaration: KSClassDeclaration): NameModel {
-    with(declaration) {
-        return NameModel(
-            packageName = packageName.asString(),
-            qualifiedName = qualifiedName!!.asString(),
-            simpleName = simpleName.asString(),
-            typeArguments = emptyList(),
-        )
-    }
+internal fun NameModel(declaration: KSClassDeclaration): ClassNameModel {
+    val packageName = declaration.packageName.asString()
+    // MAYBE: use KSName api instead of string manipulation.
+    val names = requireNotNull(declaration.qualifiedName)
+        .asString().substring(startIndex = packageName.length + 1)
+        .split('.')
+    return ClassNameModel(
+        packageName = packageName,
+        simpleNames = names,
+        typeArguments = emptyList(),
+    )
 }
 
-internal fun NameModel(type: KSType): NameModel {
+internal fun NameModel(type: KSType): ClassNameModel {
     return NameModel(type.declaration as KSClassDeclaration)
         .copy(typeArguments = type.arguments.map { NameModel(it.type!!.resolve()) })
 }

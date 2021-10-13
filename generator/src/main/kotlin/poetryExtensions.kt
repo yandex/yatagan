@@ -4,28 +4,34 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.yandex.dagger3.core.CallableNameModel
+import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.ConstructorNameModel
 import com.yandex.dagger3.core.FunctionNameModel
 import com.yandex.dagger3.core.MemberCallableNameModel
-import com.yandex.dagger3.core.NameModel
 import com.yandex.dagger3.core.NodeDependency
-import com.yandex.dagger3.core.NodeModel
 import com.yandex.dagger3.core.PropertyNameModel
 import com.yandex.dagger3.generator.poetry.ExpressionBuilder
 import com.yandex.dagger3.generator.poetry.Names
 
 
-internal inline fun NameModel.asClassName(
+internal inline fun ClassNameModel.asClassName(
     transformName: (String) -> String,
 ): ClassName {
     require(typeArguments.isEmpty())
-    return ClassName.get(packageName, transformName(simpleName))
+    // FIXME: transform only last name
+    return ClassName.get(packageName, transformName(simpleNames.single()))
 }
 
-internal fun NameModel.asTypeName(): TypeName {
-    val className = ClassName.get(packageName, simpleName)
+internal fun ClassNameModel.asTypeName(): TypeName {
+    val className = when (simpleNames.size) {
+        0 -> throw IllegalArgumentException()
+        1 -> ClassName.get(packageName, simpleNames.first())
+        2 -> ClassName.get(packageName, simpleNames[0], simpleNames[1])
+        3 -> ClassName.get(packageName, simpleNames[0], simpleNames[1], simpleNames[2])
+        else -> ClassName.get(packageName, simpleNames.first(), *simpleNames.drop(1).toTypedArray())
+    }
     return if (typeArguments.isNotEmpty()) {
-        ParameterizedTypeName.get(className, *typeArguments.map(NameModel::asTypeName).toTypedArray())
+        ParameterizedTypeName.get(className, *typeArguments.map(ClassNameModel::asTypeName).toTypedArray())
     } else className
 }
 
@@ -37,8 +43,6 @@ internal fun NodeDependency.asTypeName(): TypeName {
         NodeDependency.Kind.Provider -> ParameterizedTypeName.get(Names.Provider, typeName)
     }
 }
-
-internal fun NodeModel.asIdentifier() = name.qualifiedName.replace('.', '_') + (qualifier ?: "")
 
 internal fun MemberCallableNameModel.functionName() = when (this) {
     is FunctionNameModel -> function

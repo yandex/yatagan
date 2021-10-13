@@ -32,15 +32,9 @@ class BindingGraph(
     }
 
     init {
-        root.modules.forEach { module ->
-            for (binding in module.bindings) {
-                if (binding.target in graphBindings) {
-                    // Bad - duplicate binding
-                    // TODO(jeffset): handle this
-                    continue
-                }
-                graphBindings[binding.target] = binding
-            }
-        }
+        sequenceOf(
+            root.modules.asSequence().flatMap(ModuleModel::bindings),
+            root.factory?.inputs?.asSequence()?.filterIsInstance<InstanceBinding>() ?: emptySequence()
+        ).flatten().associateByTo(graphBindings, Binding::target)
     }
 }
