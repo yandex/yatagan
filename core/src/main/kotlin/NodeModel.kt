@@ -8,8 +8,15 @@ package com.yandex.dagger3.core
  * Implementations must provide stable [equals]/[hashCode] implementation for correct matching.
  */
 interface NodeModel : ClassBackedModel {
+    /**
+     * Optional [Qualifier].
+     */
     val qualifier: Qualifier?
-    val defaultBinding: Binding?
+
+    /**
+     * self-provision binding if supported by underlying type.
+     */
+    val defaultBinding: Binding?  // TODO(jeffset): use creating function instead of property
 
     /**
      * An opaque object representing additional qualifier information that can help to disambiguate nodes with the

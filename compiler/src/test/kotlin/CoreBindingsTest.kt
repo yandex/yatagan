@@ -42,7 +42,7 @@ class CoreBindingsTest : CompileTestBase() {
 
         givenJavaSource(
             "test.TestComponent", """
-            @Component
+            @Component @Singleton
             public interface TestComponent {
                 MySimpleClass getMySimpleClass();
                 MyScopedClass getMyScopedClass();
@@ -75,7 +75,7 @@ class CoreBindingsTest : CompileTestBase() {
 
         givenJavaSource(
             "test.TestComponent", """
-            @Component(modules = {MyModule.class})
+            @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
                 Api get();
                 Provider<Api> getProvider();
@@ -106,7 +106,7 @@ class CoreBindingsTest : CompileTestBase() {
         )
         givenJavaSource(
             "test.TestComponent", """
-            @Component(modules = {MyModule.class})
+            @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
                 Api get();
                 Provider<Api> getProvider();
@@ -138,7 +138,7 @@ class CoreBindingsTest : CompileTestBase() {
         )
         givenJavaSource(
             "test.TestComponent", """
-            @Component(modules = {MyModule.class})
+            @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
                 Api get();
                 Provider<Api> getProvider();
@@ -171,7 +171,7 @@ class CoreBindingsTest : CompileTestBase() {
         )
         givenJavaSource(
             "test.TestComponent", """
-            @Component(modules = {MyModule.class})
+            @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
                 @Named("hello") Api get();
                 @Named("hello") Provider<Api> getProvider();

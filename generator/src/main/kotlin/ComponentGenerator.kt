@@ -20,7 +20,7 @@ class ComponentGenerator(
     private val logger: GenerationLogger,
     private val graph: BindingGraph,
 ) {
-    private val _targetClassName = graph.root.name.asClassName { "Dagger$it" }
+    private val _targetClassName = graph.component.name.asClassName { "Dagger$it" }
 
     val targetPackageName: String
         get() = _targetClassName.packageName()
@@ -35,27 +35,26 @@ class ComponentGenerator(
             .writeTo(out)
     }
 
-    private fun resolveAlias(maybeAlias: Binding?): NonAliasBinding? {
-        var binding: Binding? = maybeAlias
+    private fun resolveAlias(maybeAlias: Binding): NonAliasBinding {
+        var binding: Binding = maybeAlias
         while (when (binding) {
                 is AliasBinding -> true
                 is ProvisionBinding -> return binding
                 is InstanceBinding -> return binding
-                null -> return null
             }
         ) {
-            binding = graph.resolve(binding.source)
+            binding = graph.resolveBinding(binding.source).first
         }
         throw IllegalStateException("not reached")
     }
 
     private fun generate(): TypeSpec {
         return buildClass(_targetClassName) {
-            implements(graph.root.name.asTypeName())
+            implements(graph.component.name.asTypeName())
             modifiers(Modifier.FINAL)
             annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes") }
 
-            val factory = graph.root.factory
+            val factory = graph.component.factory
             if (factory != null) {
                 factory.inputs.forEach { input ->
                     field(input.target.name.asTypeName(), input.paramName) {
@@ -78,7 +77,7 @@ class ComponentGenerator(
                         method("create") {
                             modifiers(Modifier.PUBLIC)
                             annotation<Override>()
-                            returnType(graph.root.name.asTypeName())
+                            returnType(graph.component.name.asTypeName())
                             factory.inputs.forEach { input ->
                                 parameter(input.target.name.asTypeName(), input.paramName)
                             }
@@ -101,14 +100,9 @@ class ComponentGenerator(
                 }
             }
 
-            val reachable = graph.resolveReachable()
-            val provisionBindings = reachable.asSequence()
-                .onEach { (node, binding) ->
-                    if (binding == null) {
-                        logger.warning("Missing binding for $node")
-                    }
-                }.mapNotNull { (_, binding) -> binding }
-                .filterIsInstance<ProvisionBinding>()
+            val nonAliasBindings = graph.localBindings
+                .asSequence()
+                .filterIsInstance<NonAliasBinding>()
                 .toList()
 
             // TODO(jeffset): Extract this into a provision manager of some king
@@ -125,11 +119,15 @@ class ComponentGenerator(
                 returnType(ClassName.OBJECT)
                 parameter(ClassName.INT, "i")
                 controlFlow("switch(i)") {
-                    provisionBindings.forEachIndexed { index, binding ->
+                    nonAliasBindings.forEachIndexed { index, binding ->
                         +buildExpression {
                             +"case $index: return "
-                            call(binding.provider, binding.params.asSequence()
-                                .map { dep -> internalProvision(dep) + "()" })
+                            when (binding) {
+                                is InstanceBinding -> +"this.%N".formatCode(binding.paramName)
+                                is ProvisionBinding ->
+                                    call(binding.provider, binding.params.asSequence()
+                                        .map { dep -> internalProvision(dep) + "()" })
+                            }.let { /*exhaustive*/ }
                         }
                     }
                     +"default: throw new %T(%S)".formatCode(Names.AssertionError, "not reached")
@@ -139,8 +137,8 @@ class ComponentGenerator(
             val cachingProviderName = _targetClassName.nestedClass("CachingProvider")
             var useCachingProvider = false
 
-            provisionBindings
-                .zip(0..provisionBindings.lastIndex)
+            nonAliasBindings
+                .zip(0..nonAliasBindings.lastIndex)
                 .filter { (binding, _) -> binding.isScoped } // fixme: not only provisions may be scoped - aliases too
                 .forEach { (_, index) ->
                     useCachingProvider = true
@@ -160,7 +158,7 @@ class ComponentGenerator(
                     }
                 }
 
-            graph.root.entryPoints.forEach { (getter, dep) ->
+            graph.component.entryPoints.forEach { (getter, dep) ->
                 method(getter.functionName()) {
                     modifiers(Modifier.PUBLIC)
                     annotation<Override>()
@@ -173,52 +171,39 @@ class ComponentGenerator(
             var useFactory = false
 
             for ((dep, name) in internalProvisions) {
-                val binding: NonAliasBinding? = resolveAlias(graph.resolve(dep.node))
-                val index = provisionBindings.indexOf(binding)
+                val binding: NonAliasBinding = resolveAlias(graph.resolveBinding(dep.node).first)
+                val index = nonAliasBindings.indexOf(binding)
+                check(index >= 0)
                 method(name) {
                     modifiers(Modifier.PRIVATE)
                     returnType(dep.asTypeName())
-                    if (binding == null) {
-                        +"throw new %T(%S)".formatCode(Names.AssertionError, "missing binding")
-                        return@method
-                    }
-
-                    when (dep.kind) {
-                        DependencyKind.Direct -> {
-                            if (binding.isScoped) {
+                    if (binding.isScoped) {
+                        when (dep.kind) {
+                            DependencyKind.Direct ->
                                 +"return (%T) _provider$index().get()".formatCode(dep.node.name.asTypeName())
-                            } else {
-                                +buildExpression {
-                                    +"return "
-                                    when (binding) {
-                                        is InstanceBinding -> +"this.%N".formatCode(binding.paramName)
-                                        is ProvisionBinding ->
-                                            call(binding.provider, binding.params.asSequence()
-                                                .map { dep -> internalProvision(dep) + "()" })
-                                    }.let { /*exhaustive*/ }
-                                }
-                            }
-                        }
-                        DependencyKind.Lazy -> {
-                            if (binding.isScoped) {
+                            DependencyKind.Lazy, DependencyKind.Provider ->
                                 +"return _provider$index()"
-                            } else {
-                                +buildExpression {
-                                    useCachingProvider = true
-                                    +"return new %T(this, $index)"
-                                        .formatCode(cachingProviderName)
-                                }
-                            }
                         }
-                        DependencyKind.Provider -> {
-                            if (binding.isScoped) {
-                                +"return _provider$index()"
-                            } else {
-                                +buildExpression {
-                                    useFactory = true
-                                    +"return new %T(this, $index)"
-                                        .formatCode(factoryName)
-                                }
+                    } else {
+                        when (dep.kind) {
+                            DependencyKind.Direct -> +buildExpression {
+                                +"return "
+                                when (binding) {
+                                    is InstanceBinding -> +"this.%N".formatCode(binding.paramName)
+                                    is ProvisionBinding ->
+                                        call(binding.provider, binding.params.asSequence()
+                                            .map { dep -> internalProvision(dep) + "()" })
+                                }.let { /*exhaustive*/ }
+                            }
+                            DependencyKind.Lazy -> +buildExpression {
+                                useCachingProvider = true
+                                +"return new %T(this, $index)"
+                                    .formatCode(cachingProviderName)
+                            }
+                            DependencyKind.Provider -> +buildExpression {
+                                useFactory = true
+                                +"return new %T(this, $index)"
+                                    .formatCode(factoryName)
                             }
                         }
                     }

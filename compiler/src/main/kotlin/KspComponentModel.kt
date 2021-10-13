@@ -6,6 +6,7 @@ import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.dagger3.core.Binding
 import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.ComponentDependencyFactoryInput
 import com.yandex.dagger3.core.ComponentFactoryModel
@@ -14,6 +15,7 @@ import com.yandex.dagger3.core.InstanceBinding
 import com.yandex.dagger3.core.ModuleInstanceFactoryInput
 import dagger.BindsInstance
 import dagger.Component
+import javax.inject.Scope
 
 data class KspComponentModel(
     val componentDeclaration: KSClassDeclaration,
@@ -53,6 +55,10 @@ data class KspComponentModel(
                 }
             }
         }
+    }
+
+    override val scope: Binding.Scope? by lazy {
+        KspAnnotationDescriptor.describeIfAny<Scope>(componentDeclaration)
     }
 
     @Suppress("UNCHECKED_CAST")

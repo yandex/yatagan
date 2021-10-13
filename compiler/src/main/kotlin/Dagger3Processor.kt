@@ -24,6 +24,12 @@ internal class Dagger3Processor(
                 val graph = BindingGraph(
                     root = model,
                 )
+                if (graph.missingBindings.isNotEmpty()) {
+                    graph.missingBindings.forEach { node ->
+                        logger.error("Missing binding for $node")
+                    }
+                    return@forEach
+                }
                 val generator = ComponentGenerator(
                     logger = logger,
                     graph = graph,

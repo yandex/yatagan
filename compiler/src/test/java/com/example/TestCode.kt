@@ -44,6 +44,7 @@ object SomeModule {
     }
 }
 
+@Singleton
 @Component(
     modules = [
         TestModule::class,
@@ -65,6 +66,10 @@ interface TestComponent {
 
     @Named("hello")
     val someInt2: SomeInt2
+    @Named("hello")
+    val pSomeInt2: Provider<SomeInt2>
+    @Named("hello")
+    val lSomeInt2: Lazy<SomeInt2>
 
     @Component.Factory
     interface Factory {

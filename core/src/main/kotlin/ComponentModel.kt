@@ -10,6 +10,11 @@ interface ComponentModel : ClassBackedModel {
     val modules: Set<ModuleModel>
 
     /**
+     * A scope for bindings, that component can cache.
+     */
+    val scope: Binding.Scope?
+
+    /**
      * A set of component *dependencies*.
      */
     val dependencies: Set<ComponentModel>
@@ -26,7 +31,7 @@ interface ComponentModel : ClassBackedModel {
 
     /**
      * Whether this component is marked as a component hierarchy root.
-     * Do not confuse with [dependencies] - these are different types of component relations.
+     * Do not confuse with [ComponentModel.dependencies] - these are different types of component relations.
      */
     val isRoot: Boolean
 

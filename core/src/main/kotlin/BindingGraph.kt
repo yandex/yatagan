@@ -1,40 +1,41 @@
 package com.yandex.dagger3.core
 
-import java.util.Deque
-import java.util.LinkedList
+interface BindingGraph {
+    /**
+     * Component for which graph is built
+     */
+    val component: ComponentModel
 
-class BindingGraph(
-    val root: ComponentModel,
-) {
-    private val graphBindings = hashMapOf<NodeModel, Binding?>()
+    /**
+     * Requested bindings that belong to this component.
+     * Consists of bindings directly requested by entryPoints plus bindings requested by sub-graphs.
+     */
+    val localBindings: Collection<Binding>
 
-    fun resolve(node: NodeModel): Binding? {
-        return graphBindings.getOrPut(node) {
-            node.defaultBinding
-        }
-    }
+    /**
+     * Nodes that have no binding for them.
+     * Generally the graph is invalid if these are not empty. Use for error reporting.
+     */
+    val missingBindings: Collection<NodeModel>
 
-    fun resolveReachable(): Map<NodeModel, Binding?> {
-        return buildMap {
-            val stack: Deque<NodeModel> = LinkedList()
-            root.entryPoints.forEach { entryPoint ->
-                stack.add(entryPoint.dep.node)
-            }
-            while (stack.isNotEmpty()) {
-                val node = stack.pop()
-                val binding = resolve(node)
-                this[node] = binding
-                binding?.dependencies()?.forEach { dependency ->
-                    stack += dependency.node
-                }
-            }
-        }
-    }
+    /**
+     * Child graphs (or Subcomponents). Empty if no children present.
+     */
+    val children: Collection<BindingGraph>
 
-    init {
-        sequenceOf(
-            root.modules.asSequence().flatMap(ModuleModel::bindings),
-            root.factory?.inputs?.asSequence()?.filterIsInstance<InstanceBinding>() ?: emptySequence()
-        ).flatten().associateByTo(graphBindings, Binding::target)
-    }
+    /**
+     * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
+     *
+     * @return resolved binding with a graph to which it's a local binding.
+     * @throws IllegalArgumentException if binding is not found
+     */
+    fun resolveBinding(node: NodeModel): Pair<Binding, BindingGraph>
+}
+
+/**
+ * Creates [BindingGraph] instance given the root component.
+ */
+fun BindingGraph(root: ComponentModel): BindingGraph {
+    require(root.isRoot) { "can't use non-root component as a root of a binding graph" }
+    return BindingGraphImpl(root)
 }

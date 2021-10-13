@@ -72,6 +72,8 @@ class CoreBindingsKotlinTest : CompileTestBase() {
         @Component
         interface TestComponent {
             fun get(): MyClass
+            val provider: Provider<MyClass>
+            val lazy: Lazy<MyClass>
             
             @Component.Factory
             interface Factory {
