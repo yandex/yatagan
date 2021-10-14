@@ -16,9 +16,9 @@ class ModuleInstanceFactoryInput(
 class AliasBinding(
     override val target: NodeModel,
     val source: NodeModel,
-) : Binding
+) : Binding()
 
-sealed interface NonAliasBinding : Binding
+sealed class NonAliasBinding : Binding()
 
 /**
  * A [dagger.Provides] binding.
@@ -28,7 +28,7 @@ class ProvisionBinding(
     val scope: Scope?,
     val provider: CallableNameModel,
     val params: Collection<NodeModel.Dependency>,
-) : NonAliasBinding {
+) : NonAliasBinding() {
     /**
      * Represent provision cache scope.
      * Must provide [equals]/[hashCode] implementation.
@@ -43,4 +43,4 @@ class ProvisionBinding(
 class InstanceBinding(
     override val target: NodeModel,
     override val paramName: String,
-) : NonAliasBinding, ComponentFactoryModel.Input
+) : NonAliasBinding(), ComponentFactoryModel.Input

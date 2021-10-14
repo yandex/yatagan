@@ -7,7 +7,7 @@ internal class BindingGraphImpl(
     private val allProvidedBindings: MutableMap<NodeModel, Binding?> = sequenceOf(
         component.modules.asSequence().flatMap(ModuleModel::bindings),
         component.factory?.inputs?.asSequence()?.filterIsInstance<InstanceBinding>() ?: emptySequence()
-    ).flatten().associateByTo(mutableMapOf(), Binding::target)
+    ).flatten().onEach { it.owner = this }.associateByTo(mutableMapOf(), Binding::target)
     private val localBindingsMap = mutableMapOf<NodeModel, Binding>()
 
     override val localBindings: Collection<Binding> get() = localBindingsMap.values
@@ -31,19 +31,21 @@ internal class BindingGraphImpl(
             node.defaultBinding?.takeIf {
                 val scope = it.scope()
                 scope == null || scope == component.scope
+            }?.also {
+                it.owner = this
             }
         }?.also { binding ->
             localBindingsMap[binding.target] = binding
         }
     }
 
-    private fun actualizeInParents(nodeModel: NodeModel): Pair<Binding, BindingGraphImpl>? {
+    private fun actualizeInParents(nodeModel: NodeModel): Binding? {
         if (parent == null) {
             return null
         }
         val binding = parent.actualize(nodeModel)
         if (binding != null) {
-            return binding to parent
+            return binding
         }
         return parent.actualizeInParents(nodeModel)
     }

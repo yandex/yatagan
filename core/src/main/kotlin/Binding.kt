@@ -4,10 +4,16 @@ package com.yandex.dagger3.core
  * Represents a way to provide a [NodeModel].
  * Each [NodeModel] must have a single [Binding] for a [BindingGraph] to be valid.
  */
-sealed interface Binding {
+sealed class Binding {
     /**
      * A node that this binding provides.
      */
-    val target: NodeModel
+    abstract val target: NodeModel
 
+    /**
+     * A graph which hosts the binding.
+     * Guaranteed to be initialized only for bindings retrieved from a [BindingGraph].
+     */
+    var owner: BindingGraph by lateInit()
+        internal set
 }
