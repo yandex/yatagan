@@ -10,16 +10,4 @@ sealed interface Binding {
      */
     val target: NodeModel
 
-    /**
-     * Optional binding scope.
-     * If present then the binding is called "scoped" binding - it must cache provided instance
-     * inside a [ComponentModel] of the same scope.
-     */
-    val scope: Scope?
-
-    /**
-     * Represent provision cache scope.
-     * Must provide [equals]/[hashCode] implementation.
-     */
-    interface Scope
 }

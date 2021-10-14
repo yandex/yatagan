@@ -1,7 +1,6 @@
 package com.yandex.dagger3.compiler
 
 import com.google.devtools.ksp.getConstructors
-import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -27,7 +26,7 @@ data class KspNodeModel (
         if (qualifier != null) null
         else when (val declaration = type.declaration) {
             is KSClassDeclaration -> declaration.getConstructors().find {
-                it.isAnnotationPresent(Inject::class)
+                it.isAnnotationPresent<Inject>()
             }
             else -> null
         }?.let { injectConstructor ->

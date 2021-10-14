@@ -28,7 +28,10 @@ internal class BindingGraphImpl(
         return allProvidedBindings.getOrPut(node) {
             // Take default binding only if the binding scope complies with the component one
             // TODO: don't report missing binding, report something smarter is user erred in class/component scope
-            node.defaultBinding?.takeIf { it.scope == null || it.scope == component.scope }
+            node.defaultBinding?.takeIf {
+                val scope = it.scope()
+                scope == null || scope == component.scope
+            }
         }?.also { binding ->
             localBindingsMap[binding.target] = binding
         }

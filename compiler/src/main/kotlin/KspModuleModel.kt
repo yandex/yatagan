@@ -2,7 +2,6 @@ package com.yandex.dagger3.compiler
 
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getDeclaredProperties
-import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.dagger3.core.AliasBinding
@@ -13,7 +12,6 @@ import com.yandex.dagger3.core.ModuleModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import javax.inject.Scope
 
 data class KspModuleModel(
     val type: KSType,
@@ -67,7 +65,7 @@ data class KspModuleModel(
                             type = methodDeclaration.parameters.single().type.resolve(),
                             forQualifier = methodDeclaration.parameters.single(),
                         ),
-                        scope = KspAnnotationDescriptor.describeIfAny<Scope>(methodDeclaration),
+                        // TODO: forbid scope on alias bindings
                     )
                     ann hasType Provides::class -> ProvisionBinding(
                         target = target,
@@ -86,7 +84,7 @@ data class KspModuleModel(
 
     companion object {
         fun canRepresent(declaration: KSClassDeclaration): Boolean {
-            return declaration.isAnnotationPresent(Module::class)
+            return declaration.isAnnotationPresent<Module>()
         }
     }
 }

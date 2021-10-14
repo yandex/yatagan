@@ -138,8 +138,9 @@ class ComponentGenerator(
             var useCachingProvider = false
 
             nonAliasBindings
-                .zip(0..nonAliasBindings.lastIndex)
-                .filter { (binding, _) -> binding.isScoped } // fixme: not only provisions may be scoped - aliases too
+                .asSequence()
+                .zip((0..nonAliasBindings.lastIndex).asSequence())
+                .filter { (binding, _) -> binding.isScoped() }
                 .forEach { (_, index) ->
                     useCachingProvider = true
                     field(cachingProviderName, "mProvider$index") {
@@ -177,7 +178,7 @@ class ComponentGenerator(
                 method(name) {
                     modifiers(Modifier.PRIVATE)
                     returnType(dep.asTypeName())
-                    if (binding.isScoped) {
+                    if (binding.isScoped()) {
                         when (dep.kind) {
                             DependencyKind.Direct ->
                                 +"return (%T) _provider$index().get()".formatCode(dep.node.name.asTypeName())

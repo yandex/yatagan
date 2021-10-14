@@ -23,3 +23,6 @@ internal inline fun <reified A : Annotation> KSType.getAnnotation(): KSAnnotatio
 internal operator fun KSAnnotation.get(name: String): Any? {
     return arguments.find { (it.name?.asString() ?: "value") == name }?.value
 }
+
+internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean =
+    annotations.any { it hasType T::class }

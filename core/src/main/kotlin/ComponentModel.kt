@@ -12,7 +12,7 @@ interface ComponentModel : ClassBackedModel {
     /**
      * A scope for bindings, that component can cache.
      */
-    val scope: Binding.Scope?
+    val scope: ProvisionBinding.Scope?
 
     /**
      * A set of component *dependencies*.
