@@ -20,3 +20,29 @@ fun Binding.dependencies(): Collection<NodeModel.Dependency> = when (this) {
     is ProvisionBinding -> params
     is InstanceBinding -> emptyList()
 }
+
+/**
+ * Utility wrapper around [BindingGraph.resolveBinding] which follows alias bindings.
+ * @see BindingGraph.resolveBinding
+ */
+fun BindingGraph.resolveNonAliasBinding(node: NodeModel): NonAliasBinding {
+    var binding: Binding = resolveBinding(node)
+    while (true) {
+        binding = when (binding) {
+            is AliasBinding -> resolveBinding(binding.source)
+            is InstanceBinding -> return binding
+            is ProvisionBinding -> return binding
+        }
+    }
+}
+
+fun BindingGraph.resolveNonAliasBinding(maybeAlias: Binding): NonAliasBinding {
+    var binding: Binding = maybeAlias
+    while (true) {
+        binding = when (binding) {
+            is AliasBinding -> resolveBinding(binding.source)
+            is InstanceBinding -> return binding
+            is ProvisionBinding -> return binding
+        }
+    }
+}

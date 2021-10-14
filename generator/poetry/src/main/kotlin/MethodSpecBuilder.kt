@@ -14,7 +14,7 @@ abstract class MethodSpecBuilder : CodeBuilder(), AnnotatibleBuilder {
     @PublishedApi
     internal abstract val impl: MethodSpec.Builder
 
-    fun implBuild(): MethodSpec {
+    internal fun implBuild(): MethodSpec {
         impl.addCode(implCode.build())
         return impl.build()
     }

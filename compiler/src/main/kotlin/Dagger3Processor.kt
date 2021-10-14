@@ -8,7 +8,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.dagger3.core.BindingGraph
-import com.yandex.dagger3.generator.ComponentGenerator
+import com.yandex.dagger3.generator.ComponentGeneratorFacade
 import com.yandex.dagger3.generator.GenerationLogger
 
 internal class Dagger3Processor(
@@ -30,8 +30,7 @@ internal class Dagger3Processor(
                     }
                     return@forEach
                 }
-                val generator = ComponentGenerator(
-                    logger = logger,
+                val generator = ComponentGeneratorFacade(
                     graph = graph,
                 )
                 environment.codeGenerator.createNewFile(

@@ -1,5 +1,7 @@
 package com.yandex.dagger3.core
 
+import com.yandex.dagger3.core.NodeModel.Dependency.Kind
+
 internal class BindingGraphImpl(
     override val component: ComponentModel,
     private val parent: BindingGraphImpl? = null,
@@ -10,7 +12,7 @@ internal class BindingGraphImpl(
     ).flatten().onEach { it.owner = this }.associateByTo(mutableMapOf(), Binding::target)
     private val localBindingsMap = mutableMapOf<NodeModel, Binding>()
 
-    override val localBindings: Collection<Binding> get() = localBindingsMap.values
+    override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val missingBindings: Set<NodeModel>  // Initialized in init block
     override val children: Collection<BindingGraphImpl> = component.modules
         .asSequence()
@@ -18,13 +20,14 @@ internal class BindingGraphImpl(
         .distinct()
         .map { BindingGraphImpl(it, parent = this) }
         .toList()
+    override val usedParents = mutableSetOf<BindingGraph>()
 
-    override fun resolveBinding(node: NodeModel): Pair<Binding, BindingGraph> {
-        val resolved = localBindingsMap[node]?.let { it to this } ?: parent?.resolveBinding(node)
-        return checkNotNull(resolved) { "No binding for $node" }
+    override fun resolveBinding(node: NodeModel): Binding {
+        return localBindingsMap[node] ?: parent?.resolveBinding(node) ?: throw MissingBindingException(node)
     }
 
-    private fun actualize(node: NodeModel): Binding? {
+    private fun actualize(dependency: NodeModel.Dependency): Binding? {
+        val (node, kind) = dependency
         return allProvidedBindings.getOrPut(node) {
             // Take default binding only if the binding scope complies with the component one
             // TODO: don't report missing binding, report something smarter is user erred in class/component scope
@@ -36,42 +39,60 @@ internal class BindingGraphImpl(
             }
         }?.also { binding ->
             localBindingsMap[binding.target] = binding
+            localBindings.getOrPut(binding, ::BindingUsageImpl)
+                .accept(kind)
         }
     }
 
-    private fun actualizeInParents(nodeModel: NodeModel): Binding? {
+    private fun actualizeInParents(dependency: NodeModel.Dependency): Binding? {
         if (parent == null) {
             return null
         }
-        val binding = parent.actualize(nodeModel)
+        val binding = parent.actualize(dependency)
         if (binding != null) {
+            // The binding is requested from a parent, so add parent to dependencies.
+            usedParents += parent
             return binding
         }
-        return parent.actualizeInParents(nodeModel)
+        return parent.actualizeInParents(dependency)?.also {
+            usedParents += it.owner
+        }
     }
 
     init {
-        val queue = ArrayDeque<NodeModel>()
+        val queue = ArrayDeque<NodeModel.Dependency>()
         component.entryPoints.forEach { entryPoint ->
-            queue.add(entryPoint.dep.node)
+            queue.add(entryPoint.dep)
         }
         val missing = mutableSetOf<NodeModel>()
         while (queue.isNotEmpty()) {
-            val node = queue.removeFirst()
-            val localBinding = actualize(node)
+            val dependency = queue.removeFirst()
+            val localBinding = actualize(dependency)
             if (localBinding == null) {
-                val parentBinding = actualizeInParents(node)
+                val parentBinding = actualizeInParents(dependency)
                 if (parentBinding == null) {
-                    missing += node
+                    missing += dependency.node
                     continue
                 }
-                // No need to add inherited binding dependencies
+                // No need to add inherited binding's dependencies
             } else {
-                localBinding.dependencies().forEach { dependency ->
-                    queue += dependency.node
-                }
+                queue += localBinding.dependencies()
             }
         }
         missingBindings = missing
+    }
+
+    class BindingUsageImpl : BindingUsage {
+        override var direct: Int = 0
+        override var provider: Int = 0
+        override var lazy: Int = 0
+    }
+
+    private fun BindingUsageImpl.accept(dependencyKind: Kind) {
+        when (dependencyKind) {
+            Kind.Direct -> direct++
+            Kind.Lazy -> lazy++
+            Kind.Provider -> provider++
+        }.let { /*exhaustive*/ }
     }
 }

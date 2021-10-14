@@ -9,36 +9,31 @@ import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.ExecutableElement
 
-class ClassTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
+@PublishedApi
+internal class ClassTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
     @PublishedApi
     override val impl: TypeSpec.Builder = TypeSpec.classBuilder(name)
 }
 
-class InterfaceTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
+@PublishedApi
+internal class InterfaceTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
     @PublishedApi
     override val impl: TypeSpec.Builder = TypeSpec.interfaceBuilder(name)
 }
 
-class AnnotationTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
+@PublishedApi
+internal class AnnotationTypeSpecBuilder(name: ClassName) : TypeSpecBuilder() {
     @PublishedApi
     override val impl: TypeSpec.Builder = TypeSpec.annotationBuilder(name)
 }
 
-class MethodSpecBuilderImpl(name: String) : MethodSpecBuilder() {
-    @PublishedApi
+internal class MethodSpecBuilderImpl(name: String) : MethodSpecBuilder() {
     override val impl: MethodSpec.Builder = MethodSpec.methodBuilder(name)
 }
 
-class ConstructorSpecBuilder : MethodSpecBuilder() {
-    @PublishedApi
+internal class ConstructorSpecBuilder : MethodSpecBuilder() {
     override val impl: MethodSpec.Builder = MethodSpec.constructorBuilder()
-}
-
-class OverrideMethodSpecBuilder(base: ExecutableElement) : MethodSpecBuilder() {
-    @PublishedApi
-    override val impl: MethodSpec.Builder = MethodSpec.overriding(base)
 }
 
 inline fun buildInterface(

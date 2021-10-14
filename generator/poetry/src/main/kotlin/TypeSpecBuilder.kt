@@ -7,7 +7,6 @@ import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeVariableName
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import kotlin.reflect.KClass
 
@@ -16,17 +15,23 @@ abstract class TypeSpecBuilder : AnnotatibleBuilder {
     @PublishedApi
     internal abstract val impl: TypeSpec.Builder
 
+    fun method(builder: MethodSpecBuilder) {
+        impl.addMethod(builder.implBuild())
+    }
+
     inline fun method(name: String, block: MethodSpecBuilder.() -> Unit) {
-        impl.addMethod(MethodSpecBuilderImpl(name).apply(block).implBuild())
+        method(methodBuilder(name).apply(block))
+    }
+
+    fun methodBuilder(name: String): MethodSpecBuilder {
+        return MethodSpecBuilderImpl(name)
     }
 
     inline fun constructor(block: MethodSpecBuilder.() -> Unit) {
-        impl.addMethod(ConstructorSpecBuilder().apply(block).implBuild())
+        method(constructorBuilder().apply(block))
     }
 
-    inline fun override(method: ExecutableElement, block: MethodSpecBuilder.() -> Unit) {
-        impl.addMethod(OverrideMethodSpecBuilder(method).apply(block).implBuild())
-    }
+    fun constructorBuilder(): MethodSpecBuilder = ConstructorSpecBuilder()
 
     inline fun field(type: TypeName, name: String, block: FieldSpecBuilder.() -> Unit = {}) {
         impl.addField(FieldSpecBuilder(type, name).apply(block).impl.build())
