@@ -15,10 +15,15 @@ fun Binding.scope(): ProvisionBinding.Scope? {
     }
 }
 
-fun Binding.dependencies(): Collection<NodeModel.Dependency> = when (this) {
+// MAYBE: make this a regular virtual function
+internal fun Binding.dependencies(): Collection<NodeModel.Dependency> = when (this) {
     is AliasBinding -> listOf(NodeModel.Dependency(source))
     is ProvisionBinding -> params
+    is ComponentInstanceBinding,
     is InstanceBinding -> emptyList()
+
+    // fixme: target.target.graph.usedParents.map { NodeModel.Dependency(it.component) }
+    is SubComponentFactoryBinding -> emptyList()
 }
 
 /**
@@ -30,8 +35,7 @@ fun BindingGraph.resolveNonAliasBinding(node: NodeModel): NonAliasBinding {
     while (true) {
         binding = when (binding) {
             is AliasBinding -> resolveBinding(binding.source)
-            is InstanceBinding -> return binding
-            is ProvisionBinding -> return binding
+            is NonAliasBinding -> return binding
         }
     }
 }
@@ -41,8 +45,7 @@ fun BindingGraph.resolveNonAliasBinding(maybeAlias: Binding): NonAliasBinding {
     while (true) {
         binding = when (binding) {
             is AliasBinding -> resolveBinding(binding.source)
-            is InstanceBinding -> return binding
-            is ProvisionBinding -> return binding
+            is NonAliasBinding -> return binding
         }
     }
 }

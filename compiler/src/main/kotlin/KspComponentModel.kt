@@ -18,7 +18,7 @@ import javax.inject.Scope
 
 data class KspComponentModel(
     val componentDeclaration: KSClassDeclaration,
-) : ComponentModel {
+) : ComponentModel() {
     init {
         require(canRepresent(componentDeclaration))
     }
@@ -37,7 +37,9 @@ data class KspComponentModel(
         val factoryMethod = factoryDeclaration.getDeclaredFunctions().find { it.simpleName.asString() == "create" }
             ?: return@lazy null
 
-        object : ComponentFactoryModel {
+        object : ComponentFactoryModel() {
+            override val target: ComponentModel
+                get() = this@KspComponentModel
             override val name = ClassNameModel(factoryDeclaration)
             override val inputs = factoryMethod.parameters.map {
                 val type = it.type.resolve()

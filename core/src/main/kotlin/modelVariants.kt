@@ -44,3 +44,11 @@ class InstanceBinding(
     override val target: NodeModel,
     override val paramName: String,
 ) : NonAliasBinding(), ComponentFactoryModel.Input
+
+class SubComponentFactoryBinding(
+    override val target: ComponentFactoryModel,
+) : NonAliasBinding()
+
+class ComponentInstanceBinding(
+    override val target: ComponentModel,
+) : NonAliasBinding()

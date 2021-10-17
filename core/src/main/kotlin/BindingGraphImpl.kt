@@ -6,24 +6,31 @@ internal class BindingGraphImpl(
     override val component: ComponentModel,
     private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
-    private val allProvidedBindings: MutableMap<NodeModel, Binding?> = sequenceOf(
-        component.modules.asSequence().flatMap(ModuleModel::bindings),
-        component.factory?.inputs?.asSequence()?.filterIsInstance<InstanceBinding>() ?: emptySequence()
-    ).flatten().onEach { it.owner = this }.associateByTo(mutableMapOf(), Binding::target)
+    init {
+        component.graph = this
+    }
+
     private val localBindingsMap = mutableMapOf<NodeModel, Binding>()
+
+    private val allProvidedBindings: MutableMap<NodeModel, Binding?> = sequenceOf(
+        // All bindings from installed modules
+        component.modules.asSequence().flatMap(ModuleModel::bindings),
+        // Instance bindings from factory
+        component.factory?.inputs?.asSequence()?.filterIsInstance<InstanceBinding>() ?: emptySequence(),
+        // Subcomponents factory bindings
+        component.modules.asSequence().flatMap(ModuleModel::subcomponents).distinct()
+            .mapNotNull { it.factory }.map(::SubComponentFactoryBinding),
+        // This component binding
+        sequenceOf(ComponentInstanceBinding(component)),
+    ).flatten().onEach { it.owner = this }.associateByTo(mutableMapOf(), Binding::target)
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val missingBindings: Set<NodeModel>  // Initialized in init block
-    override val children: Collection<BindingGraphImpl> = component.modules
-        .asSequence()
-        .flatMap(ModuleModel::subcomponents)
-        .distinct()
-        .map { BindingGraphImpl(it, parent = this) }
-        .toList()
     override val usedParents = mutableSetOf<BindingGraph>()
 
     override fun resolveBinding(node: NodeModel): Binding {
-        return localBindingsMap[node] ?: parent?.resolveBinding(node) ?: throw MissingBindingException(node)
+        return localBindingsMap[node] ?: parent?.resolveBinding(node)
+        ?: throw MissingBindingException(node)
     }
 
     private fun actualize(dependency: NodeModel.Dependency): Binding? {
@@ -60,6 +67,10 @@ internal class BindingGraphImpl(
     }
 
     init {
+        // This is done to actualize *potential* component dependencies as
+        // SubComponentFactoryBinding.dependencies() doesn't really work.
+        actualize(NodeModel.Dependency(component))
+
         val queue = ArrayDeque<NodeModel.Dependency>()
         component.entryPoints.forEach { entryPoint ->
             queue.add(entryPoint.dep)
@@ -81,6 +92,13 @@ internal class BindingGraphImpl(
         }
         missingBindings = missing
     }
+
+    override val children: Collection<BindingGraphImpl> = component.modules
+        .asSequence()
+        .flatMap(ModuleModel::subcomponents)
+        .distinct()
+        .map { BindingGraphImpl(it, parent = this) }
+        .toList()
 
     class BindingUsageImpl : BindingUsage {
         override var direct: Int = 0

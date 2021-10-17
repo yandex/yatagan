@@ -12,10 +12,10 @@ data class ClassNameModel(
 
     override fun toString() = buildString {
         append(packageName).append('.')
-        simpleNames.forEach(this::append)
+        simpleNames.joinTo(this, separator = ".")
         if (typeArguments.isNotEmpty()) {
             append('<')
-            typeArguments.forEach(this::append)
+            typeArguments.joinTo(this, separator = ".")
             append('>')
         }
     }

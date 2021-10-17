@@ -19,8 +19,9 @@ internal class Dagger3Processor(
 
         resolver.getSymbolsWithAnnotation(AnnotationNames.Component)
             .filterIsInstance<KSClassDeclaration>()
-            .forEach { symbol ->
-                val model = KspComponentModel(symbol)
+            .map { KspComponentModel(it) }
+            .filter { it.isRoot }
+            .forEach { model ->
                 val graph = BindingGraph(
                     root = model,
                 )
@@ -36,6 +37,7 @@ internal class Dagger3Processor(
                 environment.codeGenerator.createNewFile(
                     Dependencies(
                         aggregating = false,
+                        // fixme: provide proper dependencies here.
                     ),
                     packageName = generator.targetPackageName,
                     fileName = generator.targetClassName,
