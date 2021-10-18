@@ -34,10 +34,11 @@ internal class DaggerLiteProcessor(
                 val generator = ComponentGeneratorFacade(
                     graph = graph,
                 )
+                val sourceFile = model.componentDeclaration.containingFile
                 environment.codeGenerator.createNewFile(
                     Dependencies(
                         aggregating = false,
-                        // fixme: provide proper dependencies here.
+                        *(sourceFile?.let { arrayOf(sourceFile) } ?: emptyArray()),
                     ),
                     packageName = generator.targetPackageName,
                     fileName = generator.targetClassName,
