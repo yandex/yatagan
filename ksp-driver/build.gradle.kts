@@ -32,7 +32,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("com.google.devtools.ksp:symbol-processing-api:${Versions.Ksp}")
 
-    kspTest(project(":compiler"))
+    kspTest(project(":ksp-driver"))
     testImplementation(kotlin("test"))
     testImplementation(project(":generator:poetry"))  // MAYBE: remove this as we don't need it in tests.
     testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:${Versions.KotlinCompileTesting}")
