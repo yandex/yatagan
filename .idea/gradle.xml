@@ -18,7 +18,6 @@
             <option value="$PROJECT_DIR$/generator" />
             <option value="$PROJECT_DIR$/generator/poetry" />
             <option value="$PROJECT_DIR$/ksp-driver" />
-            <option value="$PROJECT_DIR$/ksp-driver/runtime-internals" />
             <option value="$PROJECT_DIR$/runtime" />
           </set>
         </option>
