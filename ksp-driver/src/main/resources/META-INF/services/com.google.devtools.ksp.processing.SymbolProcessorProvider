@@ -1,1 +1,1 @@
-com.yandex.daggerlite.compiler.Dagger3ProcessorProvider
+com.yandex.daggerlite.compiler.DaggerLiteProcessorProvider

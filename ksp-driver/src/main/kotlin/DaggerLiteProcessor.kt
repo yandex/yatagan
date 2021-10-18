@@ -11,7 +11,7 @@ import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
 import com.yandex.daggerlite.generator.GenerationLogger
 
-internal class Dagger3Processor(
+internal class DaggerLiteProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {

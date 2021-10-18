@@ -92,7 +92,7 @@ abstract class CompileTestBase : SourceSet by SourceSetImpl() {
     private fun setupFirstRoundCompilation() = KotlinCompilation().apply {
         sources = sourceFiles.toList()
         inheritClassPath = true
-        symbolProcessorProviders = listOf(Dagger3ProcessorProvider())
+        symbolProcessorProviders = listOf(DaggerLiteProcessorProvider())
     }
 
     protected inner class CompilationResulClause(
