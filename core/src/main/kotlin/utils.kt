@@ -1,4 +1,4 @@
-package com.yandex.dagger3.core
+package com.yandex.daggerlite.core
 
 import kotlin.reflect.KProperty
 

@@ -1,12 +1,12 @@
-package com.yandex.dagger3.generator
+package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
-import com.yandex.dagger3.core.BindingGraph
-import com.yandex.dagger3.core.ComponentModel
-import com.yandex.dagger3.generator.poetry.TypeSpecBuilder
-import com.yandex.dagger3.generator.poetry.buildClass
-import com.yandex.dagger3.generator.poetry.buildExpression
+import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.generator.poetry.buildClass
+import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.inject.Provider
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE

@@ -1,6 +1,6 @@
-package com.yandex.dagger3.generator
+package com.yandex.daggerlite.generator
 
-import com.yandex.dagger3.core.ClassNameModel
+import com.yandex.daggerlite.core.ClassNameModel
 import kotlin.random.Random
 
 internal class Namespace(

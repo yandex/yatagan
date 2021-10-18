@@ -1,10 +1,10 @@
-package com.yandex.dagger3.generator
+package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
-import com.yandex.dagger3.core.NonAliasBinding
-import com.yandex.dagger3.generator.poetry.Names
-import com.yandex.dagger3.generator.poetry.TypeSpecBuilder
-import com.yandex.dagger3.generator.poetry.buildExpression
+import com.yandex.daggerlite.core.NonAliasBinding
+import com.yandex.daggerlite.generator.poetry.Names
+import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.inject.Provider
 import javax.lang.model.element.Modifier
 

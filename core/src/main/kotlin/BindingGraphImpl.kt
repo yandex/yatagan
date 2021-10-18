@@ -1,6 +1,6 @@
-package com.yandex.dagger3.core
+package com.yandex.daggerlite.core
 
-import com.yandex.dagger3.core.NodeModel.Dependency.Kind
+import com.yandex.daggerlite.core.NodeModel.Dependency.Kind
 
 internal class BindingGraphImpl(
     override val component: ComponentModel,

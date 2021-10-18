@@ -1,4 +1,4 @@
-package com.yandex.dagger3.compiler
+package com.yandex.daggerlite.compiler
 
 import kotlin.test.Test
 

@@ -1,8 +1,8 @@
-package com.yandex.dagger3.generator
+package com.yandex.daggerlite.generator
 
-import com.yandex.dagger3.core.BindingGraph
-import com.yandex.dagger3.generator.poetry.ExpressionBuilder
-import com.yandex.dagger3.generator.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
+import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 
 internal interface ProvisionStrategy {
     fun generateInComponent(builder: TypeSpecBuilder) {

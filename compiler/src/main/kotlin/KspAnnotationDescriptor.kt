@@ -1,10 +1,10 @@
-package com.yandex.dagger3.compiler
+package com.yandex.daggerlite.compiler
 
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSDeclaration
-import com.yandex.dagger3.core.NodeModel
-import com.yandex.dagger3.core.ProvisionBinding
+import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.ProvisionBinding
 
 data class KspAnnotationDescriptor(val tag: String) : NodeModel.Qualifier, ProvisionBinding.Scope {
     companion object {

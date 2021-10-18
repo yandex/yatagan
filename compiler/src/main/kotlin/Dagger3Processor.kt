@@ -1,4 +1,4 @@
-package com.yandex.dagger3.compiler
+package com.yandex.daggerlite.compiler
 
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
@@ -7,9 +7,9 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.yandex.dagger3.core.BindingGraph
-import com.yandex.dagger3.generator.ComponentGeneratorFacade
-import com.yandex.dagger3.generator.GenerationLogger
+import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.generator.ComponentGeneratorFacade
+import com.yandex.daggerlite.generator.GenerationLogger
 
 internal class Dagger3Processor(
     private val environment: SymbolProcessorEnvironment,

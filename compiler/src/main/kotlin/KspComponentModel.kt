@@ -1,17 +1,17 @@
-package com.yandex.dagger3.compiler
+package com.yandex.daggerlite.compiler
 
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.yandex.dagger3.core.ClassNameModel
-import com.yandex.dagger3.core.ComponentDependencyFactoryInput
-import com.yandex.dagger3.core.ComponentFactoryModel
-import com.yandex.dagger3.core.ComponentModel
-import com.yandex.dagger3.core.InstanceBinding
-import com.yandex.dagger3.core.ModuleInstanceFactoryInput
-import com.yandex.dagger3.core.ProvisionBinding
+import com.yandex.daggerlite.core.ClassNameModel
+import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
+import com.yandex.daggerlite.core.ComponentFactoryModel
+import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.InstanceBinding
+import com.yandex.daggerlite.core.ModuleInstanceFactoryInput
+import com.yandex.daggerlite.core.ProvisionBinding
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Scope

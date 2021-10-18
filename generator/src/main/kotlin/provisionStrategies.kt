@@ -1,11 +1,11 @@
-package com.yandex.dagger3.generator
+package com.yandex.daggerlite.generator
 
-import com.yandex.dagger3.core.BindingGraph
-import com.yandex.dagger3.core.NonAliasBinding
-import com.yandex.dagger3.core.ProvisionBinding
-import com.yandex.dagger3.generator.poetry.ExpressionBuilder
-import com.yandex.dagger3.generator.poetry.TypeSpecBuilder
-import com.yandex.dagger3.generator.poetry.buildExpression
+import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.NonAliasBinding
+import com.yandex.daggerlite.core.ProvisionBinding
+import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
+import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.lang.model.element.Modifier.PRIVATE
 
 

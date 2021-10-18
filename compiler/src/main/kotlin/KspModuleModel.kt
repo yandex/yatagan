@@ -1,14 +1,14 @@
-package com.yandex.dagger3.compiler
+package com.yandex.daggerlite.compiler
 
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.yandex.dagger3.core.AliasBinding
-import com.yandex.dagger3.core.Binding
-import com.yandex.dagger3.core.ClassNameModel
-import com.yandex.dagger3.core.ComponentModel
-import com.yandex.dagger3.core.ModuleModel
+import com.yandex.daggerlite.core.AliasBinding
+import com.yandex.daggerlite.core.Binding
+import com.yandex.daggerlite.core.ClassNameModel
+import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.ModuleModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

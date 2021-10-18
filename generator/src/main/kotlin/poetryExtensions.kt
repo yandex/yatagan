@@ -1,18 +1,18 @@
-package com.yandex.dagger3.generator
+package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
-import com.yandex.dagger3.core.CallableNameModel
-import com.yandex.dagger3.core.ClassBackedModel
-import com.yandex.dagger3.core.ClassNameModel
-import com.yandex.dagger3.core.ConstructorNameModel
-import com.yandex.dagger3.core.FunctionNameModel
-import com.yandex.dagger3.core.MemberCallableNameModel
-import com.yandex.dagger3.core.NodeModel
-import com.yandex.dagger3.core.PropertyNameModel
-import com.yandex.dagger3.generator.poetry.ExpressionBuilder
-import com.yandex.dagger3.generator.poetry.Names
+import com.yandex.daggerlite.core.CallableNameModel
+import com.yandex.daggerlite.core.ClassBackedModel
+import com.yandex.daggerlite.core.ClassNameModel
+import com.yandex.daggerlite.core.ConstructorNameModel
+import com.yandex.daggerlite.core.FunctionNameModel
+import com.yandex.daggerlite.core.MemberCallableNameModel
+import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.PropertyNameModel
+import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
+import com.yandex.daggerlite.generator.poetry.Names
 
 internal typealias DependencyKind = NodeModel.Dependency.Kind
 

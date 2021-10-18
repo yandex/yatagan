@@ -1,4 +1,4 @@
-package com.yandex.dagger3.generator.poetry
+package com.yandex.daggerlite.generator.poetry
 
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec

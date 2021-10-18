@@ -1,19 +1,19 @@
-package com.yandex.dagger3.generator
+package com.yandex.daggerlite.generator
 
-import com.yandex.dagger3.core.Binding
-import com.yandex.dagger3.core.BindingGraph
-import com.yandex.dagger3.core.ComponentInstanceBinding
-import com.yandex.dagger3.core.ComponentModel
-import com.yandex.dagger3.core.InstanceBinding
-import com.yandex.dagger3.core.NodeModel
-import com.yandex.dagger3.core.NonAliasBinding
-import com.yandex.dagger3.core.ProvisionBinding
-import com.yandex.dagger3.core.SubComponentFactoryBinding
-import com.yandex.dagger3.core.isScoped
-import com.yandex.dagger3.core.resolveNonAliasBinding
-import com.yandex.dagger3.generator.poetry.ExpressionBuilder
-import com.yandex.dagger3.generator.poetry.TypeSpecBuilder
-import com.yandex.dagger3.generator.poetry.buildExpression
+import com.yandex.daggerlite.core.Binding
+import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.ComponentInstanceBinding
+import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.InstanceBinding
+import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.NonAliasBinding
+import com.yandex.daggerlite.core.ProvisionBinding
+import com.yandex.daggerlite.core.SubComponentFactoryBinding
+import com.yandex.daggerlite.core.isScoped
+import com.yandex.daggerlite.core.resolveNonAliasBinding
+import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
+import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.inject.Provider
 
 internal class ProvisionGenerator(

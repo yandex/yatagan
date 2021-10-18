@@ -7,7 +7,7 @@ plugins {
 
 subprojects {
     ext["version"] = "0.0.1-SNAPSHOT"
-    ext["group"] = "com.yandex.dagger3"
+    ext["group"] = "com.yandex.daggerlite"
 
     tasks.withType<KotlinCompile> {
         kotlinOptions {

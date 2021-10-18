@@ -1,4 +1,4 @@
-package com.yandex.dagger3.generator
+package com.yandex.daggerlite.generator
 
 interface GenerationLogger {
     fun error(message: String)

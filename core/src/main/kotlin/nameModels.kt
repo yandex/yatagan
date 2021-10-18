@@ -1,4 +1,4 @@
-package com.yandex.dagger3.core
+package com.yandex.daggerlite.core
 
 // MAYBE: this most likely requires generalization to support non-class types: builtin types, arrays, etc..
 data class ClassNameModel(

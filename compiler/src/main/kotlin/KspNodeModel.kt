@@ -1,12 +1,12 @@
-package com.yandex.dagger3.compiler
+package com.yandex.daggerlite.compiler
 
 import com.google.devtools.ksp.getConstructors
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.yandex.dagger3.core.Binding
-import com.yandex.dagger3.core.ClassNameModel
-import com.yandex.dagger3.core.NodeModel
+import com.yandex.daggerlite.core.Binding
+import com.yandex.daggerlite.core.ClassNameModel
+import com.yandex.daggerlite.core.NodeModel
 import javax.inject.Inject
 
 data class KspNodeModel(
