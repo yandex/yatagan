@@ -2,24 +2,23 @@ package com.yandex.dagger3.compiler
 
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.isAbstract
-import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.yandex.dagger3.core.Binding
 import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.ComponentDependencyFactoryInput
 import com.yandex.dagger3.core.ComponentFactoryModel
 import com.yandex.dagger3.core.ComponentModel
 import com.yandex.dagger3.core.InstanceBinding
 import com.yandex.dagger3.core.ModuleInstanceFactoryInput
+import com.yandex.dagger3.core.ProvisionBinding
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Scope
 
 data class KspComponentModel(
     val componentDeclaration: KSClassDeclaration,
-) : ComponentModel {
+) : ComponentModel() {
     init {
         require(canRepresent(componentDeclaration))
     }
@@ -32,13 +31,15 @@ data class KspComponentModel(
     override val factory: ComponentFactoryModel? by lazy {
         val factoryDeclaration = componentDeclaration.declarations
             .filterIsInstance<KSClassDeclaration>()
-            .find { it.isAnnotationPresent(Component.Factory::class) }
+            .find { it.isAnnotationPresent<Component.Factory>() }
             ?: return@lazy null
 
         val factoryMethod = factoryDeclaration.getDeclaredFunctions().find { it.simpleName.asString() == "create" }
             ?: return@lazy null
 
-        object : ComponentFactoryModel {
+        object : ComponentFactoryModel() {
+            override val target: ComponentModel
+                get() = this@KspComponentModel
             override val name = ClassNameModel(factoryDeclaration)
             override val inputs = factoryMethod.parameters.map {
                 val type = it.type.resolve()
@@ -49,7 +50,7 @@ data class KspComponentModel(
                         ComponentDependencyFactoryInput(KspComponentModel(declaration), name)
                     KspModuleModel.canRepresent(declaration) ->
                         ModuleInstanceFactoryInput(KspModuleModel(type), name)
-                    it.isAnnotationPresent(BindsInstance::class) ->
+                    it.isAnnotationPresent<BindsInstance>() ->
                         InstanceBinding(KspNodeModel(type, forQualifier = it), name)
                     else -> throw IllegalStateException("invalid factory method parameter")
                 }
@@ -57,7 +58,7 @@ data class KspComponentModel(
         }
     }
 
-    override val scope: Binding.Scope? by lazy {
+    override val scope: ProvisionBinding.Scope? by lazy {
         KspAnnotationDescriptor.describeIfAny<Scope>(componentDeclaration)
     }
 
@@ -95,7 +96,7 @@ data class KspComponentModel(
 
     companion object {
         fun canRepresent(declaration: KSClassDeclaration): Boolean {
-            return declaration.isAnnotationPresent(Component::class)
+            return declaration.isAnnotationPresent<Component>()
         }
     }
 }

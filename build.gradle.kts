@@ -11,9 +11,9 @@ subprojects {
 
     tasks.withType<KotlinCompile> {
         kotlinOptions {
-            freeCompilerArgs += listOf(
+            freeCompilerArgs = freeCompilerArgs + listOf(
                 "-Xopt-in=kotlin.ExperimentalStdlibApi",
-                "-Xopt-in=com.google.devtools.ksp.KspExperimental",
+                "-Xopt-in=kotlin.contracts.ExperimentalContracts",
             )
         }
     }

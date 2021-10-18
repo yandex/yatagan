@@ -7,16 +7,17 @@ package com.yandex.dagger3.core
  *
  * Implementations must provide stable [equals]/[hashCode] implementation for correct matching.
  */
-interface NodeModel : ClassBackedModel {
+abstract class NodeModel : ClassBackedModel {
     /**
      * Optional [Qualifier].
      */
-    val qualifier: Qualifier?
+    abstract val qualifier: Qualifier?
 
     /**
      * self-provision binding if supported by underlying type.
+     * TODO: rename(jeffset): rename to implicitBinding.
      */
-    val defaultBinding: Binding?  // TODO(jeffset): use creating function instead of property
+    abstract val defaultBinding: Binding?  // TODO(jeffset): use creating function instead of property
 
     /**
      * An opaque object representing additional qualifier information that can help to disambiguate nodes with the
@@ -50,5 +51,23 @@ interface NodeModel : ClassBackedModel {
         }
 
         override fun toString() = "$node [$kind]"
+    }
+
+    final override fun equals(other: Any?): Boolean {
+        // FIXME: This is way too expensive for an RT implementation; allow RT to customize this behavior.
+        if (this === other) return true
+
+        other as NodeModel
+
+        if (qualifier != other.qualifier) return false
+        if (name != other.name) return false
+
+        return true
+    }
+
+    final override fun hashCode(): Int {
+        var result = qualifier?.hashCode() ?: 0
+        result = 31 * result + name.hashCode()
+        return result
     }
 }

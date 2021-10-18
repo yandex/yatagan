@@ -3,10 +3,10 @@ package com.yandex.dagger3.compiler
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSDeclaration
-import com.yandex.dagger3.core.Binding
 import com.yandex.dagger3.core.NodeModel
+import com.yandex.dagger3.core.ProvisionBinding
 
-data class KspAnnotationDescriptor(val tag: String) : NodeModel.Qualifier, Binding.Scope {
+data class KspAnnotationDescriptor(val tag: String) : NodeModel.Qualifier, ProvisionBinding.Scope {
     companion object {
         fun describe(annotation: KSAnnotation): KspAnnotationDescriptor {
             val descriptor = buildString {

@@ -3,11 +3,14 @@ package com.yandex.dagger3.core
 /**
  * Represents [dagger.Component.Factory].
  */
-interface ComponentFactoryModel : ClassBackedModel {
+abstract class ComponentFactoryModel : NodeModel() {
+
+    abstract val target: ComponentModel
+
     /**
      * Factory function inputs.
      */
-    val inputs: Collection<Input>
+    abstract val inputs: Collection<Input>
 
     /**
      * Represent an input parameter of the factory method.
@@ -23,4 +26,7 @@ interface ComponentFactoryModel : ClassBackedModel {
          */
         val paramName: String
     }
+
+    final override val qualifier: Nothing? get() = null
+    final override val defaultBinding: Nothing? get() = null
 }

@@ -1,7 +1,6 @@
 package com.yandex.dagger3.compiler
 
 import com.google.devtools.ksp.getConstructors
-import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -9,25 +8,24 @@ import com.yandex.dagger3.core.Binding
 import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.NodeModel
 import javax.inject.Inject
-import javax.inject.Qualifier
 
-data class KspNodeModel (
+data class KspNodeModel(
     val type: KSType,
     override val qualifier: KspAnnotationDescriptor?,
-) : NodeModel {
+) : NodeModel() {
     constructor(
         type: KSType,
         forQualifier: KSAnnotated,
     ) : this(
         type = type.makeNotNullable(),  // TODO(jeffset): nullability is forbidden anyway
-        qualifier = KspAnnotationDescriptor.describeIfAny<Qualifier>(forQualifier)
+        qualifier = KspAnnotationDescriptor.describeIfAny<javax.inject.Qualifier>(forQualifier)
     )
 
     override val defaultBinding: Binding? by lazy {
         if (qualifier != null) null
         else when (val declaration = type.declaration) {
             is KSClassDeclaration -> declaration.getConstructors().find {
-                it.isAnnotationPresent(Inject::class)
+                it.isAnnotationPresent<Inject>()
             }
             else -> null
         }?.let { injectConstructor ->
@@ -44,5 +42,11 @@ data class KspNodeModel (
         ClassNameModel(type)
     }
 
-    override fun toString() = "${qualifier ?: ""} $name"
+    override fun toString() = buildString {
+        qualifier?.let {
+            append(qualifier)
+            append(' ')
+        }
+        append(name)
+    }
 }

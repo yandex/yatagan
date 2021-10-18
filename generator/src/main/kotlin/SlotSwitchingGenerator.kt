@@ -1,0 +1,41 @@
+package com.yandex.dagger3.generator
+
+import com.squareup.javapoet.ClassName
+import com.yandex.dagger3.core.NonAliasBinding
+import com.yandex.dagger3.generator.poetry.Names
+import com.yandex.dagger3.generator.poetry.TypeSpecBuilder
+import com.yandex.dagger3.generator.poetry.buildExpression
+import javax.inject.Provider
+import javax.lang.model.element.Modifier
+
+internal class SlotSwitchingGenerator(
+    private val methodsNs: Namespace,
+    private val provisionGenerator: Provider<ProvisionGenerator>,
+) : ComponentGenerator.Contributor {
+
+    private val boundSlots = mutableMapOf<NonAliasBinding, Int>()
+    private var nextFreeSlot = 0
+
+    val factoryInstance get() = "this"  // component itself is a factory
+
+    fun requestSlot(forBinding: NonAliasBinding): Int {
+        return boundSlots.getOrPut(forBinding) { nextFreeSlot++ }
+    }
+
+    override fun generate(builder: TypeSpecBuilder) {
+        builder.method(methodsNs.name("_new")) {
+            modifiers(Modifier.PRIVATE)
+            returnType(ClassName.OBJECT)
+            parameter(ClassName.INT, "slot")
+            controlFlow("switch(slot)") {
+                boundSlots.forEach { (binding, slot) ->
+                    +buildExpression {
+                        +"case $slot: return "
+                        provisionGenerator.get().generateAccess(this, binding)
+                    }
+                }
+                +"default: throw new %T()".formatCode(Names.AssertionError)
+            }
+        }
+    }
+}

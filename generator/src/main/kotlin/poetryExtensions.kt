@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.yandex.dagger3.core.CallableNameModel
+import com.yandex.dagger3.core.ClassBackedModel
 import com.yandex.dagger3.core.ClassNameModel
 import com.yandex.dagger3.core.ConstructorNameModel
 import com.yandex.dagger3.core.FunctionNameModel
@@ -18,9 +19,23 @@ internal typealias DependencyKind = NodeModel.Dependency.Kind
 internal inline fun ClassNameModel.asClassName(
     transformName: (String) -> String,
 ): ClassName {
-    require(typeArguments.isEmpty())
-    // FIXME: transform only last name
-    return ClassName.get(packageName, transformName(simpleNames.single()))
+    require(typeArguments.isEmpty()) {
+        "Can't transform type name with type arguments"
+    }
+    return when (simpleNames.size) {
+        1 -> ClassName.get(packageName, transformName(simpleNames.first()))
+        else -> ClassName.get(packageName, simpleNames.first(), *simpleNames
+            .mapIndexed { index, name ->
+                if (index == simpleNames.lastIndex) {
+                    transformName(name)
+                } else name
+            }.drop(1).toTypedArray()
+        )
+    }
+}
+
+internal fun ClassBackedModel.typeName(): TypeName {
+    return name.asTypeName()
 }
 
 internal fun ClassNameModel.asTypeName(): TypeName {

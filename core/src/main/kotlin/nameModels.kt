@@ -6,12 +6,16 @@ data class ClassNameModel(
     val simpleNames: List<String>,
     val typeArguments: List<ClassNameModel>,
 ) {
+    init {
+        require(simpleNames.isNotEmpty()) { "class with no name?" }
+    }
+
     override fun toString() = buildString {
         append(packageName).append('.')
-        simpleNames.forEach(this::append)
+        simpleNames.joinTo(this, separator = ".")
         if (typeArguments.isNotEmpty()) {
             append('<')
-            typeArguments.forEach(this::append)
+            typeArguments.joinTo(this, separator = ".")
             append('>')
         }
     }

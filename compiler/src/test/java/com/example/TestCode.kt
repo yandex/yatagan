@@ -9,8 +9,12 @@ import dagger.Provides
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import javax.inject.Scope
 import javax.inject.Singleton
 import kotlin.test.Test
+
+@Scope
+annotation class SubScope
 
 interface SomeInterface<T> {
     fun provide(): Int
@@ -29,7 +33,9 @@ class SomeObj<T> @Inject constructor(
 
 interface SomeInt2
 
-@Module
+@Module(
+    subcomponents = [SubComponent::class],
+)
 interface TestModule {
     @Binds
     fun bind1(i: SomeImpl): SomeInterface<Unit>
@@ -41,6 +47,23 @@ object SomeModule {
     @Named("hello")
     fun provide1(i: SomeInterface<Unit>): SomeInt2 {
         return object : SomeInt2 {}
+    }
+}
+
+@SubScope
+class SubScopedClass @Inject constructor(dep: SomeInterface<Unit>)
+
+@SubScope
+@Component(
+    isRoot = false
+)
+interface SubComponent {
+    val lazyHello: Lazy<SomeObj<Unit>>
+    val clzz: SubScopedClass
+
+    @Component.Factory
+    interface Factory {
+        fun create(): SubComponent
     }
 }
 
@@ -70,6 +93,7 @@ interface TestComponent {
     val pSomeInt2: Provider<SomeInt2>
     @Named("hello")
     val lSomeInt2: Lazy<SomeInt2>
+    val subFactory: SubComponent.Factory
 
     @Component.Factory
     interface Factory {
