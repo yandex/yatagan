@@ -78,7 +78,7 @@ data class KspComponentModel(
         buildSet {
             for (function in componentDeclaration.getAllFunctions().filter { it.isAbstract }) {
                 this += EntryPoint(
-                    dep = resolveNodeDependency(
+                    dependency = resolveNodeDependency(
                         type = function.returnType?.resolve() ?: continue,
                         forQualifier = function,
                     ),
@@ -87,7 +87,7 @@ data class KspComponentModel(
             }
             for (prop in componentDeclaration.getAllProperties().filter { it.isAbstract() && !it.isMutable }) {
                 this += EntryPoint(
-                    dep = resolveNodeDependency(type = prop.type.resolve(), forQualifier = prop),
+                    dependency = resolveNodeDependency(type = prop.type.resolve(), forQualifier = prop),
                     getter = PropertyNameModel(componentDeclaration, prop),
                 )
             }

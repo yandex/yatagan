@@ -28,17 +28,26 @@ internal class BindingGraphImpl(
         return resolveHelper[node] ?: parent?.resolveBinding(node) ?: throw MissingBindingException(node)
     }
 
+    // MAYBE: write algorithm in such a way that this is local variable.
+    private val materializationQueue: MutableList<NodeModel.Dependency> = ArrayDeque()
+
     init {
-        val queue = ArrayDeque<NodeModel.Dependency>()
-        val childFactoryBindings = hashSetOf<SubComponentFactoryBinding>()
+        // Build children
+        children = component.modules
+            .asSequence()
+            .flatMap(ModuleModel::subcomponents)
+            .distinct()
+            .map { BindingGraphImpl(it, parent = this) }
+            .toList()
+
         val missing = hashSetOf<NodeModel>()
 
         component.entryPoints.forEach { entryPoint ->
-            queue.add(entryPoint.dep)
+            materializationQueue.add(entryPoint.dependency)
         }
 
-        while (queue.isNotEmpty()) {
-            val dependency = queue.removeFirst()
+        while (materializationQueue.isNotEmpty()) {
+            val dependency = materializationQueue.removeFirst()
             val localBinding = materialize(dependency)
             if (localBinding == null) {
                 val parentBinding = materializeInParents(dependency)
@@ -49,10 +58,11 @@ internal class BindingGraphImpl(
                 // No need to add inherited binding's dependencies
             } else {
                 when (localBinding) {
-                    is ProvisionBinding -> queue += localBinding.params
+                    is ProvisionBinding -> materializationQueue += localBinding.params
                     is SubComponentFactoryBinding -> {
-                        // child graph is not built yet so put this to pending.
-                        childFactoryBindings += localBinding
+                        localBinding.target.createdComponent.graph.usedParents.forEach { graph ->
+                            materializationQueue += NodeModel.Dependency(graph.component)
+                        }
                     }
                     // no dependencies for instances
                     is ComponentInstanceBinding,
@@ -62,20 +72,9 @@ internal class BindingGraphImpl(
         }
         missingBindings = missing
 
-        // Build children
-        children = component.modules
-            .asSequence()
-            .flatMap(ModuleModel::subcomponents)
-            .distinct()
-            .map { BindingGraphImpl(it, parent = this) }
-            .toList()
+        // No longer required
+        allProvidedBindings.clear()
 
-        // As child graphs are built, it's safe to query |usedParents|.
-        childFactoryBindings.forEach { factoryBinding ->
-            factoryBinding.target.createdComponent.graph.usedParents.forEach { graph ->
-                materialize(NodeModel.Dependency(graph.component))
-            }
-        }
         component.graph = this
     }
 
@@ -115,6 +114,7 @@ internal class BindingGraphImpl(
         if (binding != null) {
             // The binding is requested from a parent, so add parent to dependencies.
             usedParents += parent
+            parent.materializationQueue += NodeModel.Dependency(binding.target)
             return binding
         }
         return parent.materializeInParents(dependency)?.also {

@@ -108,7 +108,7 @@ internal class ScopedProviderStrategy(
 }
 
 internal class InlineCreationStrategy(
-    private val provisionGenerator: ProvisionGenerator,
+    private val generator: Generator,
     private val binding: Binding,
 ) : ProvisionStrategy {
     init {
@@ -117,7 +117,7 @@ internal class InlineCreationStrategy(
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         assert(kind == DependencyKind.Direct)
-        provisionGenerator.generateAccess(builder, binding, inside)
+        generator.forComponent(inside).generator.generateAccess(builder, binding)
     }
 }
 

@@ -69,7 +69,6 @@ internal class ComponentGenerator(
             multiFactory = slotSwitchingGenerator,
             unscopedProviderGenerator = unscopedProviderGenerator,
             scopedProviderGenerator = scopedProviderGenerator,
-            componentFactoryGenerator = componentFactoryGenerator,
             generator = this,
         ).also(this::registerContributor)
     }
@@ -115,6 +114,9 @@ internal class ComponentGenerator(
         get() = provisionGenerator.get()
 
     override fun forComponent(component: ComponentModel): Generator {
+        if (component == graph.component) {
+            return this
+        }
         return checkNotNull(generators[component])
     }
 

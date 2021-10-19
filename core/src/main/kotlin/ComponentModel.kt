@@ -41,9 +41,9 @@ abstract class ComponentModel : NodeModel() {
      */
     data class EntryPoint(
         val getter: MemberCallableNameModel,
-        val dep: Dependency,
+        val dependency: Dependency,
     ) {
-        override fun toString() = "$getter -> $dep"
+        override fun toString() = "$getter -> $dependency"
     }
 
     var graph: BindingGraph by lateInit()

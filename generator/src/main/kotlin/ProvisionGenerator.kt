@@ -21,7 +21,6 @@ internal class ProvisionGenerator(
     multiFactory: Provider<SlotSwitchingGenerator>,
     unscopedProviderGenerator: Provider<UnscopedProviderGenerator>,
     scopedProviderGenerator: Provider<ScopedProviderGenerator>,
-    private val componentFactoryGenerator: Provider<ComponentFactoryGenerator>,
     private val generator: Generator,
 ) : ComponentGenerator.Contributor {
     private val strategies: Map<BaseBinding, ProvisionStrategy> = graph.localBindings.entries.associateBy(
@@ -32,7 +31,7 @@ internal class ProvisionGenerator(
                     // No need to generate actual provider instance, inline caching would do.
                     if (usage.direct == 1) InlineCreationStrategy(
                         binding = binding,
-                        provisionGenerator = this,
+                        generator = generator,
                     ) else InlineCachingStrategy(
                         binding = binding,
                         fieldsNs = fieldsNs,
@@ -55,14 +54,14 @@ internal class ProvisionGenerator(
                     // Inline instance creation does the trick.
                     InlineCreationStrategy(
                         binding = binding,
-                        provisionGenerator = this,
+                        generator = generator,
                     )
                 } else {
                     val slot = multiFactory.get().requestSlot(binding)
                     CompositeStrategy(
                         directStrategy = InlineCreationStrategy(
                             binding = binding,
-                            provisionGenerator = this,
+                            generator = generator,
                         ),
                         lazyStrategy = if (usage.lazy > 0) OnTheFlyScopedProviderCreationStrategy(
                             cachingProvider = scopedProviderGenerator.get(),
@@ -105,15 +104,12 @@ internal class ProvisionGenerator(
         } else "this"
     }
 
-    fun generateAccess(
-        builder: ExpressionBuilder,
-        binding: Binding,
-        inside: BindingGraph = graph,
-    ): Unit = with(builder) {
+    fun generateAccess(builder: ExpressionBuilder, binding: Binding): Unit = with(builder) {
         when (binding) {
             is InstanceBinding -> {
-                val component = componentForBinding(binding, target = inside)
-                +"$component.${componentFactoryGenerator.get().fieldNameFor(binding)}"
+                val component = componentForBinding(binding, target = graph)
+                val factory = generator.forComponent(binding.owner).factoryGenerator
+                +"$component.${factory.fieldNameFor(binding)}"
             }
             is ProvisionBinding -> {
                 // TODO: rework call and buildExpression mess here.
@@ -126,15 +122,16 @@ internal class ProvisionGenerator(
             is SubComponentFactoryBinding -> {
                 val factoryGenerator = generator.forComponent(binding.target.createdComponent).factoryGenerator
                 +"new %T(".formatCode(factoryGenerator.implName)
-                join(binding.target.createdComponent.graph.usedParents.asSequence()) { graph ->
+                join(binding.target.createdComponent.graph.usedParents.asSequence()) { parentGraph ->
                     +buildExpression {
-                        generateAccess(this, NodeModel.Dependency(graph.component))
+                        generator.forComponent(parentGraph).generator
+                            .generateAccess(this, NodeModel.Dependency(parentGraph.component))
                     }
                 }
                 +")"
             }
             is ComponentInstanceBinding -> {
-                +componentForBinding(binding, target = inside)
+                +componentForBinding(binding, target = graph)
             }
         }.let { /*exhaustive*/ }
     }
