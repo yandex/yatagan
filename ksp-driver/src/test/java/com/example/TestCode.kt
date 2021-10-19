@@ -60,6 +60,7 @@ class SubScopedClass @Inject constructor(dep: SomeInterface<Unit>)
 interface SubComponent {
     val lazyHello: Lazy<SomeObj<Unit>>
     val clzz: SubScopedClass
+    val inter: SomeInterface<Unit>
 
     @Component.Factory
     interface Factory {

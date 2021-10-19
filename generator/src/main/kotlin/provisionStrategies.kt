@@ -8,7 +8,6 @@ import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.lang.model.element.Modifier.PRIVATE
 
-
 internal class InlineCachingStrategy(
     private val binding: ProvisionBinding,
     private val provisionGenerator: ProvisionGenerator,
@@ -56,7 +55,7 @@ internal class InlineCachingStrategy(
 }
 
 internal class ScopedProviderStrategy(
-    private val multiFactory: SlotSwitchingGenerator,
+    multiFactory: SlotSwitchingGenerator,
     private val cachingProvider: ScopedProviderGenerator,
     private val binding: ProvisionBinding,
     private val provisionGenerator: ProvisionGenerator,
@@ -83,7 +82,7 @@ internal class ScopedProviderStrategy(
             returnType(providerName)
             +"%T local = this.$providerFieldName".formatCode(providerName)
             controlFlow("if (local == null)") {
-                +"local = new %T(${multiFactory.factoryInstance}, $slot)".formatCode(providerName)
+                +"local = new %T(this, $slot)".formatCode(providerName)
                 +"this.$providerFieldName = local"
             }
             +"return local"
@@ -144,28 +143,31 @@ internal class CompositeStrategy(
 
 internal class OnTheFlyScopedProviderCreationStrategy(
     private val cachingProvider: ScopedProviderGenerator,
-    private val multiFactory: SlotSwitchingGenerator,
+    private val generator: ProvisionGenerator,
+    private val binding: Binding,
     private val slot: Int,
 ) : ProvisionStrategy {
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         require(kind == DependencyKind.Lazy)
         builder.apply {
-            +"new %T(${multiFactory.factoryInstance}, $slot)".formatCode(cachingProvider.name)
+            +"new %T(${generator.componentForBinding(binding, inside)}, $slot)".formatCode(cachingProvider.name)
         }
     }
 }
 
 internal class OnTheFlyUnscopedProviderCreationStrategy(
     private val unscopedProviderGenerator: UnscopedProviderGenerator,
-    private val multiFactory: SlotSwitchingGenerator,
+    private val generator: ProvisionGenerator,
+    private val binding: Binding,
     private val slot: Int,
 ) : ProvisionStrategy {
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         require(kind == DependencyKind.Provider)
         builder.apply {
-            +"new %T(${multiFactory.factoryInstance}, $slot)".formatCode(unscopedProviderGenerator.name)
+            +"new %T(${generator.componentForBinding(binding, inside)}, $slot)"
+                .formatCode(unscopedProviderGenerator.name)
         }
     }
 }

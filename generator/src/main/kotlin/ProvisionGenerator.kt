@@ -66,12 +66,14 @@ internal class ProvisionGenerator(
                         ),
                         lazyStrategy = if (usage.lazy > 0) OnTheFlyScopedProviderCreationStrategy(
                             cachingProvider = scopedProviderGenerator.get(),
-                            multiFactory = multiFactory.get(),
+                            binding = binding,
+                            generator = this,
                             slot = slot,
                         ) else null,
                         providerStrategy = if (usage.provider > 0) OnTheFlyUnscopedProviderCreationStrategy(
                             unscopedProviderGenerator = unscopedProviderGenerator.get(),
-                            multiFactory = multiFactory.get(),
+                            binding = binding,
+                            generator = this,
                             slot = slot,
                         ) else null,
                     )
