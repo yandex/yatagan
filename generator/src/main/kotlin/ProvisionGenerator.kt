@@ -4,7 +4,6 @@ import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ComponentInstanceBinding
-import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
@@ -23,7 +22,7 @@ internal class ProvisionGenerator(
     unscopedProviderGenerator: Provider<UnscopedProviderGenerator>,
     scopedProviderGenerator: Provider<ScopedProviderGenerator>,
     private val componentFactoryGenerator: Provider<ComponentFactoryGenerator>,
-    private val generators: Map<ComponentModel, ComponentGenerator>,
+    private val generator: Generator,
 ) : ComponentGenerator.Contributor {
     private val strategies: Map<BaseBinding, ProvisionStrategy> = graph.localBindings.entries.associateBy(
         keySelector = { (binding, _) -> binding },
@@ -92,8 +91,7 @@ internal class ProvisionGenerator(
         val binding = graph.resolveBinding(node)
         val generator = if (binding.owner != graph) {
             // Inherited binding
-            checkNotNull(generators[binding.owner.component])
-                .provisionGenerator.get()
+            generator.forComponent(binding.owner).generator
         } else this
         // Generate
         checkNotNull(generator.strategies[binding]).generateAccess(builder, kind, inside = graph)
@@ -101,8 +99,7 @@ internal class ProvisionGenerator(
 
     fun componentForBinding(binding: Binding, target: BindingGraph): String {
         return if (binding.owner != target) {
-            val factoryGenerator = checkNotNull(generators[target.component]).componentFactoryGenerator.get()
-            "this." + factoryGenerator.fieldNameFor(binding.owner)
+            "this." + generator.forComponent(target).factoryGenerator.fieldNameFor(binding.owner)
         } else "this"
     }
 
@@ -125,10 +122,8 @@ internal class ProvisionGenerator(
                 })
             }
             is SubComponentFactoryBinding -> {
-                val childGenerator = checkNotNull(generators[binding.target.createdComponent])
-                // fixme: subcomponent factory constructor accepts parent component(s)
-                val generator = childGenerator.componentFactoryGenerator.get()
-                +"new %T(".formatCode(generator.factoryImplName)
+                val factoryGenerator = generator.forComponent(binding.target.createdComponent).factoryGenerator
+                +"new %T(".formatCode(factoryGenerator.implName)
                 join(binding.target.createdComponent.graph.usedParents.asSequence()) { graph ->
                     +buildExpression {
                         generateAccess(this, NodeModel.Dependency(graph.component))

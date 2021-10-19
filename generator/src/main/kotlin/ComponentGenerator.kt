@@ -15,9 +15,9 @@ import javax.lang.model.element.Modifier.STATIC
 
 internal class ComponentGenerator(
     private val graph: BindingGraph,
-    val targetClassName: ClassName = graph.component.name.asClassName { "Dagger$it" },
+    override val implName: ClassName = graph.component.name.asClassName { "Dagger$it" },
     private val parentGenerators: Map<ComponentModel, ComponentGenerator> = emptyMap(),
-) {
+) : Generator {
     interface Contributor {
         fun generate(builder: TypeSpecBuilder)
     }
@@ -32,17 +32,17 @@ internal class ComponentGenerator(
     ) {
         ComponentGenerator(
             graph = it,
-            targetClassName = targetClassName.nestedClass(subcomponentNs.name(it.component.name, "Impl")),
+            implName = implName.nestedClass(subcomponentNs.name(it.component.name, "Impl")),
             parentGenerators = parentGenerators + mapOf(graph.component to this)
         )
     }
     private val generators = childGenerators + parentGenerators
-    val componentFactoryGenerator = lazyProvider {
+    private val componentFactoryGenerator = lazyProvider {
         ComponentFactoryGenerator(
-            graph = graph,
+            thisGraph = graph,
             fieldsNs = fieldsNs,
-            componentImplName = targetClassName,
-            generators = generators,
+            componentImplName = implName,
+            generator = this,
         ).also(this::registerContributor)
     }
     private val slotSwitchingGenerator: Provider<SlotSwitchingGenerator> = lazyProvider {
@@ -53,15 +53,15 @@ internal class ComponentGenerator(
     }
     private val unscopedProviderGenerator = lazyProvider {
         UnscopedProviderGenerator(
-            componentImplName = targetClassName,
+            componentImplName = implName,
         ).also(this::registerContributor)
     }
     private val scopedProviderGenerator = lazyProvider {
         ScopedProviderGenerator(
-            componentImplName = targetClassName,
+            componentImplName = implName,
         ).also(this::registerContributor)
     }
-    val provisionGenerator = lazyProvider {
+    private val provisionGenerator = lazyProvider {
         ProvisionGenerator(
             graph = graph,
             fieldsNs = fieldsNs,
@@ -70,11 +70,11 @@ internal class ComponentGenerator(
             unscopedProviderGenerator = unscopedProviderGenerator,
             scopedProviderGenerator = scopedProviderGenerator,
             componentFactoryGenerator = componentFactoryGenerator,
-            generators = generators,
+            generator = this,
         ).also(this::registerContributor)
     }
 
-    fun generate(): TypeSpec = buildClass(targetClassName) {
+    fun generate(): TypeSpec = buildClass(implName) {
         val componentInterface = graph.component.name.asTypeName()
 
         annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
@@ -106,6 +106,16 @@ internal class ComponentGenerator(
         contributors.forEach {
             it.generate(this)
         }
+    }
+
+    override val factoryGenerator: ComponentFactoryGenerator
+        get() = componentFactoryGenerator.get()
+
+    override val generator: ProvisionGenerator
+        get() = provisionGenerator.get()
+
+    override fun forComponent(component: ComponentModel): Generator {
+        return checkNotNull(generators[component])
     }
 
     private fun registerContributor(contributor: Contributor) {

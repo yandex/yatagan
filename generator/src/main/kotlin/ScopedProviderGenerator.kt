@@ -4,7 +4,10 @@ import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
-import javax.lang.model.element.Modifier
+import javax.lang.model.element.Modifier.FINAL
+import javax.lang.model.element.Modifier.PRIVATE
+import javax.lang.model.element.Modifier.PUBLIC
+import javax.lang.model.element.Modifier.STATIC
 
 internal class ScopedProviderGenerator(
     private val componentImplName: ClassName,
@@ -15,10 +18,10 @@ internal class ScopedProviderGenerator(
         builder.nestedType {
             buildClass(name) {
                 implements(Names.Lazy)
-                modifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                field(componentImplName, "mFactory") { modifiers(Modifier.PRIVATE, Modifier.FINAL) }
-                field(ClassName.INT, "mIndex") { modifiers(Modifier.PRIVATE, Modifier.FINAL) }
-                field(ClassName.OBJECT, "mValue") { modifiers(Modifier.PRIVATE) }
+                modifiers(PRIVATE, STATIC, FINAL)
+                field(componentImplName, "mFactory") { modifiers(PRIVATE, FINAL) }
+                field(ClassName.INT, "mIndex") { modifiers(PRIVATE, FINAL) }
+                field(ClassName.OBJECT, "mValue") { modifiers(PRIVATE) }
                 constructor {
                     parameter(componentImplName, "factory")
                     parameter(ClassName.INT, "index")
@@ -27,7 +30,7 @@ internal class ScopedProviderGenerator(
                 }
 
                 method("get") {
-                    modifiers(Modifier.PUBLIC)
+                    modifiers(PUBLIC)
                     annotation<Override>()
                     returnType(ClassName.OBJECT)
                     +"%T local = mValue".formatCode(ClassName.OBJECT)

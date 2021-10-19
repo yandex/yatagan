@@ -4,7 +4,10 @@ import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
-import javax.lang.model.element.Modifier
+import javax.lang.model.element.Modifier.FINAL
+import javax.lang.model.element.Modifier.PRIVATE
+import javax.lang.model.element.Modifier.PUBLIC
+import javax.lang.model.element.Modifier.STATIC
 
 internal class UnscopedProviderGenerator(
     private val componentImplName: ClassName,
@@ -15,12 +18,12 @@ internal class UnscopedProviderGenerator(
         builder.nestedType {
             buildClass(name) {
                 implements(Names.Provider)
-                modifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                modifiers(PRIVATE, STATIC, FINAL)
                 field(componentImplName, "mFactory") {
-                    modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                    modifiers(PRIVATE, FINAL)
                 }
                 field(ClassName.INT, "mIndex") {
-                    modifiers(Modifier.PRIVATE, Modifier.FINAL)
+                    modifiers(PRIVATE, FINAL)
                 }
                 constructor {
                     parameter(componentImplName, "factory")
@@ -29,7 +32,7 @@ internal class UnscopedProviderGenerator(
                     +"mIndex = index"
                 }
                 method("get") {
-                    modifiers(Modifier.PUBLIC)
+                    modifiers(PUBLIC)
                     annotation<Override>()
                     returnType(ClassName.OBJECT)
                     +"return mFactory._new(mIndex)"

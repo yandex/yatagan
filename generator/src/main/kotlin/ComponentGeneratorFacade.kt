@@ -11,9 +11,9 @@ class ComponentGeneratorFacade(
     )
 
     val targetPackageName: String
-        get() = generator.targetClassName.packageName()
+        get() = generator.implName.packageName()
     val targetClassName: String
-        get() = generator.targetClassName.simpleName()
+        get() = generator.implName.simpleName()
 
     val targetLanguage: Language get() = Language.Java
 
