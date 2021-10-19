@@ -7,7 +7,7 @@ interface ModuleModel : ClassBackedModel {
     /**
      * Bindings exposed by this module.
      */
-    val bindings: Collection<Binding>
+    val bindings: Collection<BaseBinding>
 
     /**
      * Subcomponents installed by this module.

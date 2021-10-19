@@ -11,7 +11,7 @@ interface BindingGraph {
      * Consists of bindings directly requested by entryPoints plus bindings requested by sub-graphs.
      * TODO: doc
      */
-    val localBindings: Map<NonAliasBinding, BindingUsage>
+    val localBindings: Map<Binding, BindingUsage>
 
     /**
      * Nodes that have no binding for them.
@@ -35,7 +35,7 @@ interface BindingGraph {
      * @return resolved binding with a graph to which it's a local binding.
      * @throws MissingBindingException if binding is not found
      */
-    fun resolveBinding(node: NodeModel): NonAliasBinding
+    fun resolveBinding(node: NodeModel): Binding
 }
 
 /**

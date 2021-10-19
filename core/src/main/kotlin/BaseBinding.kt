@@ -2,9 +2,9 @@ package com.yandex.daggerlite.core
 
 /**
  * Represents a way to provide a [NodeModel].
- * Each [NodeModel] must have a single [Binding] for a [BindingGraph] to be valid.
+ * Each [NodeModel] must have a single [BaseBinding] for a [BindingGraph] to be valid.
  */
-sealed class Binding {
+sealed class BaseBinding {
     /**
      * A node that this binding provides.
      */

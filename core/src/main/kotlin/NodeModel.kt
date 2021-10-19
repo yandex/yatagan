@@ -2,7 +2,7 @@ package com.yandex.daggerlite.core
 
 /**
  * Represents a node in a Dagger Graph.
- * Each [NodeModel] can be *resolved* via appropriate [Binding] (See [Binding.target]).
+ * Each [NodeModel] can be *resolved* via appropriate [Binding] (See [BaseBinding.target]).
  * Basically, it's a type with some other information to fine tune resolution.
  *
  * Implementations must provide stable [equals]/[hashCode] implementation for correct matching.

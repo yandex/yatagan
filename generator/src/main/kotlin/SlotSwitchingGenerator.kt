@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
-import com.yandex.daggerlite.core.NonAliasBinding
+import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -13,12 +13,12 @@ internal class SlotSwitchingGenerator(
     private val provisionGenerator: Provider<ProvisionGenerator>,
 ) : ComponentGenerator.Contributor {
 
-    private val boundSlots = mutableMapOf<NonAliasBinding, Int>()
+    private val boundSlots = mutableMapOf<Binding, Int>()
     private var nextFreeSlot = 0
 
     val factoryInstance get() = "this"  // component itself is a factory
 
-    fun requestSlot(forBinding: NonAliasBinding): Int {
+    fun requestSlot(forBinding: Binding): Int {
         return boundSlots.getOrPut(forBinding) { nextFreeSlot++ }
     }
 

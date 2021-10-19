@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.generator
 
+import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.NonAliasBinding
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
@@ -110,7 +110,7 @@ internal class ScopedProviderStrategy(
 
 internal class InlineCreationStrategy(
     private val provisionGenerator: ProvisionGenerator,
-    private val binding: NonAliasBinding,
+    private val binding: Binding,
 ) : ProvisionStrategy {
     init {
         println("foo")

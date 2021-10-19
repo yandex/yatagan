@@ -12,13 +12,17 @@ class ModuleInstanceFactoryInput(
 
 /**
  * A [dagger.Binds] binding.
+ * Sort of fictional binding, that must be resolved into some real [Binding].
  */
 class AliasBinding(
     override val target: NodeModel,
     val source: NodeModel,
-) : Binding()
+) : BaseBinding()
 
-sealed class NonAliasBinding : Binding()
+/**
+ * A base class for all concrete binding implementations, apart from [AliasBinding].
+ */
+sealed class Binding : BaseBinding()
 
 /**
  * A [dagger.Provides] binding.
@@ -28,7 +32,7 @@ class ProvisionBinding(
     val scope: Scope?,
     val provider: CallableNameModel,
     val params: Collection<NodeModel.Dependency>,
-) : NonAliasBinding() {
+) : Binding() {
     /**
      * Represent provision cache scope.
      * Must provide [equals]/[hashCode] implementation.
@@ -43,12 +47,12 @@ class ProvisionBinding(
 class InstanceBinding(
     override val target: NodeModel,
     override val paramName: String,
-) : NonAliasBinding(), ComponentFactoryModel.Input
+) : Binding(), ComponentFactoryModel.Input
 
 class SubComponentFactoryBinding(
     override val target: ComponentFactoryModel,
-) : NonAliasBinding()
+) : Binding()
 
 class ComponentInstanceBinding(
     override val target: ComponentModel,
-) : NonAliasBinding()
+) : Binding()

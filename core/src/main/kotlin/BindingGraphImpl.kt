@@ -6,8 +6,8 @@ internal class BindingGraphImpl(
     override val component: ComponentModel,
     private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
-    private val resolveHelper = hashMapOf<NodeModel, NonAliasBinding>()
-    private val allProvidedBindings: MutableMap<NodeModel, Binding?> = sequenceOf(
+    private val resolveHelper = hashMapOf<NodeModel, Binding>()
+    private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = sequenceOf(
         // All bindings from installed modules
         component.modules.asSequence().flatMap(ModuleModel::bindings),
         // Instance bindings from factory
@@ -17,14 +17,14 @@ internal class BindingGraphImpl(
             .mapNotNull { it.factory }.map(::SubComponentFactoryBinding),
         // This component binding
         sequenceOf(ComponentInstanceBinding(component)),
-    ).flatten().onEach { it.owner = this }.associateByTo(mutableMapOf(), Binding::target)
+    ).flatten().onEach { it.owner = this }.associateByTo(mutableMapOf(), BaseBinding::target)
 
-    override val localBindings = mutableMapOf<NonAliasBinding, BindingUsageImpl>()
+    override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val missingBindings: Set<NodeModel>
     override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
 
-    override fun resolveBinding(node: NodeModel): NonAliasBinding {
+    override fun resolveBinding(node: NodeModel): Binding {
         return resolveHelper[node] ?: parent?.resolveBinding(node) ?: throw MissingBindingException(node)
     }
 
@@ -79,13 +79,13 @@ internal class BindingGraphImpl(
         component.graph = this
     }
 
-    private fun materialize(dependency: NodeModel.Dependency): NonAliasBinding? {
-        fun resolveAlias(maybeAlias: Binding?): NonAliasBinding? {
-            var binding: Binding? = maybeAlias
+    private fun materialize(dependency: NodeModel.Dependency): Binding? {
+        fun resolveAlias(maybeAlias: BaseBinding?): Binding? {
+            var binding: BaseBinding? = maybeAlias
             while (true) {
                 binding = when (binding) {
                     is AliasBinding -> materialize(NodeModel.Dependency(binding.source))
-                    is NonAliasBinding -> return binding
+                    is Binding -> return binding
                     null -> return null
                 }
             }
@@ -107,7 +107,7 @@ internal class BindingGraphImpl(
         return nonAlias
     }
 
-    private fun materializeInParents(dependency: NodeModel.Dependency): NonAliasBinding? {
+    private fun materializeInParents(dependency: NodeModel.Dependency): Binding? {
         if (parent == null) {
             return null
         }

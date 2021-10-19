@@ -1,12 +1,12 @@
 package com.yandex.daggerlite.generator
 
+import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ComponentInstanceBinding
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.NonAliasBinding
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.isScoped
@@ -25,7 +25,7 @@ internal class ProvisionGenerator(
     private val componentFactoryGenerator: Provider<ComponentFactoryGenerator>,
     private val generators: Map<ComponentModel, ComponentGenerator>,
 ) : ComponentGenerator.Contributor {
-    private val strategies: Map<Binding, ProvisionStrategy> = graph.localBindings.entries.associateBy(
+    private val strategies: Map<BaseBinding, ProvisionStrategy> = graph.localBindings.entries.associateBy(
         keySelector = { (binding, _) -> binding },
         valueTransform = { (binding, usage) ->
             if (binding.isScoped()) {
@@ -99,7 +99,7 @@ internal class ProvisionGenerator(
         checkNotNull(generator.strategies[binding]).generateAccess(builder, kind, inside = graph)
     }
 
-    fun componentForBinding(binding: NonAliasBinding, target: BindingGraph): String {
+    fun componentForBinding(binding: Binding, target: BindingGraph): String {
         return if (binding.owner != target) {
             val factoryGenerator = checkNotNull(generators[target.component]).componentFactoryGenerator.get()
             "this." + factoryGenerator.fieldNameFor(binding.owner)
@@ -108,7 +108,7 @@ internal class ProvisionGenerator(
 
     fun generateAccess(
         builder: ExpressionBuilder,
-        binding: NonAliasBinding,
+        binding: Binding,
         inside: BindingGraph = graph,
     ): Unit = with(builder) {
         when (binding) {

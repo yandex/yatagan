@@ -5,7 +5,7 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.core.AliasBinding
-import com.yandex.daggerlite.core.Binding
+import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.ClassNameModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ModuleModel
@@ -31,8 +31,8 @@ data class KspModuleModel(
         list.mapTo(hashSetOf()) { KspComponentModel(it.declaration as KSClassDeclaration) }
     }
 
-    override val bindings: Collection<Binding> by lazy {
-        val list = arrayListOf<Binding>()
+    override val bindings: Collection<BaseBinding> by lazy {
+        val list = arrayListOf<BaseBinding>()
         declaration.getDeclaredProperties().mapNotNullTo(list) { propertyDeclaration ->
             val propertyType = propertyDeclaration.asMemberOf(type)
             val target = KspNodeModel(
