@@ -5,7 +5,7 @@ package com.yandex.daggerlite.core
  */
 abstract class ComponentFactoryModel : NodeModel() {
 
-    abstract val target: ComponentModel
+    abstract val createdComponent: ComponentModel
 
     /**
      * Factory function inputs.
@@ -28,5 +28,5 @@ abstract class ComponentFactoryModel : NodeModel() {
     }
 
     final override val qualifier: Nothing? get() = null
-    final override val defaultBinding: Nothing? get() = null
+    final override fun implicitBinding(): Nothing? = null
 }

@@ -15,9 +15,8 @@ abstract class NodeModel : ClassBackedModel {
 
     /**
      * self-provision binding if supported by underlying type.
-     * TODO: rename(jeffset): rename to implicitBinding.
      */
-    abstract val defaultBinding: Binding?  // TODO(jeffset): use creating function instead of property
+    abstract fun implicitBinding(): Binding?
 
     /**
      * An opaque object representing additional qualifier information that can help to disambiguate nodes with the

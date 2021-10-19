@@ -10,7 +10,6 @@ import com.yandex.daggerlite.core.NonAliasBinding
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.isScoped
-import com.yandex.daggerlite.core.resolveNonAliasBinding
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -28,9 +27,7 @@ internal class ProvisionGenerator(
 ) : ComponentGenerator.Contributor {
     private val strategies: Map<Binding, ProvisionStrategy> = graph.localBindings.entries.associateBy(
         keySelector = { (binding, _) -> binding },
-        valueTransform = { (maybeAlias, usage) ->
-            // MAYBE: can there be any inconsistency with target due to alias resolve?
-            val binding = graph.resolveNonAliasBinding(maybeAlias)
+        valueTransform = { (binding, usage) ->
             if (binding.isScoped()) {
                 if (usage.lazy + usage.provider == 0) {
                     // No need to generate actual provider instance, inline caching would do.
@@ -128,11 +125,11 @@ internal class ProvisionGenerator(
                 })
             }
             is SubComponentFactoryBinding -> {
-                val childGenerator = checkNotNull(generators[binding.target.target])
+                val childGenerator = checkNotNull(generators[binding.target.createdComponent])
                 // fixme: subcomponent factory constructor accepts parent component(s)
                 val generator = childGenerator.componentFactoryGenerator.get()
                 +"new %T(".formatCode(generator.factoryImplName)
-                join(binding.target.target.graph.usedParents.asSequence()) { graph ->
+                join(binding.target.createdComponent.graph.usedParents.asSequence()) { graph ->
                     +buildExpression {
                         generateAccess(this, NodeModel.Dependency(graph.component))
                     }

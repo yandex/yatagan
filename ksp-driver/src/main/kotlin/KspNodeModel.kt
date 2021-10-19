@@ -21,9 +21,11 @@ data class KspNodeModel(
         qualifier = KspAnnotationDescriptor.describeIfAny<javax.inject.Qualifier>(forQualifier)
     )
 
-    override val defaultBinding: Binding? by lazy {
-        if (qualifier != null) null
-        else when (val declaration = type.declaration) {
+    override fun implicitBinding(): Binding? {
+        if (qualifier != null)
+            return null
+
+        return when (val declaration = type.declaration) {
             is KSClassDeclaration -> declaration.getConstructors().find {
                 it.isAnnotationPresent<Inject>()
             }

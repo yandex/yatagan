@@ -51,5 +51,5 @@ abstract class ComponentModel : NodeModel() {
 
     final override val qualifier: Nothing? get() = null
 
-    final override val defaultBinding: Nothing? get() = null
+    final override fun implicitBinding(): Nothing? = null
 }

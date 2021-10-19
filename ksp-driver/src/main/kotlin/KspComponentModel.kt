@@ -38,7 +38,7 @@ data class KspComponentModel(
             ?: return@lazy null
 
         object : ComponentFactoryModel() {
-            override val target: ComponentModel
+            override val createdComponent: ComponentModel
                 get() = this@KspComponentModel
             override val name = ClassNameModel(factoryDeclaration)
             override val inputs = factoryMethod.parameters.map {
@@ -74,10 +74,10 @@ data class KspComponentModel(
         list.mapTo(hashSetOf()) { KspComponentModel(it.declaration as KSClassDeclaration) }
     }
 
-    override val entryPoints: Set<ComponentModel.EntryPoint> by lazy {
+    override val entryPoints: Set<EntryPoint> by lazy {
         buildSet {
             for (function in componentDeclaration.getAllFunctions().filter { it.isAbstract }) {
-                this += ComponentModel.EntryPoint(
+                this += EntryPoint(
                     dep = resolveNodeDependency(
                         type = function.returnType?.resolve() ?: continue,
                         forQualifier = function,
@@ -86,7 +86,7 @@ data class KspComponentModel(
                 )
             }
             for (prop in componentDeclaration.getAllProperties().filter { it.isAbstract() && !it.isMutable }) {
-                this += ComponentModel.EntryPoint(
+                this += EntryPoint(
                     dep = resolveNodeDependency(type = prop.type.resolve(), forQualifier = prop),
                     getter = PropertyNameModel(componentDeclaration, prop),
                 )
