@@ -58,7 +58,7 @@ class ComponentInstanceBinding(
 ) : Binding()
 
 class DependencyComponentEntryPointBinding(
-    val component: ComponentModel,
+    val input: ComponentDependencyFactoryInput,
     val entryPoint: ComponentModel.EntryPoint,
 ) : Binding() {
     init {

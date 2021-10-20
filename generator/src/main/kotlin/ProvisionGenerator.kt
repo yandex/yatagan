@@ -5,6 +5,7 @@ import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
 import com.yandex.daggerlite.core.ComponentInstanceBinding
+import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.DependencyComponentEntryPointBinding
 import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.NodeModel
@@ -17,7 +18,7 @@ import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.inject.Provider
 
 internal class ProvisionGenerator(
-    private val graph: BindingGraph,
+    private val thisGraph: BindingGraph,
     fieldsNs: Namespace,
     methodsNs: Namespace,
     multiFactory: Provider<SlotSwitchingGenerator>,
@@ -25,7 +26,9 @@ internal class ProvisionGenerator(
     scopedProviderGenerator: Provider<ScopedProviderGenerator>,
     private val generator: Generator,
 ) : ComponentGenerator.Contributor {
-    private val strategies: Map<BaseBinding, ProvisionStrategy> = graph.localBindings.entries.associateBy(
+    private val thisComponent = thisGraph.component
+
+    private val strategies: Map<BaseBinding, ProvisionStrategy> = thisGraph.localBindings.entries.associateBy(
         keySelector = { (binding, _) -> binding },
         valueTransform = { (binding, usage) ->
             if (binding.isScoped()) {
@@ -91,25 +94,25 @@ internal class ProvisionGenerator(
 
     fun generateAccess(builder: ExpressionBuilder, dependency: NodeModel.Dependency) {
         val (node, kind) = dependency
-        val binding = graph.resolveBinding(node)
-        val generator = if (binding.owner != graph) {
+        val binding = thisGraph.resolveBinding(node)
+        val generator = if (binding.owner != thisComponent) {
             // Inherited binding
             generator.forComponent(binding.owner).generator
         } else this
         // Generate
-        checkNotNull(generator.strategies[binding]).generateAccess(builder, kind, inside = graph)
+        checkNotNull(generator.strategies[binding]).generateAccess(builder, kind, inside = thisComponent)
     }
 
-    fun componentForBinding(binding: Binding, target: BindingGraph): String {
-        return if (binding.owner != target) {
-            "this." + generator.forComponent(target).factoryGenerator.fieldNameFor(binding.owner)
+    fun componentForBinding(inside: ComponentModel, target: ComponentModel): String {
+        return if (inside != target) {
+            "this." + generator.forComponent(target).factoryGenerator.fieldNameFor(inside)
         } else "this"
     }
 
     fun generateAccess(builder: ExpressionBuilder, binding: Binding): Unit = with(builder) {
         when (binding) {
             is InstanceBinding -> {
-                val component = componentForBinding(binding, target = graph)
+                val component = componentForBinding(binding.owner, target = thisComponent)
                 val factory = generator.forComponent(binding.owner).factoryGenerator
                 +"$component.${factory.fieldNameFor(binding)}"
             }
@@ -124,19 +127,28 @@ internal class ProvisionGenerator(
             is SubComponentFactoryBinding -> {
                 val factoryGenerator = generator.forComponent(binding.target.createdComponent).factoryGenerator
                 +"new %T(".formatCode(factoryGenerator.implName)
-                join(binding.target.createdComponent.graph.usedParents.asSequence()) { parentGraph ->
+                join(binding.target.createdComponent.graph.usedParents.asSequence()) { parentComponent ->
                     +buildExpression {
-                        generator.forComponent(parentGraph).generator
-                            .generateAccess(this, NodeModel.Dependency(parentGraph.component))
+                        generator.forComponent(parentComponent).generator
+                            .generateAccess(this, NodeModel.Dependency(parentComponent))
                     }
                 }
                 +")"
             }
             is ComponentInstanceBinding -> {
-                +componentForBinding(binding, target = graph)
+                +componentForBinding(binding.owner, target = binding.target)
             }
-            is ComponentDependencyFactoryInput -> TODO()
-            is DependencyComponentEntryPointBinding -> TODO()
+            is ComponentDependencyFactoryInput -> {
+                val factory = generator.forComponent(binding.owner).factoryGenerator
+                +factory.fieldNameFor(binding)
+            }
+            is DependencyComponentEntryPointBinding -> {
+                val factory = generator.forComponent(binding.owner).factoryGenerator
+                +factory.fieldNameFor(binding.input)
+                +"."
+                +binding.entryPoint.getter.functionName()
+                +"()"
+            }
         }.let { /*exhaustive*/ }
     }
 }

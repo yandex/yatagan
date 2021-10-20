@@ -33,21 +33,21 @@ internal class BindingGraphImpl(
                     // Bindings backed by the component entry-points.
                     for (entryPoint: ComponentModel.EntryPoint in input.target.entryPoints)
                         if (entryPoint.dependency.kind == Kind.Direct)
-                            yield(DependencyComponentEntryPointBinding(component, entryPoint))
+                            yield(DependencyComponentEntryPointBinding(input, entryPoint))
                 }
                 // Instance binding
                 is InstanceBinding -> yield(input)
-                is ModuleInstanceFactoryInput -> TODO()
+                is ModuleInstanceFactoryInput -> TODO("support module instances")
             }.let { /*exhaustive*/ }
         }
         // This component binding
         yield(ComponentInstanceBinding(component))
-    }.onEach { binding: BaseBinding -> binding.owner = this }
+    }.onEach { binding: BaseBinding -> binding.owner = component }
         .associateByTo(mutableMapOf(), BaseBinding::target)
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val missingBindings: Set<NodeModel>
-    override val usedParents = mutableSetOf<BindingGraph>()
+    override val usedParents = mutableSetOf<ComponentModel>()
     override val children: Collection<BindingGraphImpl>
 
     override fun resolveBinding(node: NodeModel): Binding {
@@ -88,12 +88,12 @@ internal class BindingGraphImpl(
                         materializationQueue += localBinding.params
                     }
                     is SubComponentFactoryBinding -> {
-                        localBinding.target.createdComponent.graph.usedParents.forEach { graph ->
-                            materializationQueue += NodeModel.Dependency(graph.component)
+                        localBinding.target.createdComponent.graph.usedParents.forEach { component ->
+                            materializationQueue += NodeModel.Dependency(component)
                         }
                     }
                     is DependencyComponentEntryPointBinding -> {
-                        materializationQueue += NodeModel.Dependency(localBinding.component)
+                        materializationQueue += NodeModel.Dependency(localBinding.input.target)
                     }
                     // no dependencies for instances
                     is ComponentDependencyFactoryInput,
@@ -105,7 +105,7 @@ internal class BindingGraphImpl(
         missingBindings = missing
 
         // No longer required
-        allProvidedBindings.clear()
+//        allProvidedBindings.clear()
 
         component.graph = this
     }
@@ -128,7 +128,7 @@ internal class BindingGraphImpl(
                 val scope = it.scope()
                 scope == null || scope == component.scope
             }?.also {
-                it.owner = this
+                it.owner = component
             }
         }
         val nonAlias = resolveAlias(binding) ?: return null
@@ -145,7 +145,7 @@ internal class BindingGraphImpl(
         val binding = parent.materialize(dependency)
         if (binding != null) {
             // The binding is requested from a parent, so add parent to dependencies.
-            usedParents += parent
+            usedParents += parent.component
             parent.materializationQueue += NodeModel.Dependency(binding.target)
             return binding
         }
