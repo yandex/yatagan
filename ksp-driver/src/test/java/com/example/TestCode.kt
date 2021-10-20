@@ -102,13 +102,12 @@ interface TestComponent {
     }
 }
 
-class Test {
+class BasicRuntimeTest {
     @Test
-    fun `general test`() {
-//        val component: TestComponent = DaggerTestComponent.factory().create(object : SomeInt2 {})
-//        component.hello
-//        component.lazyHello
-//
-//        component.someInt
+    fun `yanking entry points does not crash`() {
+        val component: TestComponent = DaggerTestComponent.factory().create(object : SomeInt2 {})
+        component.hello
+        component.lazyHello
+        component.someInt
     }
 }

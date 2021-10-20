@@ -80,12 +80,11 @@ abstract class CompileTestBase : SourceSet by SourceSetImpl() {
                 }
                 result.exitCode
             }
-        } catch (e: Throwable) {
+        } finally {
             firstRound.kspGeneratedSources().forEach { file ->
-                System.err.println("Content of the $file")
+                System.err.println("Content of the file://$file")
                 System.err.println(file.readText())
             }
-            throw e
         }
     }
 

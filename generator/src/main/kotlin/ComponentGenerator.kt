@@ -63,7 +63,7 @@ internal class ComponentGenerator(
     }
     private val provisionGenerator = lazyProvider {
         ProvisionGenerator(
-            graph = graph,
+            thisGraph = graph,
             fieldsNs = fieldsNs,
             methodsNs = methodsNs,
             multiFactory = slotSwitchingGenerator,
@@ -101,6 +101,9 @@ internal class ComponentGenerator(
                 childGenerator.generate()
             }
         }
+
+        // Explicitly instantiate factory generator
+        componentFactoryGenerator.get()
 
         contributors.forEach {
             it.generate(this)

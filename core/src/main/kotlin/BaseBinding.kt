@@ -14,6 +14,6 @@ sealed class BaseBinding {
      * A graph which hosts the binding.
      * Guaranteed to be initialized only for bindings retrieved from a [BindingGraph].
      */
-    var owner: BindingGraph by lateInit()
+    var owner: ComponentModel by lateInit()
         internal set
 }

@@ -27,7 +27,7 @@ interface BindingGraph {
     /**
      * TODO: doc
      */
-    val usedParents: Collection<BindingGraph>
+    val usedParents: Collection<ComponentModel>
 
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
