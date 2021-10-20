@@ -3,7 +3,7 @@ package com.yandex.daggerlite.core
 class ComponentDependencyFactoryInput(
     override val target: ComponentModel,
     override val paramName: String,
-) : ComponentFactoryModel.Input
+) : Binding(), ComponentFactoryModel.Input
 
 class ModuleInstanceFactoryInput(
     override val target: ModuleModel,
@@ -56,3 +56,18 @@ class SubComponentFactoryBinding(
 class ComponentInstanceBinding(
     override val target: ComponentModel,
 ) : Binding()
+
+class DependencyComponentEntryPointBinding(
+    val component: ComponentModel,
+    val entryPoint: ComponentModel.EntryPoint,
+) : Binding() {
+    init {
+        require(entryPoint.dependency.kind == NodeModel.Dependency.Kind.Direct) {
+            // MAYBE: Implement some best-effort matching to available dependency kinds?
+            "Only direct entry points constitute a binding that can be used in dependency components"
+        }
+    }
+
+    override val target: NodeModel
+        get() = entryPoint.dependency.node
+}

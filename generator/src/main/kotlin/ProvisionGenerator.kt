@@ -3,7 +3,9 @@ package com.yandex.daggerlite.generator
 import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
 import com.yandex.daggerlite.core.ComponentInstanceBinding
+import com.yandex.daggerlite.core.DependencyComponentEntryPointBinding
 import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
@@ -133,6 +135,8 @@ internal class ProvisionGenerator(
             is ComponentInstanceBinding -> {
                 +componentForBinding(binding, target = graph)
             }
+            is ComponentDependencyFactoryInput -> TODO()
+            is DependencyComponentEntryPointBinding -> TODO()
         }.let { /*exhaustive*/ }
     }
 }
