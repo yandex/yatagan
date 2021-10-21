@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    id("java-test-fixtures")
     id("com.google.devtools.ksp")
 }
 
@@ -32,8 +33,6 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("com.google.devtools.ksp:symbol-processing-api:${Versions.Ksp}")
 
-    kspTest(project(":ksp-driver"))
-    testImplementation(kotlin("test"))
-    testImplementation(project(":generator:poetry"))  // MAYBE: remove this as we don't need it in tests.
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:${Versions.KotlinCompileTesting}")
+    testFixturesImplementation(testFixtures(project(":testing")))
+    testFixturesImplementation(kotlin("test"))
 }

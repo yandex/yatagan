@@ -1,8 +1,20 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.testing
 
-import kotlin.test.Test
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import javax.inject.Provider
 
-class ComponentDependenciesKotlinTest : CompileTestBase() {
+@RunWith(Parameterized::class)
+class ComponentDependenciesKotlinTest(
+    driverProvider: Provider<CompileTestDriverBase>
+) : CompileTestDriver by driverProvider.get() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun parameters() = compileTestDrivers()
+    }
+
     @Test
     fun `component dependencies - basic case`() {
         givenKotlinSource("test.TestCase", """
@@ -43,7 +55,7 @@ class ComponentDependenciesKotlinTest : CompileTestBase() {
             }
         """)
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerMyApplicationComponent")
             generatesJavaSources("test.DaggerMyActivityComponent")
             withNoWarnings()
@@ -79,7 +91,7 @@ class ComponentDependenciesKotlinTest : CompileTestBase() {
             }
         """)
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerMyApplicationComponent")
             generatesJavaSources("test.DaggerMyActivityComponent")
             withNoWarnings()

@@ -1,11 +1,29 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.testing
 
-import kotlin.test.Test
+import dagger.Lazy
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import java.lang.reflect.Method
+import javax.inject.Provider
+import kotlin.reflect.KClass
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
-class ComponentHierarchyKotlinTest : CompileTestBase() {
+@RunWith(Parameterized::class)
+class ComponentHierarchyKotlinTest(
+    driverProvider: Provider<CompileTestDriverBase>
+) : CompileTestDriver by driverProvider.get() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun parameters() = compileTestDrivers()
+    }
+
     @Test
     fun `subcomponents - basic case`() {
-        givenKotlinSource("test.TestCase", """
+        givenKotlinSource(
+            "test.TestCase", """
             @Scope
             annotation class ActivityScoped
 
@@ -39,9 +57,10 @@ class ComponentHierarchyKotlinTest : CompileTestBase() {
                     fun create(): MyActivityComponent 
                 }
             }
-        """)
+        """
+        )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerMyApplicationComponent")
             withNoWarnings()
         }
@@ -49,7 +68,8 @@ class ComponentHierarchyKotlinTest : CompileTestBase() {
 
     @Test
     fun `subcomponents - advanced case`() {
-        givenKotlinSource("test.TestCase", """
+        givenKotlinSource(
+            "test.TestCase", """
             @Scope annotation class ActivityScoped
             @Scope annotation class FragmentScoped
 
@@ -74,6 +94,8 @@ class ComponentHierarchyKotlinTest : CompileTestBase() {
             @Singleton
             @Component(modules = [ApplicationModule::class])
             interface MyApplicationComponent {
+                val activityFactory: MyActivityComponent.Factory
+
                 @Component.Factory
                 interface Factory {
                     fun create(
@@ -92,11 +114,13 @@ class ComponentHierarchyKotlinTest : CompileTestBase() {
             )
 
             @ActivityScoped
-            @Component(isRoot = false)
+            @Component(isRoot = false, modules = [MyActivityModule::class])
             interface MyActivityComponent {
                 val appManager: MyApplicationManager
                 val appManagerLazy: Lazy<MyApplicationManager>
                 val appManagerProvider: Provider<MyApplicationManager>
+
+                val fragmentFactory: MyFragmentComponent.Factory
 
                 @Component.Factory
                 interface Factory {
@@ -123,11 +147,47 @@ class ComponentHierarchyKotlinTest : CompileTestBase() {
                     fun create(): MyFragmentComponent 
                 }
             }
-        """)
+        """
+        )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerMyApplicationComponent")
             withNoWarnings()
+            inspectGeneratedClass("test.DaggerMyApplicationComponent") {
+                val factory = it["factory"](null)
+                val appComponent = factory.clz["create", String::class](factory, /*app_id*/"foo")
+                val activityFactory = appComponent.clz["getActivityFactory"](appComponent)
+                val activityComponent = activityFactory.clz["create", String::class](activityFactory, /*activity_id*/"bar")
+
+                with(activityComponent) {
+                    val appManager = clz["getAppManager"](activityComponent)
+                    val appManagerLazy = clz["getAppManagerLazy"](activityComponent) as Lazy<*>
+                    val appManagerProvider = clz["getAppManagerProvider"](activityComponent) as Provider<*>
+                    assertNotEquals(illegal = appManager, actual = appManagerLazy.get())
+                    assertNotEquals(illegal = appManager, actual = appManagerProvider.get())
+                    assertEquals(expected = appManagerLazy.get(), actual = appManagerLazy.get())
+                }
+
+                val fragmentFactory = activityComponent.clz["getFragmentFactory"](activityComponent)
+                val fragmentComponent = fragmentFactory.clz["create"](fragmentFactory)
+
+                with(fragmentComponent) {
+                    val appManager = clz["getAppManager"](fragmentComponent)
+                    val appManagerLazy = clz["getAppManagerLazy"](fragmentComponent) as Lazy<*>
+                    val appManagerProvider = clz["getAppManagerProvider"](fragmentComponent) as Provider<*>
+                    assertNotEquals(illegal = appManager, actual = appManagerLazy.get())
+                    assertNotEquals(illegal = appManager, actual = appManagerProvider.get())
+                    assertEquals(expected = appManagerLazy.get(), actual = appManagerLazy.get())
+                }
+            }
         }
     }
 }
+
+private operator fun Class<*>.get(name: String, vararg params: KClass<*>): Method {
+    return getDeclaredMethod(name, *params.map { it.java }.toTypedArray()).also {
+        it.isAccessible = true
+    }
+}
+
+private val Any.clz get() = javaClass

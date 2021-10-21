@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.core.Binding
-import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
@@ -41,11 +41,11 @@ internal class InlineCachingStrategy(
         }
     }
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: ComponentModel) {
+    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         builder.apply {
             when (kind) {
                 DependencyKind.Direct -> {
-                    val component = provisionGenerator.componentForBinding(inside = binding.owner, target = inside)
+                    val component = provisionGenerator.componentForBinding(inside = inside, owner = binding.owner)
                     +"$component.%N()".formatCode(instanceAccessorName)
                 }
                 DependencyKind.Lazy, DependencyKind.Provider -> throw AssertionError()
@@ -95,10 +95,10 @@ internal class ScopedProviderStrategy(
         }
     }
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: ComponentModel) {
+    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         // Generate access either to provider, lazy or direct.
         builder.apply {
-            val component = provisionGenerator.componentForBinding(inside = binding.owner, target = inside)
+            val component = provisionGenerator.componentForBinding(inside = inside, owner = binding.owner)
             when (kind) {
                 DependencyKind.Direct -> +"$component.$instanceAccessorName()"
                 DependencyKind.Lazy, DependencyKind.Provider -> +"$component.$providerAccessorName()"
@@ -108,12 +108,12 @@ internal class ScopedProviderStrategy(
 }
 
 internal class InlineCreationStrategy(
-    private val generator: Generator,
+    private val generators: Generators,
     private val binding: Binding,
 ) : ProvisionStrategy {
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: ComponentModel) {
+    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         assert(kind == DependencyKind.Direct)
-        generator.forComponent(inside).generator.generateAccess(builder, binding)
+        generators[inside].generator.generateAccess(builder, binding)
     }
 }
 
@@ -128,7 +128,7 @@ internal class CompositeStrategy(
         providerStrategy?.generateInComponent(builder)
     }
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: ComponentModel) {
+    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         when (kind) {
             DependencyKind.Direct -> directStrategy.generateAccess(builder, kind, inside)
             DependencyKind.Lazy -> checkNotNull(lazyStrategy).generateAccess(builder, kind, inside)
@@ -144,10 +144,11 @@ internal class OnTheFlyScopedProviderCreationStrategy(
     private val slot: Int,
 ) : ProvisionStrategy {
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: ComponentModel) {
+    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         require(kind == DependencyKind.Lazy)
         builder.apply {
-            +"new %T(${generator.componentForBinding(binding.owner, inside)}, $slot)".formatCode(cachingProvider.name)
+            val component = generator.componentForBinding(inside = inside, owner = binding.owner)
+            +"new %T($component, $slot)".formatCode(cachingProvider.name)
         }
     }
 }
@@ -159,10 +160,11 @@ internal class OnTheFlyUnscopedProviderCreationStrategy(
     private val slot: Int,
 ) : ProvisionStrategy {
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: ComponentModel) {
+    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         require(kind == DependencyKind.Provider)
         builder.apply {
-            +"new %T(${generator.componentForBinding(binding.owner, inside)}, $slot)"
+            val component = generator.componentForBinding(inside = inside, owner = binding.owner)
+            +"new %T($component, $slot)"
                 .formatCode(unscopedProviderGenerator.name)
         }
     }

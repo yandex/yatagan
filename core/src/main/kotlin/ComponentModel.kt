@@ -46,9 +46,6 @@ abstract class ComponentModel : NodeModel() {
         override fun toString() = "$getter -> $dependency"
     }
 
-    var graph: BindingGraph by lateInit()
-        internal set
-
     final override val qualifier: Nothing? get() = null
 
     final override fun implicitBinding(): Nothing? = null

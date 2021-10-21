@@ -15,8 +15,8 @@ import javax.lang.model.element.Modifier.STATIC
 
 internal class ComponentGenerator(
     private val graph: BindingGraph,
-    override val implName: ClassName = graph.component.name.asClassName { "Dagger$it" },
-    private val parentGenerators: Map<ComponentModel, ComponentGenerator> = emptyMap(),
+    override val implName: ClassName = graph.model.name.asClassName { "Dagger$it" },
+    private val generators: GeneratorsBuilder = GeneratorsBuilder(),
 ) : Generator {
     interface Contributor {
         fun generate(builder: TypeSpecBuilder)
@@ -28,21 +28,20 @@ internal class ComponentGenerator(
     private val subcomponentNs = Namespace()
 
     private val childGenerators: Map<ComponentModel, ComponentGenerator> = graph.children.associateBy(
-        keySelector = { it.component }
-    ) {
+        keySelector = BindingGraph::model
+    ) { childGraph ->
         ComponentGenerator(
-            graph = it,
-            implName = implName.nestedClass(subcomponentNs.name(it.component.name, "Impl")),
-            parentGenerators = parentGenerators + mapOf(graph.component to this)
+            graph = childGraph,
+            implName = implName.nestedClass(subcomponentNs.name(childGraph.model.name, "Impl")),
+            generators = generators,
         )
     }
-    private val generators = childGenerators + parentGenerators
     private val componentFactoryGenerator = lazyProvider {
         ComponentFactoryGenerator(
             thisGraph = graph,
             fieldsNs = fieldsNs,
             componentImplName = implName,
-            generator = this,
+            generators = generators,
         ).also(this::registerContributor)
     }
     private val slotSwitchingGenerator: Provider<SlotSwitchingGenerator> = lazyProvider {
@@ -69,21 +68,25 @@ internal class ComponentGenerator(
             multiFactory = slotSwitchingGenerator,
             unscopedProviderGenerator = unscopedProviderGenerator,
             scopedProviderGenerator = scopedProviderGenerator,
-            generator = this,
+            generators = generators,
         ).also(this::registerContributor)
     }
 
+    init {
+        generators[graph] = this
+    }
+
     fun generate(): TypeSpec = buildClass(implName) {
-        val componentInterface = graph.component.name.asTypeName()
+        val componentInterface = graph.model.name.asTypeName()
 
         annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
         modifiers(FINAL)
-        if (!graph.component.isRoot) {
+        if (!graph.model.isRoot) {
             modifiers(PRIVATE, STATIC)
         }
         implements(componentInterface)
 
-        graph.component.entryPoints.forEach { (getter, dependency) ->
+        graph.model.entryPoints.forEach { (getter, dependency) ->
             // TODO: reuse entry-points as accessors to reduce method count.
             method(getter.functionName()) {
                 modifiers(PUBLIC)
@@ -115,13 +118,6 @@ internal class ComponentGenerator(
 
     override val generator: ProvisionGenerator
         get() = provisionGenerator.get()
-
-    override fun forComponent(component: ComponentModel): Generator {
-        if (component == graph.component) {
-            return this
-        }
-        return checkNotNull(generators[component])
-    }
 
     private fun registerContributor(contributor: Contributor) {
         contributors += contributor
