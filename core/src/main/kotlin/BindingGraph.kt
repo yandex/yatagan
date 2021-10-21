@@ -4,7 +4,7 @@ interface BindingGraph {
     /**
      * Component for which graph is built
      */
-    val component: ComponentModel
+    val model: ComponentModel
 
     /**
      * Requested bindings that belong to this component.
@@ -27,7 +27,7 @@ interface BindingGraph {
     /**
      * TODO: doc
      */
-    val usedParents: Collection<ComponentModel>
+    val usedParents: Collection<BindingGraph>
 
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.

@@ -46,6 +46,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
                 val secondRound = KotlinCompilation().apply {
                     sources = firstRound.sources + firstRound.kspGeneratedSources().map(SourceFile::fromPath)
                     inheritClassPath = true
+                    javacArguments += "-Xdiags:verbose"
                 }
                 val result = secondRound.compile()
                 KspCompilationResultClause(
@@ -72,6 +73,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
     private fun setupFirstRoundCompilation() = KotlinCompilation().apply {
         sources = sourceFiles.toList()
         inheritClassPath = true
+        javacArguments += "-Xdiags:verbose"
         symbolProcessorProviders = listOf(DaggerLiteProcessorProvider())
     }
 
@@ -110,7 +112,9 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         }
 
         override fun inspectGeneratedClass(name: String, callback: (Class<*>) -> Unit) {
-            compiledClassesLoader?.let { callback(it.loadClass(name)) }
+            if (result.exitCode == KotlinCompilation.ExitCode.OK) {
+                compiledClassesLoader?.let { callback(it.loadClass(name)) }
+            }
         }
     }
 }

@@ -3,7 +3,6 @@ package com.yandex.daggerlite.generator
 import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -15,32 +14,32 @@ import javax.lang.model.element.Modifier.STATIC
 internal class ComponentFactoryGenerator(
     private val thisGraph: BindingGraph,
     private val componentImplName: ClassName,
-    private val generator: Generator,
+    private val generators: Generators,
     fieldsNs: Namespace,
 ) : ComponentGenerator.Contributor {
     private val inputFieldNames: Map<ComponentFactoryModel.Input, String> =
-        (thisGraph.component.factory?.inputs?.asSequence() ?: emptySequence()).associateWith { input ->
+        (thisGraph.model.factory?.inputs?.asSequence() ?: emptySequence()).associateWith { input ->
             fieldsNs.name(input.paramName)
         }
-    private val superComponentFieldNames: Map<ComponentModel, String> =
-        thisGraph.usedParents.associateWith { component ->
-            fieldsNs.name(component.name)
+    private val superComponentFieldNames: Map<BindingGraph, String> =
+        thisGraph.usedParents.associateWith { graph: BindingGraph ->
+            fieldsNs.name(graph.model.name)
         }
 
     val implName: ClassName = componentImplName.nestedClass("ComponentFactoryImpl")
 
     fun fieldNameFor(input: ComponentFactoryModel.Input) = checkNotNull(inputFieldNames[input])
-    fun fieldNameFor(component: ComponentModel) = checkNotNull(superComponentFieldNames[component])
+    fun fieldNameFor(graph: BindingGraph) = checkNotNull(superComponentFieldNames[graph])
 
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
-        val isSubComponentFactory = !thisGraph.component.isRoot
-        val factory = thisGraph.component.factory
+        val isSubComponentFactory = !thisGraph.model.isRoot
+        val factory = thisGraph.model.factory
         if (factory != null) {
             inputFieldNames.forEach { (input, name) ->
                 field(input.target.typeName(), name) { modifiers(PRIVATE, FINAL) }
             }
             superComponentFieldNames.forEach { (input, name) ->
-                field(generator.forComponent(input).implName, name) { modifiers(PRIVATE, FINAL) }
+                field(generators[input].implName, name) { modifiers(PRIVATE, FINAL) }
             }
             constructor {
                 modifiers(PRIVATE)
@@ -50,10 +49,10 @@ internal class ComponentFactoryGenerator(
                     parameter(input.target.typeName(), name)
                     +"this.${fieldNameFor(input)} = $name"
                 }
-                thisGraph.usedParents.forEach { component ->
-                    val name = paramsNs.name(component.name)
-                    parameter(generator.forComponent(component).implName, name)
-                    +"this.${fieldNameFor(component)} = $name"
+                thisGraph.usedParents.forEach { graph ->
+                    val name = paramsNs.name(graph.model.name)
+                    parameter(generators[graph].implName, name)
+                    +"this.${fieldNameFor(graph)} = $name"
                 }
             }
             nestedType {
@@ -65,10 +64,10 @@ internal class ComponentFactoryGenerator(
                     if (isSubComponentFactory) {
                         val paramsNs = Namespace(prefix = "f")
                         constructor {
-                            thisGraph.usedParents.forEach { component ->
-                                val name = paramsNs.name(component.name)
+                            thisGraph.usedParents.forEach { graph ->
+                                val name = paramsNs.name(graph.model.name)
                                 usedParentsParamNames += name
-                                val typeName = generator.forComponent(component).implName
+                                val typeName = generators[graph].implName
                                 this@buildClass.field(typeName, name)
                                 parameter(typeName, name)
                                 +"this.$name = $name"
@@ -79,7 +78,7 @@ internal class ComponentFactoryGenerator(
                     method("create") {
                         modifiers(PUBLIC)
                         annotation<Override>()
-                        returnType(thisGraph.component.typeName())
+                        returnType(thisGraph.model.typeName())
                         factory.inputs.forEach { input ->
                             parameter(input.target.typeName(), input.paramName)
                         }

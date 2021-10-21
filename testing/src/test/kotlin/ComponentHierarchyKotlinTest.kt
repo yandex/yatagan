@@ -120,6 +120,8 @@ class ComponentHierarchyKotlinTest(
                 val appManagerLazy: Lazy<MyApplicationManager>
                 val appManagerProvider: Provider<MyApplicationManager>
 
+                val fragmentFactory: MyFragmentComponent.Factory
+
                 @Component.Factory
                 interface Factory {
                     fun create(@BindsInstance @Named("activity_id") id: String): MyActivityComponent 
@@ -161,6 +163,18 @@ class ComponentHierarchyKotlinTest(
                     val appManager = clz["getAppManager"](activityComponent)
                     val appManagerLazy = clz["getAppManagerLazy"](activityComponent) as Lazy<*>
                     val appManagerProvider = clz["getAppManagerProvider"](activityComponent) as Provider<*>
+                    assertNotEquals(illegal = appManager, actual = appManagerLazy.get())
+                    assertNotEquals(illegal = appManager, actual = appManagerProvider.get())
+                    assertEquals(expected = appManagerLazy.get(), actual = appManagerLazy.get())
+                }
+
+                val fragmentFactory = activityComponent.clz["getFragmentFactory"](activityComponent)
+                val fragmentComponent = fragmentFactory.clz["create"](fragmentFactory)
+
+                with(fragmentComponent) {
+                    val appManager = clz["getAppManager"](fragmentComponent)
+                    val appManagerLazy = clz["getAppManagerLazy"](fragmentComponent) as Lazy<*>
+                    val appManagerProvider = clz["getAppManagerProvider"](fragmentComponent) as Provider<*>
                     assertNotEquals(illegal = appManager, actual = appManagerLazy.get())
                     assertNotEquals(illegal = appManager, actual = appManagerProvider.get())
                     assertEquals(expected = appManagerLazy.get(), actual = appManagerLazy.get())

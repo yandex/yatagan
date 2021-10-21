@@ -51,11 +51,16 @@ class InstanceBinding(
 
 class SubComponentFactoryBinding(
     override val target: ComponentFactoryModel,
-) : Binding()
+) : Binding() {
+    var targetGraph: BindingGraph by lateInit()
+        internal set
+}
 
-class ComponentInstanceBinding(
-    override val target: ComponentModel,
-) : Binding()
+@Suppress("CanSealedSubClassBeObject")
+class ComponentInstanceBinding : Binding() {
+    override val target: NodeModel
+        get() = owner.model
+}
 
 class DependencyComponentEntryPointBinding(
     val input: ComponentDependencyFactoryInput,

@@ -3,14 +3,14 @@ package com.yandex.daggerlite.core
 import com.yandex.daggerlite.core.NodeModel.Dependency.Kind
 
 internal class BindingGraphImpl(
-    override val component: ComponentModel,
+    override val model: ComponentModel,
     private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
     private val resolveHelper = hashMapOf<NodeModel, Binding>()
     private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = sequence {
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
-        for (module: ModuleModel in component.modules) {
+        for (module: ModuleModel in model.modules) {
             // All bindings from installed modules
             for (binding: BaseBinding in module.bindings)
                 yield(binding)
@@ -25,7 +25,7 @@ internal class BindingGraphImpl(
             }
         }
         // Gather bindings from factory
-        component.factory?.let { factory: ComponentFactoryModel ->
+        model.factory?.let { factory: ComponentFactoryModel ->
             for (input: ComponentFactoryModel.Input in factory.inputs) when (input) {
                 is ComponentDependencyFactoryInput -> {
                     // Binding for the dependency component itself.
@@ -41,13 +41,13 @@ internal class BindingGraphImpl(
             }.let { /*exhaustive*/ }
         }
         // This component binding
-        yield(ComponentInstanceBinding(component))
-    }.onEach { binding: BaseBinding -> binding.owner = component }
+        yield(ComponentInstanceBinding())
+    }.onEach { binding: BaseBinding -> binding.owner = this }
         .associateByTo(mutableMapOf(), BaseBinding::target)
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val missingBindings: Set<NodeModel>
-    override val usedParents = mutableSetOf<ComponentModel>()
+    override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
 
     override fun resolveBinding(node: NodeModel): Binding {
@@ -59,7 +59,7 @@ internal class BindingGraphImpl(
 
     init {
         // Build children
-        children = component.modules
+        children = model.modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
             .distinct()
@@ -68,7 +68,7 @@ internal class BindingGraphImpl(
 
         val missing = hashSetOf<NodeModel>()
 
-        component.entryPoints.forEach { entryPoint ->
+        model.entryPoints.forEach { entryPoint ->
             materializationQueue.add(entryPoint.dependency)
         }
 
@@ -88,8 +88,11 @@ internal class BindingGraphImpl(
                         materializationQueue += localBinding.params
                     }
                     is SubComponentFactoryBinding -> {
-                        localBinding.target.createdComponent.graph.usedParents.forEach { component ->
-                            materializationQueue += NodeModel.Dependency(component)
+                        val createdComponent = localBinding.target.createdComponent
+                        val targetGraph = checkNotNull(children.find { it.model == createdComponent })
+                        localBinding.targetGraph = targetGraph
+                        targetGraph.usedParents.forEach { graph ->
+                            materializationQueue += NodeModel.Dependency(graph.model)
                         }
                     }
                     is DependencyComponentEntryPointBinding -> {
@@ -107,7 +110,6 @@ internal class BindingGraphImpl(
         // No longer required
 //        allProvidedBindings.clear()
 
-        component.graph = this
     }
 
     private fun materialize(dependency: NodeModel.Dependency): Binding? {
@@ -126,9 +128,9 @@ internal class BindingGraphImpl(
         val binding = allProvidedBindings.getOrPut(node) {
             node.implicitBinding()?.takeIf {
                 val scope = it.scope()
-                scope == null || scope == component.scope
+                scope == null || scope == model.scope
             }?.also {
-                it.owner = component
+                it.owner = this
             }
         }
         val nonAlias = resolveAlias(binding) ?: return null
@@ -145,13 +147,17 @@ internal class BindingGraphImpl(
         val binding = parent.materialize(dependency)
         if (binding != null) {
             // The binding is requested from a parent, so add parent to dependencies.
-            usedParents += parent.component
+            usedParents += parent
             parent.materializationQueue += NodeModel.Dependency(binding.target)
             return binding
         }
         return parent.materializeInParents(dependency)?.also {
             usedParents += it.owner
         }
+    }
+
+    override fun toString(): String {
+        return "Graph[$model]"
     }
 }
 
