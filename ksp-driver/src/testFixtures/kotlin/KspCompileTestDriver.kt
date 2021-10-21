@@ -4,65 +4,29 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
-import org.intellij.lang.annotations.Language
+import com.yandex.daggerlite.testing.CompileTestDriver
+import com.yandex.daggerlite.testing.CompileTestDriverBase
 import java.io.File
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.expect
 
-interface SourceSet {
-    val sourceFiles: Collection<SourceFile>
-    fun givenJavaSource(name: String, @Language("java") source: String)
-    fun givenKotlinSource(name: String, @Language("kotlin") source: String)
-    fun useSourceSet(sourceSet: SourceSet)
-}
-
-abstract class CompileTestBase : SourceSet by SourceSetImpl() {
-    private class SourceSetImpl : SourceSet {
-        override val sourceFiles = arrayListOf<SourceFile>()
-
-        override fun givenJavaSource(name: String, @Language("java") source: String) {
-            sourceFiles += SourceFile.java(
-                "${name.substringAfterLast('.')}.java", """
-            package ${name.substringBeforeLast('.')};
-            ${CommonImports.joinToString(separator = "\n") { "import $it;" }}
-            $source
-        """.trimIndent()
-            )
-        }
-
-        override fun givenKotlinSource(name: String, @Language("kotlin") source: String) {
-            sourceFiles += SourceFile.kotlin(
-                "${name.substringAfterLast('.')}.kt", """
-            package ${name.substringBeforeLast('.')}
-            ${CommonImports.joinToString(separator = "\n") { "import $it" }}
-            $source
-        """.trimIndent()
-            )
-        }
-
-        override fun useSourceSet(sourceSet: SourceSet) {
-            sourceFiles += sourceSet.sourceFiles
-        }
-    }
-
-    protected fun givenSourceSet(block: SourceSet.() -> Unit): SourceSet = SourceSetImpl().apply(block)
-
-    protected fun failsToCompile(block: CompilationResulClause.() -> Unit) {
+class KspCompileTestDriver : CompileTestDriverBase() {
+    override fun failsToCompile(block: CompileTestDriver.CompilationResultClause.() -> Unit) {
         expect(KotlinCompilation.ExitCode.COMPILATION_ERROR) {
             val compilation = setupFirstRoundCompilation()
             val result = compilation.compile()
-            CompilationResulClause(compilation, result).block()
+            KspCompilationResultClause(compilation, result).block()
             result.exitCode
         }
     }
 
-    protected fun assertCompilesSuccessfully(block: CompilationResulClause.() -> Unit = {}) {
+    override fun compilesSuccessfully(block: CompileTestDriver.CompilationResultClause.() -> Unit) {
         val firstRound = setupFirstRoundCompilation()
         try {
             expect(KotlinCompilation.ExitCode.OK) {
                 val result = firstRound.compile()
-                CompilationResulClause(firstRound, result).apply {
+                KspCompilationResultClause(firstRound, result).apply {
                     withNoErrors()
                     block()
                 }
@@ -75,15 +39,15 @@ abstract class CompileTestBase : SourceSet by SourceSetImpl() {
                     inheritClassPath = true
                 }
                 val result = secondRound.compile()
-                CompilationResulClause(secondRound, result).apply {
+                KspCompilationResultClause(secondRound, result).apply {
                     withNoErrors()
                 }
                 result.exitCode
             }
         } finally {
             firstRound.kspGeneratedSources().forEach { file ->
-                System.err.println("Content of the file://$file")
-                System.err.println(file.readText())
+                println("Content of the file://$file")
+                println(file.readText())
             }
         }
     }
@@ -94,27 +58,27 @@ abstract class CompileTestBase : SourceSet by SourceSetImpl() {
         symbolProcessorProviders = listOf(DaggerLiteProcessorProvider())
     }
 
-    protected inner class CompilationResulClause(
+    private inner class KspCompilationResultClause(
         private val compilation: KotlinCompilation,
         private val result: KotlinCompilation.Result,
-    ) {
-        fun withErrorContaining(message: String) {
+    ) : CompileTestDriver.CompilationResultClause {
+        override fun withErrorContaining(message: String) {
             assertContains(result.kspMessages(), Message(Message.Kind.ERROR, message))
         }
 
-        fun withWarningContaining(message: String) {
+        override fun withWarningContaining(message: String) {
             assertContains(result.kspMessages(), Message(Message.Kind.WARNING, message))
         }
 
-        fun withNoWarnings() {
+        override fun withNoWarnings() {
             assertEquals(emptyList(), result.kspMessages().filter { it.kind == Message.Kind.WARNING })
         }
 
-        fun withNoErrors() {
+        override fun withNoErrors() {
             assertEquals(emptyList(), result.kspMessages().filter { it.kind == Message.Kind.ERROR })
         }
 
-        fun generatesJavaSources(name: String) {
+        override fun generatesJavaSources(name: String) {
             assertContains(
                 compilation.kspSourcesDir
                     .resolve("java")
@@ -127,13 +91,13 @@ abstract class CompileTestBase : SourceSet by SourceSetImpl() {
     }
 }
 
-internal fun KotlinCompilation.kspGeneratedSources(): Sequence<File> {
+private fun KotlinCompilation.kspGeneratedSources(): Sequence<File> {
     return kspSourcesDir.walk()
         .filter { it.isFile && it.extension in SupportedSourceExtensions }
 }
 
 
-internal fun KotlinCompilation.Result.kspMessages(): List<Message> {
+private fun KotlinCompilation.Result.kspMessages(): List<Message> {
     return messages.lineSequence().mapNotNull { line ->
         ProcessorMessageRegex.matchEntire(line)?.let { result ->
             val (kind, text) = result.destructured
@@ -165,18 +129,3 @@ internal data class Message(
 
 private val ProcessorMessageRegex = """^([we]): \[ksp] (.*)$""".toRegex()
 private val SupportedSourceExtensions = arrayOf("java", "kt")
-
-// bug: star imports sometimes behave incorrectly in KSP, so use explicit ones
-private val CommonImports = arrayOf(
-    "javax.inject.Inject",
-    "javax.inject.Named",
-    "javax.inject.Provider",
-    "javax.inject.Scope",
-    "javax.inject.Singleton",
-    "dagger.Component",
-    "dagger.Binds",
-    "dagger.BindsInstance",
-    "dagger.Provides",
-    "dagger.Lazy",
-    "dagger.Module",
-)

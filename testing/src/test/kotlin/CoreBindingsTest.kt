@@ -1,39 +1,58 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.testing
 
-import kotlin.test.Test
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import javax.inject.Provider
 
-class CoreBindingsTest : CompileTestBase() {
-    private val classes = givenSourceSet {
-        givenJavaSource(
-            "test.MyScopedClass", """
+@RunWith(Parameterized::class)
+class CoreBindingsTest(
+    driverProvider: Provider<CompileTestDriverBase>
+) : CompileTestDriver by driverProvider.get() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun parameters() = compileTestDrivers()
+    }
+
+    private lateinit var classes: SourceSet
+    private lateinit var apiImpl: SourceSet
+
+    @Before
+    fun setUp() {
+        classes = givenSourceSet {
+            givenJavaSource(
+                "test.MyScopedClass", """
             @Singleton public class MyScopedClass {
                 @Inject public MyScopedClass() {}
             }
         """
-        )
+            )
 
-        givenJavaSource(
-            "test.MySimpleClass", """
+            givenJavaSource(
+                "test.MySimpleClass", """
             public class MySimpleClass {
                 @Inject public MySimpleClass(MyScopedClass directDep) {}
             }
         """
-        )
-    }
+            )
+        }
 
-    private val apiImpl = givenSourceSet {
-        givenJavaSource(
-            "test.Api", """
+        apiImpl = givenSourceSet {
+            givenJavaSource(
+                "test.Api", """
         public interface Api {}    
         """
-        )
-        givenJavaSource(
-            "test.Impl", """
+            )
+            givenJavaSource(
+                "test.Impl", """
         public class Impl implements Api {
           @Inject public Impl() {}
         }
         """
-        )
+            )
+        }
     }
 
     @Test
@@ -54,7 +73,7 @@ class CoreBindingsTest : CompileTestBase() {
         """
         )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
         }
@@ -84,7 +103,7 @@ class CoreBindingsTest : CompileTestBase() {
         """
         )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
         }
@@ -115,7 +134,7 @@ class CoreBindingsTest : CompileTestBase() {
         """
         )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
         }
@@ -147,7 +166,7 @@ class CoreBindingsTest : CompileTestBase() {
         """
         )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
         }
@@ -180,7 +199,7 @@ class CoreBindingsTest : CompileTestBase() {
         """
         )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
         }

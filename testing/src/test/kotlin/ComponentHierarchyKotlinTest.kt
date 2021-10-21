@@ -1,8 +1,20 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.testing
 
-import kotlin.test.Test
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import javax.inject.Provider
 
-class ComponentHierarchyKotlinTest : CompileTestBase() {
+@RunWith(Parameterized::class)
+class ComponentHierarchyKotlinTest(
+    driverProvider: Provider<CompileTestDriverBase>
+) : CompileTestDriver by driverProvider.get() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun parameters() = compileTestDrivers()
+    }
+
     @Test
     fun `subcomponents - basic case`() {
         givenKotlinSource("test.TestCase", """
@@ -41,7 +53,7 @@ class ComponentHierarchyKotlinTest : CompileTestBase() {
             }
         """)
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerMyApplicationComponent")
             withNoWarnings()
         }
@@ -125,7 +137,7 @@ class ComponentHierarchyKotlinTest : CompileTestBase() {
             }
         """)
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerMyApplicationComponent")
             withNoWarnings()
         }

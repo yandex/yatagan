@@ -1,9 +1,21 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.testing
 
-import kotlin.test.Ignore
-import kotlin.test.Test
+import org.junit.Ignore
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import javax.inject.Provider
 
-class CoreBindingsKotlinTest : CompileTestBase() {
+@RunWith(Parameterized::class)
+class CoreBindingsKotlinTest(
+    driverProvider: Provider<CompileTestDriverBase>
+) : CompileTestDriver by driverProvider.get() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun parameters() = compileTestDrivers()
+    }
+
     @Test
     @Ignore("TODO: support this")
     fun `basic component - @Module object`() {
@@ -30,7 +42,7 @@ class CoreBindingsKotlinTest : CompileTestBase() {
         """
         )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
         }
@@ -57,7 +69,7 @@ class CoreBindingsKotlinTest : CompileTestBase() {
             }
         """)
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
         }
@@ -83,7 +95,7 @@ class CoreBindingsKotlinTest : CompileTestBase() {
         """
         )
 
-        assertCompilesSuccessfully {
+        compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
         }

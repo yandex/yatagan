@@ -43,12 +43,10 @@ internal class DaggerLiteProcessor(
                     packageName = generator.targetPackageName,
                     fileName = generator.targetClassName,
                     extensionName = generator.targetLanguage.extension,
-                ).use { file ->
-                    file.bufferedWriter().use { writer ->
-                        generator.generateTo(
-                            out = writer,
-                        )
-                    }
+                ).bufferedWriter().use { writer ->
+                    generator.generateTo(
+                        out = writer,
+                    )
                 }
             }
         return emptyList()
