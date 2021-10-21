@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.testing
 
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -26,6 +27,40 @@ class CoreBindingsKotlinTest(
         object MyModule {
           @Provides
           fun provides(): Api = Impl()
+        }
+        """
+        )
+        givenKotlinSource(
+            "test.TestComponent", """
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                fun get(): test.Api
+                fun getProvider(): Provider<test.Api>
+                fun getLazy(): Lazy<test.Api>
+            }
+        """
+        )
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    @Ignore("TODO - support companion objects")
+    fun `basic component - @Module with companion object`() {
+        givenKotlinSource("test.Api", """interface Api {}""")
+        givenKotlinSource("test.Impl", """class Impl : Api""")
+
+        givenKotlinSource(
+            "test.MyModule", """
+        @Module
+        interface MyModule {
+            companion object {
+                @Provides
+                fun provides(): Api = Impl()
+            }
         }
         """
         )
