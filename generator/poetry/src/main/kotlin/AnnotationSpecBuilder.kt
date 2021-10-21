@@ -22,7 +22,7 @@ class AnnotationSpecBuilder(
     fun classValues(vararg types: ClassName, name: String = "value") {
         value(name) {
             +"{"
-            join(types.asSequence()) { type -> +"%T.class".formatCode(type) }
+            join(types.asIterable()) { type -> +"%T.class".formatCode(type) }
             +"}"
         }
     }
@@ -38,7 +38,7 @@ class AnnotationSpecBuilder(
     fun stringValues(vararg values: String, name: String = "value") {
         value(name) {
             +"{"
-            join(values.asSequence()) { value -> +"%S".formatCode(value) }
+            join(values.asIterable()) { value -> +"%S".formatCode(value) }
             +"}"
         }
     }

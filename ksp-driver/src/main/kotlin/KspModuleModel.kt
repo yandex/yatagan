@@ -2,6 +2,7 @@ package com.yandex.daggerlite.compiler
 
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getDeclaredProperties
+import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.core.AliasBinding
@@ -9,6 +10,7 @@ import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.ClassNameModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.ProvisionBinding
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -33,6 +35,8 @@ data class KspModuleModel(
 
     override val bindings: Collection<BaseBinding> by lazy {
         val list = arrayListOf<BaseBinding>()
+        val mayRequireInstance = !declaration.isAbstract() && !declaration.isObject
+
         declaration.getDeclaredProperties().mapNotNullTo(list) { propertyDeclaration ->
             val propertyType = propertyDeclaration.asMemberOf(type)
             val target = KspNodeModel(
@@ -45,6 +49,7 @@ data class KspModuleModel(
                         target = target,
                         ownerType = type,
                         propertyDeclaration = propertyDeclaration,
+                        requiredModuleInstance = this.takeIf { mayRequireInstance && !propertyDeclaration.isStatic }
                     )
                     else -> null
                 }?.let { return@mapNotNullTo it }
@@ -72,12 +77,17 @@ data class KspModuleModel(
                         ownerType = type,
                         method = method,
                         methodDeclaration = methodDeclaration,
+                        requiredModuleInstance = this.takeIf { mayRequireInstance && !methodDeclaration.isStatic }
                     )
                     else -> null
                 }?.let { return@mapNotNullTo it }
             }
             null
         }
+    }
+
+    override val isInstanceRequired: Boolean by lazy {
+        !declaration.isAbstract() && bindings.any { it is ProvisionBinding && it.requiredModuleInstance != null }
     }
 
     override val name: ClassNameModel by lazy { ClassNameModel(type) }

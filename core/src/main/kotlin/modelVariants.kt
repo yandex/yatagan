@@ -32,12 +32,16 @@ class ProvisionBinding(
     val scope: Scope?,
     val provider: CallableNameModel,
     val params: Collection<NodeModel.Dependency>,
+    val requiredModuleInstance: ModuleModel?,
 ) : Binding() {
     /**
      * Represent provision cache scope.
      * Must provide [equals]/[hashCode] implementation.
      */
-    interface Scope
+    interface Scope {
+        override fun equals(other: Any?): Boolean
+        override fun hashCode(): Int
+    }
 }
 
 /**

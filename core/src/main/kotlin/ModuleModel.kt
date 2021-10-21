@@ -13,4 +13,9 @@ interface ModuleModel : ClassBackedModel {
      * Subcomponents installed by this module.
      */
     val subcomponents: Collection<ComponentModel>
+
+    /**
+     * TODO: doc
+     */
+    val isInstanceRequired: Boolean
 }

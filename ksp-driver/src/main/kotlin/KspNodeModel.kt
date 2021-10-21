@@ -36,6 +36,7 @@ data class KspNodeModel(
                 ownerType = type,
                 methodDeclaration = injectConstructor,
                 forScope = type.declaration,
+                requiredModuleInstance = null,
             )
         }
     }

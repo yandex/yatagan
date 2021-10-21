@@ -37,7 +37,7 @@ internal class BindingGraphImpl(
                 }
                 // Instance binding
                 is InstanceBinding -> yield(input)
-                is ModuleInstanceFactoryInput -> TODO("support module instances")
+                is ModuleInstanceFactoryInput -> {/*no binding for module*/}
             }.let { /*exhaustive*/ }
         }
         // This component binding

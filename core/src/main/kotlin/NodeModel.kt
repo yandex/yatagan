@@ -23,7 +23,10 @@ abstract class NodeModel : ClassBackedModel {
      * same type.
      * Must provide stable [equals]/[hashCode] implementation.
      */
-    interface Qualifier
+    interface Qualifier {
+        override fun equals(other: Any?): Boolean
+        override fun hashCode(): Int
+    }
 
     /**
      * A [NodeModel] with a request [Kind].

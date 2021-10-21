@@ -25,10 +25,12 @@ sealed interface CallableNameModel
 
 sealed interface MemberCallableNameModel : CallableNameModel {
     val ownerName: ClassNameModel
+    val isOwnerKotlinObject: Boolean
 }
 
 data class FunctionNameModel(
     override val ownerName: ClassNameModel,
+    override val isOwnerKotlinObject: Boolean,
     val function: String,
 ) : MemberCallableNameModel {
     override fun toString() = "$ownerName.$function()"
@@ -42,6 +44,7 @@ data class ConstructorNameModel(
 
 data class PropertyNameModel(
     override val ownerName: ClassNameModel,
+    override val isOwnerKotlinObject: Boolean,
     val property: String
 ) : MemberCallableNameModel {
     override fun toString() = "$ownerName.$property:"

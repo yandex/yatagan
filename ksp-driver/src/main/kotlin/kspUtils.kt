@@ -1,8 +1,12 @@
 package com.yandex.daggerlite.compiler
 
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.Modifier
 import kotlin.reflect.KClass
 
 
@@ -26,3 +30,7 @@ internal operator fun KSAnnotation.get(name: String): Any? {
 
 internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean =
     annotations.any { it hasType T::class }
+
+internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers || isAnnotationPresent<JvmStatic>()
+
+internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT

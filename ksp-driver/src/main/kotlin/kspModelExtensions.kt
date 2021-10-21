@@ -10,6 +10,7 @@ import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.core.ClassNameModel
 import com.yandex.daggerlite.core.ConstructorNameModel
 import com.yandex.daggerlite.core.FunctionNameModel
+import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.NodeModel.Dependency.Kind
 import com.yandex.daggerlite.core.PropertyNameModel
@@ -24,6 +25,7 @@ fun ProvisionBinding(
     methodDeclaration: KSFunctionDeclaration,
     method: KSFunction = methodDeclaration.asMemberOf(ownerType),
     forScope: KSAnnotated = methodDeclaration,
+    requiredModuleInstance: ModuleModel?,
 ) = ProvisionBinding(
     target = target,
     provider = if (methodDeclaration.isConstructor()) {
@@ -35,17 +37,20 @@ fun ProvisionBinding(
             resolveNodeDependency(type = paramType!!, forQualifier = param)
         },
     scope = KspAnnotationDescriptor.describeIfAny<Scope>(forScope),
+    requiredModuleInstance = requiredModuleInstance,
 )
 
 fun ProvisionBinding(
     target: NodeModel,
     ownerType: KSType,
     propertyDeclaration: KSPropertyDeclaration,
+    requiredModuleInstance: ModuleModel?,
 ) = ProvisionBinding(
     target = target,
     provider = PropertyNameModel(ownerType, propertyDeclaration),
     params = emptyList(),
     scope = KspAnnotationDescriptor.describeIfAny<Scope>(propertyDeclaration),
+    requiredModuleInstance = requiredModuleInstance,
 )
 
 internal fun resolveNodeDependency(
@@ -91,6 +96,7 @@ internal fun FunctionNameModel(owner: KSType, function: KSFunctionDeclaration): 
     return FunctionNameModel(
         ownerName = ClassNameModel(owner),
         function = function.simpleName.asString(),
+        isOwnerKotlinObject = owner.declaration.isObject && !function.isStatic,
     )
 }
 
@@ -98,6 +104,7 @@ internal fun FunctionNameModel(owner: KSClassDeclaration, function: KSFunctionDe
     return FunctionNameModel(
         ownerName = ClassNameModel(owner),
         function = function.simpleName.asString(),
+        isOwnerKotlinObject = owner.isObject && !function.isStatic,
     )
 }
 
@@ -105,6 +112,7 @@ internal fun PropertyNameModel(owner: KSType, property: KSPropertyDeclaration): 
     return PropertyNameModel(
         ownerName = ClassNameModel(owner),
         property = property.simpleName.asString(),
+        isOwnerKotlinObject = owner.declaration.isObject && !property.isStatic,
     )
 }
 
@@ -112,5 +120,6 @@ internal fun PropertyNameModel(owner: KSClassDeclaration, property: KSPropertyDe
     return PropertyNameModel(
         ownerName = ClassNameModel(owner),
         property = property.simpleName.asString(),
+        isOwnerKotlinObject = owner.isObject && !property.isStatic,
     )
 }

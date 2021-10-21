@@ -15,11 +15,11 @@ open class ExpressionBuilder {
     }
 
     inline fun <T> join(
-        seq: Sequence<T>,
+        seq: Iterable<T>,
         separator: String = ", ",
         crossinline block: ExpressionBuilder.(T) -> Unit
     ) {
-        impl.add(CodeBlock.join(seq.map { buildExpression { block(it) } }.asIterable(), separator))
+        impl.add(CodeBlock.join(seq.map { buildExpression { block(it) } }, separator))
     }
 
     fun String.formatCode(vararg args: Any): CodeBlock {
