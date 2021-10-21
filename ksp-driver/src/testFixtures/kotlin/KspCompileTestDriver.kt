@@ -7,6 +7,7 @@ import com.tschuchort.compiletesting.symbolProcessorProviders
 import com.yandex.daggerlite.testing.CompileTestDriver
 import com.yandex.daggerlite.testing.CompileTestDriverBase
 import java.io.File
+import java.net.URLClassLoader
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.expect
@@ -16,7 +17,11 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         expect(KotlinCompilation.ExitCode.COMPILATION_ERROR) {
             val compilation = setupFirstRoundCompilation()
             val result = compilation.compile()
-            KspCompilationResultClause(compilation, result).block()
+            KspCompilationResultClause(
+                generation = compilation,
+                result = result,
+                compiledClassesLoader = null,
+            ).block()
             result.exitCode
         }
     }
@@ -26,7 +31,11 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         try {
             expect(KotlinCompilation.ExitCode.OK) {
                 val result = firstRound.compile()
-                KspCompilationResultClause(firstRound, result).apply {
+                KspCompilationResultClause(
+                    generation = firstRound,
+                    result = result,
+                    compiledClassesLoader = null,
+                ).apply {
                     withNoErrors()
                     block()
                 }
@@ -39,7 +48,15 @@ class KspCompileTestDriver : CompileTestDriverBase() {
                     inheritClassPath = true
                 }
                 val result = secondRound.compile()
-                KspCompilationResultClause(secondRound, result).apply {
+                KspCompilationResultClause(
+                    generation = null,
+                    result = result,
+                    compiledClassesLoader = URLClassLoader(
+                        arrayOf(secondRound.classesDir.toURI().toURL()),
+                        KspCompileTestDriver::class.java.classLoader
+                    ),
+                ).apply {
+                    block()
                     withNoErrors()
                 }
                 result.exitCode
@@ -59,8 +76,9 @@ class KspCompileTestDriver : CompileTestDriverBase() {
     }
 
     private inner class KspCompilationResultClause(
-        private val compilation: KotlinCompilation,
+        private val generation: KotlinCompilation?,
         private val result: KotlinCompilation.Result,
+        private val compiledClassesLoader: ClassLoader?,
     ) : CompileTestDriver.CompilationResultClause {
         override fun withErrorContaining(message: String) {
             assertContains(result.kspMessages(), Message(Message.Kind.ERROR, message))
@@ -79,14 +97,20 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         }
 
         override fun generatesJavaSources(name: String) {
-            assertContains(
-                compilation.kspSourcesDir
-                    .resolve("java")
-                    .resolve(name.substringBeforeLast('.').replace('.', '/'))
-                    .listFiles()
-                    ?.map { it.name } ?: emptyList(),
-                "${name.substringAfterLast('.')}.java",
-            )
+            if (generation != null) {
+                assertContains(
+                    generation.kspSourcesDir
+                        .resolve("java")
+                        .resolve(name.substringBeforeLast('.').replace('.', '/'))
+                        .listFiles()
+                        ?.map { it.name } ?: emptyList(),
+                    "${name.substringAfterLast('.')}.java",
+                )
+            }
+        }
+
+        override fun inspectGeneratedClass(name: String, callback: (Class<*>) -> Unit) {
+            compiledClassesLoader?.let { callback(it.loadClass(name)) }
         }
     }
 }

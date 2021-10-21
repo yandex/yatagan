@@ -7,6 +7,7 @@ interface CompileTestDriver : SourceSet {
         fun withNoWarnings()
         fun withNoErrors()
         fun generatesJavaSources(name: String)
+        fun inspectGeneratedClass(name: String, callback: (Class<*>) -> Unit)
     }
 
     fun givenSourceSet(block: SourceSet.() -> Unit): SourceSet
