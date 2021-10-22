@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.jap
 
 import com.yandex.daggerlite.core.AliasBinding
 import com.yandex.daggerlite.core.BaseBinding
@@ -60,4 +60,6 @@ class JavaxModuleModel(
 
         this.isInstanceRequired = isInstanceRequired
     }
+
+    override fun toString() = name.toString()
 }

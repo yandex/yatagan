@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.jap
 
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.ClassNameModel
@@ -13,6 +13,7 @@ class JavaxNodeModel(
 ) : NodeModel() {
 
     override val qualifier = type.asElement().qualify<javax.inject.Qualifier>()
+    override val name: ClassNameModel = classNameModel(type)
 
     override fun implicitBinding(): Binding? {
         if (qualifier != null)
@@ -32,5 +33,5 @@ class JavaxNodeModel(
             }
     }
 
-    override val name: ClassNameModel = classNameModel(type)
+    override fun toString() = buildString { qualifier?.let { append("$it ") }; append(name) }
 }

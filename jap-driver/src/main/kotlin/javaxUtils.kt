@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.jap
 
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
 import com.yandex.daggerlite.generator.Language
@@ -7,7 +7,7 @@ import javax.annotation.processing.Filer
 
 fun ComponentGeneratorFacade.generateFile(filer: Filer) {
     if (targetLanguage != Language.Java)
-        throw RuntimeException("Kapt driver supports only java files generating")
+        throw RuntimeException("Jap driver supports only java files generating")
 
     val canonicalName = "$targetPackageName.$targetClassName"
     val file = filer.createSourceFile(canonicalName)

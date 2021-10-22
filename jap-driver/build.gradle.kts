@@ -31,11 +31,5 @@ dependencies {
     implementation(project(":generator"))
     implementation(kotlin("stdlib"))
 
-
     implementation("com.google.auto:auto-common:${Versions.AutoCommon}")
-    implementation("com.google.auto.service:auto-service-annotations:${Versions.AutoService}")
-    implementation("com.google.auto.service:auto-service:${Versions.AutoService}")
-
-    testImplementation(kotlin("test"))
-    kaptTest(project(":kapt"))
 }

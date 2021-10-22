@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.jap
 
 import com.google.auto.common.AnnotationMirrors
 import dagger.Component

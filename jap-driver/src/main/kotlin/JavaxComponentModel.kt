@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.jap
 
 import com.yandex.daggerlite.core.ClassNameModel
 import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
@@ -77,4 +77,6 @@ class JavaxComponentModel(
             }
         }
     }
+
+    override fun toString() = name.toString()
 }

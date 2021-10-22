@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.jap
 
 import com.yandex.daggerlite.core.ClassNameModel
 import javax.lang.model.element.TypeElement

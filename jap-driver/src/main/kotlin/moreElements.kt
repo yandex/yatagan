@@ -1,6 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-package com.yandex.daggerlite.compiler
+package com.yandex.daggerlite.jap
 
 import com.google.auto.common.MoreElements
 import javax.lang.model.element.AnnotationMirror
