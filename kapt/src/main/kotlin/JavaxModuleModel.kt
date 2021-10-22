@@ -19,20 +19,27 @@ class JavaxModuleModel(
     private val element: Element,
     private val types: Types,
     private val elements: Elements,
-    ) : ModuleModel {
+) : ModuleModel {
+
+    private val declaration = element.asTypeElement()
     private val annotation = element.getAnnotationMirror<Module>()
+
     override val subcomponents: Collection<ComponentModel> =
-        annotation.typesValue("subcomponents").map{ JavaxComponentModel(it, types, elements) }.toList()
+        annotation.typesValue("subcomponents").map { JavaxComponentModel(it, types, elements) }.toList()
+
     override val name: ClassNameModel = classNameModel(element.asType())
 
-    override val bindings: Collection<BaseBinding> = run {
-        // todo: кажется так мы получим только методы объявленные внутри класса, и нужно заменить на allMethods
-        element.asTypeElement().allMethods(types, elements).mapNotNull { method ->
+    override val bindings: Collection<BaseBinding>
+    override val isInstanceRequired: Boolean
+
+    init {
+        val mayRequireInstance = with(declaration) { !isAbstract && !isKotlinObject }
+        var isInstanceRequired = false
+        bindings = declaration.allMethods(types, elements).mapNotNull { method ->
 
             when {
                 method.isAnnotatedWith<Binds>() -> AliasBinding(
                     target = JavaxNodeModel(method.returnType),
-                    // todo: проверить что один параметр, проверить что он наследуется от таргета
                     source = JavaxNodeModel(method.typeParameters.first().asType())
                 )
                 method.isAnnotatedWith<Provides>() -> ProvisionBinding(
@@ -40,12 +47,17 @@ class JavaxModuleModel(
                     scope = element.qualify<javax.inject.Scope>(),
                     provider = FunctionNameModel(
                         name,
+                        declaration.isKotlinObject,
                         method.simpleName.toString()
                     ),
-                    params = method.parameters.map { NodeModel.Dependency(JavaxNodeModel(it.asType())) }
+                    params = method.parameters.map { NodeModel.Dependency(JavaxNodeModel(it.asType())) },
+                    requiredModuleInstance = this@JavaxModuleModel.takeIf { mayRequireInstance && !method.isStatic }
+                        ?.also { isInstanceRequired = true }
                 )
                 else -> null
             }
         }
+
+        this.isInstanceRequired = isInstanceRequired
     }
 }

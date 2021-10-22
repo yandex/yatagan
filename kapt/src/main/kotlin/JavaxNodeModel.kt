@@ -26,7 +26,8 @@ class JavaxNodeModel(
                     target = this@JavaxNodeModel,
                     scope = typeElement.qualify<javax.inject.Scope>(),
                     provider = ConstructorNameModel(classNameModel(type)),
-                    params = it.parameters.map { Dependency(JavaxNodeModel(type)) }
+                    params = it.parameters.map { Dependency(JavaxNodeModel(type)) },
+                    requiredModuleInstance = null
                 )
             }
     }

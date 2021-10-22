@@ -46,7 +46,7 @@ class JavaxComponentModel(
         }
 
         EntryPoint(
-            FunctionNameModel(name, method.simpleName.toString()),
+            FunctionNameModel(name, isOwnerKotlinObject = false, method.simpleName.toString()),
             Dependency(JavaxNodeModel(entryType), kind)
         )
     }.toSet()

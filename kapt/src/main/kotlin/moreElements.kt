@@ -40,3 +40,16 @@ inline fun <reified T : Annotation> Element.isAnnotatedWith() =
     MoreElements.getAnnotationMirror(this, T::class.java).isPresent
 
 val Element.isAbstract get() = Modifier.ABSTRACT in modifiers
+
+val Element.isPublic get() = Modifier.PUBLIC in modifiers
+
+val Element.isStatic get() = Modifier.STATIC in modifiers
+
+val TypeElement.isKotlin: Boolean get() = annotationMirrors.any { it.annotationType.toString() == "kotlin.Metadata" }
+
+// todo: вероятно тут стоит использовать библиотеку `org.jetbrains.kotlinx:kotlinx-metadata-jvm`, чтобы избежать возможных ошибок с выявлением котлин обжекта.
+val TypeElement.isKotlinObject
+    get() = isKotlin && ElementFilter.fieldsIn(enclosedElements).any { field ->
+        field.isPublic && field.isStatic && field.asType().asTypeElement() == this
+                && field.simpleName.contentEquals("INSTANCE")
+    }
