@@ -27,8 +27,8 @@ fun TypeElement.types() = ElementFilter.typesIn(enclosedElements)
 
 fun TypeElement.constructors(): List<ExecutableElement> = ElementFilter.constructorsIn(enclosedElements)
 
-fun TypeElement.allMethods(typeUtils: Types, elementUtils: Elements): Set<ExecutableElement> =
-    MoreElements.getLocalAndInheritedMethods(this, typeUtils, elementUtils)
+fun TypeElement.allMethods(typeUtils: Types, elementUtils: Elements): Collection<ExecutableElement> =
+    MoreElements.getLocalAndInheritedMethods(this, typeUtils, elementUtils) + this.methods().filter { it.isStatic }
 
 inline fun <reified T : Annotation> Element.getAnnotationMirror(): AnnotationMirror =
     MoreElements.getAnnotationMirror(this, T::class.java).get()
