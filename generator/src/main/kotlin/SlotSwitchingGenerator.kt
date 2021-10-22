@@ -16,8 +16,6 @@ internal class SlotSwitchingGenerator(
     private val boundSlots = mutableMapOf<Binding, Int>()
     private var nextFreeSlot = 0
 
-    val factoryInstance get() = "this"  // component itself is a factory
-
     fun requestSlot(forBinding: Binding): Int {
         return boundSlots.getOrPut(forBinding) { nextFreeSlot++ }
     }

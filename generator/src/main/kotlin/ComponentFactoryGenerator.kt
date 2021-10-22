@@ -2,7 +2,11 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
+import com.yandex.daggerlite.core.InstanceBinding
+import com.yandex.daggerlite.core.ModuleInstanceFactoryInput
+import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -17,10 +21,25 @@ internal class ComponentFactoryGenerator(
     private val generators: Generators,
     fieldsNs: Namespace,
 ) : ComponentGenerator.Contributor {
-    private val inputFieldNames: Map<ComponentFactoryModel.Input, String> =
-        (thisGraph.model.factory?.inputs?.asSequence() ?: emptySequence()).associateWith { input ->
-            fieldsNs.name(input.paramName)
+    private val instanceFieldNames = hashMapOf<InstanceBinding, String>()
+    private val moduleInstanceFieldNames = hashMapOf<ModuleModel, String>()
+    private val componentInstanceFieldNames = hashMapOf<ComponentDependencyFactoryInput, String>()
+    private val inputFieldNames = mutableMapOf<ComponentFactoryModel.Input, String>()
+
+    init {
+        thisGraph.model.factory?.let { factory ->
+            for (input in factory.inputs) {
+                val fieldName = fieldsNs.name(input.paramName)
+                inputFieldNames[input] = fieldName
+                when (input) {
+                    is ComponentDependencyFactoryInput -> componentInstanceFieldNames[input] = fieldName
+                    is InstanceBinding -> instanceFieldNames[input] = fieldName
+                    is ModuleInstanceFactoryInput -> moduleInstanceFieldNames[input.target] = fieldName
+                }
+            }
         }
+    }
+
     private val superComponentFieldNames: Map<BindingGraph, String> =
         thisGraph.usedParents.associateWith { graph: BindingGraph ->
             fieldsNs.name(graph.model.name)
@@ -28,8 +47,10 @@ internal class ComponentFactoryGenerator(
 
     val implName: ClassName = componentImplName.nestedClass("ComponentFactoryImpl")
 
-    fun fieldNameFor(input: ComponentFactoryModel.Input) = checkNotNull(inputFieldNames[input])
+    fun fieldNameFor(input: InstanceBinding) = checkNotNull(instanceFieldNames[input])
+    fun fieldNameFor(input: ComponentDependencyFactoryInput) = checkNotNull(componentInstanceFieldNames[input])
     fun fieldNameFor(graph: BindingGraph) = checkNotNull(superComponentFieldNames[graph])
+    fun fieldNameFor(module: ModuleModel) = checkNotNull(moduleInstanceFieldNames[module])
 
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
         val isSubComponentFactory = !thisGraph.model.isRoot
@@ -47,7 +68,7 @@ internal class ComponentFactoryGenerator(
                 factory.inputs.forEach { input ->
                     val name = paramsNs.name(input.paramName)
                     parameter(input.target.typeName(), name)
-                    +"this.${fieldNameFor(input)} = $name"
+                    +"this.${inputFieldNames[input]} = $name"
                 }
                 thisGraph.usedParents.forEach { graph ->
                     val name = paramsNs.name(graph.model.name)
@@ -58,7 +79,7 @@ internal class ComponentFactoryGenerator(
             nestedType {
                 buildClass(implName) {
                     modifiers(PRIVATE, FINAL, STATIC)
-                    implements(factory.name.asTypeName())
+                    implements(factory.typeName())
 
                     val usedParentsParamNames = arrayListOf<String>()
                     if (isSubComponentFactory) {
@@ -84,12 +105,12 @@ internal class ComponentFactoryGenerator(
                         }
                         +buildExpression {
                             +"return new %T(".formatCode(componentImplName)
-                            join(factory.inputs.asSequence()) { +it.paramName }
+                            join(factory.inputs) { +it.paramName }
                             if (usedParentsParamNames.isNotEmpty()) {
                                 if (factory.inputs.isNotEmpty()) {
                                     +", "
                                 }
-                                join(usedParentsParamNames.asSequence()) { +it }
+                                join(usedParentsParamNames) { +it }
                             }
                             +")"
                         }

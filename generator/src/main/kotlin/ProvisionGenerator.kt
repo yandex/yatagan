@@ -115,16 +115,17 @@ internal class ProvisionGenerator(
                 +"$component.${factory.fieldNameFor(binding)}"
             }
             is ProvisionBinding -> {
-                // TODO: rework call and buildExpression mess here.
-                call(binding.provider, binding.params.asSequence().map { dependency ->
-                    buildExpression {
-                        generateAccess(this, dependency)
-                    }
-                })
+                generateCall(
+                    name = binding.provider,
+                    arguments = binding.params,
+                    instance = binding.requiredModuleInstance?.let { module ->
+                        generators[binding.owner].factoryGenerator.fieldNameFor(module)
+                    },
+                ) { dependency -> generateAccess(this, dependency) }
             }
             is SubComponentFactoryBinding -> {
                 +"new %T(".formatCode(generators[binding.targetGraph].factoryGenerator.implName)
-                join(binding.targetGraph.usedParents.asSequence()) { parentGraph ->
+                join(binding.targetGraph.usedParents) { parentGraph ->
                     +buildExpression {
                         generators[binding.owner].generator
                             .generateAccess(this, NodeModel.Dependency(parentGraph.model))

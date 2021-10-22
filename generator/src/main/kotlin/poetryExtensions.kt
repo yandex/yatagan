@@ -24,12 +24,13 @@ internal inline fun ClassNameModel.asClassName(
     }
     return when (simpleNames.size) {
         1 -> ClassName.get(packageName, transformName(simpleNames.first()))
-        else -> ClassName.get(packageName, simpleNames.first(), *simpleNames
-            .mapIndexed { index, name ->
-                if (index == simpleNames.lastIndex) {
-                    transformName(name)
-                } else name
-            }.drop(1).toTypedArray()
+        else -> ClassName.get(
+            packageName, simpleNames.first(), *simpleNames
+                .mapIndexed { index, name ->
+                    if (index == simpleNames.lastIndex) {
+                        transformName(name)
+                    } else name
+                }.drop(1).toTypedArray()
         )
     }
 }
@@ -63,7 +64,7 @@ internal fun ClassNameModel.asTypeName(): TypeName {
 }
 
 internal fun NodeModel.Dependency.asTypeName(): TypeName {
-    val typeName = node.name.asTypeName()
+    val typeName = node.typeName()
     return when (kind) {
         DependencyKind.Direct -> typeName
         DependencyKind.Lazy -> ParameterizedTypeName.get(Names.Lazy, typeName)
@@ -76,16 +77,27 @@ internal fun MemberCallableNameModel.functionName() = when (this) {
     is PropertyNameModel -> "get${property.capitalize()}"
 }
 
-internal fun ExpressionBuilder.call(name: CallableNameModel, arguments: Sequence<Any>) {
+internal inline fun <A> ExpressionBuilder.generateCall(
+    name: CallableNameModel,
+    arguments: Iterable<A>,
+    instance: String?,
+    crossinline argumentBuilder: ExpressionBuilder.(A) -> Unit,
+) {
     when (name) {
         is ConstructorNameModel -> +"new %T(".formatCode(name.type.asTypeName())
-        is MemberCallableNameModel -> +"%T.%N(".formatCode(
-            name.ownerName.asTypeName(),
-            name.functionName(),
-        )
+        is MemberCallableNameModel -> {
+            if (instance != null) {
+                +"$instance.%N(".formatCode(name.functionName())
+            } else {
+                +"%T${if (name.isOwnerKotlinObject) ".INSTANCE" else ""}.%N(".formatCode(
+                    name.ownerName.asTypeName(),
+                    name.functionName(),
+                )
+            }
+        }
     }
-    join(arguments.asSequence()) { arg ->
-        +"%L".formatCode(arg)
+    join(arguments) { arg ->
+        argumentBuilder(arg)
     }
     +")"
 }

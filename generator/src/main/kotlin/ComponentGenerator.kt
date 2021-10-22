@@ -77,7 +77,7 @@ internal class ComponentGenerator(
     }
 
     fun generate(): TypeSpec = buildClass(implName) {
-        val componentInterface = graph.model.name.asTypeName()
+        val componentInterface = graph.model.typeName()
 
         annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
         modifiers(FINAL)
