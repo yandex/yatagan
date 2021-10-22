@@ -204,5 +204,27 @@ class CoreBindingsTest(
             withNoWarnings()
         }
     }
+
+    @Test(timeout = 10_000)
+    fun `basic component - cyclic reference with Provider edge`() {
+        useSourceSet(classes)
+        useSourceSet(apiImpl)
+
+        givenJavaSource("test.Classes", """
+        class MyClassA { public @Inject MyClassA(MyClassB dep) {} }
+        class MyClassB { public @Inject MyClassB(Provider<MyClassA> dep) {} }
+        """)
+        givenJavaSource("test.TestComponent", """
+            @Component @Singleton
+            public interface TestComponent {
+                MyClassA get();
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
 }
 

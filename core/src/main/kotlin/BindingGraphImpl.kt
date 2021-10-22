@@ -72,6 +72,7 @@ internal class BindingGraphImpl(
             materializationQueue.add(entryPoint.dependency)
         }
 
+        val seenBindings = hashSetOf<Binding>()
         while (materializationQueue.isNotEmpty()) {
             val dependency = materializationQueue.removeFirst()
             val localBinding = materialize(dependency)
@@ -83,6 +84,9 @@ internal class BindingGraphImpl(
                 }
                 // No need to add inherited binding's dependencies
             } else {
+                if (!seenBindings.add(localBinding)) {
+                    continue
+                }
                 when (localBinding) {
                     is ProvisionBinding -> {
                         materializationQueue += localBinding.params
