@@ -42,7 +42,7 @@ abstract class NodeModel : ClassBackedModel {
             Direct,
 
             /**
-             * [dagger.Lazy]-wrapped type is requested.
+             * [com.yandex.daggerlite.Lazy]-wrapped type is requested.
              */
             Lazy,
 

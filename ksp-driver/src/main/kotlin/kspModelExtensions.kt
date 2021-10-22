@@ -7,6 +7,7 @@ import com.google.devtools.ksp.symbol.KSFunction
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.daggerlite.Lazy
 import com.yandex.daggerlite.core.ClassNameModel
 import com.yandex.daggerlite.core.ConstructorNameModel
 import com.yandex.daggerlite.core.FunctionNameModel
@@ -15,7 +16,6 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.NodeModel.Dependency.Kind
 import com.yandex.daggerlite.core.PropertyNameModel
 import com.yandex.daggerlite.core.ProvisionBinding
-import dagger.Lazy
 import javax.inject.Provider
 import javax.inject.Scope
 

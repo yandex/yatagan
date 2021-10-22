@@ -11,7 +11,7 @@ class ModuleInstanceFactoryInput(
 ) : ComponentFactoryModel.Input
 
 /**
- * A [dagger.Binds] binding.
+ * A [com.yandex.daggerlite.Binds] binding.
  * Sort of fictional binding, that must be resolved into some real [Binding].
  */
 class AliasBinding(
@@ -25,7 +25,7 @@ class AliasBinding(
 sealed class Binding : BaseBinding()
 
 /**
- * A [dagger.Provides] binding.
+ * A [com.yandex.daggerlite.Provides] binding.
  */
 class ProvisionBinding(
     override val target: NodeModel,
@@ -45,7 +45,7 @@ class ProvisionBinding(
 }
 
 /**
- * A [dagger.BindsInstance] binding.
+ * A [com.yandex.daggerlite.BindsInstance] binding.
  * Introduced into a graph as [ComponentFactoryModel.Input].
  */
 class InstanceBinding(

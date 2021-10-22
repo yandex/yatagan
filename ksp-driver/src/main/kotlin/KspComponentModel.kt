@@ -5,6 +5,8 @@ import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.daggerlite.BindsInstance
+import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.core.ClassNameModel
 import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
@@ -12,8 +14,6 @@ import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.ModuleInstanceFactoryInput
 import com.yandex.daggerlite.core.ProvisionBinding
-import dagger.BindsInstance
-import dagger.Component
 import javax.inject.Scope
 
 data class KspComponentModel(

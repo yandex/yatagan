@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core
 
 /**
- * Represents @[dagger.Component] annotated class - Component.
+ * Represents @[com.yandex.daggerlite.Component] annotated class - Component.
  */
 abstract class ComponentModel : NodeModel() {
     /**

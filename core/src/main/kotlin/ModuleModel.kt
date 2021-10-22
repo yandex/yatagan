@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core
 
 /**
- * Represents [dagger.Module].
+ * Represents [com.yandex.daggerlite.Module].
  */
 interface ModuleModel : ClassBackedModel {
     /**
