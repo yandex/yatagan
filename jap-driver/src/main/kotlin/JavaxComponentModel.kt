@@ -58,21 +58,22 @@ class JavaxComponentModel(
         object : ComponentFactoryModel() {
             override val name: ClassNameModel = classNameModel(declaration)
             override val createdComponent: ComponentModel = this@JavaxComponentModel
-            override val inputs: Collection<Input> = createMethod.parameters.map { param ->
+            override val inputs: Collection<Input> = createMethod.parameters.map { variable ->
+                val param = variable.asType()
                 when {
-                    param.isAnnotatedWith<Component>() -> ComponentDependencyFactoryInput(
+                    param.asTypeElement().isAnnotatedWith<Component>() -> ComponentDependencyFactoryInput(
                         JavaxComponentModel(param.asTypeElement(), types, elements),
-                        param.simpleName.toString()
+                        param.asTypeElement().simpleName.toString()
                     )
-                    param.isAnnotatedWith<Module>() -> ModuleInstanceFactoryInput(
-                        JavaxModuleModel(param.asTypeElement(), types, elements),
-                        param.simpleName.toString()
+                    param.asTypeElement().isAnnotatedWith<Module>() -> ModuleInstanceFactoryInput(
+                        JavaxModuleModel(param.asElement(), types, elements),
+                        param.asTypeElement().simpleName.toString()
                     )
-                    param.isAnnotatedWith<BindsInstance>() -> InstanceBinding(
-                        JavaxNodeModel(param.asType()),
-                        param.simpleName.toString()
+                    variable.isAnnotatedWith<BindsInstance>() -> InstanceBinding(
+                        JavaxNodeModel(param),
+                        param.asTypeElement().simpleName.toString()
                     )
-                    else -> throw IllegalStateException("invalid factory method parameter")
+                    else -> throw IllegalStateException("Invalid factory method parameter")
                 }
             }
         }

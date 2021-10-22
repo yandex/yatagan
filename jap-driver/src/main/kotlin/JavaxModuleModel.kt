@@ -40,7 +40,7 @@ class JavaxModuleModel(
             when {
                 method.isAnnotatedWith<Binds>() -> AliasBinding(
                     target = JavaxNodeModel(method.returnType),
-                    source = JavaxNodeModel(method.typeParameters.first().asType())
+                    source = JavaxNodeModel(method.parameters[0].asType())
                 )
                 method.isAnnotatedWith<Provides>() -> ProvisionBinding(
                     target = JavaxNodeModel(method.returnType),
@@ -62,4 +62,8 @@ class JavaxModuleModel(
     }
 
     override fun toString() = name.toString()
+
+    override fun equals(other: Any?) = (other as?  JavaxModuleModel)?.name == name
+
+    override fun hashCode() = name.hashCode()
 }
