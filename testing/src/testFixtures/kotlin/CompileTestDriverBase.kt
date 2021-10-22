@@ -5,7 +5,7 @@ import com.tschuchort.compiletesting.SourceFile
 abstract class CompileTestDriverBase : CompileTestDriver {
     private val sourceSet = SourceSetImpl()
 
-    final override val sourceFiles: Collection<SourceFile>
+    final override val sourceFiles: List<SourceFile>
         get() = sourceSet.sourceFiles
 
     final override fun givenJavaSource(name: String, source: String) {

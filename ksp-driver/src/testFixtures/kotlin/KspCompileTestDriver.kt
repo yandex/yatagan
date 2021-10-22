@@ -71,7 +71,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
     }
 
     private fun setupFirstRoundCompilation() = KotlinCompilation().apply {
-        sources = sourceFiles.toList()
+        sources = sourceFiles
         inheritClassPath = true
         javacArguments += "-Xdiags:verbose"
         symbolProcessorProviders = listOf(DaggerLiteProcessorProvider())

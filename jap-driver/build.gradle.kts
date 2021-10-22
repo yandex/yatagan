@@ -1,4 +1,5 @@
 plugins {
+    id("java-test-fixtures")
     kotlin("jvm")
     kotlin("kapt")
 }
@@ -31,5 +32,8 @@ dependencies {
     implementation(project(":generator"))
     implementation(kotlin("stdlib"))
 
-    implementation("com.google.auto:auto-common:${Versions.AutoCommon}")
+    api("com.google.auto:auto-common:${Versions.AutoCommon}")
+
+    testFixturesImplementation(testFixtures(project(":testing")))
+    testFixturesImplementation(kotlin("test"))
 }

@@ -4,7 +4,7 @@ import com.tschuchort.compiletesting.SourceFile
 import org.intellij.lang.annotations.Language
 
 internal class SourceSetImpl : SourceSet {
-    override val sourceFiles: MutableCollection<SourceFile> = arrayListOf()
+    override val sourceFiles: MutableList<SourceFile> = arrayListOf()
 
     override fun givenJavaSource(name: String, @Language("java") source: String) {
         sourceFiles += SourceFile.java(
