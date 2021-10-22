@@ -89,7 +89,7 @@ internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
 
 internal fun ClassNameModel(type: KSType): ClassNameModel {
     return ClassNameModel(type.declaration as KSClassDeclaration)
-        .copy(typeArguments = type.arguments.map { ClassNameModel(it.type!!.resolve()) })
+        .withArguments(type.arguments.map { ClassNameModel(it.type!!.resolve()) })
 }
 
 internal fun FunctionNameModel(owner: KSType, function: KSFunctionDeclaration): FunctionNameModel {

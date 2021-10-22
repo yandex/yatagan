@@ -5,13 +5,19 @@ import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ProvisionBinding
 
 // MAYBE: this most likely requires generalization to support non-class types: builtin types, arrays, etc..
-data class ClassNameModel(
+class ClassNameModel(
     val packageName: String,
     val simpleNames: List<String>,
     val typeArguments: List<ClassNameModel>,
 ) : ClassBackedModel.Id {
     init {
         require(simpleNames.isNotEmpty()) { "class with no name?" }
+    }
+    private val precomputedHash = run {
+        var result = packageName.hashCode()
+        result = 31 * result + simpleNames.hashCode()
+        result = 31 * result + typeArguments.hashCode()
+        result
     }
 
     override fun toString() = buildString {
@@ -23,6 +29,21 @@ data class ClassNameModel(
             append('>')
         }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as ClassNameModel
+        if (precomputedHash != other.precomputedHash) return false
+        if (simpleNames != other.simpleNames) return false
+        if (typeArguments != other.typeArguments) return false
+        if (packageName != other.packageName) return false
+        return true
+    }
+
+    override fun hashCode(): Int = precomputedHash
+
+    fun withArguments(typeArguments: List<ClassNameModel>) = ClassNameModel(packageName, simpleNames, typeArguments)
 }
 
 sealed interface CallableNameModel : ProvisionBinding.ProvisionDescriptor
