@@ -8,14 +8,14 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.Lazy
-import com.yandex.daggerlite.core.ClassNameModel
-import com.yandex.daggerlite.core.ConstructorNameModel
-import com.yandex.daggerlite.core.FunctionNameModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.NodeModel.Dependency.Kind
-import com.yandex.daggerlite.core.PropertyNameModel
 import com.yandex.daggerlite.core.ProvisionBinding
+import com.yandex.daggerlite.generator.ClassNameModel
+import com.yandex.daggerlite.generator.ConstructorNameModel
+import com.yandex.daggerlite.generator.FunctionNameModel
+import com.yandex.daggerlite.generator.PropertyNameModel
 import javax.inject.Provider
 import javax.inject.Scope
 
@@ -28,7 +28,7 @@ fun ProvisionBinding(
     requiredModuleInstance: ModuleModel?,
 ) = ProvisionBinding(
     target = target,
-    provider = if (methodDeclaration.isConstructor()) {
+    descriptor = if (methodDeclaration.isConstructor()) {
         ConstructorNameModel(ClassNameModel(ownerType))
     } else FunctionNameModel(ownerType, methodDeclaration),
     params = method.parameterTypes
@@ -47,7 +47,7 @@ fun ProvisionBinding(
     requiredModuleInstance: ModuleModel?,
 ) = ProvisionBinding(
     target = target,
-    provider = PropertyNameModel(ownerType, propertyDeclaration),
+    descriptor = PropertyNameModel(ownerType, propertyDeclaration),
     params = emptyList(),
     scope = KspAnnotationDescriptor.describeIfAny<Scope>(propertyDeclaration),
     requiredModuleInstance = requiredModuleInstance,

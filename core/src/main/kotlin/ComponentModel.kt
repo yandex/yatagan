@@ -39,11 +39,12 @@ abstract class ComponentModel : NodeModel() {
      * Represents a function/property exposed from a component interface.
      * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
      */
-    data class EntryPoint(
-        val getter: MemberCallableNameModel,
-        val dependency: Dependency,
-    ) {
-        override fun toString() = "$getter -> $dependency"
+    interface EntryPoint {
+        val id: Id
+
+        val dependency: Dependency
+
+        interface Id
     }
 
     final override val qualifier: Nothing? get() = null

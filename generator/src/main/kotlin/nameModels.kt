@@ -1,11 +1,15 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.generator
+
+import com.yandex.daggerlite.core.ClassBackedModel
+import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.ProvisionBinding
 
 // MAYBE: this most likely requires generalization to support non-class types: builtin types, arrays, etc..
 data class ClassNameModel(
     val packageName: String,
     val simpleNames: List<String>,
     val typeArguments: List<ClassNameModel>,
-) {
+) : ClassBackedModel.Id {
     init {
         require(simpleNames.isNotEmpty()) { "class with no name?" }
     }
@@ -21,9 +25,9 @@ data class ClassNameModel(
     }
 }
 
-sealed interface CallableNameModel
+sealed interface CallableNameModel : ProvisionBinding.ProvisionDescriptor
 
-sealed interface MemberCallableNameModel : CallableNameModel {
+sealed interface MemberCallableNameModel : CallableNameModel, ComponentModel.EntryPoint.Id {
     val ownerName: ClassNameModel
     val isOwnerKotlinObject: Boolean
 }
@@ -49,3 +53,15 @@ data class PropertyNameModel(
 ) : MemberCallableNameModel {
     override fun toString() = "$ownerName.$property:"
 }
+
+internal val ClassBackedModel.name: ClassNameModel
+    get() = id as ClassNameModel
+
+internal val ComponentModel.EntryPoint.getter: MemberCallableNameModel
+    get() = id as MemberCallableNameModel
+
+internal val ProvisionBinding.provider: CallableNameModel
+    get() = descriptor as CallableNameModel
+
+internal operator fun ComponentModel.EntryPoint.component1() = getter
+internal operator fun ComponentModel.EntryPoint.component2() = dependency

@@ -30,7 +30,7 @@ sealed class Binding : BaseBinding()
 class ProvisionBinding(
     override val target: NodeModel,
     val scope: Scope?,
-    val provider: CallableNameModel,
+    val descriptor: ProvisionDescriptor,
     val params: Collection<NodeModel.Dependency>,
     val requiredModuleInstance: ModuleModel?,
 ) : Binding() {
@@ -42,6 +42,8 @@ class ProvisionBinding(
         override fun equals(other: Any?): Boolean
         override fun hashCode(): Int
     }
+
+    interface ProvisionDescriptor
 }
 
 /**
