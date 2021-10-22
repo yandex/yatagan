@@ -13,6 +13,7 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.PropertyNameModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.Names
+import java.util.Locale
 
 internal typealias DependencyKind = NodeModel.Dependency.Kind
 
@@ -100,4 +101,8 @@ internal inline fun <A> ExpressionBuilder.generateCall(
         argumentBuilder(arg)
     }
     +")"
+}
+
+internal fun String.capitalize(): String {
+    return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
 }
