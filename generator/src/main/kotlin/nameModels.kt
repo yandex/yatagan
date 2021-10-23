@@ -2,6 +2,7 @@ package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.core.ClassBackedModel
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
 
 // MAYBE: this most likely requires generalization to support non-class types: builtin types, arrays, etc..
@@ -83,6 +84,11 @@ internal val ComponentModel.EntryPoint.getter: MemberCallableNameModel
 
 internal val ProvisionBinding.provider: CallableNameModel
     get() = descriptor as CallableNameModel
+
+class NamedEntryPoint(
+    override val id: MemberCallableNameModel,
+    override val dependency: NodeModel.Dependency,
+) : ComponentModel.EntryPoint
 
 internal operator fun ComponentModel.EntryPoint.component1() = getter
 internal operator fun ComponentModel.EntryPoint.component2() = dependency

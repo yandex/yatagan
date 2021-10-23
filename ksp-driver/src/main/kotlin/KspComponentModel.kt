@@ -14,7 +14,7 @@ import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.ModuleInstanceFactoryInput
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.generator.ClassNameModel
-import com.yandex.daggerlite.generator.MemberCallableNameModel
+import com.yandex.daggerlite.generator.NamedEntryPoint
 import javax.inject.Scope
 
 class KspComponentModel(
@@ -78,7 +78,7 @@ class KspComponentModel(
     override val entryPoints: Set<EntryPoint> by lazy {
         buildSet {
             for (function in componentDeclaration.getAllFunctions().filter { it.isAbstract }) {
-                this += KspEntryPoint(
+                this += NamedEntryPoint(
                     dependency = resolveNodeDependency(
                         type = function.returnType?.resolve() ?: continue,
                         forQualifier = function,
@@ -87,18 +87,13 @@ class KspComponentModel(
                 )
             }
             for (prop in componentDeclaration.getAllProperties().filter { it.isAbstract() && !it.isMutable }) {
-                this += KspEntryPoint(
+                this += NamedEntryPoint(
                     dependency = resolveNodeDependency(type = prop.type.resolve(), forQualifier = prop),
                     id = PropertyNameModel(componentDeclaration, prop),
                 )
             }
         }
     }
-
-    private data class KspEntryPoint(
-        override val id: MemberCallableNameModel,
-        override val dependency: Dependency,
-    ) : EntryPoint
 
     companion object {
         fun canRepresent(declaration: KSClassDeclaration): Boolean {

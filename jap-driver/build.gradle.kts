@@ -1,31 +1,9 @@
 plugins {
-    id("java-test-fixtures")
     kotlin("jvm")
     kotlin("kapt")
+    id("java-test-fixtures")
+    id("maven-publish")
 }
-
-group = project.ext["group"] as String
-version = project.ext["version"] as String
-
-kotlin {
-    jvmToolchain {
-        (this as JavaToolchainSpec).set11Jdk()
-    }
-
-    sourceSets.test {
-        kotlin.srcDir("${project.buildDir}/generated/kapt/test/kotlin")
-    }
-}
-
-java {
-    toolchain {
-        set11Jdk()
-    }
-    sourceSets.test {
-        java.srcDir("${project.buildDir}/generated/kapt/test/java")
-    }
-}
-
 
 dependencies {
     implementation(project(":core"))

@@ -1,13 +1,13 @@
 package com.yandex.daggerlite.jap
 
-import com.yandex.daggerlite.core.ClassNameModel
+import com.yandex.daggerlite.generator.ClassNameModel
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 
 fun classNameModel(type: TypeMirror): ClassNameModel {
     val typeArgs = (type as? DeclaredType)?.typeArguments?.map { classNameModel(it) } ?: emptyList()
-    return classNameModel(type.asTypeElement()).copy(typeArguments = typeArgs)
+    return classNameModel(type.asTypeElement()).withArguments(typeArgs)
 }
 
 fun classNameModel(type: TypeElement): ClassNameModel {

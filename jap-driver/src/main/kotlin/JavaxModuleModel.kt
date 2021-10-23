@@ -1,16 +1,16 @@
 package com.yandex.daggerlite.jap
 
+import com.yandex.daggerlite.Binds
+import com.yandex.daggerlite.Module
+import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.core.AliasBinding
 import com.yandex.daggerlite.core.BaseBinding
-import com.yandex.daggerlite.core.ClassNameModel
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.FunctionNameModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
-import dagger.Binds
-import dagger.Module
-import dagger.Provides
+import com.yandex.daggerlite.generator.ClassNameModel
+import com.yandex.daggerlite.generator.FunctionNameModel
 import javax.lang.model.element.Element
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
@@ -19,7 +19,7 @@ class JavaxModuleModel(
     private val element: Element,
     private val types: Types,
     private val elements: Elements,
-) : ModuleModel {
+) : ModuleModel() {
 
     private val declaration = element.asTypeElement()
     private val annotation = element.getAnnotationMirror<Module>()
@@ -27,7 +27,7 @@ class JavaxModuleModel(
     override val subcomponents: Collection<ComponentModel> =
         annotation.typesValue("subcomponents").map { JavaxComponentModel(it, types, elements) }.toList()
 
-    override val name: ClassNameModel = classNameModel(element.asType())
+    override val id: ClassNameModel = classNameModel(element.asType())
 
     override val bindings: Collection<BaseBinding>
     override val isInstanceRequired: Boolean
@@ -45,10 +45,10 @@ class JavaxModuleModel(
                 method.isAnnotatedWith<Provides>() -> ProvisionBinding(
                     target = JavaxNodeModel(method.returnType),
                     scope = element.qualify<javax.inject.Scope>(),
-                    provider = FunctionNameModel(
-                        name,
-                        declaration.isKotlinObject,
-                        method.simpleName.toString()
+                    descriptor = FunctionNameModel(
+                        ownerName = id,
+                        isOwnerKotlinObject = declaration.isKotlinObject,
+                        function = method.simpleName.toString()
                     ),
                     params = method.parameters.map { NodeModel.Dependency(JavaxNodeModel(it.asType())) },
                     requiredModuleInstance = this@JavaxModuleModel.takeIf { mayRequireInstance && !method.isStatic }
@@ -60,10 +60,4 @@ class JavaxModuleModel(
 
         this.isInstanceRequired = isInstanceRequired
     }
-
-    override fun toString() = name.toString()
-
-    override fun equals(other: Any?) = (other as?  JavaxModuleModel)?.name == name
-
-    override fun hashCode() = name.hashCode()
 }

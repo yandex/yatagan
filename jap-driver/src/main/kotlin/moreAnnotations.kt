@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.jap
 
 import com.google.auto.common.AnnotationMirrors
-import dagger.Component
+import com.yandex.daggerlite.Component
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.AnnotationValueVisitor

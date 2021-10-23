@@ -4,7 +4,7 @@ import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.ImmutableSetMultimap
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
-import dagger.Component
+import com.yandex.daggerlite.Component
 import javax.annotation.processing.Filer
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
