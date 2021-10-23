@@ -3,16 +3,11 @@ package com.yandex.daggerlite.generator
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
-import com.yandex.daggerlite.core.CallableNameModel
 import com.yandex.daggerlite.core.ClassBackedModel
-import com.yandex.daggerlite.core.ClassNameModel
-import com.yandex.daggerlite.core.ConstructorNameModel
-import com.yandex.daggerlite.core.FunctionNameModel
-import com.yandex.daggerlite.core.MemberCallableNameModel
 import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.PropertyNameModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.Names
+import java.util.Locale
 
 internal typealias DependencyKind = NodeModel.Dependency.Kind
 
@@ -100,4 +95,8 @@ internal inline fun <A> ExpressionBuilder.generateCall(
         argumentBuilder(arg)
     }
     +")"
+}
+
+internal fun String.capitalize(): String {
+    return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
 }

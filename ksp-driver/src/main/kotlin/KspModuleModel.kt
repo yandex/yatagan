@@ -5,19 +5,19 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.daggerlite.Binds
+import com.yandex.daggerlite.Module
+import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.core.AliasBinding
 import com.yandex.daggerlite.core.BaseBinding
-import com.yandex.daggerlite.core.ClassNameModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.ProvisionBinding
-import dagger.Binds
-import dagger.Module
-import dagger.Provides
+import com.yandex.daggerlite.generator.ClassNameModel
 
-data class KspModuleModel(
-    val type: KSType,
-) : ModuleModel {
+class KspModuleModel(
+    private val type: KSType,
+) : ModuleModel() {
 
     private val declaration = type.declaration as KSClassDeclaration
 
@@ -90,7 +90,9 @@ data class KspModuleModel(
         !declaration.isAbstract() && bindings.any { it is ProvisionBinding && it.requiredModuleInstance != null }
     }
 
-    override val name: ClassNameModel by lazy { ClassNameModel(type) }
+    override val id: ClassNameModel by lazy { ClassNameModel(type) }
+
+    override fun toString() = "Module[$id]"
 
     companion object {
         fun canRepresent(declaration: KSClassDeclaration): Boolean {

@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.testing
 
-import dagger.Lazy
+import com.yandex.daggerlite.Lazy
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized

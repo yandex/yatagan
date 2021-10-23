@@ -1,21 +1,21 @@
 package com.yandex.daggerlite.core
 
 /**
- * Represents [dagger.Module].
+ * Represents [com.yandex.daggerlite.Module].
  */
-interface ModuleModel : ClassBackedModel {
+abstract class ModuleModel : ClassBackedModel() {
     /**
      * Bindings exposed by this module.
      */
-    val bindings: Collection<BaseBinding>
+    abstract val bindings: Collection<BaseBinding>
 
     /**
      * Subcomponents installed by this module.
      */
-    val subcomponents: Collection<ComponentModel>
+    abstract val subcomponents: Collection<ComponentModel>
 
     /**
      * TODO: doc
      */
-    val isInstanceRequired: Boolean
+    abstract val isInstanceRequired: Boolean
 }

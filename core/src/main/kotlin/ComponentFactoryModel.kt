@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core
 
 /**
- * Represents [dagger.Component.Factory].
+ * Represents [com.yandex.daggerlite.Component.Factory].
  */
 abstract class ComponentFactoryModel : NodeModel() {
 

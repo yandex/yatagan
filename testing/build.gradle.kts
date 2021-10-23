@@ -3,18 +3,6 @@ plugins {
     id("java-test-fixtures")
 }
 
-kotlin {
-    jvmToolchain {
-        (this as JavaToolchainSpec).set11Jdk()
-    }
-}
-
-java {
-    toolchain {
-        set11Jdk()
-    }
-}
-
 dependencies {
     implementation(kotlin("stdlib"))
 

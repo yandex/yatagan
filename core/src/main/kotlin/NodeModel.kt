@@ -7,7 +7,7 @@ package com.yandex.daggerlite.core
  *
  * Implementations must provide stable [equals]/[hashCode] implementation for correct matching.
  */
-abstract class NodeModel : ClassBackedModel {
+abstract class NodeModel : ClassBackedModel() {
     /**
      * Optional [Qualifier].
      */
@@ -42,7 +42,7 @@ abstract class NodeModel : ClassBackedModel {
             Direct,
 
             /**
-             * [dagger.Lazy]-wrapped type is requested.
+             * [com.yandex.daggerlite.Lazy]-wrapped type is requested.
              */
             Lazy,
 
@@ -56,20 +56,20 @@ abstract class NodeModel : ClassBackedModel {
     }
 
     final override fun equals(other: Any?): Boolean {
-        // FIXME: This is way too expensive for an RT implementation; allow RT to customize this behavior.
-        if (this === other) return true
-
-        other as NodeModel
-
-        if (qualifier != other.qualifier) return false
-        if (name != other.name) return false
-
-        return true
+        return this === other || other is NodeModel && (id == other.id && qualifier == other.qualifier)
     }
 
     final override fun hashCode(): Int {
         var result = qualifier?.hashCode() ?: 0
-        result = 31 * result + name.hashCode()
+        result = 31 * result + id.hashCode()
         return result
+    }
+
+    override fun toString() = buildString {
+        qualifier?.let {
+            append(qualifier)
+            append(' ')
+        }
+        append(id)
     }
 }

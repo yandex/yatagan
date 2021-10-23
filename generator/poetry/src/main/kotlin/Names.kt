@@ -10,7 +10,7 @@ object Names {
     val Character: ClassName = ClassName.get(java.lang.Character::class.java)
     val Byte: ClassName = ClassName.get(java.lang.Byte::class.java)
 
-    val Lazy: ClassName = ClassName.get(dagger.Lazy::class.java)
+    val Lazy: ClassName = ClassName.get(com.yandex.daggerlite.Lazy::class.java)
     val Provider: ClassName = ClassName.get(javax.inject.Provider::class.java)
     val AssertionError = ClassName.get(java.lang.AssertionError::class.java)
 }

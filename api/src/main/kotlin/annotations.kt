@@ -1,4 +1,4 @@
-package dagger
+package com.yandex.daggerlite
 
 import kotlin.reflect.KClass
 
