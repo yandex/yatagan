@@ -8,7 +8,7 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.memoize
 import kotlin.LazyThreadSafetyMode.NONE
 
-class KspFunctionImpl(
+internal class KspFunctionImpl(
     override val owner: TypeDeclarationLangModel,
     override val impl: KSFunctionDeclaration,
     override val isConstructor: Boolean = false,

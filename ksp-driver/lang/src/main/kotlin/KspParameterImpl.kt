@@ -5,7 +5,7 @@ import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
-class KspParameterImpl(
+internal class KspParameterImpl(
     override val impl: KSValueParameter
 ) : KspAnnotatedImpl(), ParameterLangModel {
     override val name: String

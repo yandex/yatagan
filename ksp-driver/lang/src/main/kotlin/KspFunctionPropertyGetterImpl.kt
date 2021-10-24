@@ -8,7 +8,7 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
-class KspFunctionPropertyGetterImpl(
+internal class KspFunctionPropertyGetterImpl(
     override val owner: TypeDeclarationLangModel,
     override val impl: KSPropertyDeclaration,
 ) : KspAnnotatedImpl(), FunctionLangModel {

@@ -9,7 +9,7 @@ import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.NamedTypeLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
-class KspTypeImpl(
+internal class KspTypeImpl(
     private val impl: KSType,
 ) : NamedTypeLangModel() {
     override val name: ClassNameModel by lazy {

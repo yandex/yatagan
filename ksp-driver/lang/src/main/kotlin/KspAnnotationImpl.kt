@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSAnnotation
-import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -9,12 +8,12 @@ import com.yandex.daggerlite.core.lang.memoize
 import javax.inject.Qualifier
 import javax.inject.Scope
 
-class KspAnnotationImpl(
+internal class KspAnnotationImpl(
     private val impl: KSAnnotation,
 ) : AnnotationLangModel {
     private val descriptor by lazy(LazyThreadSafetyMode.NONE) {
         buildString {
-            append(impl.annotationType.resolve().declaration.nameBestEffort)
+            append(ClassNameModel(impl.annotationType.resolve()))
             impl.arguments.joinTo(this, separator = "$") {
                 "${it.name?.asString()}=${it.value}"
             }
@@ -48,6 +47,3 @@ class KspAnnotationImpl(
 
     override fun hashCode() = descriptor.hashCode()
 }
-
-private val KSDeclaration.nameBestEffort: String
-    get() = qualifiedName?.asString() ?: (packageName.asString() + simpleName.asString())

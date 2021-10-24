@@ -13,7 +13,7 @@ import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.NamedTypeLangModel
 
-class KspTypeDeclarationImpl(
+internal class KspTypeDeclarationImpl(
     override val impl: KSClassDeclaration,
 ) : KspAnnotatedImpl(), TypeDeclarationLangModel {
     override val isAbstract: Boolean
