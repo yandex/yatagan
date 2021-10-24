@@ -1,6 +1,24 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.core.NodeModel.Dependency.Kind
+import com.yandex.daggerlite.core.AliasBinding
+import com.yandex.daggerlite.core.BaseBinding
+import com.yandex.daggerlite.core.Binding
+import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.BindingUsage
+import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
+import com.yandex.daggerlite.core.ComponentFactoryModel
+import com.yandex.daggerlite.core.ComponentInstanceBinding
+import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.DependencyComponentEntryPointBinding
+import com.yandex.daggerlite.core.InstanceBinding
+import com.yandex.daggerlite.core.MissingBindingException
+import com.yandex.daggerlite.core.ModuleInstanceFactoryInput
+import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.ProvisionBinding
+import com.yandex.daggerlite.core.SubComponentFactoryBinding
+import com.yandex.daggerlite.core.scope
+
 
 internal class BindingGraphImpl(
     override val model: ComponentModel,
@@ -32,7 +50,7 @@ internal class BindingGraphImpl(
                     yield(input)
                     // Bindings backed by the component entry-points.
                     for (entryPoint: ComponentModel.EntryPoint in input.target.entryPoints)
-                        if (entryPoint.dependency.kind == Kind.Direct)
+                        if (entryPoint.dependency.kind == NodeModel.Dependency.Kind.Direct)
                             yield(DependencyComponentEntryPointBinding(input, entryPoint))
                 }
                 // Instance binding
@@ -173,11 +191,19 @@ class BindingUsageImpl : BindingUsage {
     override var lazy: Int = 0
         private set
 
-    fun accept(dependencyKind: Kind) {
+    fun accept(dependencyKind: NodeModel.Dependency.Kind) {
         when (dependencyKind) {
-            Kind.Direct -> direct++
-            Kind.Lazy -> lazy++
-            Kind.Provider -> provider++
+            NodeModel.Dependency.Kind.Direct -> direct++
+            NodeModel.Dependency.Kind.Lazy -> lazy++
+            NodeModel.Dependency.Kind.Provider -> provider++
         }.let { /*exhaustive*/ }
     }
+}
+
+/**
+ * Creates [BindingGraph] instance given the root component.
+ */
+fun BindingGraph(root: ComponentModel): BindingGraph {
+    require(root.isRoot) { "can't use non-root component as a root of a binding graph" }
+    return BindingGraphImpl(root)
 }

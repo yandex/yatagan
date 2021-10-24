@@ -3,7 +3,7 @@ package com.yandex.daggerlite.jap
 import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.ImmutableSetMultimap
 import com.yandex.daggerlite.Component
-import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
 import com.yandex.daggerlite.generator.Language

@@ -51,7 +51,6 @@ class SubComponentFactoryBinding(
     override val target: ComponentFactoryModel,
 ) : Binding() {
     var targetGraph: BindingGraph by lateInit()
-        internal set
 }
 
 @Suppress("CanSealedSubClassBeObject")

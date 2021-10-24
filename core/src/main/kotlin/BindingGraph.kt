@@ -38,14 +38,6 @@ interface BindingGraph {
     fun resolveBinding(node: NodeModel): Binding
 }
 
-/**
- * Creates [BindingGraph] instance given the root component.
- */
-fun BindingGraph(root: ComponentModel): BindingGraph {
-    require(root.isRoot) { "can't use non-root component as a root of a binding graph" }
-    return BindingGraphImpl(root)
-}
-
 interface BindingUsage {
     val direct: Int
     val provider: Int

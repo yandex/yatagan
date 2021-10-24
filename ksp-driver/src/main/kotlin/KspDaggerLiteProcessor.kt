@@ -7,7 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.daggerlite.Component
-import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
 import com.yandex.daggerlite.ksp.lang.TypeDeclarationLangModel
