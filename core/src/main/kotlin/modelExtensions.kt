@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import kotlin.contracts.contract
 
 fun BaseBinding.isScoped(): Boolean {
@@ -7,7 +8,7 @@ fun BaseBinding.isScoped(): Boolean {
     return scope() != null
 }
 
-fun BaseBinding.scope(): ProvisionBinding.Scope? {
+fun BaseBinding.scope(): AnnotationLangModel? {
     contract { returnsNotNull() implies (this@scope is ProvisionBinding) }
     return when (this) {
         is ProvisionBinding -> scope

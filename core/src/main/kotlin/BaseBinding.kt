@@ -15,5 +15,4 @@ sealed class BaseBinding {
      * Guaranteed to be initialized only for bindings retrieved from a [BindingGraph].
      */
     var owner: BindingGraph by lateInit()
-        internal set
 }

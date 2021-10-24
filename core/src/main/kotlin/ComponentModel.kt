@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel
+
 /**
  * Represents @[com.yandex.daggerlite.Component] annotated class - Component.
  */
@@ -12,7 +15,7 @@ abstract class ComponentModel : NodeModel() {
     /**
      * A scope for bindings, that component can cache.
      */
-    abstract val scope: ProvisionBinding.Scope?
+    abstract val scope: AnnotationLangModel?
 
     /**
      * A set of component *dependencies*.
@@ -39,12 +42,12 @@ abstract class ComponentModel : NodeModel() {
      * Represents a function/property exposed from a component interface.
      * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
      */
-    interface EntryPoint {
-        val id: Id
-
-        val dependency: Dependency
-
-        interface Id
+    class EntryPoint(
+        val getter: FunctionLangModel,
+        val dependency: Dependency,
+    ) {
+        operator fun component1() = getter
+        operator fun component2() = dependency
     }
 
     final override val qualifier: Nothing? get() = null

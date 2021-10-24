@@ -1,23 +1,13 @@
 package com.yandex.daggerlite.core
 
-/**
- * An entity that is backed by a class definition.
- */
-abstract class ClassBackedModel {
-    /**
-     * Class id (name or some other entity, that can uniquely represent a class).
-     * [equals]/[hashCode] work is based on this id.
-     */
-    abstract val id: Id
+import com.yandex.daggerlite.core.lang.TypeLangModel
 
-    interface Id {
-        override fun equals(other: Any?): Boolean
-        override fun hashCode(): Int
-    }
+abstract class ClassBackedModel {
+    abstract val type: TypeLangModel
 
     override fun equals(other: Any?): Boolean {
-        return this === other || other is ClassBackedModel && id == other.id
+        return this === other || other is ClassBackedModel && type == other.type
     }
 
-    override fun hashCode() = id.hashCode()
+    override fun hashCode() = type.hashCode()
 }

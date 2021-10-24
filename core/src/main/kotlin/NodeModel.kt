@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.core.NodeModel.Dependency.Kind
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
+
 /**
  * Represents a node in a Dagger Graph.
  * Each [NodeModel] can be *resolved* via appropriate [Binding] (See [BaseBinding.target]).
@@ -9,24 +12,16 @@ package com.yandex.daggerlite.core
  */
 abstract class NodeModel : ClassBackedModel() {
     /**
-     * Optional [Qualifier].
+     * Optional qualifier.
+     * An opaque object representing additional qualifier information that can help to disambiguate nodes with the
+     * same type.
      */
-    abstract val qualifier: Qualifier?
+    abstract val qualifier: AnnotationLangModel?
 
     /**
      * self-provision binding if supported by underlying type.
      */
     abstract fun implicitBinding(): Binding?
-
-    /**
-     * An opaque object representing additional qualifier information that can help to disambiguate nodes with the
-     * same type.
-     * Must provide stable [equals]/[hashCode] implementation.
-     */
-    interface Qualifier {
-        override fun equals(other: Any?): Boolean
-        override fun hashCode(): Int
-    }
 
     /**
      * A [NodeModel] with a request [Kind].
@@ -56,12 +51,12 @@ abstract class NodeModel : ClassBackedModel() {
     }
 
     final override fun equals(other: Any?): Boolean {
-        return this === other || other is NodeModel && (id == other.id && qualifier == other.qualifier)
+        return this === other || other is NodeModel && (type == other.type && qualifier == other.qualifier)
     }
 
     final override fun hashCode(): Int {
         var result = qualifier?.hashCode() ?: 0
-        result = 31 * result + id.hashCode()
+        result = 31 * result + type.hashCode()
         return result
     }
 
@@ -70,6 +65,6 @@ abstract class NodeModel : ClassBackedModel() {
             append(qualifier)
             append(' ')
         }
-        append(id)
+        append(type)
     }
 }
