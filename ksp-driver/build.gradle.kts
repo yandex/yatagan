@@ -5,8 +5,9 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":core-impl"))
     implementation(project(":generator"))
+    implementation(project(":ksp-driver-lang"))
 
     implementation(kotlin("stdlib"))
     implementation("com.google.devtools.ksp:symbol-processing-api:${Versions.Ksp}")

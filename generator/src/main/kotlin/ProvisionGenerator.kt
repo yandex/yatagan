@@ -116,7 +116,7 @@ internal class ProvisionGenerator(
             }
             is ProvisionBinding -> {
                 generateCall(
-                    name = binding.provider,
+                    function = binding.provider,
                     arguments = binding.params,
                     instance = binding.requiredModuleInstance?.let { module ->
                         generators[binding.owner].factoryGenerator.fieldNameFor(module)
@@ -144,7 +144,7 @@ internal class ProvisionGenerator(
                 val factory = generators[binding.owner].factoryGenerator
                 +factory.fieldNameFor(binding.input)
                 +"."
-                +binding.entryPoint.getter.functionName()
+                +binding.entryPoint.getter.name
                 +"()"
             }
         }.let { /*exhaustive*/ }

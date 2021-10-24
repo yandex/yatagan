@@ -15,6 +15,6 @@ internal fun compileTestDrivers(): Collection<Provider<CompileTestDriverBase>> {
 
     return listOf(
         NamedProvider(::KspCompileTestDriver, name = "KSP"),
-        NamedProvider(::JapCompileTestDriver, name = "JAP")
+        NamedProvider(::JapCompileTestDriver, name = "JAP"),
     )
 }

@@ -4,6 +4,7 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
+import com.yandex.daggerlite.ksp.KspDaggerLiteProcessorProvider
 import com.yandex.daggerlite.testing.CompileTestDriver
 import com.yandex.daggerlite.testing.CompileTestDriverBase
 import java.io.File
@@ -74,7 +75,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         sources = sourceFiles
         inheritClassPath = true
         javacArguments += "-Xdiags:verbose"
-        symbolProcessorProviders = listOf(DaggerLiteProcessorProvider())
+        symbolProcessorProviders = listOf(KspDaggerLiteProcessorProvider())
     }
 
     private inner class KspCompilationResultClause(

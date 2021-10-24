@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.generator
 
+import com.yandex.daggerlite.generator.lang.ClassNameModel
 import kotlin.random.Random
 
 internal class Namespace(

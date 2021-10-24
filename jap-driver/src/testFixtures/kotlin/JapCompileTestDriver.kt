@@ -40,9 +40,8 @@ class JapCompileTestDriver : CompileTestDriverBase() {
     fun setupCompilation() = KotlinCompilation().apply {
         sources = sourceFiles
         inheritClassPath = true
-        annotationProcessors = listOf(DaggerLiteProcessor())
+        annotationProcessors = listOf(JapDaggerLiteProcessor())
     }
-
 }
 
 

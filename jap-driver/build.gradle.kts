@@ -1,13 +1,13 @@
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
     id("java-test-fixtures")
     id("maven-publish")
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":core-impl"))
     implementation(project(":generator"))
+    implementation(project(":jap-driver-lang"))
     implementation(kotlin("stdlib"))
 
     api("com.google.auto:auto-common:${Versions.AutoCommon}")

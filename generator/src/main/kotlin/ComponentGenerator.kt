@@ -88,7 +88,7 @@ internal class ComponentGenerator(
 
         graph.model.entryPoints.forEach { (getter, dependency) ->
             // TODO: reuse entry-points as accessors to reduce method count.
-            method(getter.functionName()) {
+            method(getter.name) {
                 modifiers(PUBLIC)
                 annotation<Override>()
                 returnType(dependency.asTypeName())

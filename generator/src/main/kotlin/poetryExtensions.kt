@@ -5,9 +5,10 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.yandex.daggerlite.core.ClassBackedModel
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.Names
-import java.util.Locale
 
 internal typealias DependencyKind = NodeModel.Dependency.Kind
 
@@ -67,26 +68,21 @@ internal fun NodeModel.Dependency.asTypeName(): TypeName {
     }
 }
 
-internal fun MemberCallableNameModel.functionName() = when (this) {
-    is FunctionNameModel -> function
-    is PropertyNameModel -> "get${property.capitalize()}"
-}
-
 internal inline fun <A> ExpressionBuilder.generateCall(
-    name: CallableNameModel,
+    function: FunctionLangModel,
     arguments: Iterable<A>,
     instance: String?,
     crossinline argumentBuilder: ExpressionBuilder.(A) -> Unit,
 ) {
-    when (name) {
-        is ConstructorNameModel -> +"new %T(".formatCode(name.type.asTypeName())
-        is MemberCallableNameModel -> {
+    when {
+        function.isConstructor -> +"new %T(".formatCode(function.ownerName.asTypeName())
+        else -> {
             if (instance != null) {
-                +"$instance.%N(".formatCode(name.functionName())
+                +"$instance.%N(".formatCode(function.name)
             } else {
-                +"%T${if (name.isOwnerKotlinObject) ".INSTANCE" else ""}.%N(".formatCode(
-                    name.ownerName.asTypeName(),
-                    name.functionName(),
+                +"%T${if (function.owner.isKotlinObject) ".INSTANCE" else ""}.%N(".formatCode(
+                    function.ownerName.asTypeName(),
+                    function.name,
                 )
             }
         }
@@ -95,8 +91,4 @@ internal inline fun <A> ExpressionBuilder.generateCall(
         argumentBuilder(arg)
     }
     +")"
-}
-
-internal fun String.capitalize(): String {
-    return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
 }

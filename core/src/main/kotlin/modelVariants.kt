@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel
+
 class ComponentDependencyFactoryInput(
     override val target: ComponentModel,
     override val paramName: String,
@@ -29,22 +32,11 @@ sealed class Binding : BaseBinding()
  */
 class ProvisionBinding(
     override val target: NodeModel,
-    val scope: Scope?,
-    val descriptor: ProvisionDescriptor,
+    val scope: AnnotationLangModel?,
+    val provider: FunctionLangModel,
     val params: Collection<NodeModel.Dependency>,
     val requiredModuleInstance: ModuleModel?,
-) : Binding() {
-    /**
-     * Represent provision cache scope.
-     * Must provide [equals]/[hashCode] implementation.
-     */
-    interface Scope {
-        override fun equals(other: Any?): Boolean
-        override fun hashCode(): Int
-    }
-
-    interface ProvisionDescriptor
-}
+) : Binding()
 
 /**
  * A [com.yandex.daggerlite.BindsInstance] binding.

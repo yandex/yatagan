@@ -6,7 +6,7 @@ import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.inject.Provider
-import javax.lang.model.element.Modifier
+import javax.lang.model.element.Modifier.PRIVATE
 
 internal class SlotSwitchingGenerator(
     private val methodsNs: Namespace,
@@ -22,7 +22,7 @@ internal class SlotSwitchingGenerator(
 
     override fun generate(builder: TypeSpecBuilder) {
         builder.method(methodsNs.name("_new")) {
-            modifiers(Modifier.PRIVATE)
+            modifiers(PRIVATE)
             returnType(ClassName.OBJECT)
             parameter(ClassName.INT, "slot")
             controlFlow("switch(slot)") {
