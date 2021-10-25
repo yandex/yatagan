@@ -3,6 +3,7 @@ package com.yandex.daggerlite.generator
 import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.BindingUsage
 import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
 import com.yandex.daggerlite.core.ComponentInstanceBinding
 import com.yandex.daggerlite.core.DependencyComponentEntryPointBinding
@@ -32,10 +33,9 @@ internal class ProvisionGenerator(
             if (binding.isScoped()) {
                 if (usage.lazy + usage.provider == 0) {
                     // No need to generate actual provider instance, inline caching would do.
-                    if (usage.direct == 1) InlineCreationStrategy(
-                        binding = binding,
-                        generators = generators,
-                    ) else InlineCachingStrategy(
+                    // TODO: There's a theoretical possibility to use inline strategy here if it can be proven,
+                    //  that this binding has *a single direct usage as a dependency of a binding of the same scope*.
+                    InlineCachingStrategy(
                         binding = binding,
                         fieldsNs = fieldsNs,
                         methodsNs = methodsNs,
@@ -55,16 +55,18 @@ internal class ProvisionGenerator(
             } else {
                 if (usage.lazy + usage.provider == 0) {
                     // Inline instance creation does the trick.
-                    InlineCreationStrategy(
+                    inlineStrategy(
                         binding = binding,
-                        generators = generators,
+                        usage = usage,
+                        methodsNs = methodsNs,
                     )
                 } else {
                     val slot = multiFactory.get().requestSlot(binding)
                     CompositeStrategy(
-                        directStrategy = InlineCreationStrategy(
+                        directStrategy = inlineStrategy(
                             binding = binding,
-                            generators = generators,
+                            usage = usage,
+                            methodsNs = methodsNs,
                         ),
                         lazyStrategy = if (usage.lazy > 0) OnTheFlyScopedProviderCreationStrategy(
                             cachingProvider = scopedProviderGenerator.get(),
@@ -84,6 +86,36 @@ internal class ProvisionGenerator(
         },
     )
 
+    private fun inlineStrategy(
+        binding: Binding,
+        usage: BindingUsage,
+        methodsNs: Namespace,
+    ): ProvisionStrategy {
+        val inline = InlineCreationStrategy(
+            generators = generators,
+            binding = binding,
+        )
+
+        if (binding.dependencyCount == 0)
+            return inline
+        if (usage.provider + usage.lazy == 0) {
+            if (usage.direct == 1) {
+                return inline
+            }
+        } else {
+            if (usage.direct == 0) {
+                return inline
+            }
+        }
+
+        return WrappingAccessorStrategy(
+            provisionGenerator = this,
+            underlying = inline,
+            binding = binding,
+            methodsNs = methodsNs,
+        )
+    }
+
     override fun generate(builder: TypeSpecBuilder) {
         strategies.values.forEach {
             it.generateInComponent(builder)
@@ -93,6 +125,10 @@ internal class ProvisionGenerator(
     fun generateAccess(builder: ExpressionBuilder, dependency: NodeModel.Dependency) {
         val (node, kind) = dependency
         val binding = thisGraph.resolveBinding(node)
+        generateAccess(builder, binding, kind)
+    }
+
+    fun generateAccess(builder: ExpressionBuilder, binding: BaseBinding, kind: DependencyKind) {
         val generator = if (binding.owner != thisGraph) {
             // Inherited binding
             generators[binding.owner].generator
@@ -107,7 +143,7 @@ internal class ProvisionGenerator(
         } else "this"
     }
 
-    fun generateAccess(builder: ExpressionBuilder, binding: Binding): Unit = with(builder) {
+    fun generateCreation(builder: ExpressionBuilder, binding: Binding): Unit = with(builder) {
         when (binding) {
             is InstanceBinding -> {
                 val component = componentForBinding(inside = thisGraph, owner = binding.owner)
@@ -148,5 +184,14 @@ internal class ProvisionGenerator(
                 +"()"
             }
         }.let { /*exhaustive*/ }
+    }
+
+    companion object {
+        private val Binding.dependencyCount
+            get() = when (this) {
+                // TODO: sync this with core.
+                is ProvisionBinding -> this.params.size
+                else -> 0
+            }
     }
 }

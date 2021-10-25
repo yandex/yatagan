@@ -4,9 +4,7 @@ import com.yandex.daggerlite.Lazy
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.lang.reflect.Method
 import javax.inject.Provider
-import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
@@ -183,11 +181,3 @@ class ComponentHierarchyKotlinTest(
         }
     }
 }
-
-private operator fun Class<*>.get(name: String, vararg params: KClass<*>): Method {
-    return getDeclaredMethod(name, *params.map { it.java }.toTypedArray()).also {
-        it.isAccessible = true
-    }
-}
-
-private val Any.clz get() = javaClass
