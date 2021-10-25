@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.generator.lang.ClassNameModel
+import kotlin.math.abs
 import kotlin.random.Random
 
 internal class Namespace(
@@ -39,7 +40,7 @@ internal class Namespace(
                     yield("")  // default - no hash suffix
                     val rnd = Random(parts.contentHashCode())
                     while (true) {
-                        yield((rnd.nextInt() % 100).toString())
+                        yield(abs((rnd.nextInt() % 100)).toString())
                     }
                 }
             }
@@ -55,8 +56,8 @@ internal class Namespace(
             variantGenerators.forEachIndexed { index, variant ->
                 while (variant.hasNext()) {
                     partVariants[index] = variant.next()
+                    yield(partVariants.joinToString(separator = ""))
                 }
-                yield(partVariants.joinToString(separator = ""))
             }
         }
 
@@ -64,6 +65,7 @@ internal class Namespace(
         do {
             name = nameGenerator.next()
         } while (name in names)
+        names += name
         return prefix + name
     }
 }

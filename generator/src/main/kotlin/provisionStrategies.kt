@@ -19,6 +19,7 @@ internal class InlineCachingStrategy(
 
     init {
         val name = binding.target.name
+        // TODO: use qualifiers for name formation.
         instanceFieldName = fieldsNs.name(name, "Instance")
         instanceAccessorName = methodsNs.name(name)
     }

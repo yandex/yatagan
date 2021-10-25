@@ -10,14 +10,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class JavaxAnnotationImpl(
     private val impl: AnnotationMirror,
 ) : CompileTimeAnnotationLangModel {
-    private val descriptor by lazy(NONE) {
-        buildString {
-            append(impl.annotationType.toString())
-            impl.elementValues.entries.joinTo(this, separator = "$", prefix = ":") { entry ->
-                "${entry.key.simpleName}=${entry.value}"
-            }
-        }
-    }
+    private val descriptor by lazy(NONE) { impl.toString() }
 
     override val isScope: Boolean
         get() = impl.annotationType.asElement().isAnnotatedWith<Scope>()
@@ -41,4 +34,6 @@ internal class JavaxAnnotationImpl(
     }
 
     override fun hashCode() = descriptor.hashCode()
+
+    override fun toString() = descriptor
 }
