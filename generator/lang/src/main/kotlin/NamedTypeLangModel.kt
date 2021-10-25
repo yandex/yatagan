@@ -19,4 +19,6 @@ abstract class NamedTypeLangModel : TypeLangModel {
     final override fun hashCode(): Int {
         return name.hashCode()
     }
+
+    override fun toString() = name.toString()
 }

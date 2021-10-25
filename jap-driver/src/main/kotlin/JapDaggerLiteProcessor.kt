@@ -4,7 +4,7 @@ import com.google.auto.common.BasicAnnotationProcessor
 import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 class JapDaggerLiteProcessor : BasicAnnotationProcessor() {
     override fun steps(): Iterable<Step> = with(processingEnv) {
         listOf(

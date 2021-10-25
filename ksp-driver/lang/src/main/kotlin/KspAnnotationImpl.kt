@@ -21,10 +21,10 @@ internal class KspAnnotationImpl(
     }
 
     override val isScope: Boolean
-        get() = impl.annotationType.isAnnotationPresent<Scope>()
+        get() = impl.annotationType.resolve().declaration.isAnnotationPresent<Scope>()
 
     override val isQualifier: Boolean
-        get() = impl.annotationType.isAnnotationPresent<Qualifier>()
+        get() = impl.annotationType.resolve().declaration.isAnnotationPresent<Qualifier>()
 
     override fun <A : Annotation> hasType(type: Class<A>): Boolean {
         return impl.shortName.getShortName() == type.simpleName &&

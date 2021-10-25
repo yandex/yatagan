@@ -33,7 +33,7 @@ internal class InlineCachingStrategy(
             controlFlow("if (local == null)") {
                 +buildExpression {
                     +"local = "
-                    provisionGenerator.generateAccess(this, binding)
+                    provisionGenerator.generateCreation(this, binding)
                 }
                 +"this.%N = local".formatCode(instanceFieldName)
             }
@@ -113,7 +113,35 @@ internal class InlineCreationStrategy(
 ) : ProvisionStrategy {
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         assert(kind == DependencyKind.Direct)
-        generators[inside].generator.generateAccess(builder, binding)
+        generators[inside].generator.generateCreation(builder, binding)
+    }
+}
+
+internal class WrappingAccessorStrategy(
+    private val provisionGenerator: ProvisionGenerator,
+    private val binding: Binding,
+    private val underlying: ProvisionStrategy,
+    methodsNs: Namespace,
+) : ProvisionStrategy {
+    private val accessorName = methodsNs.name("create", binding.target.name)
+
+    override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
+        method(accessorName) {
+            modifiers(PRIVATE)
+            returnType(binding.target.typeName())
+            +buildExpression {
+                +"return "
+                underlying.generateAccess(builder = this, kind = DependencyKind.Direct, inside = binding.owner)
+            }
+        }
+    }
+
+    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+        assert(kind == DependencyKind.Direct)
+        val component = provisionGenerator.componentForBinding(inside = inside, owner = binding.owner)
+        builder.apply {
+            +"$component.$accessorName()"
+        }
     }
 }
 

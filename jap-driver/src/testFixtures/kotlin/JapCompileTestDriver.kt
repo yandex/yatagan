@@ -3,6 +3,7 @@ package com.yandex.daggerlite.jap
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.yandex.daggerlite.testing.CompileTestDriver
 import com.yandex.daggerlite.testing.CompileTestDriverBase
+import java.net.URLClassLoader
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.expect
@@ -28,7 +29,10 @@ class JapCompileTestDriver : CompileTestDriverBase() {
             JapCompilationResultClause(
                 generation = compilation,
                 result = result,
-                compiledClassesLoader = null,
+                compiledClassesLoader = URLClassLoader(
+                    arrayOf(compilation.classesDir.toURI().toURL()),
+                    JapCompileTestDriver::class.java.classLoader
+                ),
             ).apply {
                 withNoErrors()
                 block()
