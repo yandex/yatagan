@@ -50,3 +50,4 @@
 # gclient
 /deps
 /.gclient_entries
+/.cipd
