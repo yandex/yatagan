@@ -205,6 +205,48 @@ class CoreBindingsTest(
         }
     }
 
+    @Test
+    fun `basic component - multiple qualified dependencies`() {
+        useSourceSet(apiImpl)
+
+        givenJavaSource("test.MyModule", """
+            @Module
+            public interface MyModule {
+              @Named("foo") @Singleton @Provides
+              static Api providesFoo() { return new Impl(); }
+              @Named("bar") @Singleton @Provides
+              static Api providesApi() { return new Impl(); }
+              @Named("quu") @Singleton @Provides
+              static Api providesQuu() { return new Impl(); }
+            }
+        """)
+        givenJavaSource("test.TestComponent", """
+            @Component(modules = {MyModule.class}) 
+            @Singleton
+            public interface TestComponent {
+                @Named("foo") Api getFoo();
+                @Named("bar") Api getBar();
+                @Named("quu") Api getQuu();
+            }
+        """)
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = DaggerTestComponent()
+                assert(c.getFoo() === c.getFoo()); assert(c.getFoo() !== c.getBar())
+                assert(c.getBar() === c.getBar()); assert(c.getBar() !== c.getQuu())
+                assert(c.getQuu() === c.getQuu())
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") { testCase ->
+                testCase["test"](null)
+            }
+        }
+    }
+
     @Test(timeout = 10_000)
     fun `basic component - cyclic reference with Provider edge`() {
         useSourceSet(classes)
