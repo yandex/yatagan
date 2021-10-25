@@ -5,6 +5,12 @@ package com.yandex.daggerlite.core
  */
 abstract class ModuleModel : ClassBackedModel() {
     /**
+     * Included modules.
+     * TODO: actually use them.
+     */
+    abstract val includes: Collection<ModuleModel>
+
+    /**
      * Bindings exposed by this module.
      */
     abstract val bindings: Collection<BaseBinding>

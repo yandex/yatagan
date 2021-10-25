@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.jap.lang
 
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.generator.lang.CompileTimeAnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope
 import javax.lang.model.element.AnnotationMirror
@@ -9,7 +9,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxAnnotationImpl(
     private val impl: AnnotationMirror,
-) : AnnotationLangModel {
+) : CompileTimeAnnotationLangModel {
     private val descriptor by lazy(NONE) {
         buildString {
             append(impl.annotationType.toString())

@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
-import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.core.AliasBinding
 import com.yandex.daggerlite.core.BaseBinding
@@ -11,9 +10,8 @@ import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.getAnnotation
 import com.yandex.daggerlite.core.lang.hasType
-import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ModuleModelImpl(
     private val declaration: TypeDeclarationLangModel,
@@ -22,17 +20,20 @@ internal class ModuleModelImpl(
         require(canRepresent(declaration))
     }
 
-    private val impl = declaration.getAnnotation<Module>()
+    private val impl = declaration.moduleAnnotationIfPresent!!
 
     override val type: TypeLangModel
         get() = declaration.asType()
 
-    @Suppress("UNCHECKED_CAST")
-    override val subcomponents: Collection<ComponentModel> by lazy {
-        impl.getTypes("subcomponents").map(TypeLangModel::declaration).map(::ComponentModelImpl).toSet()
+    override val includes: Collection<ModuleModel> by lazy(NONE) {
+        impl.includes.map(TypeLangModel::declaration).map(::ModuleModelImpl).toSet()
     }
 
-    override val bindings: Collection<BaseBinding> by lazy {
+    override val subcomponents: Collection<ComponentModel> by lazy(NONE) {
+        impl.subcomponents.map(TypeLangModel::declaration).map(::ComponentModelImpl).toSet()
+    }
+
+    override val bindings: Collection<BaseBinding> by lazy(NONE) {
         val list = arrayListOf<BaseBinding>()
         val mayRequireInstance = !declaration.isAbstract && !declaration.isKotlinObject
 
@@ -72,7 +73,7 @@ internal class ModuleModelImpl(
 
     companion object {
         fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
-            return declaration.isAnnotatedWith<Module>()
+            return declaration.moduleAnnotationIfPresent != null
         }
     }
 }

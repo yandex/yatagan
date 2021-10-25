@@ -7,7 +7,6 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.getAnnotation
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 
 internal class ComponentModelImpl(
@@ -17,7 +16,7 @@ internal class ComponentModelImpl(
         require(canRepresent(declaration))
     }
 
-    private val impl = declaration.getAnnotation<Component>()
+    private val impl = declaration.componentAnnotationIfPresent!!
 
     override val type: TypeLangModel
         get() = declaration.asType()
@@ -25,10 +24,10 @@ internal class ComponentModelImpl(
     override val scope = declaration.annotations.find(AnnotationLangModel::isScope)
 
     override val modules: Set<ModuleModel> by lazy {
-        impl.getTypes("modules").map(TypeLangModel::declaration).map(::ModuleModelImpl).toSet()
+        impl.modules.map(TypeLangModel::declaration).map(::ModuleModelImpl).toSet()
     }
     override val dependencies: Set<ComponentModel> by lazy {
-        impl.getTypes("dependencies").map(TypeLangModel::declaration).map(::ComponentModelImpl).toSet()
+        impl.dependencies.map(TypeLangModel::declaration).map(::ComponentModelImpl).toSet()
     }
     override val entryPoints: Set<EntryPoint> by lazy {
         buildSet {
@@ -59,11 +58,11 @@ internal class ComponentModelImpl(
         )
     }
 
-    override val isRoot: Boolean = impl.getBoolean("isRoot")
+    override val isRoot: Boolean = impl.isRoot
 
     companion object {
         fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
-            return declaration.isAnnotatedWith<Component>()
+            return declaration.componentAnnotationIfPresent != null
         }
     }
 }

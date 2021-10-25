@@ -40,6 +40,16 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
      */
     fun asType(): TypeLangModel
 
+    /**
+     * [com.yandex.daggerlite.Component] annotation if present.
+     */
+    val componentAnnotationIfPresent: ComponentAnnotationLangModel?
+
+    /**
+     * [com.yandex.daggerlite.Module] annotation if present.
+     */
+    val moduleAnnotationIfPresent: ModuleAnnotationLangModel?
+
     override fun equals(other: Any?): Boolean
     override fun hashCode(): Int
 }

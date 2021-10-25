@@ -5,6 +5,8 @@ package com.yandex.daggerlite.core.lang
  * - Can represent a constructor, see [isConstructor]
  * - Top-level kotlin functions are not covered.
  * - Kotlin properties are covered by `get{name.capitalize()}`/`set{name.capitalize()}`.
+ *
+ * MAYBE: Split this into ConstructorLangModel and namely FunctionLangModel.
  */
 interface FunctionLangModel : AnnotatedLangModel {
     /**

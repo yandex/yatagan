@@ -2,15 +2,15 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSType
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.memoize
+import com.yandex.daggerlite.generator.lang.CompileTimeAnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope
 
 internal class KspAnnotationImpl(
     private val impl: KSAnnotation,
-) : AnnotationLangModel {
+) : CompileTimeAnnotationLangModel {
     private val descriptor by lazy(LazyThreadSafetyMode.NONE) {
         buildString {
             append(ClassNameModel(impl.annotationType.resolve()))

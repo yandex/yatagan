@@ -4,6 +4,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
+import com.yandex.daggerlite.generator.lang.CompileTimeTypeDeclarationLangModel
 import com.yandex.daggerlite.generator.lang.NamedTypeLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -11,7 +12,7 @@ import javax.lang.model.element.TypeElement
 
 internal class JavaxTypeDeclarationImpl(
     override val impl: TypeElement,
-) : JavaxAnnotatedImpl(), TypeDeclarationLangModel {
+) : JavaxAnnotatedImpl(), CompileTimeTypeDeclarationLangModel {
     override val isAbstract: Boolean
         get() = impl.isAbstract
     override val isKotlinObject: Boolean

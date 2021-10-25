@@ -11,11 +11,12 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.ClassNameModel
+import com.yandex.daggerlite.generator.lang.CompileTimeTypeDeclarationLangModel
 import com.yandex.daggerlite.generator.lang.NamedTypeLangModel
 
 internal class KspTypeDeclarationImpl(
     override val impl: KSClassDeclaration,
-) : KspAnnotatedImpl(), TypeDeclarationLangModel {
+) : KspAnnotatedImpl(), CompileTimeTypeDeclarationLangModel {
     override val isAbstract: Boolean
         get() = impl.isAbstract()
     override val isKotlinObject: Boolean

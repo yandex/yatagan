@@ -19,6 +19,7 @@ include("jap-driver")
 include("jap-driver-lang")
 
 include("runtime")
+include("runtime-lang")
 
 include("generator")
 include("generator-poetry")
@@ -31,6 +32,7 @@ project(":core-impl").projectDir = file("core/impl")
 
 project(":ksp-driver-lang").projectDir = file("ksp-driver/lang")
 project(":jap-driver-lang").projectDir = file("jap-driver/lang")
+project(":runtime-lang").projectDir = file("runtime/lang")
 
 project(":generator-poetry").projectDir = file("generator/poetry")
 project(":generator-lang").projectDir = file("generator/lang")
