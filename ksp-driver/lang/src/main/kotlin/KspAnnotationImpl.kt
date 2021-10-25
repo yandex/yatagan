@@ -37,7 +37,13 @@ internal class KspAnnotationImpl(
 
     override fun getTypes(attribute: String): Sequence<TypeLangModel> {
         @Suppress("UNCHECKED_CAST")
-        return (impl[attribute] as List<KSType>).asSequence().map(::KspTypeImpl).memoize()
+        return impl[attribute].let {
+            when (it) {
+                is List<*> -> (it as List<KSType>)
+                // In java annotations we can create lists implicitly (e.g. @Component(modules = MyModule.class)).
+                else -> listOf(it as KSType)
+            }.asSequence().map(::KspTypeImpl).memoize()
+        }
     }
 
     override fun equals(other: Any?): Boolean {
