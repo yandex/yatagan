@@ -28,7 +28,13 @@ internal class BindingGraphImpl(
     private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = sequence {
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
-        for (module: ModuleModel in model.modules) {
+        val seenModules = hashSetOf<ModuleModel>()
+        val moduleQueue = ArrayDeque(model.modules)
+        while(moduleQueue.isNotEmpty()) {
+            val module = moduleQueue.removeFirst()
+            if (!seenModules.add(module)) {
+                continue
+            }
             // All bindings from installed modules
             for (binding: BaseBinding in module.bindings)
                 yield(binding)
@@ -41,6 +47,7 @@ internal class BindingGraphImpl(
                     }
                 }
             }
+            moduleQueue += module.includes
         }
         // Gather bindings from factory
         model.factory?.let { factory: ComponentFactoryModel ->

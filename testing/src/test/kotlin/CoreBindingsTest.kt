@@ -226,5 +226,36 @@ class CoreBindingsTest(
             withNoWarnings()
         }
     }
+
+    @Test
+    fun `basic component - included modules are deduplicated`() {
+        useSourceSet(apiImpl)
+        givenJavaSource("test.TestCase", """
+            @Module(includes = {MyModuleBye.class, MyModuleFoo.class})
+            interface MyModuleHello {
+                @Provides @Named("hello") static Api helloApi() { return new Impl(); } 
+            }
+            @Module(includes = {MyModuleFoo.class})
+            interface MyModuleBye{
+                @Provides @Named("bye") static Api byeApi() { return new Impl(); } 
+            }
+            @Module
+            interface MyModuleFoo{
+                @Provides @Named("foo") static Api fooApi() { return new Impl(); } 
+            }
+            
+            @Component(modules = {MyModuleHello.class, MyModuleBye.class})
+            interface TestComponent {
+                @Named("hello") Api hello();
+                @Named("bye") Api bye();
+                @Named("foo") Api foo();
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
 }
 
