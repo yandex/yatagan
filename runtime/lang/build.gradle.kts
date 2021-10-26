@@ -1,6 +1,5 @@
 plugins {
-    kotlin("jvm")
-    id("maven-publish")
+    id("daggerlite.artifact")
 }
 
 dependencies {

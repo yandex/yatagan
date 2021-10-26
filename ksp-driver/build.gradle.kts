@@ -1,8 +1,9 @@
 plugins {
-    kotlin("jvm")
+    id("daggerlite.artifact")
     id("java-test-fixtures")
-    id("maven-publish")
 }
+
+val kspVersion: String by extra
 
 dependencies {
     implementation(project(":core-impl"))
@@ -10,7 +11,7 @@ dependencies {
     implementation(project(":ksp-driver-lang"))
 
     implementation(kotlin("stdlib"))
-    implementation("com.google.devtools.ksp:symbol-processing-api:${Versions.Ksp}")
+    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
 
     testFixturesImplementation(testFixtures(project(":testing")))
     testFixturesImplementation(kotlin("test"))

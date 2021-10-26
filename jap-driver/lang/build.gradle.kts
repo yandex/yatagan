@@ -1,14 +1,15 @@
 plugins {
-    kotlin("jvm")
-    id("maven-publish")
+    id("daggerlite.artifact")
 }
+
+val autoCommonVersion: String by extra
 
 dependencies {
     implementation(project(":api"))
     implementation(project(":core-lang"))
     implementation(project(":generator-lang"))
 
-    implementation("com.google.auto:auto-common:${Versions.AutoCommon}")
+    implementation("com.google.auto:auto-common:$autoCommonVersion")
 
     implementation(kotlin("stdlib"))
 }

@@ -1,6 +1,5 @@
 plugins {
-    kotlin("jvm")
-    id("maven-publish")
+    id("daggerlite.artifact")
 }
 
 dependencies {
@@ -8,5 +7,4 @@ dependencies {
     api("javax.inject:javax.inject:1")
 
     // no stdlib required in api module.
-    //implementation(kotlin("stdlib"))
 }
