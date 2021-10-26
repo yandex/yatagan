@@ -1,13 +1,15 @@
 plugins {
-    kotlin("jvm")
+    id("daggerlite.base-module")
     id("java-test-fixtures")
 }
+
+val kotlinCompileTestingVersion: String by extra
 
 dependencies {
     implementation(kotlin("stdlib"))
 
     testFixturesApi(project(":api"))
-    testFixturesApi("com.github.tschuchortdev:kotlin-compile-testing-ksp:${Versions.KotlinCompileTesting}")
+    testFixturesApi("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
 
     testImplementation(testFixtures(project(":ksp-driver")))
     testImplementation(testFixtures(project(":jap-driver")))

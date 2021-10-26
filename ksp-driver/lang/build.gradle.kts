@@ -1,7 +1,8 @@
 plugins {
-    kotlin("jvm")
-    id("maven-publish")
+    id("daggerlite.artifact")
 }
+
+val kspVersion: String by extra
 
 dependencies {
     implementation(project(":api"))
@@ -9,5 +10,5 @@ dependencies {
     implementation(project(":generator-lang"))
 
     implementation(kotlin("stdlib"))
-    implementation("com.google.devtools.ksp:symbol-processing-api:${Versions.Ksp}")
+    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
 }

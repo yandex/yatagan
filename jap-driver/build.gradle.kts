@@ -1,8 +1,9 @@
 plugins {
-    kotlin("jvm")
+    id("daggerlite.artifact")
     id("java-test-fixtures")
-    id("maven-publish")
 }
+
+val autoCommonVersion: String by extra
 
 dependencies {
     implementation(project(":core-impl"))
@@ -10,7 +11,7 @@ dependencies {
     implementation(project(":jap-driver-lang"))
     implementation(kotlin("stdlib"))
 
-    api("com.google.auto:auto-common:${Versions.AutoCommon}")
+    api("com.google.auto:auto-common:$autoCommonVersion")
 
     testFixturesImplementation(testFixtures(project(":testing")))
     testFixturesImplementation(kotlin("test"))
