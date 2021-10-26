@@ -365,6 +365,7 @@ class CoreBindingsTest(
     }
 
     @Test
+    @Ignore
     fun `basic component - provide primitive type`() {
         givenJavaSource("test.MyModule", """
             @Module
@@ -379,7 +380,7 @@ class CoreBindingsTest(
         givenJavaSource("test.TestComponent", """
             @Component(modules = MyModule.class)
             public interface TestComponent {
-                Integer get();
+                int get();
                 Lazy<Integer> getIntLazy();
                 Provider<Integer> getIntProvider();
             }
@@ -392,6 +393,7 @@ class CoreBindingsTest(
     }
 
     @Test
+    @Ignore
     fun `basic component - convert class to primitive type`() {
         givenJavaSource("test.MyModule", """
             @Module

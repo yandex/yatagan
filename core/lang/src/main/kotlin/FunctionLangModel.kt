@@ -43,4 +43,9 @@ interface FunctionLangModel : AnnotatedLangModel {
      * Function parameters.
      */
     val parameters: Sequence<ParameterLangModel>
+
+    /**
+     * Whether the function is declared in companion object (or inherits by it).
+     */
+    val isFromCompanionObject: Boolean
 }

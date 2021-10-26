@@ -31,8 +31,10 @@ internal class KspTypeDeclarationImpl(
         }.memoize()
 
     override val allPublicFunctions: Sequence<FunctionLangModel> = sequenceOf(
-        impl.getDeclaredProperties().map { KspFunctionPropertyGetterImpl(owner = this, impl = it) },
-        impl.getDeclaredFunctions().map { KspFunctionImpl(owner = this, impl = it) },
+        impl.allMemberFunctionsAndPropertiesModels(owner = this@KspTypeDeclarationImpl),
+        impl.getCompanionObject()
+            ?.allMemberFunctionsAndPropertiesModels(owner = this@KspTypeDeclarationImpl)
+            ?: emptySequence()
     ).flatten().memoize()
 
     override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.declarations

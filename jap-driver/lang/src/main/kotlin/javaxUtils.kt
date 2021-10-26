@@ -100,7 +100,7 @@ internal fun TypeElement.allMethods(typeUtils: Types, elementUtils: Elements): S
     }
 
 // TODO: Как и в todo ниже, можно использовать библиотеку для выявления котлин обжекта.
-internal fun TypeElement.getCompanionObject(): TypeElement? =
+fun TypeElement.getCompanionObject(): TypeElement? =
     ElementFilter.typesIn(enclosedElements).find { it.simpleName.contentEquals("Companion") && it.isKotlin }
 
 // TODO: вероятно тут стоит использовать библиотеку `org.jetbrains.kotlinx:kotlinx-metadata-jvm`,

@@ -48,6 +48,36 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
+    fun `basic component - @Module object @JvmStatic @Provides`() {
+        givenKotlinSource("test.Api", """interface Api {}""")
+        givenKotlinSource("test.Impl", """class Impl : Api""")
+
+        givenKotlinSource(
+            "test.MyModule", """
+        @Module
+        object MyModule {
+            @JvmStatic
+            @Provides fun provides(): Api = Impl()
+        }
+        """
+        )
+        givenKotlinSource(
+            "test.TestComponent", """
+            @Component(modules = [MyModule::class]) @Singleton
+            interface TestComponent {
+                fun get(): Api;
+                fun getProvider(): Provider<Api>;
+                fun getLazy(): Lazy<Api>;
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
     @Ignore("TODO - support companion objects")
     fun `basic component - @Module with companion object`() {
         givenKotlinSource("test.Api", """interface Api {}""")
@@ -74,6 +104,76 @@ class CoreBindingsKotlinTest(
             }
         """
         )
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `basic component - simple kotlin companion object @JvmStatic @Provides`() {
+        givenKotlinSource("test.Api", """interface Api {}""")
+        givenKotlinSource("test.Impl", """class Impl : Api""")
+
+        givenKotlinSource(
+            "test.MyModule", """
+        @Module
+        interface MyModule {
+            companion object {
+                @JvmStatic
+                @Provides 
+                fun provides(): Api = Impl() 
+            }
+        }
+        """
+        )
+        givenKotlinSource(
+            "test.TestComponent", """
+            @Component(modules = [MyModule::class]) @Singleton
+            interface TestComponent {
+                fun get(): Api;
+                fun getProvider(): Provider<Api>;
+                fun getLazy(): Lazy<Api>;
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `basic component - @Provides with dependencies in companion`() {
+        givenKotlinSource("test.Api", """interface Api {}""")
+        givenKotlinSource("test.Impl", """class Impl : Api""")
+
+        givenKotlinSource("test.BaseModule", """
+            open class BaseModule {
+                @Provides
+                fun get(): Api = Impl()
+            } 
+        """
+        )
+
+        givenKotlinSource(
+            "test.MyModule", """
+        @Module
+        interface MyModule {
+            companion object : BaseModule()
+        }
+        """
+        )
+        givenKotlinSource(
+            "test.TestComponent", """
+            @Component(modules = [MyModule::class]) @Singleton
+            interface TestComponent {
+                fun get(): Api;
+                fun getProvider(): Provider<Api>;
+                fun getLazy(): Lazy<Api>;
+            }
+        """)
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")

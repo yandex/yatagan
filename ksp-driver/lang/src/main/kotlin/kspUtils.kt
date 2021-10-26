@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.ksp.lang
 
+import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
@@ -7,6 +8,8 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
+import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import kotlin.reflect.KClass
 
@@ -45,3 +48,33 @@ internal fun ClassNameModel(type: KSType): ClassNameModel {
     return ClassNameModel(type.declaration as KSClassDeclaration)
         .withArguments(type.arguments.map { ClassNameModel(it.type!!.resolve()) })
 }
+
+internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
+    declarations.filterIsInstance<KSClassDeclaration>().find { it.isCompanionObject }
+
+internal fun KSClassDeclaration.allMemberFunctionsAndPropertiesModels(
+    owner: TypeDeclarationLangModel,
+): Sequence<FunctionLangModel> = sequenceOf(
+    getAllProperties().map {
+        KspFunctionPropertyGetterImpl(
+            owner = owner,
+            impl = it,
+            isFromCompanionObject = this.isCompanionObject
+        )
+    },
+    getAllFunctions().map {
+        KspFunctionImpl(
+            owner = owner,
+            it,
+            isFromCompanionObject = this.isCompanionObject
+        )
+    },
+    // [KSClassDeclaration.getAllFunctions()] returns only member functions, not including java static.
+    if (!this.isObject) getDeclaredFunctions().filter { it.isStatic }.map {
+        KspFunctionImpl(
+            owner = owner,
+            it,
+            isFromCompanionObject = this.isCompanionObject
+        )
+    } else emptySequence()
+).flatten()

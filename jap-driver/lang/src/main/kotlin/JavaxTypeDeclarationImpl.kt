@@ -25,10 +25,24 @@ internal class JavaxTypeDeclarationImpl(
         .map {
             JavaxFunctionImpl(owner = this, impl = it.asExecutableElement(), isConstructor = true)
         }
-    override val allPublicFunctions: Sequence<FunctionLangModel> = impl.allMethods(Utils.types, Utils.elements)
-        .map {
-            JavaxFunctionImpl(owner = this, impl = it, isConstructor = false)
-        }
+    override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
+        yieldAll(impl.allMethods(Utils.types, Utils.elements).map {
+            JavaxFunctionImpl(
+                owner = this@JavaxTypeDeclarationImpl,
+                impl = it,
+                isConstructor = false,
+                isFromCompanionObject = false
+            )
+        })
+        impl.getCompanionObject()?.allMethods(Utils.types, Utils.elements)?.map {
+            JavaxFunctionImpl(
+                owner = this@JavaxTypeDeclarationImpl,
+                impl = it,
+                isConstructor = false,
+                isFromCompanionObject = true
+            )
+        }?.let { yieldAll(it) }
+    }
     override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
         .asSequence()
         .filter { it.kind == ElementKind.INTERFACE }

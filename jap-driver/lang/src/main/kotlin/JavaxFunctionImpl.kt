@@ -12,6 +12,7 @@ internal class JavaxFunctionImpl(
     override val owner: TypeDeclarationLangModel,
     override val impl: ExecutableElement,
     override val isConstructor: Boolean = false,
+    override val isFromCompanionObject: Boolean = false,
 ) : JavaxAnnotatedImpl(), FunctionLangModel {
     override val isAbstract: Boolean get() = impl.isAbstract
     override val isStatic: Boolean get() = impl.isStatic
