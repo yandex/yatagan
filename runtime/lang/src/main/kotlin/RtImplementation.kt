@@ -153,6 +153,7 @@ class RtParameterImpl(
 class RtConstructorImpl(
     override val owner: TypeDeclarationLangModel,
     override val impl: Constructor<*>,
+    override val isFromCompanionObject: Boolean = TODO("implement it")
 ) : RtAnnotatedImpl(), FunctionLangModel {
     override val isConstructor: Boolean get() = true
     override val isAbstract: Boolean get() = false
@@ -165,7 +166,8 @@ class RtConstructorImpl(
 
 class RtFunctionImpl(
     override val owner: TypeDeclarationLangModel,
-    override val impl: Executable
+    override val impl: Executable,
+    override val isFromCompanionObject: Boolean = TODO("implement it")
 ) : RtAnnotatedImpl(), FunctionLangModel {
     override val isConstructor: Boolean get() = false
     override val isAbstract: Boolean get() = Modifier.isAbstract(impl.modifiers)

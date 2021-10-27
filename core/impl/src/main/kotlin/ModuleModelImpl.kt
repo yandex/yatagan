@@ -38,10 +38,12 @@ internal class ModuleModelImpl(
         val mayRequireInstance = !declaration.isAbstract && !declaration.isKotlinObject
 
         declaration.allPublicFunctions.mapNotNullTo(list) { method ->
-            val target = NodeModelImpl(
-                type = method.returnType,
-                forQualifier = method,
-            )
+            val target by lazy {
+                NodeModelImpl(
+                    type = method.returnType,
+                    forQualifier = method,
+                )
+            }
             method.annotations.forEach { ann ->
                 when {
                     ann.hasType<Binds>() -> AliasBinding(
@@ -55,7 +57,9 @@ internal class ModuleModelImpl(
                         target = target,
                         provider = method,
                         scope = method.annotations.find(AnnotationLangModel::isScope),
-                        requiredModuleInstance = this.takeIf { mayRequireInstance && !method.isStatic },
+                        requiredModuleInstance = this.takeIf {
+                            mayRequireInstance && !method.isStatic && !method.isFromCompanionObject
+                                                             },
                         params = method.parameters.map { param ->
                             nodeModelDependency(type = param.type, forQualifier = param)
                         }.toList(),

@@ -11,6 +11,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspFunctionPropertyGetterImpl(
     override val owner: TypeDeclarationLangModel,
     override val impl: KSPropertyDeclaration,
+    override val isFromCompanionObject: Boolean,
 ) : KspAnnotatedImpl(), FunctionLangModel {
     override val isAbstract: Boolean
         get() = impl.isAbstract()

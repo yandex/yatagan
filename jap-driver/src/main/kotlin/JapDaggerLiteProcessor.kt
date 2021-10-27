@@ -8,7 +8,7 @@ import javax.lang.model.SourceVersion
 class JapDaggerLiteProcessor : BasicAnnotationProcessor() {
     override fun steps(): Iterable<Step> = with(processingEnv) {
         listOf(
-            JapComponentProcessingStep(filer, messager),
+            JapComponentProcessingStep(filer, messager, typeUtils, elementUtils),
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.testing
 
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -291,6 +292,123 @@ class CoreBindingsTest(
                 @Named("hello") Api hello();
                 @Named("bye") Api bye();
                 @Named("foo") Api foo();
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    @Ignore
+    fun `basic component - add imports to generated component`() {
+        givenJavaSource("utils.MySimpleClass", """ 
+            public class MySimpleClass {
+                @Inject
+                public MySimpleClass() {}
+            }
+        """)
+
+        givenJavaSource("utils.MyProvider", """
+            import test.MySimpleClass;
+            
+            public class MyProvider {
+                @Inject
+                public MyProvider(MySimpleClass i) {}
+            }
+        """
+        )
+
+        givenJavaSource("test.TestComponent", """
+            @Component
+            public interface TestComponent {
+                MyProvider get();
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `basic component - module includes inherited methods`() {
+        useSourceSet(apiImpl)
+
+        givenJavaSource("test.MyModule", """
+            @Module
+            interface MyModule {
+                @Binds
+                Api binds(Impl i);
+            }
+        """)
+
+        givenJavaSource("test.MySubModule", """
+            @Module
+            interface MySubModule extends MyModule {}
+        """)
+
+        givenJavaSource("test.TestComponent", """
+            @Component(modules = MySubModule.class)
+            public interface TestComponent {
+                Api get();
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    @Ignore
+    fun `basic component - provide primitive type`() {
+        givenJavaSource("test.MyModule", """
+            @Module
+            public interface MyModule {
+                @Provides
+                static int provides() {
+                    return 1;
+                }
+            }
+        """)
+
+        givenJavaSource("test.TestComponent", """
+            @Component(modules = MyModule.class)
+            public interface TestComponent {
+                int get();
+                Lazy<Integer> getIntLazy();
+                Provider<Integer> getIntProvider();
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    @Ignore
+    fun `basic component - convert class to primitive type`() {
+        givenJavaSource("test.MyModule", """
+            @Module
+            public interface MyModule {
+                @Provides
+                static Integer Provides() {
+                    return 1;
+                }
+            }
+        """)
+
+        givenJavaSource("test.TestComponent", """
+            @Component(modules = MyModule.class)
+            public interface TestComponent {
+                int get();
             }
         """)
 

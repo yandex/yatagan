@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.ksp.lang
 
+import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
@@ -12,6 +13,7 @@ internal class KspFunctionImpl(
     override val owner: TypeDeclarationLangModel,
     override val impl: KSFunctionDeclaration,
     override val isConstructor: Boolean = false,
+    override val isFromCompanionObject: Boolean = false,
 ) : KspAnnotatedImpl(), FunctionLangModel {
     override val isAbstract: Boolean
         get() = impl.isAbstract

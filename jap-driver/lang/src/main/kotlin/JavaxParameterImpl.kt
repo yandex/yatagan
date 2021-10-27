@@ -9,5 +9,5 @@ internal class JavaxParameterImpl(
 ) : JavaxAnnotatedImpl(), ParameterLangModel {
     override val name: String
         get() = impl.simpleName.toString()
-    override val type: TypeLangModel by lazy { JavaxTypeImpl(impl.asType()) }
+    override val type: TypeLangModel by lazy { NamedTypeLangModel(impl.asType()) }
 }

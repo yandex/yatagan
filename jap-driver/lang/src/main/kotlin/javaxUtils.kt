@@ -10,18 +10,27 @@ import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.AnnotationValueVisitor
 import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.ElementFilter
+import javax.lang.model.util.Elements
 import javax.lang.model.util.SimpleAnnotationValueVisitor8
+import javax.lang.model.util.Types
 
 internal inline fun <reified T : Annotation> Element.isAnnotatedWith() =
     MoreElements.getAnnotationMirror(this, T::class.java).isPresent
 
 internal fun TypeMirror.asTypeElement(): TypeElement = MoreTypes.asTypeElement(this)
+
+internal fun TypeMirror.asPrimitiveType() = MoreTypes.asPrimitiveType(this)
+
+internal fun TypeMirror.asDeclaredType() = MoreTypes.asDeclared(this)
 
 internal fun AnnotationMirror.typesValue(param: String): Sequence<TypeMirror> =
     AnnotationMirrors.getAnnotationValue(this, param).accept(AsTypes)
@@ -64,6 +73,9 @@ private object AsTypes : ExtractingVisitor<Sequence<TypeMirror>>() {
 
 fun Element.asTypeElement(): TypeElement = MoreElements.asType(this)
 
+internal fun Element.asExecutableElement() = MoreElements.asExecutable(this)
+
+
 internal fun Element.getPackageElement(): PackageElement = MoreElements.getPackage(this)
 
 internal val Element.isAbstract
@@ -78,7 +90,20 @@ internal val Element.isStatic
 internal val TypeElement.isKotlin: Boolean
     get() = annotationMirrors.any { it.annotationType.toString() == "kotlin.Metadata" }
 
-// todo: вероятно тут стоит использовать библиотеку `org.jetbrains.kotlinx:kotlinx-metadata-jvm`,
+@Suppress("UNCHECKED_CAST")
+internal fun TypeElement.allMethods(typeUtils: Types, elementUtils: Elements): Sequence<ExecutableElement> =
+    sequence<ExecutableElement> {
+        yieldAll(MoreElements.getLocalAndInheritedMethods(this@allMethods, typeUtils, elementUtils))
+        yieldAll(enclosedElements.filter {
+            it.kind == ElementKind.METHOD && Modifier.STATIC in it.modifiers
+        }.map { it.asExecutableElement() })
+    }
+
+// TODO: Как и в todo ниже, можно использовать библиотеку для выявления котлин обжекта.
+fun TypeElement.getCompanionObject(): TypeElement? =
+    ElementFilter.typesIn(enclosedElements).find { it.simpleName.contentEquals("Companion") && it.isKotlin }
+
+// TODO: вероятно тут стоит использовать библиотеку `org.jetbrains.kotlinx:kotlinx-metadata-jvm`,
 //  чтобы избежать возможных ошибок с выявлением котлин обжекта.
 internal val TypeElement.isKotlinObject
     get() = isKotlin && ElementFilter.fieldsIn(enclosedElements).any { field ->
@@ -87,8 +112,14 @@ internal val TypeElement.isKotlinObject
     }
 
 internal fun ClassNameModel(type: TypeMirror): ClassNameModel {
-    val typeArgs = (type as? DeclaredType)?.typeArguments?.map { ClassNameModel(it) } ?: emptyList()
-    return ClassNameModel(type.asTypeElement()).withArguments(typeArgs)
+    val typeArgs = (type as? DeclaredType)?.typeArguments?.map {
+        ClassNameModel(it)
+    } ?: emptyList()
+    return when(type.kind) {
+        TypeKind.DECLARED -> ClassNameModel(type.asTypeElement()).withArguments(typeArgs)
+        TypeKind.WILDCARD -> ClassNameModel("", listOf("?"), emptyList())
+        else -> throw RuntimeException("Unexpected type: $type")
+    }
 }
 
 internal fun ClassNameModel(type: TypeElement): ClassNameModel {

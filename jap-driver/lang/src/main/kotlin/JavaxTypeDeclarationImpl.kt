@@ -23,18 +23,30 @@ internal class JavaxTypeDeclarationImpl(
         .asSequence()
         .filter { it.kind == ElementKind.CONSTRUCTOR }
         .map {
-            JavaxFunctionImpl(owner = this, impl = it as ExecutableElement, isConstructor = true)
+            JavaxFunctionImpl(owner = this, impl = it.asExecutableElement(), isConstructor = true)
         }
-    override val allPublicFunctions: Sequence<FunctionLangModel> = impl.enclosedElements
-        .asSequence()
-        .filter { it.kind == ElementKind.METHOD }
-        .map {
-            JavaxFunctionImpl(owner = this, impl = it as ExecutableElement, isConstructor = false)
-        }
+    override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
+        yieldAll(impl.allMethods(Utils.types, Utils.elements).map {
+            JavaxFunctionImpl(
+                owner = this@JavaxTypeDeclarationImpl,
+                impl = it,
+                isConstructor = false,
+                isFromCompanionObject = false
+            )
+        })
+        impl.getCompanionObject()?.allMethods(Utils.types, Utils.elements)?.map {
+            JavaxFunctionImpl(
+                owner = this@JavaxTypeDeclarationImpl,
+                impl = it,
+                isConstructor = false,
+                isFromCompanionObject = true
+            )
+        }?.let { yieldAll(it) }
+    }
     override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
         .asSequence()
         .filter { it.kind == ElementKind.INTERFACE }
-        .map { JavaxTypeDeclarationImpl(it as TypeElement) }
+        .map { JavaxTypeDeclarationImpl(it.asTypeElement()) }
 
     override fun asType(): TypeLangModel {
         require(impl.typeParameters.isEmpty())

@@ -26,7 +26,7 @@ internal class JavaxAnnotationImpl(
     }
 
     override fun getTypes(attribute: String): Sequence<TypeLangModel> {
-        return impl.typesValue(param = attribute).map(::JavaxTypeImpl)
+        return impl.typesValue(param = attribute).map(::NamedTypeLangModel)
     }
 
     override fun equals(other: Any?): Boolean {

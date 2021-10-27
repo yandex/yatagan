@@ -80,10 +80,12 @@ internal inline fun <A> ExpressionBuilder.generateCall(
             if (instance != null) {
                 +"$instance.%N(".formatCode(function.name)
             } else {
-                +"%T${if (function.owner.isKotlinObject) ".INSTANCE" else ""}.%N(".formatCode(
-                    function.ownerName.asTypeName(),
-                    function.name,
-                )
+                val ownerObject = when {
+                    function.owner.isKotlinObject -> ".INSTANCE"
+                    function.isFromCompanionObject && !function.isStatic -> ".Companion"
+                    else -> ""
+                }
+                +"${function.ownerName.asTypeName()}$ownerObject.${function.name}("
             }
         }
     }
