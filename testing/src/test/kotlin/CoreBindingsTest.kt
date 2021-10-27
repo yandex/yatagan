@@ -302,7 +302,6 @@ class CoreBindingsTest(
     }
 
     @Test
-    @Ignore
     fun `basic component - add imports to generated component`() {
         givenJavaSource("utils.MySimpleClass", """ 
             public class MySimpleClass {
@@ -311,8 +310,8 @@ class CoreBindingsTest(
             }
         """)
 
-        givenJavaSource("utils.MyProvider", """
-            import test.MySimpleClass;
+        givenJavaSource("test.MyProvider", """
+            import utils.MySimpleClass;
             
             public class MyProvider {
                 @Inject
@@ -323,7 +322,7 @@ class CoreBindingsTest(
 
         givenJavaSource("test.TestComponent", """
             @Component
-            public interface TestComponent {
+            interface TestComponent {
                 MyProvider get();
             }
         """)
