@@ -398,7 +398,7 @@ class CoreBindingsTest(
             @Module
             public interface MyModule {
                 @Provides
-                static Integer Provides() {
+                static Integer provides() {
                     return 1;
                 }
             }
@@ -408,6 +408,31 @@ class CoreBindingsTest(
             @Component(modules = MyModule.class)
             public interface TestComponent {
                 int get();
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `basic component - provide Object`() {
+        givenJavaSource("test.MyModule", """
+            @Module
+            public interface MyModule {
+                @Provides
+                static Object provides() {
+                    return "object";
+                }
+            }
+        """)
+
+        givenJavaSource("test.TestComponent", """
+            @Component(modules = MyModule.class)
+            public interface TestComponent {
+                Object get();
             }
         """)
 

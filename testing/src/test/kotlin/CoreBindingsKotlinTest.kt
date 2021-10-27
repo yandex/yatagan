@@ -268,5 +268,30 @@ class CoreBindingsKotlinTest(
             withNoWarnings()
         }
     }
+
+    @Test
+    fun `basic component - provide Any`() {
+        givenKotlinSource("test.MyModule", """
+            @Module
+            object MyModule {
+                @Provides
+                fun provides(): Any {
+                    return "object";
+                }
+            }
+        """)
+
+        givenKotlinSource("test.TestComponent", """
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                fun get(): Any;
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
 }
 
