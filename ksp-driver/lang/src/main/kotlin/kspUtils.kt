@@ -32,14 +32,10 @@ internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers ||
 internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT
 
 internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
-    val packageName = declaration.packageName.asString()
-    // MAYBE: use KSName api instead of string manipulation.
-    val names = requireNotNull(declaration.qualifiedName)
-        .asString().substring(startIndex = packageName.length + 1)
-        .split('.')
+    val className = declaration.resolveJavaTypeName()
     return ClassNameModel(
-        packageName = packageName,
-        simpleNames = names,
+        packageName = className.packageName,
+        simpleNames = className.simpleNames,
         typeArguments = emptyList(),
     )
 }

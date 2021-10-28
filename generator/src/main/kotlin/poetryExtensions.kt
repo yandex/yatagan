@@ -36,17 +36,6 @@ internal fun ClassBackedModel.typeName(): TypeName {
 }
 
 internal fun ClassNameModel.asTypeName(): TypeName {
-    if (packageName == "kotlin") {
-        when (simpleNames.first()) {
-            "String" -> return Names.String
-            // MAYBE: it's not always necessary to use wrapper types?
-            "Int" -> return Names.Integer
-            "Long" -> return Names.Long
-            "Boolean" -> return Names.Boolean
-            "Char" -> return Names.Character
-            "Byte" -> return Names.Byte
-        }
-    }
     val className = when (simpleNames.size) {
         0 -> throw IllegalArgumentException()
         1 -> ClassName.get(packageName, simpleNames.first())
