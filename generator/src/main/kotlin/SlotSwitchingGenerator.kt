@@ -29,7 +29,7 @@ internal class SlotSwitchingGenerator(
                 boundSlots.forEach { (binding, slot) ->
                     +buildExpression {
                         +"case $slot: return "
-                        provisionGenerator.get().generateAccess(this, binding, DependencyKind.Direct)
+                        provisionGenerator.get().generateCreation(this, binding)
                     }
                 }
                 +"default: throw new %T()".formatCode(Names.AssertionError)

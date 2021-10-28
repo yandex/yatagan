@@ -104,9 +104,20 @@ class CoreBindingsTest(
         """
         )
 
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = DaggerTestComponent()
+                assert(c.get() is Impl)
+            }
+        """
+        )
+
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") { testCase ->
+                testCase["test"](null)
+            }
         }
     }
 
@@ -135,9 +146,20 @@ class CoreBindingsTest(
         """
         )
 
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = DaggerTestComponent()
+                assert(c.get() is Impl)
+            }
+        """
+        )
+
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") { testCase ->
+                testCase["test"](null)
+            }
         }
     }
 
@@ -167,9 +189,20 @@ class CoreBindingsTest(
         """
         )
 
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = DaggerTestComponent()
+                assert(c.get() is Impl)
+            }
+        """
+        )
+
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") { testCase ->
+                testCase["test"](null)
+            }
         }
     }
 
