@@ -210,9 +210,20 @@ class CoreBindingsKotlinTest(
         """
         )
 
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val m = MyModule(52)
+                val c = DaggerTestComponent.factory().create(m)
+                assert(c.get().id == 52)
+            }
+        """)
+
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
             withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") { testCase ->
+                testCase["test"](null)
+            }
         }
     }
 
@@ -234,6 +245,33 @@ class CoreBindingsKotlinTest(
                 val api: test.Api
                 val provider: Provider<test.Api>
                 val lazy: Lazy<test.Api>
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    @Ignore("Fix in ksp")
+    fun `basic component - @Provides property`() {
+        givenKotlinSource("test.TestCase", """
+            interface Api
+            class Impl : Api
+
+            @Module
+            object MyModule {
+                @get:Provides
+                val api: Api = Impl()
+            }
+
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                fun api(): test.Api
+                fun provider(): Provider<test.Api>
+                fun lazy(): Lazy<test.Api>
             }
         """)
 
