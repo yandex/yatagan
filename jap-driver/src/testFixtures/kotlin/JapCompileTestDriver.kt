@@ -22,7 +22,7 @@ class JapCompileTestDriver : CompileTestDriverBase() {
             ).block()
 
             compilation.japGeneratedSources().forEach { file ->
-                println("Content of the file://$file")
+                println("Generated file: //$file")
             }
 
             result.exitCode
@@ -46,7 +46,7 @@ class JapCompileTestDriver : CompileTestDriverBase() {
             }
 
             compilation.japGeneratedSources().forEach { file ->
-                println("Content of the file://$file")
+                println("Generated file: //$file")
             }
 
             result.exitCode
