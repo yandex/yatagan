@@ -331,5 +331,29 @@ class CoreBindingsKotlinTest(
             withNoWarnings()
         }
     }
+
+    @Test
+    fun `basic compoonent - provide list of strings`() {
+        givenKotlinSource("test.MyModule", """
+            @Module
+            object MyModule {
+                @Provides
+                fun provides(): List<String> = listOf()
+            }
+        """
+        )
+
+        givenKotlinSource("test.TestComponent", """
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                fun get(): List<String>;
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
 }
 

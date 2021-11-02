@@ -32,10 +32,24 @@ internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers ||
 internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT
 
 internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
-    val className = declaration.resolveJavaTypeName()
+    val packageName: String
+    val simpleNames: List<String>
+
+    var javaDeclaration: String? = null
+    if (declaration.packageName.asString().startsWith("kotlin")) {
+        javaDeclaration = Utils.resolver.mapKotlinNameToJava(declaration.qualifiedName!!)?.asString()?.takeIf {
+            it != declaration.qualifiedName!!.asString()
+        }
+    }
+
+    packageName = javaDeclaration?.substringBeforeLast('.') ?: declaration.packageName.asString()
+    simpleNames = javaDeclaration?.substringAfterLast('.')?.let(::listOf) ?:
+        declaration.qualifiedName!!.asString().substring(packageName.length + 1).split('.')
+
+
     return ClassNameModel(
-        packageName = className.packageName,
-        simpleNames = className.simpleNames,
+        packageName = packageName,
+        simpleNames = simpleNames,
         typeArguments = emptyList(),
     )
 }
