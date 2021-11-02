@@ -83,6 +83,8 @@ internal class ComponentGenerator(
         modifiers(FINAL)
         if (!graph.model.isRoot) {
             modifiers(PRIVATE, STATIC)
+        } else {
+            modifiers(PUBLIC)
         }
         implements(componentInterface)
 

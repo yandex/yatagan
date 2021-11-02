@@ -1,8 +1,10 @@
 package com.yandex.daggerlite.jap
 
 import com.tschuchort.compiletesting.KotlinCompilation
+import com.tschuchort.compiletesting.kspSourcesDir
 import com.yandex.daggerlite.testing.CompileTestDriver
 import com.yandex.daggerlite.testing.CompileTestDriverBase
+import java.io.File
 import java.net.URLClassLoader
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -10,14 +12,19 @@ import kotlin.test.expect
 
 class JapCompileTestDriver : CompileTestDriverBase() {
     override fun failsToCompile(block: CompileTestDriver.CompilationResultClause.() -> Unit) {
+        val compilation = setupCompilation()
         expect(KotlinCompilation.ExitCode.COMPILATION_ERROR) {
-            val compilation = setupCompilation()
             val result = compilation.compile()
             JapCompilationResultClause(
                 generation = compilation,
                 result = result,
                 compiledClassesLoader = null,
             ).block()
+
+            compilation.japGeneratedSources().forEach { file ->
+                println("Generated file: //$file")
+            }
+
             result.exitCode
         }
     }
@@ -37,6 +44,11 @@ class JapCompileTestDriver : CompileTestDriverBase() {
                 withNoErrors()
                 block()
             }
+
+            compilation.japGeneratedSources().forEach { file ->
+                println("Generated file: //$file")
+            }
+
             result.exitCode
         }
     }
@@ -113,6 +125,10 @@ private class JapCompilationResultClause(
 
         override fun toString() = "$kind: $text"
     }
+}
+
+private fun KotlinCompilation.japGeneratedSources(): Sequence<File> {
+    return kaptSourceDir.walk().filter { it.isFile && it.extension == "java" }
 }
 
 private val ProcessorMessageRegex = """^([we]): \[jap] (.*)$""".toRegex()

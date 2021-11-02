@@ -155,7 +155,8 @@ class ComponentHierarchyKotlinTest(
                 val factory = it["factory"](null)
                 val appComponent = factory.clz["create", String::class](factory, /*app_id*/"foo")
                 val activityFactory = appComponent.clz["getActivityFactory"](appComponent)
-                val activityComponent = activityFactory.clz["create", String::class](activityFactory, /*activity_id*/"bar")
+                val activityComponent =
+                    activityFactory.clz["create", String::class](activityFactory, /*activity_id*/"bar")
 
                 with(activityComponent) {
                     val appManager = clz["getAppManager"](activityComponent)
@@ -177,6 +178,179 @@ class ComponentHierarchyKotlinTest(
                     assertNotEquals(illegal = appManager, actual = appManagerProvider.get())
                     assertEquals(expected = appManagerLazy.get(), actual = appManagerLazy.get())
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `subcomponents - one more advanced case`() {
+        givenKotlinSource(
+            "test.TestCase",
+            """
+            import kotlin.test.assertEquals
+
+            @Scope annotation class ActivityScoped
+             
+            interface Theme
+            
+            class DefaultTheme @Inject constructor() : Theme
+            
+            class DarkTheme @Inject constructor(): Theme
+            
+            class RootClass
+
+            @ActivityScoped
+            class ActivityScopedClass @Inject constructor()
+
+            class CameraSettings @Inject constructor(val theme: Theme)
+            
+            open class Activity
+            
+            class SettingsActivity : Activity()
+            
+            @Singleton class SingletonClass @Inject constructor()
+             
+            //////////////////////////////////////
+            
+            @Module(subcomponents = [MainActivityComponent::class, SettingsActivityComponent::class])
+            interface ApplicationModule {
+                companion object {
+                    @Provides
+                    fun rootClass(): RootClass = RootClass()
+                }
+            }
+            
+            @Module(subcomponents = [ProfileSettingsFragmentComponent::class, ProfileFragmentComponent::class])
+            class SettingsActivityFragmentModule (private val settingsActivity: SettingsActivity) {
+                @Provides fun activity(): Activity = settingsActivity
+            }
+            
+            @Module
+            object MainActivityModule {
+                @Provides
+                fun activity() = Activity()
+            }
+            
+            @Module(subcomponents = [CameraFragmentComponent::class])
+            interface CameraFragmentModule {
+            }
+            
+            @Module(subcomponents = [CameraFragmentComponent::class, ProfileFragmentComponent::class])
+            interface ProfileCameraModule
+            
+            @Module
+            interface DefaultThemeModule {
+                @Binds fun theme(i: DefaultTheme): Theme
+            }
+            @Module
+            interface DarkThemeModule {
+                @Binds fun theme(i: DarkTheme): Theme
+            }
+            
+            //////////////////////////////////////
+            
+            @Singleton
+            @Component(modules = [ApplicationModule::class])
+            interface ApplicationComponent {    
+                val mainActivity: MainActivityComponent.Factory
+                val settingsActivity: SettingsActivityComponent.Factory
+            }
+            
+            @ActivityScoped
+            @Component(modules = [CameraFragmentModule::class, ProfileCameraModule::class, DefaultThemeModule::class, MainActivityModule::class],
+                isRoot = false)
+            interface MainActivityComponent {
+                val cameraFragmentComponent: CameraFragmentComponent.Factory
+                val profileFragmentComponent: ProfileFragmentComponent.Factory
+                
+                fun rootClass(): RootClass
+            
+                @Component.Factory
+                interface Factory {
+                    fun create(): MainActivityComponent
+                }
+            }
+            
+            @ActivityScoped
+            @Component(modules = [DarkThemeModule::class, SettingsActivityFragmentModule::class], isRoot = false)
+            interface SettingsActivityComponent {
+                fun rootClass(): RootClass
+                
+                val profileFragmentComponent: ProfileFragmentComponent.Factory
+                val profileSettingsFragmentComponent: ProfileSettingsFragmentComponent.Factory
+                
+                @Component.Factory
+                interface Factory {
+                    fun create(settingsActivityFragmentModule: SettingsActivityFragmentModule): SettingsActivityComponent
+                }
+            }
+            
+            @Component(isRoot = false)
+            interface CameraFragmentComponent {
+                fun cameraSettings(): CameraSettings
+            
+                @Component.Factory
+                interface Factory {
+                    fun create(): CameraFragmentComponent
+                }
+            }
+            
+            @Component(isRoot = false)
+            interface ProfileFragmentComponent {
+                fun activityScoped(): ActivityScopedClass
+                fun activity(): Activity
+                fun singleton(): SingletonClass
+            
+                @Component.Factory
+                interface Factory {
+                    fun create(): ProfileFragmentComponent
+                }
+            }
+            
+            @Component(isRoot = false)
+            interface ProfileSettingsFragmentComponent {
+                fun cameraSettings(): CameraSettings
+            
+                @Component.Factory
+                interface Factory {
+                    fun create(): ProfileSettingsFragmentComponent
+                }
+            }
+            
+            fun test() {
+                val c = DaggerApplicationComponent()
+                val settingsActivityFragmentModule = SettingsActivityFragmentModule(SettingsActivity())
+                
+                val mainActivityC = c.mainActivity.create()
+                val settingsActivityC = c.settingsActivity.create(settingsActivityFragmentModule)
+                
+                val cameraFragmentC = mainActivityC.cameraFragmentComponent.create()
+                val profileFragmentC = mainActivityC.profileFragmentComponent.create()
+            
+                val profileFragmentFromSettingsC = settingsActivityC.profileFragmentComponent.create()
+                val profileSettingsFragmentC = settingsActivityC.profileSettingsFragmentComponent.create()
+            
+                assert(mainActivityC.rootClass() !== settingsActivityC.rootClass())
+
+                assertEquals(profileFragmentC.activity()::class, Activity::class)
+                assertEquals<Any>(profileFragmentFromSettingsC.activity()::class, SettingsActivity::class)
+
+                assert(profileFragmentC.activityScoped() === profileFragmentC.activityScoped())
+                assert(profileFragmentFromSettingsC.activityScoped() === profileFragmentFromSettingsC.activityScoped())
+                assert(profileFragmentFromSettingsC.activityScoped() !== profileFragmentC.activityScoped())
+
+                assert(profileFragmentC.singleton() === profileFragmentFromSettingsC.singleton())
+                assertEquals(cameraFragmentC.cameraSettings().theme::class, DefaultTheme::class)
+                assertEquals(profileSettingsFragmentC.cameraSettings().theme::class, DarkTheme::class)
+            }
+        """,
+        )
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerApplicationComponent")
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
             }
         }
     }

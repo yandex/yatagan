@@ -155,7 +155,8 @@ internal class ProvisionGenerator(
                     function = binding.provider,
                     arguments = binding.params,
                     instance = binding.requiredModuleInstance?.let { module ->
-                        generators[binding.owner].factoryGenerator.fieldNameFor(module)
+                        val component = componentForBinding(inside = thisGraph, owner = binding.owner)
+                        "$component.${generators[binding.owner].factoryGenerator.fieldNameFor(module)}"
                     },
                 ) { dependency -> generateAccess(this, dependency) }
             }
