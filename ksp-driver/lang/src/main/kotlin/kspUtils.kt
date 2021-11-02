@@ -32,26 +32,29 @@ internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers ||
 internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT
 
 internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
-    val packageName: String
-    val simpleNames: List<String>
-
-    var javaDeclaration: String? = null
-    if (declaration.packageName.asString().startsWith("kotlin")) {
-        javaDeclaration = Utils.resolver.mapKotlinNameToJava(declaration.qualifiedName!!)?.asString()?.takeIf {
-            it != declaration.qualifiedName!!.asString()
+    val qualifiedName = declaration.qualifiedName!!
+    val mappedJavaName = if (declaration.packageName.asString().startsWith("kotlin")) {
+        Utils.resolver.mapKotlinNameToJava(qualifiedName)?.asString()?.takeIf {
+            // Do not use it the same as original.
+            it != qualifiedName.asString()
         }
+    } else null
+    return if (mappedJavaName != null) {
+        // We assume, that mapped Java type is not a nested type - only one simple name is present.
+        // Otherwise, we would have to do `Utils.resolver.getJavaClassByName()` yet it seems like and overkill.
+        ClassNameModel(
+            packageName = mappedJavaName.substringBeforeLast('.'),
+            simpleNames = listOf(mappedJavaName.substringAfterLast('.')),
+            typeArguments = emptyList(),
+        )
+    } else {
+        val packageName = declaration.packageName.asString()
+        ClassNameModel(
+            packageName = packageName,
+            simpleNames = qualifiedName.asString().substring(startIndex = packageName.length + 1).split('.'),
+            typeArguments = emptyList(),
+        )
     }
-
-    packageName = javaDeclaration?.substringBeforeLast('.') ?: declaration.packageName.asString()
-    simpleNames = javaDeclaration?.substringAfterLast('.')?.let(::listOf) ?:
-        declaration.qualifiedName!!.asString().substring(packageName.length + 1).split('.')
-
-
-    return ClassNameModel(
-        packageName = packageName,
-        simpleNames = simpleNames,
-        typeArguments = emptyList(),
-    )
 }
 
 internal fun ClassNameModel(type: KSType): ClassNameModel {

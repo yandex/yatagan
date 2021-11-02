@@ -78,7 +78,6 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
-    @Ignore("TODO - support companion objects")
     fun `basic component - @Module with companion object`() {
         givenKotlinSource("test.Api", """interface Api {}""")
         givenKotlinSource("test.Impl", """class Impl : Api""")
