@@ -206,81 +206,6 @@ class CoreBindingsTest(
         }
     }
 
-    @Test
-    fun `basic component - qualified dependencies`() {
-        useSourceSet(classes)
-        useSourceSet(apiImpl)
-
-        givenJavaSource(
-            "test.MyModule", """
-        @Module
-        public interface MyModule {
-          @Named("hello")
-          @Provides static Api provides(Provider<MyScopedClass> dep, MySimpleClass dep2) {
-            return new Impl();
-          }
-        }
-        """
-        )
-        givenJavaSource(
-            "test.TestComponent", """
-            @Component(modules = {MyModule.class}) @Singleton
-            public interface TestComponent {
-                @Named("hello") Api get();
-                @Named("hello") Provider<Api> getProvider();
-                @Named("hello") Lazy<Api> getLazy();
-            }
-        """
-        )
-
-        compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
-            withNoWarnings()
-        }
-    }
-
-    @Test
-    fun `basic component - multiple qualified dependencies`() {
-        useSourceSet(apiImpl)
-
-        givenJavaSource("test.MyModule", """
-            @Module
-            public interface MyModule {
-              @Named("foo") @Singleton @Provides
-              static Api providesFoo() { return new Impl(); }
-              @Named("bar") @Singleton @Provides
-              static Api providesApi() { return new Impl(); }
-              @Named("quu") @Singleton @Provides
-              static Api providesQuu() { return new Impl(); }
-            }
-        """)
-        givenJavaSource("test.TestComponent", """
-            @Component(modules = {MyModule.class}) 
-            @Singleton
-            public interface TestComponent {
-                @Named("foo") Api getFoo();
-                @Named("bar") Api getBar();
-                @Named("quu") Api getQuu();
-            }
-        """)
-        givenKotlinSource("test.TestCase", """
-            fun test() {
-                val c = DaggerTestComponent()
-                assert(c.getFoo() === c.getFoo()); assert(c.getFoo() !== c.getBar())
-                assert(c.getBar() === c.getBar()); assert(c.getBar() !== c.getQuu())
-                assert(c.getQuu() === c.getQuu())
-            }
-        """)
-
-        compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { testCase ->
-                testCase["test"](null)
-            }
-        }
-    }
-
     @Test(timeout = 10_000)
     fun `basic component - cyclic reference with Provider edge`() {
         useSourceSet(classes)
@@ -294,37 +219,6 @@ class CoreBindingsTest(
             @Component @Singleton
             public interface TestComponent {
                 MyClassA get();
-            }
-        """)
-
-        compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
-            withNoWarnings()
-        }
-    }
-
-    @Test
-    fun `basic component - included modules are deduplicated`() {
-        useSourceSet(apiImpl)
-        givenJavaSource("test.TestCase", """
-            @Module(includes = {MyModuleBye.class, MyModuleFoo.class})
-            interface MyModuleHello {
-                @Provides @Named("hello") static Api helloApi() { return new Impl(); } 
-            }
-            @Module(includes = {MyModuleFoo.class})
-            interface MyModuleBye{
-                @Provides @Named("bye") static Api byeApi() { return new Impl(); } 
-            }
-            @Module
-            interface MyModuleFoo{
-                @Provides @Named("foo") static Api fooApi() { return new Impl(); } 
-            }
-            
-            @Component(modules = {MyModuleHello.class, MyModuleBye.class})
-            interface TestComponent {
-                @Named("hello") Api hello();
-                @Named("bye") Api bye();
-                @Named("foo") Api foo();
             }
         """)
 
