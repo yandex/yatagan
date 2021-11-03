@@ -52,6 +52,63 @@ class RuntimeTest(
         }
     }
 
+
+    @Test
+    fun `basic component - included modules are deduplicated`() {
+        givenJavaSource("test.Simple", """
+            public class Simple {
+                String value;
+                
+                public Simple(String v) {
+                    value = v;
+                }
+                
+                public String getValue() {
+                    return value;
+                }
+            }
+        """)
+
+        givenJavaSource("test.TestCase", """
+            @Module(includes = {MyModuleBye.class, MyModuleFoo.class})
+            interface MyModuleHello {
+                @Provides @Named("hello") static Simple hello() { return new Simple("hello"); } 
+            }
+            @Module(includes = {MyModuleFoo.class})
+            interface MyModuleBye{
+                @Provides @Named("bye") static Simple bye() { return new Simple("bye"); } 
+            }
+            @Module
+            interface MyModuleFoo{
+                @Provides @Named("foo") static Simple foo() { return new Simple("foo"); } 
+            }
+            
+            @Component(modules = {MyModuleHello.class, MyModuleBye.class})
+            interface TestComponent {
+                @Named("hello") Simple hello();
+                @Named("bye") Simple bye();
+                @Named("foo") Simple foo();
+            }
+        """)
+
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = DaggerTestComponent()
+                assert(c.hello().value == "hello")
+                assert(c.bye().value == "bye")
+                assert(c.foo().value == "foo")
+            } 
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
+            }
+        }
+    }
+
     @Test
     fun `check @Provides used instead of @Inject constructor if exists`() {
         givenKotlinSource("test.TestCase", """

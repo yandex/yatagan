@@ -20,6 +20,7 @@ class CoreBindingsKotlinTest(
     fun `basic component - @Module object`() {
         givenKotlinSource("test.Api", """interface Api {}""")
         givenKotlinSource("test.Impl", """class Impl : Api""")
+        givenKotlinSource("test.ExplicitImpl", """class ExplicitImpl : Api""")
 
         givenKotlinSource(
             "test.MyModule", """
@@ -27,6 +28,10 @@ class CoreBindingsKotlinTest(
         object MyModule {
           @Provides
           fun provides(): Api = Impl()
+          
+          @Provides
+          @JvmStatic
+          fun providesExplicit() = ExplicitImpl()
         }
         """
         )
@@ -37,39 +42,13 @@ class CoreBindingsKotlinTest(
                 fun get(): test.Api
                 fun getProvider(): Provider<test.Api>
                 fun getLazy(): Lazy<test.Api>
+                
+                fun getExplicit(): test.ExplicitImpl
+                fun getProviderExplicit(): Provider<test.ExplicitImpl>
+                fun getLazyExplicit(): Lazy<test.ExplicitImpl>
             }
         """
         )
-
-        compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
-            withNoWarnings()
-        }
-    }
-
-    @Test
-    fun `basic component - @Module object @JvmStatic @Provides`() {
-        givenKotlinSource("test.Api", """interface Api {}""")
-        givenKotlinSource("test.Impl", """class Impl : Api""")
-
-        givenKotlinSource(
-            "test.MyModule", """
-        @Module
-        object MyModule {
-            @JvmStatic
-            @Provides fun provides(): Api = Impl()
-        }
-        """
-        )
-        givenKotlinSource(
-            "test.TestComponent", """
-            @Component(modules = [MyModule::class]) @Singleton
-            interface TestComponent {
-                fun get(): Api;
-                fun getProvider(): Provider<Api>;
-                fun getLazy(): Lazy<Api>;
-            }
-        """)
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
@@ -81,6 +60,7 @@ class CoreBindingsKotlinTest(
     fun `basic component - @Module with companion object`() {
         givenKotlinSource("test.Api", """interface Api {}""")
         givenKotlinSource("test.Impl", """class Impl : Api""")
+        givenKotlinSource("test.ExplicitImpl", """class ExplicitImpl""")
 
         givenKotlinSource(
             "test.MyModule", """
@@ -89,6 +69,10 @@ class CoreBindingsKotlinTest(
             companion object {
                 @Provides
                 fun provides(): Api = Impl()
+
+                @Provides
+                @JvmStatic
+                fun providesExplicit() = ExplicitImpl()
             }
         }
         """
@@ -100,42 +84,13 @@ class CoreBindingsKotlinTest(
                 fun get(): test.Api
                 fun getProvider(): Provider<test.Api>
                 fun getLazy(): Lazy<test.Api>
+                
+                fun getExplicit(): test.ExplicitImpl
+                fun getProviderExplicit(): Provider<test.ExplicitImpl>
+                fun getLazyExplicit(): Lazy<test.ExplicitImpl>
             }
         """
         )
-
-        compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
-            withNoWarnings()
-        }
-    }
-
-    @Test
-    fun `basic component - simple kotlin companion object @JvmStatic @Provides`() {
-        givenKotlinSource("test.Api", """interface Api {}""")
-        givenKotlinSource("test.Impl", """class Impl : Api""")
-
-        givenKotlinSource(
-            "test.MyModule", """
-        @Module
-        interface MyModule {
-            companion object {
-                @JvmStatic
-                @Provides 
-                fun provides(): Api = Impl() 
-            }
-        }
-        """
-        )
-        givenKotlinSource(
-            "test.TestComponent", """
-            @Component(modules = [MyModule::class]) @Singleton
-            interface TestComponent {
-                fun get(): Api;
-                fun getProvider(): Provider<Api>;
-                fun getLazy(): Lazy<Api>;
-            }
-        """)
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
