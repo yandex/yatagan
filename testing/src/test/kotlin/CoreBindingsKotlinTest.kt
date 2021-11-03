@@ -78,7 +78,6 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
-    @Ignore("TODO - support companion objects")
     fun `basic component - @Module with companion object`() {
         givenKotlinSource("test.Api", """interface Api {}""")
         givenKotlinSource("test.Impl", """class Impl : Api""")
@@ -323,6 +322,30 @@ class CoreBindingsKotlinTest(
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): Any;
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `basic compoonent - provide list of strings`() {
+        givenKotlinSource("test.MyModule", """
+            @Module
+            object MyModule {
+                @Provides
+                fun provides(): List<String> = listOf()
+            }
+        """
+        )
+
+        givenKotlinSource("test.TestComponent", """
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                fun get(): List<String>;
             }
         """)
 
