@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.jap
 
 import com.tschuchort.compiletesting.KotlinCompilation
-import com.tschuchort.compiletesting.kspSourcesDir
 import com.yandex.daggerlite.testing.CompileTestDriver
 import com.yandex.daggerlite.testing.CompileTestDriverBase
 import java.io.File
@@ -31,29 +30,31 @@ class JapCompileTestDriver : CompileTestDriverBase() {
 
     override fun compilesSuccessfully(block: CompileTestDriver.CompilationResultClause.() -> Unit) {
         val compilation = setupCompilation()
-        expect(KotlinCompilation.ExitCode.OK) {
-            val result = compilation.compile()
-            JapCompilationResultClause(
-                generation = compilation,
-                result = result,
-                compiledClassesLoader = URLClassLoader(
-                    arrayOf(compilation.classesDir.toURI().toURL()),
-                    JapCompileTestDriver::class.java.classLoader
-                ),
-            ).apply {
-                withNoErrors()
-                block()
+        try {
+            expect(KotlinCompilation.ExitCode.OK) {
+                val result = compilation.compile()
+                JapCompilationResultClause(
+                    generation = compilation,
+                    result = result,
+                    compiledClassesLoader = URLClassLoader(
+                        arrayOf(compilation.classesDir.toURI().toURL()),
+                        JapCompileTestDriver::class.java.classLoader
+                    ),
+                ).apply {
+                    withNoErrors()
+                    block()
+                }
+                result.exitCode
             }
-
-            compilation.japGeneratedSources().forEach { file ->
-                println("Generated file: //$file")
+        } finally {
+            for (source in compilation.japGeneratedSources()) {
+                println("Generated file://$source")
             }
-
-            result.exitCode
         }
     }
 
-    fun setupCompilation() = KotlinCompilation().apply {
+    private fun setupCompilation() = KotlinCompilation().apply {
+        basicKotlinCompilationSetup()
         sources = sourceFiles
         inheritClassPath = true
         annotationProcessors = listOf(JapDaggerLiteProcessor())

@@ -9,5 +9,6 @@ internal class CompileTimeComponentAnnotationImpl(
     override val isRoot: Boolean = impl.getBoolean("isRoot")
     override val modules: Sequence<TypeLangModel> = impl.getTypes("modules")
     override val dependencies: Sequence<TypeLangModel> = impl.getTypes("dependencies")
+    override val variant: Sequence<TypeLangModel> = impl.getTypes("variant")
 }
 

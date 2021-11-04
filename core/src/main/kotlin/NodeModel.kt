@@ -21,7 +21,7 @@ abstract class NodeModel : ClassBackedModel() {
     /**
      * self-provision binding if supported by underlying type.
      */
-    abstract fun implicitBinding(): Binding?
+    abstract fun implicitBinding(forGraph: BindingGraph): Binding?
 
     /**
      * A [NodeModel] with a request [Kind].
@@ -45,6 +45,21 @@ abstract class NodeModel : ClassBackedModel() {
              * [javax.inject.Provider]-wrapped type is requested.
              */
             Provider,
+
+            /**
+             * [com.yandex.daggerlite.Optional]-wrapped type is requested.
+             */
+            Optional,
+
+            /**
+             * TODO: doc.
+             */
+            OptionalLazy,
+
+            /**
+             * TODO: doc.
+             */
+            OptionalProvider,
         }
 
         override fun toString() = "$node [$kind]"

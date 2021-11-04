@@ -19,7 +19,7 @@ Such behaviour should later be fixed with validation steps.
     - [x] `@Binds` - no scope allowed
     - [x] `@Provides`
     - [x] kotlin objects support
-    - [ ] companion object support
+    - [x] companion object support
     - [x] module with instance support
 
 Explicitly not supported API
@@ -29,9 +29,18 @@ Explicitly not supported API
 
 ### Whetstone API
 
-- [ ] `@BindIn` is replaced by: (???)
-  - [ ] `@UnderFeature` for features
-  - [ ] `@Module(subscribers=...)` for event subscription
+- [ ] `@BindIn` is replaced by:
+  - [x] `@Conditional(/*features*/, /*variant*/` - variant - new conception instead of target modules
+  - [x] Features for subcomponents
+  - [ ] `@Module(subscribers=...)` or anything alike for event subscription
+- [x] `@ConditionHolder` - dropped and replaced by automatic implementation.
+- [x] `@Condition`, `@AnyCondition`, ...
+- [x] `@BindsFeatureScoped` -> `@Binds`
+- [ ] `@ProvidesFeatureScoped` -> `@Provides(...)`
+- [ ] Manual `Optional<T>` binding support (legacy).
+      _We don't need this if we're ready to migrate all manual bindings to `@Conditional`
+      and `@Provides(/*feature*/)` at once._ 
+- [ ] Short-circuit condition evaluation preservation.
 
 ## Full solution
 
@@ -40,5 +49,5 @@ Explicitly not supported API
 - [ ] Multi-bindings
   - [ ] `@IntoSet`
   - [ ] `@ElementsIntoSet`
-  - [ ] `@Multibinds`
-- [ ] `@Reusable`
+  - [ ] `@Multibinds` - _low priority - not used in our project._
+- [ ] `@Reusable` - _low priority - not used in our project._

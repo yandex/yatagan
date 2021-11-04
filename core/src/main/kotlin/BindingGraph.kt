@@ -14,6 +14,11 @@ interface BindingGraph {
     val localBindings: Map<Binding, BindingUsage>
 
     /**
+     * TODO: doc
+     */
+    val localConditionLiterals: Set<ConditionScope.Literal>
+
+    /**
      * Nodes that have no binding for them.
      * Generally the graph is invalid if these are not empty. Use for error reporting.
      */
@@ -42,4 +47,7 @@ interface BindingUsage {
     val direct: Int
     val provider: Int
     val lazy: Int
+    val optional: Int
+    val optionalLazy: Int
+    val optionalProvider: Int
 }

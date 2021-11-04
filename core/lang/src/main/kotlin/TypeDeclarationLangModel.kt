@@ -30,6 +30,11 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
     val allPublicFunctions: Sequence<FunctionLangModel>
 
     /**
+     * All public fields (including static and inherited ones).
+     */
+    val allPublicFields: Sequence<FieldLangModel>
+
+    /**
      * Interfaces that are declared inside this declaration.
      */
     val nestedInterfaces: Sequence<TypeDeclarationLangModel>
@@ -49,6 +54,21 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
      * [com.yandex.daggerlite.Module] annotation if present.
      */
     val moduleAnnotationIfPresent: ModuleAnnotationLangModel?
+
+    /**
+     * Aggregated [com.yandex.daggerlite.Condition], ... etc. annotations.
+     */
+    val conditions: Sequence<ConditionLangModel>
+
+    /**
+     * TODO: doc.
+     */
+    val conditionals: Sequence<ConditionalAnnotationLangModel>
+
+    /**
+     * TODO: doc.
+     */
+    val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel?
 
     override fun equals(other: Any?): Boolean
     override fun hashCode(): Int

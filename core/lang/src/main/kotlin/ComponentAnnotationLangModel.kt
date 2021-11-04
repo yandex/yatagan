@@ -7,4 +7,5 @@ interface ComponentAnnotationLangModel {
     val isRoot: Boolean
     val modules: Sequence<TypeLangModel>
     val dependencies: Sequence<TypeLangModel>
+    val variant: Sequence<TypeLangModel>
 }

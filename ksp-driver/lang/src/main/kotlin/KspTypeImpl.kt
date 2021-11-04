@@ -23,4 +23,7 @@ internal class KspTypeImpl(
 
     override val typeArguments: Sequence<TypeLangModel> =
         impl.arguments.asSequence().map { KspTypeImpl(it.type!!.resolve()) }.memoize()
+
+    override val isBoolean: Boolean
+        get() = impl == Utils.resolver.builtIns.booleanType
 }

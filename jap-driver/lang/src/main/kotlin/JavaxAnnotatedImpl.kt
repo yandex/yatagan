@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.jap.lang
 
-import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.CompileTimeAnnotationLangModel
@@ -8,8 +7,9 @@ import javax.lang.model.AnnotatedConstruct
 import javax.lang.model.element.AnnotationMirror
 import kotlin.LazyThreadSafetyMode.NONE
 
-internal abstract class JavaxAnnotatedImpl : AnnotatedLangModel {
-    protected abstract val impl: AnnotatedConstruct
+open class JavaxAnnotatedImpl<T : AnnotatedConstruct>(
+    protected val impl: T
+) : JavaxAnnotatedLangModel {
 
     override val annotations: Sequence<CompileTimeAnnotationLangModel> by lazy(NONE) {
         impl.annotationMirrors.asSequence().map(::JavaxAnnotationImpl).memoize()

@@ -8,7 +8,7 @@ package com.yandex.daggerlite.core.lang
  *
  * MAYBE: Split this into ConstructorLangModel and namely FunctionLangModel.
  */
-interface FunctionLangModel : AnnotatedLangModel {
+interface FunctionLangModel : AnnotatedLangModel, MemberLangModel {
     /**
      * Type that this function is associated with. Constructee if [isConstructor].
      */
@@ -25,19 +25,9 @@ interface FunctionLangModel : AnnotatedLangModel {
     val isAbstract: Boolean
 
     /**
-     * Whether the function is truly static (@[JvmStatic] or `static`).
-     */
-    val isStatic: Boolean
-
-    /**
      * Return type of the function.
      */
     val returnType: TypeLangModel
-
-    /**
-     * Function name.
-     */
-    val name: String
 
     /**
      * Function parameters.

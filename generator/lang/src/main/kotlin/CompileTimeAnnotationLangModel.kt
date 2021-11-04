@@ -15,4 +15,12 @@ interface CompileTimeAnnotationLangModel : AnnotationLangModel {
      * If type of the actual attribute is not the array of types then the behavior is undefined.
      */
     fun getTypes(attribute: String): Sequence<TypeLangModel>
+
+    fun getType(attribute: String): TypeLangModel
+
+    fun getString(attribute: String): String
+
+    fun getAnnotations(attribute: String): Sequence<CompileTimeAnnotationLangModel>
+
+    fun getAnnotation(attribute: String): CompileTimeAnnotationLangModel
 }

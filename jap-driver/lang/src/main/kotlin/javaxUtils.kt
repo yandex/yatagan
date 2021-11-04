@@ -15,6 +15,7 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
+import javax.lang.model.element.VariableElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
@@ -35,8 +36,23 @@ internal fun TypeMirror.asDeclaredType() = MoreTypes.asDeclared(this)
 internal fun AnnotationMirror.typesValue(param: String): Sequence<TypeMirror> =
     AnnotationMirrors.getAnnotationValue(this, param).accept(AsTypes)
 
+internal fun AnnotationMirror.typeValue(param: String): TypeMirror =
+    AnnotationMirrors.getAnnotationValue(this, param).accept(AsType)
+
 internal fun AnnotationMirror.booleanValue(param: String): Boolean =
     AnnotationMirrors.getAnnotationValue(this, param).accept(AsBoolean)
+
+internal fun AnnotationMirror.stringValue(param: String): String {
+    return AnnotationMirrors.getAnnotationValue(this, param).accept(AsString)
+}
+
+internal fun AnnotationMirror.annotationsValue(param: String): Sequence<AnnotationMirror> {
+    return AnnotationMirrors.getAnnotationValue(this, param).accept(AsAnnotations)
+}
+
+internal fun AnnotationMirror.annotationValue(param: String): AnnotationMirror {
+    return AnnotationMirrors.getAnnotationValue(this, param).accept(AsAnnotation)
+}
 
 internal fun <R> AnnotationValue.accept(visitor: AnnotationValueVisitor<R, Unit>): R = accept(visitor, Unit)
 
@@ -71,10 +87,26 @@ private object AsTypes : ExtractingVisitor<Sequence<TypeMirror>>() {
         values.asSequence().map { value -> value.accept(AsType, void) }
 }
 
+private object AsString : ExtractingVisitor<String>() {
+    override fun visitString(str: String, void: Unit) = str
+}
+
+private object AsAnnotation : ExtractingVisitor<AnnotationMirror>() {
+    override fun visitAnnotation(annotation: AnnotationMirror, void: Unit) = annotation
+}
+
+private object AsAnnotations : ExtractingVisitor<Sequence<AnnotationMirror>>() {
+    override fun visitArray(values: List<AnnotationValue>, void: Unit) =
+        values.asSequence().map { value -> value.accept(AsAnnotation, void) }
+}
+
 fun Element.asTypeElement(): TypeElement = MoreElements.asType(this)
 
-internal fun Element.asExecutableElement() = MoreElements.asExecutable(this)
+fun Element.asVariableElement(): VariableElement = MoreElements.asVariable(this)
 
+internal fun Element.isTypeElement() = MoreElements.isType(this)
+
+internal fun Element.asExecutableElement() = MoreElements.asExecutable(this)
 
 internal fun Element.getPackageElement(): PackageElement = MoreElements.getPackage(this)
 

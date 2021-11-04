@@ -11,17 +11,12 @@ abstract class ModuleModel : ClassBackedModel() {
     abstract val includes: Collection<ModuleModel>
 
     /**
-     * Bindings exposed by this module.
-     */
-    abstract val bindings: Collection<BaseBinding>
-
-    /**
      * Subcomponents installed by this module.
      */
     abstract val subcomponents: Collection<ComponentModel>
 
     /**
-     * TODO: doc
+     * Bindings exposed by this module.
      */
-    abstract val isInstanceRequired: Boolean
+    abstract fun bindings(forGraph: BindingGraph): Sequence<BaseBinding>
 }
