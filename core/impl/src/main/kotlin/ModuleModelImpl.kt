@@ -2,11 +2,11 @@ package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
 import com.yandex.daggerlite.Provides
-import com.yandex.daggerlite.core.AliasBinding
 import com.yandex.daggerlite.core.BaseBinding
+import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.ModuleModel
-import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -33,46 +33,54 @@ internal class ModuleModelImpl(
         impl.subcomponents.map(TypeLangModel::declaration).map(::ComponentModelImpl).toSet()
     }
 
-    override val bindings: Collection<BaseBinding> by lazy(NONE) {
-        val list = arrayListOf<BaseBinding>()
+    override fun bindings(forGraph: BindingGraph): Sequence<BaseBinding> = sequence {
         val mayRequireInstance = !declaration.isAbstract && !declaration.isKotlinObject
 
-        declaration.allPublicFunctions.mapNotNullTo(list) { method ->
+        for (method in declaration.allPublicFunctions) {
             val target by lazy {
                 NodeModelImpl(
                     type = method.returnType,
                     forQualifier = method,
                 )
             }
-            method.annotations.forEach { ann ->
+            for (annotation in method.annotations) {
                 when {
-                    ann.hasType<Binds>() -> AliasBinding(
-                        target = target,
-                        source = NodeModelImpl(
-                            type = method.parameters.single().type,
-                            forQualifier = method.parameters.single(),
-                        ),
-                    )
-                    ann.hasType<Provides>() -> ProvisionBinding(
+                    annotation.hasType<Binds>() -> when (method.parameters.count()) {
+                        0 -> throw IllegalStateException("@Binds with no arguments")
+                        1 -> AliasBindingImpl(
+                            owner = forGraph,
+                            target = target,
+                            source = NodeModelImpl(
+                                type = method.parameters.single().type,
+                                forQualifier = method.parameters.single(),
+                            ),
+                        )
+                        else -> AlternativesBindingImpl(
+                            owner = forGraph,
+                            target = target,
+                            alternatives = method.parameters.map { parameter ->
+                                NodeModelImpl(type = parameter.type, forQualifier = parameter)
+                            }.toList(),
+                            scope = method.annotations.find(AnnotationLangModel::isScope),
+                        )
+                    }
+                    annotation.hasType<Provides>() -> ProvisionBindingImpl(
+                        owner = forGraph,
                         target = target,
                         provider = method,
                         scope = method.annotations.find(AnnotationLangModel::isScope),
-                        requiredModuleInstance = this.takeIf {
+                        requiredModuleInstance = this@ModuleModelImpl.takeIf {
                             mayRequireInstance && !method.isStatic && !method.isFromCompanionObject
-                                                             },
+                        },
                         params = method.parameters.map { param ->
                             nodeModelDependency(type = param.type, forQualifier = param)
                         }.toList(),
+                        conditionScope = ConditionScope.Unscoped, // TODO(jeffset): support "@ProvidesFeatureScoped"
                     )
                     else -> null
-                }?.let { return@mapNotNullTo it }
+                }?.let { yield(it) }
             }
-            null
         }
-    }
-
-    override val isInstanceRequired: Boolean by lazy {
-        !declaration.isAbstract && bindings.any { it is ProvisionBinding && it.requiredModuleInstance != null }
     }
 
     companion object {

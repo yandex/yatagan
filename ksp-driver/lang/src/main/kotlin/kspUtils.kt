@@ -6,8 +6,10 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
+import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
@@ -30,6 +32,9 @@ internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): 
 internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers || isAnnotationPresent<JvmStatic>()
 
 internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT
+
+internal val KSPropertyDeclaration.isField
+    get() = origin == Origin.JAVA || origin == Origin.JAVA_LIB || isAnnotationPresent<JvmField>()
 
 internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     val qualifiedName = declaration.qualifiedName!!
@@ -72,22 +77,22 @@ internal fun KSClassDeclaration.allMemberFunctionsAndPropertiesModels(
         KspFunctionPropertyGetterImpl(
             owner = owner,
             impl = it,
-            isFromCompanionObject = this.isCompanionObject
+            isFromCompanionObject = this.isCompanionObject,
         )
     },
     getAllFunctions().map {
         KspFunctionImpl(
             owner = owner,
-            it,
-            isFromCompanionObject = this.isCompanionObject
+            impl = it,
+            isFromCompanionObject = this.isCompanionObject,
         )
     },
     // [KSClassDeclaration.getAllFunctions()] returns only member functions, not including java static.
     if (!this.isObject) getDeclaredFunctions().filter { it.isStatic }.map {
         KspFunctionImpl(
             owner = owner,
-            it,
-            isFromCompanionObject = this.isCompanionObject
+            impl = it,
+            isFromCompanionObject = this.isCompanionObject,
         )
     } else emptySequence()
 ).flatten()

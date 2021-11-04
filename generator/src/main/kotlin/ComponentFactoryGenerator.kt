@@ -2,10 +2,10 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
+import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.InstanceBinding
-import com.yandex.daggerlite.core.ModuleInstanceFactoryInput
+import com.yandex.daggerlite.core.InstanceInput
+import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
@@ -21,9 +21,9 @@ internal class ComponentFactoryGenerator(
     private val generators: Generators,
     fieldsNs: Namespace,
 ) : ComponentGenerator.Contributor {
-    private val instanceFieldNames = hashMapOf<InstanceBinding, String>()
+    private val instanceFieldNames = hashMapOf<InstanceInput, String>()
     private val moduleInstanceFieldNames = hashMapOf<ModuleModel, String>()
-    private val componentInstanceFieldNames = hashMapOf<ComponentDependencyFactoryInput, String>()
+    private val componentInstanceFieldNames = hashMapOf<ComponentDependencyInput, String>()
     private val inputFieldNames = mutableMapOf<ComponentFactoryModel.Input, String>()
 
     init {
@@ -32,10 +32,10 @@ internal class ComponentFactoryGenerator(
                 val fieldName = fieldsNs.name(input.paramName)
                 inputFieldNames[input] = fieldName
                 when (input) {
-                    is ComponentDependencyFactoryInput -> componentInstanceFieldNames[input] = fieldName
-                    is InstanceBinding -> instanceFieldNames[input] = fieldName
-                    is ModuleInstanceFactoryInput -> moduleInstanceFieldNames[input.target] = fieldName
-                }
+                    is ComponentDependencyInput -> componentInstanceFieldNames[input] = fieldName
+                    is InstanceInput -> instanceFieldNames[input] = fieldName
+                    is ModuleInstanceInput -> moduleInstanceFieldNames[input.module] = fieldName
+                }.let { /* exhaustive */ }
             }
         }
     }
@@ -47,8 +47,8 @@ internal class ComponentFactoryGenerator(
 
     val implName: ClassName = componentImplName.nestedClass("ComponentFactoryImpl")
 
-    fun fieldNameFor(input: InstanceBinding) = checkNotNull(instanceFieldNames[input])
-    fun fieldNameFor(input: ComponentDependencyFactoryInput) = checkNotNull(componentInstanceFieldNames[input])
+    fun fieldNameFor(input: InstanceInput) = checkNotNull(instanceFieldNames[input])
+    fun fieldNameFor(input: ComponentDependencyInput) = checkNotNull(componentInstanceFieldNames[input])
     fun fieldNameFor(graph: BindingGraph) = checkNotNull(superComponentFieldNames[graph])
     fun fieldNameFor(module: ModuleModel) = checkNotNull(moduleInstanceFieldNames[module])
 

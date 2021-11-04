@@ -1,17 +1,19 @@
 package com.yandex.daggerlite.generator
 
+import com.yandex.daggerlite.core.AlternativesBinding
 import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.BindingUsage
-import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
+import com.yandex.daggerlite.core.ComponentDependencyBinding
+import com.yandex.daggerlite.core.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.core.ComponentInstanceBinding
-import com.yandex.daggerlite.core.DependencyComponentEntryPointBinding
+import com.yandex.daggerlite.core.EmptyBinding
 import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
-import com.yandex.daggerlite.core.isScoped
+import com.yandex.daggerlite.core.isNotEmpty
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -27,10 +29,14 @@ internal class ProvisionGenerator(
     private val generators: Generators,
 ) : ComponentGenerator.Contributor {
 
-    private val strategies: Map<BaseBinding, ProvisionStrategy> = thisGraph.localBindings.entries.associateBy(
+    private val strategies: Map<Binding, ProvisionStrategy> = thisGraph.localBindings.entries.associateBy(
         keySelector = { (binding, _) -> binding },
-        valueTransform = { (binding, usage) ->
-            if (binding.isScoped()) {
+        valueTransform = fun(entry: Map.Entry<Binding, BindingUsage>): ProvisionStrategy {
+            val (binding, usage) = entry
+            if (binding is EmptyBinding) {
+                return EmptyProvisionStrategy
+            }
+            val strategy = if (binding.scope != null) {
                 if (usage.lazy + usage.provider == 0) {
                     // No need to generate actual provider instance, inline caching would do.
                     // TODO: There's a theoretical possibility to use inline strategy here if it can be proven,
@@ -83,6 +89,26 @@ internal class ProvisionGenerator(
                     )
                 }
             }
+            return if (usage.optional > 0) {
+                fun conditionalStrategy(kind: DependencyKind): ConditionalProvisionStrategy {
+                    return ConditionalProvisionStrategy(
+                        underlying = strategy,
+                        binding = binding,
+                        generator = this,
+                        methodsNs = methodsNs,
+                        generators = generators,
+                        dependencyKind = kind,
+                    )
+                }
+                CompositeStrategy(
+                    directStrategy = strategy,
+                    conditionalStrategy = conditionalStrategy(DependencyKind.Direct),
+                    conditionalLazyStrategy = if (usage.optionalLazy > 0)
+                        conditionalStrategy(DependencyKind.Lazy) else null,
+                    conditionalProviderStrategy = if (usage.optionalProvider > 0)
+                        conditionalStrategy(DependencyKind.Provider) else null,
+                )
+            } else strategy
         },
     )
 
@@ -128,7 +154,7 @@ internal class ProvisionGenerator(
         generateAccess(builder, binding, kind)
     }
 
-    fun generateAccess(builder: ExpressionBuilder, binding: BaseBinding, kind: DependencyKind) {
+    private fun generateAccess(builder: ExpressionBuilder, binding: BaseBinding, kind: DependencyKind) {
         val generator = if (binding.owner != thisGraph) {
             // Inherited binding
             generators[binding.owner].generator
@@ -148,7 +174,7 @@ internal class ProvisionGenerator(
             is InstanceBinding -> {
                 val component = componentForBinding(inside = thisGraph, owner = binding.owner)
                 val factory = generators[binding.owner].factoryGenerator
-                +"$component.${factory.fieldNameFor(binding)}"
+                +"$component.${factory.fieldNameFor(binding.input)}"
             }
             is ProvisionBinding -> {
                 generateCall(
@@ -164,26 +190,52 @@ internal class ProvisionGenerator(
                 +"new %T(".formatCode(generators[binding.targetGraph].factoryGenerator.implName)
                 join(binding.targetGraph.usedParents) { parentGraph ->
                     +buildExpression {
-                        generators[binding.owner].generator
-                            .generateAccess(this, NodeModel.Dependency(parentGraph.model))
+                        +componentForBinding(inside = thisGraph, owner = parentGraph)
                     }
                 }
                 +")"
             }
+            is AlternativesBinding -> {
+                // The whole result is nullable if not exhaustive.
+                with(builder) {
+                    var exhaustive = false
+                    binding.alternatives.forEach { alternative: NodeModel ->
+                        val altBinding = thisGraph.resolveBinding(alternative)
+                        if (altBinding.conditionScope.isNotEmpty) {
+                            val expression = buildExpression {
+                                val gen = generators[thisGraph].conditionGenerator
+                                gen.expression(this, altBinding.conditionScope)
+                            }
+                            +"%L ? ".formatCode(expression)
+                            generators[altBinding.owner].generator
+                                .generateAccess(builder, altBinding, DependencyKind.Direct)
+                            +" : "
+                        } else {
+                            generators[altBinding.owner].generator
+                                .generateAccess(builder, altBinding, DependencyKind.Direct)
+                            exhaustive = true
+                        }
+                    }
+                    if (!exhaustive) {
+                        +"null /*empty*/"
+                    }
+                }
+            }
             is ComponentInstanceBinding -> {
                 +componentForBinding(inside = thisGraph, owner = binding.owner)
             }
-            is ComponentDependencyFactoryInput -> {
+            is ComponentDependencyBinding -> {
                 val factory = generators[binding.owner].factoryGenerator
-                +factory.fieldNameFor(binding)
+                +factory.fieldNameFor(binding.input)
             }
-            is DependencyComponentEntryPointBinding -> {
+            is ComponentDependencyEntryPointBinding -> {
                 val factory = generators[binding.owner].factoryGenerator
                 +factory.fieldNameFor(binding.input)
                 +"."
-                +binding.entryPoint.getter.name
+                +binding.getter.name
                 +"()"
             }
+            is EmptyBinding -> throw AssertionError("not handled here")
         }.let { /*exhaustive*/ }
     }
 
@@ -192,6 +244,7 @@ internal class ProvisionGenerator(
             get() = when (this) {
                 // TODO: sync this with core.
                 is ProvisionBinding -> this.params.size
+                is AlternativesBinding -> this.alternatives.size
                 else -> 0
             }
     }

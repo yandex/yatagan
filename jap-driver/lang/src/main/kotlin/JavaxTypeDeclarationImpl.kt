@@ -1,18 +1,17 @@
 package com.yandex.daggerlite.jap.lang
 
+import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.ClassNameModel
+import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.CompileTimeTypeDeclarationLangModel
-import com.yandex.daggerlite.generator.lang.NamedTypeLangModel
 import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 
 internal class JavaxTypeDeclarationImpl(
-    override val impl: TypeElement,
-) : JavaxAnnotatedImpl(), CompileTimeTypeDeclarationLangModel {
+    val impl: TypeElement,
+) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(impl), CompileTimeTypeDeclarationLangModel() {
     override val isAbstract: Boolean
         get() = impl.isAbstract
     override val isKotlinObject: Boolean
@@ -43,6 +42,12 @@ internal class JavaxTypeDeclarationImpl(
             )
         }?.let { yieldAll(it) }
     }
+
+    override val allPublicFields: Sequence<FieldLangModel> = impl.enclosedElements.asSequence()
+        .filter { it.kind == ElementKind.FIELD && it.isPublic }
+        .map { JavaxFieldImpl(owner = this, impl = it.asVariableElement()) }
+        .memoize()
+
     override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
         .asSequence()
         .filter { it.kind == ElementKind.INTERFACE }
@@ -50,16 +55,7 @@ internal class JavaxTypeDeclarationImpl(
 
     override fun asType(): TypeLangModel {
         require(impl.typeParameters.isEmpty())
-        return NoArgsTypeImpl()
-    }
-
-    private inner class NoArgsTypeImpl : NamedTypeLangModel() {
-        override val declaration: TypeDeclarationLangModel
-            get() = this@JavaxTypeDeclarationImpl
-        override val typeArguments: Sequence<Nothing>
-            get() = emptySequence()
-        override val name: ClassNameModel
-            get() = ClassNameModel(impl)
+        return NamedTypeLangModel(impl.asType())
     }
 
     override fun equals(other: Any?): Boolean {

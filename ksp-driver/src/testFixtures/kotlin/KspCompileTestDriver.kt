@@ -45,9 +45,8 @@ class KspCompileTestDriver : CompileTestDriverBase() {
             expect(KotlinCompilation.ExitCode.OK) {
                 // Second round is required to validate that generated code compiles successfully
                 val secondRound = KotlinCompilation().apply {
+                    basicKotlinCompilationSetup()
                     sources = firstRound.sources + firstRound.kspGeneratedSources().map(SourceFile::fromPath)
-                    inheritClassPath = true
-                    javacArguments += "-Xdiags:verbose"
                 }
                 val result = secondRound.compile()
                 KspCompilationResultClause(
@@ -72,9 +71,8 @@ class KspCompileTestDriver : CompileTestDriverBase() {
     }
 
     private fun setupFirstRoundCompilation() = KotlinCompilation().apply {
+        basicKotlinCompilationSetup()
         sources = sourceFiles
-        inheritClassPath = true
-        javacArguments += "-Xdiags:verbose"
         symbolProcessorProviders = listOf(KspDaggerLiteProcessorProvider())
     }
 

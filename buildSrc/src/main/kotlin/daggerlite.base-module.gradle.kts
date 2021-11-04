@@ -11,6 +11,7 @@ repositories {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + listOf(
+            "-Xopt-in=kotlin.RequiresOptIn",
             "-Xopt-in=kotlin.ExperimentalStdlibApi",
             "-Xopt-in=kotlin.contracts.ExperimentalContracts",
             "-Xopt-in=com.google.devtools.ksp.KspExperimental",

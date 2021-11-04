@@ -14,9 +14,11 @@ internal class KspAnnotationImpl(
     private val descriptor by lazy(LazyThreadSafetyMode.NONE) {
         buildString {
             append(ClassNameModel(impl.annotationType.resolve()))
-            impl.arguments.joinTo(this, separator = "$") {
+            append('(')
+            impl.arguments.joinTo(this, separator = ",") {
                 "${it.name?.asString()}=${it.value}"
             }
+            append(')')
         }
     }
 
@@ -46,10 +48,29 @@ internal class KspAnnotationImpl(
         }
     }
 
+    override fun getType(attribute: String): TypeLangModel {
+        return KspTypeImpl((impl[attribute] as KSType))
+    }
+
+    override fun getString(attribute: String): String {
+        return impl[attribute] as String
+    }
+
+    override fun getAnnotations(attribute: String): Sequence<CompileTimeAnnotationLangModel> {
+        @Suppress("UNCHECKED_CAST")
+        return (impl[attribute] as List<KSAnnotation>).asSequence().map(::KspAnnotationImpl).memoize()
+    }
+
+    override fun getAnnotation(attribute: String): CompileTimeAnnotationLangModel {
+        return KspAnnotationImpl(impl[attribute] as KSAnnotation)
+    }
+
     override fun equals(other: Any?): Boolean {
         // TODO: further optimize this
         return this === other || (other is KspAnnotationImpl && descriptor == other.descriptor)
     }
 
     override fun hashCode() = descriptor.hashCode()
+
+    override fun toString() = descriptor
 }

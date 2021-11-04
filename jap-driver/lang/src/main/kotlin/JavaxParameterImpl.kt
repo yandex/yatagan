@@ -5,9 +5,8 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import javax.lang.model.element.VariableElement
 
 internal class JavaxParameterImpl(
-    override val impl: VariableElement,
-) : JavaxAnnotatedImpl(), ParameterLangModel {
-    override val name: String
-        get() = impl.simpleName.toString()
+    impl: VariableElement,
+) : JavaxAnnotatedImpl<VariableElement>(impl), ParameterLangModel {
+    override val name: String get() = impl.simpleName.toString()
     override val type: TypeLangModel by lazy { NamedTypeLangModel(impl.asType()) }
 }

@@ -39,6 +39,16 @@ abstract class ComponentModel : NodeModel() {
     abstract val isRoot: Boolean
 
     /**
+     * TODO: doc.
+     */
+    abstract val variant: VariantModel
+
+    /**
+     * TODO: doc.
+     */
+    abstract fun conditionScope(forVariant: VariantModel): ConditionScope?
+
+    /**
      * Represents a function/property exposed from a component interface.
      * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
      */
@@ -52,5 +62,5 @@ abstract class ComponentModel : NodeModel() {
 
     final override val qualifier: Nothing? get() = null
 
-    final override fun implicitBinding(): Nothing? = null
+    final override fun implicitBinding(forGraph: BindingGraph): Nothing? = null
 }

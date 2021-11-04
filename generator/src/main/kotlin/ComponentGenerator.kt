@@ -17,6 +17,7 @@ internal class ComponentGenerator(
     private val graph: BindingGraph,
     override val implName: ClassName = graph.model.name.asClassName { "Dagger$it" },
     private val generators: GeneratorsBuilder = GeneratorsBuilder(),
+    private val parentConditionGenerator: ConditionGenerator? = null,
 ) : Generator {
     interface Contributor {
         fun generate(builder: TypeSpecBuilder)
@@ -27,15 +28,6 @@ internal class ComponentGenerator(
     private val fieldsNs = Namespace(prefix = "m")
     private val subcomponentNs = Namespace()
 
-    private val childGenerators: Map<ComponentModel, ComponentGenerator> = graph.children.associateBy(
-        keySelector = BindingGraph::model
-    ) { childGraph ->
-        ComponentGenerator(
-            graph = childGraph,
-            implName = implName.nestedClass(subcomponentNs.name(childGraph.model.name, "Impl")),
-            generators = generators,
-        )
-    }
     private val componentFactoryGenerator = lazyProvider {
         ComponentFactoryGenerator(
             thisGraph = graph,
@@ -71,9 +63,26 @@ internal class ComponentGenerator(
             generators = generators,
         ).also(this::registerContributor)
     }
+    private val conditions = ConditionGenerator(
+        fieldsNs = fieldsNs,
+        thisGraph = graph,
+        parent = parentConditionGenerator,
+        provisionGenerator = provisionGenerator,
+    ).also(this::registerContributor)
 
     init {
         generators[graph] = this
+    }
+
+    private val childGenerators: Map<ComponentModel, ComponentGenerator> = graph.children.associateBy(
+        keySelector = BindingGraph::model
+    ) { childGraph ->
+        ComponentGenerator(
+            graph = childGraph,
+            implName = implName.nestedClass(subcomponentNs.name(childGraph.model.name, "Impl")),
+            generators = generators,
+            parentConditionGenerator = conditions,
+        )
     }
 
     fun generate(): TypeSpec = buildClass(implName) {
@@ -120,6 +129,9 @@ internal class ComponentGenerator(
 
     override val generator: ProvisionGenerator
         get() = provisionGenerator.get()
+
+    override val conditionGenerator: ConditionGenerator
+        get() = conditions
 
     private fun registerContributor(contributor: Contributor) {
         contributors += contributor

@@ -6,9 +6,11 @@ import com.squareup.javapoet.TypeName
 import com.yandex.daggerlite.core.ClassBackedModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.Names
+import com.yandex.daggerlite.generator.poetry.invoke
 
 internal typealias DependencyKind = NodeModel.Dependency.Kind
 
@@ -35,7 +37,11 @@ internal fun ClassBackedModel.typeName(): TypeName {
     return name.asTypeName()
 }
 
-internal fun ClassNameModel.asTypeName(): TypeName {
+internal fun TypeLangModel.typeName(): TypeName {
+    return name.asTypeName()
+}
+
+private fun ClassNameModel.asTypeName(): TypeName {
     val className = when (simpleNames.size) {
         0 -> throw IllegalArgumentException()
         1 -> ClassName.get(packageName, simpleNames.first())
@@ -52,8 +58,11 @@ internal fun NodeModel.Dependency.asTypeName(): TypeName {
     val typeName = node.typeName()
     return when (kind) {
         DependencyKind.Direct -> typeName
-        DependencyKind.Lazy -> ParameterizedTypeName.get(Names.Lazy, typeName)
-        DependencyKind.Provider -> ParameterizedTypeName.get(Names.Provider, typeName)
+        DependencyKind.Lazy -> Names.Lazy(typeName)
+        DependencyKind.Provider -> Names.Provider(typeName)
+        DependencyKind.Optional -> Names.Optional(typeName)
+        DependencyKind.OptionalLazy -> Names.Optional(Names.Lazy(typeName))
+        DependencyKind.OptionalProvider -> Names.Optional(Names.Provider(typeName))
     }
 }
 

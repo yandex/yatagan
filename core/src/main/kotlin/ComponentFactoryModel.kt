@@ -28,5 +28,5 @@ abstract class ComponentFactoryModel : NodeModel() {
     }
 
     final override val qualifier: Nothing? get() = null
-    final override fun implicitBinding(): Nothing? = null
+    final override fun implicitBinding(forGraph: BindingGraph): Nothing? = null
 }

@@ -16,6 +16,11 @@ interface TypeLangModel {
      */
     val typeArguments: Sequence<TypeLangModel>
 
+    /**
+     * TODO: doc.
+     */
+    val isBoolean: Boolean
+
     override fun equals(other: Any?): Boolean
     override fun hashCode(): Int
 }

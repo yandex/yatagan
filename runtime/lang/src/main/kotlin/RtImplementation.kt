@@ -5,6 +5,10 @@ import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
+import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
+import com.yandex.daggerlite.core.lang.ConditionLangModel
+import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
@@ -49,7 +53,9 @@ class RtComponentAnnotationImpl(
     override val isRoot: Boolean = impl.isRoot
     override val modules: Sequence<TypeLangModel> = impl.modules.asSequence()
         .map(KClass<*>::java).map(::RtTypeDeclarationImpl).memoize()
-    override val dependencies: Sequence<TypeLangModel> = impl.modules.asSequence()
+    override val dependencies: Sequence<TypeLangModel> = impl.dependencies.asSequence()
+        .map(KClass<*>::java).map(::RtTypeDeclarationImpl).memoize()
+    override val variant: Sequence<TypeLangModel> =  impl.variant.asSequence()
         .map(KClass<*>::java).map(::RtTypeDeclarationImpl).memoize()
 }
 
@@ -105,6 +111,9 @@ class RtTypeDeclarationImpl(
         return this
     }
 
+    override val allPublicFields: Sequence<FieldLangModel>
+        get() = TODO("Not yet implemented")
+
     override val declaration: TypeDeclarationLangModel get() = this
     override val typeArguments: Sequence<Nothing> get() = emptySequence()
 
@@ -118,6 +127,15 @@ class RtTypeDeclarationImpl(
     }
 
     override fun hashCode() = impl.hashCode()
+
+    override val conditions: Sequence<ConditionLangModel>
+        get() = TODO("Not yet implemented")
+    override val conditionals: Sequence<ConditionalAnnotationLangModel>
+        get() = TODO("Not yet implemented")
+    override val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel?
+        get() = TODO("Not yet implemented")
+    override val isBoolean: Boolean
+        get() = TODO("Not yet implemented")
 }
 
 class RtTypeImpl(
@@ -136,6 +154,8 @@ class RtTypeImpl(
         is ParameterizedType -> impl.actualTypeArguments.asSequence().map(::RtTypeImpl).memoize()
         else -> emptySequence()
     }
+    override val isBoolean: Boolean
+        get() = TODO("Not yet implemented")
 
     override fun equals(other: Any?): Boolean {
         return this === other || (other is RtTypeImpl && impl == other.impl)

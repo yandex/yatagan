@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.testing
 
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -209,7 +208,6 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
-    @Ignore("Fix in ksp")
     fun `basic component - @Provides property`() {
         givenKotlinSource("test.TestCase", """
             interface Api

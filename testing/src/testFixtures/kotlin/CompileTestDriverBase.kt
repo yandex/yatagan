@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.testing
 
+import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 
 abstract class CompileTestDriverBase : CompileTestDriver {
@@ -22,5 +23,11 @@ abstract class CompileTestDriverBase : CompileTestDriver {
 
     final override fun useSourceSet(sources: SourceSet) {
         sourceSet.sourceFiles += sources.sourceFiles
+    }
+
+    protected fun KotlinCompilation.basicKotlinCompilationSetup() {
+        verbose = false
+        inheritClassPath = true
+        javacArguments += "-Xdiags:verbose"
     }
 }

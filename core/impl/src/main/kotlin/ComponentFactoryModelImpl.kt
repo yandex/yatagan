@@ -1,11 +1,8 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.BindsInstance
-import com.yandex.daggerlite.core.ComponentDependencyFactoryInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.InstanceBinding
-import com.yandex.daggerlite.core.ModuleInstanceFactoryInput
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -23,12 +20,21 @@ internal class ComponentFactoryModelImpl(
         val declaration = param.type.declaration
         when {
             ComponentModelImpl.canRepresent(declaration) ->
-                ComponentDependencyFactoryInput(ComponentModelImpl(declaration), param.name)
+                ComponentDependencyInputImpl(
+                    component = ComponentModelImpl(declaration),
+                    paramName = param.name,
+                )
             ModuleModelImpl.canRepresent(declaration) ->
-                ModuleInstanceFactoryInput(ModuleModelImpl(declaration), param.name)
+                ModuleInstanceInputImpl(
+                    module = ModuleModelImpl(declaration),
+                    paramName = param.name,
+                )
             param.isAnnotatedWith<BindsInstance>() ->
-                InstanceBinding(NodeModelImpl(param.type, forQualifier = param), param.name)
-            else -> throw IllegalStateException("invalid factory method parameter")
+                InstanceInputImpl(
+                    node = NodeModelImpl(param.type, forQualifier = param),
+                    paramName = param.name,
+                )
+            else -> throw AssertionError("invalid factory method parameter")
         }
     }.toList()
 }
