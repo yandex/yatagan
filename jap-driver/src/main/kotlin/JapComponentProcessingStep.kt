@@ -7,7 +7,6 @@ import com.yandex.daggerlite.base.ObjectCacheRegistry
 import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
-import com.yandex.daggerlite.generator.Language
 import com.yandex.daggerlite.jap.lang.ProcessingUtils
 import com.yandex.daggerlite.jap.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.jap.lang.asTypeElement
@@ -45,9 +44,6 @@ internal class JapComponentProcessingStep(
                         continue
                     }
                     ComponentGeneratorFacade(graph).run {
-                        if (targetLanguage != Language.Java)
-                            throw RuntimeException("Jap driver supports only java files generating")
-
                         val file = filer.createSourceFile(
                             "$targetPackageName.$targetClassName",
                             element,

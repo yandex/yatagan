@@ -47,7 +47,7 @@ internal class KspDaggerLiteProcessor(
                         ),
                         packageName = generator.targetPackageName,
                         fileName = generator.targetClassName,
-                        extensionName = generator.targetLanguage.extension,
+                        extensionName = "java",
                     ).bufferedWriter().use { writer ->
                         generator.generateTo(
                             out = writer,
