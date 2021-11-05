@@ -5,15 +5,15 @@ import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.ClassNameModel
-import com.yandex.daggerlite.generator.lang.NamedTypeLangModel
+import com.yandex.daggerlite.generator.lang.CtTypeLangModel
+import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspTypeImpl private constructor(
     private val impl: KSType,
-) : NamedTypeLangModel() {
-    override val name: ClassNameModel by lazy {
-        ClassNameModel(impl)
+) : CtTypeLangModel() {
+    override val name: CtTypeNameModel by lazy {
+        CtTypeNameModel(impl)
     }
 
     override val declaration: TypeDeclarationLangModel by lazy(NONE) {

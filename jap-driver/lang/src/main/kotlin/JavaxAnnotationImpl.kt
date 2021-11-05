@@ -3,7 +3,7 @@ package com.yandex.daggerlite.jap.lang
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.memoize
-import com.yandex.daggerlite.generator.lang.CompileTimeAnnotationLangModel
+import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope
 import javax.lang.model.element.AnnotationMirror
@@ -11,7 +11,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxAnnotationImpl private constructor(
     private val impl: AnnotationMirror,
-) : CompileTimeAnnotationLangModel {
+) : CtAnnotationLangModel {
     private val descriptor by lazy(NONE) { describe(impl) }
 
     override val isScope: Boolean
@@ -28,22 +28,22 @@ internal class JavaxAnnotationImpl private constructor(
     }
 
     override fun getTypes(attribute: String): Sequence<TypeLangModel> {
-        return impl.typesValue(param = attribute).map(::NamedTypeLangModel).memoize()
+        return impl.typesValue(param = attribute).map(::CtTypeLangModel).memoize()
     }
 
     override fun getType(attribute: String): TypeLangModel {
-        return NamedTypeLangModel(impl.typeValue(param = attribute))
+        return CtTypeLangModel(impl.typeValue(param = attribute))
     }
 
     override fun getString(attribute: String): String {
         return impl.stringValue(param = attribute)
     }
 
-    override fun getAnnotations(attribute: String): Sequence<CompileTimeAnnotationLangModel> {
+    override fun getAnnotations(attribute: String): Sequence<CtAnnotationLangModel> {
         return impl.annotationsValue(param = attribute).map { Factory(it) }.memoize()
     }
 
-    override fun getAnnotation(attribute: String): CompileTimeAnnotationLangModel {
+    override fun getAnnotation(attribute: String): CtAnnotationLangModel {
         return Factory(impl.annotationValue(param = attribute))
     }
 

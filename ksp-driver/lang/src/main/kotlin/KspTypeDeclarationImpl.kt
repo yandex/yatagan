@@ -12,13 +12,13 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.memoize
-import com.yandex.daggerlite.generator.lang.CompileTimeAnnotationLangModel
-import com.yandex.daggerlite.generator.lang.CompileTimeTypeDeclarationLangModel
+import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
+import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 
 internal class KspTypeDeclarationImpl private constructor(
     private val impl: KSClassDeclaration,
-) : CompileTimeTypeDeclarationLangModel() {
-    override val annotations: Sequence<CompileTimeAnnotationLangModel> = annotationsFrom(impl)
+) : CtTypeDeclarationLangModel() {
+    override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
 
     override val isAbstract: Boolean
         get() = impl.isAbstract()

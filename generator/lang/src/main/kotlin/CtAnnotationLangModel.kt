@@ -3,7 +3,7 @@ package com.yandex.daggerlite.generator.lang
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
-interface CompileTimeAnnotationLangModel : AnnotationLangModel {
+interface CtAnnotationLangModel : AnnotationLangModel {
     /**
      * Returns the [attribute] value as boolean. Must handle default values.
      * If type of the actual attribute is not [Boolean] then the behavior is undefined.
@@ -20,7 +20,7 @@ interface CompileTimeAnnotationLangModel : AnnotationLangModel {
 
     fun getString(attribute: String): String
 
-    fun getAnnotations(attribute: String): Sequence<CompileTimeAnnotationLangModel>
+    fun getAnnotations(attribute: String): Sequence<CtAnnotationLangModel>
 
-    fun getAnnotation(attribute: String): CompileTimeAnnotationLangModel
+    fun getAnnotation(attribute: String): CtAnnotationLangModel
 }

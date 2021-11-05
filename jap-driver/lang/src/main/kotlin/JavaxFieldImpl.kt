@@ -7,12 +7,12 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import javax.lang.model.element.VariableElement
 import kotlin.LazyThreadSafetyMode.NONE
 
-class JavaxFieldImpl private constructor(
+internal class JavaxFieldImpl private constructor(
     override val owner: TypeDeclarationLangModel,
     private val impl: VariableElement,
 ) : FieldLangModel {
     override val isStatic: Boolean get() = impl.isStatic
-    override val type: TypeLangModel by lazy(NONE) { NamedTypeLangModel(impl.asType()) }
+    override val type: TypeLangModel by lazy(NONE) { CtTypeLangModel(impl.asType()) }
     override val name: String get() = impl.simpleName.toString()
 
     companion object Factory : ObjectCache<VariableElement, JavaxFieldImpl>() {

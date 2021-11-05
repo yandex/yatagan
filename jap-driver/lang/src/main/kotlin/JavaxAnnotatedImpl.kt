@@ -2,16 +2,16 @@ package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.memoize
-import com.yandex.daggerlite.generator.lang.CompileTimeAnnotationLangModel
+import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.lang.model.AnnotatedConstruct
 import javax.lang.model.element.AnnotationMirror
 import kotlin.LazyThreadSafetyMode.NONE
 
-open class JavaxAnnotatedImpl<T : AnnotatedConstruct>(
+internal open class JavaxAnnotatedImpl<T : AnnotatedConstruct>(
     protected val impl: T
 ) : JavaxAnnotatedLangModel {
 
-    override val annotations: Sequence<CompileTimeAnnotationLangModel> by lazy(NONE) {
+    override val annotations: Sequence<CtAnnotationLangModel> by lazy(NONE) {
         impl.annotationMirrors.asSequence().map { JavaxAnnotationImpl(it) }.memoize()
     }
 

@@ -5,7 +5,7 @@ package com.yandex.daggerlite.jap.lang
 import com.google.auto.common.AnnotationMirrors
 import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
-import com.yandex.daggerlite.generator.lang.ClassNameModel
+import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.AnnotationValueVisitor
@@ -141,20 +141,20 @@ internal val TypeElement.isKotlinObject
                 && field.asType().asTypeElement() == this
     }
 
-internal fun ClassNameModel(type: TypeMirror): ClassNameModel {
+internal fun CtTypeNameModel(type: TypeMirror): CtTypeNameModel {
     val typeArgs = (type as? DeclaredType)?.typeArguments?.map {
-        ClassNameModel(it)
+        CtTypeNameModel(it)
     } ?: emptyList()
     return when(type.kind) {
-        TypeKind.DECLARED -> ClassNameModel(type.asTypeElement()).withArguments(typeArgs)
-        TypeKind.WILDCARD -> ClassNameModel("", listOf("?"), emptyList())
+        TypeKind.DECLARED -> CtTypeNameModel(type.asTypeElement()).withArguments(typeArgs)
+        TypeKind.WILDCARD -> CtTypeNameModel("", listOf("?"), emptyList())
         else -> throw RuntimeException("Unexpected type: $type")
     }
 }
 
-internal fun ClassNameModel(type: TypeElement): ClassNameModel {
+internal fun CtTypeNameModel(type: TypeElement): CtTypeNameModel {
     val packageName = type.getPackageElement().qualifiedName.toString()
     val simpleNames = type.qualifiedName.substring(packageName.length + 1).split('.')
 
-    return ClassNameModel(packageName, simpleNames, emptyList())
+    return CtTypeNameModel(packageName, simpleNames, emptyList())
 }

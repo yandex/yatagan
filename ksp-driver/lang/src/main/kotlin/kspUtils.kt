@@ -14,7 +14,7 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.core.lang.memoize
-import com.yandex.daggerlite.generator.lang.ClassNameModel
+import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import kotlin.reflect.KClass
 
 
@@ -38,7 +38,7 @@ internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classK
 internal val KSPropertyDeclaration.isField
     get() = origin == Origin.JAVA || origin == Origin.JAVA_LIB || isAnnotationPresent<JvmField>()
 
-internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
+internal fun CtTypeNameModel(declaration: KSClassDeclaration): CtTypeNameModel {
     val qualifiedName = declaration.qualifiedName!!
     val mappedJavaName = if (declaration.packageName.asString().startsWith("kotlin")) {
         @OptIn(KspExperimental::class)
@@ -50,14 +50,14 @@ internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     return if (mappedJavaName != null) {
         // We assume, that mapped Java type is not a nested type - only one simple name is present.
         // Otherwise, we would have to do `Utils.resolver.getJavaClassByName()` yet it seems like and overkill.
-        ClassNameModel(
+        CtTypeNameModel(
             packageName = mappedJavaName.substringBeforeLast('.'),
             simpleNames = listOf(mappedJavaName.substringAfterLast('.')),
             typeArguments = emptyList(),
         )
     } else {
         val packageName = declaration.packageName.asString()
-        ClassNameModel(
+        CtTypeNameModel(
             packageName = packageName,
             simpleNames = qualifiedName.asString().substring(startIndex = packageName.length + 1).split('.'),
             typeArguments = emptyList(),
@@ -65,9 +65,9 @@ internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     }
 }
 
-internal fun ClassNameModel(type: KSType): ClassNameModel {
-    return ClassNameModel(type.declaration as KSClassDeclaration)
-        .withArguments(type.arguments.map { ClassNameModel(it.type!!.resolve()) })
+internal fun CtTypeNameModel(type: KSType): CtTypeNameModel {
+    return CtTypeNameModel(type.declaration as KSClassDeclaration)
+        .withArguments(type.arguments.map { CtTypeNameModel(it.type!!.resolve()) })
 }
 
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =

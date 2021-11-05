@@ -22,24 +22,24 @@ import kotlin.LazyThreadSafetyMode.NONE
 /**
  * [TypeDeclarationLangModel] specialized for compile time implementations.
  */
-abstract class CompileTimeTypeDeclarationLangModel : TypeDeclarationLangModel {
-    abstract override val annotations: Sequence<CompileTimeAnnotationLangModel>
+abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModel {
+    abstract override val annotations: Sequence<CtAnnotationLangModel>
 
     override val componentAnnotationIfPresent: ComponentAnnotationLangModel? by lazy(NONE) {
-        annotations.find { it.hasType<Component>() }?.let(::CompileTimeComponentAnnotationImpl)
+        annotations.find { it.hasType<Component>() }?.let(::CtComponentAnnotationImpl)
     }
     override val moduleAnnotationIfPresent: ModuleAnnotationLangModel? by lazy(NONE) {
-        annotations.find { it.hasType<Module>() }?.let(::CompileTimeModuleAnnotationImpl)
+        annotations.find { it.hasType<Module>() }?.let(::CtModuleAnnotationImpl)
     }
     override val conditions: Sequence<ConditionLangModel> = sequence {
         for (annotation in annotations) {
             when {
-                annotation.hasType<Condition>() -> yield(CompileTimeConditionAnnotationImpl(annotation))
-                annotation.hasType<AnyCondition>() -> yield(CompileTimeAnyConditionAnnotationImpl(annotation))
+                annotation.hasType<Condition>() -> yield(CtConditionAnnotationImpl(annotation))
+                annotation.hasType<AnyCondition>() -> yield(CtAnyConditionAnnotationImpl(annotation))
                 annotation.hasType<AllConditions>() -> for (contained in annotation.getAnnotations("value"))
-                    yield(CompileTimeConditionAnnotationImpl(contained))
+                    yield(CtConditionAnnotationImpl(contained))
                 annotation.hasType<AnyConditions>() -> for (contained in annotation.getAnnotations("value"))
-                    yield(CompileTimeAnyConditionAnnotationImpl(contained))
+                    yield(CtAnyConditionAnnotationImpl(contained))
             }
         }
     }.memoize()
@@ -47,9 +47,9 @@ abstract class CompileTimeTypeDeclarationLangModel : TypeDeclarationLangModel {
     override val conditionals: Sequence<ConditionalAnnotationLangModel> = sequence {
         for (annotation in annotations) {
             when {
-                annotation.hasType<Conditional>() -> yield(CompileTimeConditionalAnnotationImpl(annotation))
+                annotation.hasType<Conditional>() -> yield(CtConditionalAnnotationImpl(annotation))
                 annotation.hasType<Conditionals>() -> for (contained in annotation.getAnnotations("value"))
-                    yield(CompileTimeConditionalAnnotationImpl(contained))
+                    yield(CtConditionalAnnotationImpl(contained))
             }
         }
     }.memoize()

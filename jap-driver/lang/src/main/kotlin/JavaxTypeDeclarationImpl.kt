@@ -6,13 +6,13 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.memoize
-import com.yandex.daggerlite.generator.lang.CompileTimeTypeDeclarationLangModel
+import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val impl: TypeElement,
-) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(impl), CompileTimeTypeDeclarationLangModel() {
+) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(impl), CtTypeDeclarationLangModel() {
     override val isAbstract: Boolean
         get() = impl.isAbstract
 
@@ -60,7 +60,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     override fun asType(): TypeLangModel {
         require(impl.typeParameters.isEmpty())
-        return NamedTypeLangModel(impl.asType())
+        return CtTypeLangModel(impl.asType())
     }
 
     companion object Factory : ObjectCache<TypeElement, JavaxTypeDeclarationImpl>() {
