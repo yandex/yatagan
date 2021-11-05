@@ -2,8 +2,8 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope

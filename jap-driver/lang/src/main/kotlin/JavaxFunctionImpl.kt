@@ -1,11 +1,11 @@
 package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import kotlin.LazyThreadSafetyMode.NONE

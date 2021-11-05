@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.lang
+package com.yandex.daggerlite.base
 
 private class MemoizedSequence<T>(sequence: Sequence<T>) : Sequence<T> {
     private val cache = mutableListOf<T>()

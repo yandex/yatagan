@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.jap.lang
 
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.lang.model.AnnotatedConstruct
 import javax.lang.model.element.AnnotationMirror

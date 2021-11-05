@@ -3,12 +3,12 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspFunctionImpl private constructor(

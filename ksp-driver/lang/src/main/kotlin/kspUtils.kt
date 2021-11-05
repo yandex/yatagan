@@ -13,7 +13,7 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
-import com.yandex.daggerlite.core.lang.memoize
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import kotlin.reflect.KClass
 

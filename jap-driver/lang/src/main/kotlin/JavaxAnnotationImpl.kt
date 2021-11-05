@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope

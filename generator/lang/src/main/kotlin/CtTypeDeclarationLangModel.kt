@@ -9,6 +9,7 @@ import com.yandex.daggerlite.Condition
 import com.yandex.daggerlite.Conditional
 import com.yandex.daggerlite.Conditionals
 import com.yandex.daggerlite.Module
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionLangModel
@@ -16,7 +17,6 @@ import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.hasType
-import com.yandex.daggerlite.core.lang.memoize
 import kotlin.LazyThreadSafetyMode.NONE
 
 /**

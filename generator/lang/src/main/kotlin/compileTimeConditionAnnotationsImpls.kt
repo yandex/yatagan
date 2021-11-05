@@ -1,11 +1,11 @@
 package com.yandex.daggerlite.generator.lang
 
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
 
 internal open class CtAnnotationBase(
     private val impl: CtAnnotationLangModel,
