@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.jap.lang
 
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
@@ -9,39 +10,42 @@ import com.yandex.daggerlite.generator.lang.CompileTimeTypeDeclarationLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
-internal class JavaxTypeDeclarationImpl(
+internal class JavaxTypeDeclarationImpl private constructor(
     val impl: TypeElement,
 ) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(impl), CompileTimeTypeDeclarationLangModel() {
     override val isAbstract: Boolean
         get() = impl.isAbstract
+
     override val isKotlinObject: Boolean
         get() = impl.isKotlinObject
+
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
+
     override val constructors: Sequence<FunctionLangModel> = impl.enclosedElements
         .asSequence()
         .filter { it.kind == ElementKind.CONSTRUCTOR }
         .map {
-            JavaxFunctionImpl(owner = this, impl = it.asExecutableElement(), isConstructor = true)
-        }
+            JavaxFunctionImpl(owner = this, impl = it.asExecutableElement())
+        }.memoize()
+
     override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
+        val owner = this@JavaxTypeDeclarationImpl
         yieldAll(impl.allMethods(Utils.types, Utils.elements).map {
             JavaxFunctionImpl(
-                owner = this@JavaxTypeDeclarationImpl,
+                owner = owner,
                 impl = it,
-                isConstructor = false,
-                isFromCompanionObject = false
+                isFromCompanionObject = false,
             )
         })
         impl.getCompanionObject()?.allMethods(Utils.types, Utils.elements)?.map {
             JavaxFunctionImpl(
-                owner = this@JavaxTypeDeclarationImpl,
+                owner = owner,
                 impl = it,
-                isConstructor = false,
-                isFromCompanionObject = true
+                isFromCompanionObject = true,
             )
         }?.let { yieldAll(it) }
-    }
+    }.memoize()
 
     override val allPublicFields: Sequence<FieldLangModel> = impl.enclosedElements.asSequence()
         .filter { it.kind == ElementKind.FIELD && it.isPublic }
@@ -51,16 +55,15 @@ internal class JavaxTypeDeclarationImpl(
     override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
         .asSequence()
         .filter { it.kind == ElementKind.INTERFACE }
-        .map { JavaxTypeDeclarationImpl(it.asTypeElement()) }
+        .map { Factory(it.asTypeElement()) }
+        .memoize()
 
     override fun asType(): TypeLangModel {
         require(impl.typeParameters.isEmpty())
         return NamedTypeLangModel(impl.asType())
     }
 
-    override fun equals(other: Any?): Boolean {
-        return this === other || (other is JavaxTypeDeclarationImpl && impl == other.impl)
+    companion object Factory : ObjectCache<TypeElement, JavaxTypeDeclarationImpl>() {
+        operator fun invoke(impl: TypeElement) = createCached(impl, ::JavaxTypeDeclarationImpl)
     }
-
-    override fun hashCode() = impl.hashCode()
 }

@@ -12,14 +12,6 @@ abstract class NamedTypeLangModel : TypeLangModel {
      */
     abstract val name: ClassNameModel
 
-    final override fun equals(other: Any?): Boolean {
-        return this === other || (other is NamedTypeLangModel && name == other.name)
-    }
-
-    final override fun hashCode(): Int {
-        return name.hashCode()
-    }
-
     override fun toString() = name.toString()
 
     override val isBoolean: Boolean

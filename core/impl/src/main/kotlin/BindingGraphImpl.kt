@@ -49,12 +49,12 @@ internal class BindingGraphImpl(
                         factory.createdComponent.conditionScope(forVariant = model.variant)?.let { conditionScope ->
                             yield(SubComponentFactoryBindingImpl(
                                 owner = this@BindingGraphImpl,
-                                target = factory,
+                                factory = factory,
                                 conditionScope = conditionScope,
                             ))
                         } ?: yield(EmptyBindingImpl(
                             owner = this@BindingGraphImpl,
-                            target = factory,
+                            target = factory.asNode(),
                         ))
                     }
                 }
@@ -136,11 +136,11 @@ internal class BindingGraphImpl(
                     }
                     is SubComponentFactoryBinding -> {
                         localBinding.targetGraph.usedParents.forEach { graph ->
-                            materializationQueue += NodeModel.Dependency(graph.model)
+                            materializationQueue += NodeModel.Dependency(graph.model.asNode())
                         }
                     }
                     is ComponentDependencyEntryPointBinding -> {
-                        materializationQueue += NodeModel.Dependency(localBinding.input.component)
+                        materializationQueue += NodeModel.Dependency(localBinding.input.component.asNode())
                     }
                     is AlternativesBinding -> {
                         localBinding.alternatives.mapTo(materializationQueue, NodeModel::Dependency); Unit

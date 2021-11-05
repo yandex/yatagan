@@ -12,7 +12,7 @@ open class JavaxAnnotatedImpl<T : AnnotatedConstruct>(
 ) : JavaxAnnotatedLangModel {
 
     override val annotations: Sequence<CompileTimeAnnotationLangModel> by lazy(NONE) {
-        impl.annotationMirrors.asSequence().map(::JavaxAnnotationImpl).memoize()
+        impl.annotationMirrors.asSequence().map { JavaxAnnotationImpl(it) }.memoize()
     }
 
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {

@@ -104,8 +104,6 @@ fun Element.asTypeElement(): TypeElement = MoreElements.asType(this)
 
 fun Element.asVariableElement(): VariableElement = MoreElements.asVariable(this)
 
-internal fun Element.isTypeElement() = MoreElements.isType(this)
-
 internal fun Element.asExecutableElement() = MoreElements.asExecutable(this)
 
 internal fun Element.getPackageElement(): PackageElement = MoreElements.getPackage(this)
@@ -139,8 +137,8 @@ fun TypeElement.getCompanionObject(): TypeElement? =
 //  чтобы избежать возможных ошибок с выявлением котлин обжекта.
 internal val TypeElement.isKotlinObject
     get() = isKotlin && ElementFilter.fieldsIn(enclosedElements).any { field ->
-        field.isPublic && field.isStatic && field.asType().asTypeElement() == this
-                && field.simpleName.contentEquals("INSTANCE")
+        field.isPublic && field.isStatic && field.simpleName.contentEquals("INSTANCE")
+                && field.asType().asTypeElement() == this
     }
 
 internal fun ClassNameModel(type: TypeMirror): ClassNameModel {

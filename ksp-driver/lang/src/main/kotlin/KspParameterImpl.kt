@@ -15,4 +15,10 @@ internal class KspParameterImpl(
     override val type: TypeLangModel by lazy(NONE) {
         KspTypeImpl(impl.type.resolve())
     }
+
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is KspParameterImpl && impl == other.impl)
+    }
+
+    override fun hashCode() = impl.hashCode()
 }

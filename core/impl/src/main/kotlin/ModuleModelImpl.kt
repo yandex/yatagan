@@ -2,6 +2,7 @@ package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
 import com.yandex.daggerlite.Provides
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ComponentModel
@@ -13,9 +14,9 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.hasType
 import kotlin.LazyThreadSafetyMode.NONE
 
-internal class ModuleModelImpl(
+internal class ModuleModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
-) : ModuleModel() {
+) : ModuleModel {
     init {
         require(canRepresent(declaration))
     }
@@ -26,11 +27,11 @@ internal class ModuleModelImpl(
         get() = declaration.asType()
 
     override val includes: Collection<ModuleModel> by lazy(NONE) {
-        impl.includes.map(TypeLangModel::declaration).map(::ModuleModelImpl).toSet()
+        impl.includes.map(TypeLangModel::declaration).map(Factory::invoke).toSet()
     }
 
     override val subcomponents: Collection<ComponentModel> by lazy(NONE) {
-        impl.subcomponents.map(TypeLangModel::declaration).map(::ComponentModelImpl).toSet()
+        impl.subcomponents.map(TypeLangModel::declaration).map { ComponentModelImpl(it) }.toSet()
     }
 
     override fun bindings(forGraph: BindingGraph): Sequence<BaseBinding> = sequence {
@@ -83,7 +84,9 @@ internal class ModuleModelImpl(
         }
     }
 
-    companion object {
+    companion object Factory : ObjectCache<TypeDeclarationLangModel, ModuleModelImpl>() {
+        operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ModuleModelImpl)
+
         fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
             return declaration.moduleAnnotationIfPresent != null
         }

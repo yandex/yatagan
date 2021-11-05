@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.jap.lang
 
+import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.NamedTypeLangModel
 import javax.lang.model.type.DeclaredType
@@ -15,7 +15,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 //  Кажется легче всего примитивы передавать с `name` вида ClassNAmeModel("", int, emptyList()), а в генераторе
 //  разбираться, стоит ли нам брать boxed тип.
 private class JavaxPrimitiveTypeImpl(
-    impl: PrimitiveType,
+    private val impl: PrimitiveType,
 ) : NamedTypeLangModel() {
     override val declaration: TypeDeclarationLangModel by lazy(NONE) {
         JavaxTypeDeclarationImpl(Utils.types.boxedClass(impl))
@@ -23,19 +23,33 @@ private class JavaxPrimitiveTypeImpl(
     override val name: ClassNameModel by lazy(NONE) {
         ClassNameModel(Utils.types.boxedClass(impl))
     }
-    override val typeArguments: Sequence<TypeLangModel> = emptySequence()
+    override val typeArguments: Collection<Nothing> = emptyList()
     override val isBoolean: Boolean = impl.kind == TypeKind.BOOLEAN
+
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is JavaxPrimitiveTypeImpl && impl.kind == other.impl.kind)
+    }
+
+    override fun hashCode() = impl.kind.hashCode()
 }
 
-private class JavaxDeclaredTypeImpl(
+private class JavaxDeclaredTypeImpl private constructor(
     private val impl: DeclaredType,
+    override val declaration: TypeDeclarationLangModel,
+    override val typeArguments: List<TypeLangModel>,
 ) : NamedTypeLangModel() {
     override val name: ClassNameModel by lazy(NONE) { ClassNameModel(impl) }
-    override val declaration: TypeDeclarationLangModel by lazy(NONE) {
-        JavaxTypeDeclarationImpl(impl.asTypeElement())
+
+    companion object Factory : BiObjectCache<TypeDeclarationLangModel, List<TypeLangModel>, JavaxDeclaredTypeImpl>() {
+        operator fun invoke(impl: DeclaredType): JavaxDeclaredTypeImpl {
+            return createCached(
+                key1 = JavaxTypeDeclarationImpl(impl.asTypeElement()),
+                key2 = impl.typeArguments.map(::NamedTypeLangModel),
+            ) { k1, k2 ->
+                JavaxDeclaredTypeImpl(impl = impl, declaration = k1, typeArguments = k2)
+            }
+        }
     }
-    override val typeArguments: Sequence<TypeLangModel> = impl.typeArguments
-        .asSequence().map(::NamedTypeLangModel).memoize()
 }
 
 internal fun NamedTypeLangModel(impl: TypeMirror): NamedTypeLangModel = when {

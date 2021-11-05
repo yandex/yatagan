@@ -14,13 +14,10 @@ interface TypeLangModel {
     /**
      * Type arguments.
      */
-    val typeArguments: Sequence<TypeLangModel>
+    val typeArguments: Collection<TypeLangModel>
 
     /**
      * TODO: doc.
      */
     val isBoolean: Boolean
-
-    override fun equals(other: Any?): Boolean
-    override fun hashCode(): Int
 }

@@ -3,6 +3,7 @@ package com.yandex.daggerlite.jap
 import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.ImmutableSetMultimap
 import com.yandex.daggerlite.Component
+import com.yandex.daggerlite.base.ObjectCacheRegistry
 import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
@@ -28,30 +29,31 @@ internal class JapComponentProcessingStep(
 
     override fun process(elementsByAnnotation: ImmutableSetMultimap<String, Element>): Set<Element> {
         ProcessingUtils(types, elements).use {
-
-            for (element: Element in elementsByAnnotation.values()) {
-                val model = ComponentModel(TypeDeclarationLangModel(element.asTypeElement()))
-                if (!model.isRoot) {
-                    continue
-                }
-                val graph = BindingGraph(
-                    root = model,
-                )
-                if (graph.missingBindings.isNotEmpty()) {
-                    graph.missingBindings.forEach { node ->
-                        messager.printMessage(Diagnostic.Kind.ERROR, "Missing binding for $node")
+            ObjectCacheRegistry.use {
+                for (element: Element in elementsByAnnotation.values()) {
+                    val model = ComponentModel(TypeDeclarationLangModel(element.asTypeElement()))
+                    if (!model.isRoot) {
+                        continue
                     }
-                    continue
-                }
-                ComponentGeneratorFacade(graph).run {
-                    if (targetLanguage != Language.Java)
-                        throw RuntimeException("Jap driver supports only java files generating")
-
-                    val file = filer.createSourceFile(
-                        "$targetPackageName.$targetClassName",
-                        element,
+                    val graph = BindingGraph(
+                        root = model,
                     )
-                    file.openWriter().use(::generateTo)
+                    if (graph.missingBindings.isNotEmpty()) {
+                        graph.missingBindings.forEach { node ->
+                            messager.printMessage(Diagnostic.Kind.ERROR, "Missing binding for $node")
+                        }
+                        continue
+                    }
+                    ComponentGeneratorFacade(graph).run {
+                        if (targetLanguage != Language.Java)
+                            throw RuntimeException("Jap driver supports only java files generating")
+
+                        val file = filer.createSourceFile(
+                            "$targetPackageName.$targetClassName",
+                            element,
+                        )
+                        file.openWriter().use(::generateTo)
+                    }
                 }
             }
         }

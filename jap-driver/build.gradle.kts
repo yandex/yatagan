@@ -6,6 +6,7 @@ plugins {
 val autoCommonVersion: String by extra
 
 dependencies {
+    implementation(project(":base"))
     implementation(project(":core-impl"))
     implementation(project(":generator"))
     implementation(project(":jap-driver-lang"))

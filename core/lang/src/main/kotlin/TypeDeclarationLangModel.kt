@@ -69,7 +69,4 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
      * TODO: doc.
      */
     val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel?
-
-    override fun equals(other: Any?): Boolean
-    override fun hashCode(): Int
 }
