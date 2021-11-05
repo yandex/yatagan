@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.ConditionScope.Literal
 import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
@@ -10,6 +11,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import kotlin.LazyThreadSafetyMode.NONE
 
 internal val ConditionScope.Companion.Unscoped get() = ConditionScopeImpl.Unscoped
 internal val ConditionScope.Companion.NeverScoped get() = ConditionScopeImpl.NeverScoped
@@ -78,43 +80,30 @@ private class ConditionLiteralImpl private constructor(
     override val root: TypeDeclarationLangModel,
     override val path: List<MemberLangModel>,
 ) : Literal {
-    private val precomputedHash = run {
-        var result = negated.hashCode()
-        result = 31 * result + root.hashCode()
-        result = 31 * result + path.hashCode()
-        result
+    private val negative: Literal by lazy(NONE) {
+        object : Literal by this@ConditionLiteralImpl {
+            override val negated: Boolean
+                get() = !this@ConditionLiteralImpl.negated
+
+            override fun not() = this@ConditionLiteralImpl
+        }
     }
 
-    override fun not(): Literal {
-        return ConditionLiteralImpl(negated = !negated, root = root, path = path)
-    }
+    override fun not(): Literal = negative
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ConditionLiteralImpl
-
-        if (path != other.path) return false
-        if (root != other.root) return false
-        if (negated != other.negated) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int = precomputedHash
-
-    companion object Factory {
+    companion object Factory : ObjectCache<ConditionAnnotationLangModel, ConditionLiteralImpl>() {
         operator fun invoke(model: ConditionAnnotationLangModel): Literal {
-            val matched = ConditionRegex.matchEntire(model.condition)
-                ?: throw RuntimeException("invalid condition ${model.condition}")
-            val (negate, names) = matched.destructured
-            val root = model.target.declaration
-            return ConditionLiteralImpl(
-                negated = negate.isNotEmpty(),
-                root = root,
-                path = inflatePath(root.asType(), names.split('.')),
-            )
+            return createCached(model) {
+                val matched = ConditionRegex.matchEntire(model.condition)
+                    ?: throw RuntimeException("invalid condition ${model.condition}")
+                val (negate, names) = matched.destructured
+                val root = model.target.declaration
+                ConditionLiteralImpl(
+                    negated = negate.isNotEmpty(),
+                    root = root,
+                    path = inflatePath(root.asType(), names.split('.')),
+                )
+            }
         }
 
         private fun inflatePath(root: TypeLangModel, path: List<String>): List<MemberLangModel> = buildList {

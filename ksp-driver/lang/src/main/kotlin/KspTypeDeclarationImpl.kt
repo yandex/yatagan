@@ -6,6 +6,7 @@ import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
@@ -14,12 +15,14 @@ import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.CompileTimeAnnotationLangModel
 import com.yandex.daggerlite.generator.lang.CompileTimeTypeDeclarationLangModel
 
-internal class KspTypeDeclarationImpl(
+internal class KspTypeDeclarationImpl private constructor(
     private val impl: KSClassDeclaration,
 ) : CompileTimeTypeDeclarationLangModel() {
     override val annotations: Sequence<CompileTimeAnnotationLangModel> = annotationsFrom(impl)
+
     override val isAbstract: Boolean
         get() = impl.isAbstract()
+
     override val isKotlinObject: Boolean
         get() = impl.isObject
 
@@ -28,23 +31,34 @@ internal class KspTypeDeclarationImpl(
 
     override val constructors: Sequence<FunctionLangModel> =
         impl.getConstructors().map {
-            KspFunctionImpl(owner = this, impl = it, isConstructor = true)
+            KspFunctionImpl(owner = this, impl = it)
         }.memoize()
 
-    override val allPublicFunctions: Sequence<FunctionLangModel> = sequenceOf(
-        impl.allMemberFunctionsAndPropertiesModels(owner = this@KspTypeDeclarationImpl),
-        impl.getCompanionObject()
-            ?.allMemberFunctionsAndPropertiesModels(owner = this@KspTypeDeclarationImpl)
-            ?: emptySequence()
-    ).flatten().memoize()
+    override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
+        val owner = this@KspTypeDeclarationImpl
+        yieldAll(impl.allPublicFunctions().map {
+            KspFunctionImpl(owner = owner, impl = it, isFromCompanionObject = false)
+        })
+        yieldAll(impl.allPublicProperties().map {
+            KspFunctionPropertyGetterImpl(owner = owner, impl = it, isFromCompanionObject = false)
+        })
+        impl.getCompanionObject()?.let { companion ->
+            yieldAll(companion.allPublicFunctions().map {
+                KspFunctionImpl(owner = owner, impl = it, isFromCompanionObject = true)
+            })
+            yieldAll(companion.allPublicProperties().map {
+                KspFunctionPropertyGetterImpl(owner = owner, impl = it, isFromCompanionObject = true)
+            })
+        }
+    }.memoize()
 
     override val allPublicFields: Sequence<FieldLangModel> =
-        impl.getDeclaredProperties().filter(KSPropertyDeclaration::isField).map { KspFieldImpl(it, this) }.memoize()
+        impl.getDeclaredProperties().filter(KSPropertyDeclaration::isField).map { KspFieldImpl(it) }.memoize()
 
     override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.declarations
         .filterIsInstance<KSClassDeclaration>()
         .filter { it.classKind == ClassKind.INTERFACE }
-        .map(::KspTypeDeclarationImpl)
+        .map(Factory::invoke)
         .memoize()
 
     override fun asType(): TypeLangModel {
@@ -52,10 +66,7 @@ internal class KspTypeDeclarationImpl(
         return KspTypeImpl(impl.asType(emptyList()))
     }
 
-    override fun equals(other: Any?): Boolean {
-        // MAYBE: remove this if cache is implemented
-        return this === other || (other is KspTypeDeclarationImpl && impl == other.impl)
+    companion object Factory : ObjectCache<KSClassDeclaration, KspTypeDeclarationImpl>() {
+        operator fun invoke(impl: KSClassDeclaration) = createCached(impl, ::KspTypeDeclarationImpl)
     }
-
-    override fun hashCode() = impl.hashCode()
 }

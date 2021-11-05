@@ -9,4 +9,10 @@ internal class JavaxParameterImpl(
 ) : JavaxAnnotatedImpl<VariableElement>(impl), ParameterLangModel {
     override val name: String get() = impl.simpleName.toString()
     override val type: TypeLangModel by lazy { NamedTypeLangModel(impl.asType()) }
+
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is JavaxParameterImpl && impl == other.impl)
+    }
+
+    override fun hashCode() = impl.hashCode()
 }

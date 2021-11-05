@@ -9,7 +9,6 @@ sealed interface FactoryInputBinding : Binding {
 
 interface ComponentDependencyBinding : FactoryInputBinding {
     override val input: ComponentDependencyInput
-    override val target: ComponentModel
 }
 
 /**
@@ -55,7 +54,6 @@ interface InstanceBinding : FactoryInputBinding {
 }
 
 interface SubComponentFactoryBinding : Binding {
-    override val target: ComponentFactoryModel
     val targetGraph: BindingGraph
 }
 

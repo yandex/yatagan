@@ -18,8 +18,5 @@ interface AnnotationLangModel {
      * Checks whether the annotation has given JVM type.
      */
     fun <A : Annotation> hasType(type: Class<A>): Boolean
-
-    override fun equals(other: Any?): Boolean
-    override fun hashCode(): Int
 }
 

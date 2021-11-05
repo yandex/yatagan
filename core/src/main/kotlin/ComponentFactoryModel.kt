@@ -3,14 +3,22 @@ package com.yandex.daggerlite.core
 /**
  * Represents [com.yandex.daggerlite.Component.Factory].
  */
-abstract class ComponentFactoryModel : NodeModel() {
+interface ComponentFactoryModel : ClassBackedModel {
 
-    abstract val createdComponent: ComponentModel
+    /**
+     * TODO: doc.
+     */
+    val createdComponent: ComponentModel
 
     /**
      * Factory function inputs.
      */
-    abstract val inputs: Collection<Input>
+    val inputs: Collection<Input>
+
+    /**
+     * TODO: doc
+     */
+    fun asNode(): NodeModel
 
     /**
      * Represent an input parameter of the factory method.
@@ -26,7 +34,4 @@ abstract class ComponentFactoryModel : NodeModel() {
          */
         val paramName: String
     }
-
-    final override val qualifier: Nothing? get() = null
-    final override fun implicitBinding(forGraph: BindingGraph): Nothing? = null
 }

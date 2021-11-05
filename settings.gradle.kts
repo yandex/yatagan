@@ -8,6 +8,8 @@ rootProject.name = "dagger-lite"
 
 include("api")
 
+include("base")
+
 include("core")
 include("core-lang")
 include("core-impl")

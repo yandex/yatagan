@@ -264,7 +264,7 @@ private fun DependencyKind.asOptional(): DependencyKind = when (this) {
 
 object EmptyProvisionStrategy : ProvisionStrategy {
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
-        assert(kind.asOptional() == kind)
+        assert(kind.asOptional() == kind) { "Trying to use Empty strategy in non-optional context" }
         with(builder) {
             +"%T.empty()".formatCode(Names.Optional)
         }

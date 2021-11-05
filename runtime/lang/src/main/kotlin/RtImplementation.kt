@@ -115,7 +115,7 @@ class RtTypeDeclarationImpl(
         get() = TODO("Not yet implemented")
 
     override val declaration: TypeDeclarationLangModel get() = this
-    override val typeArguments: Sequence<Nothing> get() = emptySequence()
+    override val typeArguments: Collection<Nothing> get() = emptyList()
 
     override val componentAnnotationIfPresent: ComponentAnnotationLangModel?
         get() = impl.getAnnotation(Component::class.java)?.let(::RtComponentAnnotationImpl)
@@ -150,9 +150,9 @@ class RtTypeImpl(
             }
         )
     }
-    override val typeArguments: Sequence<TypeLangModel> = when (impl) {
-        is ParameterizedType -> impl.actualTypeArguments.asSequence().map(::RtTypeImpl).memoize()
-        else -> emptySequence()
+    override val typeArguments: Collection<TypeLangModel> = when (impl) {
+        is ParameterizedType -> impl.actualTypeArguments.map(::RtTypeImpl)
+        else -> emptyList()
     }
     override val isBoolean: Boolean
         get() = TODO("Not yet implemented")

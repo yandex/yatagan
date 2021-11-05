@@ -1,17 +1,19 @@
 package com.yandex.daggerlite.ksp.lang
 
+import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getDeclaredFunctions
+import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.core.lang.memoize
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import kotlin.reflect.KClass
 
@@ -39,6 +41,7 @@ internal val KSPropertyDeclaration.isField
 internal fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     val qualifiedName = declaration.qualifiedName!!
     val mappedJavaName = if (declaration.packageName.asString().startsWith("kotlin")) {
+        @OptIn(KspExperimental::class)
         Utils.resolver.mapKotlinNameToJava(qualifiedName)?.asString()?.takeIf {
             // Do not use it the same as original.
             it != qualifiedName.asString()
@@ -68,31 +71,17 @@ internal fun ClassNameModel(type: KSType): ClassNameModel {
 }
 
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
-    declarations.filterIsInstance<KSClassDeclaration>().find { it.isCompanionObject }
+    declarations.filterIsInstance<KSClassDeclaration>().find(KSClassDeclaration::isCompanionObject)
 
-internal fun KSClassDeclaration.allMemberFunctionsAndPropertiesModels(
-    owner: TypeDeclarationLangModel,
-): Sequence<FunctionLangModel> = sequenceOf(
-    getAllProperties().map {
-        KspFunctionPropertyGetterImpl(
-            owner = owner,
-            impl = it,
-            isFromCompanionObject = this.isCompanionObject,
-        )
-    },
-    getAllFunctions().map {
-        KspFunctionImpl(
-            owner = owner,
-            impl = it,
-            isFromCompanionObject = this.isCompanionObject,
-        )
-    },
-    // [KSClassDeclaration.getAllFunctions()] returns only member functions, not including java static.
-    if (!this.isObject) getDeclaredFunctions().filter { it.isStatic }.map {
-        KspFunctionImpl(
-            owner = owner,
-            impl = it,
-            isFromCompanionObject = this.isCompanionObject,
-        )
-    } else emptySequence()
-).flatten()
+internal fun KSClassDeclaration.allPublicFunctions() : Sequence<KSFunctionDeclaration> {
+    return sequenceOf(
+        getAllFunctions(),
+        getDeclaredFunctions().filter(KSFunctionDeclaration::isStatic),
+    ).flatten().filter(KSFunctionDeclaration::isPublic)
+}
+
+internal fun KSClassDeclaration.allPublicProperties() : Sequence<KSPropertyDeclaration> {
+    return getAllProperties().filter(KSPropertyDeclaration::isPublic)
+}
+
+internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map(::KspAnnotationImpl).memoize()

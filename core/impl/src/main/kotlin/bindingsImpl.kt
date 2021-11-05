@@ -70,18 +70,21 @@ internal class ComponentInstanceBindingImpl(
     graph: BindingGraph,
 ) : ComponentInstanceBinding {
     override val owner: BindingGraph = graph
-    override val target get() = owner.model
+    override val target get() = owner.model.asNode()
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
 }
 
 internal class SubComponentFactoryBindingImpl(
     override val owner: BindingGraph,
-    override val target: ComponentFactoryModel,
     override val conditionScope: ConditionScope,
+    private val factory: ComponentFactoryModel,
 ) : SubComponentFactoryBinding {
+    override val target: NodeModel
+        get() = factory.asNode()
+
     override val targetGraph: BindingGraph by lazy(NONE) {
-        val targetComponent = target.createdComponent
+        val targetComponent = factory.createdComponent
         checkNotNull(owner.children.find { it.model == targetComponent })
     }
 

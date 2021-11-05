@@ -15,12 +15,12 @@ internal class ComponentDependencyInputImpl(
     override val paramName: String,
     override val component: ComponentModel,
 ) : ComponentDependencyInput {
-    override val target get() = component
+    override val target get() = component.asNode()
 
     override fun createBinding(forGraph: BindingGraph): ComponentDependencyBinding {
         return object : ComponentDependencyBinding {
             override val input get() = this@ComponentDependencyInputImpl
-            override val target get() = input.component
+            override val target get() = input.component.asNode()
             override val conditionScope get() = ConditionScope.Unscoped
             override val scope: Nothing? get() = null
             override val owner get() = forGraph

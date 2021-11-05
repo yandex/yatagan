@@ -1,23 +1,19 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.core.ConditionScope
-import com.yandex.daggerlite.core.DimensionElementModel
-import com.yandex.daggerlite.core.DimensionModel
-import com.yandex.daggerlite.core.VariantModel
+import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 
 internal fun matchConditionScopeFromConditionals(
     conditionals: Sequence<ConditionalAnnotationLangModel>,
-    forVariant: VariantModel,
+    forVariant: Variant,
 ): ConditionScope? {
     var maxMatched = -1
     var bestMatch: ConditionalAnnotationLangModel? = null
     outer@ for (conditional in conditionals) {
-        val v: Map<DimensionModel, DimensionElementModel> =
-            conditional.onlyIn.map(::DimensionElementImpl)
-                .associateBy(DimensionElementModel::dimension)
+        val variant = VariantImpl(conditional.onlyIn)
         var currentMatch = 0
-        for ((dimension, element) in v) {
+        for ((dimension, element) in variant.parts) {
             if (forVariant.parts[dimension] != element) {
                 continue@outer
             }

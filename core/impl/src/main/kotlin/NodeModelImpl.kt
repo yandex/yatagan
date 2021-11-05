@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ConditionScope
@@ -13,12 +14,7 @@ import javax.inject.Inject
 internal class NodeModelImpl private constructor(
     override val type: TypeLangModel,
     override val qualifier: AnnotationLangModel?,
-) : NodeModel() {
-
-    constructor(
-        type: TypeLangModel,
-        forQualifier: AnnotatedLangModel,
-    ) : this(type, forQualifier.annotations.find { it.isQualifier })
+) : NodeModel {
 
     override fun implicitBinding(forGraph: BindingGraph): Binding? {
         if (qualifier != null)
@@ -46,6 +42,26 @@ internal class NodeModelImpl private constructor(
                     nodeModelDependency(type = param.type, forQualifier = param)
                 }.toList(),
                 conditionScope = conditionScope,
+            )
+        }
+    }
+
+    override fun toString() = buildString {
+        qualifier?.let {
+            append(qualifier)
+            append(' ')
+        }
+        append(type)
+    }
+
+    companion object Factory : BiObjectCache<TypeLangModel, AnnotationLangModel?, NodeModelImpl>() {
+        operator fun invoke(
+            type: TypeLangModel,
+            forQualifier: AnnotatedLangModel?,
+        ) = createCached(type, forQualifier?.annotations?.find(AnnotationLangModel::isQualifier)) { _, qualifier ->
+            NodeModelImpl(
+                type = type,
+                qualifier = qualifier,
             )
         }
     }

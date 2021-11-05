@@ -1,6 +1,8 @@
 package com.yandex.daggerlite.ksp.lang
 
+import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
@@ -9,11 +11,10 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.memoize
 import kotlin.LazyThreadSafetyMode.NONE
 
-internal class KspFunctionImpl(
+internal class KspFunctionImpl private constructor(
     private val impl: KSFunctionDeclaration,
     override val owner: TypeDeclarationLangModel,
-    override val isConstructor: Boolean = false,
-    override val isFromCompanionObject: Boolean = false,
+    override val isFromCompanionObject: Boolean,
 ) : FunctionLangModel {
     override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
     override val isAbstract: Boolean
@@ -27,9 +28,20 @@ internal class KspFunctionImpl(
     override val parameters: Sequence<ParameterLangModel> = impl.parameters
         .asSequence().map(::KspParameterImpl).memoize()
 
-    override fun equals(other: Any?): Boolean {
-        return this === other || (other is KspFunctionImpl && impl == other.impl)
-    }
+    override val isConstructor: Boolean
+        get() = impl.isConstructor()
 
-    override fun hashCode() = impl.hashCode()
+    companion object Factory : ObjectCache<KSFunctionDeclaration, KspFunctionImpl>() {
+        operator fun invoke(
+            impl: KSFunctionDeclaration,
+            owner: TypeDeclarationLangModel,
+            isFromCompanionObject: Boolean = false,
+        ) = createCached(impl) {
+            KspFunctionImpl(
+                impl = impl,
+                owner = owner,
+                isFromCompanionObject = isFromCompanionObject,
+            )
+        }
+    }
 }
