@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.generator
 
-import com.yandex.daggerlite.generator.lang.ClassNameModel
+import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -15,7 +15,7 @@ internal class Namespace(
         val variantGenerators = Array(parts.size + 1) { index ->
             if (index < parts.size) {
                 when (val name = parts[index]) {
-                    is ClassNameModel -> iterator {
+                    is CtTypeNameModel -> iterator {
                         // Use only simple name
                         yield(name.simpleNames.last())
 

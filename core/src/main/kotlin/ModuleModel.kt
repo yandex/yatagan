@@ -15,6 +15,11 @@ interface ModuleModel : ClassBackedModel {
     val subcomponents: Collection<ComponentModel>
 
     /**
+     * TODO: doc.
+     */
+    val bootstrap: Collection<NodeModel>
+
+    /**
      * Bindings exposed by this module.
      */
     fun bindings(forGraph: BindingGraph): Sequence<BaseBinding>

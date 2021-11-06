@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -32,6 +33,10 @@ internal class ModuleModelImpl private constructor(
 
     override val subcomponents: Collection<ComponentModel> by lazy(NONE) {
         impl.subcomponents.map(TypeLangModel::declaration).map { ComponentModelImpl(it) }.toSet()
+    }
+
+    override val bootstrap: Collection<NodeModel> by lazy(NONE) {
+        impl.bootstrap.map { NodeModelImpl(type = it, forQualifier = null) }.toList()
     }
 
     override fun bindings(forGraph: BindingGraph): Sequence<BaseBinding> = sequence {

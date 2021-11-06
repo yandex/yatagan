@@ -1,8 +1,10 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.BootstrapInterface
 import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
@@ -10,6 +12,7 @@ import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import javax.inject.Inject
+import kotlin.LazyThreadSafetyMode.NONE
 
 internal class NodeModelImpl private constructor(
     override val type: TypeLangModel,
@@ -46,6 +49,13 @@ internal class NodeModelImpl private constructor(
         }
     }
 
+    override val bootstrapInterfaces: Collection<BootstrapInterfaceModel> by lazy(NONE) {
+        type.declaration.implementedInterfaces
+            .filter { it.declaration.isAnnotatedWith<BootstrapInterface>() }
+            .map { BootstrapInterfaceModel(it) }
+            .toList()
+    }
+
     override fun toString() = buildString {
         qualifier?.let {
             append(qualifier)
@@ -58,7 +68,12 @@ internal class NodeModelImpl private constructor(
         operator fun invoke(
             type: TypeLangModel,
             forQualifier: AnnotatedLangModel?,
-        ) = createCached(type, forQualifier?.annotations?.find(AnnotationLangModel::isQualifier)) { _, qualifier ->
+        ) = this(type, forQualifier?.annotations?.find(AnnotationLangModel::isQualifier))
+
+        operator fun invoke(
+            type: TypeLangModel,
+            qualifier: AnnotationLangModel?,
+        ) = createCached(type, qualifier) { _, _ ->
             NodeModelImpl(
                 type = type,
                 qualifier = qualifier,

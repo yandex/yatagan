@@ -3,8 +3,8 @@ package com.yandex.daggerlite.jap.lang
 import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.ClassNameModel
-import com.yandex.daggerlite.generator.lang.NamedTypeLangModel
+import com.yandex.daggerlite.generator.lang.CtTypeLangModel
+import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.PrimitiveType
 import javax.lang.model.type.TypeKind
@@ -15,13 +15,13 @@ import kotlin.LazyThreadSafetyMode.NONE
 //  Кажется легче всего примитивы передавать с `name` вида ClassNAmeModel("", int, emptyList()), а в генераторе
 //  разбираться, стоит ли нам брать boxed тип.
 private class JavaxPrimitiveTypeImpl(
-    private val impl: PrimitiveType,
-) : NamedTypeLangModel() {
+    override val impl: PrimitiveType,
+) : CtTypeLangModel(), JavaxTypeImpl {
     override val declaration: TypeDeclarationLangModel by lazy(NONE) {
         JavaxTypeDeclarationImpl(Utils.types.boxedClass(impl))
     }
-    override val name: ClassNameModel by lazy(NONE) {
-        ClassNameModel(Utils.types.boxedClass(impl))
+    override val name: CtTypeNameModel by lazy(NONE) {
+        CtTypeNameModel(Utils.types.boxedClass(impl))
     }
     override val typeArguments: Collection<Nothing> = emptyList()
     override val isBoolean: Boolean = impl.kind == TypeKind.BOOLEAN
@@ -34,17 +34,18 @@ private class JavaxPrimitiveTypeImpl(
 }
 
 private class JavaxDeclaredTypeImpl private constructor(
-    private val impl: DeclaredType,
+    override val impl: DeclaredType,
     override val declaration: TypeDeclarationLangModel,
-    override val typeArguments: List<TypeLangModel>,
-) : NamedTypeLangModel() {
-    override val name: ClassNameModel by lazy(NONE) { ClassNameModel(impl) }
+    override val typeArguments: List<JavaxTypeImpl>,
+) : CtTypeLangModel(), JavaxTypeImpl {
+    override val name: CtTypeNameModel by lazy(NONE) { CtTypeNameModel(impl) }
 
-    companion object Factory : BiObjectCache<TypeDeclarationLangModel, List<TypeLangModel>, JavaxDeclaredTypeImpl>() {
+    companion object Factory : BiObjectCache<TypeDeclarationLangModel, List<JavaxTypeImpl>, JavaxDeclaredTypeImpl>() {
         operator fun invoke(impl: DeclaredType): JavaxDeclaredTypeImpl {
+            // MAYBE: If some bugs are encountered with equivalence here, use TypeMirrors.equivalence() from google.auto
             return createCached(
                 key1 = JavaxTypeDeclarationImpl(impl.asTypeElement()),
-                key2 = impl.typeArguments.map(::NamedTypeLangModel),
+                key2 = impl.typeArguments.map(::JavaxTypeImpl),
             ) { k1, k2 ->
                 JavaxDeclaredTypeImpl(impl = impl, declaration = k1, typeArguments = k2)
             }
@@ -52,7 +53,11 @@ private class JavaxDeclaredTypeImpl private constructor(
     }
 }
 
-internal fun NamedTypeLangModel(impl: TypeMirror): NamedTypeLangModel = when {
+internal interface JavaxTypeImpl : TypeLangModel {
+    val impl: TypeMirror
+}
+
+internal fun JavaxTypeImpl(impl: TypeMirror): JavaxTypeImpl = when {
     impl.kind == TypeKind.DECLARED -> JavaxDeclaredTypeImpl(impl.asDeclaredType())
     impl.kind.isPrimitive -> JavaxPrimitiveTypeImpl(impl.asPrimitiveType())
     else -> throw RuntimeException("Unexpected type: $impl")

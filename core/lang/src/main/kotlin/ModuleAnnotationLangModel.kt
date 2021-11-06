@@ -6,4 +6,5 @@ package com.yandex.daggerlite.core.lang
 interface ModuleAnnotationLangModel {
     val includes: Sequence<TypeLangModel>
     val subcomponents: Sequence<TypeLangModel>
+    val bootstrap: Sequence<TypeLangModel>
 }

@@ -2,6 +2,7 @@ package com.yandex.daggerlite.rt.lang
 
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.Module
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
@@ -14,7 +15,6 @@ import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
 import java.lang.reflect.AnnotatedElement
 import java.lang.reflect.Constructor
 import java.lang.reflect.Executable
@@ -66,6 +66,8 @@ class RtModuleAnnotationImpl(
         .map(KClass<*>::java).map(::RtTypeDeclarationImpl).memoize()
     override val subcomponents: Sequence<TypeLangModel> = impl.subcomponents.asSequence()
         .map(KClass<*>::java).map(::RtTypeDeclarationImpl).memoize()
+    override val bootstrap: Sequence<TypeLangModel>
+        get() = TODO("Not yet implemented")
 }
 
 abstract class RtAnnotatedImpl : AnnotatedLangModel {
@@ -100,6 +102,8 @@ class RtTypeDeclarationImpl(
     override val constructors: Sequence<FunctionLangModel> = impl.constructors.asSequence().map {
         RtConstructorImpl(owner = this, impl = it)
     }.memoize()
+    override val implementedInterfaces: Sequence<TypeLangModel>
+        get() = TODO("Not yet implemented")
     override val allPublicFunctions: Sequence<FunctionLangModel> = impl.declaredMethods.asSequence().map {
         RtFunctionImpl(owner = this, impl = it)
     }

@@ -7,14 +7,14 @@ import com.yandex.daggerlite.core.ClassBackedModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.ClassNameModel
+import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.invoke
 
 internal typealias DependencyKind = NodeModel.Dependency.Kind
 
-internal inline fun ClassNameModel.asClassName(
+internal inline fun CtTypeNameModel.asClassName(
     transformName: (String) -> String,
 ): ClassName {
     require(typeArguments.isEmpty()) {
@@ -41,7 +41,7 @@ internal fun TypeLangModel.typeName(): TypeName {
     return name.asTypeName()
 }
 
-private fun ClassNameModel.asTypeName(): TypeName {
+private fun CtTypeNameModel.asTypeName(): TypeName {
     val className = when (simpleNames.size) {
         0 -> throw IllegalArgumentException()
         1 -> ClassName.get(packageName, simpleNames.first())
@@ -50,7 +50,7 @@ private fun ClassNameModel.asTypeName(): TypeName {
         else -> ClassName.get(packageName, simpleNames.first(), *simpleNames.drop(1).toTypedArray())
     }
     return if (typeArguments.isNotEmpty()) {
-        ParameterizedTypeName.get(className, *typeArguments.map(ClassNameModel::asTypeName).toTypedArray())
+        ParameterizedTypeName.get(className, *typeArguments.map(CtTypeNameModel::asTypeName).toTypedArray())
     } else className
 }
 

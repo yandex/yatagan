@@ -1,18 +1,19 @@
 package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
-import com.yandex.daggerlite.generator.lang.CompileTimeTypeDeclarationLangModel
+import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.TypeMirror
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val impl: TypeElement,
-) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(impl), CompileTimeTypeDeclarationLangModel() {
+) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(impl), CtTypeDeclarationLangModel() {
     override val isAbstract: Boolean
         get() = impl.isAbstract
 
@@ -21,6 +22,16 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
+
+    override val implementedInterfaces: Sequence<TypeLangModel> = sequence {
+        val queue = ArrayDeque<TypeMirror>()
+        queue += impl.interfaces
+        while (queue.isNotEmpty()) {
+            val type = queue.removeFirst()
+            queue += type.asTypeElement().interfaces
+            yield(JavaxTypeImpl(type))
+        }
+    }.memoize()
 
     override val constructors: Sequence<FunctionLangModel> = impl.enclosedElements
         .asSequence()
@@ -60,7 +71,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     override fun asType(): TypeLangModel {
         require(impl.typeParameters.isEmpty())
-        return NamedTypeLangModel(impl.asType())
+        return JavaxTypeImpl(impl.asType())
     }
 
     companion object Factory : ObjectCache<TypeElement, JavaxTypeDeclarationImpl>() {

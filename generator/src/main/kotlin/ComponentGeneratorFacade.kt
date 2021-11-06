@@ -12,10 +12,9 @@ class ComponentGeneratorFacade(
 
     val targetPackageName: String
         get() = generator.implName.packageName()
+
     val targetClassName: String
         get() = generator.implName.simpleName()
-
-    val targetLanguage: Language get() = Language.Java
 
     fun generateTo(out: Appendable) {
         JavaFile.builder(targetPackageName, generator.generate())

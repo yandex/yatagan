@@ -4,7 +4,7 @@ import com.yandex.daggerlite.core.AlternativesBinding
 import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.BindingUsage
+import com.yandex.daggerlite.core.BootstrapListBinding
 import com.yandex.daggerlite.core.ComponentDependencyBinding
 import com.yandex.daggerlite.core.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.core.ComponentInstanceBinding
@@ -15,6 +15,7 @@ import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.isNotEmpty
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
+import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.inject.Provider
@@ -31,7 +32,7 @@ internal class ProvisionGenerator(
 
     private val strategies: Map<Binding, ProvisionStrategy> = thisGraph.localBindings.entries.associateBy(
         keySelector = { (binding, _) -> binding },
-        valueTransform = fun(entry: Map.Entry<Binding, BindingUsage>): ProvisionStrategy {
+        valueTransform = fun(entry: Map.Entry<Binding, BindingGraph.BindingUsage>): ProvisionStrategy {
             val (binding, usage) = entry
             if (binding is EmptyBinding) {
                 return EmptyProvisionStrategy
@@ -114,7 +115,7 @@ internal class ProvisionGenerator(
 
     private fun inlineStrategy(
         binding: Binding,
-        usage: BindingUsage,
+        usage: BindingGraph.BindingUsage,
         methodsNs: Namespace,
     ): ProvisionStrategy {
         val inline = InlineCreationStrategy(
@@ -122,7 +123,7 @@ internal class ProvisionGenerator(
             binding = binding,
         )
 
-        if (binding.dependencyCount == 0)
+        if (binding.dependencies().isEmpty())
             return inline
         if (usage.provider + usage.lazy == 0) {
             if (usage.direct == 1) {
@@ -235,17 +236,16 @@ internal class ProvisionGenerator(
                 +binding.getter.name
                 +"()"
             }
+            is BootstrapListBinding -> {
+                with(builder) {
+                    +"%T.asList(".formatCode(Names.Arrays)
+                    join(binding.list, separator = ",\n") { node ->
+                        generateAccess(this@join, NodeModel.Dependency(node))
+                    }
+                    +")"
+                }
+            }
             is EmptyBinding -> throw AssertionError("not handled here")
         }.let { /*exhaustive*/ }
-    }
-
-    companion object {
-        private val Binding.dependencyCount
-            get() = when (this) {
-                // TODO: sync this with core.
-                is ProvisionBinding -> this.params.size
-                is AlternativesBinding -> this.alternatives.size
-                else -> 0
-            }
     }
 }

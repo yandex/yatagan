@@ -1,31 +1,28 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.BootstrapList
 import com.yandex.daggerlite.core.AliasBinding
-import com.yandex.daggerlite.core.AlternativesBinding
 import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.BindingUsage
-import com.yandex.daggerlite.core.ComponentDependencyBinding
-import com.yandex.daggerlite.core.ComponentDependencyEntryPointBinding
+import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.ComponentInstanceBinding
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.EmptyBinding
-import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.MissingBindingException
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.ProvisionBinding
-import com.yandex.daggerlite.core.SubComponentFactoryBinding
+import com.yandex.daggerlite.core.lang.LangModelFactory
+import com.yandex.daggerlite.core.lang.getAnnotation
 
 
-internal class BindingGraphImpl(
+private class BindingGraphImpl(
     override val model: ComponentModel,
+    private val factory: LangModelFactory,
     private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
     private val resolveHelper = hashMapOf<NodeModel, Binding>()
@@ -34,6 +31,7 @@ internal class BindingGraphImpl(
         val seenSubcomponents = hashSetOf<ComponentModel>()
         val seenModules = hashSetOf<ModuleModel>()
         val moduleQueue = ArrayDeque(model.modules)
+        val bootstrapSets = HashMap<BootstrapInterfaceModel, MutableSet<NodeModel>>()
         while (moduleQueue.isNotEmpty()) {
             val module = moduleQueue.removeFirst()
             if (!seenModules.add(module)) {
@@ -59,6 +57,13 @@ internal class BindingGraphImpl(
                     }
                 }
             }
+            // Handle bootstrap lists
+            for (nodeModel: NodeModel in module.bootstrap) {
+                for (bootstrapInterface: BootstrapInterfaceModel in nodeModel.bootstrapInterfaces) {
+                    bootstrapSets.getOrPut(bootstrapInterface, ::linkedSetOf) += nodeModel
+                }
+            }
+
             moduleQueue += module.includes
         }
         // Gather bindings from factory
@@ -82,6 +87,18 @@ internal class BindingGraphImpl(
                 }
             }.let { /*exhaustive*/ }
         }
+        // Bootstrap lists
+        for ((bootstrap: BootstrapInterfaceModel, nodes: Set<NodeModel>) in bootstrapSets) {
+            yield(BootstrapListBindingImpl(
+                owner = this@BindingGraphImpl,
+                target = NodeModelImpl(
+                    type = factory.getListType(bootstrap.impl),
+                    qualifier = factory.getAnnotation<BootstrapList>(),
+                ),
+                inputs = nodes,
+            ))
+        }
+
         // This component binding
         yield(ComponentInstanceBindingImpl(graph = this@BindingGraphImpl))
     }.associateByTo(mutableMapOf(), BaseBinding::target)
@@ -106,7 +123,7 @@ internal class BindingGraphImpl(
             .flatMap(ModuleModel::subcomponents)
             .filter { it.conditionScope(model.variant) != null }
             .distinct()
-            .map { BindingGraphImpl(it, parent = this) }
+            .map { BindingGraphImpl(it, parent = this, factory = factory) }
             .toList()
 
         val missing = hashSetOf<NodeModel>()
@@ -130,32 +147,10 @@ internal class BindingGraphImpl(
                 if (!seenBindings.add(localBinding)) {
                     continue
                 }
-                when (localBinding) {
-                    is ProvisionBinding -> {
-                        materializationQueue += localBinding.params
-                    }
-                    is SubComponentFactoryBinding -> {
-                        localBinding.targetGraph.usedParents.forEach { graph ->
-                            materializationQueue += NodeModel.Dependency(graph.model.asNode())
-                        }
-                    }
-                    is ComponentDependencyEntryPointBinding -> {
-                        materializationQueue += NodeModel.Dependency(localBinding.input.component.asNode())
-                    }
-                    is AlternativesBinding -> {
-                        localBinding.alternatives.mapTo(materializationQueue, NodeModel::Dependency); Unit
-                    }
-                    is EmptyBinding -> {
-                        if (dependency.kind != NodeModel.Dependency.Kind.Optional) {
-                            missing += localBinding.target
-                        }; Unit
-                    }
-                    // no dependencies for instances
-                    is ComponentDependencyBinding,
-                    is ComponentInstanceBinding,
-                    is InstanceBinding,
-                    -> Unit
-                }.let { /*exhaustive*/ }
+                if (localBinding is EmptyBinding && !dependency.kind.isOptional) {
+                    missing += localBinding.target
+                }
+                materializationQueue += localBinding.dependencies()
             }
         }
         missingBindings = missing
@@ -225,7 +220,7 @@ internal class BindingGraphImpl(
     }
 }
 
-class BindingUsageImpl : BindingUsage {
+class BindingUsageImpl : BindingGraph.BindingUsage {
     private var _direct: Int = 0
     private var _provider: Int = 0
     private var _lazy: Int = 0
@@ -255,7 +250,7 @@ class BindingUsageImpl : BindingUsage {
 /**
  * Creates [BindingGraph] instance given the root component.
  */
-fun BindingGraph(root: ComponentModel): BindingGraph {
+fun BindingGraph(root: ComponentModel, modelFactory: LangModelFactory): BindingGraph {
     require(root.isRoot) { "can't use non-root component as a root of a binding graph" }
-    return BindingGraphImpl(root)
+    return BindingGraphImpl(root, modelFactory)
 }

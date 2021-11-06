@@ -22,6 +22,11 @@ interface NodeModel : ClassBackedModel {
     fun implicitBinding(forGraph: BindingGraph): Binding?
 
     /**
+     * TODO: doc.
+     */
+    val bootstrapInterfaces: Collection<BootstrapInterfaceModel>
+
+    /**
      * A [NodeModel] with a request [Kind].
      */
     data class Dependency(

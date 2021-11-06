@@ -41,13 +41,13 @@ interface BindingGraph {
      * @throws MissingBindingException if binding is not found
      */
     fun resolveBinding(node: NodeModel): Binding
-}
 
-interface BindingUsage {
-    val direct: Int
-    val provider: Int
-    val lazy: Int
-    val optional: Int
-    val optionalLazy: Int
-    val optionalProvider: Int
+    interface BindingUsage {
+        val direct: Int
+        val provider: Int
+        val lazy: Int
+        val optional: Int
+        val optionalLazy: Int
+        val optionalProvider: Int
+    }
 }

@@ -2,23 +2,23 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.memoize
-import com.yandex.daggerlite.generator.lang.CompileTimeAnnotationLangModel
+import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspAnnotationImpl(
     private val impl: KSAnnotation,
-) : CompileTimeAnnotationLangModel {
+) : CtAnnotationLangModel {
     // NOTE: It seems there's no reasonable way to cache KspAnnotationImpl instances
     // as KSAnnotation has no sane `equals` implementation.
     // TODO: maybe invent something
 
     private val descriptor by lazy(NONE) {
         buildString {
-            append(ClassNameModel(impl.annotationType.resolve()))
+            append(CtTypeNameModel(impl.annotationType.resolve()))
             append('(')
             impl.arguments.joinTo(this, separator = ",") {
                 "${it.name?.asString()}=${it.value}"
@@ -61,12 +61,12 @@ internal class KspAnnotationImpl(
         return impl[attribute] as String
     }
 
-    override fun getAnnotations(attribute: String): Sequence<CompileTimeAnnotationLangModel> {
+    override fun getAnnotations(attribute: String): Sequence<CtAnnotationLangModel> {
         @Suppress("UNCHECKED_CAST")
         return (impl[attribute] as List<KSAnnotation>).asSequence().map(::KspAnnotationImpl).memoize()
     }
 
-    override fun getAnnotation(attribute: String): CompileTimeAnnotationLangModel {
+    override fun getAnnotation(attribute: String): CtAnnotationLangModel {
         return KspAnnotationImpl(impl[attribute] as KSAnnotation)
     }
 
