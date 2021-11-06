@@ -3,6 +3,7 @@ package com.yandex.daggerlite.core.impl
 import com.yandex.daggerlite.core.AliasBinding
 import com.yandex.daggerlite.core.AlternativesBinding
 import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.BootstrapListBinding
 import com.yandex.daggerlite.core.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
@@ -26,7 +27,9 @@ internal class ProvisionBindingImpl(
     override val params: Collection<NodeModel.Dependency>,
     override val requiredModuleInstance: ModuleModel?,
     override val conditionScope: ConditionScope,
-) : ProvisionBinding
+) : ProvisionBinding {
+    override fun dependencies() = params
+}
 
 internal class AliasBindingImpl(
     override val owner: BindingGraph,
@@ -46,6 +49,8 @@ internal class AlternativesBindingImpl(
             acc or binding.conditionScope
         }
     }
+
+    override fun dependencies() = alternatives.map(NodeModel::Dependency)
 }
 
 internal class ComponentDependencyEntryPointBindingImpl(
@@ -64,6 +69,7 @@ internal class ComponentDependencyEntryPointBindingImpl(
     override val conditionScope get() = ConditionScope.Unscoped
     override val target get() = entryPoint.dependency.node
     override val getter get() = entryPoint.getter
+    override fun dependencies() = listOf(NodeModel.Dependency(input.component.asNode()))
 }
 
 internal class ComponentInstanceBindingImpl(
@@ -73,6 +79,7 @@ internal class ComponentInstanceBindingImpl(
     override val target get() = owner.model.asNode()
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
+    override fun dependencies(): List<Nothing> = emptyList()
 }
 
 internal class SubComponentFactoryBindingImpl(
@@ -89,6 +96,21 @@ internal class SubComponentFactoryBindingImpl(
     }
 
     override val scope: Nothing? get() = null
+
+    override fun dependencies() = targetGraph.usedParents.map { NodeModel.Dependency(it.model.asNode()) }
+}
+
+internal class BootstrapListBindingImpl(
+    override val owner: BindingGraph,
+    override val target: NodeModel,
+    private val inputs: Collection<NodeModel>,
+) : BootstrapListBinding {
+    override val scope: Nothing? get() = null
+    override val conditionScope get() = ConditionScope.Unscoped
+    override fun dependencies() = inputs.map(NodeModel::Dependency)
+    override val list: Collection<NodeModel> by lazy(NONE) {
+        topologicalSort(nodes = inputs, inside = owner)
+    }
 }
 
 internal class EmptyBindingImpl(
@@ -97,4 +119,5 @@ internal class EmptyBindingImpl(
 ) : EmptyBinding {
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
+    override fun dependencies(): List<Nothing> = emptyList()
 }

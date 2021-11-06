@@ -20,6 +20,11 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
     val qualifiedName: String
 
     /**
+     * All implemented interfaces, recursively.
+     */
+    val implementedInterfaces: Sequence<TypeLangModel>
+
+    /**
      * All constructors declared.
      */
     val constructors: Sequence<FunctionLangModel>

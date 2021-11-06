@@ -6,6 +6,7 @@ import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSTypeReference
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.FieldLangModel
@@ -28,6 +29,21 @@ internal class KspTypeDeclarationImpl private constructor(
 
     override val qualifiedName: String
         get() = impl.qualifiedName!!.asString()
+
+    override val implementedInterfaces: Sequence<TypeLangModel> = sequence {
+        val queue = ArrayDeque<Sequence<KSTypeReference>>()
+        queue += impl.superTypes
+        while (queue.isNotEmpty()) {
+            for (typeRef in queue.removeFirst()) {
+                val type = typeRef.resolve()
+                val declaration = type.declaration as KSClassDeclaration
+                queue += declaration.superTypes
+                if (declaration.classKind == ClassKind.INTERFACE) {
+                    yield(KspTypeImpl(type))
+                }
+            }
+        }
+    }.memoize()
 
     override val constructors: Sequence<FunctionLangModel> =
         impl.getConstructors().map {
@@ -67,6 +83,7 @@ internal class KspTypeDeclarationImpl private constructor(
     }
 
     companion object Factory : ObjectCache<KSClassDeclaration, KspTypeDeclarationImpl>() {
-        operator fun invoke(impl: KSClassDeclaration) = createCached(impl, ::KspTypeDeclarationImpl)
+        operator fun invoke(impl: KSClassDeclaration) =
+            createCached(mapToJavaPlatformIfNeeded(impl), ::KspTypeDeclarationImpl)
     }
 }

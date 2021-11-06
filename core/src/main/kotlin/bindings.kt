@@ -25,6 +25,7 @@ interface AliasBinding : BaseBinding {
 sealed interface Binding : BaseBinding {
     val conditionScope: ConditionScope
     val scope: AnnotationLangModel?
+    fun dependencies(): Collection<NodeModel.Dependency>
 }
 
 interface EmptyBinding : Binding
@@ -62,4 +63,8 @@ interface ComponentInstanceBinding : Binding
 interface ComponentDependencyEntryPointBinding : Binding {
     val input: ComponentDependencyInput
     val getter: FunctionLangModel
+}
+
+interface BootstrapListBinding : Binding {
+    val list: Collection<NodeModel>
 }

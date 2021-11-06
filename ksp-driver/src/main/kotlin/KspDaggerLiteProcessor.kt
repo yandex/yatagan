@@ -11,6 +11,7 @@ import com.yandex.daggerlite.base.ObjectCacheRegistry
 import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
+import com.yandex.daggerlite.ksp.lang.LangModelFactory
 import com.yandex.daggerlite.ksp.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.ksp.lang.Utils
 
@@ -21,6 +22,7 @@ internal class KspDaggerLiteProcessor(
         Utils.init(resolver).use {
             ObjectCacheRegistry.use {
                 val logger = KspGenerationLogger(environment.logger)
+                val factory = LangModelFactory()
                 for (annotated in resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)) {
                     annotated as KSClassDeclaration
                     val model = ComponentModel(TypeDeclarationLangModel(annotated))
@@ -29,6 +31,7 @@ internal class KspDaggerLiteProcessor(
                     }
                     val graph = BindingGraph(
                         root = model,
+                        modelFactory = factory,
                     )
                     if (graph.missingBindings.isNotEmpty()) {
                         graph.missingBindings.forEach { node ->

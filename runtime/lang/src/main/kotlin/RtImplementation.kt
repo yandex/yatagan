@@ -66,6 +66,8 @@ class RtModuleAnnotationImpl(
         .map(KClass<*>::java).map(::RtTypeDeclarationImpl).memoize()
     override val subcomponents: Sequence<TypeLangModel> = impl.subcomponents.asSequence()
         .map(KClass<*>::java).map(::RtTypeDeclarationImpl).memoize()
+    override val bootstrap: Sequence<TypeLangModel>
+        get() = TODO("Not yet implemented")
 }
 
 abstract class RtAnnotatedImpl : AnnotatedLangModel {
@@ -100,6 +102,8 @@ class RtTypeDeclarationImpl(
     override val constructors: Sequence<FunctionLangModel> = impl.constructors.asSequence().map {
         RtConstructorImpl(owner = this, impl = it)
     }.memoize()
+    override val implementedInterfaces: Sequence<TypeLangModel>
+        get() = TODO("Not yet implemented")
     override val allPublicFunctions: Sequence<FunctionLangModel> = impl.declaredMethods.asSequence().map {
         RtFunctionImpl(owner = this, impl = it)
     }

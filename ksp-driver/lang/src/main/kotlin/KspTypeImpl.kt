@@ -1,5 +1,7 @@
 package com.yandex.daggerlite.ksp.lang
 
+import com.google.devtools.ksp.KspExperimental
+import com.google.devtools.ksp.getJavaClassByName
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.base.ObjectCache
@@ -10,8 +12,9 @@ import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspTypeImpl private constructor(
-    private val impl: KSType,
+    val impl: KSType,
 ) : CtTypeLangModel() {
+
     override val name: CtTypeNameModel by lazy {
         CtTypeNameModel(impl)
     }
@@ -22,13 +25,18 @@ internal class KspTypeImpl private constructor(
     }
 
     override val typeArguments: List<TypeLangModel> by lazy(NONE) {
-        impl.arguments.map { Factory(it.type!!.resolve()) }
+        impl.arguments.map {
+            Factory(it.type!!.resolve())
+        }
     }
 
     override val isBoolean: Boolean
-        get() = impl == Utils.resolver.builtIns.booleanType
+        get() {
+            @OptIn(KspExperimental::class)
+            return impl.declaration == Utils.resolver.getJavaClassByName("java.lang.Boolean")
+        }
 
     companion object Factory : ObjectCache<KSType, KspTypeImpl>() {
-        operator fun invoke(impl: KSType) = createCached(impl.makeNotNullable(), ::KspTypeImpl)
+        operator fun invoke(impl: KSType) = createCached(mapToJavaPlatformIfNeeded(impl), ::KspTypeImpl)
     }
 }

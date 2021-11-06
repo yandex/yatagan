@@ -12,7 +12,7 @@ internal class JavaxFieldImpl private constructor(
     private val impl: VariableElement,
 ) : FieldLangModel {
     override val isStatic: Boolean get() = impl.isStatic
-    override val type: TypeLangModel by lazy(NONE) { CtTypeLangModel(impl.asType()) }
+    override val type: TypeLangModel by lazy(NONE) { JavaxTypeImpl(impl.asType()) }
     override val name: String get() = impl.simpleName.toString()
 
     companion object Factory : ObjectCache<VariableElement, JavaxFieldImpl>() {
