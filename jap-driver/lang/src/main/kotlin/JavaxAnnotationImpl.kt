@@ -1,5 +1,7 @@
 package com.yandex.daggerlite.jap.lang
 
+import com.google.auto.common.AnnotationMirrors
+import com.google.common.base.Equivalence
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -7,15 +9,13 @@ import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope
 import javax.lang.model.element.AnnotationMirror
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxAnnotationImpl private constructor(
     private val impl: AnnotationMirror,
 ) : CtAnnotationLangModel {
-    private val descriptor by lazy(NONE) { describe(impl) }
-
     override val isScope: Boolean
         get() = impl.annotationType.asElement().isAnnotatedWith<Scope>()
+
     override val isQualifier: Boolean
         get() = impl.annotationType.asElement().isAnnotatedWith<Qualifier>()
 
@@ -28,11 +28,11 @@ internal class JavaxAnnotationImpl private constructor(
     }
 
     override fun getTypes(attribute: String): Sequence<TypeLangModel> {
-        return impl.typesValue(param = attribute).map(::CtTypeLangModel).memoize()
+        return impl.typesValue(param = attribute).map(::JavaxTypeImpl).memoize()
     }
 
     override fun getType(attribute: String): TypeLangModel {
-        return CtTypeLangModel(impl.typeValue(param = attribute))
+        return JavaxTypeImpl(impl.typeValue(param = attribute))
     }
 
     override fun getString(attribute: String): String {
@@ -47,10 +47,11 @@ internal class JavaxAnnotationImpl private constructor(
         return Factory(impl.annotationValue(param = attribute))
     }
 
-    override fun toString() = descriptor
+    override fun toString() = impl.toString()
 
-    companion object Factory : ObjectCache<String, JavaxAnnotationImpl>() {
-        private fun describe(impl: AnnotationMirror) = impl.toString()
-        operator fun invoke(impl: AnnotationMirror) = createCached(describe(impl)) { JavaxAnnotationImpl(impl) }
+    companion object Factory : ObjectCache<Equivalence.Wrapper<AnnotationMirror>, JavaxAnnotationImpl>() {
+        operator fun invoke(impl: AnnotationMirror) = createCached(AnnotationMirrors.equivalence().wrap(impl)) {
+            JavaxAnnotationImpl(impl)
+        }
     }
 }
