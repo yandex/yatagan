@@ -29,14 +29,14 @@ Explicitly not supported API
 
 ### Whetstone API
 
-- [ ] `@BindIn` is replaced by:
+- [x] `@BindIn` is replaced by:
   - [x] `@Conditional(/*features*/, /*variant*/` - variant - new conception instead of target modules
   - [x] Features for subcomponents
-  - [ ] `@Module(subscribers=...)` or anything alike for event subscription
+  - [x] `@Module(bootstrap=[...])` - fully blown events are dropped, replaced with simple bootstrap lists. 
 - [x] `@ConditionHolder` - dropped and replaced by automatic implementation.
 - [x] `@Condition`, `@AnyCondition`, ...
 - [x] `@BindsFeatureScoped` -> `@Binds`
-- [ ] `@ProvidesFeatureScoped` -> `@Provides(...)`
+- [x] `@ProvidesFeatureScoped` -> `@Provides([Conditional(...), ...])`
 - [ ] Manual `Optional<T>` binding support (legacy).
       _We don't need this if we're ready to migrate all manual bindings to `@Conditional`
       and `@Provides(/*feature*/)` at once._ 
