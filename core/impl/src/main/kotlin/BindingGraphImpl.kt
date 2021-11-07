@@ -10,11 +10,13 @@ import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ConditionScope
+import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.EmptyBinding
 import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.MissingBindingException
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.getAnnotation
@@ -74,7 +76,7 @@ private class BindingGraphImpl(
                     yield(input.createBinding(forGraph = this@BindingGraphImpl))
                     // Bindings backed by the component entry-points.
                     for (entryPoint: ComponentModel.EntryPoint in input.component.entryPoints)
-                        if (entryPoint.dependency.kind == NodeModel.Dependency.Kind.Direct)
+                        if (entryPoint.dependency.kind == DependencyKind.Direct)
                             yield(ComponentDependencyEntryPointBindingImpl(
                                 owner = this@BindingGraphImpl,
                                 entryPoint = entryPoint,
@@ -114,7 +116,7 @@ private class BindingGraphImpl(
     }
 
     // MAYBE: write algorithm in such a way that this is local variable.
-    private val materializationQueue: MutableList<NodeModel.Dependency> = ArrayDeque()
+    private val materializationQueue: MutableList<NodeDependency> = ArrayDeque()
 
     init {
         // Build children
@@ -174,12 +176,12 @@ private class BindingGraphImpl(
         allProvidedBindings.clear()
     }
 
-    private fun materialize(dependency: NodeModel.Dependency): Binding? {
+    private fun materialize(dependency: NodeDependency): Binding? {
         fun resolveAlias(maybeAlias: BaseBinding?): Binding? {
             var binding: BaseBinding? = maybeAlias
             while (true) {
                 binding = when (binding) {
-                    is AliasBinding -> materialize(NodeModel.Dependency(binding.source))
+                    is AliasBinding -> materialize(NodeDependency(binding.source))
                     is Binding -> return binding
                     null -> return null
                 }
@@ -199,7 +201,7 @@ private class BindingGraphImpl(
         return nonAlias
     }
 
-    private fun materializeInParents(dependency: NodeModel.Dependency): Binding? {
+    private fun materializeInParents(dependency: NodeDependency): Binding? {
         if (parent == null) {
             return null
         }
@@ -207,7 +209,7 @@ private class BindingGraphImpl(
         if (binding != null) {
             // The binding is requested from a parent, so add parent to dependencies.
             usedParents += parent
-            parent.materializationQueue += NodeModel.Dependency(binding.target)
+            parent.materializationQueue += NodeDependency(binding.target)
             return binding
         }
         return parent.materializeInParents(dependency)?.also {
@@ -235,14 +237,14 @@ class BindingUsageImpl : BindingGraph.BindingUsage {
     override val optionalLazy get() = _optionalLazy
     override val optionalProvider get() = _optionalProvider
 
-    fun accept(dependencyKind: NodeModel.Dependency.Kind) {
+    fun accept(dependencyKind: DependencyKind) {
         when (dependencyKind) {
-            NodeModel.Dependency.Kind.Direct -> _direct++
-            NodeModel.Dependency.Kind.Lazy -> _lazy++
-            NodeModel.Dependency.Kind.Provider -> _provider++
-            NodeModel.Dependency.Kind.Optional -> _optional++
-            NodeModel.Dependency.Kind.OptionalLazy -> _optionalLazy++
-            NodeModel.Dependency.Kind.OptionalProvider -> _optionalProvider++
+            DependencyKind.Direct -> _direct++
+            DependencyKind.Lazy -> _lazy++
+            DependencyKind.Provider -> _provider++
+            DependencyKind.Optional -> _optional++
+            DependencyKind.OptionalLazy -> _optionalLazy++
+            DependencyKind.OptionalProvider -> _optionalProvider++
         }.let { /*exhaustive*/ }
     }
 }

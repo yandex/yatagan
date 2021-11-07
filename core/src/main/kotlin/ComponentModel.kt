@@ -59,7 +59,7 @@ interface ComponentModel : ClassBackedModel {
      */
     class EntryPoint(
         val getter: FunctionLangModel,
-        val dependency: NodeModel.Dependency,
+        val dependency: NodeDependency,
     ) {
         operator fun component1() = getter
         operator fun component2() = dependency

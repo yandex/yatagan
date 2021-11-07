@@ -10,8 +10,10 @@ import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentInstanceBinding
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ConditionScope
+import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.EmptyBinding
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
@@ -24,7 +26,7 @@ internal class ProvisionBindingImpl(
     override val target: NodeModel,
     override val scope: AnnotationLangModel?,
     override val provider: FunctionLangModel,
-    override val params: Collection<NodeModel.Dependency>,
+    override val params: Collection<NodeDependency>,
     override val requiredModuleInstance: ModuleModel?,
     override val conditionScope: ConditionScope,
 ) : ProvisionBinding {
@@ -50,7 +52,7 @@ internal class AlternativesBindingImpl(
         }
     }
 
-    override fun dependencies() = alternatives.map(NodeModel::Dependency)
+    override fun dependencies() = alternatives.map(::NodeDependency)
 }
 
 internal class ComponentDependencyEntryPointBindingImpl(
@@ -59,7 +61,7 @@ internal class ComponentDependencyEntryPointBindingImpl(
     private val entryPoint: ComponentModel.EntryPoint,
 ) : ComponentDependencyEntryPointBinding {
     init {
-        require(entryPoint.dependency.kind == NodeModel.Dependency.Kind.Direct) {
+        require(entryPoint.dependency.kind == DependencyKind.Direct) {
             // MAYBE: Implement some best-effort matching to available dependency kinds?
             "Only direct entry points constitute a binding that can be used in dependency components"
         }
@@ -69,7 +71,7 @@ internal class ComponentDependencyEntryPointBindingImpl(
     override val conditionScope get() = ConditionScope.Unscoped
     override val target get() = entryPoint.dependency.node
     override val getter get() = entryPoint.getter
-    override fun dependencies() = listOf(NodeModel.Dependency(input.component.asNode()))
+    override fun dependencies() = listOf(NodeDependency(input.component.asNode()))
 }
 
 internal class ComponentInstanceBindingImpl(
@@ -97,7 +99,7 @@ internal class SubComponentFactoryBindingImpl(
 
     override val scope: Nothing? get() = null
 
-    override fun dependencies() = targetGraph.usedParents.map { NodeModel.Dependency(it.model.asNode()) }
+    override fun dependencies() = targetGraph.usedParents.map { NodeDependency(it.model.asNode()) }
 }
 
 internal class BootstrapListBindingImpl(
@@ -107,7 +109,7 @@ internal class BootstrapListBindingImpl(
 ) : BootstrapListBinding {
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
-    override fun dependencies() = inputs.map(NodeModel::Dependency)
+    override fun dependencies() = inputs.map(::NodeDependency)
     override val list: Collection<NodeModel> by lazy(NONE) {
         topologicalSort(nodes = inputs, inside = owner)
     }

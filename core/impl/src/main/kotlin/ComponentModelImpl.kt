@@ -44,7 +44,7 @@ internal class ComponentModelImpl private constructor(
         buildSet {
             for (function in declaration.allPublicFunctions.filter { it.isAbstract }) {
                 this += EntryPoint(
-                    dependency = nodeModelDependency(
+                    dependency = NodeDependency(
                         type = function.returnType,
                         forQualifier = function,
                     ),

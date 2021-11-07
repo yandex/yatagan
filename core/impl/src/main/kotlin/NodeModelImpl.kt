@@ -42,7 +42,7 @@ internal class NodeModelImpl private constructor(
                 scope = type.declaration.annotations.find(AnnotationLangModel::isScope),
                 provider = injectConstructor,
                 params = injectConstructor.parameters.map { param ->
-                    nodeModelDependency(type = param.type, forQualifier = param)
+                    NodeDependency(type = param.type, forQualifier = param)
                 }.toList(),
                 conditionScope = conditionScope,
             )

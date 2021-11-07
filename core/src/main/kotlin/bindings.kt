@@ -25,7 +25,7 @@ interface AliasBinding : BaseBinding {
 sealed interface Binding : BaseBinding {
     val conditionScope: ConditionScope
     val scope: AnnotationLangModel?
-    fun dependencies(): Collection<NodeModel.Dependency>
+    fun dependencies(): Collection<NodeDependency>
 }
 
 interface EmptyBinding : Binding
@@ -35,7 +35,7 @@ interface EmptyBinding : Binding
  */
 interface ProvisionBinding : Binding {
     val provider: FunctionLangModel
-    val params: Collection<NodeModel.Dependency>
+    val params: Collection<NodeDependency>
     val requiredModuleInstance: ModuleModel?
 }
 

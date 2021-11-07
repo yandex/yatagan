@@ -79,7 +79,7 @@ internal class ModuleModelImpl private constructor(
                             mayRequireInstance && !method.isStatic && !method.isFromCompanionObject
                         },
                         params = method.parameters.map { param ->
-                            nodeModelDependency(type = param.type, forQualifier = param)
+                            NodeDependency(type = param.type, forQualifier = param)
                         }.toList(),
                         conditionScope = ConditionScope.Unscoped, // TODO(jeffset): support "@ProvidesFeatureScoped"
                     )
