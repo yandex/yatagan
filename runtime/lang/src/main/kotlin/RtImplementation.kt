@@ -13,6 +13,7 @@ import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
+import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import java.lang.reflect.AnnotatedElement
@@ -182,7 +183,8 @@ class RtConstructorImpl(
     override val isConstructor: Boolean get() = true
     override val isAbstract: Boolean get() = false
     override val isStatic: Boolean get() = true
-
+    override val providesAnnotationIfPresent: ProvidesAnnotationLangModel?
+        get() = TODO("Not yet implemented")
     override val returnType: TypeLangModel get() = owner.asType()
     override val name: String get() = impl.name
     override val parameters: Sequence<ParameterLangModel> = parametersOf(impl)
@@ -199,6 +201,8 @@ class RtFunctionImpl(
     override val returnType: TypeLangModel by lazy(NONE) {
         RtTypeImpl(impl.annotatedReturnType.type)
     }
+    override val providesAnnotationIfPresent: ProvidesAnnotationLangModel?
+        get() = TODO("Not yet implemented")
     override val name: String get() = impl.name
     override val parameters: Sequence<ParameterLangModel> = parametersOf(impl)
 }

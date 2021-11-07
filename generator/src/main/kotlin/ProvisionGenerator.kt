@@ -8,8 +8,10 @@ import com.yandex.daggerlite.core.BootstrapListBinding
 import com.yandex.daggerlite.core.ComponentDependencyBinding
 import com.yandex.daggerlite.core.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.core.ComponentInstanceBinding
+import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.EmptyBinding
 import com.yandex.daggerlite.core.InstanceBinding
+import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
@@ -149,7 +151,7 @@ internal class ProvisionGenerator(
         }
     }
 
-    fun generateAccess(builder: ExpressionBuilder, dependency: NodeModel.Dependency) {
+    fun generateAccess(builder: ExpressionBuilder, dependency: NodeDependency) {
         val (node, kind) = dependency
         val binding = thisGraph.resolveBinding(node)
         generateAccess(builder, binding, kind)
@@ -240,7 +242,7 @@ internal class ProvisionGenerator(
                 with(builder) {
                     +"%T.asList(".formatCode(Names.Arrays)
                     join(binding.list, separator = ",\n") { node ->
-                        generateAccess(this@join, NodeModel.Dependency(node))
+                        generateAccess(this@join, NodeDependency(node))
                     }
                     +")"
                 }

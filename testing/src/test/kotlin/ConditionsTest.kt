@@ -428,4 +428,63 @@ class ConditionsTest(
             }
         }
     }
+
+    @Test
+    fun `conditional provide - basic case`() {
+        useSourceSet(features)
+        useSourceSet(flavors)
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Optional
+            import com.yandex.daggerlite.Conditional
+            
+            interface Api
+            class Impl: Api
+            
+            @Module
+            object MyModule {
+                @Provides([
+                    Conditional([Conditions.FeatureA::class], onlyIn = [ActivityType.Main::class]),
+                    Conditional([Conditions.FeatureB::class]), // in the rest
+                ])
+                fun provideApi(): Api {
+                    return Impl()
+                }
+            }
+            
+            @Component(modules = [MyModule::class], variant = [ActivityType.Main::class])
+            interface TestMainComponent {
+                val api: Optional<Api>
+                val apiLazy: Optional<Lazy<Api>>
+            }
+            
+            @Component(modules = [MyModule::class], variant = [ActivityType.Custom::class])
+            interface TestCustomComponent {
+                val api: Optional<Api>
+                val apiLazy: Optional<Lazy<Api>>
+            }
+            
+            fun test() {
+                assert(!DaggerTestMainComponent().api.isPresent)
+            
+                Features.isEnabledB = true
+                assert(!DaggerTestMainComponent().api.isPresent)
+            
+                Features.isEnabledA = true
+                Features.isEnabledB = false
+                assert(DaggerTestMainComponent().api.isPresent)
+                assert(!DaggerTestCustomComponent().api.isPresent)
+                
+                Features.isEnabledA = false
+                Features.isEnabledB = true
+                assert(DaggerTestCustomComponent().api.isPresent)
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
+            }
+        }
+    }
 }

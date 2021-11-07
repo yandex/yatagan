@@ -34,6 +34,7 @@ annotation class Binds(
     AnnotationTarget.PROPERTY_GETTER,
 )
 annotation class Provides(
+    val value: Array<Conditional> = [],
 )
 
 @MustBeDocumented

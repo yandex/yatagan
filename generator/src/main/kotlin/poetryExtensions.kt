@@ -4,15 +4,14 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.yandex.daggerlite.core.ClassBackedModel
-import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.DependencyKind
+import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.invoke
-
-internal typealias DependencyKind = NodeModel.Dependency.Kind
 
 internal inline fun CtTypeNameModel.asClassName(
     transformName: (String) -> String,
@@ -54,7 +53,7 @@ private fun CtTypeNameModel.asTypeName(): TypeName {
     } else className
 }
 
-internal fun NodeModel.Dependency.asTypeName(): TypeName {
+internal fun NodeDependency.asTypeName(): TypeName {
     val typeName = node.typeName()
     return when (kind) {
         DependencyKind.Direct -> typeName

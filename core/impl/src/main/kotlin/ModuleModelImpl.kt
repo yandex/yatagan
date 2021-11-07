@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
-import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.BindingGraph
@@ -12,7 +11,7 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.hasType
+import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ModuleModelImpl private constructor(
@@ -43,19 +42,49 @@ internal class ModuleModelImpl private constructor(
         val mayRequireInstance = !declaration.isAbstract && !declaration.isKotlinObject
 
         for (method in declaration.allPublicFunctions) {
-            val target by lazy {
-                NodeModelImpl(
-                    type = method.returnType,
-                    forQualifier = method,
-                )
-            }
-            for (annotation in method.annotations) {
-                when {
-                    annotation.hasType<Binds>() -> when (method.parameters.count()) {
+            fun target(): NodeModel = NodeModelImpl(
+                type = method.returnType,
+                forQualifier = method,
+            )
+            val providesAnnotation = method.providesAnnotationIfPresent
+            when {
+                providesAnnotation != null -> {
+                    // @Provides
+                    val scope = if (providesAnnotation.conditionals.any()) {
+                        matchConditionScopeFromConditionals(
+                            forVariant = forGraph.model.variant,
+                            conditionals = providesAnnotation.conditionals,
+                        )
+                    } else ConditionScope.Unscoped
+                    if (scope == null) {
+                        // Ruled out by variant constraints
+                        yield(EmptyBindingImpl(
+                            owner = forGraph,
+                            target = target(),
+                        ))
+                    } else {
+                        yield(ProvisionBindingImpl(
+                            owner = forGraph,
+                            target = target(),
+                            provider = method,
+                            scope = method.annotations.find(AnnotationLangModel::isScope),
+                            requiredModuleInstance = this@ModuleModelImpl.takeIf {
+                                mayRequireInstance && !method.isStatic && !method.isFromCompanionObject
+                            },
+                            params = method.parameters.map { param ->
+                                NodeDependency(type = param.type, forQualifier = param)
+                            }.toList(),
+                            conditionScope = scope,
+                        ))
+                    }
+                }
+                method.isAnnotatedWith<Binds>() -> {
+                    // @Binds
+                    yield(when (method.parameters.count()) {
                         0 -> throw IllegalStateException("@Binds with no arguments")
                         1 -> AliasBindingImpl(
                             owner = forGraph,
-                            target = target,
+                            target = target(),
                             source = NodeModelImpl(
                                 type = method.parameters.single().type,
                                 forQualifier = method.parameters.single(),
@@ -63,28 +92,14 @@ internal class ModuleModelImpl private constructor(
                         )
                         else -> AlternativesBindingImpl(
                             owner = forGraph,
-                            target = target,
+                            target = target(),
                             alternatives = method.parameters.map { parameter ->
                                 NodeModelImpl(type = parameter.type, forQualifier = parameter)
                             }.toList(),
                             scope = method.annotations.find(AnnotationLangModel::isScope),
                         )
-                    }
-                    annotation.hasType<Provides>() -> ProvisionBindingImpl(
-                        owner = forGraph,
-                        target = target,
-                        provider = method,
-                        scope = method.annotations.find(AnnotationLangModel::isScope),
-                        requiredModuleInstance = this@ModuleModelImpl.takeIf {
-                            mayRequireInstance && !method.isStatic && !method.isFromCompanionObject
-                        },
-                        params = method.parameters.map { param ->
-                            nodeModelDependency(type = param.type, forQualifier = param)
-                        }.toList(),
-                        conditionScope = ConditionScope.Unscoped, // TODO(jeffset): support "@ProvidesFeatureScoped"
-                    )
-                    else -> null
-                }?.let { yield(it) }
+                    })
+                }
             }
         }
     }
