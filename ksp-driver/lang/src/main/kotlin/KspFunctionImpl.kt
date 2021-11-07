@@ -4,19 +4,19 @@ import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
+import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspFunctionImpl private constructor(
     private val impl: KSFunctionDeclaration,
     override val owner: TypeDeclarationLangModel,
     override val isFromCompanionObject: Boolean,
-) : FunctionLangModel {
-    override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
+) : CtFunctionLangModel() {
+    override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
     override val isAbstract: Boolean
         get() = impl.isAbstract
     override val isStatic: Boolean

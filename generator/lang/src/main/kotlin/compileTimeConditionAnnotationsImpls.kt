@@ -1,45 +1,68 @@
 package com.yandex.daggerlite.generator.lang
 
-import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
-internal open class CtAnnotationBase(
+internal class CtConditionAnnotationImpl private constructor(
     private val impl: CtAnnotationLangModel,
-) {
+) : ConditionAnnotationLangModel {
+    override val target: TypeLangModel = impl.getType("value")
+    override val condition: String = impl.getString("condition")
     override fun toString() = impl.toString()
-    final override fun hashCode() = impl.hashCode()
-    final override fun equals(other: Any?): Boolean {
-        return this === other || (other is CtAnnotationBase && impl == other.impl)
+
+    companion object Factory : ObjectCache<CtAnnotationLangModel, CtConditionAnnotationImpl>() {
+        operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtConditionAnnotationImpl)
     }
 }
 
-internal class CtConditionAnnotationImpl(
-    impl: CtAnnotationLangModel,
-) : CtAnnotationBase(impl), ConditionAnnotationLangModel {
-    override val target: TypeLangModel = impl.getType("value")
-    override val condition: String = impl.getString("condition")
-}
-
-internal class CtAnyConditionAnnotationImpl(
-    impl: CtAnnotationLangModel,
-) : CtAnnotationBase(impl), AnyConditionAnnotationLangModel {
+internal class CtAnyConditionAnnotationImpl private constructor(
+    private val impl: CtAnnotationLangModel,
+) : AnyConditionAnnotationLangModel {
     override val conditions: Sequence<ConditionAnnotationLangModel> =
-        impl.getAnnotations("value").map(::CtConditionAnnotationImpl).memoize()
+        impl.getAnnotations("value").map { CtConditionAnnotationImpl(it) }
+    override fun toString() = impl.toString()
+
+    companion object Factory : ObjectCache<CtAnnotationLangModel, CtAnyConditionAnnotationImpl>() {
+        operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtAnyConditionAnnotationImpl)
+    }
 }
 
-internal class CtConditionalAnnotationImpl(
-    impl: CtAnnotationLangModel,
-) : CtAnnotationBase(impl), ConditionalAnnotationLangModel {
+internal class CtConditionalAnnotationImpl private constructor(
+    private val impl: CtAnnotationLangModel,
+) : ConditionalAnnotationLangModel {
     override val featureTypes: Sequence<TypeLangModel> = impl.getTypes("value")
     override val onlyIn: Sequence<TypeLangModel> = impl.getTypes("onlyIn")
+    override fun toString() = impl.toString()
+
+    companion object Factory : ObjectCache<CtAnnotationLangModel, CtConditionalAnnotationImpl>() {
+        operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtConditionalAnnotationImpl)
+    }
 }
 
-internal class ComponentFlavorAnnotationImpl(
-    impl: CtAnnotationLangModel,
-) : CtAnnotationBase(impl), ComponentFlavorAnnotationLangModel {
+internal class CtComponentFlavorAnnotationImpl private constructor(
+    private val impl: CtAnnotationLangModel,
+) : ComponentFlavorAnnotationLangModel {
     override val dimension: TypeLangModel = impl.getType("dimension")
+    override fun toString() = impl.toString()
+
+    companion object Factory : ObjectCache<CtAnnotationLangModel, CtComponentFlavorAnnotationImpl>() {
+        operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtComponentFlavorAnnotationImpl)
+    }
+}
+
+internal class CtProvidesAnnotationImpl private constructor(
+    private val impl: CtAnnotationLangModel,
+) : ProvidesAnnotationLangModel {
+    override val conditionals: Sequence<ConditionalAnnotationLangModel> =
+        impl.getAnnotations("value").map { CtConditionalAnnotationImpl(it) }
+    override fun toString() = impl.toString()
+
+    companion object Factory : ObjectCache<CtAnnotationLangModel, CtProvidesAnnotationImpl>() {
+        operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtProvidesAnnotationImpl)
+    }
 }

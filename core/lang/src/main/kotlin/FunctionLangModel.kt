@@ -38,4 +38,9 @@ interface FunctionLangModel : AnnotatedLangModel, MemberLangModel {
      * Whether the function is declared in companion object (or inherits by it).
      */
     val isFromCompanionObject: Boolean
+
+    /**
+     * [com.yandex.daggerlite.Provides] annotation model if present. `null` if absent.
+     */
+    val providesAnnotationIfPresent: ProvidesAnnotationLangModel?
 }
