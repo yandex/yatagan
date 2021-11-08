@@ -58,7 +58,7 @@ internal class ModuleModelImpl private constructor(
                     // @Provides
                     val scope = if (providesAnnotation.conditionals.any()) {
                         matchConditionScopeFromConditionals(
-                            forVariant = forGraph.model.variant,
+                            forVariant = forGraph.variant,
                             conditionals = providesAnnotation.conditionals,
                         )
                     } else ConditionScope.Unscoped

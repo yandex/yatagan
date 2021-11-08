@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.testing
 
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -487,4 +488,139 @@ class ConditionsTest(
             }
         }
     }
+
+    @Test
+    fun `flavors inheritance in component hierarchy`() {
+        useSourceSet(flavors)
+
+        givenKotlinSource("test.TestCase", """
+            
+            import com.yandex.daggerlite.ComponentFlavor
+            import com.yandex.daggerlite.Conditional
+            import com.yandex.daggerlite.Optional
+            import com.yandex.daggerlite.Condition
+
+            @Conditional(onlyIn = [ProductType.Browser::class])
+            class Impl @Inject constructor()
+            
+            @Module(subcomponents = [MyComponent::class])
+            interface MyModule
+            
+            @Component(isRoot = false)
+            interface MyComponent {
+                val impl: Optional<Impl>
+                
+                @Component.Builder
+                interface Factory {
+                    fun create(): MyComponent
+                }
+            }
+            
+            @Component(modules = [MyModule::class], variant = [ProductType.Browser::class])
+            interface MyBrowserComponent {
+                val myC: MyComponent.Factory
+            }
+            
+            @Component(modules = [MyModule::class], variant = [ProductType.SearchApp::class])
+            interface MySearchAppComponent {
+                val myC: MyComponent.Factory
+            }
+
+            fun test() {
+                val browserC = DaggerMyBrowserComponent()
+                val searchAppC = DaggerMySearchAppComponent()
+                
+                assert(browserC.myC.create().impl.isPresent)
+                assert(!searchAppC.myC.create().impl.isPresent)
+            }
+
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            generatesJavaSources("test.DaggerMyBrowserComponent")
+            generatesJavaSources("test.DaggerMySearchAppComponent")
+
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
+            }
+        }
+    }
+
+    @Test
+    @Ignore("TODO(jeffset): binds with alternatives by flavor")
+    fun `flavors inheritance in component hierarchy II`() {
+        useSourceSet(flavors)
+
+        givenKotlinSource("test.TestCase", """
+            
+            import com.yandex.daggerlite.ComponentFlavor
+            import com.yandex.daggerlite.Conditional
+            import com.yandex.daggerlite.Optional
+
+            interface Api
+            @Conditional(onlyIn = [ProductType.Browser::class])
+            class ImplA @Inject constructor() : Api
+            @Conditional(onlyIn = [ProductType.SearchApp::class])
+            class ImplB @Inject constructor() : Api
+            
+            @Module(subcomponents = [MyApiComponent::class])
+            interface MyModule {
+                @Binds
+                fun api(i: ImplA, i2: ImplB): Api
+            }
+            
+            @Component(isRoot = false)
+            interface MyApiComponent {
+                val api: Optional<Api>
+                
+                @Component.Builder
+                interface Factory {
+                    fun create(): MyApiComponent
+                }
+            }
+            
+            @Component(modules = [MyModule::class], variant = [ProductType.Browser::class])
+            interface MyBrowserComponent {
+                val apiC: MyApiComponent.Factory
+            }
+            
+            @Component(modules = [MyModule::class], variant = [ProductType.SearchApp::class])
+            interface MySearchAppComponent {
+                val apiC: MyApiComponent.Factory
+            }
+
+            @ComponentFlavor(ProductType::class)
+            annotation class MyProductType
+            
+            @Component(modules = [MyModule::class], variant = [MyProductType::class])
+            interface MyProductComponent {
+                val apiC: MyApiComponent.Factory
+            }
+
+            fun test() {
+                val browserC = DaggerMyBrowserComponent()
+                val searchAppC = DaggerMySearchAppComponent()
+                val myProductC = DaggerMyProductComponent()
+                
+                assert(browserC.apiC.create().api.get() is ImplA)
+                assert(searchAppC.apiC.create().api.get() is ImplB)
+                assert(!myProductC.apiC.create().api.isPresent)
+            }
+
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            generatesJavaSources("test.DaggerMyBrowserComponent")
+            generatesJavaSources("test.DaggerMySearchAppComponent")
+            generatesJavaSources("test.DaggerMyProductComponent")
+
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
+            }
+        }
+    }
+
+
 }

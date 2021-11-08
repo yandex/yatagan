@@ -26,7 +26,7 @@ internal class NodeModelImpl private constructor(
         val conditionals = type.declaration.conditionals
         val conditionScope = if (conditionals.any()) {
             matchConditionScopeFromConditionals(
-                forVariant = forGraph.model.variant,
+                forVariant = forGraph.variant,
                 conditionals = conditionals,
             ) ?: return EmptyBindingImpl(
                 owner = forGraph,
