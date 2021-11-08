@@ -12,7 +12,7 @@ Such behaviour should later be fixed with validation steps.
 ### Core Dagger API
 
 - [x] `@Component` - only interface allowed
-    - [x] `@Component.Factory` - only interface allowed
+    - [x] `@Component.Builder` - only interface allowed, merged functionality of vanilla `@Builder` and `@Factory`.
 - [x] `@Subcomponent` - implemented as `@Component(isRoot=false)`
 - [x] `@Component(dependencies=...)`
 - [x] `@Module`
@@ -23,7 +23,6 @@ Such behaviour should later be fixed with validation steps.
     - [x] module with instance support
 
 Explicitly not supported API
-- `@Component.Builder`/`@Subcomponent.Builder`
 - `@BindsOptionalOf`
 - `@IntoMap`, `@MapKey`, ..
 
