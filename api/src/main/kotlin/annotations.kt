@@ -49,7 +49,7 @@ annotation class Component(
     @MustBeDocumented
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS)
-    annotation class Factory
+    annotation class Builder
 }
 
 @MustBeDocumented

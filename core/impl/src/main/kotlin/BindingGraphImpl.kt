@@ -18,6 +18,7 @@ import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.getAnnotation
 
@@ -70,7 +71,7 @@ private class BindingGraphImpl(
         }
         // Gather bindings from factory
         model.factory?.let { factory: ComponentFactoryModel ->
-            for (input: ComponentFactoryModel.Input in factory.inputs) when (input) {
+            for (input: ComponentFactoryModel.Input in factory.allInputs) when (input) {
                 is ComponentDependencyInput -> {
                     // Binding for the dependency component itself.
                     yield(input.createBinding(forGraph = this@BindingGraphImpl))

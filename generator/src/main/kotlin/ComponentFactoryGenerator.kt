@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -28,8 +29,8 @@ internal class ComponentFactoryGenerator(
 
     init {
         thisGraph.model.factory?.let { factory ->
-            for (input in factory.inputs) {
-                val fieldName = fieldsNs.name(input.paramName)
+            for (input in factory.allInputs) {
+                val fieldName = fieldsNs.name(input.name)
                 inputFieldNames[input] = fieldName
                 when (input) {
                     is ComponentDependencyInput -> componentInstanceFieldNames[input] = fieldName
@@ -65,15 +66,17 @@ internal class ComponentFactoryGenerator(
             constructor {
                 modifiers(PRIVATE)
                 val paramsNs = Namespace(prefix = "p")
-                factory.inputs.forEach { input ->
-                    val name = paramsNs.name(input.paramName)
-                    parameter(input.target.typeName(), name)
-                    +"this.${inputFieldNames[input]} = $name"
-                }
+                // Firstly - used parents
                 thisGraph.usedParents.forEach { graph ->
                     val name = paramsNs.name(graph.model.name)
                     parameter(generators[graph].implName, name)
                     +"this.${fieldNameFor(graph)} = $name"
+                }
+                // Secondly and thirdly - factory inputs and builder inputs respectively.
+                factory.allInputs.forEach { input ->
+                    val name = paramsNs.name(input.name)
+                    parameter(input.target.typeName(), name)
+                    +"this.${inputFieldNames[input]} = $name"
                 }
             }
             nestedType {
@@ -81,13 +84,13 @@ internal class ComponentFactoryGenerator(
                     modifiers(PRIVATE, FINAL, STATIC)
                     implements(factory.typeName())
 
-                    val usedParentsParamNames = arrayListOf<String>()
+                    val builderAccess = arrayListOf<String>()
                     if (isSubComponentFactory) {
                         val paramsNs = Namespace(prefix = "f")
                         constructor {
                             thisGraph.usedParents.forEach { graph ->
                                 val name = paramsNs.name(graph.model.name)
-                                usedParentsParamNames += name
+                                builderAccess += "this.$name"
                                 val typeName = generators[graph].implName
                                 this@buildClass.field(typeName, name)
                                 parameter(typeName, name)
@@ -96,22 +99,36 @@ internal class ComponentFactoryGenerator(
                         }
                     }
 
-                    method("create") {
+                    with(Namespace("m")) {
+                        factory.builderInputs.forEach { builderInput ->
+                            val fieldName = name(builderInput.name, builderInput.target.name)
+                            builderAccess += "this.$fieldName"
+                            field(builderInput.target.typeName(), fieldName) {
+                                modifiers(PRIVATE)
+                            }
+                            method(builderInput.name) {
+                                modifiers(PUBLIC)
+                                annotation<Override>()
+                                returnType(factory.typeName())
+                                parameter(builderInput.target.typeName(), "input")
+                                +"this.$fieldName = input"
+                                // TODO: support builder setters with `void` return type.
+                                +"return this"
+                            }
+                        }
+                    }
+                    factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.Input::name)
+
+                    method(factory.factoryFunctionName) {
                         modifiers(PUBLIC)
                         annotation<Override>()
                         returnType(thisGraph.model.typeName())
-                        factory.inputs.forEach { input ->
-                            parameter(input.target.typeName(), input.paramName)
+                        factory.factoryInputs.forEach { input ->
+                            parameter(input.target.typeName(), input.name)
                         }
                         +buildExpression {
                             +"return new %T(".formatCode(componentImplName)
-                            join(factory.inputs) { +it.paramName }
-                            if (usedParentsParamNames.isNotEmpty()) {
-                                if (factory.inputs.isNotEmpty()) {
-                                    +", "
-                                }
-                                join(usedParentsParamNames) { +it }
-                            }
+                            join(builderAccess) { +it }
                             +")"
                         }
                     }
