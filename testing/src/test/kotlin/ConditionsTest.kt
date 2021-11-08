@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.testing
 
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -499,7 +498,7 @@ class ConditionsTest(
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
             import com.yandex.daggerlite.Condition
-
+            
             @Conditional(onlyIn = [ProductType.Browser::class])
             class Impl @Inject constructor()
             
@@ -525,7 +524,7 @@ class ConditionsTest(
             interface MySearchAppComponent {
                 val myC: MyComponent.Factory
             }
-
+            
             fun test() {
                 val browserC = DaggerMyBrowserComponent()
                 val searchAppC = DaggerMySearchAppComponent()
@@ -548,8 +547,7 @@ class ConditionsTest(
     }
 
     @Test
-    @Ignore("TODO(jeffset): binds with alternatives by flavor")
-    fun `flavors inheritance in component hierarchy II`() {
+    fun `flavor-based alternative binding in component hierarchy`() {
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
@@ -557,7 +555,7 @@ class ConditionsTest(
             import com.yandex.daggerlite.ComponentFlavor
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
-
+            
             interface Api
             @Conditional(onlyIn = [ProductType.Browser::class])
             class ImplA @Inject constructor() : Api
@@ -573,6 +571,7 @@ class ConditionsTest(
             @Component(isRoot = false)
             interface MyApiComponent {
                 val api: Optional<Api>
+                val apiProvider: Optional<Provider<Api>>
                 
                 @Component.Builder
                 interface Factory {
@@ -589,7 +588,7 @@ class ConditionsTest(
             interface MySearchAppComponent {
                 val apiC: MyApiComponent.Factory
             }
-
+            
             @ComponentFlavor(ProductType::class)
             annotation class MyProductType
             
@@ -597,7 +596,7 @@ class ConditionsTest(
             interface MyProductComponent {
                 val apiC: MyApiComponent.Factory
             }
-
+            
             fun test() {
                 val browserC = DaggerMyBrowserComponent()
                 val searchAppC = DaggerMySearchAppComponent()
@@ -607,7 +606,6 @@ class ConditionsTest(
                 assert(searchAppC.apiC.create().api.get() is ImplB)
                 assert(!myProductC.apiC.create().api.isPresent)
             }
-
         """.trimIndent())
 
         compilesSuccessfully {
@@ -621,6 +619,4 @@ class ConditionsTest(
             }
         }
     }
-
-
 }

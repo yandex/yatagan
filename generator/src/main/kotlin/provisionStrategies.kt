@@ -3,7 +3,7 @@ package com.yandex.daggerlite.generator
 import com.yandex.daggerlite.core.Binding
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.core.isNotEmpty
+import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
@@ -227,7 +227,7 @@ internal class ConditionalProvisionStrategy(
             modifiers(PRIVATE)
             returnType(Names.Optional)
             when {
-                binding.conditionScope.isNotEmpty -> {
+                !binding.conditionScope.isAlways -> {
                     val expression = buildExpression {
                         val gen = generators[binding.owner].conditionGenerator
                         gen.expression(this, binding.conditionScope)
@@ -265,7 +265,7 @@ private fun DependencyKind.asOptional(): DependencyKind = when (this) {
 
 object EmptyProvisionStrategy : ProvisionStrategy {
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
-        assert(kind.asOptional() == kind) { "Trying to use Empty strategy in non-optional context" }
+        assert(kind.isOptional)
         with(builder) {
             +"%T.empty()".formatCode(Names.Optional)
         }

@@ -68,6 +68,12 @@ private class ConditionScopeImpl(
         }
     }
 
+    override val isAlways: Boolean
+        get() = this === Unscoped || expression.isEmpty()
+
+    override val isNever: Boolean
+        get() = this === NeverScoped || expression.singleOrNull()?.isEmpty() == true
+
     companion object {
         val Unscoped: ConditionScope = ConditionScopeImpl(emptySet())
         val NeverScoped: ConditionScope = ConditionScopeImpl(setOf(emptySet()))

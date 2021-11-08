@@ -15,7 +15,6 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
-import com.yandex.daggerlite.core.isNotEmpty
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
@@ -36,7 +35,7 @@ internal class ProvisionGenerator(
         keySelector = { (binding, _) -> binding },
         valueTransform = fun(entry: Map.Entry<Binding, BindingGraph.BindingUsage>): ProvisionStrategy {
             val (binding, usage) = entry
-            if (binding is EmptyBinding) {
+            if (binding.conditionScope.isNever) {
                 return EmptyProvisionStrategy
             }
             val strategy = if (binding.scope != null) {
@@ -199,12 +198,15 @@ internal class ProvisionGenerator(
                 +")"
             }
             is AlternativesBinding -> {
-                // The whole result is nullable if not exhaustive.
                 with(builder) {
                     var exhaustive = false
-                    binding.alternatives.forEach { alternative: NodeModel ->
+                    for (alternative: NodeModel in binding.alternatives) {
                         val altBinding = thisGraph.resolveBinding(alternative)
-                        if (altBinding.conditionScope.isNotEmpty) {
+                        if (!altBinding.conditionScope.isAlways) {
+                            if (altBinding.conditionScope.isNever) {
+                                // Never scoped is, by definition, unreached, so just skip it.
+                                continue
+                            }
                             val expression = buildExpression {
                                 val gen = generators[thisGraph].conditionGenerator
                                 gen.expression(this, altBinding.conditionScope)

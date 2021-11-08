@@ -14,6 +14,10 @@ interface ConditionScope {
 
     operator fun not(): ConditionScope
 
+    val isAlways: Boolean
+
+    val isNever: Boolean
+
     interface Literal {
         val negated: Boolean
         val root: TypeDeclarationLangModel
@@ -24,6 +28,3 @@ interface ConditionScope {
 
     companion object
 }
-
-val ConditionScope.isEmpty get() = expression.isEmpty()
-val ConditionScope.isNotEmpty get() = !isEmpty

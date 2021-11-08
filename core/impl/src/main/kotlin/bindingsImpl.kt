@@ -133,7 +133,7 @@ internal class EmptyBindingImpl(
     override val target: NodeModel,
 ) : EmptyBinding {
     override val scope: Nothing? get() = null
-    override val conditionScope get() = ConditionScope.Unscoped
+    override val conditionScope get() = ConditionScope.NeverScoped
     override fun dependencies(): List<Nothing> = emptyList()
 
     override fun toString() = "Absent $target (intrinsic)"
