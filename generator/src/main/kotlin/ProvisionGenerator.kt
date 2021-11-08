@@ -16,7 +16,6 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
-import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.inject.Provider
@@ -156,7 +155,7 @@ internal class ProvisionGenerator(
         generateAccess(builder, binding, kind)
     }
 
-    private fun generateAccess(builder: ExpressionBuilder, binding: BaseBinding, kind: DependencyKind) {
+    fun generateAccess(builder: ExpressionBuilder, binding: BaseBinding, kind: DependencyKind) {
         val generator = if (binding.owner != thisGraph) {
             // Inherited binding
             generators[binding.owner].generator
@@ -241,13 +240,9 @@ internal class ProvisionGenerator(
                 +"()"
             }
             is BootstrapListBinding -> {
-                with(builder) {
-                    +"%T.asList(".formatCode(Names.Arrays)
-                    join(binding.list, separator = ",\n") { node ->
-                        generateAccess(this@join, NodeDependency(node))
-                    }
-                    +")"
-                }
+                +componentForBinding(inside = thisGraph, owner = binding.owner)
+                +"."
+                generators[binding.owner].bootstrapListGenerator.generateCreation(builder, binding)
             }
             is EmptyBinding -> throw AssertionError("not handled here")
         }.let { /*exhaustive*/ }

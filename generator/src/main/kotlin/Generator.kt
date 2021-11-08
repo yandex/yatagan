@@ -9,6 +9,7 @@ internal interface Generator {
     val factoryGenerator: ComponentFactoryGenerator
     val generator: ProvisionGenerator
     val conditionGenerator: ConditionGenerator
+    val bootstrapListGenerator: BootstrapListGenerator
 }
 
 internal interface Generators {

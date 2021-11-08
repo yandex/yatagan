@@ -3,6 +3,7 @@ package com.yandex.daggerlite.generator
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
 import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.BootstrapListBinding
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
@@ -63,11 +64,19 @@ internal class ComponentGenerator(
             generators = generators,
         ).also(this::registerContributor)
     }
-    private val conditions = ConditionGenerator(
+    override val conditionGenerator = ConditionGenerator(
         fieldsNs = fieldsNs,
         thisGraph = graph,
         parent = parentConditionGenerator,
         provisionGenerator = provisionGenerator,
+    ).also(this::registerContributor)
+
+    override val bootstrapListGenerator = BootstrapListGenerator(
+        bootstrapListBindings = graph.localBindings.keys.filterIsInstance<BootstrapListBinding>(),
+        methodNs = methodsNs,
+        thisGraph = graph,
+        provisionGenerator = provisionGenerator,
+        generators = generators,
     ).also(this::registerContributor)
 
     init {
@@ -81,7 +90,7 @@ internal class ComponentGenerator(
             graph = childGraph,
             implName = implName.nestedClass(subcomponentNs.name(childGraph.model.name, "Impl")),
             generators = generators,
-            parentConditionGenerator = conditions,
+            parentConditionGenerator = conditionGenerator,
         )
     }
 
@@ -129,9 +138,6 @@ internal class ComponentGenerator(
 
     override val generator: ProvisionGenerator
         get() = provisionGenerator.get()
-
-    override val conditionGenerator: ConditionGenerator
-        get() = conditions
 
     private fun registerContributor(contributor: Contributor) {
         contributors += contributor
