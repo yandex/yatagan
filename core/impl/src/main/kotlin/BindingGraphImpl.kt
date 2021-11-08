@@ -18,6 +18,7 @@ import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.getAnnotation
@@ -28,6 +29,8 @@ private class BindingGraphImpl(
     private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
     private val resolveHelper = hashMapOf<NodeModel, Binding>()
+    override val variant: Variant = model.variant + parent?.variant
+
     private val allModules = run {
         val seenModules = hashSetOf<ModuleModel>()
         val moduleQueue = ArrayDeque(model.modules)
@@ -52,7 +55,7 @@ private class BindingGraphImpl(
                 if (seenSubcomponents.add(subcomponent)) {
                     // MAYBE: Factory is actually required.
                     subcomponent.factory?.let { factory: ComponentFactoryModel ->
-                        factory.createdComponent.conditionScope(forVariant = model.variant)?.let { conditionScope ->
+                        factory.createdComponent.conditionScope(forVariant = variant)?.let { conditionScope ->
                             yield(SubComponentFactoryBindingImpl(
                                 owner = this@BindingGraphImpl,
                                 factory = factory,
@@ -133,7 +136,7 @@ private class BindingGraphImpl(
         children = model.modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
-            .filter { it.conditionScope(model.variant) != null }
+            .filter { it.conditionScope(variant) != null }
             .distinct()
             .map { BindingGraphImpl(it, parent = this, factory = factory) }
             .toList()
@@ -220,7 +223,7 @@ private class BindingGraphImpl(
         if (binding != null) {
             // The binding is requested from a parent, so add parent to dependencies.
             usedParents += parent
-            parent.materializationQueue += NodeDependency(binding.target)
+            parent.materializationQueue += dependency
             return binding
         }
         return parent.materializeInParents(dependency)?.also {

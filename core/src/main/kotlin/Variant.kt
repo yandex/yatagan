@@ -11,4 +11,6 @@ interface Variant {
     }
 
     val parts: Map<DimensionModel, FlavorModel>
+
+    operator fun plus(variant: Variant?): Variant
 }

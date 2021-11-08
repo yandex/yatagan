@@ -7,11 +7,23 @@ import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 
-internal class VariantImpl(
-    flavors: Sequence<TypeLangModel>,
-) : Variant {
-    override val parts: Map<Variant.DimensionModel, Variant.FlavorModel> =
-        flavors.map { FlavorImpl(it) }.associateBy(FlavorImpl::dimension)
+internal class VariantImpl : Variant {
+
+    constructor(flavors: Sequence<TypeLangModel>) {
+        parts = flavors.map { FlavorImpl(it) }.associateBy(FlavorImpl::dimension)
+    }
+
+    private constructor(parts: Map<Variant.DimensionModel, Variant.FlavorModel>) {
+        this.parts = parts
+    }
+    override val parts: Map<Variant.DimensionModel, Variant.FlavorModel>
+
+    override fun plus(variant: Variant?): Variant {
+        return VariantImpl(
+            if (variant != null) this@VariantImpl.parts + variant.parts
+            else this@VariantImpl.parts
+        )
+    }
 
     override fun toString() = "Variant[$parts]"
 
