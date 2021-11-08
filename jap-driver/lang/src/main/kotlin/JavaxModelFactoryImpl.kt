@@ -6,7 +6,7 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import javax.lang.model.element.TypeElement
 
-private class JavaxModelFactoryImpl : LangModelFactory {
+class JavaxModelFactoryImpl : LangModelFactory {
     private val listElement: TypeElement by lazy {
         Utils.elements.getTypeElement(List::class.java.canonicalName)
     }
@@ -19,5 +19,3 @@ private class JavaxModelFactoryImpl : LangModelFactory {
         return JavaxTypeImpl(Utils.types.getDeclaredType(listElement, (type as JavaxTypeImpl).impl))
     }
 }
-
-fun LangModelFactory(): LangModelFactory = JavaxModelFactoryImpl()

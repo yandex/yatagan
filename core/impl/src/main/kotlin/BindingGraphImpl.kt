@@ -22,7 +22,6 @@ import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.getAnnotation
 
-
 private class BindingGraphImpl(
     override val model: ComponentModel,
     private val factory: LangModelFactory,
@@ -104,7 +103,10 @@ private class BindingGraphImpl(
 
         // This component binding
         yield(ComponentInstanceBindingImpl(graph = this@BindingGraphImpl))
-    }.associateByTo(mutableMapOf(), BaseBinding::target)
+    }.groupBy(BaseBinding::target).mapValuesTo(mutableMapOf()) { (target, bindings) ->
+        check(bindings.size == 1) { "Multiple bindings for $target: $bindings" }
+        bindings.first()
+    }
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableSetOf<ConditionScope.Literal>()
@@ -219,7 +221,7 @@ private class BindingGraphImpl(
     }
 
     override fun toString(): String {
-        return "Graph[$model]"
+        return "BindingGraph[$model]"
     }
 }
 

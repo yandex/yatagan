@@ -3,9 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core"))
     implementation(project(":base"))
-    implementation(project(":generator-poetry"))
-    implementation(project(":generator-lang"))
+    implementation(project(":core-impl"))
     implementation(kotlin("stdlib"))
+    implementation(project(":generator"))
 }

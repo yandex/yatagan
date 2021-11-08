@@ -95,7 +95,7 @@ internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
 internal fun KSClassDeclaration.allPublicFunctions() : Sequence<KSFunctionDeclaration> {
     return sequenceOf(
         getAllFunctions(),
-        getDeclaredFunctions().filter(KSFunctionDeclaration::isStatic),
+        getDeclaredFunctions().filter { Modifier.JAVA_STATIC in it.modifiers },
     ).flatten().filter(KSFunctionDeclaration::isPublic)
 }
 

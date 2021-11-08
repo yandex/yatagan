@@ -17,7 +17,7 @@ import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
-private class KspModelFactoryImpl : LangModelFactory {
+class KspModelFactoryImpl : LangModelFactory {
     private val listDeclaration = Utils.resolver.getClassDeclarationByName(List::class.java.canonicalName)!!
 
     override fun getAnnotation(clazz: Class<out Annotation>): AnnotationLangModel {
@@ -52,5 +52,3 @@ private class KspModelFactoryImpl : LangModelFactory {
         }
     }
 }
-
-fun LangModelFactory(): LangModelFactory = KspModelFactoryImpl()

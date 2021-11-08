@@ -72,6 +72,8 @@ internal class ComponentFactoryModelImpl private constructor(
         }
     }
 
+    override fun toString() = "ComponentFactory[$factoryDeclaration]"
+
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentFactoryModelImpl>() {
         operator fun invoke(
             factoryDeclaration: TypeDeclarationLangModel,

@@ -1,11 +1,11 @@
 package com.yandex.daggerlite.ksp
 
 import com.google.devtools.ksp.processing.KSPLogger
-import com.yandex.daggerlite.generator.GenerationLogger
+import com.yandex.daggerlite.process.Logger
 
-internal class KspGenerationLogger(
+internal class KspLogger(
     private val logger: KSPLogger,
-) : GenerationLogger {
+) : Logger {
     override fun error(message: String) {
         logger.error(message /*TODO: support where*/)
     }

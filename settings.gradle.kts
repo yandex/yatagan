@@ -14,6 +14,8 @@ include("core")
 include("core-lang")
 include("core-impl")
 
+include("process")
+
 include("ksp-driver")
 include("ksp-driver-lang")
 

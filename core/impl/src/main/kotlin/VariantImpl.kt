@@ -13,12 +13,16 @@ internal class VariantImpl(
     override val parts: Map<Variant.DimensionModel, Variant.FlavorModel> =
         flavors.map { FlavorImpl(it) }.associateBy(FlavorImpl::dimension)
 
+    override fun toString() = "Variant[$parts]"
+
     private class DimensionImpl private constructor(
         override val type: TypeLangModel,
     ) : Variant.DimensionModel {
         init {
             require(type.declaration.isAnnotatedWith<ComponentVariantDimension>())
         }
+
+        override fun toString() = "Dimension[$type]"
 
         companion object Factory : ObjectCache<TypeLangModel, DimensionImpl>() {
             operator fun invoke(type: TypeLangModel) = DimensionImpl.createCached(type, ::DimensionImpl)
@@ -34,6 +38,8 @@ internal class VariantImpl(
 
         override val dimension: DimensionImpl =
             DimensionImpl(checkNotNull(type.declaration.componentFlavorIfPresent).dimension)
+
+        override fun toString() = "Flavor[$type]"
 
         companion object Factory : ObjectCache<TypeLangModel, FlavorImpl>() {
             operator fun invoke(type: TypeLangModel) = createCached(type, ::FlavorImpl)

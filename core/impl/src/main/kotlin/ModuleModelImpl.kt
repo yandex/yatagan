@@ -104,6 +104,8 @@ internal class ModuleModelImpl private constructor(
         }
     }
 
+    override fun toString() = "Module[$declaration]"
+
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ModuleModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ModuleModelImpl)
 

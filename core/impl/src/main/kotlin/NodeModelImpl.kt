@@ -58,6 +58,7 @@ internal class NodeModelImpl private constructor(
 
     override fun toString() = buildString {
         qualifier?.let {
+            append('@')
             append(qualifier)
             append(' ')
         }
