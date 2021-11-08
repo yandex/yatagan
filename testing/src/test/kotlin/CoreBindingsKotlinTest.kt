@@ -155,7 +155,7 @@ class CoreBindingsKotlinTest(
                 fun getProvider(): Provider<test.Api>
                 fun getLazy(): Lazy<test.Api>
                 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(module: MyModule): TestComponent
                 }
@@ -245,7 +245,7 @@ class CoreBindingsKotlinTest(
             val provider: Provider<MyClass>
             val lazy: Lazy<MyClass>
             
-            @Component.Factory
+            @Component.Builder
             interface Factory {
                fun create(@BindsInstance instance: MyClass): TestComponent 
             }
@@ -299,6 +299,42 @@ class CoreBindingsKotlinTest(
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): List<String>;
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `basic component - universal builder support`() {
+        givenKotlinSource("test.TestComponent", """
+            class MyClass @Inject constructor (
+                    @Named("foo") o1: Object,
+                    @Named("bar") o2: Object,
+                    @Named("baz") o3: Object,
+            )
+
+            interface CreatorBase {
+                @BindsInstance
+                fun setFoo(@Named("foo") obj: Any): CreatorBase
+            }
+
+            @Component
+            interface TestComponent {
+                fun get(): MyClass
+                
+                @Component.Builder
+                interface Creator : CreatorBase {
+                    @BindsInstance
+                    fun setBar(@Named("bar") obj: Any): Creator 
+                    
+                    fun create(
+                        @BindsInstance @Named("baz") obj: Any,
+                    ): TestComponent
+                }
             }
         """)
 

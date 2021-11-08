@@ -35,7 +35,7 @@ class ComponentDependenciesKotlinTest(
             interface MyApplicationComponent {
                 val appManager: MyApplicationManager
 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): MyApplicationComponent 
                 }
@@ -48,7 +48,7 @@ class ComponentDependenciesKotlinTest(
                 val appManagerLazy: Lazy<MyApplicationManager>
                 val appManagerProvider: Provider<MyApplicationManager>
 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(app: MyApplicationComponent): MyActivityComponent 
                 }
@@ -71,7 +71,7 @@ class ComponentDependenciesKotlinTest(
             @Singleton
             @Component
             interface MyApplicationComponent {
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): MyApplicationComponent 
                 }
@@ -84,7 +84,7 @@ class ComponentDependenciesKotlinTest(
                 val appLazy: Lazy<MyApplicationComponent>
                 val appProvider: Provider<MyApplicationComponent>
 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(app: MyApplicationComponent): MyActivityComponent 
                 }

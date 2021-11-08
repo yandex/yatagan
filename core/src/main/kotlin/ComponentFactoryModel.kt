@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core
 
 /**
- * Represents [com.yandex.daggerlite.Component.Factory].
+ * Represents [com.yandex.daggerlite.Component.Builder].
  */
 interface ComponentFactoryModel : ClassBackedModel {
 
@@ -13,7 +13,17 @@ interface ComponentFactoryModel : ClassBackedModel {
     /**
      * Factory function inputs.
      */
-    val inputs: Collection<Input>
+    val factoryInputs: Collection<Input>
+
+    /**
+     * The name of the component creating function to implement.
+     */
+    val factoryFunctionName: String
+
+    /**
+     * TODO: doc.
+     */
+    val builderInputs: Collection<Input>
 
     /**
      * TODO: doc
@@ -30,8 +40,9 @@ interface ComponentFactoryModel : ClassBackedModel {
         val target: ClassBackedModel
 
         /**
-         * parameter name from the factory function.
+         * the parameter name from the factory function *OR*
+         * the setter function name if builder setter.
          */
-        val paramName: String
+        val name: String
     }
 }

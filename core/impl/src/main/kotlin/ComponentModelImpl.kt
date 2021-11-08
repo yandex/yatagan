@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
@@ -12,7 +11,6 @@ import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentModelImpl private constructor(
@@ -56,7 +54,9 @@ internal class ComponentModelImpl private constructor(
 
     override val factory: ComponentFactoryModel? by lazy(NONE) {
         declaration.nestedInterfaces
-            .find { it.isAnnotatedWith<Component.Factory>() }?.let { ComponentFactoryModelImpl(it) }
+            .find { ComponentFactoryModelImpl.canRepresent(it) }?.let {
+                ComponentFactoryModelImpl(factoryDeclaration = it, createdComponent = this)
+            }
     }
 
     override val isRoot: Boolean = impl.isRoot

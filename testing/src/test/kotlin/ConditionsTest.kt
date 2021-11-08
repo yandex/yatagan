@@ -278,7 +278,7 @@ class ConditionsTest(
             ])
             @Component(isRoot = false, variant = [MyFeatureActivity::class])  // TODO: not Custom.
             interface MyFeatureActivityComponent {
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): MyFeatureActivityComponent
                 }
@@ -327,7 +327,7 @@ class ConditionsTest(
             @Component(isRoot = false)
             interface TestSubComponent {
                 val b: Optional<ClassB>
-                @Component.Factory 
+                @Component.Builder 
                 interface Factory { fun create(): TestSubComponent }
             }
         """.trimIndent())

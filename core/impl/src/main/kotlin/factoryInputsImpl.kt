@@ -12,7 +12,7 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 
 internal class ComponentDependencyInputImpl(
-    override val paramName: String,
+    override val name: String,
     override val component: ComponentModel,
 ) : ComponentDependencyInput {
     override val target get() = component.asNode()
@@ -30,7 +30,7 @@ internal class ComponentDependencyInputImpl(
 }
 
 internal class InstanceInputImpl(
-    override val paramName: String,
+    override val name: String,
     override val node: NodeModel,
 ) : InstanceInput {
     override val target get() = node
@@ -48,7 +48,7 @@ internal class InstanceInputImpl(
 }
 
 internal class ModuleInstanceInputImpl(
-    override val paramName: String,
+    override val name: String,
     override val module: ModuleModel,
 ) : ModuleInstanceInput {
     override val target get() = module

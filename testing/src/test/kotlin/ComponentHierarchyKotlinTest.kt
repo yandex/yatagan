@@ -37,7 +37,7 @@ class ComponentHierarchyKotlinTest(
             @Singleton
             @Component(modules = [ApplicationModule::class])
             interface MyApplicationComponent {
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): MyApplicationComponent 
                 }
@@ -50,7 +50,7 @@ class ComponentHierarchyKotlinTest(
                 val appManagerLazy: Lazy<MyApplicationManager>
                 val appManagerProvider: Provider<MyApplicationManager>
 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): MyActivityComponent 
                 }
@@ -94,7 +94,7 @@ class ComponentHierarchyKotlinTest(
             interface MyApplicationComponent {
                 val activityFactory: MyActivityComponent.Factory
 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(
                         @BindsInstance @Named("app_id") appId: String,
@@ -120,7 +120,7 @@ class ComponentHierarchyKotlinTest(
 
                 val fragmentFactory: MyFragmentComponent.Factory
 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(@BindsInstance @Named("activity_id") id: String): MyActivityComponent 
                 }
@@ -140,7 +140,7 @@ class ComponentHierarchyKotlinTest(
                 
                 val fragment: FragmentController
 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): MyFragmentComponent 
                 }
@@ -265,7 +265,7 @@ class ComponentHierarchyKotlinTest(
                 
                 fun rootClass(): RootClass
             
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): MainActivityComponent
                 }
@@ -279,7 +279,7 @@ class ComponentHierarchyKotlinTest(
                 val profileFragmentComponent: ProfileFragmentComponent.Factory
                 val profileSettingsFragmentComponent: ProfileSettingsFragmentComponent.Factory
                 
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(settingsActivityFragmentModule: SettingsActivityFragmentModule): SettingsActivityComponent
                 }
@@ -289,7 +289,7 @@ class ComponentHierarchyKotlinTest(
             interface CameraFragmentComponent {
                 fun cameraSettings(): CameraSettings
             
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): CameraFragmentComponent
                 }
@@ -301,7 +301,7 @@ class ComponentHierarchyKotlinTest(
                 fun activity(): Activity
                 fun singleton(): SingletonClass
             
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): ProfileFragmentComponent
                 }
@@ -311,7 +311,7 @@ class ComponentHierarchyKotlinTest(
             interface ProfileSettingsFragmentComponent {
                 fun cameraSettings(): CameraSettings
             
-                @Component.Factory
+                @Component.Builder
                 interface Factory {
                     fun create(): ProfileSettingsFragmentComponent
                 }
