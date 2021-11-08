@@ -34,6 +34,11 @@ interface BindingGraph {
      */
     val usedParents: Collection<BindingGraph>
 
+    /**
+     * Graph variant (full - merged with parents)
+     *
+     * @see ComponentModel.variant
+     */
     val variant: Variant
 
     /**

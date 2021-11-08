@@ -28,9 +28,9 @@ private class BindingGraphImpl(
     private val factory: LangModelFactory,
     private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
-    private val resolveHelper = hashMapOf<NodeModel, Binding>()
     override val variant: Variant = model.variant + parent?.variant
 
+    private val resolveHelper = hashMapOf<NodeModel, Binding>()
     private val allModules = run {
         val seenModules = hashSetOf<ModuleModel>()
         val moduleQueue = ArrayDeque(model.modules)
