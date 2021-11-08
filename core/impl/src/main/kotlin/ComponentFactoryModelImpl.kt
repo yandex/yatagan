@@ -68,9 +68,12 @@ internal class ComponentFactoryModelImpl private constructor(
                     node = NodeModelImpl(param.type, forQualifier = param),
                     name = name,
                 )
-            else -> throw AssertionError("invalid creator input $declaration in $forBindsInstance in $factoryDeclaration")
+            else -> throw IllegalStateException(
+                "Invalid creator input $declaration in $forBindsInstance in $factoryDeclaration")
         }
     }
+
+    override fun toString() = "ComponentFactory[$factoryDeclaration]"
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentFactoryModelImpl>() {
         operator fun invoke(

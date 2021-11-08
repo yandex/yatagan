@@ -22,24 +22,29 @@ import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.getAnnotation
 
-
 private class BindingGraphImpl(
     override val model: ComponentModel,
     private val factory: LangModelFactory,
     private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
     private val resolveHelper = hashMapOf<NodeModel, Binding>()
-    private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = sequence {
-        // Gather bindings from modules
-        val seenSubcomponents = hashSetOf<ComponentModel>()
+    private val allModules = run {
         val seenModules = hashSetOf<ModuleModel>()
         val moduleQueue = ArrayDeque(model.modules)
-        val bootstrapSets = HashMap<BootstrapInterfaceModel, MutableSet<NodeModel>>()
         while (moduleQueue.isNotEmpty()) {
             val module = moduleQueue.removeFirst()
             if (!seenModules.add(module)) {
                 continue
             }
+            moduleQueue += module.includes
+        }
+        seenModules
+    }
+    private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = sequence {
+        // Gather bindings from modules
+        val seenSubcomponents = hashSetOf<ComponentModel>()
+        val bootstrapSets = HashMap<BootstrapInterfaceModel, MutableSet<NodeModel>>()
+        for (module: ModuleModel in allModules) {
             // All bindings from installed modules
             yieldAll(module.bindings(forGraph = this@BindingGraphImpl))
             // Subcomponent factories (distinct).
@@ -66,8 +71,6 @@ private class BindingGraphImpl(
                     bootstrapSets.getOrPut(bootstrapInterface, ::linkedSetOf) += nodeModel
                 }
             }
-
-            moduleQueue += module.includes
         }
         // Gather bindings from factory
         model.factory?.let { factory: ComponentFactoryModel ->
@@ -104,7 +107,10 @@ private class BindingGraphImpl(
 
         // This component binding
         yield(ComponentInstanceBindingImpl(graph = this@BindingGraphImpl))
-    }.associateByTo(mutableMapOf(), BaseBinding::target)
+    }.groupBy(BaseBinding::target).mapValuesTo(mutableMapOf()) { (target, bindings) ->
+        check(bindings.size == 1) { "Multiple bindings for $target: $bindings" }
+        bindings.first()
+    }
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableSetOf<ConditionScope.Literal>()
@@ -120,6 +126,9 @@ private class BindingGraphImpl(
     private val materializationQueue: MutableList<NodeDependency> = ArrayDeque()
 
     init {
+        // Pre-validate factory inputs
+        validateFactoryInputs()
+
         // Build children
         children = model.modules
             .asSequence()
@@ -175,6 +184,7 @@ private class BindingGraphImpl(
 
         // No longer required
         allProvidedBindings.clear()
+        allModules.clear()
     }
 
     private fun materialize(dependency: NodeDependency): Binding? {
@@ -218,8 +228,31 @@ private class BindingGraphImpl(
         }
     }
 
+    private fun validateFactoryInputs() {
+        val factory = model.factory ?: return
+
+        val providedComponents = factory.allInputs
+            .filterIsInstance<ComponentDependencyInput>()
+            .map(ComponentDependencyInput::component).toSet()
+        check(model.dependencies == providedComponents) {
+            val missing = model.dependencies - providedComponents
+            if (missing.isNotEmpty()) "Missing dependency components in $factory: $missing"
+            else "Unneeded components in $factory: ${providedComponents - model.dependencies}"
+        }
+
+        val providedModules = factory.allInputs
+            .filterIsInstance<ModuleInstanceInput>()
+            .map(ModuleInstanceInput::module).toSet()
+        val allModulesRequiresInstance = allModules.asSequence().filter(ModuleModel::requiresInstance).toSet()
+        check(allModulesRequiresInstance == providedModules) {
+            val missing = allModulesRequiresInstance - providedModules
+            if (missing.isNotEmpty()) "Missing modules in $factory: $missing"
+            else "Unneeded modules in $factory: ${providedModules - allModulesRequiresInstance}"
+        }
+    }
+
     override fun toString(): String {
-        return "Graph[$model]"
+        return "BindingGraph[$model]"
     }
 }
 

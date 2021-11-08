@@ -57,4 +57,6 @@ abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModel {
     override val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel? by lazy(NONE) {
         annotations.find { it.hasType<ComponentFlavor>() }?.let { CtComponentFlavorAnnotationImpl(it) }
     }
+
+    override fun toString() = asType().toString()
 }

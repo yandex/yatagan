@@ -31,13 +31,17 @@ internal class ProvisionBindingImpl(
     override val conditionScope: ConditionScope,
 ) : ProvisionBinding {
     override fun dependencies() = params
+
+    override fun toString() = "@Provides $params -> $target"
 }
 
 internal class AliasBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
     override val source: NodeModel,
-) : AliasBinding
+) : AliasBinding {
+    override fun toString() = "@Binds (alias) $source -> $target"
+}
 
 internal class AlternativesBindingImpl(
     override val owner: BindingGraph,
@@ -53,6 +57,8 @@ internal class AlternativesBindingImpl(
     }
 
     override fun dependencies() = alternatives.map(::NodeDependency)
+
+    override fun toString() = "@Binds (alternatives) [first present of $alternatives] -> $target"
 }
 
 internal class ComponentDependencyEntryPointBindingImpl(
@@ -72,6 +78,8 @@ internal class ComponentDependencyEntryPointBindingImpl(
     override val target get() = entryPoint.dependency.node
     override val getter get() = entryPoint.getter
     override fun dependencies() = listOf(NodeDependency(input.component.asNode()))
+
+    override fun toString() = "$entryPoint from ${input.component} (intrinsic)"
 }
 
 internal class ComponentInstanceBindingImpl(
@@ -82,6 +90,8 @@ internal class ComponentInstanceBindingImpl(
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
     override fun dependencies(): List<Nothing> = emptyList()
+
+    override fun toString() = "Component instance $target (intrinsic)"
 }
 
 internal class SubComponentFactoryBindingImpl(
@@ -100,6 +110,7 @@ internal class SubComponentFactoryBindingImpl(
     override val scope: Nothing? get() = null
 
     override fun dependencies() = targetGraph.usedParents.map { NodeDependency(it.model.asNode()) }
+    override fun toString() = "Subcomponent factory $factory (intrinsic)"
 }
 
 internal class BootstrapListBindingImpl(
@@ -113,6 +124,8 @@ internal class BootstrapListBindingImpl(
     override val list: Collection<NodeModel> by lazy(NONE) {
         topologicalSort(nodes = inputs, inside = owner)
     }
+
+    override fun toString() = "Bootstrap $target of ${inputs.take(3)}${if (inputs.size > 3) "..." else ""} (intrinsic)"
 }
 
 internal class EmptyBindingImpl(
@@ -122,4 +135,6 @@ internal class EmptyBindingImpl(
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
     override fun dependencies(): List<Nothing> = emptyList()
+
+    override fun toString() = "Absent $target (intrinsic)"
 }

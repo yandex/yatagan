@@ -49,13 +49,18 @@ internal class JavaxTypeDeclarationImpl private constructor(
                 isFromCompanionObject = false,
             )
         })
-        impl.getCompanionObject()?.allMethods(Utils.types, Utils.elements)?.map {
-            JavaxFunctionImpl(
-                owner = owner,
-                impl = it,
-                isFromCompanionObject = true,
-            )
-        }?.let { yieldAll(it) }
+        impl.getCompanionObject()?.allMethods(Utils.types, Utils.elements)
+            ?.filter {
+                // Such methods already have a truly static counterpart so skip them.
+                !it.isAnnotatedWith<JvmStatic>()
+            }
+            ?.map {
+                JavaxFunctionImpl(
+                    owner = owner,
+                    impl = it,
+                    isFromCompanionObject = true,
+                )
+            }?.let { yieldAll(it) }
     }.memoize()
 
     override val allPublicFields: Sequence<FieldLangModel> = impl.enclosedElements.asSequence()

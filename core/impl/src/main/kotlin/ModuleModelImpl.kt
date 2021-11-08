@@ -38,8 +38,14 @@ internal class ModuleModelImpl private constructor(
         impl.bootstrap.map { NodeModelImpl(type = it, forQualifier = null) }.toList()
     }
 
+    override val requiresInstance: Boolean
+        get() = mayRequireInstance() && declaration.allPublicFunctions.any { method ->
+            (method.isAnnotatedWith<Binds>() || method.providesAnnotationIfPresent != null) &&
+                    (!method.isStatic && !method.isFromCompanionObject)
+        }
+
     override fun bindings(forGraph: BindingGraph): Sequence<BaseBinding> = sequence {
-        val mayRequireInstance = !declaration.isAbstract && !declaration.isKotlinObject
+        val mayRequireInstance = mayRequireInstance()
 
         for (method in declaration.allPublicFunctions) {
             fun target(): NodeModel = NodeModelImpl(
@@ -103,6 +109,10 @@ internal class ModuleModelImpl private constructor(
             }
         }
     }
+
+    override fun toString() = "Module[$declaration]"
+
+    private fun mayRequireInstance() = !declaration.isAbstract && !declaration.isKotlinObject
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ModuleModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ModuleModelImpl)

@@ -75,6 +75,8 @@ internal class ComponentModelImpl private constructor(
         } else ConditionScope.Unscoped
     }
 
+    override fun toString() = "Component[$declaration]"
+
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)
 

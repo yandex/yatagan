@@ -57,11 +57,8 @@ interface ComponentModel : ClassBackedModel {
      * Represents a function/property exposed from a component interface.
      * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
      */
-    class EntryPoint(
+    data class EntryPoint(
         val getter: FunctionLangModel,
         val dependency: NodeDependency,
-    ) {
-        operator fun component1() = getter
-        operator fun component2() = dependency
-    }
+    )
 }
