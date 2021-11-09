@@ -33,6 +33,8 @@ internal fun TypeMirror.asPrimitiveType() = MoreTypes.asPrimitiveType(this)
 
 internal fun TypeMirror.asDeclaredType() = MoreTypes.asDeclared(this)
 
+internal fun TypeMirror.asWildCardType() = MoreTypes.asWildcard(this)
+
 internal fun AnnotationMirror.typesValue(param: String): Sequence<TypeMirror> =
     AnnotationMirrors.getAnnotationValue(this, param).accept(AsTypes)
 

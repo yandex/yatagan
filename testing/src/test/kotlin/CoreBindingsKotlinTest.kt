@@ -285,6 +285,26 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
+    fun `basic component - consume Lazy (wildcard type test)`() {
+        givenKotlinSource("test.MyModule", """
+            class ClassA @Inject constructor(f: Lazy<ClassB>)
+            class ClassB @Inject constructor()
+        """)
+
+        givenKotlinSource("test.TestComponent", """
+            @Component
+            interface TestComponent {
+                fun get(): ClassA
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
     fun `basic compoonent - provide list of strings`() {
         givenKotlinSource("test.MyModule", """
             @Module

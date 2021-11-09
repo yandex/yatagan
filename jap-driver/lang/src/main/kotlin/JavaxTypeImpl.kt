@@ -59,6 +59,8 @@ internal interface JavaxTypeImpl : TypeLangModel {
 
 internal fun JavaxTypeImpl(impl: TypeMirror): JavaxTypeImpl = when {
     impl.kind == TypeKind.DECLARED -> JavaxDeclaredTypeImpl(impl.asDeclaredType())
+    impl.kind == TypeKind.WILDCARD -> impl.asWildCardType().extendsBound?.let(::JavaxTypeImpl)
+        ?: throw RuntimeException("Wildcard type with no `extends` bound: $impl")
     impl.kind.isPrimitive -> JavaxPrimitiveTypeImpl(impl.asPrimitiveType())
     else -> throw RuntimeException("Unexpected type: $impl")
 }
