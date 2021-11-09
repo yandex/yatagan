@@ -5,7 +5,7 @@ import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 
-internal interface ProvisionStrategy {
+internal interface AccessStrategy {
     fun generateInComponent(builder: TypeSpecBuilder) {
         // nothing by default
     }

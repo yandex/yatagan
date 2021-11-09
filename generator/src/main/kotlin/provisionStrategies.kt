@@ -12,10 +12,9 @@ import javax.lang.model.element.Modifier.PRIVATE
 
 internal class InlineCachingStrategy(
     private val binding: Binding,
-    private val provisionGenerator: ProvisionGenerator,
     fieldsNs: Namespace,
     methodsNs: Namespace,
-) : ProvisionStrategy {
+) : AccessStrategy {
     private val instanceFieldName: String
     private val instanceAccessorName: String
 
@@ -36,7 +35,7 @@ internal class InlineCachingStrategy(
             controlFlow("if (local == null)") {
                 +buildExpression {
                     +"local = "
-                    provisionGenerator.generateCreation(this, binding)
+                    binding.generateCreation(builder = this, inside = binding.owner)
                 }
                 +"this.%N = local".formatCode(instanceFieldName)
             }
@@ -48,7 +47,7 @@ internal class InlineCachingStrategy(
         builder.apply {
             when (kind) {
                 DependencyKind.Direct -> {
-                    val component = provisionGenerator.componentForBinding(inside = inside, owner = binding.owner)
+                    val component = componentForBinding(inside = inside, binding = binding)
                     +"$component.%N()".formatCode(instanceAccessorName)
                 }
                 else -> throw AssertionError()
@@ -58,13 +57,13 @@ internal class InlineCachingStrategy(
 }
 
 internal class ScopedProviderStrategy(
-    multiFactory: SlotSwitchingGenerator,
-    private val cachingProvider: ScopedProviderGenerator,
     private val binding: Binding,
-    private val provisionGenerator: ProvisionGenerator,
+    multiFactory: SlotSwitchingGenerator,
+    cachingProvider: ScopedProviderGenerator,
     fieldsNs: Namespace,
     methodsNs: Namespace,
-) : ProvisionStrategy {
+) : AccessStrategy {
+    private val providerName = cachingProvider.name
     private val slot = multiFactory.requestSlot(binding)
     private val providerFieldName: String
     private val providerAccessorName: String
@@ -74,11 +73,11 @@ internal class ScopedProviderStrategy(
         val name = binding.target.name
         providerFieldName = fieldsNs.name(name, "Provider")
         providerAccessorName = methodsNs.name("providerOf", name)
+        // TODO: Here we assume binding has `Direct` requests, which may not be true - unneeded code is generated.
         instanceAccessorName = methodsNs.name("instOf", name)
     }
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
-        val providerName = cachingProvider.name
         field(providerName, providerFieldName) { modifiers(PRIVATE) }
         method(providerAccessorName) {
             modifiers(PRIVATE)
@@ -101,7 +100,7 @@ internal class ScopedProviderStrategy(
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         // Generate access either to provider, lazy or direct.
         builder.apply {
-            val component = provisionGenerator.componentForBinding(inside = inside, owner = binding.owner)
+            val component = componentForBinding(inside = inside, binding = binding)
             when (kind) {
                 DependencyKind.Direct -> +"$component.$instanceAccessorName()"
                 DependencyKind.Lazy, DependencyKind.Provider -> +"$component.$providerAccessorName()"
@@ -112,21 +111,19 @@ internal class ScopedProviderStrategy(
 }
 
 internal class InlineCreationStrategy(
-    private val generators: Generators,
     private val binding: Binding,
-) : ProvisionStrategy {
+) : AccessStrategy {
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         assert(kind == DependencyKind.Direct)
-        generators[inside].generator.generateCreation(builder, binding)
+        binding.generateCreation(builder = builder, inside = inside)
     }
 }
 
 internal class WrappingAccessorStrategy(
-    private val provisionGenerator: ProvisionGenerator,
     private val binding: Binding,
-    private val underlying: ProvisionStrategy,
+    private val underlying: AccessStrategy,
     methodsNs: Namespace,
-) : ProvisionStrategy {
+) : AccessStrategy {
     private val accessorName = methodsNs.name("create", binding.target.name)
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
@@ -142,7 +139,7 @@ internal class WrappingAccessorStrategy(
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         assert(kind == DependencyKind.Direct)
-        val component = provisionGenerator.componentForBinding(inside = inside, owner = binding.owner)
+        val component = componentForBinding(inside = inside, binding = binding)
         builder.apply {
             +"$component.$accessorName()"
         }
@@ -150,13 +147,13 @@ internal class WrappingAccessorStrategy(
 }
 
 internal class CompositeStrategy(
-    private val directStrategy: ProvisionStrategy,
-    private val lazyStrategy: ProvisionStrategy? = directStrategy,
-    private val providerStrategy: ProvisionStrategy? = directStrategy,
-    private val conditionalStrategy: ProvisionStrategy? = null,
-    private val conditionalLazyStrategy: ProvisionStrategy? = null,
-    private val conditionalProviderStrategy: ProvisionStrategy? = null,
-) : ProvisionStrategy {
+    private val directStrategy: AccessStrategy,
+    private val lazyStrategy: AccessStrategy? = directStrategy,
+    private val providerStrategy: AccessStrategy? = directStrategy,
+    private val conditionalStrategy: AccessStrategy? = null,
+    private val conditionalLazyStrategy: AccessStrategy? = null,
+    private val conditionalProviderStrategy: AccessStrategy? = null,
+) : AccessStrategy {
     override fun generateInComponent(builder: TypeSpecBuilder) {
         setOfNotNull(
             directStrategy,
@@ -181,45 +178,43 @@ internal class CompositeStrategy(
 }
 
 internal class OnTheFlyScopedProviderCreationStrategy(
-    private val cachingProvider: ScopedProviderGenerator,
-    private val generator: ProvisionGenerator,
+    cachingProvider: ScopedProviderGenerator,
     private val binding: Binding,
     private val slot: Int,
-) : ProvisionStrategy {
+) : AccessStrategy {
+    private val providerName = cachingProvider.name
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         require(kind == DependencyKind.Lazy)
         builder.apply {
-            val component = generator.componentForBinding(inside = inside, owner = binding.owner)
-            +"new %T($component, $slot)".formatCode(cachingProvider.name)
+            val component = componentForBinding(inside = inside, binding = binding)
+            +"new %T($component, $slot)".formatCode(providerName)
         }
     }
 }
 
 internal class OnTheFlyUnscopedProviderCreationStrategy(
-    private val unscopedProviderGenerator: UnscopedProviderGenerator,
-    private val generator: ProvisionGenerator,
+    unscopedProviderGenerator: UnscopedProviderGenerator,
     private val binding: Binding,
     private val slot: Int,
-) : ProvisionStrategy {
+) : AccessStrategy {
+    private val providerName = unscopedProviderGenerator.name
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         require(kind == DependencyKind.Provider)
         builder.apply {
-            val component = generator.componentForBinding(inside = inside, owner = binding.owner)
-            +"new %T($component, $slot)".formatCode(unscopedProviderGenerator.name)
+            val component = componentForBinding(inside = inside, binding = binding)
+            +"new %T($component, $slot)".formatCode(providerName)
         }
     }
 }
 
-internal class ConditionalProvisionStrategy(
-    private val underlying: ProvisionStrategy,
+internal class ConditionalAccessStrategy(
+    private val underlying: AccessStrategy,
     private val binding: Binding,
-    private val generator: ProvisionGenerator,
-    private val generators: Generators,
     methodsNs: Namespace,
     private val dependencyKind: DependencyKind,
-) : ProvisionStrategy {
+) : AccessStrategy {
     private val accessorName = methodsNs.name("optionalOf", binding.target.name)
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
@@ -229,7 +224,7 @@ internal class ConditionalProvisionStrategy(
             when {
                 !binding.conditionScope.isAlways -> {
                     val expression = buildExpression {
-                        val gen = generators[binding.owner].conditionGenerator
+                        val gen = Generators[binding.owner].conditionGenerator
                         gen.expression(this, binding.conditionScope)
                     }
                     +buildExpression {
@@ -249,7 +244,7 @@ internal class ConditionalProvisionStrategy(
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         check(dependencyKind.asOptional() == kind)
-        val component = generator.componentForBinding(inside = inside, owner = binding.owner)
+        val component = componentForBinding(inside = inside, binding = binding)
         builder.apply {
             +"$component.$accessorName()"
         }
@@ -263,7 +258,7 @@ private fun DependencyKind.asOptional(): DependencyKind = when (this) {
     else -> this
 }
 
-object EmptyProvisionStrategy : ProvisionStrategy {
+object EmptyAccessStrategy : AccessStrategy {
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
         assert(kind.isOptional)
         with(builder) {

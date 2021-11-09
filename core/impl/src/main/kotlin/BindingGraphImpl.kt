@@ -24,8 +24,8 @@ import com.yandex.daggerlite.core.lang.getAnnotation
 
 private class BindingGraphImpl(
     override val model: ComponentModel,
+    override val parent: BindingGraphImpl? = null,
     private val factory: LangModelFactory,
-    private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
     override val variant: Variant = model.variant + parent?.variant
 
@@ -287,5 +287,8 @@ class BindingUsageImpl : BindingGraph.BindingUsage {
  */
 fun BindingGraph(root: ComponentModel, modelFactory: LangModelFactory): BindingGraph {
     require(root.isRoot) { "can't use non-root component as a root of a binding graph" }
-    return BindingGraphImpl(root, modelFactory)
+    return BindingGraphImpl(
+        model =  root,
+        factory = modelFactory,
+    )
 }

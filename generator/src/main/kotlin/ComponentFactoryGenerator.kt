@@ -19,7 +19,6 @@ import javax.lang.model.element.Modifier.STATIC
 internal class ComponentFactoryGenerator(
     private val thisGraph: BindingGraph,
     private val componentImplName: ClassName,
-    private val generators: Generators,
     fieldsNs: Namespace,
 ) : ComponentGenerator.Contributor {
     private val instanceFieldNames = hashMapOf<InstanceInput, String>()
@@ -61,7 +60,7 @@ internal class ComponentFactoryGenerator(
                 field(input.target.typeName(), name) { modifiers(PRIVATE, FINAL) }
             }
             superComponentFieldNames.forEach { (input, name) ->
-                field(generators[input].implName, name) { modifiers(PRIVATE, FINAL) }
+                field(Generators[input].implName, name) { modifiers(PRIVATE, FINAL) }
             }
             constructor {
                 modifiers(PRIVATE)
@@ -69,7 +68,7 @@ internal class ComponentFactoryGenerator(
                 // Firstly - used parents
                 thisGraph.usedParents.forEach { graph ->
                     val name = paramsNs.name(graph.model.name)
-                    parameter(generators[graph].implName, name)
+                    parameter(Generators[graph].implName, name)
                     +"this.${fieldNameFor(graph)} = $name"
                 }
                 // Secondly and thirdly - factory inputs and builder inputs respectively.
@@ -91,7 +90,7 @@ internal class ComponentFactoryGenerator(
                             thisGraph.usedParents.forEach { graph ->
                                 val name = paramsNs.name(graph.model.name)
                                 builderAccess += "this.$name"
-                                val typeName = generators[graph].implName
+                                val typeName = Generators[graph].implName
                                 this@buildClass.field(typeName, name)
                                 parameter(typeName, name)
                                 +"this.$name = $name"
