@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.DependencyKind.Direct
 import com.yandex.daggerlite.core.DependencyKind.Lazy
 import com.yandex.daggerlite.core.DependencyKind.Optional
@@ -10,18 +9,6 @@ import com.yandex.daggerlite.core.DependencyKind.Provider
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-
-internal val DependencyKind.isOptional
-    get() = when (this) {
-        Direct, Lazy, Provider -> false
-        Optional, OptionalLazy, OptionalProvider -> true
-    }
-
-internal val DependencyKind.isEager
-    get() = when (this) {
-        Direct, Optional -> true
-        Lazy, Provider, OptionalLazy, OptionalProvider -> false
-    }
 
 internal fun NodeDependency(
     type: TypeLangModel,

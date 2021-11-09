@@ -6,15 +6,12 @@ import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
-import javax.inject.Provider
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 
 internal class ConditionGenerator(
     fieldsNs: Namespace,
     private val thisGraph: BindingGraph,
-    private val parent: ConditionGenerator?,
-    private val provisionGenerator: Provider<ProvisionGenerator>,
 ) : ComponentGenerator.Contributor {
     private val literalToField: Map<ConditionScope.Literal, String> = run {
         var nextIndex = 0  // TODO: proper condition field naming
@@ -27,8 +24,9 @@ internal class ConditionGenerator(
         }
 
         // Check parents first - we need to generate condition as high as it is used.
+        val parent = thisGraph.parent?.let(Generators::get)?.conditionGenerator
         if (parent != null) {
-            val component = provisionGenerator.get().componentForBinding(inside = thisGraph, owner = parent.thisGraph)
+            val component = componentInstance(inside = thisGraph, graph = parent.thisGraph)
             val name = parent.literalFieldName(literal)
             if (name != null) {
                 return "$component.$name"

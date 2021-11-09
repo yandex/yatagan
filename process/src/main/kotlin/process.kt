@@ -29,15 +29,15 @@ fun <Source> process(
                     continue
                 }
 
-                val generator = ComponentGeneratorFacade(
+                ComponentGeneratorFacade(
                     graph = graph,
-                )
-
-                delegate.openFileForGenerating(
-                    source = source,
-                    packageName = generator.targetPackageName,
-                    className = generator.targetClassName,
-                ).use(generator::generateTo)
+                ).use { generator ->
+                    delegate.openFileForGenerating(
+                        source = source,
+                        packageName = generator.targetPackageName,
+                        className = generator.targetClassName,
+                    ).use(generator::generateTo)
+                }
 
             } catch (e: Exception) {
                 delegate.logger.error(buildString {

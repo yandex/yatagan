@@ -2,15 +2,15 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.core.Binding
+import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
-import javax.inject.Provider
 import javax.lang.model.element.Modifier.PRIVATE
 
 internal class SlotSwitchingGenerator(
+    private val thisGraph: BindingGraph,
     private val methodsNs: Namespace,
-    private val provisionGenerator: Provider<ProvisionGenerator>,
 ) : ComponentGenerator.Contributor {
 
     private val boundSlots = mutableMapOf<Binding, Int>()
@@ -29,7 +29,7 @@ internal class SlotSwitchingGenerator(
                 boundSlots.forEach { (binding, slot) ->
                     +buildExpression {
                         +"case $slot: return "
-                        provisionGenerator.get().generateCreation(this, binding)
+                        binding.generateCreation(builder = this, inside = thisGraph)
                     }
                 }
                 +"default: throw new %T()".formatCode(Names.AssertionError)

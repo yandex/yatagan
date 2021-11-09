@@ -11,7 +11,6 @@ import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.core.EmptyBinding
 import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.MissingBindingException
 import com.yandex.daggerlite.core.ModuleInstanceInput
@@ -25,8 +24,8 @@ import com.yandex.daggerlite.core.lang.getAnnotation
 
 private class BindingGraphImpl(
     override val model: ComponentModel,
+    override val parent: BindingGraphImpl? = null,
     private val factory: LangModelFactory,
-    private val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
     override val variant: Variant = model.variant + parent?.variant
 
@@ -162,9 +161,6 @@ private class BindingGraphImpl(
                 if (!seenBindings.add(localBinding)) {
                     continue
                 }
-                if (localBinding is EmptyBinding && !dependency.kind.isOptional) {
-                    missing += localBinding.target
-                }
                 materializationQueue += localBinding.dependencies()
             }
         }
@@ -191,7 +187,7 @@ private class BindingGraphImpl(
     }
 
     private fun materialize(dependency: NodeDependency): Binding? {
-        fun resolveAlias(maybeAlias: BaseBinding?): Binding? {
+        fun materializeAlias(maybeAlias: BaseBinding?): Binding? {
             var binding: BaseBinding? = maybeAlias
             while (true) {
                 binding = when (binding) {
@@ -208,7 +204,7 @@ private class BindingGraphImpl(
                 binding.scope == null || binding.scope == model.scope
             }
         }
-        val nonAlias = resolveAlias(binding) ?: return null
+        val nonAlias = materializeAlias(binding) ?: return null
 
         resolveHelper[node] = nonAlias
         localBindings.getOrPut(nonAlias, ::BindingUsageImpl).accept(kind)
@@ -291,5 +287,8 @@ class BindingUsageImpl : BindingGraph.BindingUsage {
  */
 fun BindingGraph(root: ComponentModel, modelFactory: LangModelFactory): BindingGraph {
     require(root.isRoot) { "can't use non-root component as a root of a binding graph" }
-    return BindingGraphImpl(root, modelFactory)
+    return BindingGraphImpl(
+        model =  root,
+        factory = modelFactory,
+    )
 }

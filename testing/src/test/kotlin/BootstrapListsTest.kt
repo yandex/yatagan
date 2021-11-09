@@ -132,4 +132,53 @@ class BootstrapListsTest(
             }
         }
     }
+
+    @Test
+    fun `bootstrap list with conditional entries`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.BootstrapInterface
+            import com.yandex.daggerlite.BootstrapList
+            import com.yandex.daggerlite.Condition
+            import com.yandex.daggerlite.Conditional
+            import com.yandex.daggerlite.Optional
+
+            object Features {
+                var isEnabled = false
+
+                @Condition(Features::class, "isEnabled")
+                annotation class Feature
+            }
+            
+            @BootstrapInterface
+            interface Create
+            
+            @Singleton
+            class ClassA @Inject constructor (b: ClassB) : Create
+            
+            @Singleton
+            @Conditional([Features.Feature::class])
+            class ClassB @Inject constructor() : Create
+            
+            @Singleton
+            class ClassC @Inject constructor (c: ClassA) : Create
+            
+            @Module(bootstrap = [
+                ClassA::class,
+                ClassB::class,
+                ClassC::class,
+            ])
+            interface MyModule
+            
+            @Singleton @Component(modules = [MyModule::class])
+            interface TestComponent {
+                @BootstrapList
+                fun bootstrap(): List<Create>
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            generatesJavaSources("test.DaggerTestComponent")
+        }
+    }
 }

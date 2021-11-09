@@ -2,6 +2,7 @@ package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.isEager
 
 internal fun topologicalSort(
     nodes: Collection<NodeModel>,

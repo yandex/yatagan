@@ -42,6 +42,13 @@ interface BindingGraph {
     val variant: Variant
 
     /**
+     * Parent component, or super-component, if present.
+     *
+     * @see ComponentModel.isRoot
+     */
+    val parent: BindingGraph?
+
+    /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *
      * @return resolved binding with a graph to which it's a local binding.
