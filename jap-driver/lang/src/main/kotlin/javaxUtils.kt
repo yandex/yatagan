@@ -129,6 +129,24 @@ internal fun TypeElement.allMethods(typeUtils: Types, elementUtils: Elements): S
         }.map { it.asExecutableElement() })
     }
 
+internal fun TypeElement.allImplementedInterfaces(): Sequence<TypeMirror> = sequence {
+    val queue = ArrayDeque<TypeMirror>()
+    queue += interfaces
+    var superClass = superclass
+    while (superClass.kind != TypeKind.NONE) with(superClass.asTypeElement()) {
+        queue += this.interfaces
+        superClass = this.superclass
+    }
+    while (queue.isNotEmpty()) {
+        val type = queue.removeFirst()
+        queue += type.asTypeElement().interfaces
+        yield(type)
+    }
+    if (superclass.kind != TypeKind.NONE) {
+        yieldAll(superclass.asTypeElement().allImplementedInterfaces())
+    }
+}
+
 // TODO: Как и в todo ниже, можно использовать библиотеку для выявления котлин обжекта.
 fun TypeElement.getCompanionObject(): TypeElement? =
     ElementFilter.typesIn(enclosedElements).find { it.simpleName.contentEquals("Companion") && it.isKotlin }
