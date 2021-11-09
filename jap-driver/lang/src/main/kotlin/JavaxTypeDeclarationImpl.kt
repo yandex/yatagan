@@ -9,7 +9,6 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.TypeMirror
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val impl: TypeElement,
@@ -23,15 +22,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
 
-    override val implementedInterfaces: Sequence<TypeLangModel> = sequence {
-        val queue = ArrayDeque<TypeMirror>()
-        queue += impl.interfaces
-        while (queue.isNotEmpty()) {
-            val type = queue.removeFirst()
-            queue += type.asTypeElement().interfaces
-            yield(JavaxTypeImpl(type))
-        }
-    }.memoize()
+    override val implementedInterfaces: Sequence<TypeLangModel> = impl.allImplementedInterfaces().map(::JavaxTypeImpl).memoize()
 
     override val constructors: Sequence<FunctionLangModel> = impl.enclosedElements
         .asSequence()
