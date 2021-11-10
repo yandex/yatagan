@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.process
 
 import com.yandex.daggerlite.base.ObjectCacheRegistry
+import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
@@ -9,6 +10,20 @@ fun <Source> process(
     sources: Sequence<Source>,
     delegate: ProcessorDelegate<Source>,
 ) {
+    fun reportMissingBindings(graph: BindingGraph): Boolean {
+        var hasMissing = false
+        if (graph.missingBindings.isNotEmpty()) {
+            graph.missingBindings.forEach { node ->
+                delegate.logger.error("Missing binding for $node in $graph")
+                hasMissing = true
+            }
+        }
+        for (child in graph.children) {
+            hasMissing = hasMissing || reportMissingBindings(child)
+        }
+        return hasMissing
+    }
+
     ObjectCacheRegistry.use {
         for (source in sources) {
             try {
@@ -22,10 +37,7 @@ fun <Source> process(
                     modelFactory = delegate.langModelFactory,
                 )
 
-                if (graph.missingBindings.isNotEmpty()) {
-                    graph.missingBindings.forEach { node ->
-                        delegate.logger.error("Missing binding for $node in $graph")
-                    }
+                if (reportMissingBindings(graph)) {
                     continue
                 }
 
