@@ -149,19 +149,16 @@ private class BindingGraphImpl(
         val seenBindings = hashSetOf<Binding>()
         while (materializationQueue.isNotEmpty()) {
             val dependency = materializationQueue.removeFirst()
-            val localBinding = materialize(dependency)
-            if (localBinding == null) {
-                val parentBinding = materializeInParents(dependency)
-                if (parentBinding == null) {
-                    missing += dependency.node
+            val binding = materialize(dependency)
+            if (binding == null) {
+                missing += dependency.node
+                continue
+            }
+            if (binding.owner == this) {
+                if (!seenBindings.add(binding)) {
                     continue
                 }
-                // No need to add inherited binding's dependencies
-            } else {
-                if (!seenBindings.add(localBinding)) {
-                    continue
-                }
-                materializationQueue += localBinding.dependencies()
+                materializationQueue += binding.dependencies()
             }
         }
         missingBindings = missing
@@ -187,6 +184,10 @@ private class BindingGraphImpl(
     }
 
     private fun materialize(dependency: NodeDependency): Binding? {
+        return materializeLocal(dependency) ?: materializeInParents(dependency)
+    }
+
+    private fun materializeLocal(dependency: NodeDependency): Binding? {
         fun materializeAlias(maybeAlias: BaseBinding?): Binding? {
             var binding: BaseBinding? = maybeAlias
             while (true) {
@@ -215,7 +216,7 @@ private class BindingGraphImpl(
         if (parent == null) {
             return null
         }
-        val binding = parent.materialize(dependency)
+        val binding = parent.materializeLocal(dependency)
         if (binding != null) {
             // The binding is requested from a parent, so add parent to dependencies.
             usedParents += parent

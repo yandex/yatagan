@@ -183,6 +183,43 @@ class ComponentHierarchyKotlinTest(
     }
 
     @Test
+    fun `alias binding across component boundary`() {
+        givenKotlinSource("test.TestCase", """
+            interface MyApi
+            class MyImpl : MyApi
+            @Module
+            interface TestSubModule {
+                @Binds fun api(i: MyImpl): MyApi
+            }
+            @Module(subcomponents = [TestSubComponent::class])
+            interface TestModule
+            class Consumer @Inject constructor(api: MyApi)
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                val sub: TestSubComponent.Creator
+
+                @Component.Builder
+                interface Creator {
+                    fun create(@BindsInstance impl: MyImpl): TestComponent
+                }
+            }
+            @Component(isRoot = false, modules = [TestSubModule::class])
+            interface TestSubComponent {
+                val consumer: Consumer
+                @Component.Builder
+                interface Creator {
+                    fun create(): TestSubComponent
+                }
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            generatesJavaSources("test.DaggerTestComponent")
+        }
+    }
+
+    @Test
     fun `subcomponents - one more advanced case`() {
         givenKotlinSource(
             "test.TestCase",
