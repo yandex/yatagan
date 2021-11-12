@@ -18,6 +18,11 @@ class RuntimeTest(
     @Test
     fun `check qualified providings are correct`() {
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Named
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
+
             class Simple(val value: String)
 
             @Module
@@ -70,6 +75,11 @@ class RuntimeTest(
         """)
 
         givenJavaSource("test.TestCase", """
+            import javax.inject.Named;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+
             @Module(includes = {MyModuleBye.class, MyModuleFoo.class})
             interface MyModuleHello {
                 @Provides @Named("hello") static Simple hello() { return new Simple("hello"); } 
@@ -112,6 +122,11 @@ class RuntimeTest(
     @Test
     fun `check @Provides used instead of @Inject constructor if exists`() {
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
+            import javax.inject.Inject
+
             class Impl(val value: Int)
             class Wrapper @Inject constructor(val i: Impl)
 

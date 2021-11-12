@@ -18,6 +18,15 @@ class ComponentDependenciesKotlinTest(
     @Test
     fun `component dependencies - basic case`() {
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Provider
+            import javax.inject.Scope
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Lazy
+            import com.yandex.daggerlite.Module            
+
             @Scope
             annotation class ActivityScoped
 
@@ -53,7 +62,7 @@ class ComponentDependenciesKotlinTest(
                     fun create(app: MyApplicationComponent): MyActivityComponent 
                 }
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerMyApplicationComponent")
@@ -65,6 +74,12 @@ class ComponentDependenciesKotlinTest(
     @Test
     fun `component dependencies - dependency component instance is available for inject`() {
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Provider
+            import javax.inject.Scope
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Lazy
+
             @Scope
             annotation class ActivityScoped
 
@@ -89,7 +104,7 @@ class ComponentDependenciesKotlinTest(
                     fun create(app: MyApplicationComponent): MyActivityComponent 
                 }
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerMyApplicationComponent")

@@ -10,8 +10,7 @@ internal class SourceSetImpl : SourceSet {
         sourceFiles += SourceFile.java(
             "${name.substringAfterLast('.')}.java",
             """package ${name.substringBeforeLast('.')};
-${CommonImports.joinToString(separator = "\n") { "import $it;" }}
-${source.trimIndent()} """
+$source"""
         )
     }
 
@@ -19,23 +18,7 @@ ${source.trimIndent()} """
         sourceFiles += SourceFile.kotlin(
             "${name.substringAfterLast('.')}.kt",
             """package ${name.substringBeforeLast('.')}
-${CommonImports.joinToString(separator = "\n") { "import $it" }}
-${source.trimIndent()}"""
+$source"""
         )
     }
 }
-
-// bug: star imports sometimes behave incorrectly in KSP, so use explicit ones
-private val CommonImports = arrayOf(
-    "javax.inject.Inject",
-    "javax.inject.Named",
-    "javax.inject.Provider",
-    "javax.inject.Scope",
-    "javax.inject.Singleton",
-    "com.yandex.daggerlite.Component",
-    "com.yandex.daggerlite.Binds",
-    "com.yandex.daggerlite.BindsInstance",
-    "com.yandex.daggerlite.Provides",
-    "com.yandex.daggerlite.Lazy",
-    "com.yandex.daggerlite.Module",
-)

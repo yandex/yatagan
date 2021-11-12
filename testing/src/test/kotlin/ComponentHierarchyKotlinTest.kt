@@ -22,6 +22,15 @@ class ComponentHierarchyKotlinTest(
     fun `subcomponents - basic case`() {
         givenKotlinSource(
             "test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Scope
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Module
+            import javax.inject.Provider
+            import com.yandex.daggerlite.Lazy
+
             @Scope
             annotation class ActivityScoped
 
@@ -68,6 +77,17 @@ class ComponentHierarchyKotlinTest(
     fun `subcomponents - advanced case`() {
         givenKotlinSource(
             "test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Named
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Module
+            import javax.inject.Provider
+            import com.yandex.daggerlite.Lazy
+            import javax.inject.Scope
+            import com.yandex.daggerlite.BindsInstance
+
             @Scope annotation class ActivityScoped
             @Scope annotation class FragmentScoped
 
@@ -145,7 +165,7 @@ class ComponentHierarchyKotlinTest(
                     fun create(): MyFragmentComponent 
                 }
             }
-        """
+        """,
         )
 
         compilesSuccessfully {
@@ -187,6 +207,13 @@ class ComponentHierarchyKotlinTest(
         givenKotlinSource(
             "test.TestCase",
             """
+            import javax.inject.Inject
+            import javax.inject.Scope
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
             import kotlin.test.assertEquals
 
             @Scope annotation class ActivityScoped
