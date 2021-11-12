@@ -1,5 +1,8 @@
 package com.yandex.daggerlite
 
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * TODO: doc.
  */
@@ -40,11 +43,16 @@ class Optional<out T : Any> private constructor(
 
     @JvmSynthetic
     inline fun ifPresent(consumer: (T) -> Unit) {
+        contract { callsInPlace(consumer, InvocationKind.AT_MOST_ONCE) }
         value?.let(consumer)
     }
 
     @JvmSynthetic
     inline fun ifPresentOrElse(consumer: (T) -> Unit, onEmpty: () -> Unit) {
+        contract {
+            callsInPlace(consumer, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(onEmpty, InvocationKind.AT_MOST_ONCE)
+        }
         if (value != null) {
             consumer(value)
         } else {
@@ -54,6 +62,7 @@ class Optional<out T : Any> private constructor(
 
     @JvmSynthetic
     inline fun <U : Any> map(mapper: (T) -> (U)): Optional<U> {
+        contract { callsInPlace(mapper, InvocationKind.AT_MOST_ONCE) }
         return if (value != null) of(mapper(value)) else empty()
     }
 
