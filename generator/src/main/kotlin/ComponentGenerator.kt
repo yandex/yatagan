@@ -102,7 +102,7 @@ internal class ComponentGenerator(
             method(getter.name) {
                 modifiers(PUBLIC)
                 annotation<Override>()
-                returnType(dependency.asTypeName())
+                returnType(getter.returnType.typeName())
                 +buildExpression {
                     +"return "
                     graph.resolveBinding(dependency.node)

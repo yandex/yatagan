@@ -289,12 +289,20 @@ class CoreBindingsKotlinTest(
         givenKotlinSource("test.MyModule", """
             class ClassA @Inject constructor(f: Lazy<ClassB>)
             class ClassB @Inject constructor()
+            class ClassC
+
+            @Module
+            object MyModule {
+                @Provides fun classC() = ClassC() 
+                @Provides fun classB(f: Lazy<ClassC>): Any = f.get()
+            }
         """)
 
         givenKotlinSource("test.TestComponent", """
-            @Component
+            @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): ClassA
+                fun b(): Any
             }
         """)
 
@@ -329,13 +337,17 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
-    fun `basic component - universal builder support`() {
+    fun `basic component - universal builder support + variance test`() {
         givenKotlinSource("test.TestComponent", """
             class MyClass @Inject constructor (
                     @Named("foo") o1: Object,
                     @Named("bar") o2: Object,
                     @Named("baz") o3: Object,
+                    foos: Set<Foo>,
+                    bars: MutableSet<Bar>,
             )
+            interface Foo
+            interface Bar
 
             interface CreatorBase {
                 @BindsInstance
@@ -345,11 +357,20 @@ class CoreBindingsKotlinTest(
             @Component
             interface TestComponent {
                 fun get(): MyClass
+                val foos: MutableSet<out Foo>
+                val bars: Set<out Bar>
+                val bars2: Set<Bar>
                 
                 @Component.Builder
                 interface Creator : CreatorBase {
                     @BindsInstance
-                    fun setBar(@Named("bar") obj: Any): Creator 
+                    fun setBar(@Named("bar") obj: Any): Creator
+                    
+                    @BindsInstance
+                    fun setSetOfFoo(foos: Set<Foo>): Creator
+                    
+                    @BindsInstance
+                    fun setSetOfBar(bars: MutableSet<Bar>): Creator
                     
                     fun create(
                         @BindsInstance @Named("baz") obj: Any,

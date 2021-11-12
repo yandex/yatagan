@@ -12,11 +12,16 @@ import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeArgument
+import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
+import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
+import com.yandex.daggerlite.generator.lang.WildcardNameModel
 import kotlin.reflect.KClass
 
 
@@ -50,56 +55,95 @@ internal fun mapToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClass
     return declaration.qualifiedName?.let(Utils.resolver::getJavaClassByName) ?: declaration
 }
 
-internal fun mapToJavaPlatformIfNeeded(type: KSType): KSType {
+internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean = false): KSType {
     // TODO: deal with nullability here
     // MAYBE: Perf: implement caching for non-trivial mappings?
     val originalDeclaration = type.declaration as? KSClassDeclaration ?: return type
-    val mappedDeclaration = mapToJavaPlatformIfNeeded(originalDeclaration)
+    val mappedDeclaration = mapToJavaPlatformIfNeeded(declaration = originalDeclaration)
     if (mappedDeclaration == originalDeclaration && type.arguments.isEmpty()) {
         return type
     }
-    with(Utils.resolver) {
-        return mappedDeclaration.asType(type.arguments.map {
-            val originalArgType = it.type?.resolve() ?: return@map it
-            val mappedArgType = originalArgType.let(::mapToJavaPlatformIfNeeded)
-            if (mappedArgType != originalArgType) {
-                // Replace the whole argument
-                val ref = createKSTypeReferenceFromKSType(mappedArgType)
-                getTypeArgument(ref, variance = Variance.INVARIANT)
-            } else if (it.variance != Variance.INVARIANT) {
-                // Replace variance - we don't use it here.
-                getTypeArgument(it.type!!, variance = Variance.INVARIANT)
-            } else it
+    val mappedArguments = type.arguments.zip(originalDeclaration.typeParameters)
+        .map(fun(argAndParam: Pair<KSTypeArgument, KSTypeParameter>): KSTypeArgument {
+            val (arg, param) = argAndParam
+            val originalArgType = arg.type?.resolve() ?: return arg
+            val mappedArgType = mapToJavaPlatformIfNeeded(
+                type = originalArgType,
+                varianceAsWildcard = varianceAsWildcard,
+            )
+            return Utils.resolver.getTypeArgument(
+                typeRef = Utils.resolver.createKSTypeReferenceFromKSType(mappedArgType),
+                variance = if (varianceAsWildcard) {
+                    mergeVariance(declarationSite = param.variance, useSite = arg.variance)
+                } else {
+                    if (param.variance == arg.variance) {
+                        // redundant projection
+                        Variance.INVARIANT
+                    } else {
+                        arg.variance
+                    }
+                },
+            )
         })
-    }
+    return mappedDeclaration.asType(mappedArguments)
 }
 
-internal fun CtTypeNameModel(declaration: KSClassDeclaration): CtTypeNameModel {
+private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     val packageName = declaration.packageName.asString()
-    return CtTypeNameModel(
+    return ClassNameModel(
         packageName = packageName,
         simpleNames = declaration.qualifiedName!!.asString().substring(startIndex = packageName.length + 1)
             .split('.'),
-        typeArguments = emptyList(),
     )
 }
 
 internal fun CtTypeNameModel(type: KSType): CtTypeNameModel {
-    return CtTypeNameModel(type.declaration as KSClassDeclaration)
-        .withArguments(type.arguments.map { CtTypeNameModel(it.type!!.resolve()) })
+    val declaration = type.declaration as KSClassDeclaration
+    val raw = ClassNameModel(declaration)
+    val typeArguments = type.arguments.map { argument ->
+        fun argType() = argument.type!!.resolve()
+        when (argument.variance) {
+            Variance.STAR -> WildcardNameModel.Star
+            Variance.INVARIANT -> CtTypeNameModel(argType())
+            Variance.COVARIANT -> WildcardNameModel(upperBound = CtTypeNameModel(argType()))
+            Variance.CONTRAVARIANT -> WildcardNameModel(lowerBound = CtTypeNameModel(argType()))
+        }
+    }
+    return if (typeArguments.isNotEmpty()) {
+        ParameterizedNameModel(raw, typeArguments)
+    } else raw
+}
+
+private fun mergeVariance(declarationSite: Variance, useSite: Variance): Variance {
+    return when (declarationSite) {
+        Variance.INVARIANT -> useSite
+        Variance.COVARIANT -> when (useSite) {
+            Variance.INVARIANT -> Variance.COVARIANT
+            Variance.COVARIANT -> Variance.COVARIANT
+            Variance.CONTRAVARIANT -> throw IllegalArgumentException("variance conflict: covariant vs contravariant")
+            Variance.STAR -> Variance.STAR
+        }
+        Variance.CONTRAVARIANT -> when (useSite) {
+            Variance.INVARIANT -> Variance.CONTRAVARIANT
+            Variance.CONTRAVARIANT -> Variance.CONTRAVARIANT
+            Variance.COVARIANT -> throw IllegalArgumentException("variance conflict: contravariant vs covariant")
+            Variance.STAR -> Variance.STAR
+        }
+        Variance.STAR -> throw IllegalArgumentException("'*' (star) is not a valid declaration-site variance")
+    }
 }
 
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
     declarations.filterIsInstance<KSClassDeclaration>().find(KSClassDeclaration::isCompanionObject)
 
-internal fun KSClassDeclaration.allPublicFunctions() : Sequence<KSFunctionDeclaration> {
+internal fun KSClassDeclaration.allPublicFunctions(): Sequence<KSFunctionDeclaration> {
     return sequenceOf(
         getAllFunctions(),
         getDeclaredFunctions().filter { Modifier.JAVA_STATIC in it.modifiers },
     ).flatten().filter(KSFunctionDeclaration::isPublic)
 }
 
-internal fun KSClassDeclaration.allPublicProperties() : Sequence<KSPropertyDeclaration> {
+internal fun KSClassDeclaration.allPublicProperties(): Sequence<KSPropertyDeclaration> {
     return getAllProperties().filter(KSPropertyDeclaration::isPublic)
 }
 

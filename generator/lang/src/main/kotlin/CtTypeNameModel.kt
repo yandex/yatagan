@@ -1,46 +1,53 @@
 package com.yandex.daggerlite.generator.lang
 
 /**
- * Represents a [com.yandex.daggerlite.generator.lang.CtTypeLangModel] via its name and type arguments.
- * MAYBE: this most likely requires generalization to support non-class types: builtin types, arrays, etc..
+ *  Represents a [com.yandex.daggerlite.generator.lang.CtTypeLangModel] via its name and type arguments.
  */
-class CtTypeNameModel(
+sealed interface CtTypeNameModel
+
+data class ClassNameModel(
     val packageName: String,
     val simpleNames: List<String>,
-    val typeArguments: List<CtTypeNameModel>,
-) {
+) : CtTypeNameModel {
     init {
         require(simpleNames.isNotEmpty()) { "class with no name?" }
-    }
-    private val precomputedHash = run {
-        var result = packageName.hashCode()
-        result = 31 * result + simpleNames.hashCode()
-        result = 31 * result + typeArguments.hashCode()
-        result
     }
 
     override fun toString() = buildString {
         append(packageName).append('.')
         simpleNames.joinTo(this, separator = ".")
-        if (typeArguments.isNotEmpty()) {
-            append('<')
-            typeArguments.joinTo(this, separator = ".")
-            append('>')
+    }
+}
+
+data class ParameterizedNameModel(
+    val raw: ClassNameModel,
+    val typeArguments: List<CtTypeNameModel>,
+) : CtTypeNameModel {
+    override fun toString() = buildString {
+        append(raw)
+        append('<')
+        typeArguments.joinTo(this, separator = ".")
+        append('>')
+    }
+}
+
+data class WildcardNameModel(
+    val upperBound: CtTypeNameModel? = null,
+    val lowerBound: CtTypeNameModel? = null,
+) : CtTypeNameModel {
+    init {
+        require(upperBound == null || lowerBound == null) {
+            "Can't have both bounds: $upperBound and $lowerBound"
         }
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as CtTypeNameModel
-        if (precomputedHash != other.precomputedHash) return false
-        if (simpleNames != other.simpleNames) return false
-        if (typeArguments != other.typeArguments) return false
-        if (packageName != other.packageName) return false
-        return true
+    override fun toString() = buildString {
+        append("?")
+        upperBound?.let { append(" extends ").append(it) }
+        lowerBound?.let { append(" super ").append(it) }
     }
 
-    override fun hashCode(): Int = precomputedHash
-
-    fun withArguments(typeArguments: List<CtTypeNameModel>) = CtTypeNameModel(packageName, simpleNames, typeArguments)
+    companion object {
+        val Star = WildcardNameModel()
+    }
 }

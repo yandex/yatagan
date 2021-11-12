@@ -22,7 +22,9 @@ internal class JavaxTypeDeclarationImpl private constructor(
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
 
-    override val implementedInterfaces: Sequence<TypeLangModel> = impl.allImplementedInterfaces().map(::JavaxTypeImpl).memoize()
+    override val implementedInterfaces: Sequence<TypeLangModel> = impl.allImplementedInterfaces()
+        .map { JavaxTypeImpl(it) }
+        .memoize()
 
     override val constructors: Sequence<FunctionLangModel> = impl.enclosedElements
         .asSequence()

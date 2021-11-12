@@ -1,67 +1,55 @@
 package com.yandex.daggerlite.jap.lang
 
-import com.yandex.daggerlite.base.BiObjectCache
+import com.google.auto.common.MoreTypes
+import com.google.common.base.Equivalence
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.PrimitiveType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import kotlin.LazyThreadSafetyMode.NONE
 
-// TODO: Нужно решить, насколько мы собираемся поддерживать примитивы и исходя из этого доделать.
-//  Кажется легче всего примитивы передавать с `name` вида ClassNAmeModel("", int, emptyList()), а в генераторе
-//  разбираться, стоит ли нам брать boxed тип.
-private class JavaxPrimitiveTypeImpl(
-    override val impl: PrimitiveType,
-) : CtTypeLangModel(), JavaxTypeImpl {
-    override val declaration: TypeDeclarationLangModel by lazy(NONE) {
-        JavaxTypeDeclarationImpl(Utils.types.boxedClass(impl))
-    }
-    override val name: CtTypeNameModel by lazy(NONE) {
-        CtTypeNameModel(Utils.types.boxedClass(impl))
-    }
-    override val typeArguments: Collection<Nothing> = emptyList()
-    override val isBoolean: Boolean = impl.kind == TypeKind.BOOLEAN
-
-    override fun equals(other: Any?): Boolean {
-        return this === other || (other is JavaxPrimitiveTypeImpl && impl.kind == other.impl.kind)
-    }
-
-    override fun hashCode() = impl.kind.hashCode()
-}
-
-private class JavaxDeclaredTypeImpl private constructor(
-    override val impl: DeclaredType,
-    override val declaration: TypeDeclarationLangModel,
-    override val typeArguments: List<JavaxTypeImpl>,
-) : CtTypeLangModel(), JavaxTypeImpl {
+internal class JavaxTypeImpl private constructor(
+    val impl: DeclaredType,
+) : CtTypeLangModel() {
     override val name: CtTypeNameModel by lazy(NONE) { CtTypeNameModel(impl) }
 
-    companion object Factory : BiObjectCache<TypeDeclarationLangModel, List<JavaxTypeImpl>, JavaxDeclaredTypeImpl>() {
-        operator fun invoke(impl: DeclaredType): JavaxDeclaredTypeImpl {
-            // MAYBE: If some bugs are encountered with equivalence here, use TypeMirrors.equivalence() from google.auto
-            return createCached(
-                key1 = JavaxTypeDeclarationImpl(impl.asTypeElement()),
-                key2 = impl.typeArguments.map(::JavaxTypeImpl),
-            ) { k1, k2 ->
-                JavaxDeclaredTypeImpl(impl = impl, declaration = k1, typeArguments = k2)
-            }
+    override val declaration: TypeDeclarationLangModel by lazy(NONE) {
+        JavaxTypeDeclarationImpl(impl.asTypeElement())
+    }
+
+    override val isBoolean: Boolean
+        get() = impl.asTypeElement() == Utils.booleanType
+
+    override val typeArguments: Collection<TypeLangModel> by lazy(NONE) {
+        impl.asDeclaredType().typeArguments.map(Factory::invoke)
+    }
+
+    companion object Factory : ObjectCache<Equivalence.Wrapper<TypeMirror>, JavaxTypeImpl>() {
+        operator fun invoke(impl: TypeMirror): JavaxTypeImpl {
+            val declared = mapToDeclared(impl)
+            return createCached(MoreTypes.equivalence().wrap(declared)) { JavaxTypeImpl(impl = declared) }
+        }
+
+        private fun mapToDeclared(impl: TypeMirror): DeclaredType {
+            return when(impl.kind) {
+                TypeKind.DECLARED -> impl
+                TypeKind.WILDCARD -> {
+                    // best effort
+                    val declaredType = impl.asWildCardType().extendsBound
+                        ?: throw IllegalStateException("Wildcard type with no `extends` bound: $impl")
+                    declaredType
+                }
+                TypeKind.BOOLEAN, TypeKind.BYTE, TypeKind.SHORT, TypeKind.CHAR,
+                TypeKind.INT, TypeKind.LONG, TypeKind.FLOAT, TypeKind.DOUBLE,
+                -> {
+                    Utils.types.boxedClass(impl.asPrimitiveType()).asType()
+                }
+                else -> throw IllegalArgumentException("Unexpected type")
+            }.asDeclaredType()
         }
     }
 }
-
-internal interface JavaxTypeImpl : TypeLangModel {
-    val impl: TypeMirror
-}
-
-internal fun JavaxTypeImpl(impl: TypeMirror): JavaxTypeImpl = when {
-    impl.kind == TypeKind.DECLARED -> JavaxDeclaredTypeImpl(impl.asDeclaredType())
-    impl.kind == TypeKind.WILDCARD -> impl.asWildCardType().extendsBound?.let(::JavaxTypeImpl)
-        ?: throw RuntimeException("Wildcard type with no `extends` bound: $impl")
-    impl.kind.isPrimitive -> JavaxPrimitiveTypeImpl(impl.asPrimitiveType())
-    else -> throw RuntimeException("Unexpected type: $impl")
-}
-

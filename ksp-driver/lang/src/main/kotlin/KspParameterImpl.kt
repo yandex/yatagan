@@ -13,7 +13,11 @@ internal class KspParameterImpl(
     override val name: String
         get() = impl.name?.asString() ?: "unnamed"
     override val type: TypeLangModel by lazy(NONE) {
-        KspTypeImpl(impl.type.resolve())
+        KspTypeImpl(
+            impl = impl.type.resolve(),
+            // In parameter position, kotlin declaration-/use-site variance is mapped to a Java's wildcard type.
+            varianceAsWildcard = true,
+        )
     }
 
     override fun equals(other: Any?): Boolean {

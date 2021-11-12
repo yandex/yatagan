@@ -13,10 +13,4 @@ abstract class CtTypeLangModel : TypeLangModel {
     abstract val name: CtTypeNameModel
 
     override fun toString() = name.toString()
-
-    override val isBoolean: Boolean
-        get() = with(name) {
-            // `Types.unboxedType()` throws, so better use heuristics.
-            packageName == "java.lang" && simpleNames.singleOrNull() == "Boolean"
-        }
 }

@@ -5,7 +5,10 @@ package com.yandex.daggerlite.jap.lang
 import com.google.auto.common.AnnotationMirrors
 import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
+import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
+import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
+import com.yandex.daggerlite.generator.lang.WildcardNameModel
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.AnnotationValueVisitor
@@ -16,7 +19,6 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
-import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.ElementFilter
@@ -162,19 +164,28 @@ internal val TypeElement.isKotlinObject
     }
 
 internal fun CtTypeNameModel(type: TypeMirror): CtTypeNameModel {
-    val typeArgs = (type as? DeclaredType)?.typeArguments?.map {
-        CtTypeNameModel(it)
-    } ?: emptyList()
-    return when(type.kind) {
-        TypeKind.DECLARED -> CtTypeNameModel(type.asTypeElement()).withArguments(typeArgs)
-        TypeKind.WILDCARD -> CtTypeNameModel("", listOf("?"), emptyList())
+    return when (type.kind) {
+        TypeKind.DECLARED -> {
+            val declared = type.asDeclaredType()
+            val raw = ClassNameModel(declared.asTypeElement())
+            val typeArgs = declared.typeArguments.map(::CtTypeNameModel)
+            if (typeArgs.isNotEmpty()) {
+                ParameterizedNameModel(raw, typeArgs)
+            } else raw
+        }
+        TypeKind.WILDCARD -> {
+            val wildcard = type.asWildCardType()
+            WildcardNameModel(
+                lowerBound = wildcard?.superBound?.let(::CtTypeNameModel),
+                upperBound = wildcard?.extendsBound?.let(::CtTypeNameModel),
+            )
+        }
         else -> throw RuntimeException("Unexpected type: $type")
     }
 }
 
-internal fun CtTypeNameModel(type: TypeElement): CtTypeNameModel {
+internal fun ClassNameModel(type: TypeElement): ClassNameModel {
     val packageName = type.getPackageElement().qualifiedName.toString()
     val simpleNames = type.qualifiedName.substring(packageName.length + 1).split('.')
-
-    return CtTypeNameModel(packageName, simpleNames, emptyList())
+    return ClassNameModel(packageName, simpleNames)
 }

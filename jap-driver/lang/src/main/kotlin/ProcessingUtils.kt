@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.jap.lang
 
 import java.io.Closeable
+import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 
@@ -12,6 +13,9 @@ class ProcessingUtils(
     val types: Types,
     val elements: Elements
 ) : Closeable {
+    val booleanType: TypeElement by lazy {
+        elements.getTypeElement("java.lang.Boolean")
+    }
 
     init {
         utils = this

@@ -28,7 +28,7 @@ internal class JavaxAnnotationImpl private constructor(
     }
 
     override fun getTypes(attribute: String): Sequence<TypeLangModel> {
-        return impl.typesValue(param = attribute).map(::JavaxTypeImpl).memoize()
+        return impl.typesValue(param = attribute).map { JavaxTypeImpl(it) }.memoize()
     }
 
     override fun getType(attribute: String): TypeLangModel {

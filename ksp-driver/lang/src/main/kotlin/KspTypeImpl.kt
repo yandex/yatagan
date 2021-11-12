@@ -37,6 +37,12 @@ internal class KspTypeImpl private constructor(
         }
 
     companion object Factory : ObjectCache<KSType, KspTypeImpl>() {
-        operator fun invoke(impl: KSType) = createCached(mapToJavaPlatformIfNeeded(impl), ::KspTypeImpl)
+        operator fun invoke(
+            impl: KSType,
+            varianceAsWildcard: Boolean = false,
+        ) = createCached(mapToJavaPlatformIfNeeded(
+            type = impl,
+            varianceAsWildcard = varianceAsWildcard,
+        ), ::KspTypeImpl)
     }
 }
