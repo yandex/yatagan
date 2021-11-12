@@ -98,6 +98,7 @@ internal class ComponentFactoryGenerator(
                         }
                     }
 
+                    factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.Input::name)
                     with(Namespace("m")) {
                         factory.builderInputs.forEach { builderInput ->
                             val fieldName = name(builderInput.name, builderInput.target.name)
@@ -116,7 +117,6 @@ internal class ComponentFactoryGenerator(
                             }
                         }
                     }
-                    factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.Input::name)
 
                     method(factory.factoryFunctionName) {
                         modifiers(PUBLIC)
