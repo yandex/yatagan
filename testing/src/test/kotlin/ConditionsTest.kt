@@ -59,6 +59,7 @@ class ConditionsTest(
         givenSourceSet {
             givenKotlinSource("test.Features", """
                 import com.yandex.daggerlite.Condition
+                import javax.inject.Singleton
 
                 class FeatureC {
                     var isEnabled: Boolean = false
@@ -91,6 +92,10 @@ class ConditionsTest(
         useSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Provider
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
             import com.yandex.daggerlite.Condition
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
@@ -139,6 +144,10 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Provider
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
             import com.yandex.daggerlite.Condition
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Conditionals
@@ -187,6 +196,9 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
             import com.yandex.daggerlite.Condition
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Conditionals
@@ -239,6 +251,10 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Scope
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Module
             import com.yandex.daggerlite.Condition
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Conditionals
@@ -309,6 +325,10 @@ class ConditionsTest(
     fun `conditions in component hierarchy`() {
         useSourceSet(features)
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Module
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
             
@@ -342,8 +362,16 @@ class ConditionsTest(
     fun `@Binds with multiple alternatives`() {
         useSourceSet(features)
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Named
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Module
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
+            import javax.inject.Provider
+            import com.yandex.daggerlite.Lazy
 
             interface SomeApiBase
             
@@ -434,8 +462,12 @@ class ConditionsTest(
         useSourceSet(features)
         useSourceSet(flavors)
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
             import com.yandex.daggerlite.Optional
             import com.yandex.daggerlite.Conditional
+            import com.yandex.daggerlite.Lazy
             
             interface Api
             class Impl: Api
@@ -493,7 +525,9 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            
+            import javax.inject.Inject
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Module
             import com.yandex.daggerlite.ComponentFlavor
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
@@ -551,10 +585,14 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            
+            import javax.inject.Inject
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Module
             import com.yandex.daggerlite.ComponentFlavor
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
+            import javax.inject.Provider
             
             interface Api
             @Conditional(onlyIn = [ProductType.Browser::class])

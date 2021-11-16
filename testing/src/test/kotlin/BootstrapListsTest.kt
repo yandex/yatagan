@@ -20,6 +20,11 @@ class BootstrapListsTest(
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.BootstrapInterface
             import com.yandex.daggerlite.BootstrapList
+            import com.yandex.daggerlite.Module
+            import javax.inject.Singleton
+            import javax.inject.Inject
+            import javax.inject.Provider
+            import com.yandex.daggerlite.Component
             
             @BootstrapInterface
             interface Create
@@ -67,7 +72,12 @@ class BootstrapListsTest(
     @Test
     fun `class implements multiple interfaces`() {
         givenKotlinSource("test.TestCase", """
-            
+            import javax.inject.Inject
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
             import com.yandex.daggerlite.BootstrapInterface
             import com.yandex.daggerlite.BootstrapList
             
@@ -141,6 +151,10 @@ class BootstrapListsTest(
             import com.yandex.daggerlite.Condition
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
+            import javax.inject.Inject
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Module
 
             object Features {
                 var isEnabled = false

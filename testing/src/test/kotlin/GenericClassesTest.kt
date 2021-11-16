@@ -21,19 +21,26 @@ class GenericClassesTest(
         givenJavaSource("test.MyClass", """public class MyClass <T> {}""")
 
         givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+           
             @Module interface MyModule {
                 @Provides static MyClass<Integer> getMyClassInt() {
                     return new MyClass<>();
                 }
             }
-        """)
+        """.trimIndent())
         givenJavaSource("test.TestComponent", """
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Lazy;
+            
             @Component(modules = MyModule.class) interface TestComponent {
                 MyClass<Integer> get();
                 Provider<MyClass<Integer>> getProvider();
                 Lazy<MyClass<Integer>> getLazy();
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             withNoWarnings()
@@ -46,6 +53,9 @@ class GenericClassesTest(
         givenJavaSource("test.MyClass", """public class MyClass <T> {}""")
 
         givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+
             @Module interface MyModule {
                 @Provides static MyClass<Integer> getMyClassInt() {
                     return new MyClass<>();
@@ -55,15 +65,18 @@ class GenericClassesTest(
                     return new MyClass<>();
                 }
             }
-        """)
+        """.trimIndent())
         givenJavaSource("test.TestComponent", """
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Component;
+
             @Component(modules = MyModule.class) interface TestComponent {
                 MyClass<Integer> getInt();
                 Provider<MyClass<Integer>> getProviderInt();
                 MyClass<Boolean> getBool();
                 Provider<MyClass<Boolean>> getProviderBool();
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             withNoWarnings()
@@ -77,6 +90,9 @@ class GenericClassesTest(
         givenJavaSource("test.MySecondClass", """public class MySecondClass <T> {}""")
 
         givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+
             @Module interface MyModule {
                 @Provides static MyClass<MySecondClass<Object>> getMyClassObj() {
                     return new MyClass<>();
@@ -86,15 +102,18 @@ class GenericClassesTest(
                     return new MyClass<>();
                 }
             }
-        """)
+        """.trimIndent())
         givenJavaSource("test.TestComponent", """
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Component;      
+
             @Component(modules = MyModule.class) interface TestComponent {
                 MyClass<MySecondClass<Object>> getObj();
                 Provider<MyClass<MySecondClass<Object>> > getProviderInt();
                 MyClass<MySecondClass<String>>  getStr();
                 Provider<MyClass<MySecondClass<String>> > getProviderBool();
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             withNoWarnings()
@@ -107,17 +126,22 @@ class GenericClassesTest(
         givenJavaSource("test.MyClass", """public class MyClass <T> {}""")
 
         givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;        
+
             @Module interface MyModule {
                 @Provides static MyClass getMyClassObj() {
                     return new MyClass<>();
                 }
                  }
-        """)
+        """.trimIndent())
         givenJavaSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component;
+
             @Component(modules = MyModule.class) interface TestComponent {
                 MyClass get();
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             withNoWarnings()
