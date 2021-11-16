@@ -69,6 +69,12 @@ private class BindingGraphImpl(
             }
             // Handle bootstrap lists
             for (nodeModel: NodeModel in module.bootstrap) {
+                if (BootstrapInterfaceModel.canRepresent(nodeModel.type)) {
+                    // It is BootstrapInterface itself - it's an explicit reference to materialize a binding for
+                    // a probably empty list.
+                    bootstrapSets.getOrPut(BootstrapInterfaceModel(nodeModel.type), ::linkedSetOf)
+                    continue
+                }
                 for (bootstrapInterface: BootstrapInterfaceModel in nodeModel.bootstrapInterfaces) {
                     bootstrapSets.getOrPut(bootstrapInterface, ::linkedSetOf) += nodeModel
                 }

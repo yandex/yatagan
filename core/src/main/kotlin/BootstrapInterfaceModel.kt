@@ -7,6 +7,12 @@ import com.yandex.daggerlite.core.lang.isAnnotatedWith
 @JvmInline
 value class BootstrapInterfaceModel(val impl: TypeLangModel) {
     init {
-        require(impl.declaration.isAnnotatedWith<BootstrapInterface>())
+        require(canRepresent(impl))
+    }
+
+    companion object {
+        fun canRepresent(type: TypeLangModel): Boolean {
+            return type.declaration.isAnnotatedWith<BootstrapInterface>()
+        }
     }
 }
