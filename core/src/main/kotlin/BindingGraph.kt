@@ -22,7 +22,7 @@ interface BindingGraph {
      * Nodes that have no binding for them.
      * Generally the graph is invalid if these are not empty. Use for error reporting.
      */
-    val missingBindings: Collection<NodeModel>
+    val missingBindings: Map<NodeModel, List<NodeRequester>>
 
     /**
      * Child graphs (or Subcomponents). Empty if no children present.
@@ -55,6 +55,11 @@ interface BindingGraph {
      * @throws MissingBindingException if binding is not found
      */
     fun resolveBinding(node: NodeModel): Binding
+
+    sealed interface NodeRequester {
+        class EntryPointRequester(val entryPoint: ComponentModel.EntryPoint) : NodeRequester
+        class BindingRequester(val binding: BaseBinding): NodeRequester
+    }
 
     interface BindingUsage {
         val direct: Int

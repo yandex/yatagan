@@ -26,7 +26,7 @@ internal class ConditionGenerator(
         // Check parents first - we need to generate condition as high as it is used.
         val parent = thisGraph.parent?.let(Generators::get)?.conditionGenerator
         if (parent != null) {
-            val component = componentInstance(inside = thisGraph, graph = parent.thisGraph)
+            val component = explicitComponentInstance(inside = thisGraph, graph = parent.thisGraph)
             val name = parent.literalFieldName(literal)
             if (name != null) {
                 return "$component.$name"
@@ -68,6 +68,7 @@ internal class ConditionGenerator(
         join(conditionScope.expression, separator = " && ") { clause ->
             +"("
             join(clause, separator = " || ") { literal ->
+                +"this."
                 +checkNotNull(literalFieldName(literal))
             }
             +")"

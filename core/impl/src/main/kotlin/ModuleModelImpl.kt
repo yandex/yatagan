@@ -18,7 +18,9 @@ internal class ModuleModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
 ) : ModuleModel {
     init {
-        require(canRepresent(declaration))
+        require(canRepresent(declaration)) {
+            "$declaration is not a Dagger Lite Module"
+        }
     }
 
     private val impl = declaration.moduleAnnotationIfPresent!!
@@ -52,6 +54,7 @@ internal class ModuleModelImpl private constructor(
                 type = method.returnType,
                 forQualifier = method,
             )
+
             val providesAnnotation = method.providesAnnotationIfPresent
             when {
                 providesAnnotation != null -> {
@@ -67,6 +70,9 @@ internal class ModuleModelImpl private constructor(
                         yield(EmptyBindingImpl(
                             owner = forGraph,
                             target = target(),
+                            reason = "no matching conditional clause found for ${forGraph.variant}: " +
+                                    "${providesAnnotation.conditionals.toList()}",
+                            originatingModule = this@ModuleModelImpl,
                         ))
                     } else {
                         yield(ProvisionBindingImpl(
@@ -81,13 +87,19 @@ internal class ModuleModelImpl private constructor(
                                 NodeDependency(type = param.type, forQualifier = param)
                             }.toList(),
                             conditionScope = scope,
+                            originatingModule = this@ModuleModelImpl,
                         ))
                     }
                 }
                 method.isAnnotatedWith<Binds>() -> {
                     // @Binds
                     yield(when (method.parameters.count()) {
-                        0 -> throw IllegalStateException("@Binds with no arguments")
+                        0 -> EmptyBindingImpl(
+                            owner = forGraph,
+                            target = target(),
+                            reason = "explicitly empty",
+                            originatingModule = this@ModuleModelImpl,
+                        )
                         1 -> AliasBindingImpl(
                             owner = forGraph,
                             target = target(),
@@ -95,6 +107,7 @@ internal class ModuleModelImpl private constructor(
                                 type = method.parameters.single().type,
                                 forQualifier = method.parameters.single(),
                             ),
+                            originatingModule = this@ModuleModelImpl,
                         )
                         else -> AlternativesBindingImpl(
                             owner = forGraph,
@@ -103,6 +116,7 @@ internal class ModuleModelImpl private constructor(
                                 NodeModelImpl(type = parameter.type, forQualifier = parameter)
                             }.toList(),
                             scope = method.annotations.find(AnnotationLangModel::isScope),
+                            originatingModule = this@ModuleModelImpl,
                         )
                     })
                 }

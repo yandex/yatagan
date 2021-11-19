@@ -31,6 +31,8 @@ internal class NodeModelImpl private constructor(
             ) ?: return EmptyBindingImpl(
                 owner = forGraph,
                 target = this,
+                reason = "no matching conditional clause found for ${forGraph.variant}: " +
+                        "${type.declaration.conditionals.toList()}",
             )
         } else ConditionScope.Unscoped
 
@@ -45,6 +47,7 @@ internal class NodeModelImpl private constructor(
                     NodeDependency(type = param.type, forQualifier = param)
                 }.toList(),
                 conditionScope = conditionScope,
+                originatingModule = null,
             )
         }
     }

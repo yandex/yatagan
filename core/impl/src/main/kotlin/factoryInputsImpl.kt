@@ -25,6 +25,7 @@ internal class ComponentDependencyInputImpl(
             override val scope: Nothing? get() = null
             override val owner get() = forGraph
             override fun dependencies(): List<Nothing> = emptyList()
+            override val originatingModule: Nothing? get() = null
         }
     }
 }
@@ -43,6 +44,7 @@ internal class InstanceInputImpl(
             override val target get() = node
             override val owner get() = forGraph
             override fun dependencies(): List<Nothing> = emptyList()
+            override val originatingModule: Nothing? get() = null
         }
     }
 }

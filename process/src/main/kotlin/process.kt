@@ -2,6 +2,8 @@ package com.yandex.daggerlite.process
 
 import com.yandex.daggerlite.base.ObjectCacheRegistry
 import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.BindingGraph.NodeRequester.BindingRequester
+import com.yandex.daggerlite.core.BindingGraph.NodeRequester.EntryPointRequester
 import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
@@ -13,8 +15,17 @@ fun <Source> process(
     fun reportMissingBindings(graph: BindingGraph): Boolean {
         var hasMissing = false
         if (graph.missingBindings.isNotEmpty()) {
-            graph.missingBindings.forEach { node ->
-                delegate.logger.error("Missing binding for $node in $graph")
+            graph.missingBindings.forEach { (node, requesters) ->
+                delegate.logger.error(buildString {
+                    appendLine("Missing binding for $node in $graph")
+                    requesters.forEach {
+                        val requestedDescription = when(it) {
+                            is BindingRequester -> it.binding.toString()
+                            is EntryPointRequester -> it.entryPoint.getter.let { func -> "${func.owner}.${func.name}" }
+                        }
+                        appendLine(" - Requested from here: $requestedDescription")
+                    }
+                })
                 hasMissing = true
             }
         }

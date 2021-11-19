@@ -77,7 +77,7 @@ internal inline fun <A> ExpressionBuilder.generateCall(
                     function.isFromCompanionObject && !function.isStatic -> ".Companion"
                     else -> ""
                 }
-                +"${function.ownerName.asTypeName()}$ownerObject.${function.name}("
+                +"${function.ownerName.asTypeName()}$ownerObject.%L(".formatCode(function.name)
             }
         }
     }

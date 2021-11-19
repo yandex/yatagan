@@ -22,7 +22,7 @@ internal fun Binding.generateCreation(
     fun componentForBinding(): String {
         return componentForBinding(inside = inside, binding = this)
     }
-
+try {
     when (this) {
         is InstanceBinding -> with(builder) {
             val component = componentForBinding()
@@ -94,4 +94,7 @@ internal fun Binding.generateCreation(
         }
         is EmptyBinding -> throw AssertionError("not handled here")
     }.let { /*exhaustive*/ }
+} catch (e: Throwable) {
+    throw RuntimeException("While generating creation for $this", e)
+}
 }

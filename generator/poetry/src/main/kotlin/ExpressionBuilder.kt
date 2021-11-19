@@ -11,6 +11,9 @@ open class ExpressionBuilder {
     }
 
     operator fun String.unaryPlus() {
+        require('$' !in this) {
+            "String \"$this\" contains control characters. Use %L placeholder."
+        }
         impl.add(this)
     }
 

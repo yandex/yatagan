@@ -14,4 +14,10 @@ sealed interface BaseBinding {
      * A graph which hosts the binding.
      */
     val owner: BindingGraph
+
+    /**
+     * If binding came from a [ModuleModel] then this is it.
+     * If it's intrinsic - `null` is returned.
+     */
+    val originatingModule: ModuleModel?
 }

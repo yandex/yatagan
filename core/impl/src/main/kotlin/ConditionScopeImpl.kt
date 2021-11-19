@@ -144,7 +144,9 @@ private class ConditionLiteralImpl private constructor(
             }
 
             val allMethods = type.allPublicFunctions
-            val method = allMethods.find { it.name == name }
+            @Suppress("DEPRECATION")
+            val asGetter = "get${name.capitalize()}"
+            val method = allMethods.find { it.name == name || it.name == asGetter  }
             if (method != null) {
                 return method
             }

@@ -5,10 +5,14 @@ import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 
-internal fun componentInstance(inside: BindingGraph, graph: BindingGraph): String {
+internal fun explicitComponentInstance(inside: BindingGraph, graph: BindingGraph): String? {
     return if (inside != graph) {
-        "this." + Generators[inside].factoryGenerator.fieldNameFor(graph)
-    } else "this"
+        Generators[inside].factoryGenerator.fieldNameFor(graph)
+    } else null
+}
+
+internal fun componentInstance(inside: BindingGraph, graph: BindingGraph): String {
+    return explicitComponentInstance(inside = inside, graph = graph)?.let { "this.$it" } ?: "this"
 }
 
 internal fun componentForBinding(inside: BindingGraph, binding: Binding): String {

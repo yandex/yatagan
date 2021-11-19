@@ -29,6 +29,7 @@ internal class ProvisionBindingImpl(
     override val params: Collection<NodeDependency>,
     override val requiredModuleInstance: ModuleModel?,
     override val conditionScope: ConditionScope,
+    override val originatingModule: ModuleModel?,
 ) : ProvisionBinding {
     override fun dependencies() = params
 
@@ -39,8 +40,20 @@ internal class AliasBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
     override val source: NodeModel,
+    override val originatingModule: ModuleModel,
 ) : AliasBinding {
     override fun toString() = "@Binds (alias) $source -> $target"
+
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is AliasBindingImpl &&
+                source == other.source && target == other.target)
+    }
+
+    override fun hashCode(): Int {
+        var result = target.hashCode()
+        result = 31 * result + source.hashCode()
+        return result
+    }
 }
 
 internal class AlternativesBindingImpl(
@@ -48,6 +61,7 @@ internal class AlternativesBindingImpl(
     override val target: NodeModel,
     override val scope: AnnotationLangModel?,
     override val alternatives: Collection<NodeModel>,
+    override val originatingModule: ModuleModel,
 ) : AlternativesBinding {
     override val conditionScope: ConditionScope by lazy(NONE) {
         alternatives.fold(ConditionScope.NeverScoped) { acc, alternative ->
@@ -73,6 +87,7 @@ internal class ComponentDependencyEntryPointBindingImpl(
         }
     }
 
+    override val originatingModule: Nothing? get() = null
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
     override val target get() = entryPoint.dependency.node
@@ -90,6 +105,7 @@ internal class ComponentInstanceBindingImpl(
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
     override fun dependencies(): List<Nothing> = emptyList()
+    override val originatingModule: Nothing? get() = null
 
     override fun toString() = "Component instance $target (intrinsic)"
 }
@@ -104,11 +120,14 @@ internal class SubComponentFactoryBindingImpl(
 
     override val targetGraph: BindingGraph by lazy(NONE) {
         val targetComponent = factory.createdComponent
-        checkNotNull(owner.children.find { it.model == targetComponent })
+        checkNotNull(owner.children.find { it.model == targetComponent }) {
+            "$this: Can't find child component $targetComponent among $owner's children."
+        }
     }
 
     override val scope: Nothing? get() = null
 
+    override val originatingModule: Nothing? get() = null
     override fun dependencies() = targetGraph.usedParents.map { NodeDependency(it.model.asNode()) }
     override fun toString() = "Subcomponent factory $factory (intrinsic)"
 }
@@ -124,6 +143,7 @@ internal class BootstrapListBindingImpl(
     override val list: Collection<NodeModel> by lazy(NONE) {
         topologicalSort(nodes = inputs, inside = owner)
     }
+    override val originatingModule: Nothing? get() = null
 
     override fun toString() = "Bootstrap $target of ${inputs.take(3)}${if (inputs.size > 3) "..." else ""} (intrinsic)"
 }
@@ -131,10 +151,12 @@ internal class BootstrapListBindingImpl(
 internal class EmptyBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
+    override val originatingModule: ModuleModel? = null,
+    val reason: String,
 ) : EmptyBinding {
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.NeverScoped
     override fun dependencies(): List<Nothing> = emptyList()
 
-    override fun toString() = "Absent $target (intrinsic)"
+    override fun toString() = "Absent $target because $reason"
 }
