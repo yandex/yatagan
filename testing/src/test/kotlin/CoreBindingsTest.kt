@@ -25,18 +25,23 @@ class CoreBindingsTest(
         classes = givenSourceSet {
             givenJavaSource(
                 "test.MyScopedClass", """
+            import javax.inject.Inject;
+            import javax.inject.Singleton;
+
             @Singleton public class MyScopedClass {
                 @Inject public MyScopedClass() {}
             }
-        """
+        """.trimIndent()
             )
 
             givenJavaSource(
                 "test.MySimpleClass", """
+            import javax.inject.Inject;
+            
             public class MySimpleClass {
                 @Inject public MySimpleClass(MyScopedClass directDep) {}
             }
-        """
+        """.trimIndent()
             )
         }
 
@@ -44,14 +49,16 @@ class CoreBindingsTest(
             givenJavaSource(
                 "test.Api", """
         public interface Api {}    
-        """
+        """.trimIndent()
             )
             givenJavaSource(
                 "test.Impl", """
+        import javax.inject.Inject;
+            
         public class Impl implements Api {
           @Inject public Impl() {}
         }
-        """
+        """.trimIndent()
             )
         }
     }
@@ -62,6 +69,11 @@ class CoreBindingsTest(
 
         givenJavaSource(
             "test.TestComponent", """
+            import javax.inject.Singleton;
+            import com.yandex.daggerlite.Component;
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Lazy;
+                        
             @Component @Singleton
             public interface TestComponent {
                 MySimpleClass getMySimpleClass();
@@ -71,7 +83,7 @@ class CoreBindingsTest(
                 Provider<MyScopedClass> getMyScopedClassProvider();
                 Lazy<MyScopedClass> getMyScopedClassLazy();
             }
-        """
+        """.trimIndent()
         )
 
         compilesSuccessfully {
@@ -86,22 +98,30 @@ class CoreBindingsTest(
 
         givenJavaSource(
             "test.MyModule", """
+        import com.yandex.daggerlite.Binds;
+        import com.yandex.daggerlite.Module;
+                    
         @Module
         public interface MyModule {
           @Binds Api bind(Impl i);
         }
-        """
+        """.trimIndent()
         )
 
         givenJavaSource(
             "test.TestComponent", """
+            import javax.inject.Singleton;
+            import com.yandex.daggerlite.Component;
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Lazy;
+            
             @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
                 Api get();
                 Provider<Api> getProvider();
                 Lazy<Api> getLazy();
             }
-        """
+        """.trimIndent()
         )
 
         givenKotlinSource("test.TestCase", """
@@ -109,7 +129,7 @@ class CoreBindingsTest(
                 val c = DaggerTestComponent()
                 assert(c.get() is Impl)
             }
-        """
+        """.trimIndent()
         )
 
         compilesSuccessfully {
@@ -127,6 +147,9 @@ class CoreBindingsTest(
 
         givenJavaSource(
             "test.MyModule", """
+        import com.yandex.daggerlite.Provides;
+        import com.yandex.daggerlite.Module;
+        
         @Module
         public interface MyModule {
           @Provides static Api provides() {
@@ -137,6 +160,11 @@ class CoreBindingsTest(
         )
         givenJavaSource(
             "test.TestComponent", """
+            import javax.inject.Singleton;
+            import com.yandex.daggerlite.Component;
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Lazy;
+
             @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
                 Api get();
@@ -170,6 +198,10 @@ class CoreBindingsTest(
 
         givenJavaSource(
             "test.MyModule", """
+        import javax.inject.Provider;
+        import com.yandex.daggerlite.Provides;
+        import com.yandex.daggerlite.Module;
+
         @Module
         public interface MyModule {
           @Provides static Api provides(Provider<MyScopedClass> dep, MySimpleClass dep2) {
@@ -180,6 +212,11 @@ class CoreBindingsTest(
         )
         givenJavaSource(
             "test.TestComponent", """
+            import javax.inject.Singleton;
+            import com.yandex.daggerlite.Component;
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Lazy;
+
             @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
                 Api get();
@@ -212,10 +249,16 @@ class CoreBindingsTest(
         useSourceSet(apiImpl)
 
         givenJavaSource("test.Classes", """
+        import javax.inject.Inject;
+        import javax.inject.Provider;
+
         class MyClassA { public @Inject MyClassA(MyClassB dep) {} }
         class MyClassB { public @Inject MyClassB(Provider<MyClassA> dep) {} }
         """)
         givenJavaSource("test.TestComponent", """
+            import javax.inject.Singleton;
+            import com.yandex.daggerlite.Component;
+            
             @Component @Singleton
             public interface TestComponent {
                 MyClassA get();
@@ -231,6 +274,8 @@ class CoreBindingsTest(
     @Test
     fun `basic component - add imports to generated component`() {
         givenJavaSource("utils.MySimpleClass", """ 
+            import javax.inject.Inject;
+
             public class MySimpleClass {
                 @Inject
                 public MySimpleClass() {}
@@ -238,6 +283,7 @@ class CoreBindingsTest(
         """)
 
         givenJavaSource("test.MyProvider", """
+            import javax.inject.Inject;
             import utils.MySimpleClass;
             
             public class MyProvider {
@@ -248,6 +294,8 @@ class CoreBindingsTest(
         )
 
         givenJavaSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component;
+            
             @Component
             interface TestComponent {
                 MyProvider get();
@@ -265,6 +313,9 @@ class CoreBindingsTest(
         useSourceSet(apiImpl)
 
         givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Module;
+            import com.yandex.daggerlite.Binds;
+
             @Module
             interface MyModule {
                 @Binds
@@ -273,11 +324,15 @@ class CoreBindingsTest(
         """)
 
         givenJavaSource("test.MySubModule", """
+            import com.yandex.daggerlite.Module;
+            
             @Module
             interface MySubModule extends MyModule {}
         """)
 
         givenJavaSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component;
+
             @Component(modules = MySubModule.class)
             public interface TestComponent {
                 Api get();
@@ -294,6 +349,9 @@ class CoreBindingsTest(
     @Ignore
     fun `basic component - provide primitive type`() {
         givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+            
             @Module
             public interface MyModule {
                 @Provides
@@ -304,6 +362,10 @@ class CoreBindingsTest(
         """)
 
         givenJavaSource("test.TestComponent", """
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Lazy;
+            
             @Component(modules = MyModule.class)
             public interface TestComponent {
                 int get();
@@ -322,6 +384,9 @@ class CoreBindingsTest(
     @Ignore
     fun `basic component - convert class to primitive type`() {
         givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+            
             @Module
             public interface MyModule {
                 @Provides
@@ -332,6 +397,8 @@ class CoreBindingsTest(
         """)
 
         givenJavaSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component;
+
             @Component(modules = MyModule.class)
             public interface TestComponent {
                 int get();
@@ -347,6 +414,9 @@ class CoreBindingsTest(
     @Test
     fun `basic component - provide Object`() {
         givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+
             @Module
             public interface MyModule {
                 @Provides
@@ -357,6 +427,8 @@ class CoreBindingsTest(
         """)
 
         givenJavaSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component;
+            
             @Component(modules = MyModule.class)
             public interface TestComponent {
                 Object get();

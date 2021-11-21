@@ -23,6 +23,9 @@ class CoreBindingsKotlinTest(
 
         givenKotlinSource(
             "test.MyModule", """
+        import com.yandex.daggerlite.Provides
+        import com.yandex.daggerlite.Module
+
         @Module
         object MyModule {
           @Provides
@@ -32,10 +35,14 @@ class CoreBindingsKotlinTest(
           @JvmStatic
           fun providesExplicit() = ExplicitImpl()
         }
-        """
+        """.trimIndent()
         )
         givenKotlinSource(
             "test.TestComponent", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Lazy
+            import javax.inject.Provider
+
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): test.Api
@@ -46,7 +53,7 @@ class CoreBindingsKotlinTest(
                 fun getProviderExplicit(): Provider<test.ExplicitImpl>
                 fun getLazyExplicit(): Lazy<test.ExplicitImpl>
             }
-        """
+        """.trimIndent()
         )
 
         compilesSuccessfully {
@@ -63,6 +70,9 @@ class CoreBindingsKotlinTest(
 
         givenKotlinSource(
             "test.MyModule", """
+        import com.yandex.daggerlite.Provides
+        import com.yandex.daggerlite.Module
+
         @Module
         interface MyModule {
             companion object {
@@ -74,10 +84,14 @@ class CoreBindingsKotlinTest(
                 fun providesExplicit() = ExplicitImpl()
             }
         }
-        """
+        """.trimIndent()
         )
         givenKotlinSource(
             "test.TestComponent", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Lazy
+            import javax.inject.Provider
+
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): test.Api
@@ -88,7 +102,7 @@ class CoreBindingsKotlinTest(
                 fun getProviderExplicit(): Provider<test.ExplicitImpl>
                 fun getLazyExplicit(): Lazy<test.ExplicitImpl>
             }
-        """
+        """.trimIndent()
         )
 
         compilesSuccessfully {
@@ -103,30 +117,39 @@ class CoreBindingsKotlinTest(
         givenKotlinSource("test.Impl", """class Impl : Api""")
 
         givenKotlinSource("test.BaseModule", """
+            import com.yandex.daggerlite.Provides
+
             open class BaseModule {
                 @Provides
                 fun get(): Api = Impl()
             } 
-        """
+        """.trimIndent()
         )
 
         givenKotlinSource(
             "test.MyModule", """
+        import com.yandex.daggerlite.Module
+
         @Module
         interface MyModule {
             companion object : BaseModule()
         }
-        """
+        """.trimIndent()
         )
         givenKotlinSource(
             "test.TestComponent", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Lazy
+            import javax.inject.Provider
+            import javax.inject.Singleton
+
             @Component(modules = [MyModule::class]) @Singleton
             interface TestComponent {
                 fun get(): Api;
                 fun getProvider(): Provider<Api>;
                 fun getLazy(): Lazy<Api>;
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
@@ -140,15 +163,22 @@ class CoreBindingsKotlinTest(
 
         givenKotlinSource(
             "test.MyModule", """
+        import com.yandex.daggerlite.Provides
+        import com.yandex.daggerlite.Module
+
         @Module
         class MyModule(private val myId: Int) {
           @Provides
           fun provides(): Api = object : Api { override val id get() = myId }
         }
-        """
+        """.trimIndent()
         )
         givenKotlinSource(
             "test.TestComponent", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Lazy
+            import javax.inject.Provider
+
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): test.Api
@@ -160,7 +190,7 @@ class CoreBindingsKotlinTest(
                     fun create(module: MyModule): TestComponent
                 }
             }
-        """
+        """.trimIndent()
         )
 
         givenKotlinSource("test.TestCase", """
@@ -169,7 +199,7 @@ class CoreBindingsKotlinTest(
                 val c = DaggerTestComponent.factory().create(m)
                 assert(c.get().id == 52)
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
@@ -183,6 +213,12 @@ class CoreBindingsKotlinTest(
     @Test
     fun `basic component - properties as entry-points`() {
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Lazy
+            import javax.inject.Provider
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
+
             interface Api {}
             class Impl : Api
 
@@ -199,7 +235,7 @@ class CoreBindingsKotlinTest(
                 val provider: Provider<test.Api>
                 val lazy: Lazy<test.Api>
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
@@ -210,6 +246,12 @@ class CoreBindingsKotlinTest(
     @Test
     fun `basic component - @Provides property`() {
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Lazy
+            import javax.inject.Provider
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
+
             interface Api
             class Impl : Api
 
@@ -225,7 +267,7 @@ class CoreBindingsKotlinTest(
                 fun provider(): Provider<test.Api>
                 fun lazy(): Lazy<test.Api>
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
@@ -237,8 +279,13 @@ class CoreBindingsKotlinTest(
     fun `basic component with factory - BindsInstance`() {
         givenJavaSource("test.MyClass", """
         public class MyClass {}
-        """)
+        """.trimIndent())
         givenKotlinSource("test.TestComponent", """
+        import javax.inject.Provider
+        import com.yandex.daggerlite.Component
+        import com.yandex.daggerlite.BindsInstance
+        import com.yandex.daggerlite.Lazy
+
         @Component
         interface TestComponent {
             fun get(): MyClass
@@ -262,6 +309,9 @@ class CoreBindingsKotlinTest(
     @Test
     fun `basic component - provide Any`() {
         givenKotlinSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
+
             @Module
             object MyModule {
                 @Provides
@@ -272,6 +322,8 @@ class CoreBindingsKotlinTest(
         """)
 
         givenKotlinSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component
+
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): Any;
@@ -287,6 +339,11 @@ class CoreBindingsKotlinTest(
     @Test
     fun `basic component - consume Lazy (wildcard type test)`() {
         givenKotlinSource("test.MyModule", """
+            import com.yandex.daggerlite.Lazy
+            import com.yandex.daggerlite.Module
+            import com.yandex.daggerlite.Provides
+            import javax.inject.Inject
+
             class ClassA @Inject constructor(f: Lazy<ClassB>)
             class ClassB @Inject constructor()
             class ClassC
@@ -296,15 +353,17 @@ class CoreBindingsKotlinTest(
                 @Provides fun classC() = ClassC() 
                 @Provides fun classB(f: Lazy<ClassC>): Any = f.get()
             }
-        """)
+        """.trimIndent())
 
         givenKotlinSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component
+
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): ClassA
                 fun b(): Any
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
@@ -315,6 +374,9 @@ class CoreBindingsKotlinTest(
     @Test
     fun `basic compoonent - provide list of strings`() {
         givenKotlinSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
+
             @Module
             object MyModule {
                 @Provides
@@ -324,6 +386,8 @@ class CoreBindingsKotlinTest(
         )
 
         givenKotlinSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component
+
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun get(): List<String>;
@@ -339,6 +403,11 @@ class CoreBindingsKotlinTest(
     @Test
     fun `basic component - universal builder support + variance test`() {
         givenKotlinSource("test.TestComponent", """
+            import javax.inject.Inject
+            import javax.inject.Named
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.BindsInstance
+
             class MyClass @Inject constructor (
                     @Named("foo") o1: Object,
                     @Named("bar") o2: Object,
