@@ -101,7 +101,7 @@ internal class ComponentFactoryGenerator(
                     factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.Input::name)
                     with(Namespace("m")) {
                         factory.builderInputs.forEach { builderInput ->
-                            val fieldName = name(builderInput.name, builderInput.target.name)
+                            val fieldName = name(builderInput.name)
                             builderAccess += "this.$fieldName"
                             field(builderInput.target.typeName(), fieldName) {
                                 modifiers(PRIVATE)

@@ -10,7 +10,6 @@ import javax.lang.model.element.Modifier.PRIVATE
 
 internal class SlotSwitchingGenerator(
     private val thisGraph: BindingGraph,
-    private val methodsNs: Namespace,
 ) : ComponentGenerator.Contributor {
 
     private val boundSlots = mutableMapOf<Binding, Int>()
@@ -21,7 +20,7 @@ internal class SlotSwitchingGenerator(
     }
 
     override fun generate(builder: TypeSpecBuilder) {
-        builder.method(methodsNs.name("_new")) {
+        builder.method(FactoryMethodName) {
             modifiers(PRIVATE)
             returnType(ClassName.OBJECT)
             parameter(ClassName.INT, "slot")
@@ -35,5 +34,9 @@ internal class SlotSwitchingGenerator(
                 +"default: throw new %T()".formatCode(Names.AssertionError)
             }
         }
+    }
+
+    companion object {
+        const val FactoryMethodName = "switch\$\$new"
     }
 }

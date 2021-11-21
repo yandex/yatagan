@@ -35,7 +35,7 @@ internal class UnscopedProviderGenerator(
                     modifiers(PUBLIC)
                     annotation<Override>()
                     returnType(ClassName.OBJECT)
-                    +"return mFactory._new(mIndex)"
+                    +"return mFactory.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                 }
             }
         }

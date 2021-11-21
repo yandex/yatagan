@@ -30,7 +30,6 @@ internal class ComponentGenerator(
     private val slotSwitchingGenerator: Provider<SlotSwitchingGenerator> = lazyProvider {
         SlotSwitchingGenerator(
             thisGraph = graph,
-            methodsNs = methodsNs,
         ).also(this::registerContributor)
     }
     private val unscopedProviderGenerator = lazyProvider {
@@ -81,7 +80,9 @@ internal class ComponentGenerator(
     ) { childGraph ->
         ComponentGenerator(
             graph = childGraph,
-            generatedClassName = generatedClassName.nestedClass(subcomponentNs.name(childGraph.model.name, "Impl")),
+            generatedClassName = generatedClassName.nestedClass(
+                subcomponentNs.name(childGraph.model.name, suffix = "Impl", firstCapital = true)
+            ),
         )
     }
 

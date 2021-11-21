@@ -19,10 +19,9 @@ internal class InlineCachingStrategy(
     private val instanceAccessorName: String
 
     init {
-        val name = binding.target.name
-        // TODO: use qualifiers for name formation.
-        instanceFieldName = fieldsNs.name(name, "Instance")
-        instanceAccessorName = methodsNs.name("cache", name)
+        val target = binding.target
+        instanceFieldName = fieldsNs.name(target.name, suffix = "instance", qualifier = target.qualifier)
+        instanceAccessorName = methodsNs.name(target.name, prefix = "cache", qualifier = target.qualifier)
     }
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
@@ -70,11 +69,11 @@ internal class ScopedProviderStrategy(
     private val instanceAccessorName: String
 
     init {
-        val name = binding.target.name
-        providerFieldName = fieldsNs.name(name, "Provider")
-        providerAccessorName = methodsNs.name("providerOf", name)
+        val target = binding.target
+        providerFieldName = fieldsNs.name(target.name, suffix = "provider", qualifier = target.qualifier)
+        providerAccessorName = methodsNs.name(target.name, prefix = "scopedProviderFor", qualifier = target.qualifier)
         // TODO: Here we assume binding has `Direct` requests, which may not be true - unneeded code is generated.
-        instanceAccessorName = methodsNs.name("instOf", name)
+        instanceAccessorName = methodsNs.name(target.name, prefix = "unwrapProvider", qualifier = target.qualifier)
     }
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
@@ -124,7 +123,12 @@ internal class WrappingAccessorStrategy(
     private val underlying: AccessStrategy,
     methodsNs: Namespace,
 ) : AccessStrategy {
-    private val accessorName = methodsNs.name("create", binding.target.name)
+    private val accessorName: String
+
+    init {
+        val target = binding.target
+        accessorName = methodsNs.name(target.name, prefix = "access", qualifier = target.qualifier)
+    }
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         method(accessorName) {
@@ -215,7 +219,12 @@ internal class ConditionalAccessStrategy(
     methodsNs: Namespace,
     private val dependencyKind: DependencyKind,
 ) : AccessStrategy {
-    private val accessorName = methodsNs.name("optionalOf", binding.target.name)
+    private val accessorName: String
+
+    init {
+        val target = binding.target
+        accessorName = methodsNs.name(target.name, prefix = "optOf", qualifier = target.qualifier)
+    }
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         method(accessorName) {

@@ -35,7 +35,7 @@ internal class ScopedProviderGenerator(
                     returnType(ClassName.OBJECT)
                     +"%T local = mValue".formatCode(ClassName.OBJECT)
                     controlFlow("if (local == null)") {
-                        +"local = mFactory._new(mIndex)"
+                        +"local = mFactory.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                         +"mValue = local"
                     }
                     +"return local"
