@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.ConditionScope.Literal
 import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
@@ -10,7 +10,6 @@ import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal val ConditionScope.Companion.Unscoped get() = ConditionScopeImpl.Unscoped
@@ -80,80 +79,88 @@ private class ConditionScopeImpl(
     }
 }
 
-
 private class ConditionLiteralImpl private constructor(
     override val negated: Boolean,
-    override val root: TypeDeclarationLangModel,
-    override val path: List<MemberLangModel>,
+    private val payload: LiteralPayload,
 ) : Literal {
-    private val negative: Literal by lazy(NONE) {
-        object : Literal by this@ConditionLiteralImpl {
-            override val negated: Boolean
-                get() = !this@ConditionLiteralImpl.negated
 
-            override fun not() = this@ConditionLiteralImpl
+    override fun not(): Literal = Factory(
+        negated = !negated,
+        payload = payload,
+    )
+
+    override val path get() = payload.path
+
+    override val root get() = payload.root
+
+    private class LiteralPayload private constructor(
+        val root: TypeDeclarationLangModel,
+        private val pathSource: String,
+    ) {
+        val path: List<MemberLangModel> by lazy(NONE) {
+            buildList {
+                var currentType = root.asType()
+                var finished = false
+
+                pathSource.split('.').forEach { rawName ->
+                    check(!finished) { "Unable to reach boolean result with the given condition" }
+
+                    val member = checkNotNull(findAccessor(currentType.declaration, rawName)) {
+                        "Can't find accessible '$rawName' member in $currentType"
+                    }
+                    add(member)
+
+                    val type = when (member) {
+                        is FunctionLangModel -> member.returnType
+                        is FieldLangModel -> member.type
+                    }
+                    if (type.isBoolean) {
+                        finished = true
+                    } else {
+                        currentType = type
+                    }
+                }
+                check(finished) { "Unable to reach boolean result with the given condition" }
+            }
+        }
+
+        companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
+            operator fun invoke(root: TypeDeclarationLangModel, pathSource: String) : LiteralPayload {
+                return createCached(root, pathSource, ::LiteralPayload)
+            }
+
+            private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
+                val field = type.allPublicFields.find { it.name == name }
+                if (field != null) {
+                    return field
+                }
+
+                val allMethods = type.allPublicFunctions
+                val method = allMethods.find { it.name == name }
+                if (method != null) {
+                    return method
+                }
+                return null
+            }
         }
     }
 
-    override fun not(): Literal = negative
-
-    companion object Factory : ObjectCache<ConditionAnnotationLangModel, ConditionLiteralImpl>() {
+    companion object Factory : BiObjectCache<Boolean, LiteralPayload, ConditionLiteralImpl>() {
         operator fun invoke(model: ConditionAnnotationLangModel): Literal {
-            return createCached(model) {
-                val matched = ConditionRegex.matchEntire(model.condition)
-                    ?: throw RuntimeException("invalid condition ${model.condition}")
-                val (negate, names) = matched.destructured
-                val root = model.target.declaration
-                ConditionLiteralImpl(
-                    negated = negate.isNotEmpty(),
-                    root = root,
-                    path = inflatePath(root.asType(), names.split('.')),
-                )
-            }
+            val condition = model.condition
+            val matched = ConditionRegex.matchEntire(condition)
+                ?: throw RuntimeException("invalid condition $condition")
+            val (negate, names) = matched.destructured
+            return this(
+                negated = negate.isNotEmpty(),
+                payload = LiteralPayload(model.target.declaration, names),
+            )
         }
 
-        private fun inflatePath(root: TypeLangModel, path: List<String>): List<MemberLangModel> = buildList {
-            var currentType = root
-            var finished = false
-
-            path.forEach { rawName ->
-                check(!finished) { "Unable to reach boolean result with the given condition" }
-
-                val member = checkNotNull(findAccessor(currentType.declaration, rawName)) {
-                    "Can't find accessible '$rawName' member in $currentType"
-                }
-                add(member)
-
-                val type = when (member) {
-                    is FunctionLangModel -> member.returnType
-                    is FieldLangModel -> member.type
-                }
-                if (type.isBoolean) {
-                    finished = true
-                } else {
-                    currentType = type
-                }
-            }
-            check(finished) { "Unable to reach boolean result with the given condition" }
-        }
-
-        private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
-            val field = type.allPublicFields.find { it.name == name }
-            if (field != null) {
-                return field
-            }
-
-            val allMethods = type.allPublicFunctions
-            @Suppress("DEPRECATION")
-            val asGetter = "get${name.capitalize()}"
-            val method = allMethods.find { it.name == name || it.name == asGetter  }
-            if (method != null) {
-                return method
-            }
-
-            // TODO: support kotlin properties
-            return null
-        }
+        private operator fun invoke(
+            negated: Boolean,
+            payload: LiteralPayload,
+        ) = createCached(negated, payload, ::ConditionLiteralImpl)
 
         private val ConditionRegex = "^(!?)((?:[A-Za-z][A-Za-z0-9_]*\\.)*[A-Za-z][A-Za-z0-9_]*)\$".toRegex()
     }

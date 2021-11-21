@@ -24,6 +24,7 @@ import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.getAnnotation
+import com.yandex.daggerlite.core.normalized
 
 private class BindingGraphImpl(
     override val model: ComponentModel,
@@ -184,7 +185,7 @@ private class BindingGraphImpl(
 
         // Add all condition literals from all local bindings.
         for (binding in localBindings.keys) for (clause in binding.conditionScope.expression) for (literal in clause) {
-            localConditionLiterals += literal
+            localConditionLiterals += literal.normalized()
         }
         // Remove all local condition literals from every child (in-depth).
         val graphQueue = ArrayDeque(children)

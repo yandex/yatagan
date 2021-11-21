@@ -4,6 +4,7 @@ import com.squareup.javapoet.TypeName
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.normalized
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import javax.lang.model.element.Modifier.FINAL
@@ -68,8 +69,11 @@ internal class ConditionGenerator(
         join(conditionScope.expression, separator = " && ") { clause ->
             +"("
             join(clause, separator = " || ") { literal ->
+                if (literal.negated) {
+                    +"!"
+                }
                 +"this."
-                +checkNotNull(literalFieldName(literal))
+                +checkNotNull(literalFieldName(literal.normalized()))
             }
             +")"
         }

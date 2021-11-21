@@ -13,3 +13,7 @@ val DependencyKind.isEager
         DependencyKind.Direct, DependencyKind.Optional -> true
         DependencyKind.Lazy, DependencyKind.Provider, DependencyKind.OptionalLazy, DependencyKind.OptionalProvider -> false
     }
+
+fun ConditionScope.Literal.normalized(): ConditionScope.Literal {
+    return if (negated) !this else this
+}
