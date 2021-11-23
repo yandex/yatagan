@@ -2,6 +2,8 @@ package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.Variant
+import com.yandex.daggerlite.core.Variant.DimensionModel
+import com.yandex.daggerlite.core.Variant.FlavorModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 
 internal fun matchConditionScopeFromConditionals(
@@ -11,10 +13,17 @@ internal fun matchConditionScopeFromConditionals(
     var maxMatched = -1
     var bestMatch: ConditionalAnnotationLangModel? = null
     outer@ for (conditional in conditionals) {
-        val variant = VariantImpl(conditional.onlyIn)
+        val constraints: Map<DimensionModel, List<FlavorModel>> = conditional.onlyIn
+            .map { FlavorImpl(it) }
+            .groupBy(FlavorImpl::dimension)
         var currentMatch = 0
-        for ((dimension, element) in variant.parts) {
-            if (forVariant.parts[dimension] != element) {
+        for ((dimension: DimensionModel, allowedFlavors: List<FlavorModel>) in constraints) {
+            val flavor = forVariant.parts[dimension]
+            check(flavor != null) {
+                "Dimension $dimension doesn't exist in $forVariant"
+            }
+            if (flavor !in allowedFlavors) {
+                // Not matched
                 continue@outer
             }
             ++currentMatch

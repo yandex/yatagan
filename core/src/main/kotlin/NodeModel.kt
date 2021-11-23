@@ -18,7 +18,7 @@ interface NodeModel : ClassBackedModel {
     /**
      * self-provision binding if supported by underlying type.
      */
-    fun implicitBinding(forGraph: BindingGraph): Binding?
+    fun implicitBinding(forGraph: BindingGraph, forScope: AnnotationLangModel?): Binding?
 
     /**
      * TODO: doc.

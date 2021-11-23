@@ -221,14 +221,15 @@ private class BindingGraphImpl(
 
         val (node, kind) = dependency
         val binding = allProvidedBindings.getOrPut(node) {
-            node.implicitBinding(forGraph = this)?.takeIf { binding ->
-                binding.scope == null || binding.scope == model.scope
-            }
+            node.implicitBinding(forGraph = this, forScope = model.scope)
         }
         val nonAlias = materializeAlias(binding) ?: return null
 
         resolveHelper[node] = nonAlias
-        localBindings.getOrPut(nonAlias, ::BindingUsageImpl).accept(kind)
+        if (nonAlias.owner == this) {
+            // materializeAlias may have yielded non-local binding, so check.
+            localBindings.getOrPut(nonAlias, ::BindingUsageImpl).accept(kind)
+        }
         return nonAlias
     }
 

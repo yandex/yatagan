@@ -19,9 +19,15 @@ internal class NodeModelImpl private constructor(
     override val qualifier: AnnotationLangModel?,
 ) : NodeModel {
 
-    override fun implicitBinding(forGraph: BindingGraph): Binding? {
+    override fun implicitBinding(forGraph: BindingGraph, forScope: AnnotationLangModel?): Binding? {
         if (qualifier != null)
             return null
+
+        val injectConstructor = type.declaration.constructors.find { it.isAnnotatedWith<Inject>() } ?: return null
+        val scope = type.declaration.annotations.find(AnnotationLangModel::isScope)
+        if (scope != null && forScope != scope) {
+            return null
+        }
 
         val conditionals = type.declaration.conditionals
         val conditionScope = if (conditionals.any()) {
@@ -36,20 +42,18 @@ internal class NodeModelImpl private constructor(
             )
         } else ConditionScope.Unscoped
 
-        return type.declaration.constructors.find { it.isAnnotatedWith<Inject>() }?.let { injectConstructor ->
-            ProvisionBindingImpl(
-                owner = forGraph,
-                target = this,
-                requiredModuleInstance = null,
-                scope = type.declaration.annotations.find(AnnotationLangModel::isScope),
-                provider = injectConstructor,
-                params = injectConstructor.parameters.map { param ->
-                    NodeDependency(type = param.type, forQualifier = param)
-                }.toList(),
-                conditionScope = conditionScope,
-                originatingModule = null,
-            )
-        }
+        return ProvisionBindingImpl(
+            owner = forGraph,
+            target = this,
+            requiredModuleInstance = null,
+            scope = scope,
+            provider = injectConstructor,
+            params = injectConstructor.parameters.map { param ->
+                NodeDependency(type = param.type, forQualifier = param)
+            }.toList(),
+            conditionScope = conditionScope,
+            originatingModule = null,
+        )
     }
 
     override val bootstrapInterfaces: Collection<BootstrapInterfaceModel> by lazy(NONE) {
