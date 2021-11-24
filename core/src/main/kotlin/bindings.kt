@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 
 sealed interface FactoryInputBinding : Binding {
@@ -34,7 +35,7 @@ interface EmptyBinding : Binding
  * A [com.yandex.daggerlite.Provides] binding.
  */
 interface ProvisionBinding : Binding {
-    val provider: FunctionLangModel
+    val provider: CallableLangModel
     val params: Collection<NodeDependency>
     val requiredModuleInstance: ModuleModel?
 }

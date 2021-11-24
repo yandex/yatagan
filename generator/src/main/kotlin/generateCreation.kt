@@ -31,7 +31,7 @@ try {
         }
         is ProvisionBinding -> with(builder) {
             generateCall(
-                function = provider,
+                callable = provider,
                 arguments = params,
                 instance = requiredModuleInstance?.let { module ->
                     val component = componentForBinding()

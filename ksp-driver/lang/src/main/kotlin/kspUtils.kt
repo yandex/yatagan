@@ -3,6 +3,7 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getJavaClassByName
+import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
@@ -140,7 +141,7 @@ internal fun KSClassDeclaration.allPublicFunctions(): Sequence<KSFunctionDeclara
     return sequenceOf(
         getAllFunctions(),
         getDeclaredFunctions().filter { Modifier.JAVA_STATIC in it.modifiers },
-    ).flatten().filter(KSFunctionDeclaration::isPublic)
+    ).flatten().filter { it.isPublic() && !it.isConstructor() }
 }
 
 internal fun KSClassDeclaration.allPublicProperties(): Sequence<KSPropertyDeclaration> {

@@ -5,6 +5,8 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.WildcardTypeName
 import com.yandex.daggerlite.core.ClassBackedModel
+import com.yandex.daggerlite.core.lang.CallableLangModel
+import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
@@ -61,23 +63,23 @@ private fun CtTypeNameModel.asTypeName(): TypeName {
 }
 
 internal inline fun <A> ExpressionBuilder.generateCall(
-    function: FunctionLangModel,
+    callable: CallableLangModel,
     arguments: Iterable<A>,
     instance: String?,
     crossinline argumentBuilder: ExpressionBuilder.(A) -> Unit,
 ) {
-    when {
-        function.isConstructor -> +"new %T(".formatCode(function.ownerName.asTypeName())
-        else -> {
+    when(callable) {
+        is ConstructorLangModel -> +"new %T(".formatCode(callable.constructee.asType().typeName())
+        is FunctionLangModel -> {
             if (instance != null) {
-                +"$instance.%N(".formatCode(function.name)
+                +"$instance.%N(".formatCode(callable.name)
             } else {
                 val ownerObject = when {
-                    function.owner.isKotlinObject -> ".INSTANCE"
-                    function.isFromCompanionObject && !function.isStatic -> ".Companion"
+                    callable.owner.isKotlinObject -> ".INSTANCE"
+                    callable.isFromCompanionObject && !callable.isStatic -> ".Companion"
                     else -> ""
                 }
-                +"${function.ownerName.asTypeName()}$ownerObject.%L(".formatCode(function.name)
+                +"${callable.ownerName.asTypeName()}$ownerObject.%L(".formatCode(callable.name)
             }
         }
     }

@@ -18,7 +18,4 @@ internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
 
     override val isStatic: Boolean
         get() = property.isAbstract() || accessor.isAnnotationPresent<JvmStatic>()
-
-    override val isConstructor: Boolean
-        get() = false
 }

@@ -18,14 +18,14 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.CallableLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ProvisionBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
     override val scope: AnnotationLangModel?,
-    override val provider: FunctionLangModel,
+    override val provider: CallableLangModel,
     override val params: Collection<NodeDependency>,
     override val requiredModuleInstance: ModuleModel?,
     override val conditionScope: ConditionScope,

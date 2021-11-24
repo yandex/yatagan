@@ -2,13 +2,16 @@ package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import kotlinx.metadata.KmClass
 import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -32,11 +35,11 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .map { JavaxTypeImpl(it) }
         .memoize()
 
-    override val constructors: Sequence<FunctionLangModel> = impl.enclosedElements
+    override val constructors: Sequence<ConstructorLangModel> = impl.enclosedElements
         .asSequence()
         .filter { it.kind == ElementKind.CONSTRUCTOR }
         .map {
-            JavaxFunctionImpl(owner = this, impl = it.asExecutableElement())
+            ConstructorImpl(impl = it.asExecutableElement())
         }.memoize()
 
     override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
@@ -84,5 +87,13 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     companion object Factory : ObjectCache<TypeElement, JavaxTypeDeclarationImpl>() {
         operator fun invoke(impl: TypeElement) = createCached(impl, ::JavaxTypeDeclarationImpl)
+    }
+
+    private inner class ConstructorImpl(
+        impl: ExecutableElement,
+    ) : ConstructorLangModel, JavaxAnnotatedImpl<ExecutableElement>(impl) {
+        override val constructee: TypeDeclarationLangModel get() = this@JavaxTypeDeclarationImpl
+        override val parameters: Sequence<ParameterLangModel> = impl.parameters.asSequence()
+            .map { JavaxParameterImpl(it) }.memoize()
     }
 }

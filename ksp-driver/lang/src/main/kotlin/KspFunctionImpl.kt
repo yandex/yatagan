@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.ksp.lang
 
-import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
@@ -27,9 +26,6 @@ internal class KspFunctionImpl private constructor(
     override val name: String get() = impl.simpleName.asString()
     override val parameters: Sequence<ParameterLangModel> = impl.parameters
         .asSequence().map(::KspParameterImpl).memoize()
-
-    override val isConstructor: Boolean
-        get() = impl.isConstructor()
 
     companion object Factory : ObjectCache<KSFunctionDeclaration, KspFunctionImpl>() {
         operator fun invoke(

@@ -6,7 +6,6 @@ import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
-import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -21,8 +20,6 @@ internal class JavaxFunctionImpl private constructor(
     override val name: String get() = impl.simpleName.toString()
     override val parameters: Sequence<ParameterLangModel> =
         impl.parameters.asSequence().map(::JavaxParameterImpl).memoize()
-    override val isConstructor: Boolean
-        get() = impl.kind == ElementKind.CONSTRUCTOR
 
     companion object Factory : ObjectCache<ExecutableElement, JavaxFunctionImpl>() {
         operator fun invoke(

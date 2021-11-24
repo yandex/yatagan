@@ -27,7 +27,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
     /**
      * All constructors declared.
      */
-    val constructors: Sequence<FunctionLangModel>
+    val constructors: Sequence<ConstructorLangModel>
 
     /**
      * All public functions (including static and inherited ones).

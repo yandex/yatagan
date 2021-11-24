@@ -5,13 +5,17 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Modifier
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
@@ -46,9 +50,9 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }.memoize()
 
-    override val constructors: Sequence<FunctionLangModel> =
+    override val constructors: Sequence<ConstructorLangModel> =
         impl.getConstructors().map {
-            KspFunctionImpl(owner = this, impl = it)
+            ConstructorImpl(impl = it)
         }.memoize()
 
     override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
@@ -103,5 +107,14 @@ internal class KspTypeDeclarationImpl private constructor(
     companion object Factory : ObjectCache<KSClassDeclaration, KspTypeDeclarationImpl>() {
         operator fun invoke(impl: KSClassDeclaration) =
             createCached(mapToJavaPlatformIfNeeded(impl), ::KspTypeDeclarationImpl)
+    }
+
+    private inner class ConstructorImpl(
+        impl: KSFunctionDeclaration,
+    ) : ConstructorLangModel {
+        override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
+        override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
+        override val parameters: Sequence<ParameterLangModel> = impl.parameters.asSequence()
+            .map { KspParameterImpl(it) }.memoize()
     }
 }
