@@ -21,7 +21,6 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
-import javax.lang.model.util.ElementFilter
 import javax.lang.model.util.Elements
 import javax.lang.model.util.SimpleAnnotationValueVisitor8
 import javax.lang.model.util.Types
@@ -121,9 +120,6 @@ internal val Element.isPublic
 internal val Element.isStatic
     get() = Modifier.STATIC in modifiers
 
-internal val TypeElement.isKotlin: Boolean
-    get() = annotationMirrors.any { it.annotationType.toString() == "kotlin.Metadata" }
-
 @Suppress("UNCHECKED_CAST")
 internal fun TypeElement.allMethods(typeUtils: Types, elementUtils: Elements): Sequence<ExecutableElement> =
     sequence<ExecutableElement> {
@@ -150,18 +146,6 @@ internal fun TypeElement.allImplementedInterfaces(): Sequence<TypeMirror> = sequ
         yieldAll(superclass.asTypeElement().allImplementedInterfaces())
     }
 }
-
-// TODO: Как и в todo ниже, можно использовать библиотеку для выявления котлин обжекта.
-fun TypeElement.getCompanionObject(): TypeElement? =
-    ElementFilter.typesIn(enclosedElements).find { it.simpleName.contentEquals("Companion") && it.isKotlin }
-
-// TODO: вероятно тут стоит использовать библиотеку `org.jetbrains.kotlinx:kotlinx-metadata-jvm`,
-//  чтобы избежать возможных ошибок с выявлением котлин обжекта.
-internal val TypeElement.isKotlinObject
-    get() = isKotlin && ElementFilter.fieldsIn(enclosedElements).any { field ->
-        field.isPublic && field.isStatic && field.simpleName.contentEquals("INSTANCE")
-                && field.asType().asTypeElement() == this
-    }
 
 internal fun CtTypeNameModel(type: TypeMirror): CtTypeNameModel {
     return when (type.kind) {
