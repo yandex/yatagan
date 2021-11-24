@@ -1,5 +1,9 @@
 package com.yandex.daggerlite.rt.lang
 
+/*
+
+TODO: Revisit RT implementation once we're ready for it.
+
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.base.memoize
@@ -217,3 +221,5 @@ fun parametersOf(impl: Executable): Sequence<ParameterLangModel> = impl
             type = RtTypeImpl(param.parameterizedType),
         )
     }.memoize()
+
+ */
