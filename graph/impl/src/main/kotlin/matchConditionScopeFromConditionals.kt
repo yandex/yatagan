@@ -1,24 +1,27 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.core.ConditionScope
+import com.yandex.daggerlite.core.ConditionalHoldingModel
+import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.Variant.DimensionModel
 import com.yandex.daggerlite.core.Variant.FlavorModel
-import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 
-internal fun matchConditionScopeFromConditionals(
-    conditionals: Sequence<ConditionalAnnotationLangModel>,
+internal fun ConditionalHoldingModel.conditionScopeFor(
     forVariant: Variant,
 ): ConditionScope? {
+    if (conditionals.none()) {
+        return ConditionScope.Unscoped
+    }
+
     var maxMatched = -1
-    var bestMatch: ConditionalAnnotationLangModel? = null
+    var bestMatch: ConditionalWithFlavorConstraintsModel? = null
     outer@ for (conditional in conditionals) {
         val constraints: Map<DimensionModel, List<FlavorModel>> = conditional.onlyIn
-            .map { FlavorImpl(it) }
-            .groupBy(FlavorImpl::dimension)
+            .groupBy(FlavorModel::dimension)
         var currentMatch = 0
         for ((dimension: DimensionModel, allowedFlavors: List<FlavorModel>) in constraints) {
-            val flavor = forVariant.parts[dimension]
+            val flavor = forVariant[dimension]
             check(flavor != null) {
                 "Dimension $dimension doesn't exist in $forVariant"
             }
@@ -38,6 +41,6 @@ internal fun matchConditionScopeFromConditionals(
     }
     bestMatch ?: return null
     return bestMatch.featureTypes.fold(ConditionScope.Unscoped) { acc, featureType ->
-        acc and ConditionScope(featureType.declaration.conditions)
+        acc and ConditionScope(featureType.conditions)
     }
 }

@@ -2,9 +2,7 @@ plugins {
     id("daggerlite.artifact")
 }
 
-val javaPoetVersion: String by extra
-
 dependencies {
-    api("com.squareup:javapoet:$javaPoetVersion")
+    api(project(":core"))
     implementation(kotlin("stdlib"))
 }

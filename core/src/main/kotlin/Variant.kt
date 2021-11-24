@@ -10,7 +10,9 @@ interface Variant {
         val dimension: DimensionModel
     }
 
-    val parts: Map<DimensionModel, FlavorModel>
+    operator fun get(dimension: DimensionModel): FlavorModel?
 
     operator fun plus(variant: Variant?): Variant
+
+    fun asMap(): Map<DimensionModel, FlavorModel>
 }

@@ -4,7 +4,8 @@ plugins {
 
 dependencies {
     implementation(project(":base"))
+    implementation(project(":graph-impl"))
     implementation(project(":core-impl"))
-    implementation(kotlin("stdlib"))
     implementation(project(":generator"))
+    implementation(kotlin("stdlib"))
 }

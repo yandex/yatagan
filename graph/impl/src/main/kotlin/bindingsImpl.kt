@@ -3,7 +3,9 @@ package com.yandex.daggerlite.core.impl
 import com.yandex.daggerlite.core.AliasBinding
 import com.yandex.daggerlite.core.AlternativesBinding
 import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.BootstrapListBinding
+import com.yandex.daggerlite.core.ComponentDependencyBinding
 import com.yandex.daggerlite.core.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
@@ -12,37 +14,64 @@ import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.EmptyBinding
+import com.yandex.daggerlite.core.InjectConstructorBindingModel
+import com.yandex.daggerlite.core.InstanceBinding
+import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.ProvisionBinding
 import com.yandex.daggerlite.core.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.CallableLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ProvisionBindingImpl(
+    private val impl: ProvidesBindingModel,
     override val owner: BindingGraph,
-    override val target: NodeModel,
-    override val scope: AnnotationLangModel?,
-    override val provider: CallableLangModel,
-    override val params: Collection<NodeDependency>,
-    override val requiredModuleInstance: ModuleModel?,
     override val conditionScope: ConditionScope,
-    override val originatingModule: ModuleModel?,
 ) : ProvisionBinding {
-    override fun dependencies() = params
 
-    override fun toString() = "@Provides $params -> $target"
+    override val target get() = impl.target
+    override val originModule get() = impl.originModule
+    override val scope get() = impl.scope
+    override val provision get() = impl.provision
+    override val inputs get() = impl.inputs
+    override val requiresModuleInstance get() = impl.requiresModuleInstance
+
+    override fun dependencies(): Collection<NodeDependency> = inputs.toList()
+    override fun toString() = "@Provides ${inputs.toList()} -> $target"
+}
+
+internal class InjectConstructorProvisionBindingImpl(
+    private val impl: InjectConstructorBindingModel,
+    override val owner: BindingGraph,
+    override val conditionScope: ConditionScope,
+) : ProvisionBinding {
+    override val target get() = impl.target
+    override val originModule: Nothing? get() = null
+    override val scope: AnnotationLangModel? get() = impl.scope
+    override val provision get() = impl.constructor
+    override val inputs: Sequence<NodeDependency> get() = impl.inputs
+    override val requiresModuleInstance: Boolean = false
+
+    override fun dependencies(): Collection<NodeDependency> {
+        return impl.inputs.toList()
+    }
 }
 
 internal class AliasBindingImpl(
+    private val impl: BindsBindingModel,
     override val owner: BindingGraph,
-    override val target: NodeModel,
-    override val source: NodeModel,
-    override val originatingModule: ModuleModel,
 ) : AliasBinding {
-    override fun toString() = "@Binds (alias) $source -> $target"
+    init {
+        require(impl.scope == null)
+        require(impl.sources.count() == 1)
+    }
+
+    override val target get() = impl.target
+    override val source get() = impl.sources.single()
+    override val originModule get() = impl.originModule
 
     override fun equals(other: Any?): Boolean {
         return this === other || (other is AliasBindingImpl &&
@@ -54,15 +83,19 @@ internal class AliasBindingImpl(
         result = 31 * result + source.hashCode()
         return result
     }
+
+    override fun toString() = "@Binds (alias) $source -> $target"
 }
 
 internal class AlternativesBindingImpl(
+    private val impl: BindsBindingModel,
     override val owner: BindingGraph,
-    override val target: NodeModel,
-    override val scope: AnnotationLangModel?,
-    override val alternatives: Collection<NodeModel>,
-    override val originatingModule: ModuleModel,
 ) : AlternativesBinding {
+    override val target get() = impl.target
+    override val originModule get() = impl.originModule
+    override val scope get() = impl.scope
+    override val alternatives get() = impl.sources
+
     override val conditionScope: ConditionScope by lazy(NONE) {
         alternatives.fold(ConditionScope.NeverScoped) { acc, alternative ->
             val binding = owner.resolveBinding(alternative)
@@ -70,7 +103,7 @@ internal class AlternativesBindingImpl(
         }
     }
 
-    override fun dependencies() = alternatives.map(::NodeDependency)
+    override fun dependencies() = alternatives.map(::NodeDependency).toList()
 
     override fun toString() = "@Binds (alternatives) [first present of $alternatives] -> $target"
 }
@@ -82,12 +115,11 @@ internal class ComponentDependencyEntryPointBindingImpl(
 ) : ComponentDependencyEntryPointBinding {
     init {
         require(entryPoint.dependency.kind == DependencyKind.Direct) {
-            // MAYBE: Implement some best-effort matching to available dependency kinds?
             "Only direct entry points constitute a binding that can be used in dependency components"
         }
     }
 
-    override val originatingModule: Nothing? get() = null
+    override val originModule: Nothing? get() = null
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
     override val target get() = entryPoint.dependency.node
@@ -105,7 +137,7 @@ internal class ComponentInstanceBindingImpl(
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
     override fun dependencies(): List<Nothing> = emptyList()
-    override val originatingModule: Nothing? get() = null
+    override val originModule: Nothing? get() = null
 
     override fun toString() = "Component instance $target (intrinsic)"
 }
@@ -127,7 +159,7 @@ internal class SubComponentFactoryBindingImpl(
 
     override val scope: Nothing? get() = null
 
-    override val originatingModule: Nothing? get() = null
+    override val originModule: Nothing? get() = null
     override fun dependencies() = targetGraph.usedParents.map { NodeDependency(it.model.asNode()) }
     override fun toString() = "Subcomponent factory $factory (intrinsic)"
 }
@@ -143,7 +175,7 @@ internal class BootstrapListBindingImpl(
     override val list: Collection<NodeModel> by lazy(NONE) {
         topologicalSort(nodes = inputs, inside = owner)
     }
-    override val originatingModule: Nothing? get() = null
+    override val originModule: Nothing? get() = null
 
     override fun toString() = "Bootstrap $target of ${inputs.take(3)}${if (inputs.size > 3) "..." else ""} (intrinsic)"
 }
@@ -151,7 +183,7 @@ internal class BootstrapListBindingImpl(
 internal class EmptyBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
-    override val originatingModule: ModuleModel? = null,
+    override val originModule: ModuleModel? = null,
     val reason: String,
 ) : EmptyBinding {
     override val scope: Nothing? get() = null
@@ -159,4 +191,26 @@ internal class EmptyBindingImpl(
     override fun dependencies(): List<Nothing> = emptyList()
 
     override fun toString() = "Absent $target because $reason"
+}
+
+internal class ComponentDependencyBindingImpl(
+    override val input: ComponentDependencyInput,
+    override val owner: BindingGraph,
+) : ComponentDependencyBinding {
+    override val target get() = input.component.asNode()
+    override val conditionScope get() = ConditionScope.Unscoped
+    override val scope: Nothing? get() = null
+    override fun dependencies(): List<Nothing> = emptyList()
+    override val originModule: Nothing? get() = null
+}
+
+internal class InstanceBindingImpl(
+    override val input: InstanceInput,
+    override val owner: BindingGraph,
+) : InstanceBinding {
+    override val conditionScope get() = ConditionScope.Unscoped
+    override val scope: Nothing? get() = null
+    override val target get() = input.node
+    override fun dependencies(): List<Nothing> = emptyList()
+    override val originModule: Nothing? get() = null
 }

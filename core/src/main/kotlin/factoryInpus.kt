@@ -1,15 +1,28 @@
 package com.yandex.daggerlite.core
 
+/**
+ * Provided dependency component instance.
+ *
+ * @see ComponentModel
+ */
 interface ComponentDependencyInput : ComponentFactoryModel.Input {
-    fun createBinding(forGraph: BindingGraph): ComponentDependencyBinding
     val component: ComponentModel
 }
 
+/**
+ * Provided instance input.
+ *
+ * @see com.yandex.daggerlite.BindsInstance
+ */
 interface InstanceInput : ComponentFactoryModel.Input {
-    fun createBinding(forGraph: BindingGraph): InstanceBinding
     val node: NodeModel
 }
 
+/**
+ * Provided module instance if it requires externally provided instance.
+ *
+ * @see ModuleModel
+ */
 interface ModuleInstanceInput : ComponentFactoryModel.Input {
     val module: ModuleModel
 }

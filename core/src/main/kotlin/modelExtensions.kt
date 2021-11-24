@@ -1,19 +1,22 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.core.DependencyKind.Direct
+import com.yandex.daggerlite.core.DependencyKind.Lazy
+import com.yandex.daggerlite.core.DependencyKind.Optional
+import com.yandex.daggerlite.core.DependencyKind.OptionalLazy
+import com.yandex.daggerlite.core.DependencyKind.OptionalProvider
+import com.yandex.daggerlite.core.DependencyKind.Provider
+
 val ComponentFactoryModel.allInputs get() = factoryInputs.asSequence() + builderInputs.asSequence()
 
 val DependencyKind.isOptional
     get() = when (this) {
-        DependencyKind.Direct, DependencyKind.Lazy, DependencyKind.Provider -> false
-        DependencyKind.Optional, DependencyKind.OptionalLazy, DependencyKind.OptionalProvider -> true
+        Direct, Lazy, Provider -> false
+        Optional, OptionalLazy, OptionalProvider -> true
     }
 
 val DependencyKind.isEager
     get() = when (this) {
-        DependencyKind.Direct, DependencyKind.Optional -> true
-        DependencyKind.Lazy, DependencyKind.Provider, DependencyKind.OptionalLazy, DependencyKind.OptionalProvider -> false
+        Direct, Optional -> true
+        Lazy, Provider, OptionalLazy, OptionalProvider -> false
     }
-
-fun ConditionScope.Literal.normalized(): ConditionScope.Literal {
-    return if (negated) !this else this
-}

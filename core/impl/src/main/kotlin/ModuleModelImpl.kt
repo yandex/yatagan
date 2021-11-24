@@ -2,13 +2,17 @@ package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.BaseBinding
-import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.BindsBindingModel
+import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.ConditionScope
+import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
@@ -37,97 +41,104 @@ internal class ModuleModelImpl private constructor(
         impl.subcomponents.map(TypeLangModel::declaration).map { ComponentModelImpl(it) }.toSet()
     }
 
-    override val bootstrap: Collection<NodeModel> by lazy(NONE) {
-        impl.bootstrap.map { NodeModelImpl(type = it, forQualifier = null) }.toList()
+    override val declaredBootstrapInterfaces: Collection<BootstrapInterfaceModel> by lazy(NONE) {
+        impl.bootstrap.filter { BootstrapInterfaceModelImpl.canRepresent(it) }
+            .map { BootstrapInterfaceModelImpl(it) }
+            .toList()
     }
 
-    override val requiresInstance: Boolean
-        get() = mayRequireInstance() && declaration.allPublicFunctions.any { method ->
-            (method.isAnnotatedWith<Binds>() || method.providesAnnotationIfPresent != null) &&
-                    (!method.isStatic && !method.isFromCompanionObject)
+    override val bootstrap: Collection<NodeModel> by lazy(NONE) {
+        impl.bootstrap.filter { !BootstrapInterfaceModelImpl.canRepresent(it) }
+            .map { NodeModelImpl(it, forQualifier = null) }
+            .onEach {
+                // TODO: turn this into validation
+                check(it.bootstrapInterfaces.any()) {
+                    "$it is declared in a bootstrap list though implements no bootstrap interfaces"
+                }
+            }.toList()
+    }
+
+    override val requiresInstance: Boolean by lazy(NONE) {
+        mayRequireInstance && bindings.any { it is ProvidesBindingModel && it.requiresModuleInstance }
+    }
+
+    override val bindings: Sequence<ModuleHostedBindingModel> = declaration.allPublicFunctions.mapNotNull { method ->
+        when {
+            BindsImpl.canRepresent(method) -> BindsImpl(
+                impl = method,
+                originModule = this@ModuleModelImpl,
+            )
+            ProvidesImpl.canRepresent(method) -> ProvidesImpl(
+                impl = method,
+                originModule = this@ModuleModelImpl,
+            )
+            else -> null
+        }
+    }.memoize()
+
+    private class BindsImpl(
+        val impl: FunctionLangModel,
+        override val originModule: ModuleModel,
+    ) : BindsBindingModel {
+
+        init {
+            require(canRepresent(impl))
         }
 
-    override fun bindings(forGraph: BindingGraph): Sequence<BaseBinding> = sequence {
-        val mayRequireInstance = mayRequireInstance()
+        override val scope: AnnotationLangModel? by lazy(NONE) {
+            impl.annotations.find(AnnotationLangModel::isScope)
+        }
 
-        for (method in declaration.allPublicFunctions) {
-            fun target(): NodeModel = NodeModelImpl(
-                type = method.returnType,
-                forQualifier = method,
-            )
+        override val sources = impl.parameters.map { parameter ->
+            NodeModelImpl(type = parameter.type, forQualifier = parameter)
+        }
 
-            val providesAnnotation = method.providesAnnotationIfPresent
-            when {
-                providesAnnotation != null -> {
-                    // @Provides
-                    val scope = if (providesAnnotation.conditionals.any()) {
-                        matchConditionScopeFromConditionals(
-                            forVariant = forGraph.variant,
-                            conditionals = providesAnnotation.conditionals,
-                        )
-                    } else ConditionScope.Unscoped
-                    if (scope == null) {
-                        // Ruled out by variant constraints
-                        yield(EmptyBindingImpl(
-                            owner = forGraph,
-                            target = target(),
-                            reason = "no matching conditional clause found for ${forGraph.variant}: " +
-                                    "${providesAnnotation.conditionals.toList()}",
-                            originatingModule = this@ModuleModelImpl,
-                        ))
-                    } else {
-                        yield(ProvisionBindingImpl(
-                            owner = forGraph,
-                            target = target(),
-                            provider = method,
-                            scope = method.annotations.find(AnnotationLangModel::isScope),
-                            requiredModuleInstance = this@ModuleModelImpl.takeIf {
-                                mayRequireInstance && !method.isStatic && !method.isFromCompanionObject
-                            },
-                            params = method.parameters.map { param ->
-                                NodeDependency(type = param.type, forQualifier = param)
-                            }.toList(),
-                            conditionScope = scope,
-                            originatingModule = this@ModuleModelImpl,
-                        ))
-                    }
-                }
-                method.isAnnotatedWith<Binds>() -> {
-                    // @Binds
-                    yield(when (method.parameters.count()) {
-                        0 -> EmptyBindingImpl(
-                            owner = forGraph,
-                            target = target(),
-                            reason = "explicitly empty",
-                            originatingModule = this@ModuleModelImpl,
-                        )
-                        1 -> AliasBindingImpl(
-                            owner = forGraph,
-                            target = target(),
-                            source = NodeModelImpl(
-                                type = method.parameters.single().type,
-                                forQualifier = method.parameters.single(),
-                            ),
-                            originatingModule = this@ModuleModelImpl,
-                        )
-                        else -> AlternativesBindingImpl(
-                            owner = forGraph,
-                            target = target(),
-                            alternatives = method.parameters.map { parameter ->
-                                NodeModelImpl(type = parameter.type, forQualifier = parameter)
-                            }.toList(),
-                            scope = method.annotations.find(AnnotationLangModel::isScope),
-                            originatingModule = this@ModuleModelImpl,
-                        )
-                    })
-                }
+        override val target: NodeModel by lazy(NONE) {
+            NodeModelImpl(type = impl.returnType, forQualifier = impl)
+        }
+
+        companion object {
+            fun canRepresent(method: FunctionLangModel): Boolean {
+                return method.isAnnotatedWith<Binds>()
+            }
+        }
+    }
+
+    private class ProvidesImpl(
+        private val impl: FunctionLangModel,
+        override val originModule: ModuleModelImpl,
+    ) : ProvidesBindingModel, ConditionalHoldingModelImpl(impl.providesAnnotationIfPresent!!.conditionals) {
+
+        override val scope: AnnotationLangModel? by lazy(NONE) {
+            impl.annotations.find(AnnotationLangModel::isScope)
+        }
+
+        override val target: NodeModel by lazy(NONE) {
+            NodeModelImpl(type = impl.returnType, forQualifier = impl)
+        }
+
+        override val inputs: Sequence<NodeDependency> = impl.parameters.map { param ->
+            NodeDependency(type = param.type, forQualifier = param)
+        }.memoize()
+
+        override val provision: FunctionLangModel
+            get() = impl
+
+        override val requiresModuleInstance: Boolean
+            get() = originModule.mayRequireInstance && !impl.isStatic && !impl.isFromCompanionObject
+
+        companion object {
+            fun canRepresent(method: FunctionLangModel): Boolean {
+                return method.providesAnnotationIfPresent != null
             }
         }
     }
 
     override fun toString() = "Module[$declaration]"
 
-    private fun mayRequireInstance() = !declaration.isAbstract && !declaration.isKotlinObject
+    private val mayRequireInstance by lazy(NONE) {
+        !declaration.isAbstract && !declaration.isKotlinObject
+    }
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ModuleModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ModuleModelImpl)
@@ -137,3 +148,4 @@ internal class ModuleModelImpl private constructor(
         }
     }
 }
+

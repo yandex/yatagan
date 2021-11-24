@@ -3,7 +3,6 @@ package com.yandex.daggerlite.generator
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.BootstrapListBinding
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
-import com.yandex.daggerlite.generator.poetry.Names
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import javax.lang.model.element.Modifier.PRIVATE

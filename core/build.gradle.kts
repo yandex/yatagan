@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    api(project(":api"))
     api(project(":core-lang"))
+    implementation(project(":api"))
 
     implementation(kotlin("stdlib"))
 }

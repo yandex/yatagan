@@ -31,12 +31,12 @@ try {
         }
         is ProvisionBinding -> with(builder) {
             generateCall(
-                callable = provider,
-                arguments = params,
-                instance = requiredModuleInstance?.let { module ->
+                callable = provision,
+                arguments = inputs.asIterable(),
+                instance = if (requiresModuleInstance) {
                     val component = componentForBinding()
-                    "$component.${Generators[owner].factoryGenerator.fieldNameFor(module)}"
-                },
+                    "$component.${Generators[owner].factoryGenerator.fieldNameFor(originModule!!)}"
+                } else null,
             ) { (node, kind) ->
                 inside.resolveBinding(node).generateAccess(builder = this, inside = inside, kind = kind)
             }

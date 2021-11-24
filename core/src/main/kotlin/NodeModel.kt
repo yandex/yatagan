@@ -3,8 +3,7 @@ package com.yandex.daggerlite.core
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 
 /**
- * Represents a node in a Dagger Graph.
- * Each [NodeModel] can be *resolved* via appropriate [Binding] (See [BaseBinding.target]).
+ * Represents a node in a Dagger Graph, that can be resolved.
  * Basically, it's a type with some other information to fine tune resolution.
  */
 interface NodeModel : ClassBackedModel {
@@ -18,11 +17,10 @@ interface NodeModel : ClassBackedModel {
     /**
      * self-provision binding if supported by underlying type.
      */
-    fun implicitBinding(forGraph: BindingGraph, forScope: AnnotationLangModel?): Binding?
+    val implicitBinding: InjectConstructorBindingModel?
 
     /**
      * TODO: doc.
      */
     val bootstrapInterfaces: Collection<BootstrapInterfaceModel>
-
 }

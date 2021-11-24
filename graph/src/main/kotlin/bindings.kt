@@ -35,16 +35,16 @@ interface EmptyBinding : Binding
  * A [com.yandex.daggerlite.Provides] binding.
  */
 interface ProvisionBinding : Binding {
-    val provider: CallableLangModel
-    val params: Collection<NodeDependency>
-    val requiredModuleInstance: ModuleModel?
+    val provision: CallableLangModel
+    val inputs: Sequence<NodeDependency>
+    val requiresModuleInstance: Boolean
 }
 
 /**
  * TODO: doc.
  */
 interface AlternativesBinding : Binding {
-    val alternatives: Collection<NodeModel>
+    val alternatives: Sequence<NodeModel>
 }
 
 /**

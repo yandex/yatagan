@@ -6,7 +6,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 /**
  * Represents @[com.yandex.daggerlite.Component] annotated class - Component.
  */
-interface ComponentModel : ClassBackedModel {
+interface ComponentModel : ClassBackedModel, ConditionalHoldingModel {
     /**
      * A set of all modules that are included into the component.
      */
@@ -49,12 +49,7 @@ interface ComponentModel : ClassBackedModel {
     val variant: Variant
 
     /**
-     * TODO: doc.
-     */
-    fun conditionScope(forVariant: Variant): ConditionScope?
-
-    /**
-     * TODO: doc.
+     * Yields this component as graph node.
      */
     fun asNode(): NodeModel
 

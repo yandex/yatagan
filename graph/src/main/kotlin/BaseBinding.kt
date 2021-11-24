@@ -19,5 +19,5 @@ sealed interface BaseBinding {
      * If binding came from a [ModuleModel] then this is it.
      * If it's intrinsic - `null` is returned.
      */
-    val originatingModule: ModuleModel?
+    val originModule: ModuleModel?
 }

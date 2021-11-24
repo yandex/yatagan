@@ -4,7 +4,6 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ComponentModel.EntryPoint
-import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
@@ -16,7 +15,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
-) : ComponentModel {
+) : ComponentModel, ConditionalHoldingModelImpl(declaration.conditionals) {
     init {
         require(canRepresent(declaration))
     }
@@ -76,16 +75,6 @@ internal class ComponentModelImpl private constructor(
 
     override val variant: Variant by lazy(NONE) {
         VariantImpl(impl.variant)
-    }
-
-    override fun conditionScope(forVariant: Variant): ConditionScope? {
-        val conditionals = declaration.conditionals
-        return if (conditionals.any()) {
-            matchConditionScopeFromConditionals(
-                forVariant = forVariant,
-                conditionals = conditionals,
-            ) ?: return null  // component is excluded from this component by variant filter
-        } else ConditionScope.Unscoped
     }
 
     override fun toString() = "Component[$declaration]"

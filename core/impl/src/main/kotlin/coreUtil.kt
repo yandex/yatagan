@@ -37,7 +37,7 @@ internal fun NodeDependency(
     )
 }
 
-private object Names {
+internal object Names {
     val Lazy: String = com.yandex.daggerlite.Lazy::class.qualifiedName!!
     val Provider: String = javax.inject.Provider::class.qualifiedName!!
     val Optional: String = com.yandex.daggerlite.Optional::class.qualifiedName!!

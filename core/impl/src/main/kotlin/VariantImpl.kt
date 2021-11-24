@@ -4,7 +4,7 @@ import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
 internal class VariantImpl private constructor(
-    override val parts: Map<Variant.DimensionModel, Variant.FlavorModel>,
+    private val parts: Map<Variant.DimensionModel, Variant.FlavorModel>,
 ) : Variant {
     constructor(flavors: Sequence<TypeLangModel>)
             : this(flavors.map { FlavorImpl(it) }.associateBy(FlavorImpl::dimension))
@@ -13,13 +13,21 @@ internal class VariantImpl private constructor(
         variant ?: return this
         return VariantImpl(buildMap {
             putAll(parts)
-            variant.parts.forEach { (dimension, flavor) ->
+            variant.asMap().forEach { (dimension, flavor) ->
                 check(dimension !in this) {
                     "Duplicate dimension during variant concatenation: $dimension"
                 }
                 put(dimension, flavor)
             }
         })
+    }
+
+    override fun get(dimension: Variant.DimensionModel): Variant.FlavorModel? {
+        return parts[dimension]
+    }
+
+    override fun asMap(): Map<Variant.DimensionModel, Variant.FlavorModel> {
+        return parts
     }
 
     override fun toString() = "Variant[$parts]"

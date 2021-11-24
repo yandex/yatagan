@@ -14,6 +14,9 @@ include("core")
 include("core-lang")
 include("core-impl")
 
+include("graph")
+include("graph-impl")
+
 include("process")
 
 include("ksp-driver")
@@ -33,6 +36,9 @@ include("testing")
 
 project(":core-lang").projectDir = file("core/lang")
 project(":core-impl").projectDir = file("core/impl")
+
+project(":graph").projectDir = file("graph")
+project(":graph-impl").projectDir = file("graph/impl")
 
 project(":ksp-driver-lang").projectDir = file("ksp-driver/lang")
 project(":jap-driver-lang").projectDir = file("jap-driver/lang")

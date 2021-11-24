@@ -4,7 +4,6 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.BootstrapListBinding
-import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
@@ -77,9 +76,7 @@ internal class ComponentGenerator(
         }
     }
 
-    private val childGenerators: Map<ComponentModel, ComponentGenerator> = graph.children.associateBy(
-        keySelector = BindingGraph::model
-    ) { childGraph ->
+    private val childGenerators: Collection<ComponentGenerator> = graph.children.map { childGraph ->
         ComponentGenerator(
             graph = childGraph,
             generatedClassName = generatedClassName.nestedClass(
@@ -138,7 +135,7 @@ internal class ComponentGenerator(
             }
         }
 
-        childGenerators.values.forEach { childGenerator ->
+        childGenerators.forEach { childGenerator ->
             nestedType {
                 childGenerator.generate()
             }

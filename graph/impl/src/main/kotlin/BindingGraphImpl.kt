@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.BootstrapList
 import com.yandex.daggerlite.core.AliasBinding
 import com.yandex.daggerlite.core.BaseBinding
 import com.yandex.daggerlite.core.Binding
@@ -9,13 +8,10 @@ import com.yandex.daggerlite.core.BindingGraph.NodeRequester
 import com.yandex.daggerlite.core.BindingGraph.NodeRequester.BindingRequester
 import com.yandex.daggerlite.core.BindingGraph.NodeRequester.EntryPointRequester
 import com.yandex.daggerlite.core.BindingGraph.NodeRequester.MemberInjectRequester
-import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ComponentDependencyInput
-import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.MissingBindingException
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
@@ -24,7 +20,6 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
-import com.yandex.daggerlite.core.lang.getAnnotation
 import com.yandex.daggerlite.core.normalized
 
 private class BindingGraphImpl(
@@ -47,87 +42,17 @@ private class BindingGraphImpl(
         }
         seenModules
     }
-    private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = sequence {
-        // Gather bindings from modules
-        val seenSubcomponents = hashSetOf<ComponentModel>()
-        val bootstrapSets = HashMap<BootstrapInterfaceModel, MutableSet<NodeModel>>()
-        for (module: ModuleModel in allModules) {
-            // All bindings from installed modules
-            yieldAll(module.bindings(forGraph = this@BindingGraphImpl))
-            // Subcomponent factories (distinct).
-            for (subcomponent: ComponentModel in module.subcomponents) {
-                if (seenSubcomponents.add(subcomponent)) {
-                    // MAYBE: Factory is actually required.
-                    subcomponent.factory?.let { factory: ComponentFactoryModel ->
-                        factory.createdComponent.conditionScope(forVariant = variant)?.let { conditionScope ->
-                            yield(SubComponentFactoryBindingImpl(
-                                owner = this@BindingGraphImpl,
-                                factory = factory,
-                                conditionScope = conditionScope,
-                            ))
-                        } ?: yield(EmptyBindingImpl(
-                            owner = this@BindingGraphImpl,
-                            target = factory.asNode(),
-                            reason = "ruled out by component conditional filter"
-                        ))
-                    }
-                }
-            }
-            // Handle bootstrap lists
-            for (nodeModel: NodeModel in module.bootstrap) {
-                if (BootstrapInterfaceModel.canRepresent(nodeModel.type)) {
-                    // It is BootstrapInterface itself - it's an explicit reference to materialize a binding for
-                    // a probably empty list.
-                    bootstrapSets.getOrPut(BootstrapInterfaceModel(nodeModel.type), ::linkedSetOf)
-                    continue
-                }
-                for (bootstrapInterface: BootstrapInterfaceModel in nodeModel.bootstrapInterfaces) {
-                    bootstrapSets.getOrPut(bootstrapInterface, ::linkedSetOf) += nodeModel
-                }
-            }
-        }
-        // Gather bindings from factory
-        model.factory?.let { factory: ComponentFactoryModel ->
-            for (input: ComponentFactoryModel.Input in factory.allInputs) when (input) {
-                is ComponentDependencyInput -> {
-                    // Binding for the dependency component itself.
-                    yield(input.createBinding(forGraph = this@BindingGraphImpl))
-                    // Bindings backed by the component entry-points.
-                    for (entryPoint: ComponentModel.EntryPoint in input.component.entryPoints)
-                        if (entryPoint.dependency.kind == DependencyKind.Direct)
-                            yield(ComponentDependencyEntryPointBindingImpl(
-                                owner = this@BindingGraphImpl,
-                                entryPoint = entryPoint,
-                                input = input,
-                            ))
-                }
-                // Instance binding
-                is InstanceInput -> yield(input.createBinding(forGraph = this@BindingGraphImpl))
-                is ModuleInstanceInput -> {/*no binding for module*/
-                }
-            }.let { /*exhaustive*/ }
-        }
-        // Bootstrap lists
-        for ((bootstrap: BootstrapInterfaceModel, nodes: Set<NodeModel>) in bootstrapSets) {
-            yield(BootstrapListBindingImpl(
-                owner = this@BindingGraphImpl,
-                target = NodeModelImpl(
-                    type = factory.getListType(bootstrap.impl),
-                    qualifier = factory.getAnnotation<BootstrapList>(),
-                ),
-                inputs = nodes,
-            ))
-        }
-
-        // This component binding
-        yield(ComponentInstanceBindingImpl(graph = this@BindingGraphImpl))
-    }.groupBy(BaseBinding::target).mapValuesTo(mutableMapOf()) { (target, bindings) ->
+    private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = buildBindingsSequence(
+        graph = this,
+        modules = allModules,
+        langModelFactory = factory,
+    ).groupBy(BaseBinding::target).mapValuesTo(mutableMapOf()) { (target, bindings) ->
         if (bindings.size != 1) {
             val distinct = bindings.toSet()
             check(distinct.size == 1) {
                 "$this: Multiple bindings for $target: ${
                     bindings.joinToString(separator = ",\n") {
-                        "$it FROM ${it.originatingModule}"
+                        "$it FROM ${it.originModule}"
                     }
                 }"
             }
@@ -156,7 +81,7 @@ private class BindingGraphImpl(
         children = allModules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
-            .filter { it.conditionScope(variant) != null }
+            .filter { it.conditionScopeFor(variant) != null }
             .distinct()
             .map { BindingGraphImpl(it, parent = this, factory = factory) }
             .toList()
@@ -226,9 +151,28 @@ private class BindingGraphImpl(
         }
 
         val (node, kind) = dependency
-        val binding = allProvidedBindings.getOrPut(node) {
-            node.implicitBinding(forGraph = this, forScope = model.scope)
-        }
+        val binding = allProvidedBindings.getOrPut(node, fun(): BaseBinding? {
+            if (node.qualifier != null) {
+                return null
+            }
+            val inject = node.implicitBinding ?: return null
+
+            if (inject.scope != null && inject.scope != model.scope) {
+                return null
+            }
+
+            return inject.conditionScopeFor(variant)?.let { conditionScope ->
+                InjectConstructorProvisionBindingImpl(
+                    impl = inject,
+                    owner = this@BindingGraphImpl,
+                    conditionScope = conditionScope,
+                )
+            } ?: EmptyBindingImpl(
+                owner = this@BindingGraphImpl,
+                target = node,
+                reason = "conditional ruled out"
+            )
+        })
         val nonAlias = materializeAlias(binding) ?: return null
 
         resolveHelper[node] = nonAlias
