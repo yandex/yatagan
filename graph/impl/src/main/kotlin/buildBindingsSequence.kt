@@ -16,15 +16,17 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.BindingGraph
 
+/**
+ * @param graph incomplete graph. All required fields must be initialized.
+ */
 internal fun buildBindingsSequence(
     graph: BindingGraph,
-    modules: Collection<ModuleModel>,
     langModelFactory: LangModelFactory,
 ): Sequence<BaseBinding> = sequence {
     // Gather bindings from modules
     val seenSubcomponents = hashSetOf<ComponentModel>()
     val bootstrapSets = HashMap<BootstrapInterfaceModel, MutableSet<NodeModel>>()
-    for (module: ModuleModel in modules) {
+    for (module: ModuleModel in graph.modules) {
         // All bindings from installed modules
         for (bindingModel in module.bindings) {
             yield(when (bindingModel) {

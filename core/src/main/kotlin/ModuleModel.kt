@@ -31,6 +31,12 @@ interface ModuleModel : ClassBackedModel {
     val requiresInstance: Boolean
 
     /**
+     * Whether this module can be trivially constructed inside a component.
+     * Makes sense when [requiresInstance] is `true`.
+     */
+    val isTriviallyConstructable: Boolean
+
+    /**
      * [Binding models][ModuleHostedBindingModel] that are declared in this module.
      */
     val bindings: Sequence<ModuleHostedBindingModel>

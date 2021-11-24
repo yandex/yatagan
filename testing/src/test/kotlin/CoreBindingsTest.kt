@@ -483,5 +483,31 @@ class CoreBindingsTest(
             withNoWarnings()
         }
     }
+
+    @Test
+    fun `trivially constructable module`() {
+        givenJavaSource("test.TestCase", """
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Module;
+            import com.yandex.daggerlite.Provides;
+            
+            @Module
+            class MyModule {
+                private final Object mObj = new Object();
+                @Provides
+                public Object provides() { return mObj; }
+            }
+            
+            @Component(modules = MyModule.class)
+            interface MyComponent {
+                Object get();
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            generatesJavaSources("test.DaggerMyComponent")
+        }
+    }
 }
 

@@ -509,5 +509,44 @@ class CoreBindingsKotlinTest(
             }
         }
     }
+
+    @Test
+    fun `trivially constructable module`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Module
+            import com.yandex.daggerlite.Provides
+            
+            @Module
+            class MyModule {
+                private val mObj = Any()
+                @Provides
+                fun provides(): Any {
+                    return mObj
+                }
+            }
+            
+            @Component(modules = [MyModule::class])
+            interface MyComponent {
+                fun get(): Any
+            }
+            
+            @Component(modules = [MyModule::class])
+            interface MyComponent2 {
+                fun get(): Any
+            
+                @Component.Builder
+                interface Factory {
+                    fun build(): MyComponent2
+                }
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            generatesJavaSources("test.DaggerMyComponent")
+            generatesJavaSources("test.DaggerMyComponent2")
+        }
+    }
 }
 

@@ -30,7 +30,7 @@ private class BindingGraphImpl(
     override val variant: Variant = model.variant + parent?.variant
 
     private val resolveHelper = hashMapOf<NodeModel, Binding>()
-    private val allModules = run {
+    override val modules = run {
         val seenModules = hashSetOf<ModuleModel>()
         val moduleQueue = ArrayDeque(model.modules)
         while (moduleQueue.isNotEmpty()) {
@@ -44,7 +44,6 @@ private class BindingGraphImpl(
     }
     private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = buildBindingsSequence(
         graph = this,
-        modules = allModules,
         langModelFactory = factory,
     ).groupBy(BaseBinding::target).mapValuesTo(mutableMapOf()) { (target, bindings) ->
         if (bindings.size != 1) {
@@ -78,7 +77,7 @@ private class BindingGraphImpl(
         validateFactoryInputs()
 
         // Build children
-        children = allModules
+        children = modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
             .filter { it.conditionScopeFor(variant) != null }
@@ -131,7 +130,6 @@ private class BindingGraphImpl(
 
         // No longer required
         allProvidedBindings.clear()
-        allModules.clear()
     }
 
     private fun materialize(dependency: NodeDependency, requester: NodeRequester): Binding? {
@@ -214,11 +212,15 @@ private class BindingGraphImpl(
         val providedModules = factory.allInputs
             .filterIsInstance<ModuleInstanceInput>()
             .map(ModuleInstanceInput::module).toSet()
-        val allModulesRequiresInstance = allModules.asSequence().filter(ModuleModel::requiresInstance).toSet()
-        check(allModulesRequiresInstance == providedModules) {
-            val missing = allModulesRequiresInstance - providedModules
-            if (missing.isNotEmpty()) "Missing modules in $factory: $missing"
-            else "Unneeded modules in $factory: ${providedModules - allModulesRequiresInstance}"
+        val allModulesRequiresInstance = modules.asSequence().filter(ModuleModel::requiresInstance).toMutableSet()
+
+        val missing = (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }
+        check(missing.isEmpty()) {
+            "Missing modules in $factory: $missing"
+        }
+        val unneeded = providedModules - allModulesRequiresInstance
+        check(unneeded.isEmpty()) {
+            "Unneeded modules in $factory: $unneeded"
         }
     }
 

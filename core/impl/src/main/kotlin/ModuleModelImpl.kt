@@ -62,6 +62,9 @@ internal class ModuleModelImpl private constructor(
         mayRequireInstance && bindings.any { it is ProvidesBindingModel && it.requiresModuleInstance }
     }
 
+    override val isTriviallyConstructable: Boolean
+        get() = mayRequireInstance && declaration.constructors.any { it.parameters.none() }
+
     override val bindings: Sequence<ModuleHostedBindingModel> = declaration.allPublicFunctions.mapNotNull { method ->
         when {
             BindsImpl.canRepresent(method) -> BindsImpl(

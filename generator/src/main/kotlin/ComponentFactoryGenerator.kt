@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.allInputs
+import com.yandex.daggerlite.generator.poetry.MethodSpecBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -25,6 +26,7 @@ internal class ComponentFactoryGenerator(
     private val moduleInstanceFieldNames = hashMapOf<ModuleModel, String>()
     private val componentInstanceFieldNames = hashMapOf<ComponentDependencyInput, String>()
     private val inputFieldNames = mutableMapOf<ComponentFactoryModel.Input, String>()
+    private val triviallyConstructableModules: Collection<ModuleModel>
 
     init {
         thisGraph.model.factory?.let { factory ->
@@ -38,6 +40,16 @@ internal class ComponentFactoryGenerator(
                 }.let { /* exhaustive */ }
             }
         }
+
+        triviallyConstructableModules = thisGraph.modules.asSequence()
+            .filter { module -> module.requiresInstance && module !in moduleInstanceFieldNames }
+            .onEach { module ->
+                check(module.isTriviallyConstructable) {
+                    "module $module is not provided and can't be created on-the-fly"
+                }
+                val name = fieldsNs.name(module.name)
+                moduleInstanceFieldNames[module] = name
+            }.toList()
     }
 
     private val superComponentFieldNames: Map<BindingGraph, String> =
@@ -77,6 +89,7 @@ internal class ComponentFactoryGenerator(
                     parameter(input.target.typeName(), name)
                     +"this.${inputFieldNames[input]} = $name"
                 }
+                generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
             }
             nestedType {
                 buildClass(implName) {
@@ -140,7 +153,30 @@ internal class ComponentFactoryGenerator(
                     +"return new %T()".formatCode(implName)
                 }
             }
+        } else {
+            // TODO: generate default factory if explicit one is absent.
+            constructor {
+                modifiers(PUBLIC)
+                generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
+            }
         }
-        // TODO: generate default factory if explicit one is absent.
+    }
+
+    private fun generateTriviallyConstructableModules(
+        constructorBuilder: MethodSpecBuilder,
+        builder: TypeSpecBuilder,
+    ) {
+        triviallyConstructableModules.forEach { module ->
+            val fieldName = moduleInstanceFieldNames[module]!!
+            with(builder) {
+                field(module.typeName(), fieldName) {
+                    modifiers(PRIVATE, FINAL)
+                }
+            }
+            with(constructorBuilder) {
+                // MAYBE: Make this lazy?
+                +"this.%N = new %T()".formatCode(fieldName, module.typeName())
+            }
+        }
     }
 }
