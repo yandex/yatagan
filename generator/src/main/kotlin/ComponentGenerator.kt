@@ -2,13 +2,13 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
-import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.BootstrapListBinding
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
+import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.BootstrapListBinding
 import javax.inject.Provider
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE

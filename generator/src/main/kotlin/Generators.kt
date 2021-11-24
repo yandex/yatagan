@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.generator
 
-import com.yandex.daggerlite.core.BindingGraph
+import com.yandex.daggerlite.graph.BindingGraph
 import java.io.Closeable
 
 internal object Generators : Closeable {

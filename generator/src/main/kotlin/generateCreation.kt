@@ -1,19 +1,19 @@
 package com.yandex.daggerlite.generator
 
-import com.yandex.daggerlite.core.AlternativesBinding
-import com.yandex.daggerlite.core.Binding
-import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.BootstrapListBinding
-import com.yandex.daggerlite.core.ComponentDependencyBinding
-import com.yandex.daggerlite.core.ComponentDependencyEntryPointBinding
-import com.yandex.daggerlite.core.ComponentInstanceBinding
-import com.yandex.daggerlite.core.EmptyBinding
-import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.ProvisionBinding
-import com.yandex.daggerlite.core.SubComponentFactoryBinding
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
+import com.yandex.daggerlite.graph.AlternativesBinding
+import com.yandex.daggerlite.graph.Binding
+import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.BootstrapListBinding
+import com.yandex.daggerlite.graph.ComponentDependencyBinding
+import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
+import com.yandex.daggerlite.graph.ComponentInstanceBinding
+import com.yandex.daggerlite.graph.EmptyBinding
+import com.yandex.daggerlite.graph.InstanceBinding
+import com.yandex.daggerlite.graph.ProvisionBinding
+import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 
 internal fun Binding.generateCreation(
     builder: ExpressionBuilder,

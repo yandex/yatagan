@@ -1,13 +1,13 @@
 package com.yandex.daggerlite.process
 
 import com.yandex.daggerlite.base.ObjectCacheRegistry
-import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.BindingGraph.NodeRequester.BindingRequester
-import com.yandex.daggerlite.core.BindingGraph.NodeRequester.EntryPointRequester
-import com.yandex.daggerlite.core.BindingGraph.NodeRequester.MemberInjectRequester
-import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
+import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.BindingRequester
+import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.EntryPointRequester
+import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.MemberInjectRequester
+import com.yandex.daggerlite.graph.impl.BindingGraph
 
 fun <Source> process(
     sources: Sequence<Source>,

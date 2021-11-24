@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.isEager
+import com.yandex.daggerlite.graph.BindingGraph
 
 internal fun topologicalSort(
     nodes: Collection<NodeModel>,

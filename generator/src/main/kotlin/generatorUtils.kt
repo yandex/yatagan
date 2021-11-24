@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.generator
 
-import com.yandex.daggerlite.core.Binding
-import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
+import com.yandex.daggerlite.graph.Binding
+import com.yandex.daggerlite.graph.BindingGraph
 
 internal fun explicitComponentInstance(inside: BindingGraph, graph: BindingGraph): String? {
     return if (inside != graph) {

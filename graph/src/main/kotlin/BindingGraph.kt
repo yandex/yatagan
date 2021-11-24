@@ -1,4 +1,9 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.graph
+
+import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.MembersInjectorModel
+import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.Variant
 
 interface BindingGraph {
     /**

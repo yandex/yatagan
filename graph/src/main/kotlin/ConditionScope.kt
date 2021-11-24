@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.graph
 
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel

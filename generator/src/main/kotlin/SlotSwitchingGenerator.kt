@@ -1,10 +1,10 @@
 package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
-import com.yandex.daggerlite.core.Binding
-import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
+import com.yandex.daggerlite.graph.Binding
+import com.yandex.daggerlite.graph.BindingGraph
 import javax.lang.model.element.Modifier.PRIVATE
 
 internal class SlotSwitchingGenerator(

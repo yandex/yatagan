@@ -1,12 +1,12 @@
 package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.TypeName
-import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.normalized
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.ConditionScope
+import com.yandex.daggerlite.graph.normalized
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 

@@ -1,8 +1,6 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.base.BiObjectCache
-import com.yandex.daggerlite.core.ConditionScope
-import com.yandex.daggerlite.core.ConditionScope.Literal
 import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionLangModel
@@ -10,6 +8,8 @@ import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.graph.ConditionScope
+import com.yandex.daggerlite.graph.ConditionScope.Literal
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal val ConditionScope.Companion.Unscoped get() = ConditionScopeImpl.Unscoped

@@ -1,18 +1,8 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.core.AliasBinding
-import com.yandex.daggerlite.core.BaseBinding
-import com.yandex.daggerlite.core.Binding
-import com.yandex.daggerlite.core.BindingGraph
-import com.yandex.daggerlite.core.BindingGraph.NodeRequester
-import com.yandex.daggerlite.core.BindingGraph.NodeRequester.BindingRequester
-import com.yandex.daggerlite.core.BindingGraph.NodeRequester.EntryPointRequester
-import com.yandex.daggerlite.core.BindingGraph.NodeRequester.MemberInjectRequester
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.core.MissingBindingException
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -20,7 +10,17 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
-import com.yandex.daggerlite.core.normalized
+import com.yandex.daggerlite.graph.AliasBinding
+import com.yandex.daggerlite.graph.BaseBinding
+import com.yandex.daggerlite.graph.Binding
+import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.BindingGraph.NodeRequester
+import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.BindingRequester
+import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.EntryPointRequester
+import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.MemberInjectRequester
+import com.yandex.daggerlite.graph.ConditionScope
+import com.yandex.daggerlite.graph.MissingBindingException
+import com.yandex.daggerlite.graph.normalized
 
 private class BindingGraphImpl(
     override val model: ComponentModel,

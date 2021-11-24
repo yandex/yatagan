@@ -1,5 +1,10 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.graph
 
+import com.yandex.daggerlite.core.ComponentDependencyInput
+import com.yandex.daggerlite.core.ComponentFactoryModel
+import com.yandex.daggerlite.core.InstanceInput
+import com.yandex.daggerlite.core.NodeDependency
+import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel

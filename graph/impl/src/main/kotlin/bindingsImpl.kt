@@ -1,29 +1,29 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.core.AliasBinding
-import com.yandex.daggerlite.core.AlternativesBinding
-import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.BindsBindingModel
-import com.yandex.daggerlite.core.BootstrapListBinding
-import com.yandex.daggerlite.core.ComponentDependencyBinding
-import com.yandex.daggerlite.core.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.ComponentInstanceBinding
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.core.EmptyBinding
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
-import com.yandex.daggerlite.core.InstanceBinding
 import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
-import com.yandex.daggerlite.core.ProvisionBinding
-import com.yandex.daggerlite.core.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.graph.AliasBinding
+import com.yandex.daggerlite.graph.AlternativesBinding
+import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.BootstrapListBinding
+import com.yandex.daggerlite.graph.ComponentDependencyBinding
+import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
+import com.yandex.daggerlite.graph.ComponentInstanceBinding
+import com.yandex.daggerlite.graph.ConditionScope
+import com.yandex.daggerlite.graph.EmptyBinding
+import com.yandex.daggerlite.graph.InstanceBinding
+import com.yandex.daggerlite.graph.ProvisionBinding
+import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ProvisionBindingImpl(

@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.ConditionalHoldingModel
 import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.Variant.DimensionModel
 import com.yandex.daggerlite.core.Variant.FlavorModel
+import com.yandex.daggerlite.graph.ConditionScope
 
 internal fun ConditionalHoldingModel.conditionScopeFor(
     forVariant: Variant,

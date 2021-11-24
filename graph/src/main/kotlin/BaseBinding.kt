@@ -1,4 +1,7 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.graph
+
+import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeModel
 
 /**
  * Represents a way to provide a [NodeModel].

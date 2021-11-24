@@ -1,7 +1,5 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.core.BaseBinding
-import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ComponentDependencyInput
@@ -15,6 +13,8 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
+import com.yandex.daggerlite.graph.BaseBinding
+import com.yandex.daggerlite.graph.BindingGraph
 
 internal fun buildBindingsSequence(
     graph: BindingGraph,

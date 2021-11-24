@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
-import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.InstanceInput
@@ -11,6 +10,7 @@ import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
+import com.yandex.daggerlite.graph.BindingGraph
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.PUBLIC
