@@ -48,7 +48,8 @@ internal class JavaxTypeImpl private constructor(
                 -> {
                     Utils.types.boxedClass(impl.asPrimitiveType()).asType()
                 }
-                else -> throw IllegalArgumentException("Unexpected type")
+                TypeKind.VOID -> Utils.voidType.asType()
+                else -> throw IllegalArgumentException("Unexpected type $impl")
             }.asDeclaredType()
         }
     }

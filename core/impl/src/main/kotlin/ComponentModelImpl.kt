@@ -5,6 +5,7 @@ import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ComponentModel.EntryPoint
 import com.yandex.daggerlite.core.ConditionScope
+import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
@@ -32,24 +33,36 @@ internal class ComponentModelImpl private constructor(
 
     override val scope = declaration.annotations.find(AnnotationLangModel::isScope)
 
-    override val modules: Set<ModuleModel> by lazy {
+    override val modules: Set<ModuleModel> by lazy(NONE) {
         impl.modules.map(TypeLangModel::declaration).map { ModuleModelImpl(it) }.toSet()
     }
-    override val dependencies: Set<ComponentModel> by lazy {
+
+    override val dependencies: Set<ComponentModel> by lazy(NONE) {
         impl.dependencies.map(TypeLangModel::declaration).map(Factory::invoke).toSet()
     }
-    override val entryPoints: Set<EntryPoint> by lazy {
-        buildSet {
-            for (function in declaration.allPublicFunctions.filter { it.isAbstract }) {
-                this += EntryPoint(
-                    dependency = NodeDependency(
-                        type = function.returnType,
-                        forQualifier = function,
-                    ),
-                    getter = function,
-                )
-            }
-        }
+
+    override val entryPoints: Set<EntryPoint> by lazy(NONE) {
+        declaration.allPublicFunctions.filter {
+            it.isAbstract && it.parameters.none()
+        }.map { function ->
+            EntryPoint(
+                dependency = NodeDependency(
+                    type = function.returnType,
+                    forQualifier = function,
+                ),
+                getter = function,
+            )
+        }.toSet()
+    }
+
+    override val memberInjectors: Set<MembersInjectorModel> by lazy(NONE) {
+        declaration.allPublicFunctions.filter {
+            MembersInjectorModelImpl.canRepresent(it)
+        }.map { function ->
+            MembersInjectorModelImpl(
+                injector = function,
+            )
+        }.toSet()
     }
 
     override val factory: ComponentFactoryModel? by lazy(NONE) {

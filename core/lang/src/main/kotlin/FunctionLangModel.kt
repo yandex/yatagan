@@ -8,7 +8,7 @@ package com.yandex.daggerlite.core.lang
  *
  * MAYBE: Split this into ConstructorLangModel and namely FunctionLangModel.
  */
-interface FunctionLangModel : AnnotatedLangModel, MemberLangModel {
+interface FunctionLangModel : MemberLangModel {
     /**
      * Type that this function is associated with. Constructee if [isConstructor].
      */

@@ -16,6 +16,9 @@ class ProcessingUtils(
     val booleanType: TypeElement by lazy {
         elements.getTypeElement("java.lang.Boolean")
     }
+    val voidType: TypeElement by lazy {
+        elements.getTypeElement("java.lang.Void")
+    }
 
     init {
         utils = this

@@ -424,7 +424,7 @@ class CoreBindingsTest(
                     return "object";
                 }
             }
-        """)
+        """.trimIndent())
 
         givenJavaSource("test.TestComponent", """
             import com.yandex.daggerlite.Component;
@@ -433,10 +433,53 @@ class CoreBindingsTest(
             public interface TestComponent {
                 Object get();
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `basic members inject`() {
+        givenJavaSource("test.TestCase", """
+            import com.yandex.daggerlite.Binds;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Module;
+            
+            import javax.inject.Inject;
+            import javax.inject.Named;
+            
+            class ClassA { @Inject ClassA() {} }
+            class ClassB { @Inject ClassB() {} }
+            
+            @Module
+            interface MyModule {
+                @Named("hello") @Binds ClassA classAHello(ClassA i);
+                @Named("bye") @Binds ClassA classABye(ClassA i);
+            }
+            
+            class Foo {
+                @Inject @Named("hello")
+                public ClassA helloA;
+                
+                private ClassA bye;
+                private ClassB b;
+                
+                @Inject
+                public void setClassB(ClassB classB) { b = classB; }
+            
+                @Inject @Named("bye")
+                public void setClassA(ClassA classA) { bye = classA; }
+            }
+            
+            @Component(modules = {MyModule.class})
+            interface TestComponent {
+                void injectFoo(Foo foo);
+            }
+        """.trimIndent())
+        compilesSuccessfully {
             withNoWarnings()
         }
     }

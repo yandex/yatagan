@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.core.lang
 
-sealed interface MemberLangModel {
+sealed interface MemberLangModel : AnnotatedLangModel {
     /**
      * Whether the member is truly static (@[JvmStatic] or `static`).
      */

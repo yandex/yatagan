@@ -453,5 +453,61 @@ class CoreBindingsKotlinTest(
             withNoWarnings()
         }
     }
+
+    @Test
+    fun `basic members inject`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Module
+            
+            import javax.inject.Inject
+            import javax.inject.Named
+            
+            class ClassA @Inject constructor()
+            class ClassB @Inject constructor()
+            
+            @Module
+            interface MyModule {
+                @Named("hello") @Binds fun classAHello(i: ClassA): ClassA
+                @Named("bye") @Binds fun classABye(i: ClassA): ClassA
+            }
+            
+            class Foo {
+                @set:Inject @Named("hello")
+                lateinit var helloA: ClassA
+                @set:Inject @Named("bye")
+                lateinit var bye: ClassA
+                
+                lateinit var b: ClassB
+                    private set
+                private lateinit var _a: ClassA
+                
+                @Inject
+                fun setB(i: ClassB) { b = i }
+                
+                var a: ClassA 
+                    get() = _a 
+                    @Inject
+                    set(value) { _a = value }
+            }
+            
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                fun injectFoo(foo: Foo)
+            }
+            
+            fun test() {
+                val foo = Foo()
+                DaggerTestComponent().injectFoo(foo)
+                foo.helloA; foo.bye; foo.b; foo.a
+            }""".trimIndent())
+        compilesSuccessfully {
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
+            }
+        }
+    }
 }
 

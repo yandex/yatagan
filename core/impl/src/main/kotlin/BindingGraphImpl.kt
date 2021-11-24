@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.BindingGraph.NodeRequester
 import com.yandex.daggerlite.core.BindingGraph.NodeRequester.BindingRequester
 import com.yandex.daggerlite.core.BindingGraph.NodeRequester.EntryPointRequester
+import com.yandex.daggerlite.core.BindingGraph.NodeRequester.MemberInjectRequester
 import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
@@ -164,6 +165,11 @@ private class BindingGraphImpl(
 
         model.entryPoints.forEach { entryPoint ->
             materializationQueue.add(entryPoint.dependency to EntryPointRequester(entryPoint))
+        }
+        model.memberInjectors.forEach { membersInjector ->
+            membersInjector.membersToInject.values.forEach { injectDependency ->
+                materializationQueue.add(injectDependency to MemberInjectRequester(membersInjector))
+            }
         }
 
         val seenBindings = hashSetOf<Binding>()

@@ -16,4 +16,6 @@ internal class JavaxParameterImpl(
     }
 
     override fun hashCode() = impl.hashCode()
+
+    override fun toString() = "$name: $type"
 }

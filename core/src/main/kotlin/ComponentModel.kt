@@ -28,6 +28,11 @@ interface ComponentModel : ClassBackedModel {
     val entryPoints: Set<EntryPoint>
 
     /**
+     * A set of [MembersInjectorModel]s defined for this component.
+     */
+    val memberInjectors: Set<MembersInjectorModel>
+
+    /**
      * An optional explicit factory for this component creation.
      */
     val factory: ComponentFactoryModel?

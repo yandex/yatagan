@@ -12,4 +12,6 @@ abstract class CtFunctionLangModel : FunctionLangModel {
     override val providesAnnotationIfPresent: ProvidesAnnotationLangModel? by lazy(NONE) {
         annotations.find { it.hasType<Provides>() }?.let { CtProvidesAnnotationImpl(it) }
     }
+
+    override fun toString() = "function $name(${parameters.toList()}) -> $returnType"
 }

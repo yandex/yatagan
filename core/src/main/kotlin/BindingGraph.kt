@@ -59,6 +59,7 @@ interface BindingGraph {
     sealed interface NodeRequester {
         class EntryPointRequester(val entryPoint: ComponentModel.EntryPoint) : NodeRequester
         class BindingRequester(val binding: BaseBinding): NodeRequester
+        class MemberInjectRequester(val injector: MembersInjectorModel): NodeRequester
     }
 
     interface BindingUsage {

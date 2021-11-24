@@ -9,8 +9,8 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxFieldImpl private constructor(
     override val owner: TypeDeclarationLangModel,
-    private val impl: VariableElement,
-) : FieldLangModel {
+    impl: VariableElement,
+) : FieldLangModel, JavaxAnnotatedImpl<VariableElement>(impl) {
     override val isStatic: Boolean get() = impl.isStatic
     override val type: TypeLangModel by lazy(NONE) { JavaxTypeImpl(impl.asType()) }
     override val name: String get() = impl.simpleName.toString()

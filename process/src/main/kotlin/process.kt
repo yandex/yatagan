@@ -4,6 +4,7 @@ import com.yandex.daggerlite.base.ObjectCacheRegistry
 import com.yandex.daggerlite.core.BindingGraph
 import com.yandex.daggerlite.core.BindingGraph.NodeRequester.BindingRequester
 import com.yandex.daggerlite.core.BindingGraph.NodeRequester.EntryPointRequester
+import com.yandex.daggerlite.core.BindingGraph.NodeRequester.MemberInjectRequester
 import com.yandex.daggerlite.core.impl.BindingGraph
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
@@ -22,6 +23,7 @@ fun <Source> process(
                         val requestedDescription = when(it) {
                             is BindingRequester -> it.binding.toString()
                             is EntryPointRequester -> it.entryPoint.getter.let { func -> "${func.owner}.${func.name}" }
+                            is MemberInjectRequester -> it.injector.injector.toString()
                         }
                         appendLine(" - Requested from here: $requestedDescription")
                     }

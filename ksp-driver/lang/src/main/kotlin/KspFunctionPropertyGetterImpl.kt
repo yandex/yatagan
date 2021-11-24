@@ -1,48 +1,38 @@
 package com.yandex.daggerlite.ksp.lang
 
-import com.google.devtools.ksp.isAbstract
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyGetter
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
-import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspFunctionPropertyGetterImpl private constructor(
-    private val impl: KSPropertyDeclaration,
+    getter: KSPropertyGetter,
     override val owner: TypeDeclarationLangModel,
     override val isFromCompanionObject: Boolean,
-) : CtFunctionLangModel() {
-    override val annotations: Sequence<CtAnnotationLangModel> = impl.getter?.let(::annotationsFrom) ?: emptySequence()
-    override val isAbstract: Boolean
-        get() = impl.isAbstract()
-    override val isStatic: Boolean
-        get() = impl.isStatic
+) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter) {
     override val returnType: TypeLangModel by lazy(NONE) {
-        KspTypeImpl(impl.type.resolve())
+        KspTypeImpl((accessor.returnType ?: property.type).resolve())
     }
     override val name: String by lazy(NONE) {
-        val propName = impl.simpleName.asString()
+        val propName = property.simpleName.asString()
         @Suppress("DEPRECATION")  // capitalize
         if (PropNameIsRegex.matches(propName)) propName
-        else "get${impl.simpleName.asString().capitalize()}"
+        else "get${propName.capitalize()}"
     }
     override val parameters: Sequence<ParameterLangModel> = emptySequence()
-    override val isConstructor: Boolean
-        get() = false
 
-    companion object Factory : ObjectCache<KSPropertyDeclaration, KspFunctionPropertyGetterImpl>() {
+    companion object Factory : ObjectCache<KSPropertyGetter, KspFunctionPropertyGetterImpl>() {
         private val PropNameIsRegex = "^is[^a-z].*$".toRegex()
 
         operator fun invoke(
-            impl: KSPropertyDeclaration,
+            getter: KSPropertyGetter,
             owner: TypeDeclarationLangModel,
             isFromCompanionObject: Boolean = false,
-        ) = createCached(impl) {
+        ) = createCached(getter) {
             KspFunctionPropertyGetterImpl(
-                impl = impl,
+                getter = getter,
                 owner = owner,
                 isFromCompanionObject = isFromCompanionObject,
             )

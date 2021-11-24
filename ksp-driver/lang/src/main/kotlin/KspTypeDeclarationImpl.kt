@@ -7,6 +7,7 @@ import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.Modifier
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.FieldLangModel
@@ -55,18 +56,35 @@ internal class KspTypeDeclarationImpl private constructor(
         yieldAll(impl.allPublicFunctions().map {
             KspFunctionImpl(owner = owner, impl = it, isFromCompanionObject = false)
         })
-        yieldAll(impl.allPublicProperties().map {
-            KspFunctionPropertyGetterImpl(owner = owner, impl = it, isFromCompanionObject = false)
-        })
+        impl.allPublicProperties().forEach {
+            explodeProperty(it)
+        }
         impl.getCompanionObject()?.let { companion ->
             yieldAll(companion.allPublicFunctions().map {
                 KspFunctionImpl(owner = owner, impl = it, isFromCompanionObject = true)
             })
-            yieldAll(companion.allPublicProperties().map {
-                KspFunctionPropertyGetterImpl(owner = owner, impl = it, isFromCompanionObject = true)
-            })
+            companion.allPublicProperties().forEach {
+                explodeProperty(it, isFromCompanionObject = true)
+            }
         }
     }.memoize()
+
+    private suspend fun SequenceScope<FunctionLangModel>.explodeProperty(
+        property: KSPropertyDeclaration,
+        isFromCompanionObject: Boolean = true,
+    ) {
+        val owner = this@KspTypeDeclarationImpl
+        property.getter?.let { getter ->
+            yield(KspFunctionPropertyGetterImpl(owner = owner, getter = getter,
+                isFromCompanionObject = isFromCompanionObject))
+        }
+        property.setter?.let { setter ->
+            if (Modifier.PRIVATE !in setter.modifiers && Modifier.PROTECTED !in setter.modifiers) {
+                yield(KspFunctionPropertySetterImpl(owner = owner, setter = setter,
+                    isFromCompanionObject = isFromCompanionObject))
+            }
+        }
+    }
 
     override val allPublicFields: Sequence<FieldLangModel> =
         impl.getDeclaredProperties().filter(KSPropertyDeclaration::isField).map { KspFieldImpl(it) }.memoize()

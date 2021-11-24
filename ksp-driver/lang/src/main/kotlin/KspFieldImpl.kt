@@ -3,6 +3,7 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -11,6 +12,8 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspFieldImpl private constructor(
     private val impl: KSPropertyDeclaration,
 ) : FieldLangModel {
+    override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
+
     override val owner: TypeDeclarationLangModel by lazy(NONE) {
         KspTypeDeclarationImpl(impl.parentDeclaration as KSClassDeclaration)
     }
