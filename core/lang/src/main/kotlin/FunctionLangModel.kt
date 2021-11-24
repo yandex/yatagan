@@ -23,9 +23,11 @@ interface FunctionLangModel : MemberLangModel, CallableLangModel {
     val returnType: TypeLangModel
 
     /**
-     * Whether the function is declared in companion object (or inherits by it).
+     * Companion object name inside [owner] if this function belongs to a companion object.
+     * [isStatic] then never returns `true`.
+     * `null` if the function does not belong to a companion object.
      */
-    val isFromCompanionObject: Boolean
+    val companionObjectName: String?
 
     /**
      * [com.yandex.daggerlite.Provides] annotation model if present. `null` if absent.

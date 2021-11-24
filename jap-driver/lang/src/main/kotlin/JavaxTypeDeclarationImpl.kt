@@ -48,7 +48,6 @@ internal class JavaxTypeDeclarationImpl private constructor(
             JavaxFunctionImpl(
                 owner = owner,
                 impl = it,
-                isFromCompanionObject = false,
             )
         })
         kotlinClass?.companionObject?.let { companionName: String ->
@@ -63,7 +62,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
                     yield(JavaxFunctionImpl(
                         owner = owner,
                         impl = it,
-                        isFromCompanionObject = true,
+                        companionObjectName = companionName,
                     ))
                 }
         }

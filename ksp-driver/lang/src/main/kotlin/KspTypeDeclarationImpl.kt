@@ -58,34 +58,35 @@ internal class KspTypeDeclarationImpl private constructor(
     override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
         val owner = this@KspTypeDeclarationImpl
         yieldAll(impl.allPublicFunctions().map {
-            KspFunctionImpl(owner = owner, impl = it, isFromCompanionObject = false)
+            KspFunctionImpl(owner = owner, impl = it)
         })
         impl.allPublicProperties().forEach {
             explodeProperty(it)
         }
         impl.getCompanionObject()?.let { companion ->
+            val companionName = companion.simpleName.getShortName()
             yieldAll(companion.allPublicFunctions().map {
-                KspFunctionImpl(owner = owner, impl = it, isFromCompanionObject = true)
+                KspFunctionImpl(owner = owner, impl = it, companionObjectName = companionName)
             })
             companion.allPublicProperties().forEach {
-                explodeProperty(it, isFromCompanionObject = true)
+                explodeProperty(it, companionObjectName = companionName)
             }
         }
     }.memoize()
 
     private suspend fun SequenceScope<FunctionLangModel>.explodeProperty(
         property: KSPropertyDeclaration,
-        isFromCompanionObject: Boolean = true,
+        companionObjectName: String? = null,
     ) {
         val owner = this@KspTypeDeclarationImpl
         property.getter?.let { getter ->
             yield(KspFunctionPropertyGetterImpl(owner = owner, getter = getter,
-                isFromCompanionObject = isFromCompanionObject))
+                companionObjectName = companionObjectName))
         }
         property.setter?.let { setter ->
             if (Modifier.PRIVATE !in setter.modifiers && Modifier.PROTECTED !in setter.modifiers) {
                 yield(KspFunctionPropertySetterImpl(owner = owner, setter = setter,
-                    isFromCompanionObject = isFromCompanionObject))
+                    companionObjectName = companionObjectName))
             }
         }
     }

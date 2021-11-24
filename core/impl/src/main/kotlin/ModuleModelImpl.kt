@@ -12,6 +12,7 @@ import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.core.lang.isFromCompanionObject
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ModuleModelImpl private constructor(

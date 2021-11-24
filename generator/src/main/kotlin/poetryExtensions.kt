@@ -74,12 +74,13 @@ internal inline fun <A> ExpressionBuilder.generateCall(
             if (instance != null) {
                 +"$instance.%N(".formatCode(callable.name)
             } else {
+                val companion = callable.companionObjectName
                 val ownerObject = when {
                     callable.owner.isKotlinObject -> ".INSTANCE"
-                    callable.isFromCompanionObject && !callable.isStatic -> ".Companion"
+                    companion != null && !callable.isStatic -> ".$companion"
                     else -> ""
                 }
-                +"${callable.ownerName.asTypeName()}$ownerObject.%L(".formatCode(callable.name)
+                +"%T%L.%L(".formatCode(callable.ownerName.asTypeName(), ownerObject, callable.name)
             }
         }
     }

@@ -12,7 +12,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class JavaxFunctionImpl private constructor(
     private val impl: ExecutableElement,
     override val owner: TypeDeclarationLangModel,
-    override val isFromCompanionObject: Boolean = false,
+    override val companionObjectName: String?,
 ) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(impl), CtFunctionLangModel() {
     override val isAbstract: Boolean get() = impl.isAbstract
     override val isStatic: Boolean get() = impl.isStatic
@@ -25,12 +25,12 @@ internal class JavaxFunctionImpl private constructor(
         operator fun invoke(
             impl: ExecutableElement,
             owner: TypeDeclarationLangModel,
-            isFromCompanionObject: Boolean = false,
+            companionObjectName: String? = null,
         ) = createCached(impl) {
             JavaxFunctionImpl(
                 impl = impl,
                 owner = owner,
-                isFromCompanionObject = isFromCompanionObject,
+                companionObjectName = companionObjectName,
             )
         }
     }

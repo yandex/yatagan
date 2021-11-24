@@ -13,7 +13,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspFunctionImpl private constructor(
     private val impl: KSFunctionDeclaration,
     override val owner: TypeDeclarationLangModel,
-    override val isFromCompanionObject: Boolean,
+    override val companionObjectName: String?,
 ) : CtFunctionLangModel() {
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
     override val isAbstract: Boolean
@@ -31,12 +31,12 @@ internal class KspFunctionImpl private constructor(
         operator fun invoke(
             impl: KSFunctionDeclaration,
             owner: TypeDeclarationLangModel,
-            isFromCompanionObject: Boolean = false,
+            companionObjectName: String? = null,
         ) = createCached(impl) {
             KspFunctionImpl(
                 impl = impl,
                 owner = owner,
-                isFromCompanionObject = isFromCompanionObject,
+                companionObjectName = companionObjectName,
             )
         }
     }

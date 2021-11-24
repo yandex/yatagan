@@ -10,7 +10,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspFunctionPropertyGetterImpl private constructor(
     getter: KSPropertyGetter,
     override val owner: TypeDeclarationLangModel,
-    override val isFromCompanionObject: Boolean,
+    override val companionObjectName: String?,
 ) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter) {
     override val returnType: TypeLangModel by lazy(NONE) {
         KspTypeImpl((accessor.returnType ?: property.type).resolve())
@@ -29,12 +29,12 @@ internal class KspFunctionPropertyGetterImpl private constructor(
         operator fun invoke(
             getter: KSPropertyGetter,
             owner: TypeDeclarationLangModel,
-            isFromCompanionObject: Boolean = false,
+            companionObjectName: String? = null,
         ) = createCached(getter) {
             KspFunctionPropertyGetterImpl(
                 getter = getter,
                 owner = owner,
-                isFromCompanionObject = isFromCompanionObject,
+                companionObjectName = companionObjectName,
             )
         }
     }
