@@ -16,7 +16,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
-import com.yandex.daggerlite.core.lang.isFromCompanionObject
+import com.yandex.daggerlite.core.lang.isKotlinObject
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ModuleModelImpl private constructor(
@@ -128,7 +128,7 @@ internal class ModuleModelImpl private constructor(
             get() = impl
 
         override val requiresModuleInstance: Boolean
-            get() = originModule.mayRequireInstance && !impl.isStatic && !impl.isFromCompanionObject
+            get() = originModule.mayRequireInstance && !impl.isStatic && !impl.owner.isKotlinObject
 
         companion object {
             fun canRepresent(method: FunctionLangModel): Boolean {

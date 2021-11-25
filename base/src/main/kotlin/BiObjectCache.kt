@@ -14,8 +14,8 @@ abstract class BiObjectCache<K1, K2, V : Any> : ObjectCacheBase() {
         ObjectCacheRegistry.register(this)
     }
 
-    inline fun createCached(key1: K1, key2: K2, block: (K1, K2) -> V): V {
-        return cache.getOrPut(key1, ::hashMapOf).getOrPut(key2) { block(key1, key2) }
+    inline fun createCached(key1: K1, key2: K2, block: () -> V): V {
+        return cache.getOrPut(key1, ::hashMapOf).getOrPut(key2) { block() }
     }
 
     override fun clear() {

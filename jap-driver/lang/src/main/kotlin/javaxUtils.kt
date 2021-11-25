@@ -5,6 +5,7 @@ package com.yandex.daggerlite.jap.lang
 import com.google.auto.common.AnnotationMirrors
 import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
+import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
@@ -19,6 +20,7 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
+import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
@@ -31,6 +33,8 @@ internal inline fun <reified T : Annotation> Element.isAnnotatedWith() =
 internal fun TypeMirror.asTypeElement(): TypeElement = MoreTypes.asTypeElement(this)
 
 internal fun TypeMirror.asPrimitiveType() = MoreTypes.asPrimitiveType(this)
+
+internal fun TypeMirror.asExecutableType() = MoreTypes.asExecutable(this)
 
 internal fun TypeMirror.asDeclaredType() = MoreTypes.asDeclared(this)
 
@@ -132,18 +136,20 @@ internal fun TypeElement.allMethods(typeUtils: Types, elementUtils: Elements): S
 internal fun TypeElement.allImplementedInterfaces(): Sequence<TypeMirror> = sequence {
     val queue = ArrayDeque<TypeMirror>()
     queue += interfaces
-    var superClass = superclass
-    while (superClass.kind != TypeKind.NONE) with(superClass.asTypeElement()) {
-        queue += this.interfaces
-        superClass = this.superclass
+    if (superclass.kind != TypeKind.NONE) {
+        queue += superclass
     }
     while (queue.isNotEmpty()) {
         val type = queue.removeFirst()
-        queue += type.asTypeElement().interfaces
-        yield(type)
-    }
-    if (superclass.kind != TypeKind.NONE) {
-        yieldAll(superclass.asTypeElement().allImplementedInterfaces())
+        val element = type.asTypeElement()
+        queue += element.interfaces
+        val superClassElement = element.superclass
+        if (superClassElement.kind != TypeKind.NONE) {
+            queue += superClassElement
+        }
+        if (element.kind == ElementKind.INTERFACE) {
+            yield(type)
+        }
     }
 }
 
@@ -172,4 +178,19 @@ internal fun ClassNameModel(type: TypeElement): ClassNameModel {
     val packageName = type.getPackageElement().qualifiedName.toString()
     val simpleNames = type.qualifiedName.substring(packageName.length + 1).split('.')
     return ClassNameModel(packageName, simpleNames)
+}
+
+internal fun Element.asMemberOf(type: DeclaredType): TypeMirror {
+    return Utils.types.asMemberOf(type, this)
+}
+
+internal fun parametersSequenceFor(
+    element: ExecutableElement,
+    asMemberOf: DeclaredType,
+) = sequence<ParameterLangModel> {
+    val parameters = element.parameters
+    val types = element.asMemberOf(asMemberOf).asExecutableType().parameterTypes
+    for (i in parameters.indices) {
+        yield(JavaxParameterImpl(impl = parameters[i], refinedType = types[i]))
+    }
 }

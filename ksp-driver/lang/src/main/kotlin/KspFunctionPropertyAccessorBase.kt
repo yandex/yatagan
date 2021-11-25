@@ -5,7 +5,7 @@ import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
 
 internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
-    protected val accessor: T,
+    private val accessor: T,
 ) : CtFunctionLangModel() {
     protected val property = accessor.receiver
 

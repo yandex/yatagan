@@ -2,6 +2,7 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.TypeName
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.graph.BindingGraph
@@ -45,11 +46,14 @@ internal class ConditionGenerator(
                     if (literal.negated) +"!"
                     val rootType = literal.root.asType()
                     literal.path.first().let { member ->
+                        val kotlinObjectKind = rootType.declaration.kotlinObjectKind
                         when {
-                            member.isStatic ->
-                                +"%T.%N".formatCode(rootType.typeName(), member.name)
-                            rootType.declaration.isKotlinObject ->
+                            kotlinObjectKind == KotlinObjectKind.Object -> {
                                 +"%T.INSTANCE.%N".formatCode(rootType.typeName(), member.name)
+                            }
+                            kotlinObjectKind == KotlinObjectKind.Companion || member.isStatic -> {
+                                +"%T.%N".formatCode(rootType.typeName(), member.name)
+                            }
                             else -> throw IllegalStateException(
                                 "Member '${member.name}' in $rootType must be accessible from the static context"
                             )
