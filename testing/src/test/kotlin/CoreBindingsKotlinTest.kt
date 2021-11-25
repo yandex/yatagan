@@ -196,7 +196,7 @@ class CoreBindingsKotlinTest(
         givenKotlinSource("test.TestCase", """
             fun test() {
                 val m = MyModule(52)
-                val c = DaggerTestComponent.factory().create(m)
+                val c = DaggerTestComponent.builder().create(m)
                 assert(c.get().id == 52)
             }
         """.trimIndent())

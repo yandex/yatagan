@@ -147,7 +147,7 @@ internal class ComponentFactoryGenerator(
                 }
             }
             if (!isSubComponentFactory) {
-                method("factory") {
+                method("builder") {
                     modifiers(PUBLIC, STATIC)
                     returnType(factory.typeName())
                     +"return new %T()".formatCode(implName)
