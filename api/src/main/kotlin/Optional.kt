@@ -35,7 +35,7 @@ class Optional<out T : Any> private constructor(
     }
 
     @JavaApi
-    fun <U : Any> map(mapper: Function<T, U>): Optional<U> = map(mapper::apply)
+    fun <U : Any> map(mapper: Function<T, U?>): Optional<U> = map(mapper::apply)
 
     // endregion Java API
 
@@ -61,9 +61,9 @@ class Optional<out T : Any> private constructor(
     }
 
     @JvmSynthetic
-    inline fun <U : Any> map(mapper: (T) -> (U)): Optional<U> {
+    inline fun <U : Any> map(mapper: (T) -> (U?)): Optional<U> {
         contract { callsInPlace(mapper, InvocationKind.AT_MOST_ONCE) }
-        return if (value != null) of(mapper(value)) else empty()
+        return if (value != null) ofNullable(mapper(value)) else empty()
     }
 
     // endregion Kotlin API
