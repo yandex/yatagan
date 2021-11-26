@@ -10,6 +10,7 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
+import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import javax.inject.Inject
@@ -69,6 +70,10 @@ internal class NodeModelImpl private constructor(
             append(' ')
         }
         append(type)
+    }
+
+    override fun multiBoundListNode(langModelFactory: LangModelFactory): NodeModel {
+        return Factory(type = langModelFactory.getListType(type), qualifier = qualifier)
     }
 
     companion object Factory : BiObjectCache<TypeLangModel, AnnotationLangModel?, NodeModelImpl>() {

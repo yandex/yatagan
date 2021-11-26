@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.LangModelFactory
 
 /**
  * Represents a node in a Dagger Graph, that can be resolved.
@@ -23,4 +24,9 @@ interface NodeModel : ClassBackedModel {
      * TODO: doc.
      */
     val bootstrapInterfaces: Collection<BootstrapInterfaceModel>
+
+    /**
+     * TODO: doc.
+     */
+    fun multiBoundListNode(langModelFactory: LangModelFactory): NodeModel
 }

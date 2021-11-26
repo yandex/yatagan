@@ -4,17 +4,17 @@ import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.BootstrapListBinding
+import com.yandex.daggerlite.graph.MultiBinding
 import javax.lang.model.element.Modifier.PRIVATE
 
-internal class BootstrapListGenerator(
-    private val bootstrapListBindings: Collection<BootstrapListBinding>,
+internal class MultiBindingGenerator(
+    private val multiBindings: Collection<MultiBinding>,
     methodNs: Namespace,
     private val thisGraph: BindingGraph,
 ) : ComponentGenerator.Contributor {
-    private val accessors = bootstrapListBindings.associateWith { methodNs.name(it.target.name) }
+    private val accessors = multiBindings.associateWith { methodNs.name(it.target.name) }
 
-    fun generateCreation(builder: ExpressionBuilder, binding: BootstrapListBinding, inside: BindingGraph) {
+    fun generateCreation(builder: ExpressionBuilder, binding: MultiBinding, inside: BindingGraph) {
         with(builder) {
             +componentForBinding(inside = inside, binding = binding)
             +"."
@@ -24,12 +24,13 @@ internal class BootstrapListGenerator(
     }
 
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
-        for (binding in bootstrapListBindings) {
+        for (binding in multiBindings) {
             method(accessors[binding]!!) {
                 modifiers(PRIVATE)
                 returnType(binding.target.typeName())
-                +"final %T list = new %T<>(${binding.list.size})".formatCode(binding.target.typeName(), Names.ArrayList)
-                binding.list.forEach { node ->
+                +"final %T list = new %T<>(${binding.contributions.size})"
+                    .formatCode(binding.target.typeName(), Names.ArrayList)
+                binding.contributions.forEach { node ->
                     val nodeBinding = thisGraph.resolveBinding(node)
                     if (!nodeBinding.conditionScope.isAlways) {
                         if (nodeBinding.conditionScope.isNever) {

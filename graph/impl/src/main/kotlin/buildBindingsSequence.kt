@@ -26,16 +26,15 @@ internal fun buildBindingsSequence(
     // Gather bindings from modules
     val seenSubcomponents = hashSetOf<ComponentModel>()
     val bootstrapSets = HashMap<BootstrapInterfaceModel, MutableSet<NodeModel>>()
+    val multiBindings = linkedMapOf<NodeModel, MutableSet<NodeModel>>()
     for (module: ModuleModel in graph.modules) {
         // All bindings from installed modules
         for (bindingModel in module.bindings) {
-            yield(when (bindingModel) {
+            val binding = when (bindingModel) {
                 is BindsBindingModel -> when (bindingModel.sources.count()) {
-                    0 -> EmptyBindingImpl(
+                    0 -> ModuleHostedEmptyBindingImpl(
                         owner = graph,
-                        target = bindingModel.target,
-                        originModule = module,
-                        reason = "explicitly absent by empty @Binds directive"
+                        impl = bindingModel,
                     )
                     1 -> AliasBindingImpl(
                         owner = graph,
@@ -53,14 +52,17 @@ internal fun buildBindingsSequence(
                             owner = graph,
                             conditionScope = conditionScope,
                         )
-                    } ?: EmptyBindingImpl(
+                    } ?: ModuleHostedEmptyBindingImpl(
                         owner = graph,
-                        target = bindingModel.target,
-                        originModule = module,
-                        reason = "Ruled out by component variant"
+                        impl = bindingModel,
                     )
                 }
-            })
+            }
+            yield(binding)
+            // Handle multi-bindings
+            if (bindingModel.isMultibinding) {
+                multiBindings.getOrPut(bindingModel.target, ::mutableSetOf) += binding.target
+            }
         }
         // Subcomponent factories (distinct).
         for (subcomponent: ComponentModel in module.subcomponents) {
@@ -73,10 +75,9 @@ internal fun buildBindingsSequence(
                             factory = factory,
                             conditionScope = conditionScope,
                         ))
-                    } ?: yield(EmptyBindingImpl(
+                    } ?: yield(ImplicitEmptyBindingImpl(
                         owner = graph,
-                        target = factory.asNode(),
-                        reason = "ruled out by component conditional filter"
+                        target = factory.asNode()
                     ))
                 }
             }
@@ -118,6 +119,15 @@ internal fun buildBindingsSequence(
             owner = graph,
             target = bootstrap.asNode(langModelFactory),
             inputs = nodes,
+        ))
+    }
+
+    // Multi-bindings
+    for ((target: NodeModel, contributions: Set<NodeModel>) in multiBindings) {
+        yield(MultiBindingImpl(
+            owner = graph,
+            target = target.multiBoundListNode(langModelFactory),
+            contributions = contributions,
         ))
     }
 

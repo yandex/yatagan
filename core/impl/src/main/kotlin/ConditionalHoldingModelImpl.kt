@@ -9,7 +9,7 @@ import com.yandex.daggerlite.core.lang.ConditionLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 
-abstract class ConditionalHoldingModelImpl(
+internal open class ConditionalHoldingModelImpl(
     sources: Sequence<ConditionalAnnotationLangModel>,
 ) : ConditionalHoldingModel {
     final override val conditionals: Sequence<ConditionalWithFlavorConstraintsModel> =

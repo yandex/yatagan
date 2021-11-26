@@ -8,7 +8,7 @@ import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.BootstrapListBinding
+import com.yandex.daggerlite.graph.MultiBinding
 import javax.inject.Provider
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
@@ -62,8 +62,8 @@ internal class ComponentGenerator(
                 thisGraph = graph,
             ).also(this@ComponentGenerator::registerContributor)
 
-            override val bootstrapListGenerator = BootstrapListGenerator(
-                bootstrapListBindings = graph.localBindings.keys.filterIsInstance<BootstrapListBinding>(),
+            override val multiBindingGenerator = MultiBindingGenerator(
+                multiBindings = graph.localBindings.keys.filterIsInstance<MultiBinding>(),
                 methodNs = methodsNs,
                 thisGraph = graph,
             ).also(this@ComponentGenerator::registerContributor)

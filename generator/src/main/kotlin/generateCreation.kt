@@ -6,12 +6,12 @@ import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.AlternativesBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.BootstrapListBinding
 import com.yandex.daggerlite.graph.ComponentDependencyBinding
 import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.graph.ComponentInstanceBinding
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.InstanceBinding
+import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 
@@ -89,8 +89,8 @@ try {
             +getter.name
             +"()"
         }
-        is BootstrapListBinding -> {
-            Generators[owner].bootstrapListGenerator.generateCreation(builder, this, inside = inside)
+        is MultiBinding -> {
+            Generators[owner].multiBindingGenerator.generateCreation(builder, this, inside = inside)
         }
         is EmptyBinding -> throw AssertionError("not handled here")
     }.let { /*exhaustive*/ }

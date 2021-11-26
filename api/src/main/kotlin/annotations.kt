@@ -136,3 +136,9 @@ annotation class BootstrapInterface(
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 annotation class BootstrapList
+
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class IntoList(
+)

@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
 import com.yandex.daggerlite.core.InstanceInput
+import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
@@ -15,25 +16,45 @@ import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.AlternativesBinding
 import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.BootstrapListBinding
 import com.yandex.daggerlite.graph.ComponentDependencyBinding
 import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.graph.ComponentInstanceBinding
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.InstanceBinding
+import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import kotlin.LazyThreadSafetyMode.NONE
 
+internal abstract class ModuleHostedBindingBase {
+    protected abstract val impl: ModuleHostedBindingModel
+
+    val originModule get() = impl.originModule
+
+    val target: NodeModel by lazy(NONE) {
+        with(impl) {
+            if (isMultibinding)
+                MultiBindingContributionNode(target)
+            else target
+        }
+    }
+
+    private class MultiBindingContributionNode(
+        private val node: NodeModel,
+    ) : NodeModel by node {
+        override val implicitBinding: Nothing? get() = null
+        override val bootstrapInterfaces: Collection<Nothing> get() = emptyList()
+        override fun toString() = "$node [multi-binding contributor]"
+    }
+}
+
 internal class ProvisionBindingImpl(
-    private val impl: ProvidesBindingModel,
+    override val impl: ProvidesBindingModel,
     override val owner: BindingGraph,
     override val conditionScope: ConditionScope,
-) : ProvisionBinding {
+) : ProvisionBinding, ModuleHostedBindingBase() {
 
-    override val target get() = impl.target
-    override val originModule get() = impl.originModule
     override val scope get() = impl.scope
     override val provision get() = impl.provision
     override val inputs get() = impl.inputs
@@ -61,17 +82,15 @@ internal class InjectConstructorProvisionBindingImpl(
 }
 
 internal class AliasBindingImpl(
-    private val impl: BindsBindingModel,
+    override val impl: BindsBindingModel,
     override val owner: BindingGraph,
-) : AliasBinding {
+) : AliasBinding, ModuleHostedBindingBase() {
     init {
         require(impl.scope == null)
         require(impl.sources.count() == 1)
     }
 
-    override val target get() = impl.target
     override val source get() = impl.sources.single()
-    override val originModule get() = impl.originModule
 
     override fun equals(other: Any?): Boolean {
         return this === other || (other is AliasBindingImpl &&
@@ -88,11 +107,9 @@ internal class AliasBindingImpl(
 }
 
 internal class AlternativesBindingImpl(
-    private val impl: BindsBindingModel,
+    override val impl: BindsBindingModel,
     override val owner: BindingGraph,
-) : AlternativesBinding {
-    override val target get() = impl.target
-    override val originModule get() = impl.originModule
+) : AlternativesBinding, ModuleHostedBindingBase() {
     override val scope get() = impl.scope
     override val alternatives get() = impl.sources
 
@@ -168,11 +185,11 @@ internal class BootstrapListBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
     private val inputs: Collection<NodeModel>,
-) : BootstrapListBinding {
+) : MultiBinding {
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
     override fun dependencies() = inputs.map(::NodeDependency)
-    override val list: Collection<NodeModel> by lazy(NONE) {
+    override val contributions: Collection<NodeModel> by lazy(NONE) {
         topologicalSort(nodes = inputs, inside = owner)
     }
     override val originModule: Nothing? get() = null
@@ -180,17 +197,39 @@ internal class BootstrapListBindingImpl(
     override fun toString() = "Bootstrap $target of ${inputs.take(3)}${if (inputs.size > 3) "..." else ""} (intrinsic)"
 }
 
-internal class EmptyBindingImpl(
+internal class MultiBindingImpl(
+    override val owner: BindingGraph,
+    override val target: NodeModel,
+    override val contributions: Set<NodeModel>,
+) : MultiBinding {
+    override val scope: Nothing? get() = null
+    override val conditionScope get() = ConditionScope.Unscoped
+    override fun dependencies() = contributions.map(::NodeDependency)
+    override val originModule: Nothing? get() = null
+
+    override fun toString() =
+        "MultiBinding $target of ${contributions.take(3)}${if (contributions.size > 3) "..." else ""} (intrinsic)"
+}
+
+internal class ModuleHostedEmptyBindingImpl(
+    override val impl: ModuleHostedBindingModel,
+    override val owner: BindingGraph,
+) : EmptyBinding, ModuleHostedBindingBase() {
+    override val conditionScope get() = ConditionScope.NeverScoped
+    override val scope: Nothing? get() = null
+    override fun dependencies(): List<Nothing> = emptyList()
+    override fun toString() = "Absent $target in $impl"
+}
+
+internal class ImplicitEmptyBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
     override val originModule: ModuleModel? = null,
-    val reason: String,
 ) : EmptyBinding {
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.NeverScoped
     override fun dependencies(): List<Nothing> = emptyList()
-
-    override fun toString() = "Absent $target because $reason"
+    override fun toString() = "Absent $target (intrinsic)"
 }
 
 internal class ComponentDependencyBindingImpl(

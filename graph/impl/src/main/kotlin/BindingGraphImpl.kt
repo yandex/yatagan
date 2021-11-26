@@ -165,10 +165,9 @@ private class BindingGraphImpl(
                     owner = this@BindingGraphImpl,
                     conditionScope = conditionScope,
                 )
-            } ?: EmptyBindingImpl(
+            } ?: ImplicitEmptyBindingImpl(
                 owner = this@BindingGraphImpl,
-                target = node,
-                reason = "conditional ruled out"
+                target = node
             )
         })
         val nonAlias = materializeAlias(binding) ?: return null

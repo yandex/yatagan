@@ -71,6 +71,6 @@ interface ComponentDependencyEntryPointBinding : Binding {
     val getter: FunctionLangModel
 }
 
-interface BootstrapListBinding : Binding {
-    val list: Collection<NodeModel>
+interface MultiBinding : Binding {
+    val contributions: Collection<NodeModel>
 }

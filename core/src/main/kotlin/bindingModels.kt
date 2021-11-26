@@ -10,6 +10,8 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
  */
 sealed interface ModuleHostedBindingModel {
     val originModule: ModuleModel
+    val target: NodeModel
+    val isMultibinding: Boolean
 }
 
 /**
@@ -18,7 +20,6 @@ sealed interface ModuleHostedBindingModel {
 interface BindsBindingModel : ModuleHostedBindingModel {
     val scope: AnnotationLangModel?
     val sources: Sequence<NodeModel>
-    val target: NodeModel
 }
 
 /**
@@ -26,7 +27,6 @@ interface BindsBindingModel : ModuleHostedBindingModel {
  */
 interface ProvidesBindingModel : ModuleHostedBindingModel, ConditionalHoldingModel {
     val scope: AnnotationLangModel?
-    val target: NodeModel
     val inputs: Sequence<NodeDependency>
     val provision: FunctionLangModel
     val requiresModuleInstance: Boolean

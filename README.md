@@ -36,9 +36,6 @@ Explicitly not supported API
 - [x] `@Condition`, `@AnyCondition`, ...
 - [x] `@BindsFeatureScoped` -> `@Binds`
 - [x] `@ProvidesFeatureScoped` -> `@Provides([Conditional(...), ...])`
-- [ ] Manual `Optional<T>` binding support (legacy).
-      _We don't need this if we're ready to migrate all manual bindings to `@Conditional`
-      and `@Provides(/*feature*/)` at once._ 
 - [ ] Short-circuit condition evaluation preservation.
 
 ## Full solution
@@ -46,7 +43,7 @@ Explicitly not supported API
 - [ ] Validation and full-blown error messages.
 - [ ] Whetstone Validation
 - [ ] Multi-bindings
-  - [ ] `@IntoSet`
+  - [x] `@IntoSet` -> `@IntoList`.
   - [ ] `@ElementsIntoSet`
   - [ ] `@Multibinds` - _low priority - not used in our project._
 - [ ] `@Reusable` - _low priority - not used in our project._

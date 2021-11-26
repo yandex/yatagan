@@ -7,5 +7,5 @@ internal interface GeneratorContainer {
     val factoryGenerator: ComponentFactoryGenerator
     val accessStrategyManager: AccessStrategyManager
     val conditionGenerator: ConditionGenerator
-    val bootstrapListGenerator: BootstrapListGenerator
+    val multiBindingGenerator: MultiBindingGenerator
 }

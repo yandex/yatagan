@@ -509,5 +509,50 @@ class CoreBindingsTest(
             generatesJavaSources("test.DaggerMyComponent")
         }
     }
+
+    @Test
+    fun `type parameters`() {
+        givenJavaSource("test.TestCase", """
+            import java.util.List;
+            import javax.inject.Provider;
+            import javax.inject.Inject;
+            import com.yandex.daggerlite.Binds;
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Module;
+            import com.yandex.daggerlite.IntoList;
+            
+            class Deferred<T> {
+                @Inject Deferred(Provider<T> provider) { }
+            }
+
+            interface MySpecificDeferredEvent {}
+
+            class MyClass1 implements MySpecificDeferredEvent { @Inject MyClass1 () {} }
+            class MyClass2 implements MySpecificDeferredEvent { @Inject MyClass2 () {} }
+            class MyClass3 implements MySpecificDeferredEvent { @Inject MyClass3 () {} }
+
+            @Module
+            interface MyModule {
+                @IntoList @Binds Deferred<? extends MySpecificDeferredEvent> foo1(Deferred<MyClass1> i);
+                @IntoList @Binds Deferred<? extends MySpecificDeferredEvent> foo2(Deferred<MyClass2> i);
+                @IntoList @Binds Deferred<? extends MySpecificDeferredEvent> foo3(Deferred<MyClass3> i);
+                @IntoList @Binds Deferred<? extends MySpecificDeferredEvent> foo4();
+                @IntoList @Provides static Deferred<? extends MySpecificDeferredEvent> foo5(Provider<MyClass3> p) {
+                    return new Deferred<>(p);
+                }
+            }
+            
+            @Component(modules = MyModule.class)
+            interface MyComponent {
+                List<Deferred<? extends MySpecificDeferredEvent>> deferred();
+                Provider<List<Deferred<? extends MySpecificDeferredEvent>>> deferredProvider();
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+        }
+    }
 }
 
