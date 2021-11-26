@@ -17,7 +17,7 @@ class CoreBindingsKotlinTest(
 
     @Test
     fun `basic component - @Module object`() {
-        givenKotlinSource("test.Api", """interface Api {}""")
+        givenKotlinSource("test.Api", """interface Api""")
         givenKotlinSource("test.Impl", """class Impl : Api""")
         givenKotlinSource("test.ExplicitImpl", """class ExplicitImpl : Api""")
 
@@ -64,7 +64,7 @@ class CoreBindingsKotlinTest(
 
     @Test
     fun `basic component - @Module with companion object`() {
-        givenKotlinSource("test.Api", """interface Api {}""")
+        givenKotlinSource("test.Api", """interface Api""")
         givenKotlinSource("test.Impl", """class Impl : Api""")
         givenKotlinSource("test.ExplicitImpl", """class ExplicitImpl""")
 
@@ -113,7 +113,7 @@ class CoreBindingsKotlinTest(
 
     @Test
     fun `basic component - @Provides with dependencies in companion`() {
-        givenKotlinSource("test.Api", """interface Api {}""")
+        givenKotlinSource("test.Api", """interface Api""")
         givenKotlinSource("test.Impl", """class Impl : Api""")
 
         givenKotlinSource("test.BaseModule", """
@@ -145,9 +145,9 @@ class CoreBindingsKotlinTest(
 
             @Component(modules = [MyModule::class]) @Singleton
             interface TestComponent {
-                fun get(): Api;
-                fun getProvider(): Provider<Api>;
-                fun getLazy(): Lazy<Api>;
+                fun get(): Api
+                fun getProvider(): Provider<Api>
+                fun getLazy(): Lazy<Api>
             }
         """.trimIndent())
 
@@ -196,7 +196,7 @@ class CoreBindingsKotlinTest(
         givenKotlinSource("test.TestCase", """
             fun test() {
                 val m = MyModule(52)
-                val c = DaggerTestComponent.factory().create(m)
+                val c = DaggerTestComponent.builder().create(m)
                 assert(c.get().id == 52)
             }
         """.trimIndent())
@@ -219,7 +219,7 @@ class CoreBindingsKotlinTest(
             import com.yandex.daggerlite.Provides
             import com.yandex.daggerlite.Module
 
-            interface Api {}
+            interface Api
             class Impl : Api
 
             @Module
@@ -316,7 +316,7 @@ class CoreBindingsKotlinTest(
             object MyModule {
                 @Provides
                 fun provides(): Any {
-                    return "object";
+                    return "object"
                 }
             }
         """)
@@ -326,7 +326,7 @@ class CoreBindingsKotlinTest(
 
             @Component(modules = [MyModule::class])
             interface TestComponent {
-                fun get(): Any;
+                fun get(): Any
             }
         """)
 
@@ -372,7 +372,7 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
-    fun `basic compoonent - provide list of strings`() {
+    fun `basic component - provide list of strings`() {
         givenKotlinSource("test.MyModule", """
             import com.yandex.daggerlite.Provides
             import com.yandex.daggerlite.Module
@@ -390,7 +390,7 @@ class CoreBindingsKotlinTest(
 
             @Component(modules = [MyModule::class])
             interface TestComponent {
-                fun get(): List<String>;
+                fun get(): List<String>
             }
         """)
 
@@ -546,6 +546,43 @@ class CoreBindingsKotlinTest(
             withNoWarnings()
             generatesJavaSources("test.DaggerMyComponent")
             generatesJavaSources("test.DaggerMyComponent2")
+        }
+    }
+
+    @Test
+    fun `type variables in inject constructor`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Lazy
+            import com.yandex.daggerlite.Module
+            import com.yandex.daggerlite.Optional
+            import javax.inject.Inject
+            import javax.inject.Provider
+    
+            class DependencyA @Inject constructor()
+            class DependencyB<T> @Inject constructor(i: T)
+            class SomeClass<T> @Inject constructor(i: T)
+    
+            class Consumer @Inject constructor(a: Lazy<SomeClass<DependencyA>>)
+
+            interface Absent<T> {
+                @Binds fun foo(): T
+            }
+        
+            @Module
+            interface MyModule : Absent<Any>
+
+            @Component(modules = [MyModule::class])
+            interface MyComponent {
+                val any: Optional<Any>
+                val clazz: SomeClass<DependencyA>
+                val provider: Provider<SomeClass<DependencyB<DependencyA>>>
+            }
+        """.trimIndent())
+        compilesSuccessfully {
+            withNoWarnings()
+            generatesJavaSources("test.DaggerMyComponent")
         }
     }
 }

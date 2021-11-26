@@ -4,5 +4,5 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import javax.lang.model.element.TypeElement
 
 fun TypeDeclarationLangModel(typeElement: TypeElement): TypeDeclarationLangModel {
-    return JavaxTypeDeclarationImpl(typeElement)
+    return JavaxTypeDeclarationImpl(typeElement.asType().asDeclaredType())
 }

@@ -18,7 +18,7 @@ internal class JavaxTypeImpl private constructor(
     override val name: CtTypeNameModel by lazy(NONE) { CtTypeNameModel(impl) }
 
     override val declaration: TypeDeclarationLangModel by lazy(NONE) {
-        JavaxTypeDeclarationImpl(impl.asTypeElement())
+        JavaxTypeDeclarationImpl(impl)
     }
 
     override val isBoolean: Boolean

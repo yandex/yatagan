@@ -19,6 +19,7 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
@@ -149,3 +150,14 @@ internal fun KSClassDeclaration.allPublicProperties(): Sequence<KSPropertyDeclar
 }
 
 internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map(::KspAnnotationImpl).memoize()
+
+internal fun parametersSequenceFor(
+    declaration: KSFunctionDeclaration,
+    containing: KSType,
+) = sequence<ParameterLangModel> {
+    val parameters = declaration.parameters
+    val types = declaration.asMemberOf(containing).parameterTypes
+    for (i in parameters.indices) {
+        yield(KspParameterImpl(impl = parameters[i], refinedType = types[i]!!))
+    }
+}

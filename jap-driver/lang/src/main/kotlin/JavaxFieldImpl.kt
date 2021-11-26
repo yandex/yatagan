@@ -1,24 +1,32 @@
 package com.yandex.daggerlite.jap.lang
 
-import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.lang.FieldLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import javax.lang.model.element.VariableElement
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxFieldImpl private constructor(
-    override val owner: TypeDeclarationLangModel,
+    override val owner: JavaxTypeDeclarationImpl,
     impl: VariableElement,
 ) : FieldLangModel, JavaxAnnotatedImpl<VariableElement>(impl) {
     override val isStatic: Boolean get() = impl.isStatic
-    override val type: TypeLangModel by lazy(NONE) { JavaxTypeImpl(impl.asType()) }
+
+    override val type: TypeLangModel by lazy(NONE) {
+        JavaxTypeImpl(impl.asMemberOf(owner.type))
+    }
+
     override val name: String get() = impl.simpleName.toString()
 
-    companion object Factory : ObjectCache<VariableElement, JavaxFieldImpl>() {
+    companion object Factory : BiObjectCache<JavaxTypeDeclarationImpl, VariableElement, JavaxFieldImpl>() {
         operator fun invoke(
-            owner: TypeDeclarationLangModel,
+            owner: JavaxTypeDeclarationImpl,
             impl: VariableElement,
-        ) = createCached(impl) { JavaxFieldImpl(owner, it) }
+        ) = createCached(owner, impl) {
+            JavaxFieldImpl(
+                owner = owner,
+                impl = impl,
+            )
+        }
     }
 }

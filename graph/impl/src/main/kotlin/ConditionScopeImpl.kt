@@ -126,7 +126,9 @@ private class ConditionLiteralImpl private constructor(
 
         companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
             operator fun invoke(root: TypeDeclarationLangModel, pathSource: String) : LiteralPayload {
-                return createCached(root, pathSource, ::LiteralPayload)
+                return createCached(root, pathSource) {
+                    LiteralPayload(root, pathSource)
+                }
             }
 
             private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
@@ -160,7 +162,9 @@ private class ConditionLiteralImpl private constructor(
         private operator fun invoke(
             negated: Boolean,
             payload: LiteralPayload,
-        ) = createCached(negated, payload, ::ConditionLiteralImpl)
+        ) = createCached(negated, payload) {
+            ConditionLiteralImpl(negated, payload)
+        }
 
         private val ConditionRegex = "^(!?)((?:[A-Za-z][A-Za-z0-9_]*\\.)*[A-Za-z][A-Za-z0-9_]*)\$".toRegex()
     }

@@ -8,4 +8,4 @@ inline fun <reified A : Annotation> AnnotationLangModel.hasType() = hasType(A::c
 
 inline fun <reified A : Annotation> LangModelFactory.getAnnotation() = getAnnotation(A::class.java)
 
-val FunctionLangModel.isFromCompanionObject get() = companionObjectName != null
+val TypeDeclarationLangModel.isKotlinObject get() = kotlinObjectKind != null

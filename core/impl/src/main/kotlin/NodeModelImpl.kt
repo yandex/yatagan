@@ -80,7 +80,7 @@ internal class NodeModelImpl private constructor(
         operator fun invoke(
             type: TypeLangModel,
             qualifier: AnnotationLangModel?,
-        ) = createCached(type, qualifier) { _, _ ->
+        ) = createCached(type, qualifier) {
             NodeModelImpl(
                 type = type,
                 qualifier = qualifier,

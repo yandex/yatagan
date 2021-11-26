@@ -172,7 +172,7 @@ class ComponentHierarchyKotlinTest(
             generatesJavaSources("test.DaggerMyApplicationComponent")
             withNoWarnings()
             inspectGeneratedClass("test.DaggerMyApplicationComponent") {
-                val factory = it["factory"](null)
+                val factory = it["builder"](null)
                 val appComponent = factory.clz["create", String::class](factory, /*app_id*/"foo")
                 val activityFactory = appComponent.clz["getActivityFactory"](appComponent)
                 val activityComponent =

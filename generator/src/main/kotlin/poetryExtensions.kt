@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.ClassBackedModel
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
@@ -74,10 +75,8 @@ internal inline fun <A> ExpressionBuilder.generateCall(
             if (instance != null) {
                 +"$instance.%N(".formatCode(callable.name)
             } else {
-                val companion = callable.companionObjectName
-                val ownerObject = when {
-                    callable.owner.isKotlinObject -> ".INSTANCE"
-                    companion != null && !callable.isStatic -> ".$companion"
+                val ownerObject = when(callable.owner.kotlinObjectKind) {
+                    KotlinObjectKind.Object -> ".INSTANCE"
                     else -> ""
                 }
                 +"%T%L.%L(".formatCode(callable.ownerName.asTypeName(), ownerObject, callable.name)

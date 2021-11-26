@@ -12,7 +12,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
     /**
      * Whether the declaration is a kotlin `object`.
      */
-    val isKotlinObject: Boolean
+    val kotlinObjectKind: KotlinObjectKind?
 
     /**
      * Qualified/Canonical name of the represented class from the Java point of view.
@@ -30,7 +30,11 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
     val constructors: Sequence<ConstructorLangModel>
 
     /**
-     * All public functions (including static and inherited ones).
+     * All public functions (including static and inherited ones, functions from kotlin companion object).
+     *
+     * All returned functions (including inherited or overridden ones) have [owner][FunctionLangModel.owner] defined
+     * as `this`. Only companion object's functions have the [owner][FunctionLangModel.owner] defined as component
+     * object declaration and not `this`.
      */
     val allPublicFunctions: Sequence<FunctionLangModel>
 
