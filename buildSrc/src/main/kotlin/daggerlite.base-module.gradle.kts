@@ -22,7 +22,7 @@ val kotlinVersion by extra(properties["daggerlite.kotlin.version"])
 val kspVersion by extra("$kotlinVersion-1.0.0")
 val javaPoetVersion by extra("1.13.0")
 val kotlinCompileTestingVersion by extra("1.4.5")
-val autoCommonVersion by extra("0.11")
+val autoCommonVersion by extra("1.2.1")
 val kotlinxMetadataVersion by extra("0.3.0")
 
 java {
