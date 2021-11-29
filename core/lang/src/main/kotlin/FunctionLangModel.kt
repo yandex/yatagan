@@ -26,4 +26,27 @@ interface FunctionLangModel : MemberLangModel, CallableLangModel {
      * [com.yandex.daggerlite.Provides] annotation model if present. `null` if absent.
      */
     val providesAnnotationIfPresent: ProvidesAnnotationLangModel?
+
+    /**
+     * The [kotlin property accessor info][PropertyAccessorInfo] for which this function.
+     * `null` if no kotlin property corresponds to this function.
+     */
+    val propertyAccessorInfo: PropertyAccessorInfo?
+
+    interface PropertyAccessorInfo {
+        /**
+         * Name of the property that the accessor corresponds to.
+         */
+        val propertyName: String
+
+        /**
+         * Accessor kind.
+         */
+        val kind: PropertyAccessorKind
+    }
+
+    enum class PropertyAccessorKind {
+        Getter,
+        Setter,
+    }
 }

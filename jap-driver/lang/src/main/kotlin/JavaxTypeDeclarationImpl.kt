@@ -7,15 +7,21 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind.Getter
+import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind.Setter
 import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import kotlinx.metadata.KmClass
+import kotlinx.metadata.KmProperty
+import kotlinx.metadata.jvm.getterSignature
+import kotlinx.metadata.jvm.setterSignature
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeKind
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxTypeDeclarationImpl private constructor(
@@ -92,6 +98,33 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     override fun asType(): TypeLangModel {
         return JavaxTypeImpl(type)
+    }
+
+    private val allKotlinProperties: Sequence<KmProperty> = sequence {
+        val kotlinClass = kotlinClass ?: return@sequence
+        for (property in kotlinClass.properties) if (!property.isOverride) {
+            yield(property)
+        }
+        for (implemented in impl.interfaces) {
+            yieldAll(Factory(implemented.asDeclaredType()).allKotlinProperties)
+        }
+        if (impl.superclass.kind != TypeKind.NONE) {
+            yieldAll(Factory(impl.superclass.asDeclaredType()).allKotlinProperties)
+        }
+    }.memoize()
+
+    internal fun findKotlinPropertyAccessorFor(element: ExecutableElement): JavaxPropertyAccessorImpl? {
+        if (allKotlinProperties.none()) {
+            return null
+        }
+        val signature = jvmSignatureOf(element = element, type = Utils.types.asMemberOf(type, element))
+        allKotlinProperties.forEach { kmProperty ->
+            when(signature) {
+                kmProperty.setterSignature -> return JavaxPropertyAccessorImpl(property = kmProperty, kind = Setter)
+                kmProperty.getterSignature -> return JavaxPropertyAccessorImpl(property = kmProperty, kind = Getter)
+            }
+        }
+        return null
     }
 
     companion object Factory : ObjectCache<Equivalence.Wrapper<DeclaredType>, JavaxTypeDeclarationImpl>() {

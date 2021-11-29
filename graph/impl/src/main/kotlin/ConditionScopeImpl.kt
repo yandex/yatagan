@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.ConditionScope.Literal
 import kotlin.LazyThreadSafetyMode.NONE
@@ -138,7 +139,12 @@ private class ConditionLiteralImpl private constructor(
                 }
 
                 val allMethods = type.allPublicFunctions
-                val method = allMethods.find { it.name == name }
+                val method = allMethods.find { function ->
+                    function.propertyAccessorInfo?.let {
+                        // If this is a kotlin property getter, then look for property name
+                        it.isGetter && it.propertyName == name
+                    } ?: (function.name == name)
+                }
                 if (method != null) {
                     return method
                 }

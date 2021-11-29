@@ -66,14 +66,15 @@ class ConditionsTest(
                 }
 
                 object Features {
-                    var isEnabledA: Boolean = false 
+                    @get:JvmName("fooBar")
+                    var enabledA: Boolean = false 
                     var isEnabledB: Boolean = false
                     val FeatureC = FeatureC()
                 }
 
                 @Singleton
                 interface Conditions {
-                    @Condition(Features::class, condition = "isEnabledA")
+                    @Condition(Features::class, condition = "enabledA")
                     annotation class FeatureA
     
                     @Condition(Features::class, condition = "isEnabledB")
@@ -115,7 +116,7 @@ class ConditionsTest(
             fun test() {
                 val component = DaggerTestComponent()
                 assert(!component.opt.isPresent)
-                Features.isEnabledA = true
+                Features.enabledA = true
                 assert(!DaggerTestComponent().opt.isPresent)
                 Features.isEnabledB = true
                 val new = DaggerTestComponent()
@@ -501,12 +502,12 @@ class ConditionsTest(
                 Features.isEnabledB = true
                 assert(!DaggerTestMainComponent().api.isPresent)
             
-                Features.isEnabledA = true
+                Features.enabledA = true
                 Features.isEnabledB = false
                 assert(DaggerTestMainComponent().api.isPresent)
                 assert(!DaggerTestCustomComponent().api.isPresent)
                 
-                Features.isEnabledA = false
+                Features.enabledA = false
                 Features.isEnabledB = true
                 assert(DaggerTestCustomComponent().api.isPresent)
             }

@@ -24,6 +24,8 @@ internal class KspFunctionImpl private constructor(
         KspTypeImpl(impl.asMemberOf(owner.type).returnType!!)
     }
 
+    override val propertyAccessorInfo: Nothing? get() = null
+
     override val name: String
         get() = impl.simpleName.asString()
 

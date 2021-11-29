@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.KspExperimental
+import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getJavaClassByName
 import com.google.devtools.ksp.isConstructor
@@ -39,6 +40,9 @@ internal operator fun KSAnnotation.get(name: String): Any? {
 
 internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean =
     annotations.any { it.hasType(T::class) }
+
+@OptIn(KspExperimental::class)
+internal val KSAnnotated.explicitJvmName: String? get() = getAnnotationsByType(JvmName::class).firstOrNull()?.name
 
 internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers || isAnnotationPresent<JvmStatic>()
 

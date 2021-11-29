@@ -6,6 +6,7 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.core.lang.isGetter
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -29,10 +30,7 @@ internal class MembersInjectorModelImpl private constructor(
                 ))
             }
             injectee.declaration.allPublicFunctions.filter {
-                it.isAnnotatedWith<Inject>() &&
-                        // TODO: this is rather a requirement than a filter condition; though it can fail on
-                        //  kotlin properties. So either model kotlin property separately or live like this.
-                        it.parameters.count() == 1
+                it.isAnnotatedWith<Inject>() && it.propertyAccessorInfo?.isGetter != true
             }.forEach { functionInjectee ->
                 put(functionInjectee, NodeDependency(
                     type = functionInjectee.parameters.single().type,
