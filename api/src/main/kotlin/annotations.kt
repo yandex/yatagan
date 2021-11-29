@@ -141,4 +141,5 @@ annotation class BootstrapList
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class IntoList(
+    val flatten: Boolean = false,
 )

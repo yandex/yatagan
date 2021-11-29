@@ -5,6 +5,7 @@ import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.core.lang.IntoListAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
@@ -64,5 +65,18 @@ internal class CtProvidesAnnotationImpl private constructor(
 
     companion object Factory : ObjectCache<CtAnnotationLangModel, CtProvidesAnnotationImpl>() {
         operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtProvidesAnnotationImpl)
+    }
+}
+
+internal class CtIntoListAnnotationImpl private constructor(
+    private val impl: CtAnnotationLangModel,
+) : IntoListAnnotationLangModel {
+    override val flatten: Boolean
+        get() = impl.getBoolean("flatten")
+
+    override fun toString() = impl.toString()
+
+    companion object Factory : ObjectCache<CtAnnotationLangModel, CtIntoListAnnotationImpl>() {
+        operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtIntoListAnnotationImpl)
     }
 }

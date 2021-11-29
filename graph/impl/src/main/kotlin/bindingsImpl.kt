@@ -23,6 +23,7 @@ import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.InstanceBinding
 import com.yandex.daggerlite.graph.MultiBinding
+import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import kotlin.LazyThreadSafetyMode.NONE
@@ -34,7 +35,7 @@ internal abstract class ModuleHostedBindingBase {
 
     val target: NodeModel by lazy(NONE) {
         with(impl) {
-            if (isMultibinding)
+            if (multiBinding != null)
                 MultiBindingContributionNode(target)
             else target
         }
@@ -189,8 +190,10 @@ internal class BootstrapListBindingImpl(
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
     override fun dependencies() = inputs.map(::NodeDependency)
-    override val contributions: Collection<NodeModel> by lazy(NONE) {
-        topologicalSort(nodes = inputs, inside = owner)
+    override val contributions: Map<NodeModel, ContributionType> by lazy(NONE) {
+        topologicalSort(nodes = inputs, inside = owner).associateWith {
+            ContributionType.Element
+        }
     }
     override val originModule: Nothing? get() = null
 
@@ -200,15 +203,15 @@ internal class BootstrapListBindingImpl(
 internal class MultiBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
-    override val contributions: Set<NodeModel>,
+    override val contributions: Map<NodeModel, ContributionType>,
 ) : MultiBinding {
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
-    override fun dependencies() = contributions.map(::NodeDependency)
+    override fun dependencies() = contributions.keys.map(::NodeDependency)
     override val originModule: Nothing? get() = null
 
     override fun toString() =
-        "MultiBinding $target of ${contributions.take(3)}${if (contributions.size > 3) "..." else ""} (intrinsic)"
+        "MultiBinding $target of ${contributions.keys.take(3)}${if (contributions.size > 3) "..." else ""} (intrinsic)"
 }
 
 internal class ModuleHostedEmptyBindingImpl(

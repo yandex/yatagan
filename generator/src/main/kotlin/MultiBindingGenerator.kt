@@ -1,10 +1,12 @@
 package com.yandex.daggerlite.generator
 
+import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.MultiBinding
+import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import javax.lang.model.element.Modifier.PRIVATE
 
 internal class MultiBindingGenerator(
@@ -30,8 +32,17 @@ internal class MultiBindingGenerator(
                 returnType(binding.target.typeName())
                 +"final %T list = new %T<>(${binding.contributions.size})"
                     .formatCode(binding.target.typeName(), Names.ArrayList)
-                binding.contributions.forEach { node ->
+                binding.contributions.forEach { (node: NodeModel, kind: ContributionType) ->
                     val nodeBinding = thisGraph.resolveBinding(node)
+                    fun generateAccess() = buildExpression {
+                        when(kind) {
+                            ContributionType.Element -> +"list.add("
+                            ContributionType.Collection -> +"list.addAll("
+                        }
+                        nodeBinding.generateAccess(builder = this, inside = thisGraph)
+                        +")"
+                    }
+
                     if (!nodeBinding.conditionScope.isAlways) {
                         if (nodeBinding.conditionScope.isNever) {
                             // Just skip this.
@@ -41,19 +52,11 @@ internal class MultiBindingGenerator(
                                 gen.expression(this, nodeBinding.conditionScope)
                             }
                             controlFlow("if (%L) ".formatCode(expression)) {
-                                +buildExpression {
-                                    +"list.add("
-                                    nodeBinding.generateAccess(builder = this, inside = thisGraph)
-                                    +")"
-                                }
+                                +generateAccess()
                             }
                         }
                     } else {
-                        +buildExpression {
-                            +"list.add("
-                            nodeBinding.generateAccess(builder = this, inside = thisGraph)
-                            +")"
-                        }
+                        +generateAccess()
                     }
                 }
                 +"return list"

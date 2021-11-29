@@ -42,8 +42,10 @@ Explicitly not supported API
 
 - [ ] Validation and full-blown error messages.
 - [ ] Whetstone Validation
-- [ ] Multi-bindings
-  - [x] `@IntoSet` -> `@IntoList`.
-  - [ ] `@ElementsIntoSet`
-  - [ ] `@Multibinds` - _low priority - not used in our project._
+- [x] Multi-bindings
+  - [x] `@IntoSet` -> `@IntoList`
+  - [x] `@ElementsIntoSet` -> `@IntoList(flatten=true)`
+
+Very low priority
+- [ ] `@Multibinds` - _low priority - not used in our project._
 - [ ] `@Reusable` - _low priority - not used in our project._

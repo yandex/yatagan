@@ -72,5 +72,17 @@ interface ComponentDependencyEntryPointBinding : Binding {
 }
 
 interface MultiBinding : Binding {
-    val contributions: Collection<NodeModel>
+    val contributions: Map<NodeModel, ContributionType>
+
+    enum class ContributionType {
+        /**
+         * Single element to be contributed to a collection.
+         */
+        Element,
+
+        /**
+         * Elements of a collection to be contributed.
+         */
+        Collection,
+    }
 }

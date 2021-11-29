@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.InstanceInput
+import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
@@ -15,6 +16,7 @@ import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 
 /**
  * @param graph incomplete graph. All required fields must be initialized.
@@ -26,7 +28,7 @@ internal fun buildBindingsSequence(
     // Gather bindings from modules
     val seenSubcomponents = hashSetOf<ComponentModel>()
     val bootstrapSets = HashMap<BootstrapInterfaceModel, MutableSet<NodeModel>>()
-    val multiBindings = linkedMapOf<NodeModel, MutableSet<NodeModel>>()
+    val multiBindings = linkedMapOf<NodeModel, MutableMap<NodeModel, ContributionType>>()
     for (module: ModuleModel in graph.modules) {
         // All bindings from installed modules
         for (bindingModel in module.bindings) {
@@ -60,8 +62,11 @@ internal fun buildBindingsSequence(
             }
             yield(binding)
             // Handle multi-bindings
-            if (bindingModel.isMultibinding) {
-                multiBindings.getOrPut(bindingModel.target, ::mutableSetOf) += binding.target
+            bindingModel.multiBinding?.let { kind ->
+                multiBindings.getOrPut(bindingModel.target, ::mutableMapOf)[binding.target] = when(kind) {
+                    MultiBindingKind.Direct -> ContributionType.Element
+                    MultiBindingKind.Flatten -> ContributionType.Collection
+                }
             }
         }
         // Subcomponent factories (distinct).
@@ -123,7 +128,7 @@ internal fun buildBindingsSequence(
     }
 
     // Multi-bindings
-    for ((target: NodeModel, contributions: Set<NodeModel>) in multiBindings) {
+    for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {
         yield(MultiBindingImpl(
             owner = graph,
             target = target.multiBoundListNode(langModelFactory),

@@ -1,10 +1,10 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
-import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ConditionalHoldingModel
+import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
@@ -22,11 +22,16 @@ internal abstract class ModuleHostedBindingBase {
     }
 
     val target: NodeModel by lazy(LazyThreadSafetyMode.NONE) {
-        NodeModelImpl(type = impl.returnType, forQualifier = impl)
+        val type = if (impl.intoListAnnotationLangModel?.flatten == true) {
+            impl.returnType.typeArguments.first()
+        } else impl.returnType
+        NodeModelImpl(type = type, forQualifier = impl)
     }
 
-    val isMultibinding: Boolean
-        get() = impl.isAnnotatedWith<IntoList>()
+    val multiBinding: MultiBindingKind?
+        get() = impl.intoListAnnotationLangModel?.let {
+            if (it.flatten) MultiBindingKind.Flatten else MultiBindingKind.Direct
+        }
 }
 
 internal class BindsImpl(

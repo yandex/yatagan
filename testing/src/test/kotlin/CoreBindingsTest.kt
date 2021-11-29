@@ -511,8 +511,10 @@ class CoreBindingsTest(
     }
 
     @Test
-    fun `type parameters`() {
+    fun `type parameters and multi-bindings`() {
         givenJavaSource("test.TestCase", """
+            import java.util.Collections;
+            import java.util.Collection;
             import java.util.List;
             import javax.inject.Provider;
             import javax.inject.Inject;
@@ -540,6 +542,10 @@ class CoreBindingsTest(
                 @IntoList @Binds Deferred<? extends MySpecificDeferredEvent> foo4();
                 @IntoList @Provides static Deferred<? extends MySpecificDeferredEvent> foo5(Provider<MyClass3> p) {
                     return new Deferred<>(p);
+                }
+                @IntoList(flatten = true)
+                @Provides static Collection<Deferred<? extends MySpecificDeferredEvent>> collection() {
+                    return Collections.emptyList();
                 }
             }
             

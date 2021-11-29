@@ -11,7 +11,12 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 sealed interface ModuleHostedBindingModel {
     val originModule: ModuleModel
     val target: NodeModel
-    val isMultibinding: Boolean
+    val multiBinding: MultiBindingKind?
+
+    enum class MultiBindingKind {
+        Direct,
+        Flatten,
+    }
 }
 
 /**
