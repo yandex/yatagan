@@ -10,8 +10,9 @@ include("api")
 
 include("base")
 
+include("lang")
+
 include("core")
-include("core-lang")
 include("core-impl")
 
 include("graph")
@@ -34,7 +35,8 @@ include("generator-lang")
 
 include("testing")
 
-project(":core-lang").projectDir = file("core/lang")
+project(":lang").projectDir = file("lang")
+
 project(":core-impl").projectDir = file("core/impl")
 
 project(":graph").projectDir = file("graph")
