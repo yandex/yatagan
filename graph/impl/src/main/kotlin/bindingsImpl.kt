@@ -3,8 +3,6 @@ package com.yandex.daggerlite.graph.impl
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
 import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
@@ -13,6 +11,7 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.AlternativesBinding
 import com.yandex.daggerlite.graph.BindingGraph
@@ -129,22 +128,15 @@ internal class AlternativesBindingImpl(
 internal class ComponentDependencyEntryPointBindingImpl(
     override val owner: BindingGraph,
     override val input: ComponentDependencyInput,
-    private val entryPoint: ComponentModel.EntryPoint,
-) : ComponentDependencyEntryPointBinding {
-    init {
-        require(entryPoint.dependency.kind == DependencyKind.Direct) {
-            "Only direct entry points constitute a binding that can be used in dependency components"
-        }
-    }
-
+    override val getter: FunctionLangModel,
+    override val target: NodeModel,
+    ) : ComponentDependencyEntryPointBinding {
     override val originModule: Nothing? get() = null
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
-    override val target get() = entryPoint.dependency.node
-    override val getter get() = entryPoint.getter
-    override fun dependencies() = listOf(NodeDependency(input.component.asNode()))
+    override fun dependencies() = listOf(NodeDependency(input.dependency.asNode()))
 
-    override fun toString() = "$entryPoint from ${input.component} (intrinsic)"
+    override fun toString() = "$getter from ${input.dependency} (intrinsic)"
 }
 
 internal class ComponentInstanceBindingImpl(
@@ -239,7 +231,7 @@ internal class ComponentDependencyBindingImpl(
     override val input: ComponentDependencyInput,
     override val owner: BindingGraph,
 ) : ComponentDependencyBinding {
-    override val target get() = input.component.asNode()
+    override val target get() = input.dependency.asNode()
     override val conditionScope get() = ConditionScope.Unscoped
     override val scope: Nothing? get() = null
     override fun dependencies(): List<Nothing> = emptyList()

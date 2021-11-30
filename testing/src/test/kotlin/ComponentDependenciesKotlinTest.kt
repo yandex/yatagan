@@ -72,6 +72,36 @@ class ComponentDependenciesKotlinTest(
     }
 
     @Test
+    fun `plain interfaces are allowed as dependencies`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Component
+            import javax.inject.Named
+
+            class MyClass
+    
+            interface Dependencies {
+                @get:Named val myClass: MyClass
+            }
+        
+            @Component(dependencies = [Dependencies::class])
+            interface MyComponent {
+                @get:Named("") val myClass: MyClass
+                
+                @Component.Builder
+                interface Builder {
+                    fun create(dep: Dependencies): MyComponent
+                }
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            generatesJavaSources("test.DaggerMyComponent")
+        }
+    }
+
+
+    @Test
     fun `component dependencies - dependency component instance is available for inject`() {
         givenKotlinSource("test.TestCase", """
             import javax.inject.Provider

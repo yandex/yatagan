@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ComponentModel.EntryPoint
@@ -36,8 +37,8 @@ internal class ComponentModelImpl private constructor(
         impl.modules.map(TypeLangModel::declaration).map { ModuleModelImpl(it) }.toSet()
     }
 
-    override val dependencies: Set<ComponentModel> by lazy(NONE) {
-        impl.dependencies.map(TypeLangModel::declaration).map(Factory::invoke).toSet()
+    override val dependencies: Set<ComponentDependencyModel> by lazy(NONE) {
+        impl.dependencies.map { ComponentDependencyModelImpl(it) }.toSet()
     }
 
     override val entryPoints: Set<EntryPoint> by lazy(NONE) {

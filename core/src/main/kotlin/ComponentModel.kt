@@ -20,7 +20,7 @@ interface ComponentModel : ClassBackedModel, ConditionalHoldingModel {
     /**
      * A set of component *dependencies*.
      */
-    val dependencies: Set<ComponentModel>
+    val dependencies: Set<ComponentDependencyModel>
 
     /**
      * A set of [EntryPoint]s in the component.

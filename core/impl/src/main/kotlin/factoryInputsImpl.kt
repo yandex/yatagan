@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.core.ComponentDependencyInput
-import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
@@ -9,9 +9,9 @@ import com.yandex.daggerlite.core.NodeModel
 
 internal class ComponentDependencyInputImpl(
     override val name: String,
-    override val component: ComponentModel,
+    override val dependency: ComponentDependencyModel,
 ) : ComponentDependencyInput {
-    override val target get() = component.asNode()
+    override val target get() = dependency
 }
 
 internal class InstanceInputImpl(

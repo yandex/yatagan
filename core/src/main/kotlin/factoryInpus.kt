@@ -6,7 +6,7 @@ package com.yandex.daggerlite.core
  * @see ComponentModel
  */
 interface ComponentDependencyInput : ComponentFactoryModel.Input {
-    val component: ComponentModel
+    val dependency: ComponentDependencyModel
 }
 
 /**

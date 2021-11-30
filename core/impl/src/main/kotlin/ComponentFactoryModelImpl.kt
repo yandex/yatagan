@@ -53,11 +53,6 @@ internal class ComponentFactoryModelImpl private constructor(
     ): ComponentFactoryModel.Input {
         val declaration = param.type.declaration
         return when {
-            ComponentModelImpl.canRepresent(declaration) ->
-                ComponentDependencyInputImpl(
-                    component = ComponentModelImpl(declaration),
-                    name = name,
-                )
             ModuleModelImpl.canRepresent(declaration) ->
                 ModuleInstanceInputImpl(
                     module = ModuleModelImpl(declaration),
@@ -66,6 +61,11 @@ internal class ComponentFactoryModelImpl private constructor(
             forBindsInstance.isAnnotatedWith<BindsInstance>() ->
                 InstanceInputImpl(
                     node = NodeModelImpl(param.type, forQualifier = param),
+                    name = name,
+                )
+            ComponentDependencyModelImpl.canRepresent(declaration) ->
+                ComponentDependencyInputImpl(
+                    dependency = ComponentDependencyModelImpl(declaration.asType()),
                     name = name,
                 )
             else -> throw IllegalStateException(

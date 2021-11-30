@@ -201,7 +201,7 @@ private class BindingGraphImpl(
 
         val providedComponents = factory.allInputs
             .filterIsInstance<ComponentDependencyInput>()
-            .map(ComponentDependencyInput::component).toSet()
+            .map(ComponentDependencyInput::dependency).toSet()
         check(model.dependencies == providedComponents) {
             val missing = model.dependencies - providedComponents
             if (missing.isNotEmpty()) "Missing dependency components in $factory: $missing"

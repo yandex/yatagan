@@ -5,7 +5,6 @@ import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
 import com.yandex.daggerlite.core.ModuleInstanceInput
@@ -13,6 +12,7 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.allInputs
+import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.BindingGraph
@@ -104,13 +104,13 @@ internal fun buildBindingsSequence(
                 // Binding for the dependency component itself.
                 yield(ComponentDependencyBindingImpl(input = input, owner = graph))
                 // Bindings backed by the component entry-points.
-                for (entryPoint: ComponentModel.EntryPoint in input.component.entryPoints)
-                    if (entryPoint.dependency.kind == DependencyKind.Direct)
-                        yield(ComponentDependencyEntryPointBindingImpl(
-                            owner = graph,
-                            entryPoint = entryPoint,
-                            input = input,
-                        ))
+                for ((node: NodeModel, getter: FunctionLangModel) in input.dependency.exposedDependencies)
+                    yield(ComponentDependencyEntryPointBindingImpl(
+                        owner = graph,
+                        input = input,
+                        target = node,
+                        getter = getter,
+                    ))
             }
             // Instance binding
             is InstanceInput -> yield(InstanceBindingImpl(input = input, owner = graph))
