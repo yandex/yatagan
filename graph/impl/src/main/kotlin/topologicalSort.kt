@@ -26,9 +26,8 @@ internal fun topologicalSort(
             }
         }
 
-        if (node in remainingNodes) {
+        if (remainingNodes.remove(node)) {
             result += node
-            remainingNodes -= node
         }
     }
 
@@ -36,5 +35,6 @@ internal fun topologicalSort(
         visit(node)
     }
 
+    check(remainingNodes.isEmpty())
     return result
 }

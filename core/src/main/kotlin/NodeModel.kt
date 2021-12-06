@@ -23,10 +23,5 @@ interface NodeModel : ClassBackedModel {
     /**
      * TODO: doc.
      */
-    val bootstrapInterfaces: Collection<BootstrapInterfaceModel>
-
-    /**
-     * TODO: doc.
-     */
     fun multiBoundListNode(langModelFactory: LangModelFactory): NodeModel
 }

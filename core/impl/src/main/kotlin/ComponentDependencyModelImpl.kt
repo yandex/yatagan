@@ -9,7 +9,7 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
-class ComponentDependencyModelImpl private constructor(
+internal class ComponentDependencyModelImpl private constructor(
     override val type: TypeLangModel,
 ) : ComponentDependencyModel {
 

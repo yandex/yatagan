@@ -47,5 +47,5 @@ Explicitly not supported API
   - [x] `@ElementsIntoSet` -> `@IntoList(flatten=true)`
 
 Very low priority
-- [ ] `@Multibinds` - _low priority - not used in our project._
+- [x] `@Multibinds` -> `@DeclareList`
 - [ ] `@Reusable` - _low priority - not used in our project._

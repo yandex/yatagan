@@ -2,11 +2,10 @@ package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleModel
-import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -35,22 +34,15 @@ internal class ModuleModelImpl private constructor(
         impl.subcomponents.map(TypeLangModel::declaration).map { ComponentModelImpl(it) }.toSet()
     }
 
-    override val declaredBootstrapInterfaces: Collection<BootstrapInterfaceModel> by lazy(NONE) {
-        impl.bootstrap.filter { BootstrapInterfaceModelImpl.canRepresent(it) }
-            .map { BootstrapInterfaceModelImpl(it) }
-            .toList()
-    }
-
-    override val bootstrap: Collection<NodeModel> by lazy(NONE) {
-        impl.bootstrap.filter { !BootstrapInterfaceModelImpl.canRepresent(it) }
-            .map { NodeModelImpl(it, forQualifier = null) }
-            .onEach {
-                // TODO: turn this into validation
-                check(it.bootstrapInterfaces.any()) {
-                    "$it is declared in a bootstrap list though implements no bootstrap interfaces"
-                }
-            }.toList()
-    }
+    override val listDeclarations: Sequence<ListDeclarationModel> =
+        declaration.allPublicFunctions.mapNotNull { method ->
+            method.declareListAnnotationIfPresent?.let { declareList ->
+                ListDeclarationImpl(
+                    impl = method,
+                    declareList = declareList,
+                )
+            }
+        }.memoize()
 
     override val requiresInstance: Boolean by lazy(NONE) {
         mayRequireInstance && bindings.any { it is ProvidesBindingModel && it.requiresModuleInstance }

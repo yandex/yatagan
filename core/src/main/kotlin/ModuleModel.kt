@@ -17,12 +17,7 @@ interface ModuleModel : ClassBackedModel {
     /**
      * TODO: doc.
      */
-    val bootstrap: Collection<NodeModel>
-
-    /**
-     * TODO: doc.
-     */
-    val declaredBootstrapInterfaces: Collection<BootstrapInterfaceModel>
+    val listDeclarations: Sequence<ListDeclarationModel>
 
     /**
      * Whether module instance is required to use some (or all) of its bindings.

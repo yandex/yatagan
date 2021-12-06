@@ -1,11 +1,11 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.core.BindsBindingModel
-import com.yandex.daggerlite.core.BootstrapInterfaceModel
 import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.InstanceInput
+import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
 import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
@@ -27,7 +27,6 @@ internal fun buildBindingsSequence(
 ): Sequence<BaseBinding> = sequence {
     // Gather bindings from modules
     val seenSubcomponents = hashSetOf<ComponentModel>()
-    val bootstrapSets = HashMap<BootstrapInterfaceModel, MutableSet<NodeModel>>()
     val multiBindings = linkedMapOf<NodeModel, MutableMap<NodeModel, ContributionType>>()
     for (module: ModuleModel in graph.modules) {
         // All bindings from installed modules
@@ -87,15 +86,6 @@ internal fun buildBindingsSequence(
                 }
             }
         }
-        // Handle bootstrap lists
-        for (declared: BootstrapInterfaceModel in module.declaredBootstrapInterfaces) {
-            bootstrapSets.getOrPut(declared, ::linkedSetOf)
-        }
-        for (nodeModel: NodeModel in module.bootstrap) {
-            for (bootstrapInterface: BootstrapInterfaceModel in nodeModel.bootstrapInterfaces) {
-                bootstrapSets.getOrPut(bootstrapInterface, ::linkedSetOf) += nodeModel
-            }
-        }
     }
     // Gather bindings from factory
     graph.model.factory?.let { factory: ComponentFactoryModel ->
@@ -118,14 +108,14 @@ internal fun buildBindingsSequence(
             }
         }.let { /*exhaustive*/ }
     }
-    // Bootstrap lists
-    for ((bootstrap: BootstrapInterfaceModel, nodes: Set<NodeModel>) in bootstrapSets) {
-        yield(BootstrapListBindingImpl(
-            owner = graph,
-            target = bootstrap.asNode(langModelFactory),
-            inputs = nodes,
-        ))
-    }
+
+    val declaredLists: Map<NodeModel, ListDeclarationModel> = graph.modules.asSequence()
+        .flatMap { it.listDeclarations }
+        .onEach {
+            // Provide empty map for an empty list
+            multiBindings.getOrPut(it.listType, ::mutableMapOf)
+        }
+        .associateBy { it.listType } // TODO: [validation]: no duplicates are allowed
 
     // Multi-bindings
     for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {
@@ -133,6 +123,7 @@ internal fun buildBindingsSequence(
             owner = graph,
             target = target.multiBoundListNode(langModelFactory),
             contributions = contributions,
+            declaration = declaredLists[target]
         ))
     }
 

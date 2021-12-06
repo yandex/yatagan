@@ -3,7 +3,6 @@
 package com.yandex.daggerlite
 
 import java.lang.annotation.Repeatable
-import javax.inject.Qualifier
 import kotlin.reflect.KClass
 
 /*
@@ -18,7 +17,6 @@ import kotlin.reflect.KClass
 annotation class Module(
     val includes: Array<KClass<*>> = [],
     val subcomponents: Array<KClass<*>> = [],
-    val bootstrap: Array<KClass<*>> = [],
 )
 
 @MustBeDocumented
@@ -128,14 +126,10 @@ annotation class ComponentFlavor(
 
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.CLASS)
-annotation class BootstrapInterface(
+@Target(AnnotationTarget.FUNCTION)
+annotation class DeclareList(
+    val orderByDependency: Boolean = false,
 )
-
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class BootstrapList
 
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)

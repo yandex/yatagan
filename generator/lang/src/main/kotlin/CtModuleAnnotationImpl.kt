@@ -8,5 +8,4 @@ internal class CtModuleAnnotationImpl(
 ) : ModuleAnnotationLangModel {
     override val includes: Sequence<TypeLangModel> = impl.getTypes("includes")
     override val subcomponents: Sequence<TypeLangModel> = impl.getTypes("subcomponents")
-    override val bootstrap: Sequence<TypeLangModel> = impl.getTypes("bootstrap")
 }
