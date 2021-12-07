@@ -5,6 +5,7 @@ import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
 import com.yandex.daggerlite.core.InstanceInput
+import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -44,7 +45,6 @@ internal abstract class ModuleHostedBindingBase {
         private val node: NodeModel,
     ) : NodeModel by node {
         override val implicitBinding: Nothing? get() = null
-        override val bootstrapInterfaces: Collection<Nothing> get() = emptyList()
         override fun toString() = "$node [multi-binding contributor]"
     }
 }
@@ -174,32 +174,29 @@ internal class SubComponentFactoryBindingImpl(
     override fun toString() = "Subcomponent factory $factory (intrinsic)"
 }
 
-internal class BootstrapListBindingImpl(
-    override val owner: BindingGraph,
-    override val target: NodeModel,
-    private val inputs: Collection<NodeModel>,
-) : MultiBinding {
-    override val scope: Nothing? get() = null
-    override val conditionScope get() = ConditionScope.Unscoped
-    override fun dependencies() = inputs.map(::NodeDependency)
-    override val contributions: Map<NodeModel, ContributionType> by lazy(NONE) {
-        topologicalSort(nodes = inputs, inside = owner).associateWith {
-            ContributionType.Element
-        }
-    }
-    override val originModule: Nothing? get() = null
-
-    override fun toString() = "Bootstrap $target of ${inputs.take(3)}${if (inputs.size > 3) "..." else ""} (intrinsic)"
-}
-
 internal class MultiBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
-    override val contributions: Map<NodeModel, ContributionType>,
+    contributions: Map<NodeModel, ContributionType>,
+    declaration: ListDeclarationModel?,
 ) : MultiBinding {
+    private val _contributions = contributions
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
-    override fun dependencies() = contributions.keys.map(::NodeDependency)
+    override val contributions: Map<NodeModel, ContributionType> by lazy(NONE) {
+        if (declaration?.orderByDependency == true) {
+            // Resolve aliases as multi-bindings often work with @Binds
+            val resolved = _contributions.mapKeys { (node, _) -> owner.resolveBinding(node).target }
+            topologicalSort(
+                nodes = resolved.keys,
+                inside = owner,
+            ).associateWith(resolved::getValue)
+        } else {
+            _contributions
+        }
+    }
+
+    override fun dependencies() = _contributions.keys.map(::NodeDependency)
     override val originModule: Nothing? get() = null
 
     override fun toString() =

@@ -3,6 +3,9 @@ package com.yandex.daggerlite.generator.lang
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
+/**
+ * An [AnnotationLangModel] which supports getting typed attribute values by name efficiently.
+ */
 interface CtAnnotationLangModel : AnnotationLangModel {
     /**
      * Returns the [attribute] value as boolean. Must handle default values.

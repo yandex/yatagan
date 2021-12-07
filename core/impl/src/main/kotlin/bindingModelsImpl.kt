@@ -22,14 +22,14 @@ internal abstract class ModuleHostedBindingBase {
     }
 
     val target: NodeModel by lazy(LazyThreadSafetyMode.NONE) {
-        val type = if (impl.intoListAnnotationLangModel?.flatten == true) {
+        val type = if (impl.intoListAnnotationIfPresent?.flatten == true) {
             impl.returnType.typeArguments.first()
         } else impl.returnType
         NodeModelImpl(type = type, forQualifier = impl)
     }
 
     val multiBinding: MultiBindingKind?
-        get() = impl.intoListAnnotationLangModel?.let {
+        get() = impl.intoListAnnotationIfPresent?.let {
             if (it.flatten) MultiBindingKind.Flatten else MultiBindingKind.Direct
         }
 }
