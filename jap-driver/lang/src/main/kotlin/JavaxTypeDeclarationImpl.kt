@@ -1,7 +1,5 @@
 package com.yandex.daggerlite.jap.lang
 
-import com.google.auto.common.MoreTypes
-import com.google.common.base.Equivalence
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
@@ -127,11 +125,11 @@ internal class JavaxTypeDeclarationImpl private constructor(
         return null
     }
 
-    companion object Factory : ObjectCache<Equivalence.Wrapper<DeclaredType>, JavaxTypeDeclarationImpl>() {
+    companion object Factory : ObjectCache<TypeMirrorEquivalence, JavaxTypeDeclarationImpl>() {
         operator fun invoke(
             impl: DeclaredType,
         ): JavaxTypeDeclarationImpl {
-            return createCached(MoreTypes.equivalence().wrap(impl)) {
+            return createCached(TypeMirrorEquivalence(impl)) {
                 JavaxTypeDeclarationImpl(type = impl)
             }
         }

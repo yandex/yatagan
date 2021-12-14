@@ -12,6 +12,8 @@ internal class KspFunctionImpl private constructor(
     private val impl: KSFunctionDeclaration,
     override val owner: KspTypeDeclarationImpl,
 ) : CtFunctionLangModel() {
+    private val jvmSignature = JvmMethodSignature(impl)
+
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
 
     override val isAbstract: Boolean
@@ -21,16 +23,23 @@ internal class KspFunctionImpl private constructor(
         get() = impl.isStatic
 
     override val returnType: TypeLangModel by lazy(NONE) {
-        KspTypeImpl(impl.asMemberOf(owner.type).returnType!!)
+        KspTypeImpl(
+            impl = impl.asMemberOf(owner.type).returnType!!,
+            jvmSignatureHint = jvmSignature.returnType,
+        )
     }
 
     override val propertyAccessorInfo: Nothing? get() = null
 
-    override val name: String
-        get() = impl.simpleName.asString()
+    override val name: String by lazy(NONE) {
+        Utils.resolver.getJvmName(impl) ?: impl.simpleName.asString()
+    }
 
     override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
-        declaration = impl, containing = owner.type)
+        declaration = impl,
+        containing = owner.type,
+        jvmMethodSignature = jvmSignature,
+    )
 
     companion object Factory : BiObjectCache<KSFunctionDeclaration, KspTypeDeclarationImpl, KspFunctionImpl>() {
         operator fun invoke(

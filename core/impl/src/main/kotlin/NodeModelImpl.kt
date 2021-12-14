@@ -74,12 +74,15 @@ internal class NodeModelImpl private constructor(
 
         operator fun invoke(
             type: TypeLangModel,
-            qualifier: AnnotationLangModel?,
-        ) = createCached(type, qualifier) {
-            NodeModelImpl(
-                type = type,
-                qualifier = qualifier,
-            )
+            qualifier: AnnotationLangModel? = null,
+        ): NodeModelImpl {
+            val decayed = type.decay()
+            return createCached(decayed, qualifier) {
+                NodeModelImpl(
+                    type = decayed,
+                    qualifier = qualifier,
+                )
+            }
         }
     }
 }

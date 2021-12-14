@@ -1,11 +1,11 @@
 package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
-import com.yandex.daggerlite.core.ComponentDependencyInput
+import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.InstanceInput
-import com.yandex.daggerlite.core.ModuleInstanceInput
+import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.generator.poetry.MethodSpecBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
@@ -22,10 +22,10 @@ internal class ComponentFactoryGenerator(
     private val componentImplName: ClassName,
     fieldsNs: Namespace,
 ) : ComponentGenerator.Contributor {
-    private val instanceFieldNames = hashMapOf<InstanceInput, String>()
+    private val instanceFieldNames = hashMapOf<NodeModel, String>()
     private val moduleInstanceFieldNames = hashMapOf<ModuleModel, String>()
-    private val componentInstanceFieldNames = hashMapOf<ComponentDependencyInput, String>()
-    private val inputFieldNames = mutableMapOf<ComponentFactoryModel.Input, String>()
+    private val componentInstanceFieldNames = hashMapOf<ComponentDependencyModel, String>()
+    private val inputFieldNames = mutableMapOf<ComponentFactoryModel.InputModel, String>()
     private val triviallyConstructableModules: Collection<ModuleModel>
 
     init {
@@ -33,10 +33,10 @@ internal class ComponentFactoryGenerator(
             for (input in factory.allInputs) {
                 val fieldName = fieldsNs.name(input.name)
                 inputFieldNames[input] = fieldName
-                when (input) {
-                    is ComponentDependencyInput -> componentInstanceFieldNames[input] = fieldName
-                    is InstanceInput -> instanceFieldNames[input] = fieldName
-                    is ModuleInstanceInput -> moduleInstanceFieldNames[input.module] = fieldName
+                when (val payload = input.payload) {
+                    is InputPayload.Dependency -> componentInstanceFieldNames[payload.dependency] = fieldName
+                    is InputPayload.Instance -> instanceFieldNames[payload.node] = fieldName
+                    is InputPayload.Module -> moduleInstanceFieldNames[payload.module] = fieldName
                 }.let { /* exhaustive */ }
             }
         }
@@ -59,8 +59,8 @@ internal class ComponentFactoryGenerator(
 
     val implName: ClassName = componentImplName.nestedClass("ComponentFactoryImpl")
 
-    fun fieldNameFor(input: InstanceInput) = checkNotNull(instanceFieldNames[input])
-    fun fieldNameFor(input: ComponentDependencyInput) = checkNotNull(componentInstanceFieldNames[input])
+    fun fieldNameFor(boundInstance: NodeModel) = checkNotNull(instanceFieldNames[boundInstance])
+    fun fieldNameFor(dependency: ComponentDependencyModel) = checkNotNull(componentInstanceFieldNames[dependency])
     fun fieldNameFor(graph: BindingGraph) = checkNotNull(superComponentFieldNames[graph])
     fun fieldNameFor(module: ModuleModel) = checkNotNull(moduleInstanceFieldNames[module])
 
@@ -69,7 +69,7 @@ internal class ComponentFactoryGenerator(
         val factory = thisGraph.model.factory
         if (factory != null) {
             inputFieldNames.forEach { (input, name) ->
-                field(input.target.typeName(), name) { modifiers(PRIVATE, FINAL) }
+                field(input.payload.typeName(), name) { modifiers(PRIVATE, FINAL) }
             }
             superComponentFieldNames.forEach { (input, name) ->
                 field(Generators[input].implName, name) { modifiers(PRIVATE, FINAL) }
@@ -86,7 +86,7 @@ internal class ComponentFactoryGenerator(
                 // Secondly and thirdly - factory inputs and builder inputs respectively.
                 factory.allInputs.forEach { input ->
                     val name = paramsNs.name(input.name)
-                    parameter(input.target.typeName(), name)
+                    parameter(input.payload.typeName(), name)
                     +"this.${inputFieldNames[input]} = $name"
                 }
                 generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
@@ -111,33 +111,26 @@ internal class ComponentFactoryGenerator(
                         }
                     }
 
-                    factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.Input::name)
+                    factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.InputModel::name)
                     with(Namespace("m")) {
                         factory.builderInputs.forEach { builderInput ->
                             val fieldName = name(builderInput.name)
                             builderAccess += "this.$fieldName"
-                            field(builderInput.target.typeName(), fieldName) {
+                            field(builderInput.payload.typeName(), fieldName) {
                                 modifiers(PRIVATE)
                             }
-                            method(builderInput.name) {
+                            overrideMethod(builderInput.builderSetter) {
                                 modifiers(PUBLIC)
-                                annotation<Override>()
-                                returnType(factory.typeName())
-                                parameter(builderInput.target.typeName(), "input")
-                                +"this.$fieldName = input"
-                                // TODO: support builder setters with `void` return type.
-                                +"return this"
+                                +"this.$fieldName = %N".formatCode(builderInput.builderSetter.parameters.single().name)
+                                if (!builderInput.builderSetter.returnType.isVoid) {
+                                    +"return this"
+                                }
                             }
                         }
                     }
 
-                    method(factory.factoryFunctionName) {
+                    overrideMethod(factory.factoryMethod) {
                         modifiers(PUBLIC)
-                        annotation<Override>()
-                        returnType(thisGraph.model.typeName())
-                        factory.factoryInputs.forEach { input ->
-                            parameter(input.target.typeName(), input.name)
-                        }
                         +buildExpression {
                             +"return new %T(".formatCode(componentImplName)
                             join(builderAccess) { +it }

@@ -1,13 +1,11 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.core.BindsBindingModel
-import com.yandex.daggerlite.core.ComponentDependencyInput
 import com.yandex.daggerlite.core.ComponentFactoryModel
+import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
-import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
@@ -89,23 +87,21 @@ internal fun buildBindingsSequence(
     }
     // Gather bindings from factory
     graph.model.factory?.let { factory: ComponentFactoryModel ->
-        for (input: ComponentFactoryModel.Input in factory.allInputs) when (input) {
-            is ComponentDependencyInput -> {
+        for (input: ComponentFactoryModel.InputModel in factory.allInputs) when (val payload = input.payload) {
+            is InputPayload.Dependency -> {
                 // Binding for the dependency component itself.
-                yield(ComponentDependencyBindingImpl(input = input, owner = graph))
+                yield(ComponentDependencyBindingImpl(dependency = payload.dependency, owner = graph))
                 // Bindings backed by the component entry-points.
-                for ((node: NodeModel, getter: FunctionLangModel) in input.dependency.exposedDependencies)
+                for ((node: NodeModel, getter: FunctionLangModel) in payload.dependency.exposedDependencies)
                     yield(ComponentDependencyEntryPointBindingImpl(
                         owner = graph,
-                        input = input,
+                        dependency = payload.dependency,
                         target = node,
                         getter = getter,
                     ))
             }
-            // Instance binding
-            is InstanceInput -> yield(InstanceBindingImpl(input = input, owner = graph))
-            is ModuleInstanceInput -> {/*no binding for module*/
-            }
+            is InputPayload.Instance -> yield(InstanceBindingImpl(target = payload.node, owner = graph))
+            is InputPayload.Module -> {/*no binding for module*/}
         }.let { /*exhaustive*/ }
     }
 

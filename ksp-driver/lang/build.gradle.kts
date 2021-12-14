@@ -1,5 +1,16 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("daggerlite.artifact")
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs + listOf(
+            // We rely heavily on jvm types/signatures discovery, so no use scattering opt-ins throughout the code.
+            "-Xopt-in=com.google.devtools.ksp.KspExperimental",
+        )
+    }
 }
 
 val kspVersion: String by extra

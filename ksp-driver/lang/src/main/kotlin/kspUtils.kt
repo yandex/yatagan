@@ -1,7 +1,5 @@
 package com.yandex.daggerlite.ksp.lang
 
-import com.google.devtools.ksp.KspExperimental
-import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getJavaClassByName
 import com.google.devtools.ksp.isConstructor
@@ -21,10 +19,13 @@ import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ParameterLangModel
+import com.yandex.daggerlite.generator.lang.ArrayNameModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
+import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
 import com.yandex.daggerlite.generator.lang.WildcardNameModel
+import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.reflect.KClass
 
 
@@ -41,9 +42,6 @@ internal operator fun KSAnnotation.get(name: String): Any? {
 internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean =
     annotations.any { it.hasType(T::class) }
 
-@OptIn(KspExperimental::class)
-internal val KSAnnotated.explicitJvmName: String? get() = getAnnotationsByType(JvmName::class).firstOrNull()?.name
-
 internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers || isAnnotationPresent<JvmStatic>()
 
 internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT
@@ -51,18 +49,16 @@ internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classK
 internal val KSPropertyDeclaration.isField
     get() = origin == Origin.JAVA || origin == Origin.JAVA_LIB || isAnnotationPresent<JvmField>()
 
-internal fun mapToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
+private fun mapToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
     if (!declaration.packageName.asString().startsWith("kotlin")) {
         // Heuristic: only types from `kotlin` package can have different java counterparts.
         return declaration
     }
 
-    @OptIn(KspExperimental::class)
     return declaration.qualifiedName?.let(Utils.resolver::getJavaClassByName) ?: declaration
 }
 
 internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean = false): KSType {
-    // TODO: deal with nullability here
     // MAYBE: Perf: implement caching for non-trivial mappings?
     val originalDeclaration = type.declaration as? KSClassDeclaration ?: return type
     val mappedDeclaration = mapToJavaPlatformIfNeeded(declaration = originalDeclaration)
@@ -103,21 +99,68 @@ private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     )
 }
 
-internal fun CtTypeNameModel(type: KSType): CtTypeNameModel {
-    val declaration = type.declaration as KSClassDeclaration
-    val raw = ClassNameModel(declaration)
-    val typeArguments = type.arguments.map { argument ->
-        fun argType() = argument.type!!.resolve()
-        when (argument.variance) {
-            Variance.STAR -> WildcardNameModel.Star
-            Variance.INVARIANT -> CtTypeNameModel(argType())
-            Variance.COVARIANT -> WildcardNameModel(upperBound = CtTypeNameModel(argType()))
-            Variance.CONTRAVARIANT -> WildcardNameModel(lowerBound = CtTypeNameModel(argType()))
+internal fun inferJvmInfoFrom(kotlinDeclaredType: KSType): JvmTypeInfo {
+    val declaration = kotlinDeclaredType.declaration as KSClassDeclaration
+    return when (declaration.qualifiedName?.asString()) {
+        "kotlin.ByteArray" -> JvmTypeInfo.Array(JvmTypeInfo.Byte)
+        "kotlin.IntArray" -> JvmTypeInfo.Array(JvmTypeInfo.Int)
+        "kotlin.LongArray" -> JvmTypeInfo.Array(JvmTypeInfo.Long)
+        "kotlin.ShortArray" -> JvmTypeInfo.Array(JvmTypeInfo.Short)
+        "kotlin.FloatArray" -> JvmTypeInfo.Array(JvmTypeInfo.Float)
+        "kotlin.DoubleArray" -> JvmTypeInfo.Array(JvmTypeInfo.Double)
+        "kotlin.CharArray" -> JvmTypeInfo.Array(JvmTypeInfo.Char)
+        "kotlin.BooleanArray" -> JvmTypeInfo.Array(JvmTypeInfo.Boolean)
+        "kotlin.Array" -> JvmTypeInfo.Array(JvmTypeInfo.Declared)
+        "kotlin.Unit" -> JvmTypeInfo.Void
+        else -> JvmTypeInfo.Declared
+    }
+}
+
+internal fun CtTypeNameModel(
+    type: KSType,
+    jvmTypeKind: JvmTypeInfo = inferJvmInfoFrom(type),
+): CtTypeNameModel = CtTypeNameModel(jvmTypeKind = jvmTypeKind, typeSupplier = { type })
+
+internal fun CtTypeNameModel(
+    jvmTypeKind: JvmTypeInfo,
+    typeSupplier: () -> KSType,
+): CtTypeNameModel {
+    return when (jvmTypeKind) {
+        JvmTypeInfo.Void -> KeywordTypeNameModel.Void
+        JvmTypeInfo.Byte -> KeywordTypeNameModel.Byte
+        JvmTypeInfo.Char -> KeywordTypeNameModel.Char
+        JvmTypeInfo.Double -> KeywordTypeNameModel.Double
+        JvmTypeInfo.Float -> KeywordTypeNameModel.Float
+        JvmTypeInfo.Int -> KeywordTypeNameModel.Int
+        JvmTypeInfo.Long -> KeywordTypeNameModel.Long
+        JvmTypeInfo.Short -> KeywordTypeNameModel.Short
+        JvmTypeInfo.Boolean -> KeywordTypeNameModel.Boolean
+        JvmTypeInfo.Declared -> {
+            val type = typeSupplier()
+            val declaration = type.declaration as KSClassDeclaration
+            val raw = ClassNameModel(declaration)
+            val typeArguments = type.arguments.map { argument ->
+                fun argType() = argument.type!!.resolve()
+                when (argument.variance) {
+                    Variance.STAR -> WildcardNameModel.Star
+                    Variance.INVARIANT -> CtTypeNameModel(argType())
+                    Variance.COVARIANT -> WildcardNameModel(upperBound = CtTypeNameModel(argType()))
+                    Variance.CONTRAVARIANT -> WildcardNameModel(lowerBound = CtTypeNameModel(argType()))
+                }
+            }
+            return if (typeArguments.isNotEmpty()) {
+                ParameterizedNameModel(raw, typeArguments)
+            } else raw
+        }
+        is JvmTypeInfo.Array -> {
+            return ArrayNameModel(
+                elementType = CtTypeNameModel(
+                    typeSupplier = { typeSupplier().arguments.first().type!!.resolve() },
+                    jvmTypeKind = jvmTypeKind.elementInfo,
+                )
+            )
         }
     }
-    return if (typeArguments.isNotEmpty()) {
-        ParameterizedNameModel(raw, typeArguments)
-    } else raw
 }
 
 private fun mergeVariance(declarationSite: Variance, useSite: Variance): Variance {
@@ -157,11 +200,47 @@ internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map(::KspAnno
 
 internal fun parametersSequenceFor(
     declaration: KSFunctionDeclaration,
+    jvmMethodSignature: JvmMethodSignature,
     containing: KSType,
 ) = sequence<ParameterLangModel> {
     val parameters = declaration.parameters
     val types = declaration.asMemberOf(containing).parameterTypes
     for (i in parameters.indices) {
-        yield(KspParameterImpl(impl = parameters[i], refinedType = types[i]!!))
+        yield(KspParameterImpl(
+            impl = parameters[i],
+            jvmSignatureSupplier = { jvmMethodSignature.parameterTypes?.get(i) },
+            refinedType = types[i]!!,
+        ))
+    }
+}
+
+/**
+ * This is required for correctly distinguish between Java's primitive and wrapper types, as they all are
+ * represented uniformly in Kotlin.
+ */
+internal class JvmMethodSignature(
+    declaration: KSFunctionDeclaration,
+) {
+    private val match by lazy(NONE) {
+        Utils.resolver.mapToJvmSignature(declaration)?.let { descriptor ->
+            checkNotNull(MethodSignatureRegex.matchEntire(descriptor)) {
+                "Not reached: invalid jvm method signature: $descriptor"
+            }
+        }
+    }
+
+    val returnType: String? by lazy(NONE) {
+        match?.groupValues?.get(2)
+    }
+
+    val parameterTypes: List<String>? by lazy(NONE) {
+        match?.groupValues?.get(1)?.let { params ->
+            ParamSignatureRegex.findAll(params).map(MatchResult::value).toList()
+        }
+    }
+
+    companion object {
+        private val MethodSignatureRegex = """^\((.*)\)(.*)$""".toRegex()
+        private val ParamSignatureRegex = """\[*(?:B|C|D|F|I|J|S|Z|L.*?;)""".toRegex()
     }
 }

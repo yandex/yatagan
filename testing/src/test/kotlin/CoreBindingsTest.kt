@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.testing
 
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -346,7 +345,6 @@ class CoreBindingsTest(
     }
 
     @Test
-    @Ignore
     fun `basic component - provide primitive type`() {
         givenJavaSource("test.MyModule", """
             import com.yandex.daggerlite.Provides;
@@ -381,7 +379,6 @@ class CoreBindingsTest(
     }
 
     @Test
-    @Ignore
     fun `basic component - convert class to primitive type`() {
         givenJavaSource("test.MyModule", """
             import com.yandex.daggerlite.Provides;
@@ -402,6 +399,66 @@ class CoreBindingsTest(
             @Component(modules = MyModule.class)
             public interface TestComponent {
                 int get();
+            }
+        """)
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `basic component - provide array type`() {
+        givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+            
+            @Module
+            public interface MyModule {
+                @Provides
+                static int[] providesIntArray() {
+                    return new int[] { 228, };
+                }
+                
+                @Provides
+                static Double[] providesDoubleArray() {
+                    return new Double[] { 7.40, };
+                }
+                
+                @Provides
+                static String[] providesStringArray() {
+                    return new String[] { "foo", "bar" };
+                }
+            }
+        """)
+
+        givenJavaSource("test.TestComponent", """
+            import javax.inject.Inject;
+            import javax.inject.Provider;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Lazy;
+            
+            class Consumer<T> {
+                @Inject
+                public Consumer(int[] i1, Provider<int[]> i2, T[] i3, Provider<T[]> i4, String[] i5,
+                                Provider<String[]> i6) {}
+            }
+            
+            @Component(modules = MyModule.class)
+            public interface TestComponent {
+                int[] getInt();
+                Lazy<int[]> getIntLazy();
+                Provider<int[]> getIntProvider();
+
+                Provider<Double[]> getDoubleProvider();
+                Double[] getDouble();
+                
+                String[] getString();
+                Lazy<String[]> getStringLazy();
+                Provider<String[]> getStringProvider();
+                
+                Consumer<Double> c();
             }
         """)
 

@@ -401,6 +401,61 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
+    fun `basic component - provide array type`() {
+        givenKotlinSource("test.TestComponent", """
+            import javax.inject.Inject
+            import javax.inject.Provider
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Lazy
+            import com.yandex.daggerlite.Provides
+            import com.yandex.daggerlite.Module
+            
+            @Module
+            object MyModule {
+                @Provides
+                fun providesIntArray(): IntArray {
+                    return intArrayOf(228)
+                }
+                
+                @Provides
+                fun providesDoubleArray(): Array<Double> {
+                    return arrayOf(7.40)
+                }
+                
+                @Provides
+                fun providesStringArray(): Array<String> {
+                    return arrayOf("foo", "bar")
+                }
+            }
+            
+            class Consumer<T> @Inject constructor (
+                 i1: IntArray, i2: Provider<IntArray>, i3: Array<T>, i4: Provider<Array<T>>, 
+                 i5: Array<String>, i6: Provider<Array<String>>,
+            )
+            
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                val int2: IntArray
+                val intLazy: Lazy<IntArray>
+                val intProvider: Provider<IntArray>
+            
+                val doubleProvider: Provider<Array<Double>>
+                val double2: Array<Double>
+                
+                val stringProvider: Provider<Array<String>>
+                val string2: Array<String>
+                
+                val c: Consumer<Double>
+            }
+            """.trimIndent())
+
+        compilesSuccessfully {
+            generatesJavaSources("test.DaggerTestComponent")
+            withNoWarnings()
+        }
+    }
+
+    @Test
     fun `basic component - universal builder support + variance test`() {
         givenKotlinSource("test.TestComponent", """
             import javax.inject.Inject
@@ -436,7 +491,7 @@ class CoreBindingsKotlinTest(
                     fun setBar(@Named("bar") obj: Any): Creator
                     
                     @BindsInstance
-                    fun setSetOfFoo(foos: Set<Foo>): Creator
+                    fun setSetOfFoo(foos: Set<Foo>)
                     
                     @BindsInstance
                     fun setSetOfBar(bars: MutableSet<Bar>): Creator

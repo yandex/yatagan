@@ -1,10 +1,9 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.core.BindsBindingModel
-import com.yandex.daggerlite.core.ComponentDependencyInput
+import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
-import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleModel
@@ -127,16 +126,16 @@ internal class AlternativesBindingImpl(
 
 internal class ComponentDependencyEntryPointBindingImpl(
     override val owner: BindingGraph,
-    override val input: ComponentDependencyInput,
+    override val dependency: ComponentDependencyModel,
     override val getter: FunctionLangModel,
     override val target: NodeModel,
     ) : ComponentDependencyEntryPointBinding {
     override val originModule: Nothing? get() = null
     override val scope: Nothing? get() = null
     override val conditionScope get() = ConditionScope.Unscoped
-    override fun dependencies() = listOf(NodeDependency(input.dependency.asNode()))
+    override fun dependencies() = listOf(NodeDependency(dependency.asNode()))
 
-    override fun toString() = "$getter from ${input.dependency} (intrinsic)"
+    override fun toString() = "$getter from $dependency (intrinsic)"
 }
 
 internal class ComponentInstanceBindingImpl(
@@ -225,10 +224,10 @@ internal class ImplicitEmptyBindingImpl(
 }
 
 internal class ComponentDependencyBindingImpl(
-    override val input: ComponentDependencyInput,
+    override val dependency: ComponentDependencyModel,
     override val owner: BindingGraph,
 ) : ComponentDependencyBinding {
-    override val target get() = input.dependency.asNode()
+    override val target get() = dependency.asNode()
     override val conditionScope get() = ConditionScope.Unscoped
     override val scope: Nothing? get() = null
     override fun dependencies(): List<Nothing> = emptyList()
@@ -236,12 +235,11 @@ internal class ComponentDependencyBindingImpl(
 }
 
 internal class InstanceBindingImpl(
-    override val input: InstanceInput,
+    override val target: NodeModel,
     override val owner: BindingGraph,
 ) : InstanceBinding {
     override val conditionScope get() = ConditionScope.Unscoped
     override val scope: Nothing? get() = null
-    override val target get() = input.node
     override fun dependencies(): List<Nothing> = emptyList()
     override val originModule: Nothing? get() = null
 }

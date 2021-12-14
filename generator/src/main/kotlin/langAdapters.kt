@@ -7,7 +7,7 @@ import com.yandex.daggerlite.generator.lang.CtTypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 
 internal val TypeLangModel.name: CtTypeNameModel
-    get() = (this as CtTypeLangModel).name
+    get() = (this as CtTypeLangModel).nameModel
 
 internal val ClassBackedModel.name: CtTypeNameModel
     get() = type.name

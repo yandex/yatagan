@@ -51,3 +51,24 @@ data class WildcardNameModel(
         val Star = WildcardNameModel()
     }
 }
+
+data class ArrayNameModel(
+    val elementType: CtTypeNameModel,
+) : CtTypeNameModel {
+    override fun toString() = "$elementType[]"
+}
+
+enum class KeywordTypeNameModel : CtTypeNameModel {
+    Void,
+    Boolean,
+    Byte,
+    Int,
+    Short,
+    Long,
+    Float,
+    Double,
+    Char,
+    ;
+
+    override fun toString() = name.lowercase()
+}

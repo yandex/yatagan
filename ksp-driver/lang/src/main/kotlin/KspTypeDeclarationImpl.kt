@@ -117,9 +117,14 @@ internal class KspTypeDeclarationImpl private constructor(
     private inner class ConstructorImpl(
         impl: KSFunctionDeclaration,
     ) : ConstructorLangModel {
+        private val jvmSignature = JvmMethodSignature(impl)
+
         override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
         override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
-            declaration = impl, containing = type)
+            declaration = impl,
+            containing = type,
+            jvmMethodSignature = jvmSignature,
+        )
     }
 }
