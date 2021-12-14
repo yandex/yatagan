@@ -1,9 +1,8 @@
 package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.core.ComponentDependencyInput
+import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.core.ModuleInstanceInput
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
@@ -200,8 +199,10 @@ private class BindingGraphImpl(
         val factory = model.factory ?: return
 
         val providedComponents = factory.allInputs
-            .filterIsInstance<ComponentDependencyInput>()
-            .map(ComponentDependencyInput::dependency).toSet()
+            .map { it.payload }
+            .filterIsInstance<ComponentFactoryModel.InputPayload.Dependency>()
+            .map { it.dependency }
+            .toSet()
         check(model.dependencies == providedComponents) {
             val missing = model.dependencies - providedComponents
             if (missing.isNotEmpty()) "Missing dependency components in $factory: $missing"
@@ -209,8 +210,10 @@ private class BindingGraphImpl(
         }
 
         val providedModules = factory.allInputs
-            .filterIsInstance<ModuleInstanceInput>()
-            .map(ModuleInstanceInput::module).toSet()
+            .map { it.payload }
+            .filterIsInstance< ComponentFactoryModel.InputPayload.Module>()
+            .map { it.module }
+            .toSet()
         val allModulesRequiresInstance = modules.asSequence().filter(ModuleModel::requiresInstance).toMutableSet()
 
         val missing = (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }

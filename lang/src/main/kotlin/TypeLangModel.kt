@@ -13,11 +13,30 @@ interface TypeLangModel {
 
     /**
      * Type arguments.
+     *
+     * NOTE: Every returned type is implicitly [decayed][decay].
      */
     val typeArguments: Collection<TypeLangModel>
 
     /**
-     * TODO: doc.
+     * Checks if the type is `boolean` or `java.lang.Boolean` (`kotlin.Boolean`) type.
      */
     val isBoolean: Boolean
+
+    /**
+     * Checks if the type is the `void` (`kotlin.Unit`) type.
+     */
+    val isVoid: Boolean
+
+    /**
+     * This API is inspired by C++'s `std::decay` - the type "decays" into some other type according to some
+     * well-defined rules.
+     *
+     * @return
+     *  If this is wildcard type (type with non-invariant variance), returns upper *xor* lower bound.
+     *  If this is a java builtin type, returns its *boxed* counterpart.
+     *  In any other cases, just returns the original type.
+     *  In all the cases, nullability info is discarded.
+     */
+    fun decay(): TypeLangModel
 }

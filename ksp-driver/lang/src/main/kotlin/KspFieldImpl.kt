@@ -15,7 +15,12 @@ internal class KspFieldImpl private constructor(
     override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
 
     override val isStatic: Boolean get() = impl.isStatic
-    override val type: TypeLangModel by lazy(NONE) { KspTypeImpl(impl.type.resolve()) }
+    override val type: TypeLangModel by lazy(NONE) {
+        KspTypeImpl(
+            impl = impl.type.resolve(),
+            jvmSignatureHint = Utils.resolver.mapToJvmSignature(impl),
+        )
+    }
     override val name: String get() = impl.simpleName.asString()
 
     companion object Factory : ObjectCache<KSPropertyDeclaration, KspFieldImpl>() {

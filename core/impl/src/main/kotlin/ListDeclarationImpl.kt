@@ -10,7 +10,7 @@ internal class ListDeclarationImpl(
     private val declareList: DeclareListAnnotationLangModel,
 ) : ListDeclarationModel {
     override val listType: NodeModel
-        get() = NodeModelImpl(impl.returnType, qualifier = null)
+        get() = NodeModelImpl(impl.returnType)
     override val orderByDependency: Boolean
         get() = declareList.orderByDependency
 }

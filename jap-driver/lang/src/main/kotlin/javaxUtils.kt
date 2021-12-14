@@ -5,9 +5,12 @@ package com.yandex.daggerlite.jap.lang
 import com.google.auto.common.AnnotationMirrors
 import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
+import com.google.common.base.Equivalence
 import com.yandex.daggerlite.core.lang.ParameterLangModel
+import com.yandex.daggerlite.generator.lang.ArrayNameModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
+import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
 import com.yandex.daggerlite.generator.lang.WildcardNameModel
 import javax.lang.model.element.AnnotationMirror
@@ -20,9 +23,13 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
+import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.ExecutableType
+import javax.lang.model.type.PrimitiveType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
+import javax.lang.model.type.WildcardType
 import javax.lang.model.util.Elements
 import javax.lang.model.util.SimpleAnnotationValueVisitor8
 import javax.lang.model.util.Types
@@ -32,13 +39,15 @@ internal inline fun <reified T : Annotation> Element.isAnnotatedWith() =
 
 internal fun TypeMirror.asTypeElement(): TypeElement = MoreTypes.asTypeElement(this)
 
-internal fun TypeMirror.asPrimitiveType() = MoreTypes.asPrimitiveType(this)
+internal fun TypeMirror.asPrimitiveType(): PrimitiveType = MoreTypes.asPrimitiveType(this)
 
-internal fun TypeMirror.asExecutableType() = MoreTypes.asExecutable(this)
+internal fun TypeMirror.asExecutableType(): ExecutableType = MoreTypes.asExecutable(this)
 
-internal fun TypeMirror.asDeclaredType() = MoreTypes.asDeclared(this)
+internal fun TypeMirror.asDeclaredType(): DeclaredType = MoreTypes.asDeclared(this)
 
-internal fun TypeMirror.asWildCardType() = MoreTypes.asWildcard(this)
+internal fun TypeMirror.asWildCardType(): WildcardType = MoreTypes.asWildcard(this)
+
+internal fun TypeMirror.asArrayType(): ArrayType = MoreTypes.asArray(this)
 
 internal fun AnnotationMirror.typesValue(param: String): Sequence<TypeMirror> =
     AnnotationMirrors.getAnnotationValue(this, param).accept(AsTypes)
@@ -166,11 +175,25 @@ internal fun CtTypeNameModel(type: TypeMirror): CtTypeNameModel {
         TypeKind.WILDCARD -> {
             val wildcard = type.asWildCardType()
             WildcardNameModel(
-                lowerBound = wildcard?.superBound?.let(::CtTypeNameModel),
-                upperBound = wildcard?.extendsBound?.let(::CtTypeNameModel),
+                lowerBound = wildcard.superBound?.let(::CtTypeNameModel),
+                upperBound = wildcard.extendsBound?.let(::CtTypeNameModel),
             )
         }
-        else -> throw RuntimeException("Unexpected type: $type")
+        TypeKind.VOID -> KeywordTypeNameModel.Void
+        TypeKind.BOOLEAN -> KeywordTypeNameModel.Boolean
+        TypeKind.BYTE -> KeywordTypeNameModel.Byte
+        TypeKind.SHORT -> KeywordTypeNameModel.Short
+        TypeKind.INT -> KeywordTypeNameModel.Int
+        TypeKind.LONG -> KeywordTypeNameModel.Long
+        TypeKind.CHAR -> KeywordTypeNameModel.Char
+        TypeKind.FLOAT -> KeywordTypeNameModel.Float
+        TypeKind.DOUBLE -> KeywordTypeNameModel.Double
+
+        TypeKind.ARRAY -> ArrayNameModel(CtTypeNameModel(type.asArrayType().componentType))
+
+        TypeKind.NULL, TypeKind.ERROR, TypeKind.TYPEVAR -> TODO("Consider supporting these?")
+
+        else -> throw AssertionError("Not reached: unexpected type: $type")
     }
 }
 
@@ -194,3 +217,13 @@ internal fun parametersSequenceFor(
         yield(JavaxParameterImpl(impl = parameters[i], refinedType = types[i]))
     }
 }
+
+internal typealias TypeMirrorEquivalence = Equivalence.Wrapper<TypeMirror>
+
+internal typealias AnnotationMirrorEquivalence = Equivalence.Wrapper<AnnotationMirror>
+
+internal fun TypeMirrorEquivalence(type: TypeMirror): TypeMirrorEquivalence =
+    MoreTypes.equivalence().wrap(type)
+
+internal fun AnnotationMirrorEquivalence(annotation: AnnotationMirror): AnnotationMirrorEquivalence =
+    AnnotationMirrors.equivalence().wrap(annotation)

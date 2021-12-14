@@ -4,11 +4,16 @@ import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorInfo
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
+import kotlin.LazyThreadSafetyMode.NONE
 
 internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
     private val accessor: T,
 ) : CtFunctionLangModel(), PropertyAccessorInfo {
     protected val property = accessor.receiver
+
+    protected val jvmSignature by lazy(NONE) {
+        Utils.resolver.mapToJvmSignature(property)
+    }
 
     // NOTE: We can't use annotations from |property| as they aren't properly accessible from Kapt.
     //  See https://youtrack.jetbrains.com/issue/KT-34684

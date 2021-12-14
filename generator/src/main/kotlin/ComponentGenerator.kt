@@ -99,10 +99,8 @@ internal class ComponentGenerator(
 
         graph.model.entryPoints.forEach { (getter, dependency) ->
             // TODO: reuse entry-points as accessors to reduce method count.
-            method(getter.name) {
+            overrideMethod(getter) {
                 modifiers(PUBLIC)
-                annotation<Override>()
-                returnType(getter.returnType.typeName())
                 +buildExpression {
                     +"return "
                     graph.resolveBinding(dependency.node)
@@ -111,21 +109,19 @@ internal class ComponentGenerator(
             }
         }
         graph.model.memberInjectors.forEach { membersInjector ->
-            method(membersInjector.injector.name) {
+            overrideMethod(membersInjector.injector) {
+                val instanceName = membersInjector.injector.parameters.first().name
                 modifiers(PUBLIC)
-                annotation<Override>()
-                returnType(ClassName.VOID)
-                parameter(membersInjector.injectee.typeName(), "i")
                 membersInjector.membersToInject.forEach { (member, dependency) ->
                     val binding = graph.resolveBinding(dependency.node)
                     +buildExpression {
                         when(member) {
                             is FieldLangModel -> {
-                                +"i.%N = ".formatCode(member.name)
+                                +"%N.%N = ".formatCode(instanceName, member.name)
                                 binding.generateAccess(builder = this, inside = graph, kind = dependency.kind)
                             }
                             is FunctionLangModel -> {
-                                +"i.%N(".formatCode(member.name)
+                                +"%N.%N(".formatCode(instanceName, member.name)
                                 binding.generateAccess(builder = this, inside = graph, kind = dependency.kind)
                                 +")"
                             }

@@ -10,6 +10,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspParameterImpl(
     private val impl: KSValueParameter,
     private val refinedType: KSType,
+    private val jvmSignatureSupplier: () -> String?,
 ) : ParameterLangModel {
     override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
     override val name: String
@@ -17,6 +18,7 @@ internal class KspParameterImpl(
     override val type: TypeLangModel by lazy(NONE) {
         KspTypeImpl(
             impl = refinedType,
+            jvmSignatureHint = jvmSignatureSupplier(),
             // In parameter position, kotlin declaration-/use-site variance is mapped to a Java's wildcard type.
             varianceAsWildcard = true,
         )

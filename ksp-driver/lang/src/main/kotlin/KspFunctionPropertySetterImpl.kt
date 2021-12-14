@@ -16,11 +16,15 @@ internal class KspFunctionPropertySetterImpl private constructor(
 
     @Suppress("DEPRECATION")  // capitalize
     override val name: String by lazy(NONE) {
-        setter.explicitJvmName ?: "set${property.simpleName.asString().capitalize()}"
+        Utils.resolver.getJvmName(setter) ?: "set${property.simpleName.asString().capitalize()}"
     }
 
     override val parameters: Sequence<ParameterLangModel> = sequence {
-        yield(KspParameterImpl(impl = setter.parameter, refinedType = property.asMemberOf(owner.type)))
+        yield(KspParameterImpl(
+            impl = setter.parameter,
+            refinedType = property.asMemberOf(owner.type),
+            jvmSignatureSupplier = { jvmSignature },
+        ))
     }
 
     override val kind: PropertyAccessorKind

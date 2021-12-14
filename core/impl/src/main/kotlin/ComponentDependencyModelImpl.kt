@@ -30,7 +30,7 @@ internal class ComponentDependencyModelImpl private constructor(
     }
 
     override fun asNode(): NodeModel {
-        return NodeModelImpl(type = type, qualifier = null)
+        return NodeModelImpl(type = type)
     }
 
     companion object Factory : ObjectCache<TypeLangModel, ComponentDependencyModelImpl>() {

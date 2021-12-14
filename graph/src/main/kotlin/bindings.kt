@@ -1,20 +1,15 @@
 package com.yandex.daggerlite.graph
 
-import com.yandex.daggerlite.core.ComponentDependencyInput
+import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.InstanceInput
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 
-sealed interface FactoryInputBinding : Binding {
-    val input: ComponentFactoryModel.Input
-}
-
-interface ComponentDependencyBinding : FactoryInputBinding {
-    override val input: ComponentDependencyInput
+interface ComponentDependencyBinding : Binding {
+    val dependency: ComponentDependencyModel
 }
 
 /**
@@ -54,11 +49,9 @@ interface AlternativesBinding : Binding {
 
 /**
  * A [com.yandex.daggerlite.BindsInstance] binding.
- * Introduced into a graph as [ComponentFactoryModel.Input].
+ * Introduced into a graph as [ComponentFactoryModel.InputModel].
  */
-interface InstanceBinding : FactoryInputBinding {
-    override val input: InstanceInput
-}
+interface InstanceBinding : Binding
 
 interface SubComponentFactoryBinding : Binding {
     val targetGraph: BindingGraph
@@ -67,7 +60,7 @@ interface SubComponentFactoryBinding : Binding {
 interface ComponentInstanceBinding : Binding
 
 interface ComponentDependencyEntryPointBinding : Binding {
-    val input: ComponentDependencyInput
+    val dependency: ComponentDependencyModel
     val getter: FunctionLangModel
 }
 

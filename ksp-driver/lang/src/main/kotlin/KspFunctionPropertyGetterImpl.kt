@@ -11,13 +11,14 @@ internal class KspFunctionPropertyGetterImpl private constructor(
     getter: KSPropertyGetter,
     override val owner: KspTypeDeclarationImpl,
 ) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter) {
+
     override val returnType: TypeLangModel by lazy(NONE) {
-        KspTypeImpl(property.asMemberOf(owner.type))
+        KspTypeImpl(property.asMemberOf(owner.type), jvmSignatureHint = jvmSignature)
     }
 
     @Suppress("DEPRECATION")  // capitalize
     override val name: String by lazy(NONE) {
-        getter.explicitJvmName ?: run {
+        Utils.resolver.getJvmName(getter) ?: run {
             val propName = property.simpleName.asString()
             if (PropNameIsRegex.matches(propName)) propName
             else "get${propName.capitalize()}"

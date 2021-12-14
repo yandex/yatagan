@@ -27,7 +27,7 @@ try {
         is InstanceBinding -> with(builder) {
             val component = componentForBinding()
             val factory = Generators[owner].factoryGenerator
-            +"$component.${factory.fieldNameFor(input)}"
+            +"$component.${factory.fieldNameFor(target)}"
         }
         is ProvisionBinding -> with(builder) {
             generateCall(
@@ -80,11 +80,11 @@ try {
         }
         is ComponentDependencyBinding -> with(builder) {
             val factory = Generators[owner].factoryGenerator
-            +factory.fieldNameFor(input)
+            +factory.fieldNameFor(dependency)
         }
         is ComponentDependencyEntryPointBinding -> with(builder) {
             val factory = Generators[owner].factoryGenerator
-            +factory.fieldNameFor(input)
+            +factory.fieldNameFor(dependency)
             +"."
             +getter.name
             +"()"

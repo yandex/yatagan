@@ -1,8 +1,10 @@
 package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.generator.lang.ArrayNameModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
+import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
 import com.yandex.daggerlite.generator.lang.WildcardNameModel
 import java.util.Locale
@@ -19,7 +21,19 @@ private fun Iterable<String>.joinWithCamelCase(firstCapital: Boolean? = null): S
     }
 }
 
-val NonIdentifierCharacters = "[^a-zA-Z$0-9]".toRegex()
+private val NonIdentifierCharacters = "[^a-zA-Z$0-9]".toRegex()
+
+private fun <T> singleValueIterator(value: T) = object : Iterator<T> {
+    var expired = false
+
+    override fun hasNext() = !expired
+
+    override fun next(): T {
+        if (expired) throw NoSuchElementException()
+        expired = false
+        return value
+    }
+}
 
 internal class Namespace(
     private val prefix: String = "",
@@ -50,7 +64,13 @@ internal class Namespace(
             is WildcardNameModel ->
                 nameModel.lowerBound?.let(::obtainNameImpl)
                     ?: nameModel.upperBound?.let(::obtainNameImpl)
-                    ?: iterator { yield("Any") }
+                    ?: singleValueIterator("Any")
+            is ArrayNameModel -> iterator {
+                for (name in obtainNameImpl(nameModel.elementType)) {
+                    yield("arrayOf$name")
+                }
+            }
+            is KeywordTypeNameModel -> singleValueIterator(nameModel.name)
         }
     }
 
@@ -60,6 +80,7 @@ internal class Namespace(
     ): String {
         val name = sequenceOf(this.prefix, string).asIterable().joinWithCamelCase(firstCapital = firstCapital)
         if (name !in names) {
+            names[name] = 0
             return name
         }
 

@@ -1,7 +1,5 @@
 package com.yandex.daggerlite.jap.lang
 
-import com.google.auto.common.AnnotationMirrors
-import com.google.common.base.Equivalence
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -49,8 +47,8 @@ internal class JavaxAnnotationImpl private constructor(
 
     override fun toString() = impl.toString()
 
-    companion object Factory : ObjectCache<Equivalence.Wrapper<AnnotationMirror>, JavaxAnnotationImpl>() {
-        operator fun invoke(impl: AnnotationMirror) = createCached(AnnotationMirrors.equivalence().wrap(impl)) {
+    companion object Factory : ObjectCache<AnnotationMirrorEquivalence, JavaxAnnotationImpl>() {
+        operator fun invoke(impl: AnnotationMirror) = createCached(AnnotationMirrorEquivalence(impl)) {
             JavaxAnnotationImpl(impl)
         }
     }
