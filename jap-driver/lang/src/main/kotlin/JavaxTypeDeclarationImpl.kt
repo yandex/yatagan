@@ -68,7 +68,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         kotlinClass?.companionObject?.let { companionName: String ->
             val companionClass = checkNotNull(impl.enclosedElements.find {
                 it.kind == ElementKind.CLASS && it.simpleName.contentEquals(companionName)
-            }) { "Inconsistent metadata interpreting: No companion $companionName detected in $impl" }
+            }) { "Not reached: inconsistent metadata interpreting: No companion $companionName detected in $impl" }
             val companionType = JavaxTypeDeclarationImpl(companionClass.asType().asDeclaredType())
             companionClass.asTypeElement().allMethods(Utils.types, Utils.elements)
                 .filter {

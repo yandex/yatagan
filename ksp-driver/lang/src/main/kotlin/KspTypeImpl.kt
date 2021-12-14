@@ -97,7 +97,7 @@ internal class KspTypeImpl private constructor(
                 'Z' -> JvmTypeInfo.Boolean
                 '[' -> JvmTypeInfo.Array(elementInfo = parseJvmSignature(
                     jvmSignatureHint = jvmSignatureHint.subSequence(startIndex = 1, endIndex = jvmSignatureHint.length),
-                    typeSupplier = { typeSupplier().arguments.first().type!!.resolve() },
+                    typeSupplier = { typeSupplier().arguments.first().type.resolveOrError() },
                 ))
                 'L' -> JvmTypeInfo.Declared
                 'V' -> JvmTypeInfo.Void

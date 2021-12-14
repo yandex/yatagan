@@ -72,3 +72,7 @@ enum class KeywordTypeNameModel : CtTypeNameModel {
 
     override fun toString() = name.lowercase()
 }
+
+class ErrorNameModel(val comment: String) : CtTypeNameModel {
+    // No equals/hashCode overloading - no need.
+}

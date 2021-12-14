@@ -14,6 +14,7 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.ArrayNameModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
+import com.yandex.daggerlite.generator.lang.ErrorNameModel
 import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
 import com.yandex.daggerlite.generator.lang.WildcardNameModel
@@ -75,6 +76,7 @@ private fun CtTypeNameModel.asTypeName(): TypeName {
         KeywordTypeNameModel.Char -> TypeName.CHAR
         KeywordTypeNameModel.Void -> TypeName.VOID
         is ArrayNameModel -> ArrayTypeName.of(elementType.asTypeName())
+        is ErrorNameModel -> ClassName.get("", comment)
     }
 }
 

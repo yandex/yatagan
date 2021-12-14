@@ -10,11 +10,17 @@ import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeParameter
+import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.KSVisitor
+import com.google.devtools.ksp.symbol.Location
 import com.google.devtools.ksp.symbol.Modifier
+import com.google.devtools.ksp.symbol.NonExistLocation
+import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.base.memoize
@@ -48,6 +54,10 @@ internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classK
 
 internal val KSPropertyDeclaration.isField
     get() = origin == Origin.JAVA || origin == Origin.JAVA_LIB || isAnnotationPresent<JvmField>()
+
+internal fun KSTypeReference?.resolveOrError(): KSType {
+    return this?.resolve() ?: ErrorTypeImpl
+}
 
 private fun mapToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
     if (!declaration.packageName.asString().startsWith("kotlin")) {
@@ -94,8 +104,8 @@ private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     val packageName = declaration.packageName.asString()
     return ClassNameModel(
         packageName = packageName,
-        simpleNames = declaration.qualifiedName!!.asString().substring(startIndex = packageName.length + 1)
-            .split('.'),
+        simpleNames = declaration.qualifiedName?.asString()?.substring(startIndex = packageName.length + 1)
+            ?.split('.') ?: listOf("<unnamed>"),
     )
 }
 
@@ -140,7 +150,7 @@ internal fun CtTypeNameModel(
             val declaration = type.declaration as KSClassDeclaration
             val raw = ClassNameModel(declaration)
             val typeArguments = type.arguments.map { argument ->
-                fun argType() = argument.type!!.resolve()
+                fun argType() = argument.type.resolveOrError()
                 when (argument.variance) {
                     Variance.STAR -> WildcardNameModel.Star
                     Variance.INVARIANT -> CtTypeNameModel(argType())
@@ -155,7 +165,7 @@ internal fun CtTypeNameModel(
         is JvmTypeInfo.Array -> {
             return ArrayNameModel(
                 elementType = CtTypeNameModel(
-                    typeSupplier = { typeSupplier().arguments.first().type!!.resolve() },
+                    typeSupplier = { typeSupplier().arguments.first().type.resolveOrError() },
                     jvmTypeKind = jvmTypeKind.elementInfo,
                 )
             )
@@ -169,16 +179,16 @@ private fun mergeVariance(declarationSite: Variance, useSite: Variance): Varianc
         Variance.COVARIANT -> when (useSite) {
             Variance.INVARIANT -> Variance.COVARIANT
             Variance.COVARIANT -> Variance.COVARIANT
-            Variance.CONTRAVARIANT -> throw IllegalArgumentException("variance conflict: covariant vs contravariant")
+            Variance.CONTRAVARIANT -> throw AssertionError("Not reached: variance conflict: covariant vs contravariant")
             Variance.STAR -> Variance.STAR
         }
         Variance.CONTRAVARIANT -> when (useSite) {
             Variance.INVARIANT -> Variance.CONTRAVARIANT
             Variance.CONTRAVARIANT -> Variance.CONTRAVARIANT
-            Variance.COVARIANT -> throw IllegalArgumentException("variance conflict: contravariant vs covariant")
+            Variance.COVARIANT -> throw AssertionError("Not reached: variance conflict: contravariant vs covariant")
             Variance.STAR -> Variance.STAR
         }
-        Variance.STAR -> throw IllegalArgumentException("'*' (star) is not a valid declaration-site variance")
+        Variance.STAR -> throw AssertionError("Not reached: '*' (star) is not a valid declaration-site variance")
     }
 }
 
@@ -209,7 +219,7 @@ internal fun parametersSequenceFor(
         yield(KspParameterImpl(
             impl = parameters[i],
             jvmSignatureSupplier = { jvmMethodSignature.parameterTypes?.get(i) },
-            refinedType = types[i]!!,
+            refinedType = types[i] ?: ErrorTypeImpl,
         ))
     }
 }
@@ -242,5 +252,60 @@ internal class JvmMethodSignature(
     companion object {
         private val MethodSignatureRegex = """^\((.*)\)(.*)$""".toRegex()
         private val ParamSignatureRegex = """\[*(?:B|C|D|F|I|J|S|Z|L.*?;)""".toRegex()
+    }
+}
+
+internal object ErrorTypeImpl : KSType {
+    override val annotations get() = emptySequence<Nothing>()
+    override val arguments get() = emptyList<Nothing>()
+    override val declaration: KSDeclaration get() = ErrorDeclarationImpl
+    override val isError: Boolean get() = true
+    override val isFunctionType: Boolean get() = false
+    override val isMarkedNullable: Boolean get() = false
+    override val isSuspendFunctionType: Boolean get() = false
+    override val nullability: Nullability get() = Nullability.NOT_NULL
+    override fun isAssignableFrom(that: KSType): Boolean = false
+    override fun isCovarianceFlexible(): Boolean = false
+    override fun isMutabilityFlexible(): Boolean = false
+    override fun makeNotNullable(): KSType = this
+    override fun makeNullable(): KSType = this
+    override fun replace(arguments: List<KSTypeArgument>): KSType = this
+    override fun starProjection(): KSType = this
+}
+
+private object ErrorDeclarationImpl : KSClassDeclaration {
+    override val annotations get() = emptySequence<Nothing>()
+    override val classKind: ClassKind get() = ClassKind.CLASS
+    override val containingFile: Nothing? get() = null
+    override val declarations get() = emptySequence<Nothing>()
+    override val docString: Nothing? get() = null
+    override val isActual: Boolean get() = false
+    override val isCompanionObject: Boolean get() = false
+    override val isExpect: Boolean get() = false
+    override val location: Location get() = NonExistLocation
+    override val modifiers: Set<Modifier> get() = emptySet()
+    override val origin: Origin get() = Origin.SYNTHETIC
+    override val packageName: KSName get() = Utils.resolver.getKSNameFromString("")
+    override val parent: Nothing? get() = null
+    override val parentDeclaration: Nothing? get() = null
+    override val primaryConstructor: Nothing? get() = null
+    override val qualifiedName: Nothing? get() = null
+    override val simpleName: KSName get() = Utils.resolver.getKSNameFromString("<Error>")
+    override val superTypes get() = emptySequence<Nothing>()
+    override val typeParameters get() = emptyList<Nothing>()
+    override fun asStarProjectedType() = ErrorTypeImpl
+    override fun findActuals() = emptySequence<Nothing>()
+    override fun findExpects() = emptySequence<Nothing>()
+    override fun getAllFunctions() = emptySequence<Nothing>()
+    override fun getAllProperties() = emptySequence<Nothing>()
+    override fun getSealedSubclasses() = emptySequence<Nothing>()
+
+    override fun <D, R> accept(visitor: KSVisitor<D, R>, data: D): R {
+        return visitor.visitClassDeclaration(this, data)
+    }
+
+    override fun asType(typeArguments: List<KSTypeArgument>): KSType {
+        check(typeArguments.isEmpty()) { "Not reached" }
+        return ErrorTypeImpl
     }
 }

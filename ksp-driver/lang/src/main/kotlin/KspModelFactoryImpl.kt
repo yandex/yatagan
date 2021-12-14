@@ -18,11 +18,15 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
 class KspModelFactoryImpl : LangModelFactory {
-    private val listDeclaration = Utils.resolver.getClassDeclarationByName(List::class.java.canonicalName)!!
+    private val listDeclaration = checkNotNull(Utils.resolver.getClassDeclarationByName(List::class.java.canonicalName)) {
+        "Not reached: unable to define list declaration"
+    }
 
     override fun getAnnotation(clazz: Class<out Annotation>): AnnotationLangModel {
         return KspAnnotationImpl(FakeKsAnnotationImpl(
-            Utils.resolver.getClassDeclarationByName(clazz.canonicalName)!!
+            checkNotNull(Utils.resolver.getClassDeclarationByName(clazz.canonicalName)) {
+                "Not reached: unable to define $clazz annotation"
+            }
         ))
     }
 

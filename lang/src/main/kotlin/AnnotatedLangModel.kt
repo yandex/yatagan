@@ -15,12 +15,4 @@ interface AnnotatedLangModel {
     fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {
         return annotations.any { it.hasType(type) }
     }
-
-    /**
-     * Returns an [AnnotationLangModel] of the given [type]. If such annotation is not present, the behavior is
-     * undefined.
-     */
-    fun <A : Annotation> getAnnotation(type: Class<A>): AnnotationLangModel {
-        return annotations.first { it.hasType(type) }
-    }
 }

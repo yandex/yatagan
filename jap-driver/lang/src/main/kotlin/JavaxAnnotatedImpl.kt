@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.lang.model.AnnotatedConstruct
 import javax.lang.model.element.AnnotationMirror
@@ -17,10 +16,6 @@ internal open class JavaxAnnotatedImpl<T : AnnotatedConstruct>(
 
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {
         return getAnnotationIfPresent(type) != null
-    }
-
-    override fun <A : Annotation> getAnnotation(type: Class<A>): AnnotationLangModel {
-        return JavaxAnnotationImpl(getAnnotationIfPresent(type)!!)
     }
 
     private fun <A : Annotation> getAnnotationIfPresent(clazz: Class<A>): AnnotationMirror? {

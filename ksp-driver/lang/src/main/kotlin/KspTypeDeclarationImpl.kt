@@ -41,7 +41,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
 
     override val qualifiedName: String
-        get() = impl.qualifiedName!!.asString()
+        get() = impl.qualifiedName?.asString() ?: ""
 
     override val implementedInterfaces: Sequence<TypeLangModel> = sequence {
         val queue = ArrayDeque<Sequence<KSTypeReference>>()
