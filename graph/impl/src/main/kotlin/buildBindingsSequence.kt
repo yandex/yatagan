@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.core.BindsBindingModel
+import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
@@ -83,23 +84,23 @@ internal fun buildBindingsSequence(
         }
     }
     // Gather bindings from factory
+    for (dependency: ComponentDependencyModel in graph.model.dependencies) {
+        // Binding for the dependency component itself.
+        yield(ComponentDependencyBindingImpl(dependency = dependency, owner = graph))
+        // Bindings backed by the component entry-points.
+        for ((node: NodeModel, getter: FunctionLangModel) in dependency.exposedDependencies)
+            yield(ComponentDependencyEntryPointBindingImpl(
+                owner = graph,
+                dependency = dependency,
+                target = node,
+                getter = getter,
+            ))
+    }
     graph.model.factory?.let { factory: ComponentFactoryModel ->
         for (input: ComponentFactoryModel.InputModel in factory.allInputs) when (val payload = input.payload) {
-            is InputPayload.Dependency -> {
-                // Binding for the dependency component itself.
-                yield(ComponentDependencyBindingImpl(dependency = payload.dependency, owner = graph))
-                // Bindings backed by the component entry-points.
-                for ((node: NodeModel, getter: FunctionLangModel) in payload.dependency.exposedDependencies)
-                    yield(ComponentDependencyEntryPointBindingImpl(
-                        owner = graph,
-                        dependency = payload.dependency,
-                        target = node,
-                        getter = getter,
-                    ))
-            }
             is InputPayload.Instance -> yield(InstanceBindingImpl(target = payload.node, owner = graph))
-            is InputPayload.Module -> {/*no binding for module*/}
-        }.let { /*exhaustive*/ }
+            else -> {}
+        }
     }
 
     val declaredLists: Map<NodeModel, ListDeclarationModel> = graph.modules.asSequence()
