@@ -37,6 +37,11 @@ internal fun NodeDependency(
     )
 }
 
+internal fun isFrameworkType(type: TypeLangModel) = when (type.declaration.qualifiedName) {
+    Names.Lazy, Names.Optional, Names.Provider -> true
+    else -> false
+}
+
 internal object Names {
     val Lazy: String = com.yandex.daggerlite.Lazy::class.qualifiedName!!
     val Provider: String = javax.inject.Provider::class.qualifiedName!!

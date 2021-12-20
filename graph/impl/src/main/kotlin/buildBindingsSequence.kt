@@ -11,17 +11,14 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.graph.BaseBinding
-import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 
 /**
  * @param graph incomplete graph. All required fields must be initialized.
  */
 internal fun buildBindingsSequence(
-    graph: BindingGraph,
-    langModelFactory: LangModelFactory,
+    graph: BindingGraphImpl,
 ): Sequence<BaseBinding> = sequence {
     // Gather bindings from modules
     val seenSubcomponents = hashSetOf<ComponentModel>()
@@ -117,7 +114,7 @@ internal fun buildBindingsSequence(
     for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {
         yield(MultiBindingImpl(
             owner = graph,
-            target = target.multiBoundListNode(langModelFactory),
+            target = target.multiBoundListNode(),
             contributions = contributions,
             declaration = declaredLists[target]
         ))

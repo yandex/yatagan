@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
  * Component dependency.
@@ -8,7 +9,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
  *
  * @see com.yandex.daggerlite.Component.dependencies
  */
-interface ComponentDependencyModel : ClassBackedModel {
+interface ComponentDependencyModel : ClassBackedModel, MayBeInvalid {
     val exposedDependencies: Map<NodeModel, FunctionLangModel>
 
     fun asNode(): NodeModel

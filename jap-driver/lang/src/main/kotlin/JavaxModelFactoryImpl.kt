@@ -8,7 +8,10 @@ import javax.lang.model.element.TypeElement
 
 class JavaxModelFactoryImpl : LangModelFactory {
     private val listElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(List::class.java.canonicalName)
+        Utils.elements.getTypeElement(java.util.List::class.java.canonicalName)
+    }
+    private val collectionElement: TypeElement by lazy {
+        Utils.elements.getTypeElement(java.util.Collection::class.java.canonicalName)
     }
 
     override fun getAnnotation(clazz: Class<out Annotation>): AnnotationLangModel {
@@ -17,5 +20,9 @@ class JavaxModelFactoryImpl : LangModelFactory {
 
     override fun getListType(type: TypeLangModel): TypeLangModel {
         return JavaxTypeImpl(Utils.types.getDeclaredType(listElement, (type as JavaxTypeImpl).impl))
+    }
+
+    override fun getCollectionType(type: TypeLangModel): TypeLangModel {
+        return JavaxTypeImpl(Utils.types.getDeclaredType(collectionElement, (type as JavaxTypeImpl).impl))
     }
 }

@@ -11,21 +11,14 @@ import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.buildError
 import javax.inject.Inject
 
 internal class NodeModelImpl private constructor(
     override val type: TypeLangModel,
     override val qualifier: AnnotationLangModel?,
 ) : NodeModel {
-
-    init {
-        require(when (type.declaration.qualifiedName) {
-            Names.Lazy, Names.Provider, Names.Optional -> false
-            else -> true
-        }) {
-            "$type constitutes a framework type which is prohibited"
-        }
-    }
 
     override val implicitBinding: InjectConstructorBindingModel?
         get() = if (qualifier == null) {
@@ -62,8 +55,16 @@ internal class NodeModelImpl private constructor(
         append(type)
     }
 
-    override fun multiBoundListNode(langModelFactory: LangModelFactory): NodeModel {
-        return Factory(type = langModelFactory.getListType(type), qualifier = qualifier)
+    override fun multiBoundListNode(): NodeModel {
+        return Factory(type = LangModelFactory.getListType(type), qualifier = qualifier)
+    }
+
+    override fun validate(validator: Validator) {
+        if (isFrameworkType(type)) {
+            validator.report(buildError {
+                contents = "$type is wrapped into a framework type, can't be manually bound"
+            })
+        }
     }
 
     companion object Factory : BiObjectCache<TypeLangModel, AnnotationLangModel?, NodeModelImpl>() {

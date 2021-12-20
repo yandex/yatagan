@@ -10,6 +10,9 @@ include("api")
 
 include("base")
 
+include("validation")
+include("validation-impl")
+
 include("lang")
 
 include("core")
@@ -35,7 +38,7 @@ include("generator-lang")
 
 include("testing")
 
-project(":lang").projectDir = file("lang")
+project(":validation-impl").projectDir = file("validation/impl")
 
 project(":core-impl").projectDir = file("core/impl")
 

@@ -7,6 +7,8 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentDependencyModelImpl private constructor(
@@ -32,6 +34,12 @@ internal class ComponentDependencyModelImpl private constructor(
     override fun asNode(): NodeModel {
         return NodeModelImpl(type = type)
     }
+
+    override fun validate(validator: Validator) {
+        validator.child(node = asNode(), kind = Inline)
+    }
+
+    override fun toString() = "Dependency[$type]"
 
     companion object Factory : ObjectCache<TypeLangModel, ComponentDependencyModelImpl>() {
         operator fun invoke(type: TypeLangModel) = createCached(type) {

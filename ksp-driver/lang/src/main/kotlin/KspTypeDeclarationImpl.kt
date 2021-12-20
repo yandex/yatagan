@@ -30,6 +30,9 @@ internal class KspTypeDeclarationImpl private constructor(
 
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
 
+    override val isInterface: Boolean
+        get() = impl.classKind == ClassKind.INTERFACE
+
     override val isAbstract: Boolean
         get() = impl.isAbstract()
 

@@ -1,12 +1,12 @@
 package com.yandex.daggerlite.graph
 
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
+import com.yandex.daggerlite.validation.MayBeInvalid
 
-interface BindingGraph {
+interface BindingGraph : MayBeInvalid {
     /**
      * Component for which graph is built
      */
@@ -28,12 +28,6 @@ interface BindingGraph {
      * TODO: doc
      */
     val localConditionLiterals: Set<ConditionScope.Literal>
-
-    /**
-     * Nodes that have no binding for them.
-     * Generally the graph is invalid if these are not empty. Use for error reporting.
-     */
-    val missingBindings: Map<NodeModel, List<NodeRequester>>
 
     /**
      * Child graphs (or Subcomponents). Empty if no children present.
@@ -63,15 +57,8 @@ interface BindingGraph {
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *
      * @return resolved binding with a graph to which it's a local binding.
-     * @throws MissingBindingException if binding is not found
      */
     fun resolveBinding(node: NodeModel): Binding
-
-    sealed interface NodeRequester {
-        class EntryPointRequester(val entryPoint: ComponentModel.EntryPoint) : NodeRequester
-        class BindingRequester(val binding: BaseBinding): NodeRequester
-        class MemberInjectRequester(val injector: MembersInjectorModel): NodeRequester
-    }
 
     interface BindingUsage {
         val direct: Int

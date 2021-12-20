@@ -1,9 +1,11 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.validation.MayBeInvalid
+
 /**
  * Represents [com.yandex.daggerlite.Module].
  */
-interface ModuleModel : ClassBackedModel {
+interface ModuleModel : ClassBackedModel, MayBeInvalid {
     /**
      * Included modules.
      */

@@ -10,6 +10,7 @@ class CtNoDeclaration private constructor(
     private val type: CtTypeLangModel,
 ) : CtTypeDeclarationLangModel() {
     override val isAbstract get() = false
+    override val isInterface get() = false
 
     override val annotations get() = emptySequence<Nothing>()
     override val implementedInterfaces get() = emptySequence<Nothing>()

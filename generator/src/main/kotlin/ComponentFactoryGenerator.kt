@@ -128,13 +128,14 @@ internal class ComponentFactoryGenerator(
                             }
                         }
                     }
-
-                    overrideMethod(factory.factoryMethod) {
-                        modifiers(PUBLIC)
-                        +buildExpression {
-                            +"return new %T(".formatCode(componentImplName)
-                            join(builderAccess) { +it }
-                            +")"
+                    factory.factoryMethod?.let { factoryMethod ->
+                        overrideMethod(factoryMethod) {
+                            modifiers(PUBLIC)
+                            +buildExpression {
+                                +"return new %T(".formatCode(componentImplName)
+                                join(builderAccess) { +it }
+                                +")"
+                            }
                         }
                     }
                 }

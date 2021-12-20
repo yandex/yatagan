@@ -2,11 +2,12 @@ package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
  * Represents @[com.yandex.daggerlite.Component] annotated class - Component.
  */
-interface ComponentModel : ClassBackedModel, ConditionalHoldingModel {
+interface ComponentModel : ClassBackedModel, ConditionalHoldingModel, MayBeInvalid {
     /**
      * A set of all modules that are included into the component.
      */

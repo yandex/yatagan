@@ -7,6 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.daggerlite.Component
+import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.ksp.lang.KspModelFactoryImpl
 import com.yandex.daggerlite.ksp.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.ksp.lang.Utils
@@ -18,17 +19,18 @@ import java.io.Writer
 internal class KspDaggerLiteProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor, ProcessorDelegate<KSClassDeclaration> {
-    override val langModelFactory by lazy(::KspModelFactoryImpl)
     override val logger: Logger = KspLogger(environment.logger)
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         Utils.init(resolver).use {
-            process(
-                sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
-                    .filterIsInstance<KSClassDeclaration>(),
-                delegate = this,
-            )
-            return emptyList()
+            LangModelFactory.use(KspModelFactoryImpl()) {
+                process(
+                    sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
+                        .filterIsInstance<KSClassDeclaration>(),
+                    delegate = this,
+                )
+                return emptyList()
+            }
         }
     }
 

@@ -32,6 +32,13 @@ sealed interface Binding : BaseBinding {
 interface EmptyBinding : Binding
 
 /**
+ * A placeholder for a binding that is missing.
+ * There's no defined handling for this binding on any levels.
+ * Such bindings are, by definition, always invalid.
+ */
+interface MissingBinding : Binding
+
+/**
  * A [com.yandex.daggerlite.Provides] binding.
  */
 interface ProvisionBinding : Binding {

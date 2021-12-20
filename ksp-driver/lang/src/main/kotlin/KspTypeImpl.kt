@@ -42,6 +42,13 @@ internal class KspTypeImpl private constructor(
     override val isVoid: Boolean
         get() = jvmType == JvmTypeInfo.Void || impl == Utils.resolver.builtIns.unitType
 
+    override fun isAssignableFrom(another: TypeLangModel): Boolean {
+        return when (another) {
+            is KspTypeImpl -> impl.isAssignableFrom(another.impl)
+            else -> false
+        }
+    }
+
     override fun toString() = nameModel.toString()
 
     override fun decay(): TypeLangModel {

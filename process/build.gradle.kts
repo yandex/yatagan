@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":base"))
+    implementation(project(":validation-impl"))
     implementation(project(":graph-impl"))
     implementation(project(":core-impl"))
     implementation(project(":generator"))

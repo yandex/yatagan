@@ -5,6 +5,7 @@ import com.google.devtools.ksp.getJavaClassByName
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.symbol.ClassKind
+import com.google.devtools.ksp.symbol.FunctionKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -49,6 +50,8 @@ internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): 
     annotations.any { it.hasType(T::class) }
 
 internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers || isAnnotationPresent<JvmStatic>()
+
+internal val KSFunctionDeclaration.isStatic get() = functionKind == FunctionKind.STATIC
 
 internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT
 

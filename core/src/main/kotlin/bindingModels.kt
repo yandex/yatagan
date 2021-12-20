@@ -3,12 +3,13 @@ package com.yandex.daggerlite.core
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
  * Declared in a [ModuleModel], and thus explicit, binding model.
  * Backed by a `lang`-level construct.
  */
-sealed interface ModuleHostedBindingModel {
+sealed interface ModuleHostedBindingModel: MayBeInvalid {
     val originModule: ModuleModel
     val target: NodeModel
     val multiBinding: MultiBindingKind?

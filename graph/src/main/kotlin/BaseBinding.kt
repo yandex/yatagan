@@ -2,12 +2,13 @@ package com.yandex.daggerlite.graph
 
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
  * Represents a way to provide a [NodeModel].
  * Each [NodeModel] must have a single [BaseBinding] for a [BindingGraph] to be valid.
  */
-sealed interface BaseBinding {
+sealed interface BaseBinding : MayBeInvalid {
     /**
      * A node that this binding provides.
      */

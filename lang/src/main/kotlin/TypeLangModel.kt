@@ -29,6 +29,11 @@ interface TypeLangModel {
     val isVoid: Boolean
 
     /**
+     * Checks if a variable of this type can be assigned a value of [another] type.
+     */
+    fun isAssignableFrom(another: TypeLangModel): Boolean
+
+    /**
      * This API is inspired by C++'s `std::decay` - the type "decays" into some other type according to some
      * well-defined rules.
      *

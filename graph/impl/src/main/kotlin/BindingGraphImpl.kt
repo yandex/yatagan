@@ -8,23 +8,18 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.allInputs
-import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.BindingGraph.NodeRequester
-import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.BindingRequester
-import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.EntryPointRequester
-import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.MemberInjectRequester
 import com.yandex.daggerlite.graph.ConditionScope
-import com.yandex.daggerlite.graph.MissingBindingException
+import com.yandex.daggerlite.graph.MissingBinding
 import com.yandex.daggerlite.graph.normalized
+import com.yandex.daggerlite.validation.Validator
 
-private class BindingGraphImpl(
+internal class BindingGraphImpl(
     override val model: ComponentModel,
     override val parent: BindingGraphImpl? = null,
-    private val factory: LangModelFactory,
 ) : BindingGraph {
     override val variant: Variant = model.variant + parent?.variant
 
@@ -43,7 +38,6 @@ private class BindingGraphImpl(
     }
     private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = buildBindingsSequence(
         graph = this,
-        langModelFactory = factory,
     ).groupBy(BaseBinding::target).mapValuesTo(mutableMapOf()) { (target, bindings) ->
         if (bindings.size != 1) {
             val distinct = bindings.toSet()
@@ -60,16 +54,23 @@ private class BindingGraphImpl(
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableSetOf<ConditionScope.Literal>()
-    override val missingBindings: Map<NodeModel, List<NodeRequester>>
     override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
 
     override fun resolveBinding(node: NodeModel): Binding {
-        return resolveHelper[node] ?: parent?.resolveBinding(node) ?: throw MissingBindingException(node)
+        return resolveHelper[node]
+            ?: parent?.resolveBinding(node)
+            ?: throw AssertionError("Not reached: non-materialized node $node")
+    }
+
+    fun resolveRaw(node: NodeModel): BaseBinding {
+        return allProvidedBindings[node]
+            ?: parent?.resolveRaw(node)
+            ?: throw AssertionError("Not reached: non-materialized node $node")
     }
 
     // MAYBE: write algorithm in such a way that this is local variable.
-    private val materializationQueue: MutableList<Pair<NodeDependency, NodeRequester>> = ArrayDeque()
+    private val materializationQueue: MutableList<NodeDependency> = ArrayDeque()
 
     init {
         // Pre-validate factory inputs
@@ -81,36 +82,29 @@ private class BindingGraphImpl(
             .flatMap(ModuleModel::subcomponents)
             .filter { it.conditionScopeFor(variant) != null }
             .distinct()
-            .map { BindingGraphImpl(it, parent = this, factory = factory) }
+            .map { BindingGraphImpl(it, parent = this) }
             .toList()
 
-        val missing = hashMapOf<NodeModel, MutableList<NodeRequester>>()
-
         model.entryPoints.forEach { entryPoint ->
-            materializationQueue.add(entryPoint.dependency to EntryPointRequester(entryPoint))
+            materializationQueue.add(entryPoint.dependency)
         }
         model.memberInjectors.forEach { membersInjector ->
             membersInjector.membersToInject.values.forEach { injectDependency ->
-                materializationQueue.add(injectDependency to MemberInjectRequester(membersInjector))
+                materializationQueue.add(injectDependency)
             }
         }
 
         val seenBindings = hashSetOf<Binding>()
         while (materializationQueue.isNotEmpty()) {
-            val (dependency, requester) = materializationQueue.removeFirst()
-            val binding = materialize(dependency, requester)
-            if (binding == null) {
-                missing.getOrPut(dependency.node, ::mutableListOf) += requester
-                continue
-            }
+            val dependency = materializationQueue.removeFirst()
+            val binding = materialize(dependency)
             if (binding.owner == this) {
                 if (!seenBindings.add(binding)) {
                     continue
                 }
-                materializationQueue += binding.dependencies().map { it to BindingRequester(binding) }
+                materializationQueue += binding.dependencies()
             }
         }
-        missingBindings = missing
 
         // Add all condition literals from all local bindings.
         for (binding in localBindings.keys) for (clause in binding.conditionScope.expression) for (literal in clause) {
@@ -126,21 +120,26 @@ private class BindingGraphImpl(
             }
             graphQueue += child.children
         }
-
-        // No longer required
-        allProvidedBindings.clear()
     }
 
-    private fun materialize(dependency: NodeDependency, requester: NodeRequester): Binding? {
-        return materializeLocal(dependency, requester) ?: materializeInParents(dependency, requester)
+    private fun materialize(dependency: NodeDependency): Binding {
+        return materializeLocal(dependency) ?: materializeInParents(dependency) ?: materializeMissing(dependency)
     }
 
-    private fun materializeLocal(dependency: NodeDependency, requester: NodeRequester): Binding? {
+    private fun materializeMissing(dependency: NodeDependency): MissingBinding {
+        val (node, kind) = dependency
+        return MissingBindingImpl(node, this).also {
+            resolveHelper[node] = it
+            localBindings.getOrPut(it, ::BindingUsageImpl).accept(kind)
+        }
+    }
+
+    private fun materializeLocal(dependency: NodeDependency): Binding? {
         fun materializeAlias(maybeAlias: BaseBinding?): Binding? {
             var binding: BaseBinding? = maybeAlias
             while (true) {
                 binding = when (binding) {
-                    is AliasBinding -> materialize(NodeDependency(binding.source), requester)
+                    is AliasBinding -> materialize(NodeDependency(binding.source))
                     is Binding -> return binding
                     null -> return null
                 }
@@ -179,18 +178,18 @@ private class BindingGraphImpl(
         return nonAlias
     }
 
-    private fun materializeInParents(dependency: NodeDependency, requester: NodeRequester): Binding? {
+    private fun materializeInParents(dependency: NodeDependency): Binding? {
         if (parent == null) {
             return null
         }
-        val binding = parent.materializeLocal(dependency, requester)
+        val binding = parent.materializeLocal(dependency)
         if (binding != null) {
             // The binding is requested from a parent, so add parent to dependencies.
             usedParents += parent
-            parent.materializationQueue += dependency to requester
+            parent.materializationQueue += dependency
             return binding
         }
-        return parent.materializeInParents(dependency, requester)?.also {
+        return parent.materializeInParents(dependency)?.also {
             usedParents += it.owner
         }
     }
@@ -229,6 +228,16 @@ private class BindingGraphImpl(
     override fun toString(): String {
         return "BindingGraph[$model]"
     }
+
+    override fun validate(validator: Validator) {
+        validator.child(model)
+        for (child in children) {
+            validator.child(child)
+        }
+        for ((_, dependency) in model.entryPoints) {
+            validator.child(resolveBinding(dependency.node))
+        }
+    }
 }
 
 class BindingUsageImpl : BindingGraph.BindingUsage {
@@ -261,10 +270,9 @@ class BindingUsageImpl : BindingGraph.BindingUsage {
 /**
  * Creates [BindingGraph] instance given the root component.
  */
-fun BindingGraph(root: ComponentModel, modelFactory: LangModelFactory): BindingGraph {
-    require(root.isRoot) { "can't use non-root component as a root of a binding graph" }
+fun BindingGraph(root: ComponentModel): BindingGraph {
+    require(root.isRoot) { "Not reached: can't use non-root component as a root of a binding graph" }
     return BindingGraphImpl(
         model = root,
-        factory = modelFactory,
     )
 }

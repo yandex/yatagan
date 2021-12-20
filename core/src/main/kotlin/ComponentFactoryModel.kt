@@ -4,11 +4,12 @@ import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload.Dependency
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload.Instance
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload.Module
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
  * Represents [com.yandex.daggerlite.Component.Builder].
  */
-interface ComponentFactoryModel : ClassBackedModel {
+interface ComponentFactoryModel : ClassBackedModel, MayBeInvalid {
 
     /**
      * TODO: doc.
@@ -22,8 +23,9 @@ interface ComponentFactoryModel : ClassBackedModel {
 
     /**
      * The component creating function to implement.
+     * `null` if no appropriate method is found.
      */
-    val factoryMethod: FunctionLangModel
+    val factoryMethod: FunctionLangModel?
 
     /**
      * TODO: doc.
@@ -41,24 +43,30 @@ interface ComponentFactoryModel : ClassBackedModel {
      *
      * @see InputModel
      */
-    sealed interface InputPayload : ClassBackedModel {
+    sealed interface InputPayload : ClassBackedModel, MayBeInvalid {
         /**
          * Represent an externally given instance via [com.yandex.daggerlite.BindsInstance].
          */
-        class Instance(val node: NodeModel) : InputPayload, ClassBackedModel by node
+        interface Instance : InputPayload {
+            val node: NodeModel
+        }
 
         /**
          * A [Module][ModuleModel] for which [ModuleModel.requiresInstance] holds `true` and it should be externally
          * supplied as a factory input.
          */
-        class Module(val module: ModuleModel) : InputPayload, ClassBackedModel by module
+        interface Module : InputPayload {
+            val module: ModuleModel
+        }
 
         /**
          * An external component dependency.
          *
          * @see ComponentDependencyModel
          */
-        class Dependency(val dependency: ComponentDependencyModel) : InputPayload, ClassBackedModel by dependency
+        interface Dependency : InputPayload {
+            val dependency: ComponentDependencyModel
+        }
     }
 
     /**
@@ -86,7 +94,7 @@ interface ComponentFactoryModel : ClassBackedModel {
     /**
      * Represents a setter method for the input in builder-like fashion.
      */
-    interface BuilderInputModel : InputModel {
+    interface BuilderInputModel : InputModel, MayBeInvalid {
         /**
          * Actual abstract setter.
          * Has *single parameter*; return type may be of the builder type itself or

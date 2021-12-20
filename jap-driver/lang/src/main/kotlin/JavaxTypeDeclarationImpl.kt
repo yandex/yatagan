@@ -31,6 +31,9 @@ internal class JavaxTypeDeclarationImpl private constructor(
         impl.obtainKotlinClassIfApplicable()
     }
 
+    override val isInterface: Boolean
+        get() = impl.kind == ElementKind.INTERFACE
+
     override val isAbstract: Boolean
         get() = impl.isAbstract
 

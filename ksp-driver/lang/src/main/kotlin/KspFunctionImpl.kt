@@ -17,7 +17,7 @@ internal class KspFunctionImpl private constructor(
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
 
     override val isAbstract: Boolean
-        get() = impl.isAbstract
+        get() = impl.isAbstract && !impl.isStatic  // Checking for static due to bug in KSP.
 
     override val isStatic: Boolean
         get() = impl.isStatic

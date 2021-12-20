@@ -5,6 +5,11 @@ package com.yandex.daggerlite.core.lang
  */
 interface TypeDeclarationLangModel : AnnotatedLangModel {
     /**
+     * Whether the declaration is an interface.
+     */
+    val isInterface: Boolean
+
+    /**
      * Whether the declaration is abstract (abstract class or interface).
      */
     val isAbstract: Boolean

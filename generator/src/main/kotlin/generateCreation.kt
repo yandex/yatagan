@@ -11,6 +11,7 @@ import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.graph.ComponentInstanceBinding
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.InstanceBinding
+import com.yandex.daggerlite.graph.MissingBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
@@ -22,7 +23,6 @@ internal fun Binding.generateCreation(
     fun componentForBinding(): String {
         return componentForBinding(inside = inside, binding = this)
     }
-try {
     when (this) {
         is InstanceBinding -> with(builder) {
             val component = componentForBinding()
@@ -92,9 +92,6 @@ try {
         is MultiBinding -> {
             Generators[owner].multiBindingGenerator.generateCreation(builder, this, inside = inside)
         }
-        is EmptyBinding -> throw AssertionError("not handled here")
+        is EmptyBinding, is MissingBinding -> throw AssertionError("Not reached")
     }.let { /*exhaustive*/ }
-} catch (e: Throwable) {
-    throw RuntimeException("While generating creation for $this", e)
-}
 }

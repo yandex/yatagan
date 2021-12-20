@@ -12,16 +12,15 @@ import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.buildError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
 ) : ComponentModel, ConditionalHoldingModelImpl(declaration.conditionals) {
-    init {
-        require(canRepresent(declaration))
-    }
 
-    private val impl = declaration.componentAnnotationIfPresent!!
+    private val impl = declaration.componentAnnotationIfPresent
 
     override val type: TypeLangModel
         get() = declaration.asType()
@@ -34,11 +33,11 @@ internal class ComponentModelImpl private constructor(
     override val scope = declaration.annotations.find(AnnotationLangModel::isScope)
 
     override val modules: Set<ModuleModel> by lazy(NONE) {
-        impl.modules.map(TypeLangModel::declaration).map { ModuleModelImpl(it) }.toSet()
+        impl?.modules?.map(TypeLangModel::declaration)?.map { ModuleModelImpl(it) }?.toSet() ?: emptySet()
     }
 
     override val dependencies: Set<ComponentDependencyModel> by lazy(NONE) {
-        impl.dependencies.map { ComponentDependencyModelImpl(it) }.toSet()
+        impl?.dependencies?.map { ComponentDependencyModelImpl(it) }?.toSet() ?: emptySet()
     }
 
     override val entryPoints: Set<EntryPoint> by lazy(NONE) {
@@ -72,10 +71,33 @@ internal class ComponentModelImpl private constructor(
             }
     }
 
-    override val isRoot: Boolean = impl.isRoot
+    override val isRoot: Boolean = impl?.isRoot ?: false
 
     override val variant: Variant by lazy(NONE) {
-        VariantImpl(impl.variant)
+        VariantImpl(impl?.variant ?: emptySequence())
+    }
+
+    override fun validate(validator: Validator) {
+        for (module in modules) {
+            validator.child(module)
+        }
+        for (dependency in dependencies) {
+            validator.child(dependency)
+        }
+
+        factory?.let(validator::child)
+
+        if (impl == null) {
+            validator.report(buildError {
+                contents = "$declaration is not annotated with @Component"
+            })
+        }
+
+        if (!declaration.isInterface) {
+            validator.report(buildError {
+                contents = "Component declaration must be an interface"
+            })
+        }
     }
 
     override fun toString() = "Component[$declaration]"
