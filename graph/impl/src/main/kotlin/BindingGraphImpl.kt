@@ -23,7 +23,6 @@ internal class BindingGraphImpl(
 ) : BindingGraph {
     override val variant: Variant = model.variant + parent?.variant
 
-    private val resolveHelper = hashMapOf<NodeModel, Binding>()
     override val modules = run {
         val seenModules = hashSetOf<ModuleModel>()
         val moduleQueue = ArrayDeque(model.modules)
@@ -58,15 +57,17 @@ internal class BindingGraphImpl(
     override val children: Collection<BindingGraphImpl>
 
     override fun resolveBinding(node: NodeModel): Binding {
-        return resolveHelper[node]
-            ?: parent?.resolveBinding(node)
-            ?: throw AssertionError("Not reached: non-materialized node $node")
+        var source: NodeModel = node
+        do when (val maybeAlias = resolveRaw(source)) {
+            is AliasBinding -> source = maybeAlias.source
+            is Binding -> return maybeAlias
+        } while (true)
     }
 
-    fun resolveRaw(node: NodeModel): BaseBinding {
+    internal fun resolveRaw(node: NodeModel): BaseBinding {
         return allProvidedBindings[node]
             ?: parent?.resolveRaw(node)
-            ?: throw AssertionError("Not reached: non-materialized node $node")
+            ?: throw AssertionError("Not reached: missing binding for $node")
     }
 
     // MAYBE: write algorithm in such a way that this is local variable.
@@ -129,7 +130,6 @@ internal class BindingGraphImpl(
     private fun materializeMissing(dependency: NodeDependency): MissingBinding {
         val (node, kind) = dependency
         return MissingBindingImpl(node, this).also {
-            resolveHelper[node] = it
             localBindings.getOrPut(it, ::BindingUsageImpl).accept(kind)
         }
     }
@@ -170,7 +170,6 @@ internal class BindingGraphImpl(
         })
         val nonAlias = materializeAlias(binding) ?: return null
 
-        resolveHelper[node] = nonAlias
         if (nonAlias.owner == this) {
             // materializeAlias may have yielded non-local binding, so check.
             localBindings.getOrPut(nonAlias, ::BindingUsageImpl).accept(kind)
