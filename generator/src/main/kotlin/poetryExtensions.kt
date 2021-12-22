@@ -2,6 +2,7 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.WildcardTypeName
@@ -97,14 +98,14 @@ internal inline fun TypeSpecBuilder.overrideMethod(
 internal inline fun <A> ExpressionBuilder.generateCall(
     callable: CallableLangModel,
     arguments: Iterable<A>,
-    instance: String?,
+    instance: CodeBlock?,
     crossinline argumentBuilder: ExpressionBuilder.(A) -> Unit,
 ) {
     when (callable) {
         is ConstructorLangModel -> +"new %T(".formatCode(callable.constructee.asType().typeName())
         is FunctionLangModel -> {
             if (instance != null) {
-                +"$instance.%N(".formatCode(callable.name)
+                +"%L.%N(".formatCode(instance, callable.name)
             } else {
                 val ownerObject = when (callable.owner.kotlinObjectKind) {
                     KotlinObjectKind.Object -> ".INSTANCE"

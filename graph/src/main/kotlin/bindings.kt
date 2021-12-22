@@ -23,10 +23,25 @@ interface AliasBinding : BaseBinding {
 /**
  * A base class for all concrete binding implementations, apart from [AliasBinding].
  */
-sealed interface Binding : BaseBinding {
+interface Binding : BaseBinding {
     val conditionScope: ConditionScope
     val scope: AnnotationLangModel?
     fun dependencies(): Collection<NodeDependency>
+
+    fun <R> accept(visitor: Visitor<R>): R
+
+    interface Visitor<R> {
+        fun visitProvision(binding: ProvisionBinding): R
+        fun visitInstance(binding: InstanceBinding): R
+        fun visitAlternatives(binding: AlternativesBinding): R
+        fun visitSubComponentFactory(binding: SubComponentFactoryBinding): R
+        fun visitComponentDependency(binding: ComponentDependencyBinding): R
+        fun visitComponentInstance(binding: ComponentInstanceBinding): R
+        fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R
+        fun visitMulti(binding: MultiBinding): R
+        fun visitEmpty(binding: EmptyBinding): R
+        fun visitMissing(binding: MissingBinding): R
+    }
 }
 
 interface EmptyBinding : Binding

@@ -6,6 +6,7 @@ import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
 import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
+import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
@@ -13,6 +14,8 @@ import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.AlternativesBinding
+import com.yandex.daggerlite.graph.BaseBinding
+import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ComponentDependencyBinding
 import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
@@ -25,35 +28,48 @@ import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
-import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.addNote
 import com.yandex.daggerlite.validation.impl.buildError
 import com.yandex.daggerlite.validation.impl.buildWarning
 import kotlin.LazyThreadSafetyMode.NONE
 
-internal abstract class BindingBase : MayBeInvalid {
-    protected abstract fun dependencies(): Collection<NodeDependency>
-    protected abstract val owner: BindingGraphImpl
+internal interface BaseBindingMixin : BaseBinding {
+    override val owner: BindingGraphImpl
+
+    override val originModule: ModuleModel?
+        get() = null
+}
+
+internal interface BindingMixin : Binding, BaseBindingMixin {
+    override val conditionScope: ConditionScope
+        get() = ConditionScope.Unscoped
+
+    override val scope: AnnotationLangModel?
+        get() = null
 
     override fun validate(validator: Validator) {
         dependencies().forEach {
             validator.child(owner.resolveRaw(it.node))
         }
     }
+
+    override fun dependencies(): Collection<NodeDependency> = emptyList()
+
+    override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
+        return visitor.visitBinding(this)
+    }
 }
 
-internal abstract class ModuleHostedBindingBase : BindingBase() {
-    protected abstract val impl: ModuleHostedBindingModel
+internal abstract class ModuleHostedMixin : BaseBindingMixin {
+    abstract val impl: ModuleHostedBindingModel
 
-    val originModule get() = impl.originModule
+    final override val originModule get() = impl.originModule
 
-    val target: NodeModel by lazy(NONE) {
-        with(impl) {
-            if (multiBinding != null)
-                MultiBindingContributionNode(target)
-            else target
-        }
+    final override val target: NodeModel by lazy(NONE) {
+        if (impl.multiBinding != null)
+            MultiBindingContributionNode(impl.target)
+        else impl.target
     }
 
     private class MultiBindingContributionNode(
@@ -68,7 +84,7 @@ internal class ProvisionBindingImpl(
     override val impl: ProvidesBindingModel,
     override val owner: BindingGraphImpl,
     override val conditionScope: ConditionScope,
-) : ProvisionBinding, ModuleHostedBindingBase() {
+) : ProvisionBinding, BindingMixin, ModuleHostedMixin() {
 
     override val scope get() = impl.scope
     override val provision get() = impl.provision
@@ -77,13 +93,17 @@ internal class ProvisionBindingImpl(
 
     override fun dependencies(): Collection<NodeDependency> = inputs.toList()
     override fun toString() = "@Provides ${inputs.toList()} -> $target"
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitProvision(this)
+    }
 }
 
 internal class InjectConstructorProvisionBindingImpl(
     private val impl: InjectConstructorBindingModel,
     override val owner: BindingGraphImpl,
     override val conditionScope: ConditionScope,
-) : ProvisionBinding, BindingBase() {
+) : ProvisionBinding, BindingMixin {
     override val target get() = impl.target
     override val originModule: Nothing? get() = null
     override val scope: AnnotationLangModel? get() = impl.scope
@@ -94,12 +114,16 @@ internal class InjectConstructorProvisionBindingImpl(
     override fun dependencies(): Collection<NodeDependency> {
         return impl.inputs.toList()
     }
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitProvision(this)
+    }
 }
 
 internal class AliasBindingImpl(
     override val impl: BindsBindingModel,
     override val owner: BindingGraphImpl,
-) : AliasBinding, ModuleHostedBindingBase() {
+) : AliasBinding, ModuleHostedMixin() {
     init {
         require(impl.sources.count() == 1) {
             "Not reached: sources count must be equal to 1"
@@ -121,12 +145,8 @@ internal class AliasBindingImpl(
 
     override fun toString() = "@Binds (alias) $source -> $target"
 
-    override fun dependencies(): Collection<NodeDependency> {
-        return listOf(NodeDependency(source))
-    }
-
     override fun validate(validator: Validator) {
-        super.validate(validator)
+        validator.child(source)
         if (impl.scope != null) {
             validator.report(buildWarning {
                 this.contents = "Scope has no effect on 'alias' binding"
@@ -136,12 +156,16 @@ internal class AliasBindingImpl(
             })
         }
     }
+
+    override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
+        return visitor.visitAlias(this)
+    }
 }
 
 internal class AlternativesBindingImpl(
     override val impl: BindsBindingModel,
     override val owner: BindingGraphImpl,
-) : AlternativesBinding, ModuleHostedBindingBase() {
+) : AlternativesBinding, BindingMixin, ModuleHostedMixin() {
     override val scope get() = impl.scope
     override val alternatives get() = impl.sources
 
@@ -155,6 +179,10 @@ internal class AlternativesBindingImpl(
     override fun dependencies() = alternatives.map(::NodeDependency).toList()
 
     override fun toString() = "@Binds (alternatives) [first present of $alternatives] -> $target"
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitAlternatives(this)
+    }
 }
 
 internal class ComponentDependencyEntryPointBindingImpl(
@@ -162,33 +190,34 @@ internal class ComponentDependencyEntryPointBindingImpl(
     override val dependency: ComponentDependencyModel,
     override val getter: FunctionLangModel,
     override val target: NodeModel,
-) : ComponentDependencyEntryPointBinding, BindingBase() {
-    override val originModule: Nothing? get() = null
-    override val scope: Nothing? get() = null
-    override val conditionScope get() = ConditionScope.Unscoped
+) : ComponentDependencyEntryPointBinding, BindingMixin {
     override fun dependencies() = listOf(NodeDependency(dependency.asNode()))
 
     override fun toString() = "$getter from $dependency (intrinsic)"
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitComponentDependencyEntryPoint(this)
+    }
 }
 
 internal class ComponentInstanceBindingImpl(
     graph: BindingGraphImpl,
-) : ComponentInstanceBinding, BindingBase() {
+) : ComponentInstanceBinding, BindingMixin {
     override val owner: BindingGraphImpl = graph
     override val target get() = owner.model.asNode()
-    override val scope: Nothing? get() = null
-    override val conditionScope get() = ConditionScope.Unscoped
-    override fun dependencies(): List<Nothing> = emptyList()
-    override val originModule: Nothing? get() = null
 
     override fun toString() = "Component instance $target (intrinsic)"
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitComponentInstance(this)
+    }
 }
 
 internal class SubComponentFactoryBindingImpl(
     override val owner: BindingGraphImpl,
     override val conditionScope: ConditionScope,
     private val factory: ComponentFactoryModel,
-) : SubComponentFactoryBinding, BindingBase() {
+) : SubComponentFactoryBinding, BindingMixin {
     override val target: NodeModel
         get() = factory.asNode()
 
@@ -199,11 +228,12 @@ internal class SubComponentFactoryBindingImpl(
         }
     }
 
-    override val scope: Nothing? get() = null
-
-    override val originModule: Nothing? get() = null
     override fun dependencies() = targetGraph.usedParents.map { NodeDependency(it.model.asNode()) }
     override fun toString() = "Subcomponent factory $factory (intrinsic)"
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitSubComponentFactory(this)
+    }
 }
 
 internal class MultiBindingImpl(
@@ -211,10 +241,8 @@ internal class MultiBindingImpl(
     override val target: NodeModel,
     contributions: Map<NodeModel, ContributionType>,
     declaration: ListDeclarationModel?,
-) : MultiBinding, BindingBase() {
+) : MultiBinding, BindingMixin {
     private val _contributions = contributions
-    override val scope: Nothing? get() = null
-    override val conditionScope get() = ConditionScope.Unscoped
     override val contributions: Map<NodeModel, ContributionType> by lazy(NONE) {
         if (declaration?.orderByDependency == true) {
             // Resolve aliases as multi-bindings often work with @Binds
@@ -233,58 +261,62 @@ internal class MultiBindingImpl(
 
     override fun toString() =
         "MultiBinding $target of ${contributions.keys.take(3)}${if (contributions.size > 3) "..." else ""} (intrinsic)"
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitMulti(this)
+    }
 }
 
 internal class ModuleHostedEmptyBindingImpl(
     override val impl: ModuleHostedBindingModel,
     override val owner: BindingGraphImpl,
-) : EmptyBinding, ModuleHostedBindingBase() {
+) : EmptyBinding, BindingMixin, ModuleHostedMixin() {
     override val conditionScope get() = ConditionScope.NeverScoped
-    override val scope: Nothing? get() = null
-    override fun dependencies(): List<Nothing> = emptyList()
     override fun toString() = "Absent $target in $impl"
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitEmpty(this)
+    }
 }
 
 internal class ImplicitEmptyBindingImpl(
     override val owner: BindingGraphImpl,
     override val target: NodeModel,
-) : EmptyBinding, BindingBase() {
-    override val scope: Nothing? get() = null
+) : EmptyBinding, BindingMixin {
     override val conditionScope get() = ConditionScope.NeverScoped
-    override fun dependencies(): List<Nothing> = emptyList()
     override fun toString() = "Absent $target (intrinsic)"
-    override val originModule: Nothing? get() = null
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitEmpty(this)
+    }
 }
 
 internal class ComponentDependencyBindingImpl(
     override val dependency: ComponentDependencyModel,
     override val owner: BindingGraphImpl,
-) : ComponentDependencyBinding, BindingBase() {
+) : ComponentDependencyBinding, BindingMixin {
     override val target get() = dependency.asNode()
-    override val conditionScope get() = ConditionScope.Unscoped
-    override val scope: Nothing? get() = null
-    override fun dependencies(): List<Nothing> = emptyList()
-    override val originModule: Nothing? get() = null
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitComponentDependency(this)
+    }
 }
 
 internal class InstanceBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraphImpl,
-) : InstanceBinding, BindingBase() {
-    override val conditionScope get() = ConditionScope.Unscoped
-    override val scope: Nothing? get() = null
-    override fun dependencies(): List<Nothing> = emptyList()
-    override val originModule: Nothing? get() = null
+) : InstanceBinding, BindingMixin {
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitInstance(this)
+    }
 }
 
 internal data class MissingBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraphImpl,
-) : MissingBinding, BindingBase() {
+) : MissingBinding, BindingMixin {
     override val conditionScope get() = ConditionScope.NeverScoped
-    override val scope: Nothing? get() = null
-    override fun dependencies(): List<Nothing> = emptyList()
-    override val originModule: Nothing? get() = null
 
     override fun validate(validator: Validator) {
         validator.report(buildError {
@@ -293,5 +325,9 @@ internal data class MissingBindingImpl(
                         "hierarchy matched its scope ${failedInject.scope}"
             } ?: "Missing binding for $target, no known way to create it"
         })
+    }
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitMissing(this)
     }
 }

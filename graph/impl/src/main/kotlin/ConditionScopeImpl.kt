@@ -94,65 +94,6 @@ private class ConditionLiteralImpl private constructor(
 
     override val root get() = payload.root
 
-    private class LiteralPayload private constructor(
-        val root: TypeDeclarationLangModel,
-        private val pathSource: String,
-    ) {
-        val path: List<MemberLangModel> by lazy(NONE) {
-            buildList {
-                var currentType = root.asType()
-                var finished = false
-
-                pathSource.split('.').forEach { rawName ->
-                    check(!finished) { "Unable to reach boolean result with the given condition" }
-
-                    val member = checkNotNull(findAccessor(currentType.declaration, rawName)) {
-                        "Can't find accessible '$rawName' member in $currentType"
-                    }
-                    add(member)
-
-                    val type = when (member) {
-                        is FunctionLangModel -> member.returnType
-                        is FieldLangModel -> member.type
-                    }
-                    if (type.isBoolean) {
-                        finished = true
-                    } else {
-                        currentType = type
-                    }
-                }
-                check(finished) { "Unable to reach boolean result with the given condition" }
-            }
-        }
-
-        companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
-            operator fun invoke(root: TypeDeclarationLangModel, pathSource: String) : LiteralPayload {
-                return createCached(root, pathSource) {
-                    LiteralPayload(root, pathSource)
-                }
-            }
-
-            private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
-                val field = type.allPublicFields.find { it.name == name }
-                if (field != null) {
-                    return field
-                }
-
-                val allMethods = type.allPublicFunctions
-                val method = allMethods.find { function ->
-                    function.propertyAccessorInfo?.let {
-                        // If this is a kotlin property getter, then look for property name
-                        it.isGetter && it.propertyName == name
-                    } ?: (function.name == name)
-                }
-                if (method != null) {
-                    return method
-                }
-                return null
-            }
-        }
-    }
-
     companion object Factory : BiObjectCache<Boolean, LiteralPayload, ConditionLiteralImpl>() {
         operator fun invoke(model: ConditionAnnotationLangModel): Literal {
             val condition = model.condition
@@ -173,5 +114,64 @@ private class ConditionLiteralImpl private constructor(
         }
 
         private val ConditionRegex = "^(!?)((?:[A-Za-z][A-Za-z0-9_]*\\.)*[A-Za-z][A-Za-z0-9_]*)\$".toRegex()
+    }
+}
+
+private class LiteralPayload private constructor(
+    val root: TypeDeclarationLangModel,
+    private val pathSource: String,
+) {
+    val path: List<MemberLangModel> by lazy(NONE) {
+        buildList {
+            var currentType = root.asType()
+            var finished = false
+
+            pathSource.split('.').forEach { rawName ->
+                check(!finished) { "Unable to reach boolean result with the given condition" }
+
+                val member = checkNotNull(findAccessor(currentType.declaration, rawName)) {
+                    "Can't find accessible '$rawName' member in $currentType"
+                }
+                add(member)
+
+                val type = when (member) {
+                    is FunctionLangModel -> member.returnType
+                    is FieldLangModel -> member.type
+                }
+                if (type.isBoolean) {
+                    finished = true
+                } else {
+                    currentType = type
+                }
+            }
+            check(finished) { "Unable to reach boolean result with the given condition" }
+        }
+    }
+
+    companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
+        operator fun invoke(root: TypeDeclarationLangModel, pathSource: String) : LiteralPayload {
+            return createCached(root, pathSource) {
+                LiteralPayload(root, pathSource)
+            }
+        }
+
+        private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
+            val field = type.allPublicFields.find { it.name == name }
+            if (field != null) {
+                return field
+            }
+
+            val allMethods = type.allPublicFunctions
+            val method = allMethods.find { function ->
+                function.propertyAccessorInfo?.let {
+                    // If this is a kotlin property getter, then look for property name
+                    it.isGetter && it.propertyName == name
+                } ?: (function.name == name)
+            }
+            if (method != null) {
+                return method
+            }
+            return null
+        }
     }
 }

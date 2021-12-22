@@ -112,20 +112,19 @@ internal class BindingGraphImpl(
     }
 
     private fun materializeLocal(dependency: NodeDependency): Binding? {
-        fun materializeAlias(maybeAlias: BaseBinding?): Binding? {
-            var binding: BaseBinding? = maybeAlias
-            while (true) {
-                binding = when (binding) {
-                    is AliasBinding -> materialize(NodeDependency(binding.source))
-                    is Binding -> return binding
-                    null -> return null
-                }
+        class MaterializeAliasVisitor : BaseBinding.Visitor<Binding> {
+            override fun visitAlias(alias: AliasBinding): Binding {
+                return materialize(dependency.copy(node = alias.source))
+            }
+
+            override fun visitBinding(binding: Binding): Binding {
+                return binding
             }
         }
 
         val (node, kind) = dependency
-        val binding = bindings.materializeBindingFor(node)
-        val nonAlias = materializeAlias(binding) ?: return null
+        val binding = bindings.materializeBindingFor(node) ?: return null
+        val nonAlias = binding.accept(MaterializeAliasVisitor())
 
         if (nonAlias.owner == this) {
             // materializeAlias may have yielded non-local binding, so check.

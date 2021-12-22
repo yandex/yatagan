@@ -16,43 +16,39 @@ import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 
-internal fun Binding.generateCreation(
-    builder: ExpressionBuilder,
-    inside: BindingGraph,
-) {
-    fun componentForBinding(): String {
-        return componentForBinding(inside = inside, binding = this)
-    }
-    when (this) {
-        is InstanceBinding -> with(builder) {
-            val component = componentForBinding()
-            val factory = Generators[owner].factoryGenerator
-            +"$component.${factory.fieldNameFor(target)}"
-        }
-        is ProvisionBinding -> with(builder) {
+private class CreationGeneratorVisitor(
+    private val builder: ExpressionBuilder,
+    private val inside: BindingGraph,
+) : Binding.Visitor<Unit> {
+    override fun visitProvision(binding: ProvisionBinding) {
+        with(builder) {
             generateCall(
-                callable = provision,
-                arguments = inputs.asIterable(),
-                instance = if (requiresModuleInstance) {
-                    val component = componentForBinding()
-                    "$component.${Generators[owner].factoryGenerator.fieldNameFor(originModule!!)}"
+                callable = binding.provision,
+                arguments = binding.inputs.asIterable(),
+                instance = if (binding.requiresModuleInstance) {
+                    "%N.%N".formatCode(
+                        componentForBinding(binding),
+                        Generators[binding.owner].factoryGenerator.fieldNameFor(binding.originModule!!),
+                    )
                 } else null,
             ) { (node, kind) ->
                 inside.resolveBinding(node).generateAccess(builder = this, inside = inside, kind = kind)
             }
         }
-        is SubComponentFactoryBinding -> with(builder) {
-            +"new %T(".formatCode(Generators[targetGraph].factoryGenerator.implName)
-            join(targetGraph.usedParents) { parentGraph ->
-                +buildExpression {
-                    +componentInstance(inside = inside, graph = parentGraph)
-                }
-            }
-            +")"
+    }
+
+    override fun visitInstance(binding: InstanceBinding) {
+        with(builder) {
+            val component = componentForBinding(binding)
+            val factory = Generators[binding.owner].factoryGenerator
+            +"$component.${factory.fieldNameFor(binding.target)}"
         }
-        is AlternativesBinding -> with(builder) {
+    }
+
+    override fun visitAlternatives(binding: AlternativesBinding) {
+        with(builder) {
             var exhaustive = false
-            for (alternative: NodeModel in alternatives) {
+            for (alternative: NodeModel in binding.alternatives) {
                 val altBinding = inside.resolveBinding(alternative)
                 if (!altBinding.conditionScope.isAlways) {
                     if (altBinding.conditionScope.isNever) {
@@ -75,23 +71,66 @@ internal fun Binding.generateCreation(
                 +"null /*empty*/"
             }
         }
-        is ComponentInstanceBinding -> with(builder) {
-            +componentForBinding()
+    }
+
+    override fun visitSubComponentFactory(binding: SubComponentFactoryBinding) {
+        with(builder) {
+            +"new %T(".formatCode(Generators[binding.targetGraph].factoryGenerator.implName)
+            join(binding.targetGraph.usedParents) { parentGraph ->
+                +buildExpression {
+                    +componentInstance(inside = inside, graph = parentGraph)
+                }
+            }
+            +")"
         }
-        is ComponentDependencyBinding -> with(builder) {
-            val factory = Generators[owner].factoryGenerator
-            +factory.fieldNameFor(dependency)
+    }
+
+    override fun visitComponentDependency(binding: ComponentDependencyBinding) {
+        with(builder) {
+            val factory = Generators[binding.owner].factoryGenerator
+            +factory.fieldNameFor(binding.dependency)
         }
-        is ComponentDependencyEntryPointBinding -> with(builder) {
-            val factory = Generators[owner].factoryGenerator
-            +factory.fieldNameFor(dependency)
-            +"."
-            +getter.name
-            +"()"
+    }
+
+    override fun visitComponentInstance(binding: ComponentInstanceBinding) {
+        with(builder) {
+            +componentForBinding(binding)
         }
-        is MultiBinding -> {
-            Generators[owner].multiBindingGenerator.generateCreation(builder, this, inside = inside)
+    }
+
+    override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding) {
+        with(builder) {
+            +"%N.%N()".formatCode(
+                Generators[binding.owner].factoryGenerator.fieldNameFor(binding.dependency),
+                binding.getter.name,
+            )
         }
-        is EmptyBinding, is MissingBinding -> throw AssertionError("Not reached")
-    }.let { /*exhaustive*/ }
+    }
+
+    override fun visitMulti(binding: MultiBinding) {
+        Generators[binding.owner].multiBindingGenerator.generateCreation(
+            builder = builder,
+            binding = binding,
+            inside = inside,
+        )
+    }
+
+    override fun visitEmpty(binding: EmptyBinding) {
+        throw AssertionError("Not reached")
+    }
+
+    override fun visitMissing(binding: MissingBinding) {
+        throw AssertionError("Not reached")
+    }
+
+    private fun componentForBinding(binding: Binding): String {
+        return componentForBinding(inside = inside, binding = binding)
+    }
+}
+
+internal fun Binding.generateCreation(
+    builder: ExpressionBuilder,
+    inside: BindingGraph,
+) {
+    accept(CreationGeneratorVisitor(builder = builder, inside = inside))
 }
