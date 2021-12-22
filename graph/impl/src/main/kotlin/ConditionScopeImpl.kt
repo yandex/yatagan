@@ -6,11 +6,16 @@ import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.ConditionScope.Literal
+import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
+import com.yandex.daggerlite.validation.impl.buildError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal val ConditionScope.Companion.Unscoped get() = ConditionScopeImpl.Unscoped
@@ -74,6 +79,12 @@ private class ConditionScopeImpl(
     override val isNever: Boolean
         get() = this === NeverScoped || expression.singleOrNull()?.isEmpty() == true
 
+    override fun validate(validator: Validator) {
+        for (literal: Literal in expression.asSequence().flatten().toSet()) {
+            validator.child(literal)
+        }
+    }
+
     companion object {
         val Unscoped: ConditionScope = ConditionScopeImpl(emptySet())
         val NeverScoped: ConditionScope = ConditionScopeImpl(setOf(emptySet()))
@@ -94,15 +105,31 @@ private class ConditionLiteralImpl private constructor(
 
     override val root get() = payload.root
 
+    override fun validate(validator: Validator) {
+        validator.child(payload, kind = Inline)
+    }
+
     companion object Factory : BiObjectCache<Boolean, LiteralPayload, ConditionLiteralImpl>() {
         operator fun invoke(model: ConditionAnnotationLangModel): Literal {
             val condition = model.condition
-            val matched = ConditionRegex.matchEntire(condition)
-                ?: throw RuntimeException("invalid condition $condition")
-            val (negate, names) = matched.destructured
-            return this(
-                negated = negate.isNotEmpty(),
-                payload = LiteralPayload(model.target.declaration, names),
+            return ConditionRegex.matchEntire(condition)?.let { matched ->
+                val (negate, names) = matched.destructured
+                this(
+                    negated = negate.isNotEmpty(),
+                    payload = LiteralPayloadImpl(model.target.declaration, names),
+                )
+            } ?: this(
+                negated = false,
+                payload = object : LiteralPayload {
+                    override val root: TypeDeclarationLangModel get() = LangModelFactory.errorType.declaration
+                    override val path: List<MemberLangModel> get() = emptyList()
+                    override fun validate(validator: Validator) {
+                        // Always invalid
+                        validator.report(buildError {
+                            contents = "Invalid condition expression '$condition'"
+                        })
+                    }
+                }
             )
         }
 
@@ -117,20 +144,41 @@ private class ConditionLiteralImpl private constructor(
     }
 }
 
-private class LiteralPayload private constructor(
-    val root: TypeDeclarationLangModel,
+private interface LiteralPayload : MayBeInvalid {
+    val path: List<MemberLangModel>
+    val root: TypeDeclarationLangModel
+}
+
+private class LiteralPayloadImpl private constructor(
+    override val root: TypeDeclarationLangModel,
     private val pathSource: String,
-) {
-    val path: List<MemberLangModel> by lazy(NONE) {
+) : LiteralPayload {
+    private var pathParsingError: String? = null
+
+    override fun validate(validator: Validator) {
+        path  // Ensure path is parsed
+        pathParsingError?.let { message ->
+            validator.report(buildError {
+                contents = message
+            })
+        }
+    }
+
+    override val path: List<MemberLangModel> by lazy(NONE) {
         buildList {
             var currentType = root.asType()
             var finished = false
 
             pathSource.split('.').forEach { rawName ->
-                check(!finished) { "Unable to reach boolean result with the given condition" }
+                if (finished) {
+                    pathParsingError = "Unable to reach boolean result with the given condition"
+                    return@forEach
+                }
 
-                val member = checkNotNull(findAccessor(currentType.declaration, rawName)) {
-                    "Can't find accessible '$rawName' member in $currentType"
+                val member = findAccessor(currentType.declaration, rawName)
+                if (member == null) {
+                    pathParsingError = "Can't find accessible '$rawName' member in $currentType"
+                    return@forEach
                 }
                 add(member)
 
@@ -144,14 +192,16 @@ private class LiteralPayload private constructor(
                     currentType = type
                 }
             }
-            check(finished) { "Unable to reach boolean result with the given condition" }
+            if (!finished) {
+                pathParsingError = "Unable to reach boolean result with the given condition"
+            }
         }
     }
 
     companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
         operator fun invoke(root: TypeDeclarationLangModel, pathSource: String) : LiteralPayload {
             return createCached(root, pathSource) {
-                LiteralPayload(root, pathSource)
+                LiteralPayloadImpl(root, pathSource)
             }
         }
 

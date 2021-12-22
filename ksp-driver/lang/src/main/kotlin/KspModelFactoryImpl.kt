@@ -49,6 +49,9 @@ class KspModelFactoryImpl : LangModelFactory {
         }
     }
 
+    override val errorType: TypeLangModel
+        get() = KspTypeImpl(ErrorTypeImpl)
+
     private class FakeKsAnnotationImpl(
         annotationClassDeclaration: KSClassDeclaration,
     ) : KSAnnotation {

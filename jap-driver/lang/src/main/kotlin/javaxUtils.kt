@@ -219,7 +219,7 @@ internal fun parametersSequenceFor(
     }
 }
 
-private object ErrorTypeImpl : ErrorType {
+internal object ErrorTypeImpl : ErrorType {
     override fun getAnnotationMirrors(): List<AnnotationMirror> = emptyList()
     override fun getKind(): TypeKind = TypeKind.ERROR
     override fun <A : Annotation?> getAnnotation(clazz: Class<A>) = throw UnsupportedOperationException()

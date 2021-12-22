@@ -7,6 +7,7 @@ interface LangModelFactory {
     fun getAnnotation(clazz: Class<out Annotation>): AnnotationLangModel
     fun getListType(type: TypeLangModel): TypeLangModel
     fun getCollectionType(type: TypeLangModel): TypeLangModel
+    val errorType: TypeLangModel
 
     companion object : LangModelFactory {
         @PublishedApi
@@ -26,5 +27,6 @@ interface LangModelFactory {
         override fun getAnnotation(clazz: Class<out Annotation>) = checkNotNull(delegate).getAnnotation(clazz)
         override fun getListType(type: TypeLangModel) = checkNotNull(delegate).getListType(type)
         override fun getCollectionType(type: TypeLangModel) = checkNotNull(delegate).getCollectionType(type)
+        override val errorType: TypeLangModel get() = checkNotNull(delegate).errorType
     }
 }

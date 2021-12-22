@@ -2,8 +2,9 @@ package com.yandex.daggerlite.graph
 
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 
-interface ConditionScope {
+interface ConditionScope : MayBeInvalid {
     val expression: Set<Set<Literal>>
 
     fun contains(another: ConditionScope): Boolean
@@ -18,7 +19,7 @@ interface ConditionScope {
 
     val isNever: Boolean
 
-    interface Literal {
+    interface Literal : MayBeInvalid {
         val negated: Boolean
         val root: TypeDeclarationLangModel
         val path: List<MemberLangModel>

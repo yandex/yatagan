@@ -25,4 +25,7 @@ class JavaxModelFactoryImpl : LangModelFactory {
     override fun getCollectionType(type: TypeLangModel): TypeLangModel {
         return JavaxTypeImpl(Utils.types.getDeclaredType(collectionElement, (type as JavaxTypeImpl).impl))
     }
+
+    override val errorType: TypeLangModel
+        get() = JavaxTypeImpl(ErrorTypeImpl)
 }

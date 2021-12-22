@@ -49,6 +49,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
         get() = null
 
     override fun validate(validator: Validator) {
+        validator.child(conditionScope)
         dependencies().forEach {
             validator.child(owner.resolveRaw(it.node))
         }
