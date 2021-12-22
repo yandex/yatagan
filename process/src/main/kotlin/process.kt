@@ -24,8 +24,8 @@ fun <Source> process(
 
         validationResults.forEach { locatedMessage ->
             val message = buildString {
-                appendLine(locatedMessage.message)
-                appendLine("\tEncountered in:")
+                appendLine(locatedMessage.message.contents)
+                appendLine("Encountered in:")
                 locatedMessage.encounterPaths.forEach { path ->
                     append('\t')
                     path.joinTo(this, separator = " -> ")

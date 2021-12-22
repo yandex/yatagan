@@ -12,6 +12,7 @@ import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
@@ -116,6 +117,40 @@ internal class ComponentFactoryModelImpl private constructor(
                 continue
             validator.report(buildError {
                 contents = "Invalid method in component creator: $function"
+            })
+        }
+
+        val providedComponents = allInputs
+            .map { it.payload }
+            .filterIsInstance<InputPayload.Dependency>()
+            .map { it.dependency }
+            .toSet()
+        if (createdComponent.dependencies != providedComponents) {
+            val missing = createdComponent.dependencies - providedComponents
+            validator.report(buildError {
+                contents = if (missing.isNotEmpty()) "Missing dependency components: $missing"
+                else "Unneeded components in $factory: ${providedComponents - createdComponent.dependencies}"
+            })
+        }
+
+        val providedModules = allInputs
+            .map { it.payload }
+            .filterIsInstance<InputPayload.Module>()
+            .map { it.module }
+            .toSet()
+        val allModulesRequiresInstance = createdComponent.modules.asSequence()
+            .filter(ModuleModel::requiresInstance).toMutableSet()
+
+        val missing = (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }
+        if (missing.isNotEmpty()) {
+            validator.report(buildError {
+                contents = "Missing modules' instances: $missing"
+            })
+        }
+        val unneeded = providedModules - allModulesRequiresInstance
+        if (unneeded.isNotEmpty()) {
+            validator.report(buildError {
+                contents = "Unneeded modules' instances: $unneeded"
             })
         }
     }

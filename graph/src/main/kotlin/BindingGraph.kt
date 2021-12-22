@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.graph
 
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -11,11 +10,6 @@ interface BindingGraph : MayBeInvalid {
      * Component for which graph is built
      */
     val model: ComponentModel
-
-    /**
-     * All modules that are included into this graph.
-     */
-    val modules: Collection<ModuleModel>
 
     /**
      * Requested bindings that belong to this component.
@@ -37,7 +31,7 @@ interface BindingGraph : MayBeInvalid {
     /**
      * TODO: doc
      */
-    val usedParents: Collection<BindingGraph>
+    val usedParents: Set<BindingGraph>
 
     /**
      * Graph variant (full - merged with parents)

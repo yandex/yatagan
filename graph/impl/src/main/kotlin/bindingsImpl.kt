@@ -287,6 +287,11 @@ internal data class MissingBindingImpl(
     override val originModule: Nothing? get() = null
 
     override fun validate(validator: Validator) {
-        validator.report(buildError { this.contents = "Missing binding for ${this@MissingBindingImpl.target}" })
+        validator.report(buildError {
+            contents = target.implicitBinding?.let { failedInject ->
+                "$target has an @Inject constructor, though no components in the " +
+                        "hierarchy matched its scope ${failedInject.scope}"
+            } ?: "Missing binding for $target, no known way to create it"
+        })
     }
 }

@@ -9,7 +9,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  */
 interface ComponentModel : ClassBackedModel, ConditionalHoldingModel, MayBeInvalid {
     /**
-     * A set of all modules that are included into the component.
+     * A set of *all* modules that are included into the component (transitively).
      */
     val modules: Set<ModuleModel>
 

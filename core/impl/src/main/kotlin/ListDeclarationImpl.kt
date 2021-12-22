@@ -13,4 +13,16 @@ internal class ListDeclarationImpl(
         get() = NodeModelImpl(impl.returnType)
     override val orderByDependency: Boolean
         get() = declareList.orderByDependency
+
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is ListDeclarationImpl &&
+                listType == other.listType &&
+                orderByDependency == other.orderByDependency)
+    }
+
+    override fun hashCode(): Int {
+        var result = listType.hashCode()
+        result = 31 * result + orderByDependency.hashCode()
+        return result
+    }
 }

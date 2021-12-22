@@ -1,13 +1,11 @@
 package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
-import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
@@ -16,6 +14,7 @@ import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.MissingBinding
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 
 internal class BindingGraphImpl(
     override val model: ComponentModel,
@@ -23,33 +22,14 @@ internal class BindingGraphImpl(
 ) : BindingGraph {
     override val variant: Variant = model.variant + parent?.variant
 
-    override val modules = run {
-        val seenModules = hashSetOf<ModuleModel>()
-        val moduleQueue = ArrayDeque(model.modules)
-        while (moduleQueue.isNotEmpty()) {
-            val module = moduleQueue.removeFirst()
-            if (!seenModules.add(module)) {
-                continue
-            }
-            moduleQueue += module.includes
-        }
-        seenModules
-    }
-    private val allProvidedBindings: MutableMap<NodeModel, BaseBinding?> = buildBindingsSequence(
+    private val bindings = GraphBindingsFactory(
+        variant = variant,
+        modules = model.modules,
+        dependencies = model.dependencies,
+        factory = model.factory,
         graph = this,
-    ).groupBy(BaseBinding::target).mapValuesTo(mutableMapOf()) { (target, bindings) ->
-        if (bindings.size != 1) {
-            val distinct = bindings.toSet()
-            check(distinct.size == 1) {
-                "$this: Multiple bindings for $target: ${
-                    bindings.joinToString(separator = ",\n") {
-                        "$it FROM ${it.originModule}"
-                    }
-                }"
-            }
-        }
-        bindings.first()
-    }
+        scope = model.scope,
+    )
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableSetOf<ConditionScope.Literal>()
@@ -65,7 +45,7 @@ internal class BindingGraphImpl(
     }
 
     internal fun resolveRaw(node: NodeModel): BaseBinding {
-        return allProvidedBindings[node]
+        return bindings.getBindingFor(node)
             ?: parent?.resolveRaw(node)
             ?: throw AssertionError("Not reached: missing binding for $node")
     }
@@ -74,11 +54,8 @@ internal class BindingGraphImpl(
     private val materializationQueue: MutableList<NodeDependency> = ArrayDeque()
 
     init {
-        // Pre-validate factory inputs
-        validateFactoryInputs()
-
         // Build children
-        children = modules
+        children = model.modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
             .filter { it.conditionScopeFor(variant) != null }
@@ -147,27 +124,7 @@ internal class BindingGraphImpl(
         }
 
         val (node, kind) = dependency
-        val binding = allProvidedBindings.getOrPut(node, fun(): BaseBinding? {
-            if (node.qualifier != null) {
-                return null
-            }
-            val inject = node.implicitBinding ?: return null
-
-            if (inject.scope != null && inject.scope != model.scope) {
-                return null
-            }
-
-            return inject.conditionScopeFor(variant)?.let { conditionScope ->
-                InjectConstructorProvisionBindingImpl(
-                    impl = inject,
-                    owner = this@BindingGraphImpl,
-                    conditionScope = conditionScope,
-                )
-            } ?: ImplicitEmptyBindingImpl(
-                owner = this@BindingGraphImpl,
-                target = node
-            )
-        })
+        val binding = bindings.materializeBindingFor(node)
         val nonAlias = materializeAlias(binding) ?: return null
 
         if (nonAlias.owner == this) {
@@ -193,49 +150,32 @@ internal class BindingGraphImpl(
         }
     }
 
-    private fun validateFactoryInputs() {
-        val factory = model.factory ?: return
-
-        val providedComponents = factory.allInputs
-            .map { it.payload }
-            .filterIsInstance<ComponentFactoryModel.InputPayload.Dependency>()
-            .map { it.dependency }
-            .toSet()
-        check(model.dependencies == providedComponents) {
-            val missing = model.dependencies - providedComponents
-            if (missing.isNotEmpty()) "Missing dependency components in $factory: $missing"
-            else "Unneeded components in $factory: ${providedComponents - model.dependencies}"
-        }
-
-        val providedModules = factory.allInputs
-            .map { it.payload }
-            .filterIsInstance< ComponentFactoryModel.InputPayload.Module>()
-            .map { it.module }
-            .toSet()
-        val allModulesRequiresInstance = modules.asSequence().filter(ModuleModel::requiresInstance).toMutableSet()
-
-        val missing = (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }
-        check(missing.isEmpty()) {
-            "Missing modules in $factory: $missing"
-        }
-        val unneeded = providedModules - allModulesRequiresInstance
-        check(unneeded.isEmpty()) {
-            "Unneeded modules in $factory: $unneeded"
-        }
-    }
-
     override fun toString(): String {
         return "BindingGraph[$model]"
     }
 
     override fun validate(validator: Validator) {
         validator.child(model)
-        for (child in children) {
-            validator.child(child)
-        }
+        validator.child(bindings, kind = Inline)
+        children.forEach(validator::child)
+
+        // Validate every used binding in a graph structure.
+
+        // Reachable via entry-points.
         for ((_, dependency) in model.entryPoints) {
             validator.child(resolveBinding(dependency.node))
         }
+        // Reachable via members-inject.
+        for (memberInjector in model.memberInjectors) {
+            for ((_, dependency) in memberInjector.membersToInject) {
+                validator.child(resolveBinding(dependency.node))
+            }
+        }
+
+        // Validate graph integrity and soundness as a whole
+
+        // TODO: validate no loops in a graph
+        // TODO: validate dependency conditions
     }
 }
 

@@ -41,7 +41,7 @@ internal class ComponentFactoryGenerator(
             }
         }
 
-        triviallyConstructableModules = thisGraph.modules.asSequence()
+        triviallyConstructableModules = thisGraph.model.modules.asSequence()
             .filter { module -> module.requiresInstance && module !in moduleInstanceFieldNames }
             .onEach { module ->
                 check(module.isTriviallyConstructable) {
