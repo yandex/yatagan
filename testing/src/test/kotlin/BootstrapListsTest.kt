@@ -49,7 +49,7 @@ class BootstrapListsTest(
             }
             
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 
                 val bootstrapList = c.bootstrap()
                 assert(bootstrapList !== c.bootstrap())
@@ -125,7 +125,7 @@ class BootstrapListsTest(
             }
             
             fun test() {
-                val c = DaggerMyComponent()
+                val c = DaggerMyComponent.create()
                 val create = c.bootstrapCreate
                 val destroy = c.bootstrapDestroy
             
@@ -173,7 +173,7 @@ class BootstrapListsTest(
             }
             
             fun test() {
-                assert(DaggerTestComponent().bootstrap().isEmpty())
+                assert(DaggerTestComponent.create().bootstrap().isEmpty())
             }
         """.trimIndent())
 

@@ -40,7 +40,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.simple().value == "simple")
                 assert(c.one().value == "one")
                 assert(c.two().value == "two")
@@ -103,7 +103,7 @@ class RuntimeTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.hello().value == "hello")
                 assert(c.bye().value == "bye")
                 assert(c.foo().value == "foo")
@@ -143,7 +143,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.impl().value == 1)
                 assert(c.wrapper().i.value == 2)
             }

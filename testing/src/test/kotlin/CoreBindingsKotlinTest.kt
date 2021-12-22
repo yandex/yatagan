@@ -554,7 +554,7 @@ class CoreBindingsKotlinTest(
             
             fun test() {
                 val foo = Foo()
-                DaggerTestComponent().injectFoo(foo)
+                DaggerTestComponent.create().injectFoo(foo)
                 foo.helloA; foo.bye; foo.b; foo.a
             }""".trimIndent())
         compilesSuccessfully {

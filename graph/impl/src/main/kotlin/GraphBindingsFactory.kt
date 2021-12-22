@@ -82,7 +82,6 @@ internal class GraphBindingsFactory(
             // Subcomponent factories (distinct).
             for (subcomponent: ComponentModel in module.subcomponents) {
                 if (seenSubcomponents.add(subcomponent)) {
-                    // MAYBE: Factory is actually required.
                     subcomponent.factory?.let { factory: ComponentFactoryModel ->
                         factory.createdComponent.conditionScopeFor(variant)?.let { conditionScope ->
                             add(SubComponentFactoryBindingImpl(

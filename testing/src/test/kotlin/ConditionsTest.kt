@@ -114,12 +114,12 @@ class ConditionsTest(
             }
 
             fun test() {
-                val component = DaggerTestComponent()
+                val component = DaggerTestComponent.create()
                 assert(!component.opt.isPresent)
                 Features.enabledA = true
-                assert(!DaggerTestComponent().opt.isPresent)
+                assert(!DaggerTestComponent.create().opt.isPresent)
                 Features.isEnabledB = true
-                val new = DaggerTestComponent()
+                val new = DaggerTestComponent.create()
                 assert(new.opt.isPresent)
                 assert(new.opt.get() === new.direct && new.direct === new.provider.get())
 
@@ -224,8 +224,8 @@ class ConditionsTest(
             }
 
             fun test() {
-                val phone = DaggerTestPhoneComponent()
-                val tablet = DaggerTestTabletComponent()
+                val phone = DaggerTestPhoneComponent.create()
+                val tablet = DaggerTestTabletComponent.create()
 
                 assert(phone.phone.isPresent)
                 assert(!phone.tablet.isPresent)
@@ -303,8 +303,8 @@ class ConditionsTest(
 
             fun test() {
                 Features.isEnabledB = true
-                val phone: TestComponent = DaggerTestPhoneComponent()
-                val tablet: TestComponent = DaggerTestTabletComponent()
+                val phone: TestComponent = DaggerTestPhoneComponent.create()
+                val tablet: TestComponent = DaggerTestTabletComponent.create()
 
                 assert(!phone.myFeatureActivity.isPresent)
                 assert(tablet.myFeatureActivity.isPresent)
@@ -431,7 +431,7 @@ class ConditionsTest(
             
             fun test() {
                 Features.isEnabledB = true
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(!c.apiV1.isPresent)
                 assert(c.apiV2.get() is Stub)
                 assert(c.apiV3.get() is ImplB)
@@ -497,19 +497,19 @@ class ConditionsTest(
             }
             
             fun test() {
-                assert(!DaggerTestMainComponent().api.isPresent)
+                assert(!DaggerTestMainComponent.create().api.isPresent)
             
                 Features.isEnabledB = true
-                assert(!DaggerTestMainComponent().api.isPresent)
+                assert(!DaggerTestMainComponent.create().api.isPresent)
             
                 Features.enabledA = true
                 Features.isEnabledB = false
-                assert(DaggerTestMainComponent().api.isPresent)
-                assert(!DaggerTestCustomComponent().api.isPresent)
+                assert(DaggerTestMainComponent.create().api.isPresent)
+                assert(!DaggerTestCustomComponent.create().api.isPresent)
                 
                 Features.enabledA = false
                 Features.isEnabledB = true
-                assert(DaggerTestCustomComponent().api.isPresent)
+                assert(DaggerTestCustomComponent.create().api.isPresent)
             }
         """.trimIndent())
 
@@ -561,8 +561,8 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = DaggerMyBrowserComponent()
-                val searchAppC = DaggerMySearchAppComponent()
+                val browserC = DaggerMyBrowserComponent.create()
+                val searchAppC = DaggerMySearchAppComponent.create()
                 
                 assert(browserC.myC.create().impl.isPresent)
                 assert(!searchAppC.myC.create().impl.isPresent)
@@ -637,9 +637,9 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = DaggerMyBrowserComponent()
-                val searchAppC = DaggerMySearchAppComponent()
-                val myProductC = DaggerMyProductComponent()
+                val browserC = DaggerMyBrowserComponent.create()
+                val searchAppC = DaggerMySearchAppComponent.create()
+                val myProductC = DaggerMyProductComponent.create()
                 
                 assert(browserC.apiC.create().api.get() is ImplA)
                 assert(searchAppC.apiC.create().api.get() is ImplB)

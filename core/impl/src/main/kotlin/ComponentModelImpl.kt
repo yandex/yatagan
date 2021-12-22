@@ -108,6 +108,27 @@ internal class ComponentModelImpl private constructor(
                 contents = "Component declaration must be an interface"
             })
         }
+
+        if (factory == null) {
+            if (!isRoot) {
+                validator.report(buildError {
+                    contents = "Non-root component declaration must include factory declaration"
+                })
+            }
+
+            if (dependencies.isNotEmpty()) {
+                validator.report(buildError {
+                    contents = "Component declares dependencies, yet no factory declaration is present"
+                })
+            }
+
+            if (modules.any { it.requiresInstance && !it.isTriviallyConstructable }) {
+                validator.report(buildError {
+                    contents = "Component includes non-trivially constructable modules, that require instance, " +
+                            "yet no factory declaration is present"
+                })
+            }
+        }
     }
 
     override fun toString() = "Component[$declaration]"

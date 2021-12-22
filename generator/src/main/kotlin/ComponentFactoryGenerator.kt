@@ -44,9 +44,7 @@ internal class ComponentFactoryGenerator(
         triviallyConstructableModules = thisGraph.model.modules.asSequence()
             .filter { module -> module.requiresInstance && module !in moduleInstanceFieldNames }
             .onEach { module ->
-                check(module.isTriviallyConstructable) {
-                    "module $module is not provided and can't be created on-the-fly"
-                }
+                // Such module must be trivially constructable, it's validated.
                 val name = fieldsNs.name(module.name)
                 moduleInstanceFieldNames[module] = name
             }.toList()
@@ -148,10 +146,15 @@ internal class ComponentFactoryGenerator(
                 }
             }
         } else {
-            // TODO: generate default factory if explicit one is absent.
             constructor {
-                modifiers(PUBLIC)
+                modifiers(PRIVATE)
                 generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
+            }
+
+            method("create") {
+                modifiers(PUBLIC, STATIC)
+                returnType(thisGraph.model.typeName())
+                +"return new %T()".formatCode(componentImplName)
             }
         }
     }
