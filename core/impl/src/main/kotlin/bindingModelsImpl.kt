@@ -3,7 +3,7 @@ package com.yandex.daggerlite.core.impl
 import com.yandex.daggerlite.Binds
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.BindsBindingModel
-import com.yandex.daggerlite.core.ConditionalHoldingModel
+import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -15,28 +15,29 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.buildError
 
-internal abstract class ModuleHostedBindingBase {
+internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
     protected abstract val impl: FunctionLangModel
 
-    val scope: AnnotationLangModel? by lazy(LazyThreadSafetyMode.NONE) {
+    override val scope: AnnotationLangModel? by lazy(LazyThreadSafetyMode.NONE) {
         impl.annotations.find(AnnotationLangModel::isScope)
     }
 
-    val target: NodeModel by lazy(LazyThreadSafetyMode.NONE) {
+    override val target: NodeModel by lazy(LazyThreadSafetyMode.NONE) {
         val type = if (multiBinding == MultiBindingKind.Flatten) {
             impl.returnType.typeArguments.firstOrNull() ?: impl.returnType
         } else impl.returnType
         NodeModelImpl(type = type, forQualifier = impl)
     }
 
-    val multiBinding: MultiBindingKind?
+    override val multiBinding: MultiBindingKind?
         get() = impl.intoListAnnotationIfPresent?.let {
             if (it.flatten) MultiBindingKind.Flatten else MultiBindingKind.Direct
         }
 
-    open fun validate(validator: Validator) {
+    override fun validate(validator: Validator) {
         validator.child(target)
         if (multiBinding == MultiBindingKind.Flatten) {
             val firstArg = impl.returnType.typeArguments.firstOrNull()
@@ -87,6 +88,10 @@ internal class BindsImpl(
         }
     }
 
+    override fun <R> accept(visitor: ModuleHostedBindingModel.Visitor<R>): R {
+        return visitor.visitBinds(this)
+    }
+
     companion object {
         fun canRepresent(method: FunctionLangModel): Boolean {
             return method.isAnnotatedWith<Binds>()
@@ -98,12 +103,14 @@ internal class ProvidesImpl(
     override val impl: FunctionLangModel,
     override val originModule: ModuleModelImpl,
 ) : ProvidesBindingModel,
-    ModuleHostedBindingBase(),
-    ConditionalHoldingModel by ConditionalHoldingModelImpl(impl.providesAnnotationIfPresent!!.conditionals) {
+    ModuleHostedBindingBase() {
+    private val conditionalHolder = ConditionalHoldingModelImpl(impl.providesAnnotationIfPresent!!.conditionals)
 
     init {
         require(canRepresent(impl))
     }
+
+    override val conditionals get() = conditionalHolder.conditionals
 
     override val inputs: Sequence<NodeDependency> = impl.parameters.map { param ->
         NodeDependency(type = param.type, forQualifier = param)
@@ -111,6 +118,8 @@ internal class ProvidesImpl(
 
     override fun validate(validator: Validator) {
         super.validate(validator)
+
+        validator.child(conditionalHolder, kind = Inline)
 
         for (dependency in inputs) {
             validator.child(dependency.node)
@@ -126,6 +135,10 @@ internal class ProvidesImpl(
 
     override val requiresModuleInstance: Boolean
         get() = originModule.mayRequireInstance && !impl.isStatic && !impl.owner.isKotlinObject
+
+    override fun <R> accept(visitor: ModuleHostedBindingModel.Visitor<R>): R {
+        return visitor.visitProvides(this)
+    }
 
     companion object {
         fun canRepresent(method: FunctionLangModel): Boolean {

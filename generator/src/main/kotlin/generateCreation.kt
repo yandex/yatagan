@@ -11,7 +11,6 @@ import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.graph.ComponentInstanceBinding
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.InstanceBinding
-import com.yandex.daggerlite.graph.MissingBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
@@ -116,10 +115,6 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitEmpty(binding: EmptyBinding) {
-        throw AssertionError("Not reached")
-    }
-
-    override fun visitMissing(binding: MissingBinding) {
         throw AssertionError("Not reached")
     }
 

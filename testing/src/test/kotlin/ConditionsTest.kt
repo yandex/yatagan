@@ -293,7 +293,7 @@ class ConditionsTest(
             @Conditionals([
                 Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class]),
             ])
-            @Component(isRoot = false, variant = [MyFeatureActivity::class])  // TODO: not Custom.
+            @Component(isRoot = false, variant = [MyFeatureActivity::class])
             interface MyFeatureActivityComponent {
                 @Component.Builder
                 interface Factory {
@@ -463,6 +463,7 @@ class ConditionsTest(
         useSourceSet(features)
         useSourceSet(flavors)
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Named
             import com.yandex.daggerlite.Component
             import com.yandex.daggerlite.Provides
             import com.yandex.daggerlite.Module
@@ -482,21 +483,39 @@ class ConditionsTest(
                 fun provideApi(): Api {
                     return Impl()
                 }
+                
+                @Named
+                @Provides([
+                    Conditional(onlyIn = [ActivityType.Main::class]),
+                    // Nowhere else
+                ])
+                fun provideNamedApi(): Api {
+                    return Impl()
+                }
             }
             
             @Component(modules = [MyModule::class], variant = [ActivityType.Main::class])
             interface TestMainComponent {
                 val api: Optional<Api>
                 val apiLazy: Optional<Lazy<Api>>
+                
+                @get:Named
+                val namedApi: Optional<Api>
             }
             
             @Component(modules = [MyModule::class], variant = [ActivityType.Custom::class])
             interface TestCustomComponent {
                 val api: Optional<Api>
                 val apiLazy: Optional<Lazy<Api>>
+                
+                @get:Named
+                val namedApi: Optional<Api>
             }
             
             fun test() {
+                assert(DaggerTestMainComponent.create().namedApi.isPresent)
+                assert(!DaggerTestCustomComponent.create().namedApi.isPresent)
+            
                 assert(!DaggerTestMainComponent.create().api.isPresent)
             
                 Features.isEnabledB = true

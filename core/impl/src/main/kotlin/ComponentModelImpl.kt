@@ -88,6 +88,8 @@ internal class ComponentModelImpl private constructor(
     }
 
     override fun validate(validator: Validator) {
+        super.validate(validator)
+
         for (module in modules) {
             validator.child(module)
         }

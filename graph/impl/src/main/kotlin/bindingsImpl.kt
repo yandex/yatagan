@@ -23,7 +23,6 @@ import com.yandex.daggerlite.graph.ComponentInstanceBinding
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.InstanceBinding
-import com.yandex.daggerlite.graph.MissingBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.ProvisionBinding
@@ -62,6 +61,21 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
     }
 }
 
+internal interface ConditionalBindingMixin : BindingMixin {
+    val variantMatch: VariantMatch
+
+    override val conditionScope: ConditionScope
+        get() = variantMatch.conditionScope
+
+    override fun validate(validator: Validator) {
+        super.validate(validator)
+        when (val match = variantMatch) {
+            is VariantMatch.Error -> validator.report(match.message)
+            is VariantMatch.Matched -> {}
+        }
+    }
+}
+
 internal abstract class ModuleHostedMixin : BaseBindingMixin {
     abstract val impl: ModuleHostedBindingModel
 
@@ -84,15 +98,18 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
 internal class ProvisionBindingImpl(
     override val impl: ProvidesBindingModel,
     override val owner: BindingGraphImpl,
-    override val conditionScope: ConditionScope,
-) : ProvisionBinding, BindingMixin, ModuleHostedMixin() {
+) : ProvisionBinding, ConditionalBindingMixin, ModuleHostedMixin() {
 
     override val scope get() = impl.scope
     override val provision get() = impl.provision
     override val inputs get() = impl.inputs
     override val requiresModuleInstance get() = impl.requiresModuleInstance
+    override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
 
-    override fun dependencies(): Collection<NodeDependency> = inputs.toList()
+    override fun dependencies(): Collection<NodeDependency> {
+        return if (conditionScope.isNever) emptyList() else inputs.toList()
+    }
+
     override fun toString() = "@Provides ${inputs.toList()} -> $target"
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -103,17 +120,17 @@ internal class ProvisionBindingImpl(
 internal class InjectConstructorProvisionBindingImpl(
     private val impl: InjectConstructorBindingModel,
     override val owner: BindingGraphImpl,
-    override val conditionScope: ConditionScope,
-) : ProvisionBinding, BindingMixin {
+) : ProvisionBinding, ConditionalBindingMixin {
     override val target get() = impl.target
     override val originModule: Nothing? get() = null
     override val scope: AnnotationLangModel? get() = impl.scope
     override val provision get() = impl.constructor
     override val inputs: Sequence<NodeDependency> get() = impl.inputs
     override val requiresModuleInstance: Boolean = false
+    override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
 
     override fun dependencies(): Collection<NodeDependency> {
-        return impl.inputs.toList()
+        return if (conditionScope.isNever) emptyList() else impl.inputs.toList()
     }
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -216,9 +233,8 @@ internal class ComponentInstanceBindingImpl(
 
 internal class SubComponentFactoryBindingImpl(
     override val owner: BindingGraphImpl,
-    override val conditionScope: ConditionScope,
     private val factory: ComponentFactoryModel,
-) : SubComponentFactoryBinding, BindingMixin {
+) : SubComponentFactoryBinding, ConditionalBindingMixin {
     override val target: NodeModel
         get() = factory.asNode()
 
@@ -229,7 +245,15 @@ internal class SubComponentFactoryBindingImpl(
         }
     }
 
-    override fun dependencies() = targetGraph.usedParents.map { NodeDependency(it.model.asNode()) }
+    override fun dependencies(): List<NodeDependency> {
+        return if (conditionScope.isNever) emptyList()
+        else targetGraph.usedParents.map { NodeDependency(it.model.asNode()) }
+    }
+
+    override val variantMatch: VariantMatch by lazy(NONE) {
+        VariantMatch(factory.createdComponent, owner.variant)
+    }
+
     override fun toString() = "Subcomponent factory $factory (intrinsic)"
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -280,18 +304,6 @@ internal class ModuleHostedEmptyBindingImpl(
     }
 }
 
-internal class ImplicitEmptyBindingImpl(
-    override val owner: BindingGraphImpl,
-    override val target: NodeModel,
-) : EmptyBinding, BindingMixin {
-    override val conditionScope get() = ConditionScope.NeverScoped
-    override fun toString() = "Absent $target (intrinsic)"
-
-    override fun <R> accept(visitor: Binding.Visitor<R>): R {
-        return visitor.visitEmpty(this)
-    }
-}
-
 internal class ComponentDependencyBindingImpl(
     override val dependency: ComponentDependencyModel,
     override val owner: BindingGraphImpl,
@@ -316,7 +328,7 @@ internal class InstanceBindingImpl(
 internal data class MissingBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraphImpl,
-) : MissingBinding, BindingMixin {
+) : EmptyBinding, BindingMixin {
     override val conditionScope get() = ConditionScope.NeverScoped
 
     override fun validate(validator: Validator) {
@@ -329,6 +341,6 @@ internal data class MissingBindingImpl(
     }
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
-        return visitor.visitMissing(this)
+        return visitor.visitEmpty(this)
     }
 }

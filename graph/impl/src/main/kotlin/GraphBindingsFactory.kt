@@ -8,11 +8,11 @@ import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ListDeclarationModel
+import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
-import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -30,46 +30,44 @@ internal class GraphBindingsFactory(
     dependencies: Set<ComponentDependencyModel>,
     factory: ComponentFactoryModel?,
     private val graph: BindingGraphImpl,
-    private val variant: Variant,
     private val scope: AnnotationLangModel?,
 ) : MayBeInvalid {
     private val validationMessages = arrayListOf<ValidationMessage>()
 
-    private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList<BaseBinding> {
+    private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
+        val bindingModelVisitor = object : ModuleHostedBindingModel.Visitor<BaseBinding> {
+            override fun visitBinds(model: BindsBindingModel): BaseBinding {
+                return when (model.sources.count()) {
+                    0 -> ModuleHostedEmptyBindingImpl(
+                        owner = graph,
+                        impl = model,
+                    )
+                    1 -> AliasBindingImpl(
+                        owner = graph,
+                        impl = model,
+                    )
+                    else -> AlternativesBindingImpl(
+                        owner = graph,
+                        impl = model,
+                    )
+                }
+            }
+
+            override fun visitProvides(model: ProvidesBindingModel): BaseBinding {
+                return ProvisionBindingImpl(
+                    impl = model,
+                    owner = graph,
+                )
+            }
+        }
+
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
         val multiBindings = linkedMapOf<NodeModel, MutableMap<NodeModel, ContributionType>>()
         for (module: ModuleModel in modules) {
             // All bindings from installed modules
             for (bindingModel in module.bindings) {
-                val binding = when (bindingModel) {
-                    is BindsBindingModel -> when (bindingModel.sources.count()) {
-                        0 -> ModuleHostedEmptyBindingImpl(
-                            owner = graph,
-                            impl = bindingModel,
-                        )
-                        1 -> AliasBindingImpl(
-                            owner = graph,
-                            impl = bindingModel,
-                        )
-                        else -> AlternativesBindingImpl(
-                            owner = graph,
-                            impl = bindingModel,
-                        )
-                    }
-                    is ProvidesBindingModel -> {
-                        bindingModel.conditionScopeFor(variant)?.let { conditionScope ->
-                            ProvisionBindingImpl(
-                                impl = bindingModel,
-                                owner = graph,
-                                conditionScope = conditionScope,
-                            )
-                        } ?: ModuleHostedEmptyBindingImpl(
-                            owner = graph,
-                            impl = bindingModel,
-                        )
-                    }
-                }
+                val binding = bindingModel.accept(bindingModelVisitor)
                 add(binding)
                 // Handle multi-bindings
                 bindingModel.multiBinding?.let { kind ->
@@ -83,15 +81,9 @@ internal class GraphBindingsFactory(
             for (subcomponent: ComponentModel in module.subcomponents) {
                 if (seenSubcomponents.add(subcomponent)) {
                     subcomponent.factory?.let { factory: ComponentFactoryModel ->
-                        factory.createdComponent.conditionScopeFor(variant)?.let { conditionScope ->
-                            add(SubComponentFactoryBindingImpl(
-                                owner = graph,
-                                factory = factory,
-                                conditionScope = conditionScope,
-                            ))
-                        } ?: add(ImplicitEmptyBindingImpl(
+                        add(SubComponentFactoryBindingImpl(
                             owner = graph,
-                            target = factory.asNode()
+                            factory = factory,
                         ))
                     }
                 }
@@ -171,15 +163,9 @@ internal class GraphBindingsFactory(
                 return null
             }
 
-            return inject.conditionScopeFor(variant)?.let { conditionScope ->
-                InjectConstructorProvisionBindingImpl(
-                    impl = inject,
-                    owner = graph,
-                    conditionScope = conditionScope,
-                )
-            } ?: ImplicitEmptyBindingImpl(
+            return InjectConstructorProvisionBindingImpl(
+                impl = inject,
                 owner = graph,
-                target = node
             )
         })
     }

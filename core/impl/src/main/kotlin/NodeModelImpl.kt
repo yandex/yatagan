@@ -44,6 +44,13 @@ internal class NodeModelImpl private constructor(
         override val scope: AnnotationLangModel? by lazy {
             constructor.constructee.annotations.find(AnnotationLangModel::isScope)
         }
+
+        override fun validate(validator: Validator) {
+            super.validate(validator)
+            for (input in inputs) {
+                validator.child(input.node)
+            }
+        }
     }
 
     override fun toString() = buildString {

@@ -40,18 +40,10 @@ interface Binding : BaseBinding {
         fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R
         fun visitMulti(binding: MultiBinding): R
         fun visitEmpty(binding: EmptyBinding): R
-        fun visitMissing(binding: MissingBinding): R
     }
 }
 
 interface EmptyBinding : Binding
-
-/**
- * A placeholder for a binding that is missing.
- * There's no defined handling for this binding on any levels.
- * Such bindings are, by definition, always invalid.
- */
-interface MissingBinding : Binding
 
 /**
  * A [com.yandex.daggerlite.Provides] binding.

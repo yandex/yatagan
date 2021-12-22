@@ -4,10 +4,12 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.ConditionalHoldingModel
 import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.daggerlite.core.ConditionalHoldingModel.FeatureModel
-import com.yandex.daggerlite.core.Variant
+import com.yandex.daggerlite.core.Variant.FlavorModel
 import com.yandex.daggerlite.core.lang.ConditionLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.buildError
 
 internal open class ConditionalHoldingModelImpl(
     sources: Sequence<ConditionalAnnotationLangModel>,
@@ -20,10 +22,14 @@ internal open class ConditionalHoldingModelImpl(
     private class ConditionalWithFlavorConstraintsModelImpl(
         annotation: ConditionalAnnotationLangModel,
     ) : ConditionalWithFlavorConstraintsModel {
-        override val onlyIn: Sequence<Variant.FlavorModel> =
+        override val onlyIn: Sequence<FlavorModel> =
             annotation.onlyIn.map { FlavorImpl(it) }
         override val featureTypes: Sequence<FeatureModel> =
             annotation.featureTypes.map { FeatureModelImpl(it.declaration) }
+    }
+
+    override fun validate(validator: Validator) {
+        conditionals.flatMap { it.featureTypes }.distinct().forEach(validator::child)
     }
 
     private class FeatureModelImpl private constructor(
@@ -31,9 +37,11 @@ internal open class ConditionalHoldingModelImpl(
     ) : FeatureModel {
         override val conditions: Sequence<ConditionLangModel> = impl.conditions
 
-        init {
-            require(conditions.any()) {
-                "No conditions present on feature declaration $impl"
+        override fun validate(validator: Validator) {
+            if (conditions.none()) {
+                validator.report(buildError {
+                    contents = "No conditions present on feature declaration"
+                })
             }
         }
 

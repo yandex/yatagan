@@ -11,7 +11,7 @@ import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ConditionScope
-import com.yandex.daggerlite.graph.MissingBinding
+import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
@@ -23,7 +23,6 @@ internal class BindingGraphImpl(
     override val variant: Variant = model.variant + parent?.variant
 
     private val bindings = GraphBindingsFactory(
-        variant = variant,
         modules = model.modules,
         dependencies = model.dependencies,
         factory = model.factory,
@@ -58,7 +57,7 @@ internal class BindingGraphImpl(
         children = model.modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
-            .filter { it.conditionScopeFor(variant) != null }
+            .filter { !VariantMatch(it, variant).conditionScope.isNever }
             .distinct()
             .map { BindingGraphImpl(it, parent = this) }
             .toList()
@@ -104,7 +103,7 @@ internal class BindingGraphImpl(
         return materializeLocal(dependency) ?: materializeInParents(dependency) ?: materializeMissing(dependency)
     }
 
-    private fun materializeMissing(dependency: NodeDependency): MissingBinding {
+    private fun materializeMissing(dependency: NodeDependency): EmptyBinding {
         val (node, kind) = dependency
         return MissingBindingImpl(node, this).also {
             localBindings.getOrPut(it, ::BindingUsageImpl).accept(kind)
