@@ -149,6 +149,12 @@ internal class GraphBindingsFactory(
         return implicitBindings[node] ?: providedBindings[node]?.first()
     }
 
+    fun materializeMissing(node: NodeModel): Binding {
+        return MissingBindingImpl(node, graph).also {
+            implicitBindings[node] = it
+        }
+    }
+
     fun materializeBindingFor(node: NodeModel): BaseBinding? {
         // fixme: implicit binding should only be queried after parents are checked, not like this.
         //  otherwise it could conflict with explicit bindings in parents if any. Though this is

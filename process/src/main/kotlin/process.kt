@@ -20,21 +20,27 @@ fun <Source> process(
             BindingGraph(root = model)
         }.toList()
 
+        val logger = LoggerDecorator(delegate.logger)
+
         val validationResults = validate(graphRoots)
 
         validationResults.forEach { locatedMessage ->
             val message = buildString {
+                append("\u001b[31m")
                 appendLine(locatedMessage.message.contents)
+                append("\u001b[0m")
                 appendLine("Encountered in:")
                 locatedMessage.encounterPaths.forEach { path ->
-                    append('\t')
-                    path.joinTo(this, separator = " -> ")
+                    append("    ")
+                    path.joinTo(this, separator = " ⟶ ") {
+                        "\u001b[36m$it\u001b[0m"
+                    }
                     appendLine()
                 }
             }
             when (locatedMessage.message.kind) {
-                Error -> delegate.logger.error(message)
-                Warning -> delegate.logger.warning(message)
+                Error -> logger.error(message)
+                Warning -> logger.warning(message)
                 Note -> TODO()
             }
 
@@ -65,9 +71,10 @@ fun <Source> process(
                     ).use(generator::generateTo)
                 }
 
-            } catch (e: Exception) {
-                delegate.logger.error(buildString {
-                    appendLine("While processing $source")
+            } catch (e: Throwable) {
+                logger.error(buildString {
+                    appendLine("Internal Processor Error while processing $source")
+                    appendLine("Please, report this to the maintainers, along with the code (diff) that triggered this.")
                     appendLine(e.message)
                     appendLine(e.stackTraceToString())
                 })

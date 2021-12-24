@@ -1,7 +1,9 @@
 package com.yandex.daggerlite.validation.impl
 
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.ValidationMessage.Kind
+import com.yandex.daggerlite.validation.Validator
 
 /**
  * An API for building [messages][ValidationMessage].
@@ -31,4 +33,18 @@ inline fun buildNote(block: ValidationMessageBuilder.() -> Unit): ValidationMess
 
 inline fun ValidationMessageBuilder.addNote(block: ValidationMessageBuilder.() -> Unit) {
     add(buildMessage(Kind.Note, block))
+}
+
+class ValidationWrapper(
+    val name: String,
+    val wrapped: MayBeInvalid,
+) : MayBeInvalid {
+    override fun toString() = name
+    override fun validate(validator: Validator) {
+        validator.child(wrapped)
+    }
+}
+
+fun MayBeInvalid.wrap(name: String): ValidationWrapper {
+    return ValidationWrapper(name = name, wrapped = this)
 }

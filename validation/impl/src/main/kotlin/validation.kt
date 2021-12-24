@@ -8,7 +8,7 @@ import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Nested
 
 interface LocatedMessage {
     val message: ValidationMessage
-    val encounterPaths: Collection<List<MayBeInvalid>>
+    val encounterPaths: Collection<List<Any>>
 }
 
 private class ValidatorImpl : Validator {

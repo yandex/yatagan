@@ -136,6 +136,8 @@ internal class InjectConstructorProvisionBindingImpl(
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitProvision(this)
     }
+
+    override fun toString() = "@Inject $target"
 }
 
 internal class AliasBindingImpl(
@@ -343,4 +345,6 @@ internal data class MissingBindingImpl(
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)
     }
+
+    override fun toString() = "[missing: $target]"
 }

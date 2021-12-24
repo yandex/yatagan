@@ -6,15 +6,17 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
+import com.yandex.daggerlite.core.component1
+import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ConditionScope
-import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
+import com.yandex.daggerlite.validation.impl.wrap
 
 internal class BindingGraphImpl(
     override val model: ComponentModel,
@@ -103,9 +105,9 @@ internal class BindingGraphImpl(
         return materializeLocal(dependency) ?: materializeInParents(dependency) ?: materializeMissing(dependency)
     }
 
-    private fun materializeMissing(dependency: NodeDependency): EmptyBinding {
+    private fun materializeMissing(dependency: NodeDependency): Binding {
         val (node, kind) = dependency
-        return MissingBindingImpl(node, this).also {
+        return bindings.materializeMissing(node).also {
             localBindings.getOrPut(it, ::BindingUsageImpl).accept(kind)
         }
     }
@@ -148,9 +150,14 @@ internal class BindingGraphImpl(
         }
     }
 
-    override fun toString(): String {
-        return "BindingGraph[$model]"
-    }
+    override fun toString() = buildList<ComponentModel> {
+        var current: BindingGraph? = this@BindingGraphImpl
+        while (current != null) {
+            add(current.model)
+            current = current.parent
+        }
+        reverse()
+    }.joinToString(separator = "::")
 
     override fun validate(validator: Validator) {
         validator.child(model)
@@ -160,13 +167,16 @@ internal class BindingGraphImpl(
         // Validate every used binding in a graph structure.
 
         // Reachable via entry-points.
-        for ((_, dependency) in model.entryPoints) {
-            validator.child(resolveBinding(dependency.node))
+        for ((getter, dependency) in model.entryPoints) {
+            validator.child(resolveBinding(dependency.node).wrap("[entry-point] ${getter.name}"))
         }
         // Reachable via members-inject.
         for (memberInjector in model.memberInjectors) {
-            for ((_, dependency) in memberInjector.membersToInject) {
-                validator.child(resolveBinding(dependency.node))
+            for ((member, dependency) in memberInjector.membersToInject) {
+                validator.child(resolveBinding(dependency.node)
+                    .wrap("[member-to-inject] ${member.name}")
+                    .wrap("[injector-fun] ${memberInjector.injector.name}")
+                )
             }
         }
 

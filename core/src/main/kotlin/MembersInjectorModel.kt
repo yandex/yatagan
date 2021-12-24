@@ -3,11 +3,12 @@ package com.yandex.daggerlite.core
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
  * TODO: doc.
  */
-interface MembersInjectorModel {
+interface MembersInjectorModel : MayBeInvalid {
     /**
      * A function (in a component interface) that performs injection
      */

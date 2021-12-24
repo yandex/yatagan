@@ -25,5 +25,10 @@ abstract class CtFunctionLangModel : FunctionLangModel {
         annotations.find { it.hasType<DeclareList>() }?.let { CtDeclareListAnnotationImpl(it) }
     }
 
-    override fun toString() = "function $name(${parameters.toList()}) -> $returnType"
+    override fun toString() = buildString {
+        append(name).append('(')
+        parameters.joinTo(this)
+        append("): ")
+        append(returnType)
+    }
 }

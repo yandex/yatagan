@@ -58,8 +58,8 @@ interface ComponentModel : ClassBackedModel, ConditionalHoldingModel, MayBeInval
      * Represents a function/property exposed from a component interface.
      * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
      */
-    data class EntryPoint(
-        val getter: FunctionLangModel,
-        val dependency: NodeDependency,
-    )
+    interface EntryPoint : MayBeInvalid {
+        val getter: FunctionLangModel
+        val dependency: NodeDependency
+    }
 }

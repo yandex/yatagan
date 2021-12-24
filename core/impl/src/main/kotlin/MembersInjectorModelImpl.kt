@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isGetter
+import com.yandex.daggerlite.validation.Validator
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -37,6 +38,12 @@ internal class MembersInjectorModelImpl private constructor(
                     forQualifier = functionInjectee,
                 ))
             }
+        }
+    }
+
+    override fun validate(validator: Validator) {
+        membersToInject.forEach { (_, dependency) ->
+            validator.child(dependency.node)
         }
     }
 

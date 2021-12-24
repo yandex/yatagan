@@ -10,6 +10,9 @@ dependencies {
 
     testFixturesApi(project(":api"))
     testFixturesApi("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
+    testFixturesImplementation(project(":process"))
+    testFixturesImplementation(project(":base"))
+    testFixturesImplementation(kotlin("test"))
 
     testImplementation(testFixtures(project(":ksp-driver")))
     testImplementation(testFixtures(project(":jap-driver")))

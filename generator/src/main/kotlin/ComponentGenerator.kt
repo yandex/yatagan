@@ -2,6 +2,8 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
+import com.yandex.daggerlite.core.component1
+import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder

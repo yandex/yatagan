@@ -32,7 +32,7 @@ internal class JapComponentProcessingStep(
     override fun createDeclaration(source: TypeElement) = TypeDeclarationLangModel(source)
 
     override fun openFileForGenerating(source: TypeElement, packageName: String, className: String): Writer {
-        return filer.createSourceFile("$packageName.$className", source).openWriter()
+        return filer.createSourceFile("$packageName.$className", source).openWriter().buffered()
     }
 
     override fun process(elementsByAnnotation: ImmutableSetMultimap<String, Element>): Set<Element> {

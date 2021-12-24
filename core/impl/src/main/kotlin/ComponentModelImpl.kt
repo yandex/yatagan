@@ -7,9 +7,11 @@ import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ComponentModel.EntryPoint
 import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
@@ -51,10 +53,19 @@ internal class ComponentModelImpl private constructor(
     }
 
     override val entryPoints: Set<EntryPoint> by lazy(NONE) {
+        class EntryPointImpl(
+            override val getter: FunctionLangModel,
+            override val dependency: NodeDependency,
+        ) : EntryPoint {
+            override fun validate(validator: Validator) {
+                validator.child(dependency.node)
+            }
+        }
+
         declaration.allPublicFunctions.filter {
             it.isAbstract && it.parameters.none()
         }.map { function ->
-            EntryPoint(
+            EntryPointImpl(
                 dependency = NodeDependency(
                     type = function.returnType,
                     forQualifier = function,
@@ -96,6 +107,12 @@ internal class ComponentModelImpl private constructor(
         for (dependency in dependencies) {
             validator.child(dependency)
         }
+        for (entryPoint in entryPoints) {
+            validator.child(entryPoint)
+        }
+        for (memberInjector in memberInjectors) {
+            validator.child(memberInjector)
+        }
 
         factory?.let(validator::child)
 
@@ -133,7 +150,13 @@ internal class ComponentModelImpl private constructor(
         }
     }
 
-    override fun toString() = "Component[$declaration]"
+    override fun toString() = buildString {
+        val declarationString = declaration.toString()
+        append(declarationString)
+        if (!declarationString.endsWith("Component")) {
+            append(" (Component)")
+        }
+    }
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)
