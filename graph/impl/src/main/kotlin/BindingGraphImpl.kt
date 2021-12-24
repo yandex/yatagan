@@ -162,6 +162,7 @@ internal class BindingGraphImpl(
     override fun validate(validator: Validator) {
         validator.child(model)
         validator.child(bindings, kind = Inline)
+        validator.child(variant)
         children.forEach(validator::child)
 
         // Validate every used binding in a graph structure.
