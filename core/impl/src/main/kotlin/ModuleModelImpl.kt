@@ -11,6 +11,7 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.buildError
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -61,7 +62,7 @@ internal class ModuleModelImpl private constructor(
         }
     }.memoize()
 
-    override fun toString() = "Module[$declaration]"
+    override fun toString() = declaration.toString()
 
     internal val mayRequireInstance by lazy(NONE) {
         !declaration.isAbstract && !declaration.isKotlinObject
@@ -69,7 +70,9 @@ internal class ModuleModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (impl == null) {
-            validator.report(buildError { contents = "$declaration is not annotated with @Module" })
+            validator.report(buildError {
+                contents = Errors.`declaration is not annotated with @Module`()
+            })
         }
         for (binding in bindings) {
             validator.child(binding)

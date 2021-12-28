@@ -7,5 +7,8 @@ data class NodeDependency(
     val node: NodeModel,
     val kind: DependencyKind = DependencyKind.Direct,
 ) {
-    override fun toString() = "$node [$kind]"
+    override fun toString() = when(kind) {
+        DependencyKind.Direct -> node.toString()
+        else -> "$node [$kind]"
+    }
 }

@@ -12,20 +12,29 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.buildError
 import javax.inject.Inject
+import kotlin.LazyThreadSafetyMode.NONE
 
 internal class NodeModelImpl private constructor(
     override val type: TypeLangModel,
     override val qualifier: AnnotationLangModel?,
 ) : NodeModel {
 
-    override val implicitBinding: InjectConstructorBindingModel?
-        get() = if (qualifier == null) {
+    init {
+        require(!type.isVoid) {
+            "Not reached: void can't be represented as NodeModel"
+        }
+    }
+
+    override val implicitBinding: InjectConstructorBindingModel? by lazy(NONE) {
+        if (qualifier == null) {
             type.declaration.constructors.find { it.isAnnotatedWith<Inject>() }?.let {
                 InjectConstructorImpl(constructor = it)
             }
         } else null
+    }
 
     private inner class InjectConstructorImpl(
         override val constructor: ConstructorLangModel,
@@ -51,11 +60,12 @@ internal class NodeModelImpl private constructor(
                 validator.child(input.node)
             }
         }
+
+        override fun toString() = "@Inject $target"
     }
 
     override fun toString() = buildString {
         qualifier?.let {
-            append('@')
             append(qualifier)
             append(' ')
         }
@@ -69,12 +79,21 @@ internal class NodeModelImpl private constructor(
     override fun validate(validator: Validator) {
         if (isFrameworkType(type)) {
             validator.report(buildError {
-                contents = "$type is wrapped into a framework type, can't be manually bound"
+                contents = Errors.`framework type is manually managed`()
             })
         }
     }
 
     companion object Factory : BiObjectCache<TypeLangModel, AnnotationLangModel?, NodeModelImpl>() {
+        class NoNode : NodeModel {
+            override val type get() = LangModelFactory.errorType
+            override val qualifier: Nothing? get() = null
+            override val implicitBinding: Nothing? get() = null
+            override fun multiBoundListNode(): NodeModel = this
+            override fun validate(validator: Validator) = Unit // No need to report an error here
+            override fun toString() = "[invalid]"
+        }
+
         operator fun invoke(
             type: TypeLangModel,
             forQualifier: AnnotatedLangModel?,

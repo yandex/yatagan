@@ -16,6 +16,7 @@ import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
+import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.buildError
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
@@ -29,7 +30,9 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         val type = if (multiBinding == MultiBindingKind.Flatten) {
             impl.returnType.typeArguments.firstOrNull() ?: impl.returnType
         } else impl.returnType
-        NodeModelImpl(type = type, forQualifier = impl)
+        if (impl.returnType.isVoid) {
+            NodeModelImpl.Factory.NoNode()
+        } else NodeModelImpl(type = type, forQualifier = impl)
     }
 
     override val multiBinding: MultiBindingKind?
@@ -43,13 +46,13 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
             val firstArg = impl.returnType.typeArguments.firstOrNull()
             if (firstArg == null || !LangModelFactory.getCollectionType(firstArg).isAssignableFrom(impl.returnType)) {
                 validator.report(buildError {
-                    contents = "Flattening multi-binding must return Collection or any of its subtypes"
+                    contents = Errors.`invalid flattening multibinding`(insteadOf = impl.returnType)
                 })
             }
         }
         if (impl.returnType.isVoid) {
             validator.report(buildError {
-                this.contents = "Binding method must not return ${impl.returnType}"
+                this.contents = Errors.`binding must not return void`()
             })
         }
     }
@@ -78,18 +81,27 @@ internal class BindsImpl(
         for (param in impl.parameters) {
             if (!impl.returnType.isAssignableFrom(param.type)) {
                 validator.report(buildError {
-                    contents = "$param is not compatible with binding return type ${impl.returnType}"
+                    contents = Errors.`binds param type is incompatible with return type`(
+                        param = param.type,
+                        returnType = impl.returnType,
+                    )
                 })
             }
         }
 
         if (!impl.isAbstract) {
-            validator.report(buildError { this.contents = "@Binds annotated method must be abstract" })
+            validator.report(buildError {
+                contents = Errors.`binds must be abstract`()
+            })
         }
     }
 
     override fun <R> accept(visitor: ModuleHostedBindingModel.Visitor<R>): R {
         return visitor.visitBinds(this)
+    }
+
+    override fun toString(): String {
+        return "@Binds $originModule::${impl.name}(${sources.joinToString()}): $target"
     }
 
     companion object {
@@ -104,11 +116,9 @@ internal class ProvidesImpl(
     override val originModule: ModuleModelImpl,
 ) : ProvidesBindingModel,
     ModuleHostedBindingBase() {
-    private val conditionalHolder = ConditionalHoldingModelImpl(impl.providesAnnotationIfPresent!!.conditionals)
 
-    init {
-        require(canRepresent(impl))
-    }
+    private val conditionalHolder = ConditionalHoldingModelImpl(
+        checkNotNull(impl.providesAnnotationIfPresent) { "Not reached" }.conditionals)
 
     override val conditionals get() = conditionalHolder.conditionals
 
@@ -126,7 +136,9 @@ internal class ProvidesImpl(
         }
 
         if (impl.isAbstract) {
-            validator.report(buildError { this.contents = "@Provides-annotated method must not be abstract" })
+            validator.report(buildError {
+                contents = Errors.`provides must not be abstract`()
+            })
         }
     }
 
@@ -138,6 +150,10 @@ internal class ProvidesImpl(
 
     override fun <R> accept(visitor: ModuleHostedBindingModel.Visitor<R>): R {
         return visitor.visitProvides(this)
+    }
+
+    override fun toString(): String {
+        return "@Provides $originModule::${impl.name}(${inputs.joinToString()}): $target"
     }
 
     companion object {

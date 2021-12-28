@@ -2,8 +2,8 @@ package com.yandex.daggerlite.testing
 
 interface CompileTestDriver : SourceSet {
     interface CompilationResultClause {
-        fun withError(message: String, block: ((notes: String) -> Unit)? = null)
-        fun withWarning(message: String, block: ((notes: String) -> Unit)? = null)
+        fun withError(message: String)
+        fun withWarning(message: String)
         fun withNoWarnings()
         fun withNoErrors()
         fun generatesJavaSources(name: String)
@@ -16,3 +16,6 @@ interface CompileTestDriver : SourceSet {
     fun failsToCompile(block: CompilationResultClause.() -> Unit)
     fun compilesSuccessfully(block: CompilationResultClause.() -> Unit)
 }
+
+fun CompileTestDriver.CompilationResultClause.withNoMoreErrors() = withNoErrors()
+fun CompileTestDriver.CompilationResultClause.withNoMoreWarnings() = withNoWarnings()

@@ -10,7 +10,7 @@ import com.yandex.daggerlite.validation.Validator
  */
 interface ValidationMessageBuilder {
     var contents: String
-    fun add(message: ValidationMessage)
+    fun addNote(note: String)
 }
 
 inline fun buildMessage(kind: Kind, block: ValidationMessageBuilder.() -> Unit): ValidationMessage {
@@ -25,14 +25,6 @@ inline fun buildError(block: ValidationMessageBuilder.() -> Unit): ValidationMes
 
 inline fun buildWarning(block: ValidationMessageBuilder.() -> Unit): ValidationMessage {
     return buildMessage(Kind.Warning, block)
-}
-
-inline fun buildNote(block: ValidationMessageBuilder.() -> Unit): ValidationMessage {
-    return buildMessage(Kind.Warning, block)
-}
-
-inline fun ValidationMessageBuilder.addNote(block: ValidationMessageBuilder.() -> Unit) {
-    add(buildMessage(Kind.Note, block))
 }
 
 class ValidationWrapper(

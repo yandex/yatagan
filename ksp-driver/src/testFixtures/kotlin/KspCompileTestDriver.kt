@@ -55,6 +55,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
                         arrayOf(secondRound.classesDir.toURI().toURL()),
                         KspCompileTestDriver::class.java.classLoader
                     ),
+                    checkMessageText = false,
                 ).apply {
                     block()
                     withNoErrors()
@@ -79,6 +80,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         private val generation: KotlinCompilation?,
         result: KotlinCompilation.Result,
         compiledClassesLoader: ClassLoader?,
+        override val checkMessageText: Boolean = true,
     ) : CompilationResultClauseBase(result, compiledClassesLoader) {
         override fun generatesJavaSources(name: String) {
             if (generation != null) {

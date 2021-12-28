@@ -39,28 +39,28 @@ abstract class CompileTestDriverBase : CompileTestDriver {
         private val result: KotlinCompilation.Result,
         private val compiledClassesLoader: ClassLoader?,
     ) : CompileTestDriver.CompilationResultClause {
-        override fun withError(message: String, block: ((notes: String) -> Unit)?) {
-            val errors = result.parsedMessages().filter { it.kind == Message.Kind.Error }.toList()
-            assertContains(errors.map(Message::text), message)
-            if (block != null) {
-                errors.find { it.text == message }?.let { block(it.notes) }
-            }
+        private val messages = result.parsedMessages().toMutableList()
+
+        open val checkMessageText: Boolean get() = true
+
+        override fun withError(message: String) {
+            if (!checkMessageText) return
+            assertContains(messages.filter { it.kind == Message.Kind.Error }.map(Message::text), message)
+            messages.removeIf { it.kind == Message.Kind.Error && it.text == message }
         }
 
-        override fun withWarning(message: String, block: ((notes: String) -> Unit)?) {
-            val warnings = result.parsedMessages().filter { it.kind == Message.Kind.Warning }.toList()
-            assertContains(warnings.map(Message::text), message)
-            if (block != null) {
-                warnings.find { it.text == message }?.let { block(it.notes) }
-            }
+        override fun withWarning(message: String) {
+            if (!checkMessageText) return
+            assertContains(messages.filter { it.kind == Message.Kind.Warning }.map(Message::text), message)
+            messages.removeIf { it.kind == Message.Kind.Warning && it.text == message }
         }
 
         override fun withNoWarnings() {
-            assertEquals(emptyList(), result.parsedMessages().filter { it.kind == Message.Kind.Warning }.toList())
+            assertEquals(emptyList(), messages.filter { it.kind == Message.Kind.Warning }.toList())
         }
 
         override fun withNoErrors() {
-            assertEquals(emptyList(), result.parsedMessages().filter { it.kind == Message.Kind.Error }.toList())
+            assertEquals(emptyList(), messages.filter { it.kind == Message.Kind.Error }.toList())
         }
 
         override fun inspectGeneratedClass(name: String, callback: (Class<*>) -> Unit) {
@@ -73,7 +73,6 @@ abstract class CompileTestDriverBase : CompileTestDriver {
     protected data class Message(
         val kind: Kind,
         val text: String,
-        val notes: String,
     ) {
         enum class Kind {
             Error,
@@ -84,19 +83,17 @@ abstract class CompileTestDriverBase : CompileTestDriver {
     }
 
     companion object {
-        private val AnsiColorSeqRegex = "\u001b.*?m".toRegex()
 
         private fun KotlinCompilation.Result.parsedMessages(): Sequence<Message> {
             return LoggerDecorator.MessageRegex.findAll(messages).map { messageMatch ->
-                val (kind, message, notes) = messageMatch.destructured
+                val (kind, message) = messageMatch.destructured
                 Message(
                     kind = when (kind) {
                         "error" -> Message.Kind.Error
                         "warning" -> Message.Kind.Warning
                         else -> throw AssertionError()
                     },
-                    text = message.replace(AnsiColorSeqRegex, "").trim(),
-                    notes = notes.replace(AnsiColorSeqRegex, "").trimIndent(),
+                    text = message.trimIndent(),
                 )
             }.memoize()
         }

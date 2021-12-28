@@ -18,12 +18,22 @@ internal class KspAnnotationImpl(
 
     private val descriptor by lazy(NONE) {
         buildString {
+            append('@')
             append(CtTypeNameModel(impl.annotationType.resolve()))
-            append('(')
-            impl.arguments.joinTo(this, separator = ",") {
-                "${it.name?.asString()}=${it.value}"
+            if (impl.arguments.isNotEmpty()) {
+                append('(')
+                impl.arguments.joinTo(this, separator = ",") {
+                    val value = when (val value = it.value) {
+                        is String -> "\"$value\""
+                        else -> value.toString()
+                    }
+                    when (val name = it.name?.asString()) {
+                        null, "value" -> value
+                        else -> "$name=$value"
+                    }
+                }
+                append(')')
             }
-            append(')')
         }
     }
 

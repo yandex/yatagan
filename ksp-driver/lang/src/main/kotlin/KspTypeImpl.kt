@@ -13,6 +13,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspTypeImpl private constructor(
     val impl: KSType,
     private val jvmType: JvmTypeInfo,
+    private val varianceAsWildcard: Boolean,
 ) : CtTypeLangModel {
 
     override val nameModel: CtTypeNameModel by lazy(NONE) {
@@ -57,7 +58,7 @@ internal class KspTypeImpl private constructor(
             JvmTypeInfo.Boolean, JvmTypeInfo.Byte, JvmTypeInfo.Char, JvmTypeInfo.Double,
             JvmTypeInfo.Float, JvmTypeInfo.Int, JvmTypeInfo.Long, JvmTypeInfo.Short,
             JvmTypeInfo.Declared,
-            -> Factory(impl = impl.makeNotNullable())
+            -> Factory(impl = impl.makeNotNullable(), varianceAsWildcard = varianceAsWildcard)
             is JvmTypeInfo.Array -> Factory(impl = when (jvmType.elementInfo) {
                 JvmTypeInfo.Declared -> {
                     // Make array's element type also not-nullable
@@ -88,6 +89,7 @@ internal class KspTypeImpl private constructor(
                 KspTypeImpl(
                     impl = mappedType,
                     jvmType = jvmTypeKind,
+                    varianceAsWildcard = varianceAsWildcard,
                 )
             }
         }

@@ -22,7 +22,7 @@ import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.addNote
+import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.buildError
 
 internal class GraphBindingsFactory(
@@ -120,11 +120,9 @@ internal class GraphBindingsFactory(
             }
             .duplicateAwareAssociateBy(onDuplicates = { listNode, duplicateDeclarations ->
                 validationMessages += buildError {
-                    contents = "Conflicting list declarations for $listNode"
+                    contents = Strings.Errors.`conflicting list declarations`(`for` = listNode)
                     duplicateDeclarations.forEachIndexed { i, duplicate ->
-                        addNote {
-                            contents = "${i + 1}. $duplicate"
-                        }
+                        addNote("${i + 1}. $duplicate")
                     }
                 }
             }, keySelector = ListDeclarationModel::listType)
@@ -184,11 +182,9 @@ internal class GraphBindingsFactory(
         providedBindings.forEach { (node, bindings) ->
             bindings.ifContainsDuplicates { duplicates ->
                 validator.report(buildError {
-                    contents = "Multiple bindings for $node detected"
-                    duplicates.forEachIndexed { index, binding ->
-                        addNote {
-                            contents = "Duplicate ${index + 1}. $binding"
-                        }
+                    contents = Strings.Errors.`conflicting bindings`(`for` = node)
+                    duplicates.forEach { binding ->
+                        addNote("Duplicate binding: $binding")
                     }
                 })
             }

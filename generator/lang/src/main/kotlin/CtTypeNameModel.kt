@@ -75,4 +75,5 @@ enum class KeywordTypeNameModel : CtTypeNameModel {
 
 class ErrorNameModel(val comment: String) : CtTypeNameModel {
     // No equals/hashCode overloading - no need.
+    override fun toString() = "<$comment>"
 }

@@ -4,6 +4,7 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.buildError
 
 internal class FlavorImpl private constructor(
@@ -17,7 +18,9 @@ internal class FlavorImpl private constructor(
         validator.child(dimension)
 
         if (type.declaration.componentFlavorIfPresent == null) {
-            validator.report(buildError { contents = "$type is not a component flavor" })
+            validator.report(buildError {
+                contents = Errors.`declaration is not annotated with @ComponentFlavor`()
+            })
         }
     }
 

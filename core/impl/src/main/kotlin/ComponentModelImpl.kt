@@ -15,6 +15,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.buildError
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -118,33 +119,33 @@ internal class ComponentModelImpl private constructor(
 
         if (impl == null) {
             validator.report(buildError {
-                contents = "$declaration is not annotated with @Component"
+                contents = Errors.`declaration is not annotated with @Component`()
             })
         }
 
         if (!declaration.isInterface) {
             validator.report(buildError {
-                contents = "Component declaration must be an interface"
+                contents = Errors.`component must be an interface`()
             })
         }
 
         if (factory == null) {
             if (!isRoot) {
                 validator.report(buildError {
-                    contents = "Non-root component declaration must include factory declaration"
+                    contents = Errors.`missing component creator - non-root`()
                 })
             }
 
             if (dependencies.isNotEmpty()) {
                 validator.report(buildError {
-                    contents = "Component declares dependencies, yet no factory declaration is present"
+                    contents = Errors.`missing component creator - dependencies`()
                 })
             }
 
             if (modules.any { it.requiresInstance && !it.isTriviallyConstructable }) {
                 validator.report(buildError {
-                    contents = "Component includes non-trivially constructable modules, that require instance, " +
-                            "yet no factory declaration is present"
+                    contents = Errors.`missing component creator - modules`()
+                    // TODO: provide notes about concrete modules that require instances.
                 })
             }
         }
@@ -160,9 +161,5 @@ internal class ComponentModelImpl private constructor(
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)
-
-        fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
-            return declaration.componentAnnotationIfPresent != null
-        }
     }
 }

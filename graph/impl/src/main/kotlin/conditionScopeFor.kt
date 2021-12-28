@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.Variant.DimensionModel
 import com.yandex.daggerlite.core.Variant.FlavorModel
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.validation.ValidationMessage
+import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.buildError
 
 internal sealed interface VariantMatch {
@@ -38,7 +39,10 @@ internal fun VariantMatch(
         var currentMatch = 0
         for ((dimension: DimensionModel, allowedFlavors: List<FlavorModel>) in constraints) {
             val flavor = forVariant[dimension] ?: return VariantMatch.Error(buildError {
-                contents = "Dimension $dimension doesn't exist in $forVariant"
+                contents = Strings.Errors.`undeclared dimension in variant`(
+                    dimension = dimension,
+                    variant = forVariant,
+                )
             })
             if (flavor !in allowedFlavors) {
                 // Not matched
@@ -48,7 +52,7 @@ internal fun VariantMatch(
         }
         if (maxMatched == currentMatch) {
             return VariantMatch.Error(buildError {
-                contents = "Variant matching ambiguity: $bestMatch and $conditional are in conflict"
+                contents = Strings.Errors.`variant matching ambiguity`(one = bestMatch!!, two = conditional)
             })
         }
         if (maxMatched < currentMatch) {

@@ -468,10 +468,16 @@ class CoreBindingsKotlinTest(
                     @Named("bar") o2: Object,
                     @Named("baz") o3: Object,
                     foos: Set<Foo>,
+                    bazs: Set<Baz>,
                     bars: MutableSet<Bar>,
+                    fooConsumer: Consumer<Foo>,
+                    bazConsumer: Consumer<Baz>,
             )
             interface Foo
             interface Bar
+            class Baz
+
+            interface Consumer<in T>
 
             interface CreatorBase {
                 @BindsInstance
@@ -484,6 +490,7 @@ class CoreBindingsKotlinTest(
                 val foos: MutableSet<out Foo>
                 val bars: Set<out Bar>
                 val bars2: Set<Bar>
+                val bazs: Set<Baz>
                 
                 @Component.Builder
                 interface Creator : CreatorBase {
@@ -494,9 +501,14 @@ class CoreBindingsKotlinTest(
                     fun setSetOfFoo(foos: Set<Foo>)
                     
                     @BindsInstance
+                    fun setBazs(bazs: Set<Baz>)
+                    
+                    @BindsInstance
                     fun setSetOfBar(bars: MutableSet<Bar>): Creator
                     
                     fun create(
+                        @BindsInstance fooConsumer: Consumer<Foo>,
+                        @BindsInstance bazConsumer: Consumer<Baz>,
                         @BindsInstance @Named("baz") obj: Any,
                     ): TestComponent
                 }

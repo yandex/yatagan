@@ -6,25 +6,25 @@ import com.yandex.daggerlite.validation.ValidationMessage
 internal class ValidationMessageBuilderImpl(
     private val kind: ValidationMessage.Kind,
 ) : ValidationMessageBuilder {
-    private val nested = arrayListOf<ValidationMessage>()
+    private val notes = arrayListOf<String>()
 
     override lateinit var contents: String
 
-    override fun add(message: ValidationMessage) {
-        nested += message
+    override fun addNote(note: String) {
+        notes += note
     }
 
     fun build(): ValidationMessage {
         return ValidationMessageImpl(
             kind = kind,
             contents = contents,
-            nestedMessages = nested,
+            notes = notes,
         )
     }
 
     private data class ValidationMessageImpl(
         override val kind: ValidationMessage.Kind,
         override val contents: String,
-        override val nestedMessages: Collection<ValidationMessage>,
+        override val notes: Collection<String>,
     ) : ValidationMessage
 }

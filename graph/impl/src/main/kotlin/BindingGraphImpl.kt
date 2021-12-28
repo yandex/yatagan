@@ -150,17 +150,10 @@ internal class BindingGraphImpl(
         }
     }
 
-    override fun toString() = buildList<ComponentModel> {
-        var current: BindingGraph? = this@BindingGraphImpl
-        while (current != null) {
-            add(current.model)
-            current = current.parent
-        }
-        reverse()
-    }.joinToString(separator = "::")
+    override fun toString() = model.toString()
 
     override fun validate(validator: Validator) {
-        validator.child(model)
+        validator.child(model, kind = Inline)
         validator.child(bindings, kind = Inline)
         validator.child(variant)
         children.forEach(validator::child)

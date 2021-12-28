@@ -3,6 +3,7 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getJavaClassByName
 import com.google.devtools.ksp.isConstructor
+import com.google.devtools.ksp.isOpen
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.FunctionKind
@@ -89,7 +90,11 @@ internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean
             return Utils.resolver.getTypeArgument(
                 typeRef = Utils.resolver.createKSTypeReferenceFromKSType(mappedArgType),
                 variance = if (varianceAsWildcard) {
-                    mergeVariance(declarationSite = param.variance, useSite = arg.variance)
+                    mergeVariance(
+                        declarationSite = param.variance,
+                        useSite = arg.variance,
+                        isTypeOpen = { mappedArgType.declaration.isOpen() },
+                    )
                 } else {
                     if (param.variance == arg.variance) {
                         // redundant projection
@@ -176,12 +181,12 @@ internal fun CtTypeNameModel(
     }
 }
 
-private fun mergeVariance(declarationSite: Variance, useSite: Variance): Variance {
+private inline fun mergeVariance(declarationSite: Variance, useSite: Variance, isTypeOpen: () -> Boolean): Variance {
     return when (declarationSite) {
         Variance.INVARIANT -> useSite
         Variance.COVARIANT -> when (useSite) {
-            Variance.INVARIANT -> Variance.COVARIANT
-            Variance.COVARIANT -> Variance.COVARIANT
+            Variance.INVARIANT -> if (isTypeOpen()) Variance.COVARIANT else Variance.INVARIANT
+            Variance.COVARIANT -> if (isTypeOpen()) Variance.COVARIANT else Variance.INVARIANT
             Variance.CONTRAVARIANT -> throw AssertionError("Not reached: variance conflict: covariant vs contravariant")
             Variance.STAR -> Variance.STAR
         }

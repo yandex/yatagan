@@ -28,7 +28,8 @@ import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.addNote
+import com.yandex.daggerlite.validation.impl.Strings
+import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.buildError
 import com.yandex.daggerlite.validation.impl.buildWarning
 import kotlin.LazyThreadSafetyMode.NONE
@@ -47,10 +48,26 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
     override val scope: AnnotationLangModel?
         get() = null
 
+    val isImplicitBinding: Boolean get() = false
+
     override fun validate(validator: Validator) {
         validator.child(conditionScope)
         dependencies().forEach {
             validator.child(owner.resolveRaw(it.node))
+        }
+
+        if (scope != null && scope != owner.model.scope) {
+            validator.report(buildError {
+                contents = Errors.`no matching scope for binding`(binding = this@BindingMixin, scope = scope)
+            })
+        }
+        if (!isImplicitBinding && target.implicitBinding != null) {
+            validator.report(buildWarning {
+                contents = Strings.Warnings.`custom binding shadow @Inject constructor`(
+                    target = target,
+                    binding = this@BindingMixin,
+                )
+            })
         }
     }
 
@@ -110,7 +127,7 @@ internal class ProvisionBindingImpl(
         return if (conditionScope.isNever) emptyList() else inputs.toList()
     }
 
-    override fun toString() = "@Provides ${inputs.toList()} -> $target"
+    override fun toString() = impl.toString()
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitProvision(this)
@@ -129,6 +146,9 @@ internal class InjectConstructorProvisionBindingImpl(
     override val requiresModuleInstance: Boolean = false
     override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
 
+    override val isImplicitBinding: Boolean
+        get() = true
+
     override fun dependencies(): Collection<NodeDependency> {
         return if (conditionScope.isNever) emptyList() else impl.inputs.toList()
     }
@@ -137,7 +157,7 @@ internal class InjectConstructorProvisionBindingImpl(
         return visitor.visitProvision(this)
     }
 
-    override fun toString() = "@Inject $target"
+    override fun toString() = impl.toString()
 }
 
 internal class AliasBindingImpl(
@@ -163,16 +183,14 @@ internal class AliasBindingImpl(
         return result
     }
 
-    override fun toString() = "@Binds (alias) $source -> $target"
+    override fun toString() = "[alias] $impl"
 
     override fun validate(validator: Validator) {
         validator.child(source)
         if (impl.scope != null) {
             validator.report(buildWarning {
-                this.contents = "Scope has no effect on 'alias' binding"
-                this.addNote {
-                    this.contents = "Scope is inherited from source graph node and can not be overridden"
-                }
+                contents = "Scope has no effect on 'alias' binding"
+                addNote( "Scope is inherited from source graph node and can not be overridden")
             })
         }
     }
@@ -198,7 +216,7 @@ internal class AlternativesBindingImpl(
 
     override fun dependencies() = alternatives.map(::NodeDependency).toList()
 
-    override fun toString() = "@Binds (alternatives) [first present of $alternatives] -> $target"
+    override fun toString() = "[alternatives] $impl"
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitAlternatives(this)
@@ -243,7 +261,7 @@ internal class SubComponentFactoryBindingImpl(
     override val targetGraph: BindingGraph by lazy(NONE) {
         val targetComponent = factory.createdComponent
         checkNotNull(owner.children.find { it.model == targetComponent }) {
-            "$this: Can't find child component $targetComponent among $owner's children."
+            "Not reached: $this: Can't find child component $targetComponent among $owner's children."
         }
     }
 
@@ -299,7 +317,7 @@ internal class ModuleHostedEmptyBindingImpl(
     override val owner: BindingGraphImpl,
 ) : EmptyBinding, BindingMixin, ModuleHostedMixin() {
     override val conditionScope get() = ConditionScope.NeverScoped
-    override fun toString() = "Absent $target in $impl"
+    override fun toString() = "[absent] $impl"
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)
@@ -312,6 +330,8 @@ internal class ComponentDependencyBindingImpl(
 ) : ComponentDependencyBinding, BindingMixin {
     override val target get() = dependency.asNode()
 
+    override fun toString() = "[dependency binding] $dependency"
+
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentDependency(this)
     }
@@ -321,6 +341,8 @@ internal class InstanceBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraphImpl,
 ) : InstanceBinding, BindingMixin {
+
+    override fun toString() = "[provided instance] $target"
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitInstance(this)
@@ -334,12 +356,20 @@ internal data class MissingBindingImpl(
     override val conditionScope get() = ConditionScope.NeverScoped
 
     override fun validate(validator: Validator) {
-        validator.report(buildError {
-            contents = target.implicitBinding?.let { failedInject ->
-                "$target has an @Inject constructor, though no components in the " +
-                        "hierarchy matched its scope ${failedInject.scope}"
-            } ?: "Missing binding for $target, no known way to create it"
-        })
+        val failedInject = target.implicitBinding
+        if (failedInject != null) {
+            validator.report(buildError {
+                contents = Errors.`no matching scope for binding`(binding = failedInject, scope = failedInject.scope)
+            })
+        } else {
+            validator.report(buildError {
+                // TODO: implement hint about how to provide a binding
+                //  - subcomponent factory
+                //  - maybe the same differently qualified binding exists
+                //  - binding exists in a sibling component hierarchy path
+                contents = Errors.`missing binding`(`for` = target)
+            })
+        }
     }
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {

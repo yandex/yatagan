@@ -29,4 +29,6 @@ internal class KspParameterImpl(
     }
 
     override fun hashCode() = impl.hashCode()
+
+    override fun toString() = "$name: $type"
 }

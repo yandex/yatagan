@@ -20,6 +20,7 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
+import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.buildError
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -57,7 +58,9 @@ internal class ComponentFactoryModelImpl private constructor(
                 validator.child(payload, kind = Inline)
                 if (!method.returnType.isVoid && !method.returnType.isAssignableFrom(factoryDeclaration.asType())) {
                     validator.report(buildError {
-                        contents = "Setter $method in component creator must return either void or creator type itself"
+                        contents = Errors.`invalid builder setter return type`(
+                            creatorType = factoryDeclaration.asType(),
+                        )
                     })
                 }
             }
@@ -85,10 +88,7 @@ internal class ComponentFactoryModelImpl private constructor(
                 InputPayloadModuleImpl(module = ModuleModelImpl(declaration))
             forBindsInstance.isAnnotatedWith<BindsInstance>() ->
                 InputPayloadInstanceImpl(node = NodeModelImpl(param.type, forQualifier = param))
-            ComponentDependencyModelImpl.canRepresent(declaration) ->
-                InputPayloadDependencyImpl(dependency = ComponentDependencyModelImpl(declaration.asType()))
-            else -> throw IllegalStateException(
-                "Invalid creator input $declaration in $forBindsInstance in $factoryDeclaration")
+            else -> InputPayloadDependencyImpl(dependency = ComponentDependencyModelImpl(declaration.asType()))
         }
     }
 
@@ -102,13 +102,13 @@ internal class ComponentFactoryModelImpl private constructor(
 
         if (!factoryDeclaration.isInterface) {
             validator.report(buildError {
-                contents = "Component creator declaration must be an interface"
+                contents = Errors.`component creator must be an interface`()
             })
         }
         val factory = factoryMethod
         if (factory == null) {
             validator.report(buildError {
-                contents = "No component creating method is found"
+                contents = Errors.`missing component creating method`()
             })
         }
 
@@ -116,7 +116,7 @@ internal class ComponentFactoryModelImpl private constructor(
             if (function == factoryMethod || function.parameters.count() == 1 || !function.isAbstract)
                 continue
             validator.report(buildError {
-                contents = "Invalid method in component creator: $function"
+                contents = Errors.`invalid method in component creator`(method = function)
             })
         }
 
@@ -127,10 +127,17 @@ internal class ComponentFactoryModelImpl private constructor(
             .toSet()
         if (createdComponent.dependencies != providedComponents) {
             val missing = createdComponent.dependencies - providedComponents
-            validator.report(buildError {
-                contents = if (missing.isNotEmpty()) "Missing dependency components: $missing"
-                else "Unneeded components in $factory: ${providedComponents - createdComponent.dependencies}"
-            })
+            for (missingDependency in missing) {
+                validator.report(buildError {
+                    contents = Errors.`missing component dependency`(missing = missingDependency)
+                })
+            }
+            val unneeded = providedComponents - createdComponent.dependencies
+            for (extraDependency in unneeded) {
+                validator.report(buildError {
+                    contents = Errors.`unneeded component dependency`(extra = extraDependency)
+                })
+            }
         }
 
         val providedModules = allInputs
@@ -142,16 +149,18 @@ internal class ComponentFactoryModelImpl private constructor(
             .filter(ModuleModel::requiresInstance).toMutableSet()
 
         val missing = (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }
-        if (missing.isNotEmpty()) {
+        for (missingModule in missing) {
             validator.report(buildError {
-                contents = "Missing modules' instances: $missing"
+                contents = Errors.`missing module`(missing = missingModule)
             })
         }
         val unneeded = providedModules - allModulesRequiresInstance
         if (unneeded.isNotEmpty()) {
-            validator.report(buildError {
-                contents = "Unneeded modules' instances: $unneeded"
-            })
+            for (extraModule in unneeded) {
+                validator.report(buildError {
+                    contents = Errors.`unneeded module`(extra = extraModule)
+                })
+            }
         }
     }
 

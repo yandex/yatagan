@@ -26,6 +26,8 @@ abstract class CtFunctionLangModel : FunctionLangModel {
     }
 
     override fun toString() = buildString {
+        append(owner.qualifiedName)
+        append("::")
         append(name).append('(')
         parameters.joinTo(this)
         append("): ")

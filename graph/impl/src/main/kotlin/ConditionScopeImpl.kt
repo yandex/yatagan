@@ -15,6 +15,7 @@ import com.yandex.daggerlite.graph.ConditionScope.Literal
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
+import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.buildError
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -126,7 +127,7 @@ private class ConditionLiteralImpl private constructor(
                     override fun validate(validator: Validator) {
                         // Always invalid
                         validator.report(buildError {
-                            contents = "Invalid condition expression '$condition'"
+                            contents = Errors.`invalid condition`(expression = condition)
                         })
                     }
                 }
@@ -169,15 +170,15 @@ private class LiteralPayloadImpl private constructor(
             var currentType = root.asType()
             var finished = false
 
-            pathSource.split('.').forEach { rawName ->
+            pathSource.split('.').forEach { name ->
                 if (finished) {
-                    pathParsingError = "Unable to reach boolean result with the given condition"
+                    pathParsingError = Errors.`invalid condition - unable to reach boolean`()
                     return@forEach
                 }
 
-                val member = findAccessor(currentType.declaration, rawName)
+                val member = findAccessor(currentType.declaration, name)
                 if (member == null) {
-                    pathParsingError = "Can't find accessible '$rawName' member in $currentType"
+                    pathParsingError = Errors.`invalid condition - missing member`(name = name, type = currentType)
                     return@forEach
                 }
                 add(member)
@@ -193,7 +194,7 @@ private class LiteralPayloadImpl private constructor(
                 }
             }
             if (!finished) {
-                pathParsingError = "Unable to reach boolean result with the given condition"
+                pathParsingError = Errors.`invalid condition - unable to reach boolean`()
             }
         }
     }

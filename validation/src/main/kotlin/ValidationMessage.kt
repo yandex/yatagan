@@ -18,11 +18,6 @@ interface ValidationMessage {
          * Warning message, non-fatal.
          */
         Warning,
-
-        /**
-         * Usually good for additional notes/advices, explaining the error/warning.
-         */
-        Note,
     }
 
     /**
@@ -37,7 +32,7 @@ interface ValidationMessage {
     val contents: String
 
     /**
-     * Nested messages, usually [Notes][Kind.Note].
+     * Notes, related to the message, helping/clarifying/adding more info.
      */
-    val nestedMessages: Collection<ValidationMessage>
+    val notes: Collection<String>
 }
