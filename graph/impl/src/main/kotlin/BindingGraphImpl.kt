@@ -3,7 +3,6 @@ package com.yandex.daggerlite.graph.impl
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
@@ -219,42 +218,4 @@ internal class BindingGraphImpl(
             current = current.parent
         }
     }
-}
-
-class BindingUsageImpl : BindingGraph.BindingUsage {
-    private var _direct: Int = 0
-    private var _provider: Int = 0
-    private var _lazy: Int = 0
-    private var _optional: Int = 0
-    private var _optionalLazy: Int = 0
-    private var _optionalProvider: Int = 0
-
-    override val direct get() = _direct + _optional
-    override val provider get() = _provider + _optionalProvider
-    override val lazy get() = _lazy + _optionalLazy
-    override val optional get() = _optional + _optionalLazy + _optionalProvider
-    override val optionalLazy get() = _optionalLazy
-    override val optionalProvider get() = _optionalProvider
-
-    fun accept(dependencyKind: DependencyKind) {
-        when (dependencyKind) {
-            DependencyKind.Direct -> _direct++
-            DependencyKind.Lazy -> _lazy++
-            DependencyKind.Provider -> _provider++
-            DependencyKind.Optional -> _optional++
-            DependencyKind.OptionalLazy -> _optionalLazy++
-            DependencyKind.OptionalProvider -> _optionalProvider++
-        }.let { /*exhaustive*/ }
-    }
-}
-
-/**
- * Creates [BindingGraph] instance given the root component.
- */
-fun BindingGraph(root: ComponentModel): BindingGraph {
-    require(root.isRoot) { "Not reached: can't use non-root component as a root of a binding graph" }
-    return BindingGraphImpl(
-        component = root,
-        conditionScope = ConditionScope.Unscoped,
-    )
 }
