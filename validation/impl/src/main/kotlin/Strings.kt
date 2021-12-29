@@ -180,6 +180,15 @@ object Strings {
 
         fun `conflicting bindings`(`for`: Any) =
             "Multiple bindings for $`for`"
+
+        fun `root component can not be a subcomponent`() =
+            "Root component can not be a subcomponent"
+
+        fun `duplicate component scope`(scope: Any) =
+            "A single scope `$scope` can not be present on more than one component in a hierarchy"
+
+        fun `component hierarchy loop`() =
+            "component hierarchy loop"
     }
 
     object Warnings {

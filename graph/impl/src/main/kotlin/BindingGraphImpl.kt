@@ -17,6 +17,8 @@ import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
+import com.yandex.daggerlite.validation.impl.Strings
+import com.yandex.daggerlite.validation.impl.reportError
 
 internal class BindingGraphImpl(
     private val component: ComponentModel,
@@ -189,13 +191,33 @@ internal class BindingGraphImpl(
         // Reachable via members-inject.
         memberInjectors.forEach(validator::child)
 
-        // Validate graph integrity and soundness as a whole
+        if (parent != null && isRoot) {
+            validator.reportError(Strings.Errors.`root component can not be a subcomponent`())
+        }
 
+        scope?.let { scope ->
+            parents().find { parent -> parent.scope == scope }?.let { withDuplicateScope ->
+                validator.reportError(Strings.Errors.`duplicate component scope`(scope)) {
+                    addNote("In component $withDuplicateScope")
+                    addNote("In component ${this@BindingGraphImpl}")
+                }
+            }
+        }
+
+        if (parents().find { parent -> parent.component == component } != null) {
+            validator.reportError(Strings.Errors.`component hierarchy loop`())
+        }
+
+        // Validate graph integrity and soundness as a whole
         // TODO: validate no loops in a graph
-        // TODO: validate dependency conditions
-        // TODO: validate scope doesn't repeat for each three path.
-        // TODO: validate no loops in component hierarchy
-        // TODO: validate isRoot = false for subcomponents
+    }
+
+    private fun parents() = sequence<BindingGraphImpl> {
+        var current = parent
+        while (current != null) {
+            yield(current)
+            current = current.parent
+        }
     }
 }
 
