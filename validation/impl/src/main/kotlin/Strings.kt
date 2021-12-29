@@ -77,6 +77,12 @@ object Strings {
             "Condition $aCondition is not always true, given $bCondition is true,\n" +
                     "$Indent=> `$a` can not be injected into `$b` without `Optional<>` wrapper."
 
+        @Covered
+        fun `incompatible condition scope for entry-point`(aCondition: Any, bCondition: Any,
+                                                           binding: Any, component: Any) =
+            "Entry-point condition $aCondition is not always true, given component's condition $bCondition is true,\n" +
+                    "$Indent=> `$binding` can not be exposed from `$component` without `Optional<>` wrapper."
+
 
         fun `invalid builder setter return type`(creatorType: Any) =
             "Setter method in component creator must return either `void` or creator type itself ($creatorType)"
@@ -101,6 +107,10 @@ object Strings {
 
         fun `unneeded module`(extra: Any) =
             "Extra/unneeded module instance $extra is present"
+
+
+        fun `non-void injector method return type`(type: Any) =
+            "Injector method should return `void`/`Unit` instead of $type"
 
 
         fun `declaration is not annotated with @Component`() =

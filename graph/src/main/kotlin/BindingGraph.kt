@@ -66,6 +66,8 @@ interface BindingGraph : MayBeInvalid {
 
     val memberInjectors: Collection<GraphMemberInjector>
 
+    val conditionScope: ConditionScope
+
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *

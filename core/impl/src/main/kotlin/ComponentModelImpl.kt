@@ -141,13 +141,7 @@ internal class ComponentModelImpl private constructor(
         }
     }
 
-    override fun toString() = buildString {
-        val declarationString = declaration.toString()
-        append(declarationString)
-        if (!declarationString.endsWith("Component")) {
-            append(" (Component)")
-        }
-    }
+    override fun toString() = declaration.toString()
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)

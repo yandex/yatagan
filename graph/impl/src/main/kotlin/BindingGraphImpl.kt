@@ -21,6 +21,7 @@ import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 internal class BindingGraphImpl(
     private val component: ComponentModel,
     override val parent: BindingGraphImpl? = null,
+    override val conditionScope: ConditionScope,
 ) : BindingGraph {
     override val model: ComponentModel
         get() = component
@@ -75,9 +76,16 @@ internal class BindingGraphImpl(
         children = modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
-            .filter { !VariantMatch(it, variant).conditionScope.isNever }
             .distinct()
-            .map { BindingGraphImpl(it, parent = this) }
+            .map { it to VariantMatch(it, variant).conditionScope }
+            .filter { (_, conditionScope) -> !conditionScope.isNever }
+            .map { (childComponent, childConditionScope) ->
+                BindingGraphImpl(
+                    component = childComponent,
+                    parent = this,
+                    conditionScope = conditionScope and childConditionScope
+                )
+            }
             .toList()
 
         entryPoints.forEach { entryPoint ->
@@ -185,6 +193,9 @@ internal class BindingGraphImpl(
 
         // TODO: validate no loops in a graph
         // TODO: validate dependency conditions
+        // TODO: validate scope doesn't repeat for each three path.
+        // TODO: validate no loops in component hierarchy
+        // TODO: validate isRoot = false for subcomponents
     }
 }
 
@@ -222,5 +233,6 @@ fun BindingGraph(root: ComponentModel): BindingGraph {
     require(root.isRoot) { "Not reached: can't use non-root component as a root of a binding graph" }
     return BindingGraphImpl(
         component = root,
+        conditionScope = ConditionScope.Unscoped,
     )
 }

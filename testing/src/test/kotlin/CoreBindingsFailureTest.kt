@@ -3,6 +3,7 @@ package com.yandex.daggerlite.testing
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.Strings.formatMessage
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -16,6 +17,27 @@ class CoreBindingsFailureTest(
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun parameters() = compileTestDrivers()
+    }
+
+    private lateinit var features: SourceSet
+
+    @Before
+    fun setUp() {
+        features = givenSourceSet {
+            givenKotlinSource("test.features", """
+                import com.yandex.daggerlite.Condition                
+
+                object Foo { 
+                    val isEnabledA = true 
+                    val isEnabledB = true 
+                    val isEnabledC = true 
+                }
+                
+                @Condition(Foo::class, "isEnabledA") annotation class A
+                @Condition(Foo::class, "isEnabledB") annotation class B
+                @Condition(Foo::class, "isEnabledC") annotation class C
+            """.trimIndent())
+        }
     }
 
     @Test
@@ -245,20 +267,12 @@ class CoreBindingsFailureTest(
 
     @Test
     fun `incompatible conditions`() {
+        useSourceSet(features)
+
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             import javax.inject.*
-
-            object Foo { 
-                const val isEnabledA = true 
-                const val isEnabledB = true 
-                const val isEnabledC = true 
-            }
-
-            @Condition(Foo::class, "isEnabledA") annotation class A
-            @Condition(Foo::class, "isEnabledB") annotation class B
-            @Condition(Foo::class, "isEnabledC") annotation class C
-
+            
             @AllConditions([
                 Condition(Foo::class, "isEnabledA"),
                 Condition(Foo::class, "isEnabledB"),
@@ -270,16 +284,16 @@ class CoreBindingsFailureTest(
                 Condition(Foo::class, "isEnabledB"),
             ])
             annotation class AorB
-
+            
             @Conditional([A::class, B::class])
             class UnderAandB @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>)
-
+            
             @Conditional([AorB::class, A::class])
             class UnderAorB @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>/*error*/)
-
+            
             @Conditional([AandB::class, AorB::class])
             class UnderComplex @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>)
-
+            
             @Conditional([A::class]) class UnderA @Inject constructor(
                 a: UnderAandB,  // error
                 ab: UnderAorB,  // ok
@@ -288,7 +302,7 @@ class CoreBindingsFailureTest(
                 b: UnderA,  // error
                 c: Lazy<UnderComplex>,  // error
             )
-
+            
             @Module
             class MyModule {
                 @Provides @Named("error")
@@ -296,16 +310,16 @@ class CoreBindingsFailureTest(
                 @Provides @Named("ok1")
                 fun provideObject2(c: Optional<Provider<UnderA>>): Any = c
                 @Provides([Conditional([A::class])]) @Named("ok2")
-                fun provideObject2(c: UnderA): Any = c
+                fun provideObject3(c: UnderA): Any = c
             }
-
+            
             @Component(modules = [MyModule::class])
             interface MyComponent {
                 val e1: Optional<UnderA>
                 val e2: Optional<UnderB>
                 @get:Named("error") val object1: Any
                 @get:Named("ok1") val object2: Any
-                @get:Named("ok2") val object3: Any
+                @get:Named("ok2") val object3: Optional<Any>
             }
         """.trimIndent())
 
@@ -326,7 +340,7 @@ class CoreBindingsFailureTest(
                     listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderA"),
                     listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object", "@Inject test.UnderA"),
                     listOf("test.MyComponent", "[entry-point] getObject2", "@Provides test.MyModule::provideObject2(test.UnderA [OptionalProvider]): @javax.inject.Named(\"ok1\") java.lang.Object", "@Inject test.UnderA"),
-                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject2(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA"),
                     // @formatter:on
                 ),
             ))
@@ -388,6 +402,126 @@ class CoreBindingsFailureTest(
                 ),
                 // @formatter:on
             ))
+            withNoMoreErrors()
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `component features`() {
+        useSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            interface Heater
+            
+            @Conditional([A::class])
+            class ElectricHeater @Inject constructor() : Heater
+            
+            @Conditional([B::class])
+            class GasHeater @Inject constructor() : Heater
+            
+            class Stub : Heater
+            
+            @Qualifier private annotation class Private
+
+            class Consumer {
+                @set:Inject lateinit var heater: Heater
+                @set:Inject lateinit var gasHeater: GasHeater
+                @set:Inject lateinit var electricHeater: ElectricHeater
+                @set:Inject lateinit var gasHeaterOptional: Optional<GasHeater>
+                @set:Inject lateinit var electricHeaterOptional: Optional<ElectricHeater>
+            }
+            
+            @Module(subcomponents = [SubComponentA::class, SubComponentB::class])
+            interface RootModule {
+                companion object {
+                    @Provides @Private fun stubHeater() = Stub()
+                }
+            
+                @Binds fun heater(e: ElectricHeater, g: GasHeater, @Private s: Stub): Heater
+            }
+            
+            @Singleton
+            @Component(modules = [RootModule::class])
+            interface RootComponent {
+                val heater: Heater  // ok
+                val electric: ElectricHeater  // error
+                val gas: GasHeater  // error
+                
+                fun injectConsumer(consumer: Consumer)
+            }
+            
+            @Conditional([A::class])
+            @Component(isRoot = false)
+            interface SubComponentA {
+                val electric: ElectricHeater  // ok
+                val gas: GasHeater  // error
+                
+                @Component.Builder
+                interface Creator { fun create(): SubComponentA }
+            
+                fun injectConsumer(consumer: Consumer)
+            }
+            
+            @Conditional([B::class])
+            @Component(isRoot = false)
+            interface SubComponentB {
+                val electric: ElectricHeater  // error
+                val gas: GasHeater  // ok
+                
+                @Component.Builder
+                interface Creator { fun create(): SubComponentB }
+            
+                fun injectConsumer(consumer: Consumer)
+            }
+        """.trimIndent())
+
+        failsToCompile {
+            withError(formatMessage(
+                Errors.`incompatible condition scope for entry-point`(
+                    aCondition = "[test.Foo.isEnabledA]", bCondition = "[unconditional]",
+                    binding = "@Inject test.ElectricHeater", component = "test.RootComponent",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "[entry-point] getElectric"),
+                    listOf("test.RootComponent", "[injector-fun] injectConsumer", "[member-to-inject] setElectricHeater")
+                ),
+            ))
+            withError(formatMessage(
+                Errors.`incompatible condition scope for entry-point`(
+                    aCondition = "[test.Foo.isEnabledB]", bCondition = "[unconditional]",
+                    binding = "@Inject test.GasHeater", component = "test.RootComponent",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "[entry-point] getGas"),
+                    listOf("test.RootComponent", "[injector-fun] injectConsumer", "[member-to-inject] setGasHeater"),
+                ),
+            ))
+            withError(formatMessage(
+                Errors.`incompatible condition scope for entry-point`(
+                    aCondition = "[test.Foo.isEnabledB]", bCondition = "[test.Foo.isEnabledA]",
+                    binding = "@Inject test.GasHeater", component = "test.SubComponentA",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "test.SubComponentA", "[entry-point] getGas"),
+                    listOf("test.RootComponent", "test.SubComponentA", "[injector-fun] injectConsumer", "[member-to-inject] setGasHeater"),
+                ),
+            ))
+            withError(formatMessage(
+                Errors.`incompatible condition scope for entry-point`(
+                    aCondition = "[test.Foo.isEnabledA]", bCondition = "[test.Foo.isEnabledB]",
+                    binding = "@Inject test.ElectricHeater", component = "test.SubComponentB",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "test.SubComponentB", "[entry-point] getElectric"),
+                    listOf("test.RootComponent", "test.SubComponentB", "[injector-fun] injectConsumer", "[member-to-inject] setElectricHeater")
+                ),
+            ))
+            withNoMoreErrors()
+            withNoWarnings()
         }
     }
 }

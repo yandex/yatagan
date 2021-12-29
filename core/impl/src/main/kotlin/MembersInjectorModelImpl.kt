@@ -8,6 +8,8 @@ import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings
+import com.yandex.daggerlite.validation.impl.reportError
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -44,6 +46,9 @@ internal class MembersInjectorModelImpl private constructor(
     override fun validate(validator: Validator) {
         membersToInject.forEach { (_, dependency) ->
             validator.child(dependency.node)
+        }
+        if (!injector.returnType.isVoid) {
+            validator.reportError(Strings.Errors.`non-void injector method return type`(type = injector.returnType))
         }
     }
 

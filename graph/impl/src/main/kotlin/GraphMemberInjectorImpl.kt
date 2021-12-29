@@ -6,7 +6,6 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.GraphMemberInjector
-import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -18,21 +17,19 @@ internal class GraphMemberInjectorImpl(
         get() = impl.injector
 
     private val _membersToInject by lazy(NONE) {
-        impl.membersToInject.map { (member, dependency) -> MemberToInject(member, dependency) }
+        impl.membersToInject.map { (member, dependency) -> MemberToInjectEntryPoint(member, dependency) }
     }
 
     override val membersToInject: Map<out MemberLangModel, NodeDependency> by lazy(NONE) {
         _membersToInject.associateWith { it.dependency }
     }
 
-    private inner class MemberToInject(
+    private inner class MemberToInjectEntryPoint(
         val member: MemberLangModel,
-        val dependency: NodeDependency,
-    ) : MemberLangModel by member, MayBeInvalid {
-
-        override fun validate(validator: Validator) {
-            validator.child(owner.resolveBinding(dependency.node))
-        }
+        override val dependency: NodeDependency,
+    ) : MemberLangModel by member, GraphEntryPointBase() {
+        override val owner: BindingGraph
+            get() = this@GraphMemberInjectorImpl.owner
 
         override fun toString() = "[member-to-inject] ${member.name}"
     }

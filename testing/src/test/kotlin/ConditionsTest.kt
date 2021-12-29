@@ -115,8 +115,7 @@ class ConditionsTest(
             @Component
             interface TestComponent {
                 val opt: Optional<MyClass>
-                val provider: Provider<MyClass>
-                val direct: MyClass
+                val provider: Optional<Provider<MyClass>>
             }
 
             fun test() {
@@ -127,7 +126,7 @@ class ConditionsTest(
                 Features.isEnabledB = true
                 val new = DaggerTestComponent.create()
                 assert(new.opt.isPresent)
-                assert(new.opt.get() === new.direct && new.direct === new.provider.get())
+                assert(new.opt.get() === new.provider.get().get())
 
                 // Condition is not re-requested.
                 assert(!component.opt.isPresent)
@@ -169,16 +168,16 @@ class ConditionsTest(
             @Component(variant = [DeviceType.Phone::class])
             interface TestPhoneComponent {
                 val opt: Optional<MyClass>
-                val provider: Provider<MyClass>
-                val direct: MyClass
+                val provider: Optional<Provider<MyClass>>
+                val direct: Optional<MyClass>
             }
 
             @Singleton
             @Component(variant = [DeviceType.Tablet::class])
             interface TestTabletComponent {
                 val opt: Optional<MyClass>
-                val provider: Provider<MyClass>
-                val direct: MyClass
+                val provider: Optional<Provider<MyClass>>
+                val direct: Optional<MyClass>
             }
 
             fun test() {

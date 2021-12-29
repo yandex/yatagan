@@ -42,6 +42,8 @@ internal interface BaseBindingMixin : BaseBinding {
         get() = null
 }
 
+internal fun Binding.graphConditionScope(): ConditionScope = conditionScope and owner.conditionScope
+
 internal interface BindingMixin : Binding, BaseBindingMixin {
     override val conditionScope: ConditionScope
         get() = ConditionScope.Unscoped
@@ -65,8 +67,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
             for ((node, kind) in dependencies) {
                 if (kind.isOptional) continue
                 val resolved = owner.resolveBinding(node)
-                val resolvedScope = resolved.conditionScope
-                // TODO: take component conditions into account.
+                val resolvedScope = resolved.graphConditionScope()
                 if (resolvedScope !in conditionScope) {
                     validator.reportError(Errors.`incompatible condition scope`(
                         aCondition = resolvedScope, bCondition = conditionScope, a = node, b = this,
