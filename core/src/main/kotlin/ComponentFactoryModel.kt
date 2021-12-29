@@ -9,7 +9,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
 /**
  * Represents [com.yandex.daggerlite.Component.Builder].
  */
-interface ComponentFactoryModel : ClassBackedModel, MayBeInvalid {
+interface ComponentFactoryModel : ClassBackedModel, MayBeInvalid, HasNodeModel {
 
     /**
      * TODO: doc.
@@ -31,11 +31,6 @@ interface ComponentFactoryModel : ClassBackedModel, MayBeInvalid {
      * TODO: doc.
      */
     val builderInputs: Collection<BuilderInputModel>
-
-    /**
-     * TODO: doc
-     */
-    fun asNode(): NodeModel
 
     /**
      * Encodes actual input data model, that [InputModel] introduces to the graph.

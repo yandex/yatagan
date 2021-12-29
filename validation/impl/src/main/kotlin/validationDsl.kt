@@ -19,12 +19,20 @@ inline fun buildMessage(kind: Kind, block: ValidationMessageBuilder.() -> Unit):
         .build()
 }
 
-inline fun buildError(block: ValidationMessageBuilder.() -> Unit): ValidationMessage {
-    return buildMessage(Kind.Error, block)
+@Suppress("DEPRECATION")
+inline fun Validator.reportError(message: String, block: ValidationMessageBuilder.() -> Unit = {}) {
+    report(buildMessage(Kind.Error) {
+        contents = message
+        block()
+    })
 }
 
-inline fun buildWarning(block: ValidationMessageBuilder.() -> Unit): ValidationMessage {
-    return buildMessage(Kind.Warning, block)
+@Suppress("DEPRECATION")
+inline fun Validator.reportWarning(message: String, block: ValidationMessageBuilder.() -> Unit = {}) {
+    report(buildMessage(Kind.Warning) {
+        contents = message
+        block()
+    })
 }
 
 class ValidationWrapper(

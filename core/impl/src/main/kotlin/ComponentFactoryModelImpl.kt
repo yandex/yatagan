@@ -14,6 +14,7 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
+import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -21,13 +22,16 @@ import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentFactoryModelImpl private constructor(
     private val factoryDeclaration: TypeDeclarationLangModel,
-    override val createdComponent: ComponentModel,
 ) : ComponentFactoryModel {
+
+    override val createdComponent: ComponentModel by lazy(NONE) {
+        ComponentModelImpl(factoryDeclaration.enclosingType ?: LangModelFactory.errorType.declaration)
+    }
 
     override val factoryMethod = factoryDeclaration.allPublicFunctions.find {
         it.isAbstract && it.returnType == createdComponent.type
@@ -57,11 +61,9 @@ internal class ComponentFactoryModelImpl private constructor(
             override fun validate(validator: Validator) {
                 validator.child(payload, kind = Inline)
                 if (!method.returnType.isVoid && !method.returnType.isAssignableFrom(factoryDeclaration.asType())) {
-                    validator.report(buildError {
-                        contents = Errors.`invalid builder setter return type`(
-                            creatorType = factoryDeclaration.asType(),
-                        )
-                    })
+                    validator.reportError(Errors.`invalid builder setter return type`(
+                        creatorType = factoryDeclaration.asType(),
+                    ))
                 }
             }
         }
@@ -101,23 +103,17 @@ internal class ComponentFactoryModelImpl private constructor(
         }
 
         if (!factoryDeclaration.isInterface) {
-            validator.report(buildError {
-                contents = Errors.`component creator must be an interface`()
-            })
+            validator.reportError(Errors.`component creator must be an interface`())
         }
         val factory = factoryMethod
         if (factory == null) {
-            validator.report(buildError {
-                contents = Errors.`missing component creating method`()
-            })
+            validator.reportError(Errors.`missing component creating method`())
         }
 
         for (function in factoryDeclaration.allPublicFunctions) {
             if (function == factoryMethod || function.parameters.count() == 1 || !function.isAbstract)
                 continue
-            validator.report(buildError {
-                contents = Errors.`invalid method in component creator`(method = function)
-            })
+            validator.reportError(Errors.`invalid method in component creator`(method = function))
         }
 
         val providedComponents = allInputs
@@ -128,15 +124,11 @@ internal class ComponentFactoryModelImpl private constructor(
         if (createdComponent.dependencies != providedComponents) {
             val missing = createdComponent.dependencies - providedComponents
             for (missingDependency in missing) {
-                validator.report(buildError {
-                    contents = Errors.`missing component dependency`(missing = missingDependency)
-                })
+                validator.reportError(Errors.`missing component dependency`(missing = missingDependency))
             }
             val unneeded = providedComponents - createdComponent.dependencies
             for (extraDependency in unneeded) {
-                validator.report(buildError {
-                    contents = Errors.`unneeded component dependency`(extra = extraDependency)
-                })
+                validator.reportError(Errors.`unneeded component dependency`(extra = extraDependency))
             }
         }
 
@@ -150,16 +142,12 @@ internal class ComponentFactoryModelImpl private constructor(
 
         val missing = (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }
         for (missingModule in missing) {
-            validator.report(buildError {
-                contents = Errors.`missing module`(missing = missingModule)
-            })
+            validator.reportError(Errors.`missing module`(missing = missingModule))
         }
         val unneeded = providedModules - allModulesRequiresInstance
         if (unneeded.isNotEmpty()) {
             for (extraModule in unneeded) {
-                validator.report(buildError {
-                    contents = Errors.`unneeded module`(extra = extraModule)
-                })
+                validator.reportError(Errors.`unneeded module`(extra = extraModule))
             }
         }
     }
@@ -191,11 +179,9 @@ internal class ComponentFactoryModelImpl private constructor(
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentFactoryModelImpl>() {
         operator fun invoke(
             factoryDeclaration: TypeDeclarationLangModel,
-            createdComponent: ComponentModel,
         ) = createCached(factoryDeclaration) {
             ComponentFactoryModelImpl(
                 factoryDeclaration = it,
-                createdComponent = createdComponent,
             )
         }
 

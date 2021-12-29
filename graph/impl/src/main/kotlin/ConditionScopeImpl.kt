@@ -16,7 +16,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal val ConditionScope.Companion.Unscoped get() = ConditionScopeImpl.Unscoped
@@ -37,7 +37,9 @@ private class ConditionScopeImpl(
     override val expression: Set<Set<Literal>>,
 ) : ConditionScope {
     override fun contains(another: ConditionScope): Boolean {
-        TODO("Required in validation step - implement later")
+        if (another === Unscoped) return true
+        if (this == another) return true
+        return solveContains(expression, another.expression)
     }
 
     override fun and(rhs: ConditionScope): ConditionScope {
@@ -80,6 +82,15 @@ private class ConditionScopeImpl(
     override val isNever: Boolean
         get() = this === NeverScoped || expression.singleOrNull()?.isEmpty() == true
 
+    override fun toString() = when (this) {
+        Unscoped -> "[unconditional]"
+        NeverScoped -> "[never-present]"
+        else -> expression.joinToString(prefix = "[", separator = " && ", postfix = "]") { clause ->
+            clause.singleOrNull()?.toString()
+                ?: clause.joinToString(prefix = "(", separator = " || ", postfix = ")")
+        }
+    }
+
     override fun validate(validator: Validator) {
         for (literal: Literal in expression.asSequence().flatten().toSet()) {
             validator.child(literal)
@@ -110,6 +121,13 @@ private class ConditionLiteralImpl private constructor(
         validator.child(payload, kind = Inline)
     }
 
+    override fun toString(): String {
+        return buildString {
+            if (negated) append('!')
+            append(payload)
+        }
+    }
+
     companion object Factory : BiObjectCache<Boolean, LiteralPayload, ConditionLiteralImpl>() {
         operator fun invoke(model: ConditionAnnotationLangModel): Literal {
             val condition = model.condition
@@ -126,10 +144,10 @@ private class ConditionLiteralImpl private constructor(
                     override val path: List<MemberLangModel> get() = emptyList()
                     override fun validate(validator: Validator) {
                         // Always invalid
-                        validator.report(buildError {
-                            contents = Errors.`invalid condition`(expression = condition)
-                        })
+                        validator.reportError(Errors.`invalid condition`(expression = condition))
                     }
+
+                    override fun toString() = "<invalid>"
                 }
             )
         }
@@ -158,12 +176,10 @@ private class LiteralPayloadImpl private constructor(
 
     override fun validate(validator: Validator) {
         path  // Ensure path is parsed
-        pathParsingError?.let { message ->
-            validator.report(buildError {
-                contents = message
-            })
-        }
+        pathParsingError?.let(validator::reportError)
     }
+
+    override fun toString() = "$root.$pathSource"
 
     override val path: List<MemberLangModel> by lazy(NONE) {
         buildList {

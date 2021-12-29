@@ -74,6 +74,7 @@ private fun mapToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassD
 
 internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean = false): KSType {
     // MAYBE: Perf: implement caching for non-trivial mappings?
+    if (type.isError) return type
     val originalDeclaration = type.declaration as? KSClassDeclaration ?: return type
     val mappedDeclaration = mapToJavaPlatformIfNeeded(declaration = originalDeclaration)
     if (mappedDeclaration == originalDeclaration && type.arguments.isEmpty()) {
@@ -105,7 +106,12 @@ internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean
                 },
             )
         })
-    return mappedDeclaration.asType(mappedArguments)
+    return try {
+        mappedDeclaration.asType(mappedArguments)
+    } catch (e: ClassCastException) {
+        // fixme: think of a better way to handle it
+        type  // Internal KSP error, likely due to an ErrorType in mappedArguments, so return unmapped type.
+    }
 }
 
 private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {

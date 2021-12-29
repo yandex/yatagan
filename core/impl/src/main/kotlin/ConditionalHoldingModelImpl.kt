@@ -10,7 +10,7 @@ import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 
 internal open class ConditionalHoldingModelImpl(
     sources: Sequence<ConditionalAnnotationLangModel>,
@@ -40,9 +40,7 @@ internal open class ConditionalHoldingModelImpl(
 
         override fun validate(validator: Validator) {
             if (conditions.none()) {
-                validator.report(buildError {
-                    contents = Errors.`no conditions on feature`()
-                })
+                validator.reportError(Errors.`no conditions on feature`())
             }
         }
 

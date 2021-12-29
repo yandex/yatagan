@@ -18,6 +18,15 @@ object Strings {
     ): String {
         return buildString {
             appendLine(red(message))
+            if (notes.size == 1) {
+                append(cyan("• NOTE: "))
+                appendLine(notes.first())
+            } else {
+                notes.forEachIndexed { index, note ->
+                    append(cyan("• NOTE #${index + 1}:")).append(' ')
+                    appendLine(note)
+                }
+            }
             appendLine("Encountered in:")
             encounterPaths.joinTo(this, separator = "\n") { path ->
                 val pathElement = path.joinToString(separator = " ⟶ ") {
@@ -25,34 +34,48 @@ object Strings {
                 }
                 "$Indent$pathElement"
             }
-            notes.forEachIndexed { index, note ->
-                append(cyan("• NOTE #${index + 1}:")).append(' ')
-                appendLine(note)
-            }
         }
     }
 
-    object Errors {
-        fun `missing binding`(`for`: Any) =
-            "Missing binding for $`for`, no known way to create it"
+    /**
+     * Just a marker for a message string function, that the corresponding case is covered with test(s).
+     */
+    @Retention(AnnotationRetention.SOURCE)
+    private annotation class Covered
 
+    object Errors {
+        @Covered
+        fun `missing binding`(`for`: Any) =
+            "Missing binding for $`for`"
+
+        @Covered
         fun `no matching scope for binding`(binding: Any, scope: Any?) =
             "No components in the hierarchy match binding -> \n$Indent`$binding`\n -> with scope $scope"
 
+        @Covered
         fun `invalid flattening multibinding`(insteadOf: Any) =
             "Flattening multi-binding must return `Collection` or any of its subtypes instead of `$insteadOf`"
 
+        @Covered
         fun `binding must not return void`() =
             "Binding method must not return `void`"
 
+        @Covered
         fun `binds must be abstract`() =
             "@Binds annotated method must be abstract"
 
+        @Covered
         fun `provides must not be abstract`() =
             "@Provides annotated method must not be abstract (must have a body)"
 
+        @Covered
         fun `binds param type is incompatible with return type`(param: Any, returnType: Any) =
             "@Binds parameter $param is not compatible with its return type $returnType"
+
+        @Covered
+        fun `incompatible condition scope`(aCondition: Any, bCondition: Any, a: Any, b: Any) =
+            "Condition $aCondition is not always true, given $bCondition is true,\n" +
+                    "$Indent=> `$a` can not be injected into `$b` without `Optional<>` wrapper."
 
 
         fun `invalid builder setter return type`(creatorType: Any) =
@@ -150,15 +173,16 @@ object Strings {
     }
 
     object Warnings {
+        @Covered
         fun `custom binding shadow @Inject constructor`(target: Any, binding: Any) =
-            "$target has an inject constructor, yet a custom binding\n$Indent$binding\nis used " +
+            "`$target` has an inject constructor, yet a custom binding\n$Indent`$binding`\nis used " +
                     "instead. This is usually confusing and error-prone. Please, either tweak an " +
                     "inject constructor/conditionals and remove this binding, or remove inject constructor in " +
                     "favor of this binding."
 
         fun `exposed dependency of a framework type`(functionName: Any, returnType: Any) =
-            "$functionName has $returnType which is a framework type thus it can not be directly introduced " +
-                    "to the graph via component dependency - the function will be ignored." +
+            "`$functionName` has return type `$returnType` which is a framework type thus it can not be directly " +
+                    "introduced to the graph via component dependency - the function will be ignored." +
                     "If you need this to form a binding - change the return type, or use a wrapper type. " +
                     "Otherwise remove the function from the dependency interface entirely."
 
@@ -166,5 +190,11 @@ object Strings {
             "Component dependency declaration is not abstract. If it is already known how to provide necessary " +
                     "dependencies for the graph, consider using Inject-constructors or a @Module with " +
                     "regular provisions instead."
+    }
+
+    object Notes {
+        @Covered
+        fun `no known way to infer a binding`() =
+            "No known way to infer the binding"
     }
 }

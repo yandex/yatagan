@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.Strings.formatMessage
 import org.junit.Test
@@ -45,22 +46,15 @@ class CoreBindingsFailureTest(
             withError(formatMessage(
                 message = Errors.`missing binding`("java.lang.Object"),
                 encounterPaths = listOf(
-                    listOf("test.TestComponent",
-                        "[entry-point] getFoo",
-                        "@Inject test.Foo",
-                        "[missing: java.lang.Object]"),
-                    listOf("test.TestComponent",
-                        "[entry-point] getFoo",
-                        "@Inject test.Foo",
-                        "@Inject test.Foo2",
-                        "[missing: java.lang.Object]"),
+                    // @formatter:off
+                    listOf("test.TestComponent", "[entry-point] getFoo", "@Inject test.Foo", "[missing: java.lang.Object]"),
+                    listOf("test.TestComponent", "[entry-point] getFoo", "@Inject test.Foo", "@Inject test.Foo2", "[missing: java.lang.Object]"),
                     listOf("test.TestComponent", "[entry-point] getHello", "[missing: java.lang.Object]"),
                     listOf("test.TestComponent", "[entry-point] getBye", "[missing: java.lang.Object]"),
-                    listOf("test.TestComponent",
-                        "[injector-fun] inject",
-                        "[member-to-inject] setObj",
-                        "[missing: java.lang.Object]"),
-                )
+                    listOf("test.TestComponent", "[injector-fun] inject", "[member-to-inject] setObj", "[missing: java.lang.Object]"),
+                    // @formatter:on
+                ),
+                notes = listOf(Strings.Notes.`no known way to infer a binding`()),
             ))
             withNoMoreErrors()
             withNoWarnings()
@@ -102,11 +96,15 @@ class CoreBindingsFailureTest(
 
         failsToCompile {
             withError(formatMessage(
-                message = Errors.`no matching scope for binding`(binding = "@Inject test.Foo",
-                    scope = "@javax.inject.Singleton"),
+                message = Errors.`no matching scope for binding`(
+                    binding = "@Inject test.Foo",
+                    scope = "@javax.inject.Singleton",
+                ),
                 encounterPaths = listOf(
+                    // @formatter:off
                     listOf("test.RootComponent", "test.SubComponent", "[entry-point] getFooForSub", "[missing: test.Foo]"),
                     listOf("test.RootComponent", "[entry-point] getFooForRoot", "[missing: test.Foo]"),
+                    // @formatter:on
                 )
             ))
             withNoWarnings()
@@ -167,7 +165,8 @@ class CoreBindingsFailureTest(
                 message = Errors.`missing binding`(`for` = "java.lang.Integer"),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "test.SubComponent", "[entry-point] getFooForSub", binding, "[missing: java.lang.Integer]"),
-                )
+                ),
+                notes = listOf(Strings.Notes.`no known way to infer a binding`())
             ))
             withNoWarnings()
             withNoMoreErrors()
@@ -241,6 +240,154 @@ class CoreBindingsFailureTest(
             ))
             withNoWarnings()
             withNoMoreErrors()
+        }
+    }
+
+    @Test
+    fun `incompatible conditions`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            object Foo { 
+                const val isEnabledA = true 
+                const val isEnabledB = true 
+                const val isEnabledC = true 
+            }
+
+            @Condition(Foo::class, "isEnabledA") annotation class A
+            @Condition(Foo::class, "isEnabledB") annotation class B
+            @Condition(Foo::class, "isEnabledC") annotation class C
+
+            @AllConditions([
+                Condition(Foo::class, "isEnabledA"),
+                Condition(Foo::class, "isEnabledB"),
+            ])
+            annotation class AandB
+            
+            @AnyCondition([
+                Condition(Foo::class, "isEnabledA"),
+                Condition(Foo::class, "isEnabledB"),
+            ])
+            annotation class AorB
+
+            @Conditional([A::class, B::class])
+            class UnderAandB @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>)
+
+            @Conditional([AorB::class, A::class])
+            class UnderAorB @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>/*error*/)
+
+            @Conditional([AandB::class, AorB::class])
+            class UnderComplex @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>)
+
+            @Conditional([A::class]) class UnderA @Inject constructor(
+                a: UnderAandB,  // error
+                ab: UnderAorB,  // ok
+            )
+            @Conditional([AorB::class, B::class]) class UnderB @Inject constructor(
+                b: UnderA,  // error
+                c: Lazy<UnderComplex>,  // error
+            )
+
+            @Module
+            class MyModule {
+                @Provides @Named("error")
+                fun provideObject(c: UnderA): Any = c
+                @Provides @Named("ok1")
+                fun provideObject2(c: Optional<Provider<UnderA>>): Any = c
+                @Provides([Conditional([A::class])]) @Named("ok2")
+                fun provideObject2(c: UnderA): Any = c
+            }
+
+            @Component(modules = [MyModule::class])
+            interface MyComponent {
+                val e1: Optional<UnderA>
+                val e2: Optional<UnderB>
+                @get:Named("error") val object1: Any
+                @get:Named("ok1") val object2: Any
+                @get:Named("ok2") val object3: Any
+            }
+        """.trimIndent())
+
+        failsToCompile {
+            withError(formatMessage(
+                message = Errors.`incompatible condition scope`(
+                    aCondition = "[test.Foo.isEnabledA && test.Foo.isEnabledB]",
+                    bCondition = "[test.Foo.isEnabledA]",
+                    a = "test.UnderAandB",
+                    b = "@Inject test.UnderA",
+                ),
+                encounterPaths = listOf(
+                    // @formatter:off
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB", "@Inject test.UnderComplex", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getObject2", "@Provides test.MyModule::provideObject2(test.UnderA [OptionalProvider]): @javax.inject.Named(\"ok1\") java.lang.Object", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject2(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA"),
+                    // @formatter:on
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`incompatible condition scope`(
+                    aCondition = "[test.Foo.isEnabledA]",
+                    bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
+                    a = "test.UnderA",
+                    b = "@Inject test.UnderB",
+                ),
+                encounterPaths = listOf(
+                    // @formatter:off
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB", "@Inject test.UnderComplex", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getE2", "@Inject test.UnderB"),
+                    // @formatter:on
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`incompatible condition scope`(
+                    aCondition = "[test.Foo.isEnabledA && test.Foo.isEnabledB && (test.Foo.isEnabledA || test.Foo.isEnabledB)]",
+                    bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
+                    a = "test.UnderComplex",
+                    b = "@Inject test.UnderB",
+                ),
+                encounterPaths = listOf(
+                    // @formatter:off
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB", "@Inject test.UnderComplex", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getE2", "@Inject test.UnderB"),
+                    // @formatter:on
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`incompatible condition scope`(
+                    aCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
+                    bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledA]",
+                    a = "test.UnderB",
+                    b = "@Inject test.UnderAorB",
+                ),
+                encounterPaths = listOf(
+                    // @formatter:off
+                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB"),
+                    // @formatter:on
+                ),
+            ))
+            withError(formatMessage(
+                // @formatter:off
+                message = Errors.`incompatible condition scope`(
+                    aCondition = "[test.Foo.isEnabledA]",
+                    bCondition = "[unconditional]",
+                    a = "test.UnderA",
+                    b = "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object"),
+                ),
+                // @formatter:on
+            ))
         }
     }
 }

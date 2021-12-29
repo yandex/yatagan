@@ -24,4 +24,17 @@ interface NodeModel : ClassBackedModel, MayBeInvalid {
      * TODO: doc.
      */
     fun multiBoundListNode(): NodeModel
+
+    /**
+     * What specific core-level model the node represents. `null` if none.
+     */
+    val superModel: HasNodeModel?
+
+    /**
+     * Returns a node that is equal to this one without qualifier.
+     *
+     * @return the same node only with [qualifier] = `null`.
+     * If `this` node already has no qualifier, `this` is returned.
+     */
+    fun dropQualifier(): NodeModel
 }

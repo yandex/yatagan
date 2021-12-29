@@ -21,9 +21,11 @@ import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.ValidationMessage
+import com.yandex.daggerlite.validation.ValidationMessage.Kind
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.ValidationMessageBuilder
+import com.yandex.daggerlite.validation.impl.buildMessage
 
 internal class GraphBindingsFactory(
     modules: Set<ModuleModel>,
@@ -119,12 +121,12 @@ internal class GraphBindingsFactory(
                 multiBindings.getOrPut(it.listType, ::mutableMapOf)
             }
             .duplicateAwareAssociateBy(onDuplicates = { listNode, duplicateDeclarations ->
-                validationMessages += buildError {
+                validationMessages += buildMessage(Kind.Error, fun ValidationMessageBuilder.() {
                     contents = Strings.Errors.`conflicting list declarations`(`for` = listNode)
                     duplicateDeclarations.forEachIndexed { i, duplicate ->
                         addNote("${i + 1}. $duplicate")
                     }
-                }
+                })
             }, keySelector = ListDeclarationModel::listType)
 
         // Multi-bindings
@@ -181,12 +183,12 @@ internal class GraphBindingsFactory(
         //  as written now, "overriding" or "shadowing" of parent bindings is allowed.
         providedBindings.forEach { (node, bindings) ->
             bindings.ifContainsDuplicates { duplicates ->
-                validator.report(buildError {
+                validator.report(buildMessage(Kind.Error, fun ValidationMessageBuilder.() {
                     contents = Strings.Errors.`conflicting bindings`(`for` = node)
                     duplicates.forEach { binding ->
                         addNote("Duplicate binding: $binding")
                     }
-                })
+                }))
             }
         }
     }

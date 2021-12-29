@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
+import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
@@ -162,7 +163,12 @@ internal class BindingGraphImpl(
 
         // Reachable via entry-points.
         for ((getter, dependency) in model.entryPoints) {
-            validator.child(resolveBinding(dependency.node).wrap("[entry-point] ${getter.name}"))
+            val (node, kind) = dependency
+            val resolved = resolveBinding(node)
+            if (!kind.isOptional) {
+                // TODO: validate that this entry point is unscoped according to this component.
+            }
+            validator.child(resolved.wrap("[entry-point] ${getter.name}"))
         }
         // Reachable via members-inject.
         for (memberInjector in model.memberInjectors) {

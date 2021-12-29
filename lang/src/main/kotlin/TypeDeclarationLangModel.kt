@@ -25,6 +25,11 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
     val qualifiedName: String
 
     /**
+     * If this declaration is nested, returns enclosing declaration. `null` otherwise.
+     */
+    val enclosingType: TypeDeclarationLangModel?
+
+    /**
      * All implemented interfaces, recursively.
      */
     val implementedInterfaces: Sequence<TypeLangModel>

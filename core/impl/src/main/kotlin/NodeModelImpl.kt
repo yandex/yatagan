@@ -2,6 +2,7 @@ package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
@@ -13,7 +14,7 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -78,10 +79,23 @@ internal class NodeModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (isFrameworkType(type)) {
-            validator.report(buildError {
-                contents = Errors.`framework type is manually managed`()
-            })
+            validator.reportError(Errors.`framework type is manually managed`())
         }
+    }
+
+    override val superModel: HasNodeModel?
+        get() {
+            val declaration = type.declaration
+            return when {
+                ComponentFactoryModelImpl.canRepresent(declaration) -> ComponentFactoryModelImpl(declaration)
+                ComponentModelImpl.canRepresent(declaration) -> ComponentFactoryModelImpl(declaration)
+                else -> null
+            }
+        }
+
+    override fun dropQualifier(): NodeModel {
+        if (qualifier == null) return this
+        return Factory(type = type, qualifier = null)
     }
 
     companion object Factory : BiObjectCache<TypeLangModel, AnnotationLangModel?, NodeModelImpl>() {
@@ -89,6 +103,8 @@ internal class NodeModelImpl private constructor(
             override val type get() = LangModelFactory.errorType
             override val qualifier: Nothing? get() = null
             override val implicitBinding: Nothing? get() = null
+            override val superModel: Nothing? get() = null
+            override fun dropQualifier(): NodeModel = this
             override fun multiBoundListNode(): NodeModel = this
             override fun validate(validator: Validator) = Unit // No need to report an error here
             override fun toString() = "[invalid]"

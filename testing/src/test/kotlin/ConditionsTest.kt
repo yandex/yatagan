@@ -103,7 +103,13 @@ class ConditionsTest(
 
             @Singleton
             @Conditional([Conditions.FeatureA::class, Conditions.FeatureB::class])
-            class MyClass @Inject constructor()
+            class MyClass @Inject constructor(a: ClassA, b: ClassB)
+
+            @Conditional([Conditions.FeatureA::class])
+            class ClassA @Inject constructor()
+
+            @Conditional([Conditions.FeatureB::class])
+            class ClassB @Inject constructor()
 
             @Singleton
             @Component
@@ -137,7 +143,6 @@ class ConditionsTest(
             }
         }
     }
-
 
     @Test
     fun `flavors test`() {

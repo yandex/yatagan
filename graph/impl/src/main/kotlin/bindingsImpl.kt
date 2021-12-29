@@ -10,6 +10,7 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
+import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.graph.AliasBinding
@@ -30,8 +31,8 @@ import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
-import com.yandex.daggerlite.validation.impl.buildWarning
+import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.impl.reportWarning
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal interface BaseBindingMixin : BaseBinding {
@@ -50,24 +51,38 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
 
     val isImplicitBinding: Boolean get() = false
 
+    val checkDependenciesConditionScope: Boolean get() = false
+
     override fun validate(validator: Validator) {
         validator.child(conditionScope)
-        dependencies().forEach {
+        val dependencies = dependencies()
+        dependencies.forEach {
             validator.child(owner.resolveRaw(it.node))
         }
 
+        if (checkDependenciesConditionScope) {
+            val conditionScope = conditionScope
+            for ((node, kind) in dependencies) {
+                if (kind.isOptional) continue
+                val resolved = owner.resolveBinding(node)
+                val resolvedScope = resolved.conditionScope
+                // TODO: take component conditions into account.
+                if (resolvedScope !in conditionScope) {
+                    validator.reportError(Errors.`incompatible condition scope`(
+                        aCondition = resolvedScope, bCondition = conditionScope, a = node, b = this,
+                    ))
+                }
+            }
+        }
+
         if (scope != null && scope != owner.model.scope) {
-            validator.report(buildError {
-                contents = Errors.`no matching scope for binding`(binding = this@BindingMixin, scope = scope)
-            })
+            validator.reportError(Errors.`no matching scope for binding`(binding = this@BindingMixin, scope = scope))
         }
         if (!isImplicitBinding && target.implicitBinding != null) {
-            validator.report(buildWarning {
-                contents = Strings.Warnings.`custom binding shadow @Inject constructor`(
-                    target = target,
-                    binding = this@BindingMixin,
-                )
-            })
+            validator.reportWarning(Strings.Warnings.`custom binding shadow @Inject constructor`(
+                target = target,
+                binding = this@BindingMixin,
+            ))
         }
     }
 
@@ -129,6 +144,8 @@ internal class ProvisionBindingImpl(
 
     override fun toString() = impl.toString()
 
+    override val checkDependenciesConditionScope get() = true
+
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitProvision(this)
     }
@@ -147,6 +164,9 @@ internal class InjectConstructorProvisionBindingImpl(
     override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
 
     override val isImplicitBinding: Boolean
+        get() = true
+
+    override val checkDependenciesConditionScope: Boolean
         get() = true
 
     override fun dependencies(): Collection<NodeDependency> {
@@ -188,10 +208,9 @@ internal class AliasBindingImpl(
     override fun validate(validator: Validator) {
         validator.child(source)
         if (impl.scope != null) {
-            validator.report(buildWarning {
-                contents = "Scope has no effect on 'alias' binding"
+            validator.reportWarning("Scope has no effect on 'alias' binding") {
                 addNote( "Scope is inherited from source graph node and can not be overridden")
-            })
+            }
         }
     }
 
@@ -353,22 +372,31 @@ internal data class MissingBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraphImpl,
 ) : EmptyBinding, BindingMixin {
-    override val conditionScope get() = ConditionScope.NeverScoped
 
     override fun validate(validator: Validator) {
         val failedInject = target.implicitBinding
         if (failedInject != null) {
-            validator.report(buildError {
-                contents = Errors.`no matching scope for binding`(binding = failedInject, scope = failedInject.scope)
-            })
+            validator.reportError(Errors.`no matching scope for binding`(
+                binding = failedInject, scope = failedInject.scope))
         } else {
-            validator.report(buildError {
+            validator.reportError(Errors.`missing binding`(`for` = target)) {
+                val factory = target.superModel as? ComponentFactoryModel
+                if (factory != null) {
+                    val component = factory.createdComponent
+                    if (!component.isRoot) {
+                        addNote("$target is a factory for $component, ensure that this component is specified " +
+                                "via `@Module(subcomponents=..)` and that module is included into $owner")
+                    } else {
+                        addNote("$target is a factory for a root component, " +
+                                "injecting such factory is not supported")
+                    }
+                } else {
+                    addNote(Strings.Notes.`no known way to infer a binding`())
+                }
                 // TODO: implement hint about how to provide a binding
-                //  - subcomponent factory
                 //  - maybe the same differently qualified binding exists
                 //  - binding exists in a sibling component hierarchy path
-                contents = Errors.`missing binding`(`for` = target)
-            })
+            }
         }
     }
 

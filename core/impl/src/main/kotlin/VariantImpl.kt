@@ -7,7 +7,7 @@ import com.yandex.daggerlite.core.Variant.FlavorModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 
 internal class VariantImpl private constructor(
     private val parts: Map<DimensionModel, List<FlavorModel>>,
@@ -40,9 +40,7 @@ internal class VariantImpl private constructor(
             validator.child(dimension)
             flavors.forEach(validator::child)
             flavors.ifContainsDuplicates { duplicates ->
-                validator.report(buildError {
-                    contents = Strings.Errors.`conflicting flavors for dimension`(dimension = dimension)
-                })
+                validator.reportError(Strings.Errors.`conflicting flavors for dimension`(dimension = dimension))
             }
         }
     }

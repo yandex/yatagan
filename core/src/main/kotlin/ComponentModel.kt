@@ -7,7 +7,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
 /**
  * Represents @[com.yandex.daggerlite.Component] annotated class - Component.
  */
-interface ComponentModel : ClassBackedModel, ConditionalHoldingModel, MayBeInvalid {
+interface ComponentModel : ClassBackedModel, ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
     /**
      * A set of *all* modules that are included into the component (transitively).
      */
@@ -48,11 +48,6 @@ interface ComponentModel : ClassBackedModel, ConditionalHoldingModel, MayBeInval
      * TODO: doc.
      */
     val variant: Variant
-
-    /**
-     * Yields this component as graph node.
-     */
-    fun asNode(): NodeModel
 
     /**
      * Represents a function/property exposed from a component interface.

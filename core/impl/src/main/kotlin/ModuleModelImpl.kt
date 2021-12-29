@@ -12,7 +12,7 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ModuleModelImpl private constructor(
@@ -70,9 +70,7 @@ internal class ModuleModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (impl == null) {
-            validator.report(buildError {
-                contents = Errors.`declaration is not annotated with @Module`()
-            })
+            validator.reportError(Errors.`declaration is not annotated with @Module`())
         }
         for (binding in bindings) {
             validator.child(binding)

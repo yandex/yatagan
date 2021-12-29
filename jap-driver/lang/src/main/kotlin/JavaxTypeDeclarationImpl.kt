@@ -18,6 +18,7 @@ import kotlinx.metadata.jvm.getterSignature
 import kotlinx.metadata.jvm.setterSignature
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.NestingKind
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import kotlin.LazyThreadSafetyMode.NONE
@@ -48,6 +49,12 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
+
+    override val enclosingType: TypeDeclarationLangModel?
+        get() = when (impl.nestingKind) {
+            NestingKind.MEMBER -> Factory(impl.enclosingElement.asType().asDeclaredType())
+            else -> null
+        }
 
     override val implementedInterfaces: Sequence<TypeLangModel> = impl.allImplementedInterfaces()
         .map { JavaxTypeImpl(it) }

@@ -7,7 +7,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
 interface ConditionScope : MayBeInvalid {
     val expression: Set<Set<Literal>>
 
-    fun contains(another: ConditionScope): Boolean
+    operator fun contains(another: ConditionScope): Boolean
 
     infix fun and(rhs: ConditionScope): ConditionScope
 
@@ -19,12 +19,15 @@ interface ConditionScope : MayBeInvalid {
 
     val isNever: Boolean
 
-    interface Literal : MayBeInvalid {
+    interface LiteralBase {
         val negated: Boolean
+        operator fun not(): LiteralBase
+    }
+
+    interface Literal : LiteralBase, MayBeInvalid {
         val root: TypeDeclarationLangModel
         val path: List<MemberLangModel>
-
-        operator fun not(): Literal
+        override operator fun not(): Literal
     }
 
     companion object

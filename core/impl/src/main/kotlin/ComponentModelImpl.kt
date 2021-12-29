@@ -16,7 +16,7 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentModelImpl private constructor(
@@ -89,7 +89,7 @@ internal class ComponentModelImpl private constructor(
     override val factory: ComponentFactoryModel? by lazy(NONE) {
         declaration.nestedInterfaces
             .find { ComponentFactoryModelImpl.canRepresent(it) }?.let {
-                ComponentFactoryModelImpl(factoryDeclaration = it, createdComponent = this)
+                ComponentFactoryModelImpl(factoryDeclaration = it)
             }
     }
 
@@ -118,35 +118,25 @@ internal class ComponentModelImpl private constructor(
         factory?.let(validator::child)
 
         if (impl == null) {
-            validator.report(buildError {
-                contents = Errors.`declaration is not annotated with @Component`()
-            })
+            validator.reportError(Errors.`declaration is not annotated with @Component`())
         }
 
         if (!declaration.isInterface) {
-            validator.report(buildError {
-                contents = Errors.`component must be an interface`()
-            })
+            validator.reportError(Errors.`component must be an interface`())
         }
 
         if (factory == null) {
             if (!isRoot) {
-                validator.report(buildError {
-                    contents = Errors.`missing component creator - non-root`()
-                })
+                validator.reportError(Errors.`missing component creator - non-root`())
             }
 
             if (dependencies.isNotEmpty()) {
-                validator.report(buildError {
-                    contents = Errors.`missing component creator - dependencies`()
-                })
+                validator.reportError(Errors.`missing component creator - dependencies`())
             }
 
             if (modules.any { it.requiresInstance && !it.isTriviallyConstructable }) {
-                validator.report(buildError {
-                    contents = Errors.`missing component creator - modules`()
-                    // TODO: provide notes about concrete modules that require instances.
-                })
+                // TODO: provide notes about concrete modules that require instances.
+                validator.reportError(Errors.`missing component creator - modules`())
             }
         }
     }
@@ -161,5 +151,9 @@ internal class ComponentModelImpl private constructor(
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)
+
+        fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
+            return declaration.componentAnnotationIfPresent != null
+        }
     }
 }

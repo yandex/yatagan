@@ -10,7 +10,7 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.buildWarning
+import com.yandex.daggerlite.validation.impl.reportWarning
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentDependencyModelImpl private constructor(
@@ -43,19 +43,15 @@ internal class ComponentDependencyModelImpl private constructor(
         validator.child(node = asNode(), kind = Inline)
 
         if (!type.declaration.isAbstract) {
-            validator.report(buildWarning {
-                contents = Strings.Warnings.`non-abstract dependency declaration`()
-            })
+            validator.reportWarning(Strings.Warnings.`non-abstract dependency declaration`())
         }
 
         exposedEntryPoints.forEach { (dependency, function) ->
-            if (dependency.kind == DependencyKind.Direct) {
-                validator.report(buildWarning {
-                    contents = Strings.Warnings.`exposed dependency of a framework type`(
-                        functionName = function.name,
-                        returnType = function.returnType,
-                    )
-                })
+            if (dependency.kind != DependencyKind.Direct) {
+                validator.reportWarning(Strings.Warnings.`exposed dependency of a framework type`(
+                    functionName = function.name,
+                    returnType = function.returnType,
+                ))
             }
         }
     }

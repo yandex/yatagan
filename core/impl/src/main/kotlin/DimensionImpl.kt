@@ -8,7 +8,7 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 
 internal class DimensionImpl private constructor(
     override val type: TypeLangModel,
@@ -18,9 +18,7 @@ internal class DimensionImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (!type.declaration.isAnnotatedWith<ComponentVariantDimension>()) {
-            validator.report(buildError {
-                contents = Errors.`declaration is not annotated with @ComponentVariantDimension`()
-            })
+            validator.reportError(Errors.`declaration is not annotated with @ComponentVariantDimension`())
         }
     }
 
@@ -35,9 +33,7 @@ internal class MissingDimension(private val flavor: Variant.FlavorModel) : Varia
 
     override fun validate(validator: Validator) {
         // Always invalid
-        validator.report(buildError {
-            contents = Errors.`missing component variant dimension`()
-        })
+        validator.reportError(Errors.`missing component variant dimension`())
     }
 
     override fun toString() = "[missing dimension for $flavor]"

@@ -17,7 +17,7 @@ import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
     protected abstract val impl: FunctionLangModel
@@ -45,15 +45,11 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         if (multiBinding == MultiBindingKind.Flatten) {
             val firstArg = impl.returnType.typeArguments.firstOrNull()
             if (firstArg == null || !LangModelFactory.getCollectionType(firstArg).isAssignableFrom(impl.returnType)) {
-                validator.report(buildError {
-                    contents = Errors.`invalid flattening multibinding`(insteadOf = impl.returnType)
-                })
+                validator.reportError(Errors.`invalid flattening multibinding`(insteadOf = impl.returnType))
             }
         }
         if (impl.returnType.isVoid) {
-            validator.report(buildError {
-                this.contents = Errors.`binding must not return void`()
-            })
+            validator.reportError(Errors.`binding must not return void`())
         }
     }
 }
@@ -80,19 +76,15 @@ internal class BindsImpl(
 
         for (param in impl.parameters) {
             if (!impl.returnType.isAssignableFrom(param.type)) {
-                validator.report(buildError {
-                    contents = Errors.`binds param type is incompatible with return type`(
-                        param = param.type,
-                        returnType = impl.returnType,
-                    )
-                })
+                validator.reportError(Errors.`binds param type is incompatible with return type`(
+                    param = param.type,
+                    returnType = impl.returnType,
+                ))
             }
         }
 
         if (!impl.isAbstract) {
-            validator.report(buildError {
-                contents = Errors.`binds must be abstract`()
-            })
+            validator.reportError(Errors.`binds must be abstract`())
         }
     }
 
@@ -136,9 +128,7 @@ internal class ProvidesImpl(
         }
 
         if (impl.isAbstract) {
-            validator.report(buildError {
-                contents = Errors.`provides must not be abstract`()
-            })
+            validator.reportError(Errors.`provides must not be abstract`())
         }
     }
 

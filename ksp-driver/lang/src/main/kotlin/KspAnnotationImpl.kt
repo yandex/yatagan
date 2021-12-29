@@ -49,31 +49,35 @@ internal class KspAnnotationImpl(
     }
 
     override fun getBoolean(attribute: String): Boolean {
-        return impl[attribute] as Boolean
+        return impl[attribute] as? Boolean ?: false
     }
 
     override fun getTypes(attribute: String): Sequence<TypeLangModel> {
         @Suppress("UNCHECKED_CAST")
         return impl[attribute].let { value ->
             when (value) {
-                is List<*> -> (value as List<KSType>)
+                is List<*> -> (value as List<KSType>).asSequence()
+                null -> emptySequence()
                 // In java annotations we can create lists implicitly (e.g. @Component(modules = MyModule.class)).
-                else -> listOf(value as KSType)
-            }.asSequence().map { KspTypeImpl(it) }.memoize()
+                else -> sequenceOf(value as KSType)
+            }.map { KspTypeImpl(it) }.memoize()
         }
     }
 
     override fun getType(attribute: String): TypeLangModel {
-        return KspTypeImpl((impl[attribute] as KSType))
+        return KspTypeImpl((impl[attribute] as? KSType ?: ErrorTypeImpl))
     }
 
     override fun getString(attribute: String): String {
-        return impl[attribute] as String
+        return impl[attribute] as? String ?: "<error-annotation-attribute>"
     }
 
     override fun getAnnotations(attribute: String): Sequence<CtAnnotationLangModel> {
-        @Suppress("UNCHECKED_CAST")
-        return (impl[attribute] as List<KSAnnotation>).asSequence().map(::KspAnnotationImpl).memoize()
+        return when(val value = impl[attribute]) {
+            is List<*> -> value.asSequence().map { KspAnnotationImpl(it as KSAnnotation) }.memoize()
+            is KSAnnotation -> sequenceOf(KspAnnotationImpl(value))
+            else -> emptySequence()
+        }
     }
 
     override fun getAnnotation(attribute: String): CtAnnotationLangModel {

@@ -5,7 +5,7 @@ import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.buildError
+import com.yandex.daggerlite.validation.impl.reportError
 
 internal class FlavorImpl private constructor(
     override val type: TypeLangModel,
@@ -18,9 +18,7 @@ internal class FlavorImpl private constructor(
         validator.child(dimension)
 
         if (type.declaration.componentFlavorIfPresent == null) {
-            validator.report(buildError {
-                contents = Errors.`declaration is not annotated with @ComponentFlavor`()
-            })
+            validator.reportError(Errors.`declaration is not annotated with @ComponentFlavor`())
         }
     }
 

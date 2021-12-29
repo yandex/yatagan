@@ -21,6 +21,7 @@ class CtNoDeclaration private constructor(
     override val conditions get() = emptySequence<Nothing>()
     override val conditionals get() = emptySequence<Nothing>()
 
+    override val enclosingType: Nothing? get() = null
     override val kotlinObjectKind: Nothing? get() = null
     override val componentAnnotationIfPresent: Nothing? get() = null
     override val moduleAnnotationIfPresent: Nothing? get() = null
