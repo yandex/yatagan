@@ -1,15 +1,20 @@
 package com.yandex.daggerlite.graph
 
+import com.yandex.daggerlite.core.ComponentDependencyModel
+import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.HasNodeModel
+import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 interface BindingGraph : MayBeInvalid {
     /**
-     * Component for which graph is built
+     * A model behind this graph.
      */
-    val model: ComponentModel
+    val model: HasNodeModel
 
     /**
      * Requested bindings that belong to this component.
@@ -33,6 +38,8 @@ interface BindingGraph : MayBeInvalid {
      */
     val usedParents: Set<BindingGraph>
 
+    val isRoot: Boolean
+
     /**
      * Graph variant (full - merged with parents)
      *
@@ -46,6 +53,18 @@ interface BindingGraph : MayBeInvalid {
      * @see ComponentModel.isRoot
      */
     val parent: BindingGraph?
+
+    val modules: Collection<ModuleModel>
+
+    val dependencies: Collection<ComponentDependencyModel>
+
+    val scope: AnnotationLangModel?
+
+    val creator: ComponentFactoryModel?
+
+    val entryPoints: Collection<GraphEntryPoint>
+
+    val memberInjectors: Collection<GraphMemberInjector>
 
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.

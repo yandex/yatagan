@@ -2,14 +2,15 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
-import com.yandex.daggerlite.core.component1
-import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.component1
+import com.yandex.daggerlite.graph.component2
 import javax.inject.Provider
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
@@ -90,14 +91,14 @@ internal class ComponentGenerator(
 
         annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
         modifiers(FINAL)
-        if (!graph.model.isRoot) {
+        if (!graph.isRoot) {
             modifiers(PRIVATE, STATIC)
         } else {
             modifiers(PUBLIC)
         }
         implements(componentInterface)
 
-        graph.model.entryPoints.forEach { (getter, dependency) ->
+        graph.entryPoints.forEach { (getter, dependency) ->
             // TODO: reuse entry-points as accessors to reduce method count.
             overrideMethod(getter) {
                 modifiers(PUBLIC)
@@ -108,24 +109,27 @@ internal class ComponentGenerator(
                 }
             }
         }
-        graph.model.memberInjectors.forEach { membersInjector ->
+        graph.memberInjectors.forEach { membersInjector ->
             overrideMethod(membersInjector.injector) {
                 val instanceName = membersInjector.injector.parameters.first().name
                 modifiers(PUBLIC)
                 membersInjector.membersToInject.forEach { (member, dependency) ->
                     val binding = graph.resolveBinding(dependency.node)
                     +buildExpression {
-                        when(member) {
-                            is FieldLangModel -> {
-                                +"%N.%N = ".formatCode(instanceName, member.name)
-                                binding.generateAccess(builder = this, inside = graph, kind = dependency.kind)
-                            }
-                            is FunctionLangModel -> {
+                        member.accept(object : MemberLangModel.Visitor<Unit> {
+                            override fun visitFunction(model: FunctionLangModel) {
                                 +"%N.%N(".formatCode(instanceName, member.name)
-                                binding.generateAccess(builder = this, inside = graph, kind = dependency.kind)
+                                binding.generateAccess(
+                                    builder = this@buildExpression, inside = graph, kind = dependency.kind)
                                 +")"
                             }
-                        }
+
+                            override fun visitField(model: FieldLangModel) {
+                                +"%N.%N = ".formatCode(instanceName, member.name)
+                                binding.generateAccess(
+                                    builder = this@buildExpression, inside = graph, kind = dependency.kind)
+                            }
+                        })
                     }
                 }
             }

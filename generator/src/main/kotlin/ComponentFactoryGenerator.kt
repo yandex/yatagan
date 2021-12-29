@@ -29,8 +29,8 @@ internal class ComponentFactoryGenerator(
     private val triviallyConstructableModules: Collection<ModuleModel>
 
     init {
-        thisGraph.model.factory?.let { factory ->
-            for (input in factory.allInputs) {
+        thisGraph.creator?.let { creator ->
+            for (input in creator.allInputs) {
                 val fieldName = fieldsNs.name(input.name)
                 inputFieldNames[input] = fieldName
                 when (val payload = input.payload) {
@@ -41,7 +41,7 @@ internal class ComponentFactoryGenerator(
             }
         }
 
-        triviallyConstructableModules = thisGraph.model.modules.asSequence()
+        triviallyConstructableModules = thisGraph.modules.asSequence()
             .filter { module -> module.requiresInstance && module !in moduleInstanceFieldNames }
             .onEach { module ->
                 // Such module must be trivially constructable, it's validated.
@@ -63,9 +63,9 @@ internal class ComponentFactoryGenerator(
     fun fieldNameFor(module: ModuleModel) = checkNotNull(moduleInstanceFieldNames[module])
 
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
-        val isSubComponentFactory = !thisGraph.model.isRoot
-        val factory = thisGraph.model.factory
-        if (factory != null) {
+        val isSubComponentFactory = !thisGraph.isRoot
+        val creator = thisGraph.creator
+        if (creator != null) {
             inputFieldNames.forEach { (input, name) ->
                 field(input.payload.typeName(), name) { modifiers(PRIVATE, FINAL) }
             }
@@ -82,7 +82,7 @@ internal class ComponentFactoryGenerator(
                     +"this.${fieldNameFor(graph)} = $name"
                 }
                 // Secondly and thirdly - factory inputs and builder inputs respectively.
-                factory.allInputs.forEach { input ->
+                creator.allInputs.forEach { input ->
                     val name = paramsNs.name(input.name)
                     parameter(input.payload.typeName(), name)
                     +"this.${inputFieldNames[input]} = $name"
@@ -92,7 +92,7 @@ internal class ComponentFactoryGenerator(
             nestedType {
                 buildClass(implName) {
                     modifiers(PRIVATE, FINAL, STATIC)
-                    implements(factory.typeName())
+                    implements(creator.typeName())
 
                     val builderAccess = arrayListOf<String>()
                     if (isSubComponentFactory) {
@@ -109,9 +109,9 @@ internal class ComponentFactoryGenerator(
                         }
                     }
 
-                    factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.InputModel::name)
+                    creator.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.InputModel::name)
                     with(Namespace("m")) {
-                        factory.builderInputs.forEach { builderInput ->
+                        creator.builderInputs.forEach { builderInput ->
                             val fieldName = name(builderInput.name)
                             builderAccess += "this.$fieldName"
                             field(builderInput.payload.typeName(), fieldName) {
@@ -126,7 +126,7 @@ internal class ComponentFactoryGenerator(
                             }
                         }
                     }
-                    factory.factoryMethod?.let { factoryMethod ->
+                    creator.factoryMethod?.let { factoryMethod ->
                         overrideMethod(factoryMethod) {
                             modifiers(PUBLIC)
                             +buildExpression {
@@ -141,7 +141,7 @@ internal class ComponentFactoryGenerator(
             if (!isSubComponentFactory) {
                 method("builder") {
                     modifiers(PUBLIC, STATIC)
-                    returnType(factory.typeName())
+                    returnType(creator.typeName())
                     +"return new %T()".formatCode(implName)
                 }
             }

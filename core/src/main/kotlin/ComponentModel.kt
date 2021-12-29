@@ -7,7 +7,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
 /**
  * Represents @[com.yandex.daggerlite.Component] annotated class - Component.
  */
-interface ComponentModel : ClassBackedModel, ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
+interface ComponentModel : ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
     /**
      * A set of *all* modules that are included into the component (transitively).
      */

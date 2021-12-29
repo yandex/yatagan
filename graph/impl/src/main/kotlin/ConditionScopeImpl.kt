@@ -9,6 +9,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.ConditionScope.Literal
@@ -168,6 +169,11 @@ private interface LiteralPayload : MayBeInvalid {
     val root: TypeDeclarationLangModel
 }
 
+private val MemberTypeVisitor = object : MemberLangModel.Visitor<TypeLangModel> {
+    override fun visitFunction(model: FunctionLangModel) = model.returnType
+    override fun visitField(model: FieldLangModel) = model.type
+}
+
 private class LiteralPayloadImpl private constructor(
     override val root: TypeDeclarationLangModel,
     private val pathSource: String,
@@ -199,10 +205,7 @@ private class LiteralPayloadImpl private constructor(
                 }
                 add(member)
 
-                val type = when (member) {
-                    is FunctionLangModel -> member.returnType
-                    is FieldLangModel -> member.type
-                }
+                val type = member.accept(MemberTypeVisitor)
                 if (type.isBoolean) {
                     finished = true
                 } else {

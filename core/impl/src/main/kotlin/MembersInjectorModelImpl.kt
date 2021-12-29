@@ -18,7 +18,7 @@ internal class MembersInjectorModelImpl private constructor(
         require(canRepresent(injector))
     }
 
-    override val injectee = injector.parameters.single().type
+    private val injectee = injector.parameters.single().type
 
     override val membersToInject: Map<MemberLangModel, NodeDependency> by lazy(NONE) {
         buildMap {

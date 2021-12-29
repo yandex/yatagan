@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.validation.impl
 
-import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.ValidationMessage.Kind
 import com.yandex.daggerlite.validation.Validator
@@ -33,18 +32,4 @@ inline fun Validator.reportWarning(message: String, block: ValidationMessageBuil
         contents = message
         block()
     })
-}
-
-class ValidationWrapper(
-    val name: String,
-    val wrapped: MayBeInvalid,
-) : MayBeInvalid {
-    override fun toString() = name
-    override fun validate(validator: Validator) {
-        validator.child(wrapped)
-    }
-}
-
-fun MayBeInvalid.wrap(name: String): ValidationWrapper {
-    return ValidationWrapper(name = name, wrapped = this)
 }

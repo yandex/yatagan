@@ -1,14 +1,14 @@
 package com.yandex.daggerlite.graph.impl
 
+import com.yandex.daggerlite.core.ComponentDependencyModel
+import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
-import com.yandex.daggerlite.core.component1
-import com.yandex.daggerlite.core.component2
-import com.yandex.daggerlite.core.isOptional
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
@@ -17,21 +17,36 @@ import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
-import com.yandex.daggerlite.validation.impl.wrap
 
 internal class BindingGraphImpl(
-    override val model: ComponentModel,
+    private val component: ComponentModel,
     override val parent: BindingGraphImpl? = null,
 ) : BindingGraph {
-    override val variant: Variant = model.variant + parent?.variant
+    override val model: ComponentModel
+        get() = component
 
-    private val bindings = GraphBindingsFactory(
-        modules = model.modules,
-        dependencies = model.dependencies,
-        factory = model.factory,
-        graph = this,
-        scope = model.scope,
-    )
+    override val isRoot: Boolean
+        get() = component.isRoot
+
+    override val variant: Variant = component.variant + parent?.variant
+
+    override val scope: AnnotationLangModel?
+        get() = component.scope
+
+    override val creator: ComponentFactoryModel?
+        get() = component.factory
+
+    override val modules: Collection<ModuleModel>
+        get() = component.modules
+
+    override val dependencies: Collection<ComponentDependencyModel>
+        get() = component.dependencies
+
+    override val entryPoints = component.entryPoints.map { GraphEntryPointImpl(owner = this, impl = it) }
+
+    override val memberInjectors = component.memberInjectors.map { GraphMemberInjectorImpl(owner = this, impl = it) }
+
+    private val bindings = GraphBindingsFactory(graph = this)
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableSetOf<ConditionScope.Literal>()
@@ -57,7 +72,7 @@ internal class BindingGraphImpl(
 
     init {
         // Build children
-        children = model.modules
+        children = modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
             .filter { !VariantMatch(it, variant).conditionScope.isNever }
@@ -65,10 +80,10 @@ internal class BindingGraphImpl(
             .map { BindingGraphImpl(it, parent = this) }
             .toList()
 
-        model.entryPoints.forEach { entryPoint ->
+        entryPoints.forEach { entryPoint ->
             materializationQueue.add(entryPoint.dependency)
         }
-        model.memberInjectors.forEach { membersInjector ->
+        memberInjectors.forEach { membersInjector ->
             membersInjector.membersToInject.values.forEach { injectDependency ->
                 materializationQueue.add(injectDependency)
             }
@@ -154,7 +169,7 @@ internal class BindingGraphImpl(
     override fun toString() = model.toString()
 
     override fun validate(validator: Validator) {
-        validator.child(model, kind = Inline)
+        validator.child(component, kind = Inline)
         validator.child(bindings, kind = Inline)
         validator.child(variant)
         children.forEach(validator::child)
@@ -162,23 +177,9 @@ internal class BindingGraphImpl(
         // Validate every used binding in a graph structure.
 
         // Reachable via entry-points.
-        for ((getter, dependency) in model.entryPoints) {
-            val (node, kind) = dependency
-            val resolved = resolveBinding(node)
-            if (!kind.isOptional) {
-                // TODO: validate that this entry point is unscoped according to this component.
-            }
-            validator.child(resolved.wrap("[entry-point] ${getter.name}"))
-        }
+        entryPoints.forEach(validator::child)
         // Reachable via members-inject.
-        for (memberInjector in model.memberInjectors) {
-            for ((member, dependency) in memberInjector.membersToInject) {
-                validator.child(resolveBinding(dependency.node)
-                    .wrap("[member-to-inject] ${member.name}")
-                    .wrap("[injector-fun] ${memberInjector.injector.name}")
-                )
-            }
-        }
+        memberInjectors.forEach(validator::child)
 
         // Validate graph integrity and soundness as a whole
 
@@ -220,6 +221,6 @@ class BindingUsageImpl : BindingGraph.BindingUsage {
 fun BindingGraph(root: ComponentModel): BindingGraph {
     require(root.isRoot) { "Not reached: can't use non-root component as a root of a binding graph" }
     return BindingGraphImpl(
-        model = root,
+        component = root,
     )
 }

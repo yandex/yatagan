@@ -14,7 +14,6 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.allInputs
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
@@ -28,11 +27,7 @@ import com.yandex.daggerlite.validation.impl.ValidationMessageBuilder
 import com.yandex.daggerlite.validation.impl.buildMessage
 
 internal class GraphBindingsFactory(
-    modules: Set<ModuleModel>,
-    dependencies: Set<ComponentDependencyModel>,
-    factory: ComponentFactoryModel?,
     private val graph: BindingGraphImpl,
-    private val scope: AnnotationLangModel?,
 ) : MayBeInvalid {
     private val validationMessages = arrayListOf<ValidationMessage>()
 
@@ -66,7 +61,7 @@ internal class GraphBindingsFactory(
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
         val multiBindings = linkedMapOf<NodeModel, MutableMap<NodeModel, ContributionType>>()
-        for (module: ModuleModel in modules) {
+        for (module: ModuleModel in graph.modules) {
             // All bindings from installed modules
             for (bindingModel in module.bindings) {
                 val binding = bindingModel.accept(bindingModelVisitor)
@@ -92,7 +87,7 @@ internal class GraphBindingsFactory(
             }
         }
         // Gather bindings from factory
-        for (dependency: ComponentDependencyModel in dependencies) {
+        for (dependency: ComponentDependencyModel in graph.dependencies) {
             // Binding for the dependency component itself.
             add(ComponentDependencyBindingImpl(dependency = dependency, owner = graph))
             // Bindings backed by the component entry-points.
@@ -104,8 +99,9 @@ internal class GraphBindingsFactory(
                     getter = getter,
                 ))
         }
-        if (factory != null) {
-            for (input: ComponentFactoryModel.InputModel in factory.allInputs) when (val payload = input.payload) {
+        val creator = graph.creator
+        if (creator != null) {
+            for (input: ComponentFactoryModel.InputModel in creator.allInputs) when (val payload = input.payload) {
                 is InputPayload.Instance -> add(InstanceBindingImpl(
                     target = payload.node,
                     owner = graph,
@@ -114,7 +110,7 @@ internal class GraphBindingsFactory(
             }
         }
 
-        val declaredLists: Map<NodeModel, ListDeclarationModel> = modules.asSequence()
+        val declaredLists: Map<NodeModel, ListDeclarationModel> = graph.modules.asSequence()
             .flatMap { it.listDeclarations }
             .onEach {
                 // Provide empty map for an empty list
@@ -165,7 +161,7 @@ internal class GraphBindingsFactory(
             }
             val inject = node.implicitBinding ?: return null
 
-            if (inject.scope != null && inject.scope != scope) {
+            if (inject.scope != null && inject.scope != graph.scope) {
                 return null
             }
 

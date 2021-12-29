@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.core.lang
 
-sealed interface MemberLangModel : AnnotatedLangModel {
+interface MemberLangModel : AnnotatedLangModel {
     /**
      * Whether the member is truly static (@[JvmStatic] or `static`).
      */
@@ -10,4 +10,11 @@ sealed interface MemberLangModel : AnnotatedLangModel {
      * Member name.
      */
     val name: String
+
+    interface Visitor<R> {
+        fun visitFunction(model: FunctionLangModel): R
+        fun visitField(model: FieldLangModel): R
+    }
+
+    fun <R> accept(visitor: Visitor<R>): R
 }

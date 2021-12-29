@@ -9,7 +9,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
 /**
  * Represents [com.yandex.daggerlite.Component.Builder].
  */
-interface ComponentFactoryModel : ClassBackedModel, MayBeInvalid, HasNodeModel {
+interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
 
     /**
      * TODO: doc.

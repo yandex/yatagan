@@ -513,7 +513,7 @@ class CoreBindingsKotlinTest(
                     ): TestComponent
                 }
             }
-        """)
+        """.trimIndent())
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
@@ -626,20 +626,20 @@ class CoreBindingsKotlinTest(
             import com.yandex.daggerlite.Optional
             import javax.inject.Inject
             import javax.inject.Provider
-    
+            
             class DependencyA @Inject constructor()
             class DependencyB<T> @Inject constructor(i: T)
             class SomeClass<T> @Inject constructor(i: T)
-    
+            
             class Consumer @Inject constructor(a: Lazy<SomeClass<DependencyA>>)
-
+            
             interface Absent<T> {
                 @Binds fun foo(): T
             }
-        
+            
             @Module
             interface MyModule : Absent<Any>
-
+            
             @Component(modules = [MyModule::class])
             interface MyComponent {
                 val any: Optional<Any>

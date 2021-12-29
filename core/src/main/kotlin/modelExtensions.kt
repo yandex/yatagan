@@ -22,7 +22,3 @@ val DependencyKind.isEager
         Direct, Optional -> true
         Lazy, Provider, OptionalLazy, OptionalProvider -> false
     }
-
-operator fun ComponentModel.EntryPoint.component1() = getter
-
-operator fun ComponentModel.EntryPoint.component2() = dependency

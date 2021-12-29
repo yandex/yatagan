@@ -2,7 +2,6 @@ package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -15,12 +14,7 @@ interface MembersInjectorModel : MayBeInvalid {
     val injector: FunctionLangModel
 
     /**
-     * An [injector]'s single parameter's type, the target of the injection.
-     */
-    val injectee: TypeLangModel
-
-    /**
-     * The @[javax.inject.Inject]-annotated fields/setters discovered in [injectee].
+     * The @[javax.inject.Inject]-annotated fields/setters discovered in the injectee.
      */
     val membersToInject: Map<MemberLangModel, NodeDependency>
 }

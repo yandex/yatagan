@@ -75,7 +75,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
             }
         }
 
-        if (scope != null && scope != owner.model.scope) {
+        if (scope != null && scope != owner.scope) {
             validator.reportError(Errors.`no matching scope for binding`(binding = this@BindingMixin, scope = scope))
         }
         if (!isImplicitBinding && target.implicitBinding != null) {
@@ -209,7 +209,7 @@ internal class AliasBindingImpl(
         validator.child(source)
         if (impl.scope != null) {
             validator.reportWarning("Scope has no effect on 'alias' binding") {
-                addNote( "Scope is inherited from source graph node and can not be overridden")
+                addNote("Scope is inherited from source graph node and can not be overridden")
             }
         }
     }
