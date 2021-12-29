@@ -65,7 +65,6 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         } finally {
             firstRound.kspGeneratedSources().forEach { file ->
                 println("Content of the file://$file")
-                println(file.readText())
             }
         }
     }
