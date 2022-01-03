@@ -7,7 +7,10 @@ repositories {
     mavenCentral()
 }
 
-val kotlinVersion = properties["daggerlite.kotlin.version"]
+val kotlinVersion: String = providers
+    .fileContents(layout.projectDirectory.file("../kotlin.version"))
+    .asText.forUseAtConfigurationTime()
+    .get().trimEnd()
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")

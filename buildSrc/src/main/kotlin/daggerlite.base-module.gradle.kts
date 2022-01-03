@@ -18,7 +18,10 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-val kotlinVersion by extra(properties["daggerlite.kotlin.version"])
+val kotlinVersion: String by extra(
+    providers.fileContents(rootProject.layout.projectDirectory.file("kotlin.version"))
+        .asText.forUseAtConfigurationTime().get().trimEnd()
+)
 val kspVersion by extra("$kotlinVersion-1.0.0")
 val javaPoetVersion by extra("1.13.0")
 val kotlinCompileTestingVersion by extra("1.4.5")
