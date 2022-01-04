@@ -56,11 +56,11 @@ internal class BindingGraphImpl(
     override val children: Collection<BindingGraphImpl>
 
     override fun resolveBinding(node: NodeModel): Binding {
-        var source: NodeModel = node
-        do when (val maybeAlias = resolveRaw(source)) {
-            is AliasBinding -> source = maybeAlias.source
-            is Binding -> return maybeAlias
-        } while (true)
+        class AliasResolveVisitor : BaseBinding.Visitor<Binding> {
+            override fun visitAlias(alias: AliasBinding) = resolveRaw(alias.source).accept(this)
+            override fun visitBinding(binding: Binding) = binding
+        }
+        return resolveRaw(node).accept(AliasResolveVisitor())
     }
 
     internal fun resolveRaw(node: NodeModel): BaseBinding {
@@ -142,10 +142,7 @@ internal class BindingGraphImpl(
             override fun visitAlias(alias: AliasBinding): Binding {
                 return materialize(dependency.copy(node = alias.source))
             }
-
-            override fun visitBinding(binding: Binding): Binding {
-                return binding
-            }
+            override fun visitBinding(binding: Binding) = binding
         }
 
         val (node, kind) = dependency
@@ -207,8 +204,7 @@ internal class BindingGraphImpl(
             validator.reportError(Strings.Errors.`component hierarchy loop`())
         }
 
-        // Validate graph integrity and soundness as a whole
-        // TODO: validate no loops in a graph
+        validateNoLoops(this, validator)
     }
 
     private fun parents() = sequence<BindingGraphImpl> {

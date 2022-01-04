@@ -369,6 +369,23 @@ internal class InstanceBindingImpl(
     }
 }
 
+internal class SelfDependentInvalidBinding(
+    override val impl: ModuleHostedBindingModel,
+    override val owner: BindingGraphImpl,
+): EmptyBinding, BindingMixin, ModuleHostedMixin() {
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitEmpty(this)
+    }
+
+    override fun validate(validator: Validator) {
+        super.validate(validator)
+        // Always invalid
+        validator.reportError(Errors.`self-dependent binding`())
+    }
+
+    override fun toString() = "[invalid] $impl"
+}
+
 internal data class MissingBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraphImpl,

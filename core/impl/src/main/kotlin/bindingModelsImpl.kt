@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
-import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
@@ -18,15 +17,16 @@ import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
+import kotlin.LazyThreadSafetyMode.NONE
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
     protected abstract val impl: FunctionLangModel
 
-    override val scope: AnnotationLangModel? by lazy(LazyThreadSafetyMode.NONE) {
+    override val scope: AnnotationLangModel? by lazy(NONE) {
         impl.annotations.find(AnnotationLangModel::isScope)
     }
 
-    override val target: NodeModel by lazy(LazyThreadSafetyMode.NONE) {
+    override val target: NodeModel by lazy(NONE) {
         val type = if (multiBinding == MultiBindingKind.Flatten) {
             impl.returnType.typeArguments.firstOrNull() ?: impl.returnType
         } else impl.returnType
@@ -114,9 +114,14 @@ internal class ProvidesImpl(
 
     override val conditionals get() = conditionalHolder.conditionals
 
-    override val inputs: Sequence<NodeDependency> = impl.parameters.map { param ->
-        NodeDependency(type = param.type, forQualifier = param)
-    }.memoize()
+    private val paramsToDependencies by lazy(NONE) {
+        impl.parameters.associateWith { param ->
+            NodeDependency(type = param.type, forQualifier = param)
+        }
+    }
+
+    override val inputs: Sequence<NodeDependency>
+        get() = paramsToDependencies.values.asSequence()
 
     override fun validate(validator: Validator) {
         super.validate(validator)

@@ -480,6 +480,7 @@ class CoreBindingsFailureTest(
         """.trimIndent())
 
         failsToCompile {
+            // @formatter:off
             withError(formatMessage(
                 Errors.`incompatible condition scope for entry-point`(
                     aCondition = "[test.Foo.isEnabledA]", bCondition = "[unconditional]",
@@ -522,6 +523,7 @@ class CoreBindingsFailureTest(
             ))
             withNoMoreErrors()
             withNoWarnings()
+            // @formatter:on
         }
     }
 }

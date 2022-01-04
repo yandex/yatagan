@@ -34,6 +34,7 @@ fun validate(
     val result: MutableMap<ValidationMessage, MutableSet<List<MayBeInvalid>>> = mutableMapOf()
     val currentPath = arrayListOf<MayBeInvalid>()
 
+    // TODO: write non-recursive algorithm
     fun validateImpl(node: MayBeInvalid) {
         currentPath.add(node)
         try {

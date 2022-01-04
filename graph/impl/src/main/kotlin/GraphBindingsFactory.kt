@@ -11,6 +11,7 @@ import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.allInputs
@@ -34,7 +35,12 @@ internal class GraphBindingsFactory(
     private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
         val bindingModelVisitor = object : ModuleHostedBindingModel.Visitor<BaseBinding> {
             override fun visitBinds(model: BindsBindingModel): BaseBinding {
-                return when (model.sources.count()) {
+                return if (model.target in model.sources) {
+                    SelfDependentInvalidBinding(
+                        owner = graph,
+                        impl = model,
+                    )
+                } else when (model.sources.count()) {
                     0 -> ModuleHostedEmptyBindingImpl(
                         owner = graph,
                         impl = model,
@@ -51,7 +57,10 @@ internal class GraphBindingsFactory(
             }
 
             override fun visitProvides(model: ProvidesBindingModel): BaseBinding {
-                return ProvisionBindingImpl(
+                return if (model.target in model.inputs.map(NodeDependency::node)) SelfDependentInvalidBinding(
+                    owner = graph,
+                    impl = model,
+                ) else ProvisionBindingImpl(
                     impl = model,
                     owner = graph,
                 )

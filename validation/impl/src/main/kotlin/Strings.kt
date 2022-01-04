@@ -68,6 +68,9 @@ object Strings {
         fun `provides must not be abstract`() =
             "@Provides annotated method must not be abstract (must have a body)"
 
+        fun `self-dependent binding`() =
+            "Binding depends on itself"
+
         @Covered
         fun `binds param type is incompatible with return type`(param: Any, returnType: Any) =
             "@Binds parameter $param is not compatible with its return type $returnType"
@@ -189,6 +192,19 @@ object Strings {
 
         fun `component hierarchy loop`() =
             "component hierarchy loop"
+
+        @Covered
+        fun `dependency loop`(chain: List<Pair<Any, Any>>) = buildString {
+            appendLine("Binding dependency loop detected:")
+            chain.forEachIndexed { index, (target, binding) ->
+                if (index == 0) append("(*) ") else append("    ")
+                append('`').append(target).append("` provided by `").append(binding).append("` depends on <-")
+                if (index != chain.lastIndex) {
+                    appendLine()
+                }
+            }
+            append(" (*)")
+        }
     }
 
     object Warnings {
