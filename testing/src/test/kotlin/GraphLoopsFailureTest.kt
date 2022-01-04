@@ -3,7 +3,6 @@ package com.yandex.daggerlite.testing
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.Strings.formatMessage
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -135,6 +134,7 @@ class GraphLoopsFailureTest(
         """.trimIndent())
 
         failsToCompile {
+            // @formatter:off
             withError(formatMessage(
                 message = Errors.`self-dependent binding`(),
                 encounterPaths = listOf(
@@ -142,13 +142,13 @@ class GraphLoopsFailureTest(
                     listOf("test.RootComponent", "[entry-point] getB", "[invalid] @Provides test.MyModule::b(test.ApiA, test.ApiB): test.ApiB"),
                 ),
             ))
+            // @formatter:on
             withNoMoreErrors()
             withNoWarnings()
         }
     }
 
-    @Test
-    @Ignore("Broken")
+    @Test(timeout = 10_000)
     fun `invalid cross-alias loop`() {
         useSourceSet(features)
 
@@ -156,7 +156,7 @@ class GraphLoopsFailureTest(
             import com.yandex.daggerlite.*
             import javax.inject.*
             
-            interface ApiA
+            interface ApiA : ApiB
             interface ApiB
             
             @Module
@@ -168,11 +168,29 @@ class GraphLoopsFailureTest(
             @Component(modules = [MyModule::class])
             interface RootComponent {
                 val a: ApiA
-                val b: ApiB
             }
         """.trimIndent())
 
         failsToCompile {
+            // @formatter:off
+            withError(formatMessage(
+                message = Errors.`binds param type is incompatible with return type`(
+                    param = "test.ApiB", returnType = "test.ApiA",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "test.MyModule", "@Binds test.MyModule::a(test.ApiB): test.ApiA")
+                )
+            ))
+            withError(formatMessage(
+                message = Errors.`dependency loop`(chain = listOf(
+                    "test.ApiA" to "[alias] @Binds test.MyModule::a(test.ApiB): test.ApiA",
+                    "test.ApiB" to "[alias] @Binds test.MyModule::b(test.ApiA): test.ApiB",
+                )),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "[entry-point] getA", "[invalid] [alias] @Binds test.MyModule::a(test.ApiB): test.ApiA")
+                )
+            ))
+            // @formatter:on
             withNoMoreErrors()
             withNoWarnings()
         }

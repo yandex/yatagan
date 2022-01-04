@@ -101,12 +101,29 @@ internal class BindingGraphImpl(
         val seenBindings = hashSetOf<Binding>()
         while (materializationQueue.isNotEmpty()) {
             val dependency = materializationQueue.removeFirst()
-            val binding = materialize(dependency)
+            val binding: BaseBinding = materialize(dependency)
+            class AliasMaterializeVisitor : BaseBinding.Visitor<Binding> {
+                var aliases = mutableSetOf<AliasBinding>()
+                override fun visitAlias(alias: AliasBinding): Binding {
+                    val carryDependency = dependency.copy(node = alias.source)
+                    if (!aliases.add(alias)) {
+                        // Alias loop detected, bail out.
+                        return bindings.materializeAliasLoop(node = dependency.node, chain = aliases)
+                    }
+                    return materialize(carryDependency).accept(this)
+                }
+                override fun visitBinding(binding: Binding) = binding
+            }
+            // MAYBE: employ local alias resolution cache
+            val nonAlias = binding.accept(AliasMaterializeVisitor())
+            if (nonAlias.owner == this) {
+                localBindings.getOrPut(nonAlias, ::BindingUsageImpl).accept(dependency.kind)
+            }
             if (binding.owner == this) {
-                if (!seenBindings.add(binding)) {
+                if (!seenBindings.add(nonAlias)) {
                     continue
                 }
-                materializationQueue += binding.dependencies()
+                materializationQueue += nonAlias.dependencies()
             }
         }
 
@@ -126,7 +143,7 @@ internal class BindingGraphImpl(
         }
     }
 
-    private fun materialize(dependency: NodeDependency): Binding {
+    private fun materialize(dependency: NodeDependency): BaseBinding {
         return materializeLocal(dependency)
             ?: materializeInParents(dependency, BindingGraphImpl::materializeLocal)
             ?: materializeImplicit(dependency)
@@ -135,40 +152,21 @@ internal class BindingGraphImpl(
     }
 
     private fun materializeMissing(dependency: NodeDependency): Binding {
-        val (node, kind) = dependency
-        return bindings.materializeMissing(node).also {
-            localBindings.getOrPut(it, ::BindingUsageImpl).accept(kind)
-        }
+        return bindings.materializeMissing(dependency.node)
     }
 
-    private fun materializeLocal(dependency: NodeDependency): Binding? {
-        class MaterializeAliasVisitor : BaseBinding.Visitor<Binding> {
-            override fun visitAlias(alias: AliasBinding): Binding {
-                return materialize(dependency.copy(node = alias.source))
-            }
-            override fun visitBinding(binding: Binding) = binding
-        }
-
-        val (node, kind) = dependency
-        val binding = bindings.getExplicitBindingFor(node) ?: return null
-        val nonAlias = binding.accept(MaterializeAliasVisitor())
-
-        if (nonAlias.owner == this) {
-            // materializeAlias may have yielded non-local binding, so check.
-            localBindings.getOrPut(nonAlias, ::BindingUsageImpl).accept(kind)
-        }
-        return nonAlias
+    private fun materializeLocal(dependency: NodeDependency): BaseBinding? {
+        return bindings.getExplicitBindingFor(dependency.node)
     }
 
     private fun materializeImplicit(dependency: NodeDependency): Binding? {
-        val (node, kind) = dependency
-        return bindings.materializeImplicitBindingFor(node)?.also {
-            localBindings.getOrPut(it, ::BindingUsageImpl).accept(kind)
-        }
+        return bindings.materializeImplicitBindingFor(dependency.node)
     }
 
-    private fun materializeInParents(dependency: NodeDependency,
-                                     materializeFunction: BindingGraphImpl.(NodeDependency) -> Binding?): Binding? {
+    private fun materializeInParents(
+        dependency: NodeDependency,
+        materializeFunction: BindingGraphImpl.(NodeDependency) -> BaseBinding?,
+    ): BaseBinding? {
         if (parent == null) return null
         val binding = parent.materializeFunction(dependency)
         if (binding != null) {
@@ -182,7 +180,7 @@ internal class BindingGraphImpl(
         }
     }
 
-    override fun toString() = model.toString()
+    override fun toString() = component.toString()
 
     override fun validate(validator: Validator) {
         validator.child(component, kind = Inline)

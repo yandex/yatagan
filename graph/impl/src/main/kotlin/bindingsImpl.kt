@@ -386,6 +386,23 @@ internal class SelfDependentInvalidBinding(
     override fun toString() = "[invalid] $impl"
 }
 
+internal class AliasLoopStubBinding(
+    override val owner: BindingGraphImpl,
+    override val target: NodeModel,
+    private val aliasLoop: Collection<AliasBinding>,
+) : EmptyBinding, BindingMixin {
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitEmpty(this)
+    }
+
+    override fun validate(validator: Validator) {
+        super.validate(validator)
+        validator.reportError(Errors.`dependency loop`(aliasLoop.map { it.target to it }))
+    }
+
+    override fun toString() = "[invalid] ${aliasLoop.first()}"
+}
+
 internal data class MissingBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraphImpl,

@@ -30,7 +30,7 @@ internal fun validateNoLoops(graph: BindingGraphImpl, validator: Validator) {
         if (!kind.isEager)
             return
         if (node in markedGray) {
-            val bindingLoop = stack.dropWhile { it != node }.plus(node).associateWith(graph::resolveRaw).toList()
+            val bindingLoop = stack.dropWhile { it != node }.plus(node).map { it to graph.resolveRaw(it) }
             validator.reportError(Strings.Errors.`dependency loop`(chain = bindingLoop))
         } else {
             stack += node

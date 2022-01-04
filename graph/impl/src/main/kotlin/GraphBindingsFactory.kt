@@ -16,6 +16,7 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
@@ -155,7 +156,13 @@ internal class GraphBindingsFactory(
     }
 
     fun materializeMissing(node: NodeModel): Binding {
-        return MissingBindingImpl(node, graph).also {
+        return MissingBindingImpl(target = node, owner = graph).also {
+            implicitBindings[node] = it
+        }
+    }
+
+    fun materializeAliasLoop(node: NodeModel, chain: Collection<AliasBinding>): Binding {
+        return AliasLoopStubBinding(owner = graph, target = node, aliasLoop = chain).also {
             implicitBindings[node] = it
         }
     }

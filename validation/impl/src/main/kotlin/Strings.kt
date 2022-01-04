@@ -68,6 +68,7 @@ object Strings {
         fun `provides must not be abstract`() =
             "@Provides annotated method must not be abstract (must have a body)"
 
+        @Covered
         fun `self-dependent binding`() =
             "Binding depends on itself"
 
