@@ -17,7 +17,7 @@ class CtNoDeclaration private constructor(
     override val constructors get() = emptySequence<Nothing>()
     override val allPublicFunctions get() = emptySequence<Nothing>()
     override val allPublicFields get() = emptySequence<Nothing>()
-    override val nestedInterfaces get() = emptySequence<Nothing>()
+    override val nestedClasses get() = emptySequence<Nothing>()
     override val conditions get() = emptySequence<Nothing>()
     override val conditionals get() = emptySequence<Nothing>()
 

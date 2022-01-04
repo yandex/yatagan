@@ -49,14 +49,13 @@ internal class ComponentDependencyModelImpl private constructor(
         exposedEntryPoints.forEach { (dependency, function) ->
             if (dependency.kind != DependencyKind.Direct) {
                 validator.reportWarning(Strings.Warnings.`exposed dependency of a framework type`(
-                    functionName = function.name,
-                    returnType = function.returnType,
+                    function = function,
                 ))
             }
         }
     }
 
-    override fun toString() = "Dependency[$type]"
+    override fun toString() = type.toString()
 
     companion object Factory : ObjectCache<TypeLangModel, ComponentDependencyModelImpl>() {
         operator fun invoke(type: TypeLangModel) = createCached(type) {

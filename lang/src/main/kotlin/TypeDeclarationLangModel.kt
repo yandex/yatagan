@@ -56,7 +56,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
     /**
      * Interfaces that are declared inside this declaration.
      */
-    val nestedInterfaces: Sequence<TypeDeclarationLangModel>
+    val nestedClasses: Sequence<TypeDeclarationLangModel>
 
     /**
      * Creates [TypeLangModel] based on the declaration **assuming, that no type arguments are required**.

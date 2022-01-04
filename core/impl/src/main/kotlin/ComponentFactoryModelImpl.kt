@@ -21,8 +21,10 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
+import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.impl.reportWarning
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentFactoryModelImpl private constructor(
@@ -60,12 +62,17 @@ internal class ComponentFactoryModelImpl private constructor(
 
             override fun validate(validator: Validator) {
                 validator.child(payload, kind = Inline)
+                if (method.parameters.first().isAnnotatedWith<BindsInstance>()) {
+                    validator.reportWarning(Strings.Warnings.`@BindsInstance on builder method's parameter`())
+                }
                 if (!method.returnType.isVoid && !method.returnType.isAssignableFrom(factoryDeclaration.asType())) {
                     validator.reportError(Errors.`invalid builder setter return type`(
                         creatorType = factoryDeclaration.asType(),
                     ))
                 }
             }
+
+            override fun toString() = "[setter] ${builderSetter.name}($payload)"
         }
     }.toList()
 
@@ -76,6 +83,12 @@ internal class ComponentFactoryModelImpl private constructor(
                     InputPayload(param = param)
                 }
                 override val name get() = param.name
+
+                override fun validate(validator: Validator) {
+                    validator.child(payload, Inline)
+                }
+
+                override fun toString() = "[param] ${factoryMethod.name}(.., $name: $payload, ..)"
             }
         }?.toList() ?: emptyList()
     }
@@ -94,12 +107,12 @@ internal class ComponentFactoryModelImpl private constructor(
         }
     }
 
-    override fun toString() = "ComponentFactory[$factoryDeclaration]"
+    override fun toString() = "[builder] $factoryDeclaration"
 
     override fun validate(validator: Validator) {
         validator.child(asNode(), kind = Inline)
-        for (builderInput in builderInputs) {
-            validator.child(builderInput)
+        for (input in allInputs) {
+            validator.child(input)
         }
 
         if (!factoryDeclaration.isInterface) {
@@ -116,22 +129,19 @@ internal class ComponentFactoryModelImpl private constructor(
             validator.reportError(Errors.`invalid method in component creator`(method = function))
         }
 
-        val providedComponents = allInputs
+        // TODO: check for duplicates in modules, dependencies.
+
+        // Check for missing component dependencies
+        val providedDependencies = allInputs
             .map { it.payload }
             .filterIsInstance<InputPayload.Dependency>()
             .map { it.dependency }
             .toSet()
-        if (createdComponent.dependencies != providedComponents) {
-            val missing = createdComponent.dependencies - providedComponents
-            for (missingDependency in missing) {
-                validator.reportError(Errors.`missing component dependency`(missing = missingDependency))
-            }
-            val unneeded = providedComponents - createdComponent.dependencies
-            for (extraDependency in unneeded) {
-                validator.reportError(Errors.`unneeded component dependency`(extra = extraDependency))
-            }
+        for (missingDependency in createdComponent.dependencies - providedDependencies) {
+            validator.reportError(Errors.`missing component dependency`(missing = missingDependency))
         }
 
+        // Check for missing modules, that require instance and not trivially constructable
         val providedModules = allInputs
             .map { it.payload }
             .filterIsInstance<InputPayload.Module>()
@@ -139,25 +149,23 @@ internal class ComponentFactoryModelImpl private constructor(
             .toSet()
         val allModulesRequiresInstance = createdComponent.modules.asSequence()
             .filter(ModuleModel::requiresInstance).toMutableSet()
-
-        val missing = (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }
-        for (missingModule in missing) {
+        for (missingModule in (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }) {
             validator.reportError(Errors.`missing module`(missing = missingModule))
-        }
-        val unneeded = providedModules - allModulesRequiresInstance
-        if (unneeded.isNotEmpty()) {
-            for (extraModule in unneeded) {
-                validator.reportError(Errors.`unneeded module`(extra = extraModule))
-            }
         }
     }
 
-    private class InputPayloadModuleImpl(
+    private inner class InputPayloadModuleImpl(
         override val module: ModuleModel,
     ) : InputPayload.Module, ClassBackedModel by module {
         override fun validate(validator: Validator) {
-            validator.child(module, kind = Inline)
+            if (!module.requiresInstance ||
+                module.isTriviallyConstructable ||
+                module !in createdComponent.modules) {
+                validator.reportError(Errors.`unneeded module`())
+            }
         }
+
+        override fun toString() = module.toString()
     }
 
     private class InputPayloadInstanceImpl(
@@ -166,14 +174,20 @@ internal class ComponentFactoryModelImpl private constructor(
         override fun validate(validator: Validator) {
             validator.child(node, kind = Inline)
         }
+
+        override fun toString() = node.toString()
     }
 
-    private class InputPayloadDependencyImpl(
+    private inner class InputPayloadDependencyImpl(
         override val dependency: ComponentDependencyModel,
     ) : InputPayload.Dependency, ClassBackedModel by dependency {
         override fun validate(validator: Validator) {
-            validator.child(dependency, kind = Inline)
+            if (dependency !in createdComponent.dependencies) {
+                validator.reportError(Errors.`unneeded component dependency`())
+            }
         }
+
+        override fun toString() = dependency.toString()
     }
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentFactoryModelImpl>() {

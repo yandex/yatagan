@@ -88,47 +88,69 @@ object Strings {
                     "$Indent=> `$binding` can not be exposed from `$component` without `Optional<>` wrapper."
 
 
+        @Covered
         fun `invalid builder setter return type`(creatorType: Any) =
             "Setter method in component creator must return either `void` or creator type itself ($creatorType)"
 
+        @Covered
         fun `component creator must be an interface`() =
             "Component creator declaration must be an `interface`"
 
+        @Covered
         fun `missing component creating method`() =
-            "Component creator is missing a creating method - a method which returns the component interface"
+            "Component creator is missing a creating method - an abstract method which returns the component interface"
 
+        @Covered
         fun `invalid method in component creator`(method: Any) =
             "Unexpected/unrecognized method \n$Indent`$method`\n for component creator interface"
 
+        @Covered
         fun `missing component dependency`(missing: Any) =
             "Declared dependency $missing is missing"
 
-        fun `unneeded component dependency`(extra: Any) =
-            "Extra/unneeded type (dependency) $extra is present"
+        @Covered
+        fun `unneeded component dependency`() =
+            "Unrecognized type (component dependency?) is present"
 
+        @Covered
         fun `missing module`(missing: Any) =
             "Declared module $missing requires object instance and it is not provided"
 
-        fun `unneeded module`(extra: Any) =
-            "Extra/unneeded module instance $extra is present"
+        @Covered
+        fun `unneeded module`() =
+            "Extra/unneeded module instance is present"
 
 
-        fun `non-void injector method return type`(type: Any) =
-            "Injector method should return `void`/`Unit` instead of $type"
+        @Covered
+        fun `non-void injector method return type`() =
+            "Injector method should return `void`/`Unit`."
 
 
+        @Covered
+        fun `multiple component creators`() =
+            "Multiple component factories detected declared"
+
+        @Covered
+        fun `invalid method in component`(method: Any) =
+            "Unexpected method \n$Indent`$method`\n in component declaration"
+
+        @Covered
         fun `declaration is not annotated with @Component`() =
             "Type declaration is used as a component yet not annotated with `@Component`"
 
+        @Covered
         fun `component must be an interface`() =
             "Component declaration must be an `interface`"
 
+        @Covered
         fun `missing component creator - non-root`() =
             "Non-root component declaration must include creator declaration"
 
+        @Covered
         fun `missing component creator - dependencies`() =
             "Component declares dependencies, yet no creator declaration is present"
 
+        @Covered
         fun `missing component creator - modules`() =
             "Component includes non-trivially constructable modules that require object instance, " +
                     "yet no creator declaration is present"
@@ -185,6 +207,7 @@ object Strings {
         fun `conflicting bindings`(`for`: Any) =
             "Multiple bindings for $`for`"
 
+        @Covered
         fun `root component can not be a subcomponent`() =
             "Root component can not be a subcomponent"
 
@@ -216,21 +239,36 @@ object Strings {
                     "inject constructor/conditionals and remove this binding, or remove inject constructor in " +
                     "favor of this binding."
 
-        fun `exposed dependency of a framework type`(functionName: Any, returnType: Any) =
-            "`$functionName` has return type `$returnType` which is a framework type thus it can not be directly " +
-                    "introduced to the graph via component dependency - the function will be ignored." +
+        @Covered
+        fun `exposed dependency of a framework type`(function: Any) =
+            "function\n$Indent`$function`\nreturns a framework type and such type can not be directly " +
+                    "introduced to the graph via component dependency - the function will be ignored. " +
                     "If you need this to form a binding - change the return type, or use a wrapper type. " +
                     "Otherwise remove the function from the dependency interface entirely."
 
+        @Covered
         fun `non-abstract dependency declaration`() =
             "Component dependency declaration is not abstract. If it is already known how to provide necessary " +
                     "dependencies for the graph, consider using Inject-constructors or a @Module with " +
                     "regular provisions instead."
+
+        @Covered
+        fun `@BindsInstance on builder method's parameter`() =
+            "A parameter of a builder's method is annotated with @BindsInstance, which has no effect. " +
+                    "Maybe you meant to annotate the method itself for it to work as a binding?"
     }
 
     object Notes {
         @Covered
         fun `no known way to infer a binding`() =
             "No known way to infer the binding"
+
+        @Covered
+        fun `missing module instance`(module: Any) =
+            "Instance of `$module` must be provided"
+
+        @Covered
+        fun `conflicting component creator declared`(creator: Any) =
+            "Declared $creator"
     }
 }

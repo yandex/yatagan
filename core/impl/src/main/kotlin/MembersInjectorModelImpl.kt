@@ -48,9 +48,11 @@ internal class MembersInjectorModelImpl private constructor(
             validator.child(dependency.node)
         }
         if (!injector.returnType.isVoid) {
-            validator.reportError(Strings.Errors.`non-void injector method return type`(type = injector.returnType))
+            validator.reportError(Strings.Errors.`non-void injector method return type`())
         }
     }
+
+    override fun toString() = "[injector-fun] ${injector.name}"
 
     companion object Factory : ObjectCache<FunctionLangModel, MembersInjectorModelImpl>() {
         operator fun invoke(injector: FunctionLangModel) = createCached(injector, ::MembersInjectorModelImpl)

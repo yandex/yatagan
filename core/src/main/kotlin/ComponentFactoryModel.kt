@@ -69,7 +69,7 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
      *
      * @see InputPayload
      */
-    interface InputModel {
+    interface InputModel : MayBeInvalid {
         /**
          * @see InputPayload
          */
@@ -89,7 +89,7 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
     /**
      * Represents a setter method for the input in builder-like fashion.
      */
-    interface BuilderInputModel : InputModel, MayBeInvalid {
+    interface BuilderInputModel : InputModel {
         /**
          * Actual abstract setter.
          * Has *single parameter*; return type may be of the builder type itself or

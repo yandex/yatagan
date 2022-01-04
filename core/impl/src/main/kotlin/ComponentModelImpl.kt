@@ -15,6 +15,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
@@ -87,7 +88,7 @@ internal class ComponentModelImpl private constructor(
     }
 
     override val factory: ComponentFactoryModel? by lazy(NONE) {
-        declaration.nestedInterfaces
+        declaration.nestedClasses
             .find { ComponentFactoryModelImpl.canRepresent(it) }?.let {
                 ComponentFactoryModelImpl(factoryDeclaration = it)
             }
@@ -114,8 +115,21 @@ internal class ComponentModelImpl private constructor(
         for (memberInjector in memberInjectors) {
             validator.child(memberInjector)
         }
+        if (declaration.nestedClasses.count(ComponentFactoryModelImpl::canRepresent) > 1) {
+            validator.reportError(Errors.`multiple component creators`()) {
+                declaration.nestedClasses.filter(ComponentFactoryModelImpl::canRepresent).forEach {
+                    addNote(Strings.Notes.`conflicting component creator declared`(it))
+                }
+            }
+        }
 
         factory?.let(validator::child)
+
+        for (function in declaration.allPublicFunctions) {
+            if (function.parameters.count() > 1) {
+                validator.reportError(Errors.`invalid method in component`(method = function))
+            }
+        }
 
         if (impl == null) {
             validator.reportError(Errors.`declaration is not annotated with @Component`())
@@ -135,8 +149,13 @@ internal class ComponentModelImpl private constructor(
             }
 
             if (modules.any { it.requiresInstance && !it.isTriviallyConstructable }) {
-                // TODO: provide notes about concrete modules that require instances.
-                validator.reportError(Errors.`missing component creator - modules`())
+                validator.reportError(Errors.`missing component creator - modules`()) {
+                    modules.filter {
+                        it.requiresInstance && !it.isTriviallyConstructable
+                    }.forEach { module ->
+                        addNote(Strings.Notes.`missing module instance`(module))
+                    }
+                }
             }
         }
     }

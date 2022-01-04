@@ -38,5 +38,5 @@ internal class GraphMemberInjectorImpl(
         _membersToInject.forEach(validator::child)
     }
 
-    override fun toString() = "[injector-fun] ${injector.name}"
+    override fun toString() = impl.toString()
 }

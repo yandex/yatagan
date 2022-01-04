@@ -98,9 +98,14 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .map { JavaxFieldImpl(owner = this, impl = it.asVariableElement()) }
         .memoize()
 
-    override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
         .asSequence()
-        .filter { it.kind == ElementKind.INTERFACE }
+        .filter {
+            when (it.kind) {
+                ElementKind.ENUM, ElementKind.CLASS, ElementKind.ANNOTATION_TYPE, ElementKind.INTERFACE -> true
+                else -> false
+            }
+        }
         .map { Factory(it.asType().asDeclaredType()) }
         .memoize()
 

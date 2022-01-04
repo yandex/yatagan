@@ -105,9 +105,8 @@ internal class KspTypeDeclarationImpl private constructor(
     override val allPublicFields: Sequence<FieldLangModel> =
         impl.getDeclaredProperties().filter(KSPropertyDeclaration::isField).map { KspFieldImpl(it, this) }.memoize()
 
-    override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.declarations
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> = impl.declarations
         .filterIsInstance<KSClassDeclaration>()
-        .filter { it.classKind == ClassKind.INTERFACE }
         .map { Factory(it.asType(emptyList())) }
         .memoize()
 
