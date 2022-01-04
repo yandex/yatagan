@@ -160,11 +160,12 @@ internal class GraphBindingsFactory(
         }
     }
 
-    fun materializeBindingFor(node: NodeModel): BaseBinding? {
-        // fixme: implicit binding should only be queried after parents are checked, not like this.
-        //  otherwise it could conflict with explicit bindings in parents if any. Though this is
-        //  actually not a good situation. And actually not checked now.
-        return providedBindings[node]?.first() ?: implicitBindings.getOrPut(node, fun(): Binding? {
+    fun getExplicitBindingFor(node: NodeModel): BaseBinding? {
+        return providedBindings[node]?.first()
+    }
+
+    fun materializeImplicitBindingFor(node: NodeModel): Binding? {
+        return implicitBindings.getOrPut(node, fun(): Binding? {
             if (node.qualifier != null) {
                 return null
             }

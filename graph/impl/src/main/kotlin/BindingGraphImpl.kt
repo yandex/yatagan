@@ -127,7 +127,11 @@ internal class BindingGraphImpl(
     }
 
     private fun materialize(dependency: NodeDependency): Binding {
-        return materializeLocal(dependency) ?: materializeInParents(dependency) ?: materializeMissing(dependency)
+        return materializeLocal(dependency)
+            ?: materializeInParents(dependency, BindingGraphImpl::materializeLocal)
+            ?: materializeImplicit(dependency)
+            ?: materializeInParents(dependency, BindingGraphImpl::materializeImplicit)
+            ?: materializeMissing(dependency)
     }
 
     private fun materializeMissing(dependency: NodeDependency): Binding {
@@ -146,7 +150,7 @@ internal class BindingGraphImpl(
         }
 
         val (node, kind) = dependency
-        val binding = bindings.materializeBindingFor(node) ?: return null
+        val binding = bindings.getExplicitBindingFor(node) ?: return null
         val nonAlias = binding.accept(MaterializeAliasVisitor())
 
         if (nonAlias.owner == this) {
@@ -156,18 +160,24 @@ internal class BindingGraphImpl(
         return nonAlias
     }
 
-    private fun materializeInParents(dependency: NodeDependency): Binding? {
-        if (parent == null) {
-            return null
+    private fun materializeImplicit(dependency: NodeDependency): Binding? {
+        val (node, kind) = dependency
+        return bindings.materializeImplicitBindingFor(node)?.also {
+            localBindings.getOrPut(it, ::BindingUsageImpl).accept(kind)
         }
-        val binding = parent.materializeLocal(dependency)
+    }
+
+    private fun materializeInParents(dependency: NodeDependency,
+                                     materializeFunction: BindingGraphImpl.(NodeDependency) -> Binding?): Binding? {
+        if (parent == null) return null
+        val binding = parent.materializeFunction(dependency)
         if (binding != null) {
             // The binding is requested from a parent, so add parent to dependencies.
             usedParents += parent
             parent.materializationQueue += dependency
             return binding
         }
-        return parent.materializeInParents(dependency)?.also {
+        return parent.materializeInParents(dependency, materializeFunction)?.also {
             usedParents += it.owner
         }
     }
