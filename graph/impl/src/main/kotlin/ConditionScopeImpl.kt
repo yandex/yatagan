@@ -212,7 +212,7 @@ private class LiteralPayloadImpl private constructor(
                     currentType = type
                 }
             }
-            if (!finished) {
+            if (!finished && pathParsingError == null) {
                 pathParsingError = Errors.`invalid condition - unable to reach boolean`()
             }
         }

@@ -603,4 +603,58 @@ class CoreBindingsFailureTest(
             withNoMoreErrors()
         }
     }
+
+    @Test
+    fun `invalid conditions`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            object Foo {
+                val foo: String
+            }
+
+            @Condition(Foo::class, "!hello")
+            annotation class Invalid1
+            @Condition(Int::class, "#invalid")
+            annotation class Invalid2
+            @Condition(Foo::class, "foo")
+            annotation class Invalid3
+
+            @Conditional([
+                Invalid1::class,
+                Invalid2::class,
+                Invalid3::class,
+            ])
+            class ClassA @Inject constructor()
+            
+            @Component
+            interface MyComponent {
+                val a: Optional<ClassA>
+            }
+        """.trimIndent())
+
+        failsToCompile {
+            withError(formatMessage(
+                message = Errors.`invalid condition`("#invalid"),
+                encounterPaths = listOf(
+                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "<invalid>")
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`invalid condition - missing member`(name = "hello", type = "test.Foo"),
+                encounterPaths = listOf(
+                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "!test.Foo.hello")
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`invalid condition - unable to reach boolean`(),
+                encounterPaths = listOf(
+                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "test.Foo.foo")
+                ),
+            ))
+            withNoMoreErrors()
+            withNoWarnings()
+        }
+    }
 }

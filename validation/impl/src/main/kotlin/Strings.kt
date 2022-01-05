@@ -197,12 +197,15 @@ object Strings {
             "Variant matching ambiguity: `$one` vs `$two` could not be resolved"
 
 
+        @Covered
         fun `invalid condition`(expression: Any) =
             "Invalid condition expression '$expression'"
 
+        @Covered
         fun `invalid condition - unable to reach boolean`() =
             "Unable to reach boolean result in the given expression"
 
+        @Covered
         fun `invalid condition - missing member`(name: Any, type: Any) =
             "Can not find accessible `$name` member in $type"
 
