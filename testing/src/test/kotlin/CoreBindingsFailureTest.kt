@@ -526,4 +526,81 @@ class CoreBindingsFailureTest(
             // @formatter:on
         }
     }
+
+    @Test
+    fun `invalid features & variants`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            annotation class NotAFeature
+            annotation class NotAFeature2
+            annotation class NotADimension
+            @ComponentFlavor(dimension = NotADimension::class)
+            annotation class InvalidFlavor
+            annotation class NotAFlavor
+            @ComponentFlavor(dimension = NotADimension::class)
+            annotation class InvalidFlavor2
+            
+            @Conditional([NotAFeature::class, NotAFeature2::class],
+                         onlyIn = [InvalidFlavor::class, NotAFlavor::class])
+            class ClassA @Inject constructor()
+            @Module(subcomponents = [AnotherComponent::class]) interface RootModule
+            @Component(variant = [InvalidFlavor::class], modules = [RootModule::class])
+            interface RootComponent {
+                val a: Optional<ClassA>
+            }
+            @Component(variant = [InvalidFlavor::class, InvalidFlavor2::class, NotAFlavor::class], isRoot = false)
+            interface AnotherComponent { @Component.Builder interface C { fun c(): AnotherComponent } }
+        """.trimIndent())
+
+        failsToCompile { 
+            withError(formatMessage(
+                message = Errors.`no conditions on feature`(),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[feature] test.NotAFeature"),
+                    listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[feature] test.NotAFeature2"),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`declaration is not annotated with @ComponentVariantDimension`(),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "Variant{...}", "[flavor] test.InvalidFlavor", "[dimension] test.NotADimension"),
+                    listOf("test.RootComponent", "test.AnotherComponent", "Variant{...}", "[flavor] test.InvalidFlavor2", "[dimension] test.NotADimension"),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`conflicting or duplicate flavors for dimension`(dimension = "[dimension] test.NotADimension"),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "test.AnotherComponent", "Variant{...}"),
+                ),
+                notes = listOf(
+                    "Conflicting flavor: `[flavor] test.InvalidFlavor`",
+                    "Conflicting flavor: `[flavor] test.InvalidFlavor2`",
+                    "Conflicting flavor: `[flavor] test.InvalidFlavor`",
+                )
+            ))
+            withError(formatMessage(
+                message = Errors.`declaration is not annotated with @ComponentFlavor`(),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "test.AnotherComponent", "Variant{...}", "[flavor] test.NotAFlavor"),
+                    listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[flavor] test.NotAFlavor"),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`missing component variant dimension`(),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "test.AnotherComponent", "Variant{...}", "[flavor] test.NotAFlavor", "[missing dimension]"),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`undeclared dimension in variant`(dimension = "[missing dimension]"),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA"),
+                ),
+            ))
+            withNoWarnings()
+            withNoMoreErrors()
+        }
+    }
 }

@@ -23,7 +23,7 @@ interface ConditionalHoldingModel : MayBeInvalid {
     /**
      * Core-level model of a [com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel].
      */
-    interface ConditionalWithFlavorConstraintsModel {
+    interface ConditionalWithFlavorConstraintsModel : MayBeInvalid {
         val featureTypes: Sequence<FeatureModel>
         val onlyIn: Sequence<Variant.FlavorModel>
     }

@@ -16,13 +16,13 @@ private typealias MutableConjunctiveNormalForm = MutableSet<Set<LiteralBase>>
 
 private fun ConjunctiveNormalForm.splitBy(literal: LiteralBase): ConjunctiveNormalForm {
     val negLiteral = !literal
-    return asSequence().mapNotNull { disjuncts ->
-        if (literal !in disjuncts) {
-            disjuncts - negLiteral
-        } else {
-            null
+    return buildSet {
+        for (clause in this@splitBy) {
+            if (literal !in clause) {
+                add(clause - negLiteral)
+            }
         }
-    }.toSet()
+    }
 }
 
 private fun unitPropagate(input: ConjunctiveNormalForm): ConjunctiveNormalForm {

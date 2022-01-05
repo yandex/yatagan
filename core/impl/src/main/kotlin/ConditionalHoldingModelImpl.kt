@@ -9,6 +9,7 @@ import com.yandex.daggerlite.core.lang.ConditionLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
 
@@ -27,14 +28,19 @@ internal open class ConditionalHoldingModelImpl(
             annotation.onlyIn.map { FlavorImpl(it) }
         override val featureTypes: Sequence<FeatureModel> =
             annotation.featureTypes.map { FeatureModelImpl(it.declaration) }
+
+        override fun validate(validator: Validator) {
+            onlyIn.forEach(validator::child)
+            featureTypes.forEach(validator::child)
+        }
     }
 
     override fun validate(validator: Validator) {
-        conditionals.flatMap { it.featureTypes }.distinct().forEach(validator::child)
+        conditionals.forEach { validator.child(it, Inline) }
     }
 
     private class FeatureModelImpl private constructor(
-        impl: TypeDeclarationLangModel,
+        private val impl: TypeDeclarationLangModel,
     ) : FeatureModel {
         override val conditions: Sequence<ConditionLangModel> = impl.conditions
 
@@ -43,6 +49,8 @@ internal open class ConditionalHoldingModelImpl(
                 validator.reportError(Errors.`no conditions on feature`())
             }
         }
+
+        override fun toString() = "[feature] $impl"
 
         companion object Factory : ObjectCache<TypeDeclarationLangModel, FeatureModelImpl>() {
             operator fun invoke(impl: TypeDeclarationLangModel) = createCached(impl, ::FeatureModelImpl)

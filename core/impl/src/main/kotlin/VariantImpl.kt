@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.base.ifContainsDuplicates
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.Variant.DimensionModel
 import com.yandex.daggerlite.core.Variant.FlavorModel
@@ -37,13 +36,17 @@ internal class VariantImpl private constructor(
 
     override fun validate(validator: Validator) {
         parts.forEach { (dimension: DimensionModel, flavors: List<FlavorModel>) ->
-            validator.child(dimension)
             flavors.forEach(validator::child)
-            flavors.ifContainsDuplicates { duplicates ->
-                validator.reportError(Strings.Errors.`conflicting flavors for dimension`(dimension = dimension))
+            if (flavors.size > 1) {
+                validator.reportError(
+                    Strings.Errors.`conflicting or duplicate flavors for dimension`(dimension = dimension)) {
+                    for (conflict in flavors) {
+                        addNote("Conflicting flavor: `$conflict`")
+                    }
+                }
             }
         }
     }
 
-    override fun toString() = "Variant[$parts]"
+    override fun toString() = if (parts.isEmpty()) "Variant{empty}" else "Variant{...}"
 }

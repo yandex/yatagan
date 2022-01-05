@@ -22,7 +22,7 @@ internal class FlavorImpl private constructor(
         }
     }
 
-    override fun toString() = "Flavor[$type]"
+    override fun toString() = "[flavor] $type"
 
     companion object Factory : ObjectCache<TypeLangModel, FlavorImpl>() {
         operator fun invoke(type: TypeLangModel) = createCached(type, ::FlavorImpl)

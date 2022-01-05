@@ -9,7 +9,6 @@ import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.ValidationMessage.Kind
 import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.ValidationMessageBuilder
 import com.yandex.daggerlite.validation.impl.buildMessage
 
 internal sealed interface VariantMatch {
@@ -40,13 +39,11 @@ internal fun VariantMatch(
             .groupBy(FlavorModel::dimension)
         var currentMatch = 0
         for ((dimension: DimensionModel, allowedFlavors: List<FlavorModel>) in constraints) {
-            val flavor = forVariant[dimension] ?: return VariantMatch.Error(buildMessage(Kind.Error,
-                fun ValidationMessageBuilder.() {
-                    contents = Strings.Errors.`undeclared dimension in variant`(
-                        dimension = dimension,
-                        variant = forVariant,
-                    )
-                }))
+            val flavor = forVariant[dimension] ?: return VariantMatch.Error(buildMessage(Kind.Error) {
+                contents = Strings.Errors.`undeclared dimension in variant`(
+                    dimension = dimension,
+                )
+            })
             if (flavor !in allowedFlavors) {
                 // Not matched
                 continue@outer
@@ -54,9 +51,9 @@ internal fun VariantMatch(
             ++currentMatch
         }
         if (maxMatched == currentMatch) {
-            return VariantMatch.Error(buildMessage(Kind.Error, fun ValidationMessageBuilder.() {
+            return VariantMatch.Error(buildMessage(Kind.Error) {
                 contents = Strings.Errors.`variant matching ambiguity`(one = bestMatch!!, two = conditional)
-            }))
+            })
         }
         if (maxMatched < currentMatch) {
             maxMatched = currentMatch

@@ -24,7 +24,7 @@ inline fun <T, K, M : MutableMap<in K, in T>> Sequence<T>.duplicateAwareAssociat
     }
 }
 
-inline fun <T> Collection<T>.ifContainsDuplicates(block: (Set<T>) -> Unit) {
+inline fun <T> List<T>.ifContainsDuplicates(block: (Set<T>) -> Unit) {
     if (size > 1) {
         val distinct = toSet()
         if (distinct.size > 1) {

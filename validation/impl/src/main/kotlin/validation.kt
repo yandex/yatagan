@@ -48,6 +48,10 @@ fun validate(
                 node.validate(validator)
                 messages = validator.messages
                 children = validator.children
+                // fixme: children error messages are not always being referenced fully, some usages may be dropped
+                //  due to `validationCache`: child can't be reached more than once through one parent. This is not a
+                //  very important error, as an error will still be reported, only its paths of occurrence may hide
+                //  each other.
                 validationCache[node] = messages
             }
 

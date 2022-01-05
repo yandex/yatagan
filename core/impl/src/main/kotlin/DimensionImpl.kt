@@ -14,7 +14,7 @@ internal class DimensionImpl private constructor(
     override val type: TypeLangModel,
 ) : Variant.DimensionModel {
 
-    override fun toString() = "Dimension[$type]"
+    override fun toString() = "[dimension] $type"
 
     override fun validate(validator: Validator) {
         if (!type.declaration.isAnnotatedWith<ComponentVariantDimension>()) {
@@ -36,7 +36,7 @@ internal class MissingDimension(private val flavor: Variant.FlavorModel) : Varia
         validator.reportError(Errors.`missing component variant dimension`())
     }
 
-    override fun toString() = "[missing dimension for $flavor]"
+    override fun toString() = "[missing dimension]"
 
     override fun hashCode() = flavor.hashCode()
 

@@ -156,18 +156,22 @@ object Strings {
                     "yet no creator declaration is present"
 
 
+        @Covered
         fun `no conditions on feature`() =
             "Feature declaration has no `@Condition`-family annotations on it."
 
 
+        @Covered
         fun `declaration is not annotated with @ComponentVariantDimension`() =
             "Type declaration is used as a component variant dimension, " +
                     "yet not annotated with @ComponentVariantDimension"
 
+        @Covered
         fun `missing component variant dimension`() =
             "Component variant dimension is missing"
 
 
+        @Covered
         fun `declaration is not annotated with @ComponentFlavor`() =
             "Type declaration is used as a component flavor, yet not annotated with @ComponentFlavor"
 
@@ -180,15 +184,17 @@ object Strings {
             "Framework types (Lazy, Provider, Optional) can't be manually managed (provided/bound)"
 
 
-        fun `conflicting flavors for dimension`(dimension: Any) =
-            "Conflicting flavors for a single dimension $dimension"
+        @Covered
+        fun `conflicting or duplicate flavors for dimension`(dimension: Any) =
+            "Duplicate flavors for a single `$dimension`"
 
 
-        fun `undeclared dimension in variant`(dimension: Any, variant: Any) =
-            "No flavor is declared for dimension $dimension in a variant $variant"
+        @Covered
+        fun `undeclared dimension in variant`(dimension: Any) =
+            "No flavor is declared for `$dimension` in a variant"
 
         fun `variant matching ambiguity`(one: Any, two: Any) =
-            "Variant matching ambiguity: $one vs $two could not be resolved"
+            "Variant matching ambiguity: `$one` vs `$two` could not be resolved"
 
 
         fun `invalid condition`(expression: Any) =

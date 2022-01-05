@@ -29,6 +29,7 @@ import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
@@ -172,6 +173,11 @@ internal class InjectConstructorProvisionBindingImpl(
 
     override fun dependencies(): Collection<NodeDependency> {
         return if (conditionScope.isNever) emptyList() else impl.inputs.toList()
+    }
+
+    override fun validate(validator: Validator) {
+        super.validate(validator)
+        validator.child(impl, Inline)
     }
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
