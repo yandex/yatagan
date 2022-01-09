@@ -1,8 +1,5 @@
-@file:Suppress("DEPRECATED_JAVA_ANNOTATION")  // TODO: Replace with @JvmRepeatable when Kotlin 1.6 hits release.
-
 package com.yandex.daggerlite
 
-import java.lang.annotation.Repeatable
 import kotlin.reflect.KClass
 
 /*
@@ -66,7 +63,7 @@ annotation class BindsInstance(
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
-@Repeatable(AllConditions::class)
+@JvmRepeatable(AllConditions::class)
 annotation class Condition(
     val value: KClass<*>,
     val condition: String,
@@ -82,7 +79,7 @@ annotation class AllConditions(
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
-@Repeatable(AnyConditions::class)
+@JvmRepeatable(AnyConditions::class)
 annotation class AnyCondition(
     val value: Array<Condition>
 )
@@ -102,7 +99,7 @@ annotation class Conditionals(
 )
 
 @MustBeDocumented
-@Repeatable(Conditionals::class)
+@JvmRepeatable(Conditionals::class)
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
 annotation class Conditional(

@@ -2,41 +2,17 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope
-import kotlin.LazyThreadSafetyMode.NONE
 
-internal class KspAnnotationImpl(
+internal class KspAnnotationImpl private constructor(
+    private val descriptor: String,
     private val impl: KSAnnotation,
 ) : CtAnnotationLangModel {
-    // NOTE: It seems there's no reasonable way to cache KspAnnotationImpl instances
-    // as KSAnnotation has no sane `equals` implementation.
-    // TODO: maybe invent something
-
-    private val descriptor by lazy(NONE) {
-        buildString {
-            append('@')
-            append(CtTypeNameModel(impl.annotationType.resolve()))
-            if (impl.arguments.isNotEmpty()) {
-                append('(')
-                impl.arguments.joinTo(this, separator = ",") {
-                    val value = when (val value = it.value) {
-                        is String -> "\"$value\""
-                        else -> value.toString()
-                    }
-                    when (val name = it.name?.asString()) {
-                        null, "value" -> value
-                        else -> "$name=$value"
-                    }
-                }
-                append(')')
-            }
-        }
-    }
-
     override val isScope: Boolean
         get() = impl.annotationType.resolve().declaration.isAnnotationPresent<Scope>()
 
@@ -84,12 +60,44 @@ internal class KspAnnotationImpl(
         return KspAnnotationImpl(impl[attribute] as KSAnnotation)
     }
 
-    override fun equals(other: Any?): Boolean {
-        // TODO: further optimize this
-        return this === other || (other is KspAnnotationImpl && descriptor == other.descriptor)
-    }
-
-    override fun hashCode() = descriptor.hashCode()
-
     override fun toString() = descriptor
+
+    companion object Factory : ObjectCache<String, KspAnnotationImpl>() {
+        operator fun invoke(impl: KSAnnotation): KspAnnotationImpl {
+            val descriptor = formatAnnotation(impl)
+            return createCached(descriptor) {
+                KspAnnotationImpl(descriptor = descriptor, impl = impl)
+            }
+        }
+
+        private fun formatValue(value: Any?): String {
+            return when (value) {
+                is String -> "\"$value\""
+                is List<*> -> value.joinToString(
+                    prefix = "{",
+                    separator = ", ",
+                    postfix = "}",
+                    transform = ::formatValue,
+                )
+                is KSAnnotation -> Factory(value).toString()
+                else -> value.toString()
+            }
+        }
+
+        private fun formatAnnotation(impl: KSAnnotation): String {
+            return buildString {
+                append('@')
+                append(CtTypeNameModel(impl.annotationType.resolve()))
+                if (impl.arguments.isNotEmpty()) {
+                    impl.arguments.joinTo(this, prefix = "(", separator = ", ", postfix = ")") { arg ->
+                        val value = formatValue(arg.value)
+                        when (val name = arg.name?.asString()) {
+                            null, "value" -> value
+                            else -> "$name = $value"
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

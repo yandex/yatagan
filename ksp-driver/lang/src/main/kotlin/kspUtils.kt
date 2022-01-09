@@ -240,7 +240,7 @@ internal fun KSClassDeclaration.allPublicProperties(): Sequence<KSPropertyDeclar
     return getAllProperties().filter(KSPropertyDeclaration::isPublic)
 }
 
-internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map(::KspAnnotationImpl).memoize()
+internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map { KspAnnotationImpl(it) }.memoize()
 
 internal fun parametersSequenceFor(
     declaration: KSFunctionDeclaration,

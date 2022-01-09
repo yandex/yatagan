@@ -158,10 +158,8 @@ class ConditionsTest(
             import com.yandex.daggerlite.Conditionals
             import com.yandex.daggerlite.Optional
 
-            @Conditionals([
-                Conditional([Conditions.FeatureA::class], onlyIn = [DeviceType.Phone::class]),
-                Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class]),
-            ])
+            @Conditional([Conditions.FeatureA::class], onlyIn = [DeviceType.Phone::class])
+            @Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class])
             class MyClass @Inject constructor()
 
             @Singleton
@@ -294,9 +292,7 @@ class ConditionsTest(
             interface TestTabletComponent : TestComponent
 
             @ActivityScoped
-            @Conditionals([
-                Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class]),
-            ])
+            @Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class])
             @Component(isRoot = false, variant = [MyFeatureActivity::class])
             interface MyFeatureActivityComponent {
                 @Component.Builder
@@ -601,6 +597,57 @@ class ConditionsTest(
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
             }
+        }
+    }
+
+    @Test
+    fun `complex condition expression`() {
+        useSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*            
+            import javax.inject.*
+            
+            private const val EnabledB = "isEnabledB" 
+            
+            @Condition(Features::class, "enabledA")
+            @Condition(Features::class, "isEnabledB")
+            @AnyCondition([
+                Condition(Features::class, "FeatureC.isEnabled"),                                
+                Condition(Features::class, "isEnabledB"),                                
+            ])
+            annotation class ComplexFeature1
+            
+            @AnyCondition([
+                Condition(Features::class, "enabledA"),
+            ])
+            @AnyCondition([
+                Condition(Features::class, EnabledB),
+            ])
+            @AnyCondition([
+                Condition(Features::class, "FeatureC.isEnabled"),                                
+                Condition(Features::class, condition = EnabledB),                                
+            ])
+            @AnyCondition([
+                Condition(Features::class, "FeatureC.isEnabled"),                                
+                Condition(value = Features::class, condition = "isEnabledB"),                                
+            ])            
+            annotation class ComplexFeature2
+            
+            @Conditional([ComplexFeature1::class])               
+            class ClassA @Inject constructor(b: ClassB)
+            @Conditional([ComplexFeature2::class])
+            class ClassB @Inject constructor(a: Provider<ClassA>)
+            
+            @Component            
+            interface MyComponent {
+                val a: Optional<ClassA>                        
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            withNoErrors()
         }
     }
 
