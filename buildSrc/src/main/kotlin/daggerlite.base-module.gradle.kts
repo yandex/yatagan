@@ -22,11 +22,11 @@ val kotlinVersion: String by extra(
     providers.fileContents(rootProject.layout.projectDirectory.file("kotlin.version"))
         .asText.forUseAtConfigurationTime().get().trimEnd()
 )
-val kspVersion by extra("$kotlinVersion-1.0.0")
+val kspVersion by extra("$kotlinVersion-1.0.2")
 val javaPoetVersion by extra("1.13.0")
-val kotlinCompileTestingVersion by extra("1.4.5")
+val kotlinCompileTestingVersion by extra("1.4.7")
 val autoCommonVersion by extra("1.2.1")
-val kotlinxMetadataVersion by extra("0.3.0")
+val kotlinxMetadataVersion by extra("0.4.0")
 
 java {
     toolchain {
