@@ -5,6 +5,7 @@ import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Nested
+import kotlin.LazyThreadSafetyMode.NONE
 
 interface LocatedMessage {
     val message: ValidationMessage
@@ -12,16 +13,20 @@ interface LocatedMessage {
 }
 
 private class ValidatorImpl : Validator {
-    val children = arrayListOf<MayBeInvalid>()
-    val messages = arrayListOf<ValidationMessage>()
+    private val _children = arrayListOf<MayBeInvalid>()
+    val children: List<MayBeInvalid>
+        get() = _children
+    private val _messages = lazy(NONE) { arrayListOf<ValidationMessage>() }
+    val messages: List<ValidationMessage>
+        get() = if (_messages.isInitialized()) _messages.value else emptyList()
 
     override fun report(message: ValidationMessage) {
-        messages += message
+        _messages.value += message
     }
 
     override fun child(node: MayBeInvalid, kind: Validator.ChildValidationKind) {
         when (kind) {
-            Nested -> children += node
+            Nested -> _children += node
             Inline -> node.validate(this)
         }
     }
@@ -30,50 +35,47 @@ private class ValidatorImpl : Validator {
 fun validate(
     roots: Iterable<MayBeInvalid>,
 ): Collection<LocatedMessage> {
-    val validationCache = hashMapOf<MayBeInvalid, List<ValidationMessage>>()
+    val cache = hashMapOf<MayBeInvalid, ValidatorImpl>()
+
     val result: MutableMap<ValidationMessage, MutableSet<List<MayBeInvalid>>> = mutableMapOf()
-    val currentPath = arrayListOf<MayBeInvalid>()
 
-    // TODO: write non-recursive algorithm
-    fun validateImpl(node: MayBeInvalid) {
-        currentPath.add(node)
-        try {
-            val messages: List<ValidationMessage>
-            val children: Collection<MayBeInvalid>
-            if (node in validationCache) {
-                messages = validationCache[node]!!
-                children = emptyList()
-            } else {
-                val validator = ValidatorImpl()
-                node.validate(validator)
-                messages = validator.messages
-                children = validator.children
-                // fixme: children error messages are not always being referenced fully, some usages may be dropped
-                //  due to `validationCache`: child can't be reached more than once through one parent. This is not a
-                //  very important error, as an error will still be reported, only its paths of occurrence may hide
-                //  each other.
-                validationCache[node] = messages
-            }
+    val markedGray = hashSetOf<MayBeInvalid>()
+    val stack = arrayListOf<MutableList<MayBeInvalid>>()
 
-            for (message in messages) {
-                result.getOrPut(message, ::mutableSetOf) += ArrayList(currentPath)
+    stack.add(roots.toMutableList())
+
+    while (stack.isNotEmpty()) {
+        // Substack is introduced to preserve node hierarchy
+        val subStack = stack.last()
+        if (subStack.isEmpty()) {
+            stack.removeLast()
+            continue
+        }
+        when (val node = subStack.last()) {
+            // No black marks here, as we want to discover all paths referencing messages.
+            // This might be not the most efficient way.
+            in markedGray -> {
+                subStack.removeLast()
+                markedGray -= node
             }
-            for (child in children) {
-                validateImpl(child)
+            else -> {
+                markedGray += node
+                val validator = cache.getOrPut(node) {
+                    ValidatorImpl().apply(node::validate)
+                }
+                for (message in validator.messages) {
+                    // Extract current path from stack::substack
+                    result.getOrPut(message, ::mutableSetOf) += stack.map { it.last() }
+                }
+                stack += validator.children.filterTo(mutableListOf()) { it !in markedGray }
             }
-        } finally {
-            assert(currentPath.removeLast() == node)
         }
     }
 
-    for (root in roots) {
-        validateImpl(root)
-    }
-
-    return result.map {  (message, paths) ->
+    return result.map { (message, paths) ->
         object : LocatedMessage {
-            override val message get() = message
-            override val encounterPaths get() = paths
+            override val message = message
+            override val encounterPaths = paths.reversed()  // reverse leads to more natural iteration order.
         }
     }
 }

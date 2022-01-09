@@ -71,6 +71,7 @@ class CoreBindingsFailureTest(
                     // @formatter:off
                     listOf("test.TestComponent", "[entry-point] getFoo", "@Inject test.Foo", "[missing: java.lang.Object]"),
                     listOf("test.TestComponent", "[entry-point] getFoo", "@Inject test.Foo", "@Inject test.Foo2", "[missing: java.lang.Object]"),
+                    listOf("test.TestComponent", "[entry-point] getFoo2", "@Inject test.Foo2", "[missing: java.lang.Object]"),
                     listOf("test.TestComponent", "[entry-point] getHello", "[missing: java.lang.Object]"),
                     listOf("test.TestComponent", "[entry-point] getBye", "[missing: java.lang.Object]"),
                     listOf("test.TestComponent", "[injector-fun] inject", "[member-to-inject] setObj", "[missing: java.lang.Object]"),
@@ -334,10 +335,8 @@ class CoreBindingsFailureTest(
                 encounterPaths = listOf(
                     // @formatter:off
                     listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA"),
-                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderA"),
-                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB", "@Inject test.UnderA"),
-                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB", "@Inject test.UnderComplex", "@Inject test.UnderA"),
-                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getE2", "@Inject test.UnderB", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getE2", "@Inject test.UnderB", "@Inject test.UnderComplex", "@Inject test.UnderA"),
                     listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object", "@Inject test.UnderA"),
                     listOf("test.MyComponent", "[entry-point] getObject2", "@Provides test.MyModule::provideObject2(test.UnderA [OptionalProvider]): @javax.inject.Named(\"ok1\") java.lang.Object", "@Inject test.UnderA"),
                     listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA"),
@@ -354,9 +353,14 @@ class CoreBindingsFailureTest(
                 encounterPaths = listOf(
                     // @formatter:off
                     listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
-                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB", "@Inject test.UnderComplex", "@Inject test.UnderB"),
                     listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
                     listOf("test.MyComponent", "[entry-point] getE2", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject2", "@Provides test.MyModule::provideObject2(test.UnderA [OptionalProvider]): @javax.inject.Named(\"ok1\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject2", "@Provides test.MyModule::provideObject2(test.UnderA [OptionalProvider]): @javax.inject.Named(\"ok1\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
                     // @formatter:on
                 ),
             ))
@@ -370,9 +374,14 @@ class CoreBindingsFailureTest(
                 encounterPaths = listOf(
                     // @formatter:off
                     listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
-                    listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB", "@Inject test.UnderComplex", "@Inject test.UnderB"),
                     listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
                     listOf("test.MyComponent", "[entry-point] getE2", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject2", "@Provides test.MyModule::provideObject2(test.UnderA [OptionalProvider]): @javax.inject.Named(\"ok1\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject2", "@Provides test.MyModule::provideObject2(test.UnderA [OptionalProvider]): @javax.inject.Named(\"ok1\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAandB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
                     // @formatter:on
                 ),
             ))
@@ -386,6 +395,11 @@ class CoreBindingsFailureTest(
                 encounterPaths = listOf(
                     // @formatter:off
                     listOf("test.MyComponent", "[entry-point] getE1", "@Inject test.UnderA", "@Inject test.UnderAorB"),
+                    listOf("test.MyComponent", "[entry-point] getE2", "@Inject test.UnderB", "@Inject test.UnderA", "@Inject test.UnderAorB"),
+                    listOf("test.MyComponent", "[entry-point] getE2", "@Inject test.UnderB", "@Inject test.UnderComplex", "@Inject test.UnderA", "@Inject test.UnderAorB"),
+                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB"),
+                    listOf("test.MyComponent", "[entry-point] getObject2", "@Provides test.MyModule::provideObject2(test.UnderA [OptionalProvider]): @javax.inject.Named(\"ok1\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB"),
                     // @formatter:on
                 ),
             ))
@@ -567,6 +581,8 @@ class CoreBindingsFailureTest(
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "Variant{...}", "[flavor] test.InvalidFlavor", "[dimension] test.NotADimension"),
                     listOf("test.RootComponent", "test.AnotherComponent", "Variant{...}", "[flavor] test.InvalidFlavor2", "[dimension] test.NotADimension"),
+                    listOf("test.RootComponent", "test.AnotherComponent", "Variant{...}", "[flavor] test.InvalidFlavor", "[dimension] test.NotADimension"),
+                    listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[flavor] test.InvalidFlavor", "[dimension] test.NotADimension"),
                 ),
             ))
             withError(formatMessage(
@@ -591,6 +607,7 @@ class CoreBindingsFailureTest(
                 message = Errors.`missing component variant dimension`(),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "test.AnotherComponent", "Variant{...}", "[flavor] test.NotAFlavor", "[missing dimension]"),
+                    listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[flavor] test.NotAFlavor", "[missing dimension]"),
                 ),
             ))
             withError(formatMessage(
