@@ -18,6 +18,9 @@ fun <Source> process(
             ComponentModel(delegate.createDeclaration(source)).takeIf { it.isRoot }
         }.map { model ->
             BindingGraph(root = model)
+        }.sortedBy {
+            // To ensure stable aggregated error messages
+            it.model.type.declaration.qualifiedName
         }.toList()
 
         val logger = LoggerDecorator(delegate.logger)

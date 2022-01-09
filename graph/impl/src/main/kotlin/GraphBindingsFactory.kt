@@ -30,6 +30,7 @@ import com.yandex.daggerlite.validation.impl.buildMessage
 
 internal class GraphBindingsFactory(
     private val graph: BindingGraphImpl,
+    private val parent: GraphBindingsFactory?,
 ) : MayBeInvalid {
     private val validationMessages = arrayListOf<ValidationMessage>()
 
@@ -42,7 +43,7 @@ internal class GraphBindingsFactory(
                         impl = model,
                     )
                 } else when (model.sources.count()) {
-                    0 -> ModuleHostedEmptyBindingImpl(
+                    0 -> ExplicitEmptyBindingImpl(
                         owner = graph,
                         impl = model,
                     )
@@ -71,6 +72,7 @@ internal class GraphBindingsFactory(
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
         val multiBindings = linkedMapOf<NodeModel, MutableMap<NodeModel, ContributionType>>()
+        // TODO: In vanilla dagger, multibindings are inherited and accumulated from parents.
         for (module: ModuleModel in graph.modules) {
             // All bindings from installed modules
             for (bindingModel in module.bindings) {
@@ -96,7 +98,7 @@ internal class GraphBindingsFactory(
                 }
             }
         }
-        // Gather bindings from factory
+        // Gather dependencies
         for (dependency: ComponentDependencyModel in graph.dependencies) {
             // Binding for the dependency component itself.
             add(ComponentDependencyBindingImpl(dependency = dependency, owner = graph))
@@ -115,6 +117,7 @@ internal class GraphBindingsFactory(
                 is InputPayload.Instance -> add(InstanceBindingImpl(
                     target = payload.node,
                     owner = graph,
+                    origin = input,
                 ))
                 else -> {}
             }
@@ -127,12 +130,12 @@ internal class GraphBindingsFactory(
                 multiBindings.getOrPut(it.listType, ::mutableMapOf)
             }
             .duplicateAwareAssociateBy(onDuplicates = { listNode, duplicateDeclarations ->
-                validationMessages += buildMessage(Kind.Error, fun ValidationMessageBuilder.() {
+                validationMessages += buildMessage(Kind.Error) {
                     contents = Strings.Errors.`conflicting list declarations`(`for` = listNode)
                     duplicateDeclarations.forEachIndexed { i, duplicate ->
                         addNote("${i + 1}. $duplicate")
                     }
-                })
+                }
             }, keySelector = ListDeclarationModel::listType)
 
         // Multi-bindings
@@ -189,17 +192,33 @@ internal class GraphBindingsFactory(
         })
     }
 
+    private fun localAndParentExplicitBindings(): Map<NodeModel, List<BaseBinding>> {
+        return buildMap<NodeModel, MutableList<BaseBinding>> {
+            parent?.localAndParentExplicitBindings()?.forEach { (node, bindings) ->
+                getOrPut(node, ::arrayListOf) += bindings
+            }
+            providedBindings.forEach { (node, bindings) ->
+                getOrPut(node, ::arrayListOf) += bindings
+            }
+        }
+    }
+
     override fun validate(validator: Validator) {
         validationMessages.forEach(validator::report)
 
-        // fixme: check duplicates with parent graphs also.
-        //  as written now, "overriding" or "shadowing" of parent bindings is allowed.
-        providedBindings.forEach { (node, bindings) ->
+        val locallyRequestedNodes = graph.localBindings.map { (binding, _) -> binding.target }.toHashSet()
+        for ((node, bindings) in localAndParentExplicitBindings()) {
+            if (node !in locallyRequestedNodes) {
+                // Check duplicates only for locally requested bindings - no need to report parent duplicates.
+                // As a side effect, if duplicates are present for an unused binding - we don't care.
+                continue
+            }
+
             bindings.ifContainsDuplicates { duplicates ->
                 validator.report(buildMessage(Kind.Error, fun ValidationMessageBuilder.() {
                     contents = Strings.Errors.`conflicting bindings`(`for` = node)
                     duplicates.forEach { binding ->
-                        addNote("Duplicate binding: $binding")
+                        addNote(Strings.Notes.`duplicate binding`(binding))
                     }
                 }))
             }

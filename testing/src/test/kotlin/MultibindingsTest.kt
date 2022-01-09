@@ -6,8 +6,8 @@ import org.junit.runners.Parameterized
 import javax.inject.Provider
 
 @RunWith(Parameterized::class)
-class BootstrapListsTest(
-    driverProvider: Provider<CompileTestDriverBase>
+class MultibindingsTest(
+    driverProvider: Provider<CompileTestDriverBase>,
 ) : CompileTestDriver by driverProvider.get() {
     companion object {
         @JvmStatic
@@ -147,7 +147,7 @@ class BootstrapListsTest(
     }
 
     @Test
-    fun `no subscribers result in empty list`() {
+    fun `list declaration binds empty list`() {
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.Condition
             import com.yandex.daggerlite.Conditional
@@ -187,7 +187,7 @@ class BootstrapListsTest(
     }
 
     @Test
-    fun `bootstrap list with conditional entries`() {
+    fun `multi-bound list with conditional entries`() {
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.Condition
             import com.yandex.daggerlite.Conditional

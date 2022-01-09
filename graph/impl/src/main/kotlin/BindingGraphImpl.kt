@@ -48,7 +48,10 @@ internal class BindingGraphImpl(
 
     override val memberInjectors = component.memberInjectors.map { GraphMemberInjectorImpl(owner = this, impl = it) }
 
-    private val bindings = GraphBindingsFactory(graph = this)
+    private val bindings: GraphBindingsFactory = GraphBindingsFactory(
+        graph = this,
+        parent = parent?.bindings,
+    )
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableSetOf<ConditionScope.Literal>()

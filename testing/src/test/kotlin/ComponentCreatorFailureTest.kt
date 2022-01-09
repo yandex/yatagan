@@ -143,25 +143,25 @@ class ComponentCreatorFailureTest(
             withError(formatMessage(
                 message = Strings.Errors.`component creator must be an interface`(),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Builder"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
             ))
             withError(formatMessage(
                 message = Strings.Errors.`missing component dependency`(missing = "test.MyDependency"),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Builder"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
             ))
             withError(formatMessage(
                 message = Strings.Errors.`missing module`(missing = "test.RequiresInstance"),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Builder"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
             ))
             withError(formatMessage(
                 message = Strings.Errors.`unneeded module`(),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Builder", "[param] create(.., module: test.Unknown, ..)"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Builder", "[param] create(.., module: test.Unknown, ..)"),
                 )
             ))
             withWarning(formatMessage(
@@ -224,33 +224,33 @@ class ComponentCreatorFailureTest(
             withError(formatMessage(
                 message = Strings.Errors.`missing component creating method`(),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Foo"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Foo"),
                 )
             ))
             withError(formatMessage(
                 message = Strings.Errors.`unneeded component dependency`(),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Foo", "[setter] setInt(int)"),
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setInt(int)"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )
             ))
             withError(formatMessage(
                 message = Strings.Errors.`invalid builder setter return type`("test.MyComponent.Foo"),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )
             ))
             withError(formatMessage(
                 message = Strings.Errors.`invalid method in component creator`(
                     method = "test.MyComponent.Foo::create(): void"),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Foo"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Foo"),
                 )
             ))
             withError(formatMessage(
                 message = Strings.Errors.`unneeded module`(),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Foo", "[setter] setModule(test.Unnecessary)"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setModule(test.Unnecessary)"),
                 )
             ))
             withError(formatMessage(
@@ -266,7 +266,7 @@ class ComponentCreatorFailureTest(
             withWarning(formatMessage(
                 message = Strings.Warnings.`@BindsInstance on builder method's parameter`(),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[builder] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
+                    listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )
             ))
             withNoMoreErrors()

@@ -213,8 +213,9 @@ object Strings {
         fun `conflicting list declarations`(`for`: Any) =
             "Conflicting list declarations for $`for`"
 
+        @Covered
         fun `conflicting bindings`(`for`: Any) =
-            "Multiple bindings for $`for`"
+            "Conflicting bindings for `$`for``"
 
         @Covered
         fun `root component can not be a subcomponent`() =
@@ -279,5 +280,37 @@ object Strings {
         @Covered
         fun `conflicting component creator declared`(creator: Any) =
             "Declared $creator"
+
+        @Covered
+        fun `duplicate binding`(binding: Any) =
+            "Conflicting binding: `$binding`"
+    }
+
+    object Bindings {
+        fun componentInstance(component: Any) =
+            "[intrinsic] component instance `$component`"
+
+        fun componentDependencyInstance(dependency: Any) =
+            "[intrinsic] component dependency instance `$dependency`"
+
+        fun instance(origin: Any) =
+            "[intrinsic] pre-provided instance via `$origin`"
+
+        fun multibinding(elementType: Any, declaration: Any? = null, contributions: Iterable<Any>) = buildString {
+            append("[intrinsic] multi-bound `$elementType` list")
+            if (declaration != null) {
+                append(" declared by `$declaration`")
+            }
+            appendLine(":")
+            contributions.forEach {
+                append(Indent).appendLine(it)
+            }
+        }
+
+        fun subcomponentFactory(factory: Any) =
+            "[intrinsic] subcomponent creator (factory/builder) `$factory`"
+
+        fun componentDependencyEntryPoint(entryPoint: Any) =
+            "[intrinsic] provision from dependency `$entryPoint`"
     }
 }

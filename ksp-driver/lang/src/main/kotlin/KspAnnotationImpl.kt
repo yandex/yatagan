@@ -93,7 +93,7 @@ internal class KspAnnotationImpl private constructor(
                         val value = formatValue(arg.value)
                         when (val name = arg.name?.asString()) {
                             null, "value" -> value
-                            else -> "$name = $value"
+                            else -> "$name=$value"
                         }
                     }
                 }

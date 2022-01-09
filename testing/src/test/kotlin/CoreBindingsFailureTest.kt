@@ -674,4 +674,149 @@ class CoreBindingsFailureTest(
             withNoWarnings()
         }
     }
+
+    @Test
+    fun `conflicting bindings`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            @Qualifier
+            annotation class MyQualifier(val named: Named)
+            @Qualifier
+            annotation class Numbered(val value: Int)
+            const val Hello = "hello"
+            
+            interface Dependency {
+                val myString: String
+            }
+            
+            @Module
+            class MyModule {
+                @MyQualifier(Named("hello"))
+                @Provides fun provideObject(): Any { return Any() }
+                
+                @MyQualifier(Named(value = Hello))
+                @Provides fun provideObject2(): Any { return Any() }
+            
+                @Provides fun c1() : MyComponent1 = throw AssertionError()
+                @Named("flag") @Provides fun bool() = true
+                @Provides fun dep(): Dependency = throw AssertionError()
+            }
+            
+            @Module(includes = [MyModule::class], subcomponents = [SubComponent::class])
+            class MyModule2 {
+                @Provides @IntoList fun one(): Number = 1L
+                @Provides @IntoList fun two(): Number = 2.0
+                @Provides @IntoList fun three(): Number = 3f
+            
+                @Provides fun numbers(): List<Number> = emptyList()
+                @Provides fun builder(): SubComponent.Builder = throw AssertionError()
+            }
+            
+            interface Base {
+                @get:MyQualifier(Named("hello")) val any: Any
+                @get:Named("flag") val flag: Boolean
+                val c: MyComponent1
+                val dep: Dependency
+            }
+            @Component(modules = [MyModule::class])
+            interface MyComponent1 : Base
+            @Component(modules = [MyModule2::class], dependencies = [Dependency::class])
+            interface MyComponent2 : Base {
+                val numbers: List<Number>
+                val sub: SubComponent.Builder
+                val string: String
+
+                @Component.Builder
+                interface Builder {
+                    @BindsInstance fun setFlag(@Named("flag") i: Boolean)
+                    @BindsInstance fun setNumbers(i: MutableList<Number>)
+                    fun withDependency(i: Dependency)
+                    @BindsInstance fun withString(i: String)
+                    @BindsInstance fun withAnotherString(i: String)
+                    fun create(): MyComponent2
+                }
+            }
+            @Component(isRoot = false)
+            interface SubComponent {
+                @Component.Builder interface Builder { fun create(): SubComponent }
+            }
+        """.trimIndent())
+
+        failsToCompile {
+            withError(formatMessage(
+                message = Errors.`conflicting bindings`(`for` = "@test.MyQualifier(named=@javax.inject.Named(\"hello\")) java.lang.Object"),
+                encounterPaths = listOf(
+                    listOf("test.MyComponent1"),
+                    listOf("test.MyComponent2"),
+                ),
+                notes = listOf(
+                    Strings.Notes.`duplicate binding`(binding = "@Provides test.MyModule::provideObject(): @test.MyQualifier(named=@javax.inject.Named(\"hello\")) java.lang.Object"),
+                    Strings.Notes.`duplicate binding`(binding = "@Provides test.MyModule::provideObject2(): @test.MyQualifier(named=@javax.inject.Named(\"hello\")) java.lang.Object"),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`conflicting bindings`(`for` = "test.MyComponent1"),
+                encounterPaths = listOf(listOf("test.MyComponent1")),
+                notes = listOf(
+                    Strings.Notes.`duplicate binding`(binding = "@Provides test.MyModule::c1(): test.MyComponent1"),
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.componentInstance("test.MyComponent1")),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`conflicting bindings`(`for` = "@javax.inject.Named(\"flag\") java.lang.Boolean"),
+                encounterPaths = listOf(listOf("test.MyComponent2")),
+                notes = listOf(
+                    Strings.Notes.`duplicate binding`(binding = "@Provides test.MyModule::bool(): @javax.inject.Named(\"flag\") java.lang.Boolean"),
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.instance("[setter] setFlag(@javax.inject.Named(\"flag\") java.lang.Boolean)")),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`conflicting bindings`(`for` = "test.Dependency"),
+                encounterPaths = listOf(listOf("test.MyComponent2")),
+                notes = listOf(
+                    Strings.Notes.`duplicate binding`(binding = "@Provides test.MyModule::dep(): test.Dependency"),
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.componentDependencyInstance("test.Dependency")),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`conflicting bindings`(`for` = "java.util.List<java.lang.Number>"),
+                encounterPaths = listOf(listOf("test.MyComponent2")),
+                notes = listOf(
+                    Strings.Notes.`duplicate binding`(binding = "@Provides test.MyModule2::numbers(): java.util.List<java.lang.Number>"),
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.instance("[setter] setNumbers(java.util.List<java.lang.Number>)")),
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.multibinding(
+                        elementType = "java.util.List<java.lang.Number>",
+                        contributions = listOf(
+                            "@Provides test.MyModule2::one(): java.lang.Number",
+                            "@Provides test.MyModule2::two(): java.lang.Number",
+                            "@Provides test.MyModule2::three(): java.lang.Number",
+                        ),
+                    )),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`conflicting bindings`(`for` = "test.SubComponent.Builder"),
+                encounterPaths = listOf(listOf("test.MyComponent2")),
+                notes = listOf(
+                    Strings.Notes.`duplicate binding`(binding = "@Provides test.MyModule2::builder(): test.SubComponent.Builder"),
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.subcomponentFactory("[creator] test.SubComponent.Builder")),
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`conflicting bindings`(`for` = "java.lang.String"),
+                encounterPaths = listOf(listOf("test.MyComponent2")),
+                notes = listOf(
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.componentDependencyEntryPoint(
+                        entryPoint = "test.Dependency::getMyString(): java.lang.String",
+                    )),
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.instance("[setter] withString(java.lang.String)")),
+                    Strings.Notes.`duplicate binding`(binding = Strings.Bindings.instance("[setter] withAnotherString(java.lang.String)")),
+                ),
+            ))
+            withNoMoreErrors()
+            withNoWarnings()
+        }
+    }
 }

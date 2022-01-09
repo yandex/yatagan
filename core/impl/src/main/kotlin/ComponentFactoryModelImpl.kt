@@ -107,7 +107,7 @@ internal class ComponentFactoryModelImpl private constructor(
         }
     }
 
-    override fun toString() = "[builder] $factoryDeclaration"
+    override fun toString() = "[creator] $factoryDeclaration"
 
     override fun validate(validator: Validator) {
         validator.child(asNode(), kind = Inline)

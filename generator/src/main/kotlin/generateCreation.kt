@@ -64,6 +64,7 @@ private class CreationGeneratorVisitor(
                 } else {
                     altBinding.generateAccess(builder = builder, inside = inside)
                     exhaustive = true
+                    break  // no further generation, the rest are (if any) unreachable.
                 }
             }
             if (!exhaustive) {

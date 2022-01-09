@@ -247,6 +247,8 @@ internal class AlternativesBindingImpl(
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitAlternatives(this)
     }
+
+    // TODO: issue warnings about unreachable alternatives
 }
 
 internal class ComponentDependencyEntryPointBindingImpl(
@@ -257,7 +259,7 @@ internal class ComponentDependencyEntryPointBindingImpl(
 ) : ComponentDependencyEntryPointBinding, BindingMixin {
     override fun dependencies() = listOf(NodeDependency(dependency.asNode()))
 
-    override fun toString() = "$getter from $dependency (intrinsic)"
+    override fun toString() = Strings.Bindings.componentDependencyEntryPoint(getter)
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentDependencyEntryPoint(this)
@@ -270,7 +272,7 @@ internal class ComponentInstanceBindingImpl(
     override val owner: BindingGraphImpl = graph
     override val target get() = owner.model.asNode()
 
-    override fun toString() = "Component instance $target (intrinsic)"
+    override fun toString() = Strings.Bindings.componentInstance(component = target)
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentInstance(this)
@@ -300,7 +302,7 @@ internal class SubComponentFactoryBindingImpl(
         VariantMatch(factory.createdComponent, owner.variant)
     }
 
-    override fun toString() = "Subcomponent factory $factory (intrinsic)"
+    override fun toString() = Strings.Bindings.subcomponentFactory(factory)
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitSubComponentFactory(this)
@@ -310,8 +312,8 @@ internal class SubComponentFactoryBindingImpl(
 internal class MultiBindingImpl(
     override val owner: BindingGraphImpl,
     override val target: NodeModel,
+    private val declaration: ListDeclarationModel?,
     contributions: Map<NodeModel, ContributionType>,
-    declaration: ListDeclarationModel?,
 ) : MultiBinding, BindingMixin {
     private val _contributions = contributions
     override val contributions: Map<NodeModel, ContributionType> by lazy(NONE) {
@@ -330,15 +332,18 @@ internal class MultiBindingImpl(
     override fun dependencies() = _contributions.keys.map(::NodeDependency)
     override val originModule: Nothing? get() = null
 
-    override fun toString() =
-        "MultiBinding $target of ${contributions.keys.take(3)}${if (contributions.size > 3) "..." else ""} (intrinsic)"
+    override fun toString() = Strings.Bindings.multibinding(
+        elementType = target,
+        declaration = declaration,
+        contributions = contributions.map { (node, _) -> owner.resolveRaw(node) }
+    )
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitMulti(this)
     }
 }
 
-internal class ModuleHostedEmptyBindingImpl(
+internal class ExplicitEmptyBindingImpl(
     override val impl: ModuleHostedBindingModel,
     override val owner: BindingGraphImpl,
 ) : EmptyBinding, BindingMixin, ModuleHostedMixin() {
@@ -356,7 +361,7 @@ internal class ComponentDependencyBindingImpl(
 ) : ComponentDependencyBinding, BindingMixin {
     override val target get() = dependency.asNode()
 
-    override fun toString() = "[dependency binding] $dependency"
+    override fun toString() = Strings.Bindings.componentDependencyInstance(dependency = dependency)
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentDependency(this)
@@ -366,9 +371,10 @@ internal class ComponentDependencyBindingImpl(
 internal class InstanceBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraphImpl,
+    private val origin: ComponentFactoryModel.InputModel,
 ) : InstanceBinding, BindingMixin {
 
-    override fun toString() = "[provided instance] $target"
+    override fun toString() = Strings.Bindings.instance(origin = origin)
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitInstance(this)
