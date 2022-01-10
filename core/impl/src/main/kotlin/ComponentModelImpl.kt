@@ -7,21 +7,24 @@ import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ComponentModel.EntryPoint
 import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings
+import com.yandex.daggerlite.validation.impl.Strings.Errors
+import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
 ) : ComponentModel, ConditionalHoldingModelImpl(declaration.conditionals) {
-    init {
-        require(canRepresent(declaration))
-    }
 
-    private val impl = declaration.componentAnnotationIfPresent!!
+    private val impl = declaration.componentAnnotationIfPresent
 
     override val type: TypeLangModel
         get() = declaration.asType()
@@ -34,18 +37,39 @@ internal class ComponentModelImpl private constructor(
     override val scope = declaration.annotations.find(AnnotationLangModel::isScope)
 
     override val modules: Set<ModuleModel> by lazy(NONE) {
-        impl.modules.map(TypeLangModel::declaration).map { ModuleModelImpl(it) }.toSet()
+        val seenModules = hashSetOf<ModuleModel>()
+        val moduleQueue: ArrayDeque<ModuleModel> = ArrayDeque(
+            impl?.modules?.map(TypeLangModel::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList())
+        while (moduleQueue.isNotEmpty()) {
+            val module = moduleQueue.removeFirst()
+            if (!seenModules.add(module)) {
+                continue
+            }
+            moduleQueue += module.includes
+        }
+        seenModules
     }
 
     override val dependencies: Set<ComponentDependencyModel> by lazy(NONE) {
-        impl.dependencies.map { ComponentDependencyModelImpl(it) }.toSet()
+        impl?.dependencies?.map { ComponentDependencyModelImpl(it) }?.toSet() ?: emptySet()
     }
 
     override val entryPoints: Set<EntryPoint> by lazy(NONE) {
+        class EntryPointImpl(
+            override val getter: FunctionLangModel,
+            override val dependency: NodeDependency,
+        ) : EntryPoint {
+            override fun validate(validator: Validator) {
+                validator.child(dependency.node)
+            }
+
+            override fun toString() = "[entry-point] ${getter.name}"
+        }
+
         declaration.allPublicFunctions.filter {
             it.isAbstract && it.parameters.none()
         }.map { function ->
-            EntryPoint(
+            EntryPointImpl(
                 dependency = NodeDependency(
                     type = function.returnType,
                     forQualifier = function,
@@ -66,19 +90,79 @@ internal class ComponentModelImpl private constructor(
     }
 
     override val factory: ComponentFactoryModel? by lazy(NONE) {
-        declaration.nestedInterfaces
+        declaration.nestedClasses
             .find { ComponentFactoryModelImpl.canRepresent(it) }?.let {
-                ComponentFactoryModelImpl(factoryDeclaration = it, createdComponent = this)
+                ComponentFactoryModelImpl(factoryDeclaration = it)
             }
     }
 
-    override val isRoot: Boolean = impl.isRoot
+    override val isRoot: Boolean = impl?.isRoot ?: false
 
     override val variant: Variant by lazy(NONE) {
-        VariantImpl(impl.variant)
+        VariantImpl(impl?.variant ?: emptySequence())
     }
 
-    override fun toString() = "Component[$declaration]"
+    override fun validate(validator: Validator) {
+        super.validate(validator)
+
+        for (module in modules) {
+            validator.child(module)
+        }
+        for (dependency in dependencies) {
+            validator.child(dependency)
+        }
+        for (entryPoint in entryPoints) {
+            validator.child(entryPoint)
+        }
+        for (memberInjector in memberInjectors) {
+            validator.child(memberInjector)
+        }
+        if (declaration.nestedClasses.count(ComponentFactoryModelImpl::canRepresent) > 1) {
+            validator.reportError(Errors.`multiple component creators`()) {
+                declaration.nestedClasses.filter(ComponentFactoryModelImpl::canRepresent).forEach {
+                    addNote(Strings.Notes.`conflicting component creator declared`(it))
+                }
+            }
+        }
+
+        factory?.let(validator::child)
+
+        for (function in declaration.allPublicFunctions) {
+            if (function.parameters.count() > 1) {
+                validator.reportError(Errors.`invalid method in component`(method = function))
+            }
+        }
+
+        if (impl == null) {
+            validator.reportError(Errors.`declaration is not annotated with @Component`())
+        }
+
+        if (!declaration.isInterface) {
+            validator.reportError(Errors.`component must be an interface`())
+        }
+
+        if (factory == null) {
+            if (!isRoot) {
+                validator.reportError(Errors.`missing component creator - non-root`())
+            }
+
+            if (dependencies.isNotEmpty()) {
+                validator.reportError(Errors.`missing component creator - dependencies`())
+            }
+
+            if (modules.any { it.requiresInstance && !it.isTriviallyConstructable }) {
+                validator.reportError(Errors.`missing component creator - modules`()) {
+                    modules.filter {
+                        it.requiresInstance && !it.isTriviallyConstructable
+                    }.forEach { module ->
+                        addNote(Strings.Notes.`missing module instance`(module))
+                    }
+                }
+            }
+        }
+    }
+
+    override fun toString() = declaration.toString()
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)

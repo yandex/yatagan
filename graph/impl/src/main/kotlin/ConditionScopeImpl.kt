@@ -6,11 +6,17 @@ import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.ConditionScope.Literal
+import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings.Errors
+import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal val ConditionScope.Companion.Unscoped get() = ConditionScopeImpl.Unscoped
@@ -31,7 +37,9 @@ private class ConditionScopeImpl(
     override val expression: Set<Set<Literal>>,
 ) : ConditionScope {
     override fun contains(another: ConditionScope): Boolean {
-        TODO("Required in validation step - implement later")
+        if (another === Unscoped) return true
+        if (this == another) return true
+        return solveContains(expression, another.expression)
     }
 
     override fun and(rhs: ConditionScope): ConditionScope {
@@ -74,6 +82,21 @@ private class ConditionScopeImpl(
     override val isNever: Boolean
         get() = this === NeverScoped || expression.singleOrNull()?.isEmpty() == true
 
+    override fun toString() = when (this) {
+        Unscoped -> "[unconditional]"
+        NeverScoped -> "[never-present]"
+        else -> expression.joinToString(prefix = "[", separator = " && ", postfix = "]") { clause ->
+            clause.singleOrNull()?.toString()
+                ?: clause.joinToString(prefix = "(", separator = " || ", postfix = ")")
+        }
+    }
+
+    override fun validate(validator: Validator) {
+        for (literal: Literal in expression.asSequence().flatten().toSet()) {
+            validator.child(literal)
+        }
+    }
+
     companion object {
         val Unscoped: ConditionScope = ConditionScopeImpl(emptySet())
         val NeverScoped: ConditionScope = ConditionScopeImpl(setOf(emptySet()))
@@ -94,74 +117,38 @@ private class ConditionLiteralImpl private constructor(
 
     override val root get() = payload.root
 
-    private class LiteralPayload private constructor(
-        val root: TypeDeclarationLangModel,
-        private val pathSource: String,
-    ) {
-        val path: List<MemberLangModel> by lazy(NONE) {
-            buildList {
-                var currentType = root.asType()
-                var finished = false
+    override fun validate(validator: Validator) {
+        validator.inline(payload)
+    }
 
-                pathSource.split('.').forEach { rawName ->
-                    check(!finished) { "Unable to reach boolean result with the given condition" }
-
-                    val member = checkNotNull(findAccessor(currentType.declaration, rawName)) {
-                        "Can't find accessible '$rawName' member in $currentType"
-                    }
-                    add(member)
-
-                    val type = when (member) {
-                        is FunctionLangModel -> member.returnType
-                        is FieldLangModel -> member.type
-                    }
-                    if (type.isBoolean) {
-                        finished = true
-                    } else {
-                        currentType = type
-                    }
-                }
-                check(finished) { "Unable to reach boolean result with the given condition" }
-            }
-        }
-
-        companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
-            operator fun invoke(root: TypeDeclarationLangModel, pathSource: String) : LiteralPayload {
-                return createCached(root, pathSource) {
-                    LiteralPayload(root, pathSource)
-                }
-            }
-
-            private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
-                val field = type.allPublicFields.find { it.name == name }
-                if (field != null) {
-                    return field
-                }
-
-                val allMethods = type.allPublicFunctions
-                val method = allMethods.find { function ->
-                    function.propertyAccessorInfo?.let {
-                        // If this is a kotlin property getter, then look for property name
-                        it.isGetter && it.propertyName == name
-                    } ?: (function.name == name)
-                }
-                if (method != null) {
-                    return method
-                }
-                return null
-            }
+    override fun toString(): String {
+        return buildString {
+            if (negated) append('!')
+            append(payload)
         }
     }
 
     companion object Factory : BiObjectCache<Boolean, LiteralPayload, ConditionLiteralImpl>() {
         operator fun invoke(model: ConditionAnnotationLangModel): Literal {
             val condition = model.condition
-            val matched = ConditionRegex.matchEntire(condition)
-                ?: throw RuntimeException("invalid condition $condition")
-            val (negate, names) = matched.destructured
-            return this(
-                negated = negate.isNotEmpty(),
-                payload = LiteralPayload(model.target.declaration, names),
+            return ConditionRegex.matchEntire(condition)?.let { matched ->
+                val (negate, names) = matched.destructured
+                this(
+                    negated = negate.isNotEmpty(),
+                    payload = LiteralPayloadImpl(model.target.declaration, names),
+                )
+            } ?: this(
+                negated = false,
+                payload = object : LiteralPayload {
+                    override val root: TypeDeclarationLangModel get() = LangModelFactory.errorType.declaration
+                    override val path: List<MemberLangModel> get() = emptyList()
+                    override fun validate(validator: Validator) {
+                        // Always invalid
+                        validator.reportError(Errors.`invalid condition`(expression = condition))
+                    }
+
+                    override fun toString() = "<invalid>"
+                }
             )
         }
 
@@ -173,5 +160,87 @@ private class ConditionLiteralImpl private constructor(
         }
 
         private val ConditionRegex = "^(!?)((?:[A-Za-z][A-Za-z0-9_]*\\.)*[A-Za-z][A-Za-z0-9_]*)\$".toRegex()
+    }
+}
+
+private interface LiteralPayload : MayBeInvalid {
+    val path: List<MemberLangModel>
+    val root: TypeDeclarationLangModel
+}
+
+private val MemberTypeVisitor = object : MemberLangModel.Visitor<TypeLangModel> {
+    override fun visitFunction(model: FunctionLangModel) = model.returnType
+    override fun visitField(model: FieldLangModel) = model.type
+}
+
+private class LiteralPayloadImpl private constructor(
+    override val root: TypeDeclarationLangModel,
+    private val pathSource: String,
+) : LiteralPayload {
+    private var pathParsingError: String? = null
+
+    override fun validate(validator: Validator) {
+        path  // Ensure path is parsed
+        pathParsingError?.let(validator::reportError)
+    }
+
+    override fun toString() = "$root.$pathSource"
+
+    override val path: List<MemberLangModel> by lazy(NONE) {
+        buildList {
+            var currentType = root.asType()
+            var finished = false
+
+            pathSource.split('.').forEach { name ->
+                if (finished) {
+                    pathParsingError = Errors.`invalid condition - unable to reach boolean`()
+                    return@forEach
+                }
+
+                val member = findAccessor(currentType.declaration, name)
+                if (member == null) {
+                    pathParsingError = Errors.`invalid condition - missing member`(name = name, type = currentType)
+                    return@forEach
+                }
+                add(member)
+
+                val type = member.accept(MemberTypeVisitor)
+                if (type.isBoolean) {
+                    finished = true
+                } else {
+                    currentType = type
+                }
+            }
+            if (!finished && pathParsingError == null) {
+                pathParsingError = Errors.`invalid condition - unable to reach boolean`()
+            }
+        }
+    }
+
+    companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
+        operator fun invoke(root: TypeDeclarationLangModel, pathSource: String) : LiteralPayload {
+            return createCached(root, pathSource) {
+                LiteralPayloadImpl(root, pathSource)
+            }
+        }
+
+        private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
+            val field = type.allPublicFields.find { it.name == name }
+            if (field != null) {
+                return field
+            }
+
+            val allMethods = type.allPublicFunctions
+            val method = allMethods.find { function ->
+                function.propertyAccessorInfo?.let {
+                    // If this is a kotlin property getter, then look for property name
+                    it.isGetter && it.propertyName == name
+                } ?: (function.name == name)
+            }
+            if (method != null) {
+                return method
+            }
+            return null
+        }
     }
 }

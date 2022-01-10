@@ -11,6 +11,7 @@ repositories {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + listOf(
+            "-Xjvm-default=all",
             "-Xopt-in=kotlin.RequiresOptIn",
             "-Xopt-in=kotlin.ExperimentalStdlibApi",
             "-Xopt-in=kotlin.contracts.ExperimentalContracts",
@@ -18,12 +19,15 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-val kotlinVersion by extra(properties["daggerlite.kotlin.version"])
-val kspVersion by extra("$kotlinVersion-1.0.0")
+val kotlinVersion: String by extra(
+    providers.fileContents(rootProject.layout.projectDirectory.file("kotlin.version"))
+        .asText.forUseAtConfigurationTime().get().trimEnd()
+)
+val kspVersion by extra("$kotlinVersion-1.0.2")
 val javaPoetVersion by extra("1.13.0")
-val kotlinCompileTestingVersion by extra("1.4.5")
+val kotlinCompileTestingVersion by extra("1.4.7")
 val autoCommonVersion by extra("1.2.1")
-val kotlinxMetadataVersion by extra("0.3.0")
+val kotlinxMetadataVersion by extra("0.4.0")
 
 java {
     toolchain {

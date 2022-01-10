@@ -10,6 +10,7 @@ import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.generator.lang.ArrayNameModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
+import com.yandex.daggerlite.generator.lang.ErrorNameModel
 import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
 import com.yandex.daggerlite.generator.lang.WildcardNameModel
@@ -25,10 +26,12 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.ErrorType
 import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.PrimitiveType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
+import javax.lang.model.type.TypeVisitor
 import javax.lang.model.type.WildcardType
 import javax.lang.model.util.Elements
 import javax.lang.model.util.SimpleAnnotationValueVisitor8
@@ -78,12 +81,9 @@ internal fun <R> AnnotationValue.accept(visitor: AnnotationValueVisitor<R, Unit>
  */
 private const val ERROR_TYPE_STRING = "<error>"
 
-// TODO: handle it somewhere to defer element processing
-internal class ErrorTypeException : RuntimeException()
-
 private abstract class ExtractingVisitor<T : Any> : SimpleAnnotationValueVisitor8<T, Unit>() {
     final override fun defaultAction(unexpected: Any?, void: Unit) =
-        throw AssertionError("Unexpected annotation value: $unexpected")
+        throw AssertionError("Not reached: unexpected annotation value: $unexpected")
 }
 
 private object AsBoolean : ExtractingVisitor<Boolean>() {
@@ -92,9 +92,9 @@ private object AsBoolean : ExtractingVisitor<Boolean>() {
 
 private object AsType : ExtractingVisitor<TypeMirror>() {
     override fun visitType(typeMirror: TypeMirror, void: Unit) = typeMirror
-    override fun visitString(maybeError: String?, void: Unit) = throw when (maybeError) {
-        ERROR_TYPE_STRING -> ErrorTypeException()
-        else -> AssertionError(maybeError)
+    override fun visitString(maybeError: String?, void: Unit) = when (maybeError) {
+        ERROR_TYPE_STRING -> ErrorTypeImpl
+        else -> throw AssertionError("Not reached: expected type, got: $maybeError")
     }
 }
 
@@ -191,7 +191,8 @@ internal fun CtTypeNameModel(type: TypeMirror): CtTypeNameModel {
 
         TypeKind.ARRAY -> ArrayNameModel(CtTypeNameModel(type.asArrayType().componentType))
 
-        TypeKind.NULL, TypeKind.ERROR, TypeKind.TYPEVAR -> TODO("Consider supporting these?")
+        TypeKind.ERROR -> ErrorNameModel("unresolved")
+        TypeKind.TYPEVAR -> ErrorNameModel("unsubstituted-type-var")
 
         else -> throw AssertionError("Not reached: unexpected type: $type")
     }
@@ -215,6 +216,20 @@ internal fun parametersSequenceFor(
     val types = element.asMemberOf(asMemberOf).asExecutableType().parameterTypes
     for (i in parameters.indices) {
         yield(JavaxParameterImpl(impl = parameters[i], refinedType = types[i]))
+    }
+}
+
+internal object ErrorTypeImpl : ErrorType {
+    override fun getAnnotationMirrors(): List<AnnotationMirror> = emptyList()
+    override fun getKind(): TypeKind = TypeKind.ERROR
+    override fun <A : Annotation?> getAnnotation(clazz: Class<A>) = throw UnsupportedOperationException()
+    override fun <A : Annotation?> getAnnotationsByType(clazz: Class<A>) = throw UnsupportedOperationException()
+    override fun asElement() = throw UnsupportedOperationException()
+    override fun getEnclosingType(): TypeMirror = Utils.types.getNoType(TypeKind.NONE)
+    override fun getTypeArguments(): List<TypeMirror> = emptyList()
+
+    override fun <R : Any?, P : Any?> accept(visitor: TypeVisitor<R, P>, param: P): R {
+        return visitor.visitError(this, param)
     }
 }
 

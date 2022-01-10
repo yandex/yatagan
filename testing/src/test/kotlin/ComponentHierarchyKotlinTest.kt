@@ -388,7 +388,7 @@ class ComponentHierarchyKotlinTest(
             }
             
             fun test() {
-                val c = DaggerApplicationComponent()
+                val c = DaggerApplicationComponent.create()
                 val settingsActivityFragmentModule = SettingsActivityFragmentModule(SettingsActivity())
                 
                 val mainActivityC = c.mainActivity.create()

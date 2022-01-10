@@ -43,6 +43,10 @@ interface FunctionLangModel : MemberLangModel, CallableLangModel {
      */
     val propertyAccessorInfo: PropertyAccessorInfo?
 
+    override fun <R> accept(visitor: MemberLangModel.Visitor<R>): R {
+        return visitor.visitFunction(this)
+    }
+
     interface PropertyAccessorInfo {
         /**
          * Name of the property that the accessor corresponds to.

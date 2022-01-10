@@ -45,24 +45,25 @@ internal class ConditionGenerator(
                 initializer {
                     if (literal.negated) +"!"
                     val rootType = literal.root.asType()
-                    literal.path.first().let { member ->
-                        val kotlinObjectKind = rootType.declaration.kotlinObjectKind
-                        when {
-                            kotlinObjectKind == KotlinObjectKind.Object -> {
-                                +"%T.INSTANCE.%N".formatCode(rootType.typeName(), member.name)
+                    literal.path.asSequence().forEachIndexed { index, member ->
+                        if (index == 0) {
+                            val kotlinObjectKind = rootType.declaration.kotlinObjectKind
+                            when {
+                                kotlinObjectKind == KotlinObjectKind.Object -> {
+                                    +"%T.INSTANCE.%N".formatCode(rootType.typeName(), member.name)
+                                }
+                                kotlinObjectKind == KotlinObjectKind.Companion || member.isStatic -> {
+                                    +"%T.%N".formatCode(rootType.typeName(), member.name)
+                                }
+                                else -> throw IllegalStateException(
+                                    "Member '${member.name}' in $rootType must be accessible from the static context"
+                                )
                             }
-                            kotlinObjectKind == KotlinObjectKind.Companion || member.isStatic -> {
-                                +"%T.%N".formatCode(rootType.typeName(), member.name)
-                            }
-                            else -> throw IllegalStateException(
-                                "Member '${member.name}' in $rootType must be accessible from the static context"
-                            )
+                            if (member is FunctionLangModel) +"()"
+                        } else {
+                            +".%N".formatCode(member.name)
+                            if (member is FunctionLangModel) +"()"
                         }
-                        if (member is FunctionLangModel) +"()"
-                    }
-                    literal.path.asSequence().drop(1).forEach { member ->
-                        +".%N".formatCode(member.name)
-                        if (member is FunctionLangModel) +"()"
                     }
                 }
             }

@@ -26,7 +26,7 @@ class CoreBindingsTest(
                 "test.MyScopedClass", """
             import javax.inject.Inject;
             import javax.inject.Singleton;
-
+            
             @Singleton public class MyScopedClass {
                 @Inject public MyScopedClass() {}
             }
@@ -125,7 +125,7 @@ class CoreBindingsTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.get() is Impl)
             }
         """.trimIndent()
@@ -175,7 +175,7 @@ class CoreBindingsTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.get() is Impl)
             }
         """
@@ -227,7 +227,7 @@ class CoreBindingsTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.get() is Impl)
             }
         """

@@ -35,6 +35,6 @@ internal fun topologicalSort(
         visit(node)
     }
 
-    check(remainingNodes.isEmpty())
+    check(remainingNodes.isEmpty()) { "Not reached" }
     return result
 }

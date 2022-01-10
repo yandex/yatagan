@@ -65,7 +65,7 @@ private fun jvmDescriptorOf(type: TypeMirror): String {
             TypeKind.LONG -> "J"
             TypeKind.SHORT -> "S"
             TypeKind.BOOLEAN -> "Z"
-            else -> throw IllegalStateException("not a primitive type ${type.kind}")
+            else -> throw AssertionError("Not reached: not a primitive type ${type.kind}")
         }
         is DeclaredType -> {
             val internalName = when (val element = type.asElement()) {
@@ -74,6 +74,6 @@ private fun jvmDescriptorOf(type: TypeMirror): String {
             }
             return "L$internalName;"
         }
-        else -> throw UnsupportedOperationException("Unsupported type for jvm-signature: $type")
+        else -> throw AssertionError("Not reached: unsupported type for jvm-signature: $type")
     }
 }

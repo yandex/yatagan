@@ -10,10 +10,10 @@ import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import javax.lang.model.element.Modifier.PRIVATE
 
 internal class MultiBindingGenerator(
-    private val multiBindings: Collection<MultiBinding>,
     methodNs: Namespace,
     private val thisGraph: BindingGraph,
 ) : ComponentGenerator.Contributor {
+    private val multiBindings = thisGraph.localBindings.keys.filterIsInstance<MultiBinding>()
     private val accessors = multiBindings.associateWith { methodNs.name(it.target.name) }
 
     fun generateCreation(builder: ExpressionBuilder, binding: MultiBinding, inside: BindingGraph) {

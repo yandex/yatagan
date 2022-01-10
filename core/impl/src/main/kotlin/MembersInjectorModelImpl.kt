@@ -7,6 +7,9 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isGetter
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings
+import com.yandex.daggerlite.validation.impl.reportError
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -17,7 +20,7 @@ internal class MembersInjectorModelImpl private constructor(
         require(canRepresent(injector))
     }
 
-    override val injectee = injector.parameters.single().type
+    private val injectee = injector.parameters.single().type
 
     override val membersToInject: Map<MemberLangModel, NodeDependency> by lazy(NONE) {
         buildMap {
@@ -39,6 +42,17 @@ internal class MembersInjectorModelImpl private constructor(
             }
         }
     }
+
+    override fun validate(validator: Validator) {
+        membersToInject.forEach { (_, dependency) ->
+            validator.child(dependency.node)
+        }
+        if (!injector.returnType.isVoid) {
+            validator.reportError(Strings.Errors.`non-void injector method return type`())
+        }
+    }
+
+    override fun toString() = "[injector-fun] ${injector.name}"
 
     companion object Factory : ObjectCache<FunctionLangModel, MembersInjectorModelImpl>() {
         operator fun invoke(injector: FunctionLangModel) = createCached(injector, ::MembersInjectorModelImpl)

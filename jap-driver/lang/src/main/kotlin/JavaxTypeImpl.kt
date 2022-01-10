@@ -36,9 +36,16 @@ internal class JavaxTypeImpl private constructor(
     }
 
     override val typeArguments: Collection<TypeLangModel> by lazy(NONE) {
-        when(impl.kind) {
+        when (impl.kind) {
             TypeKind.DECLARED -> impl.asDeclaredType().typeArguments.map { Factory(decay(it)) }
             else -> emptyList()
+        }
+    }
+
+    override fun isAssignableFrom(another: TypeLangModel): Boolean {
+        return when (another) {
+            is JavaxTypeImpl -> Utils.types.isAssignable(another.impl, impl)
+            else -> false
         }
     }
 

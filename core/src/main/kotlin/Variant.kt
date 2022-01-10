@@ -1,12 +1,14 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.validation.MayBeInvalid
+
 /**
  * TODO: doc.
  */
-interface Variant {
-    interface DimensionModel : ClassBackedModel
+interface Variant : MayBeInvalid {
+    interface DimensionModel : ClassBackedModel, MayBeInvalid
 
-    interface FlavorModel : ClassBackedModel {
+    interface FlavorModel : ClassBackedModel, MayBeInvalid {
         val dimension: DimensionModel
     }
 

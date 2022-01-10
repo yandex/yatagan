@@ -2,13 +2,14 @@ package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
  * Represents @[com.yandex.daggerlite.Component] annotated class - Component.
  */
-interface ComponentModel : ClassBackedModel, ConditionalHoldingModel {
+interface ComponentModel : ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
     /**
-     * A set of all modules that are included into the component.
+     * A set of *all* modules that are included into the component (transitively).
      */
     val modules: Set<ModuleModel>
 
@@ -49,16 +50,11 @@ interface ComponentModel : ClassBackedModel, ConditionalHoldingModel {
     val variant: Variant
 
     /**
-     * Yields this component as graph node.
-     */
-    fun asNode(): NodeModel
-
-    /**
      * Represents a function/property exposed from a component interface.
      * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
      */
-    data class EntryPoint(
-        val getter: FunctionLangModel,
-        val dependency: NodeDependency,
-    )
+    interface EntryPoint : MayBeInvalid {
+        val getter: FunctionLangModel
+        val dependency: NodeDependency
+    }
 }

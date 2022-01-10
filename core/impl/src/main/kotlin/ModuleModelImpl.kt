@@ -10,28 +10,25 @@ import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isKotlinObject
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.impl.Strings.Errors
+import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ModuleModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
 ) : ModuleModel {
-    init {
-        require(canRepresent(declaration)) {
-            "$declaration is not a Dagger Lite Module"
-        }
-    }
-
-    private val impl = declaration.moduleAnnotationIfPresent!!
+    private val impl = declaration.moduleAnnotationIfPresent
 
     override val type: TypeLangModel
         get() = declaration.asType()
 
     override val includes: Collection<ModuleModel> by lazy(NONE) {
-        impl.includes.map(TypeLangModel::declaration).map(Factory::invoke).toSet()
+        impl?.includes?.map(TypeLangModel::declaration)?.map(Factory::invoke)?.toSet() ?: emptySet()
     }
 
     override val subcomponents: Collection<ComponentModel> by lazy(NONE) {
-        impl.subcomponents.map(TypeLangModel::declaration).map { ComponentModelImpl(it) }.toSet()
+        impl?.subcomponents?.map(TypeLangModel::declaration)?.map { ComponentModelImpl(it) }?.toSet() ?: emptySet()
     }
 
     override val listDeclarations: Sequence<ListDeclarationModel> =
@@ -65,10 +62,22 @@ internal class ModuleModelImpl private constructor(
         }
     }.memoize()
 
-    override fun toString() = "Module[$declaration]"
+    override fun toString() = declaration.toString()
 
     internal val mayRequireInstance by lazy(NONE) {
         !declaration.isAbstract && !declaration.isKotlinObject
+    }
+
+    override fun validate(validator: Validator) {
+        if (impl == null) {
+            validator.reportError(Errors.`declaration is not annotated with @Module`())
+        }
+        for (binding in bindings) {
+            validator.child(binding)
+        }
+        for (module in includes) {
+            validator.child(module)
+        }
     }
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ModuleModelImpl>() {

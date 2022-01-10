@@ -1,13 +1,13 @@
 package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.LangModelFactory
+import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
  * Represents a node in a Dagger Graph, that can be resolved.
  * Basically, it's a type with some other information to fine tune resolution.
  */
-interface NodeModel : ClassBackedModel {
+interface NodeModel : ClassBackedModel, MayBeInvalid {
     /**
      * Optional qualifier.
      * An opaque object representing additional qualifier information that can help to disambiguate nodes with the
@@ -23,5 +23,24 @@ interface NodeModel : ClassBackedModel {
     /**
      * TODO: doc.
      */
-    fun multiBoundListNode(langModelFactory: LangModelFactory): NodeModel
+    fun multiBoundListNode(): NodeModel
+
+    /**
+     * What specific core-level model the node represents. `null` if none.
+     */
+    val superModel: HasNodeModel?
+
+    /**
+     * Returns a node that is equal to this one without qualifier.
+     *
+     * @return the same node only with [qualifier] = `null`.
+     * If `this` node already has no qualifier, `this` is returned.
+     */
+    fun dropQualifier(): NodeModel
+
+    /**
+     * `true` if such node can not be satisfied by definition for whatever reason, e.g. framework type.
+     * `false` for any normal node.
+     */
+    val hintIsFrameworkType: Boolean
 }

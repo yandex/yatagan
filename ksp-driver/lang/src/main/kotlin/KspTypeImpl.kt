@@ -13,6 +13,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspTypeImpl private constructor(
     val impl: KSType,
     private val jvmType: JvmTypeInfo,
+    private val varianceAsWildcard: Boolean,
 ) : CtTypeLangModel {
 
     override val nameModel: CtTypeNameModel by lazy(NONE) {
@@ -42,6 +43,13 @@ internal class KspTypeImpl private constructor(
     override val isVoid: Boolean
         get() = jvmType == JvmTypeInfo.Void || impl == Utils.resolver.builtIns.unitType
 
+    override fun isAssignableFrom(another: TypeLangModel): Boolean {
+        return when (another) {
+            is KspTypeImpl -> impl.isAssignableFrom(another.impl)
+            else -> false
+        }
+    }
+
     override fun toString() = nameModel.toString()
 
     override fun decay(): TypeLangModel {
@@ -50,7 +58,7 @@ internal class KspTypeImpl private constructor(
             JvmTypeInfo.Boolean, JvmTypeInfo.Byte, JvmTypeInfo.Char, JvmTypeInfo.Double,
             JvmTypeInfo.Float, JvmTypeInfo.Int, JvmTypeInfo.Long, JvmTypeInfo.Short,
             JvmTypeInfo.Declared,
-            -> Factory(impl = impl.makeNotNullable())
+            -> Factory(impl = impl.makeNotNullable(), varianceAsWildcard = varianceAsWildcard)
             is JvmTypeInfo.Array -> Factory(impl = when (jvmType.elementInfo) {
                 JvmTypeInfo.Declared -> {
                     // Make array's element type also not-nullable
@@ -81,6 +89,7 @@ internal class KspTypeImpl private constructor(
                 KspTypeImpl(
                     impl = mappedType,
                     jvmType = jvmTypeKind,
+                    varianceAsWildcard = varianceAsWildcard,
                 )
             }
         }
@@ -97,7 +106,7 @@ internal class KspTypeImpl private constructor(
                 'Z' -> JvmTypeInfo.Boolean
                 '[' -> JvmTypeInfo.Array(elementInfo = parseJvmSignature(
                     jvmSignatureHint = jvmSignatureHint.subSequence(startIndex = 1, endIndex = jvmSignatureHint.length),
-                    typeSupplier = { typeSupplier().arguments.first().type!!.resolve() },
+                    typeSupplier = { typeSupplier().arguments.first().type.resolveOrError() },
                 ))
                 'L' -> JvmTypeInfo.Declared
                 'V' -> JvmTypeInfo.Void

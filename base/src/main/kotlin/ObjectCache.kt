@@ -23,7 +23,7 @@ abstract class ObjectCache<K, V : Any> : ObjectCacheBase() {
         return cache.getOrPut(key) { block(key) }
     }
 
-    override fun clear() {
+    final override fun clear() {
         cache.clear()
     }
 }

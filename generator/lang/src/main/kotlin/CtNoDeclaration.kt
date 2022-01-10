@@ -10,16 +10,18 @@ class CtNoDeclaration private constructor(
     private val type: CtTypeLangModel,
 ) : CtTypeDeclarationLangModel() {
     override val isAbstract get() = false
+    override val isInterface get() = false
 
     override val annotations get() = emptySequence<Nothing>()
     override val implementedInterfaces get() = emptySequence<Nothing>()
     override val constructors get() = emptySequence<Nothing>()
     override val allPublicFunctions get() = emptySequence<Nothing>()
     override val allPublicFields get() = emptySequence<Nothing>()
-    override val nestedInterfaces get() = emptySequence<Nothing>()
+    override val nestedClasses get() = emptySequence<Nothing>()
     override val conditions get() = emptySequence<Nothing>()
     override val conditionals get() = emptySequence<Nothing>()
 
+    override val enclosingType: Nothing? get() = null
     override val kotlinObjectKind: Nothing? get() = null
     override val componentAnnotationIfPresent: Nothing? get() = null
     override val moduleAnnotationIfPresent: Nothing? get() = null

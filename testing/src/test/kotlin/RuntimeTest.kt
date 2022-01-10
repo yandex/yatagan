@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.validation.impl.Strings
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -40,7 +41,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.simple().value == "simple")
                 assert(c.one().value == "one")
                 assert(c.two().value == "two")
@@ -103,7 +104,7 @@ class RuntimeTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.hello().value == "hello")
                 assert(c.bye().value == "bye")
                 assert(c.foo().value == "foo")
@@ -143,7 +144,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(c.impl().value == 1)
                 assert(c.wrapper().i.value == 2)
             }
@@ -152,7 +153,15 @@ class RuntimeTest(
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
-            withNoWarnings()
+            withWarning(Strings.formatMessage(
+                message = Strings.Warnings.`custom binding shadow @Inject constructor`(
+                    target = "test.Wrapper", binding = "@Provides test.MyModule::wrapper(): test.Wrapper",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] wrapper", "@Provides test.MyModule::wrapper(): test.Wrapper")
+                ),
+            ))
+            withNoMoreWarnings()
             inspectGeneratedClass("test.TestCaseKt") { tc ->
                 tc["test"](null)
             }

@@ -3,18 +3,26 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getJavaClassByName
 import com.google.devtools.ksp.isConstructor
+import com.google.devtools.ksp.isOpen
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.symbol.ClassKind
+import com.google.devtools.ksp.symbol.FunctionKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeParameter
+import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.KSVisitor
+import com.google.devtools.ksp.symbol.Location
 import com.google.devtools.ksp.symbol.Modifier
+import com.google.devtools.ksp.symbol.NonExistLocation
+import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.base.memoize
@@ -44,10 +52,16 @@ internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): 
 
 internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers || isAnnotationPresent<JvmStatic>()
 
+internal val KSFunctionDeclaration.isStatic get() = functionKind == FunctionKind.STATIC
+
 internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT
 
 internal val KSPropertyDeclaration.isField
     get() = origin == Origin.JAVA || origin == Origin.JAVA_LIB || isAnnotationPresent<JvmField>()
+
+internal fun KSTypeReference?.resolveOrError(): KSType {
+    return this?.resolve() ?: ErrorTypeImpl
+}
 
 private fun mapToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
     if (!declaration.packageName.asString().startsWith("kotlin")) {
@@ -60,6 +74,7 @@ private fun mapToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassD
 
 internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean = false): KSType {
     // MAYBE: Perf: implement caching for non-trivial mappings?
+    if (type.isError) return type
     val originalDeclaration = type.declaration as? KSClassDeclaration ?: return type
     val mappedDeclaration = mapToJavaPlatformIfNeeded(declaration = originalDeclaration)
     if (mappedDeclaration == originalDeclaration && type.arguments.isEmpty()) {
@@ -73,10 +88,15 @@ internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean
                 type = originalArgType,
                 varianceAsWildcard = varianceAsWildcard,
             )
+            // TODO: Use `Utils.resolver.getJavaWildcard()` on reference
             return Utils.resolver.getTypeArgument(
                 typeRef = Utils.resolver.createKSTypeReferenceFromKSType(mappedArgType),
                 variance = if (varianceAsWildcard) {
-                    mergeVariance(declarationSite = param.variance, useSite = arg.variance)
+                    mergeVariance(
+                        declarationSite = param.variance,
+                        useSite = arg.variance,
+                        isTypeOpen = { mappedArgType.declaration.isOpen() },
+                    )
                 } else {
                     if (param.variance == arg.variance) {
                         // redundant projection
@@ -87,15 +107,20 @@ internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean
                 },
             )
         })
-    return mappedDeclaration.asType(mappedArguments)
+    return try {
+        mappedDeclaration.asType(mappedArguments)
+    } catch (e: ClassCastException) {
+        // fixme: think of a better way to handle it
+        type  // Internal KSP error, likely due to an ErrorType in mappedArguments, so return unmapped type.
+    }
 }
 
 private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     val packageName = declaration.packageName.asString()
     return ClassNameModel(
         packageName = packageName,
-        simpleNames = declaration.qualifiedName!!.asString().substring(startIndex = packageName.length + 1)
-            .split('.'),
+        simpleNames = declaration.qualifiedName?.asString()?.substring(startIndex = packageName.length + 1)
+            ?.split('.') ?: listOf("<unnamed>"),
     )
 }
 
@@ -140,7 +165,7 @@ internal fun CtTypeNameModel(
             val declaration = type.declaration as KSClassDeclaration
             val raw = ClassNameModel(declaration)
             val typeArguments = type.arguments.map { argument ->
-                fun argType() = argument.type!!.resolve()
+                fun argType() = argument.type.resolveOrError()
                 when (argument.variance) {
                     Variance.STAR -> WildcardNameModel.Star
                     Variance.INVARIANT -> CtTypeNameModel(argType())
@@ -155,7 +180,7 @@ internal fun CtTypeNameModel(
         is JvmTypeInfo.Array -> {
             return ArrayNameModel(
                 elementType = CtTypeNameModel(
-                    typeSupplier = { typeSupplier().arguments.first().type!!.resolve() },
+                    typeSupplier = { typeSupplier().arguments.first().type.resolveOrError() },
                     jvmTypeKind = jvmTypeKind.elementInfo,
                 )
             )
@@ -163,40 +188,60 @@ internal fun CtTypeNameModel(
     }
 }
 
-private fun mergeVariance(declarationSite: Variance, useSite: Variance): Variance {
+private inline fun mergeVariance(declarationSite: Variance, useSite: Variance, isTypeOpen: () -> Boolean): Variance {
     return when (declarationSite) {
         Variance.INVARIANT -> useSite
         Variance.COVARIANT -> when (useSite) {
-            Variance.INVARIANT -> Variance.COVARIANT
-            Variance.COVARIANT -> Variance.COVARIANT
-            Variance.CONTRAVARIANT -> throw IllegalArgumentException("variance conflict: covariant vs contravariant")
+            Variance.INVARIANT -> if (isTypeOpen()) Variance.COVARIANT else Variance.INVARIANT
+            Variance.COVARIANT -> if (isTypeOpen()) Variance.COVARIANT else Variance.INVARIANT
+            Variance.CONTRAVARIANT -> throw AssertionError("Not reached: variance conflict: covariant vs contravariant")
             Variance.STAR -> Variance.STAR
         }
         Variance.CONTRAVARIANT -> when (useSite) {
             Variance.INVARIANT -> Variance.CONTRAVARIANT
             Variance.CONTRAVARIANT -> Variance.CONTRAVARIANT
-            Variance.COVARIANT -> throw IllegalArgumentException("variance conflict: contravariant vs covariant")
+            Variance.COVARIANT -> throw AssertionError("Not reached: variance conflict: contravariant vs covariant")
             Variance.STAR -> Variance.STAR
         }
-        Variance.STAR -> throw IllegalArgumentException("'*' (star) is not a valid declaration-site variance")
+        Variance.STAR -> throw AssertionError("Not reached: '*' (star) is not a valid declaration-site variance")
     }
 }
 
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
     declarations.filterIsInstance<KSClassDeclaration>().find(KSClassDeclaration::isCompanionObject)
 
-internal fun KSClassDeclaration.allPublicFunctions(): Sequence<KSFunctionDeclaration> {
-    return sequenceOf(
-        getAllFunctions(),
-        getDeclaredFunctions().filter { Modifier.JAVA_STATIC in it.modifiers },
-    ).flatten().filter { it.isPublic() && !it.isConstructor() }
+internal fun KSClassDeclaration.allPublicFunctions(): Sequence<KSFunctionDeclaration> = sequence {
+    if (classKind == ClassKind.INTERFACE) {
+        for (function in getAllFunctions()) {
+            when(function.simpleName.asString()) {
+                // This is necessary to drop `equals`, `hashCode`, `toString` from `Any`.
+                // KSP implicitly adds them to the interface functions for some reason.
+                // TODO: invent something more subtle
+                "equals", "hashCode", "toString" -> Unit
+                else -> yield(function)
+            }
+        }
+    } else {
+        // For non-interface, return everything public, except constructors.
+        for (function in getAllFunctions()) {
+            if (!function.isConstructor() && function.isPublic()) {
+                yield(function)
+            }
+        }
+    }
+    // Yield all declared static functions
+    for (declaredFunction in getDeclaredFunctions()) {
+        if (declaredFunction.functionKind == FunctionKind.STATIC) {
+            yield(declaredFunction)
+        }
+    }
 }
 
 internal fun KSClassDeclaration.allPublicProperties(): Sequence<KSPropertyDeclaration> {
     return getAllProperties().filter(KSPropertyDeclaration::isPublic)
 }
 
-internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map(::KspAnnotationImpl).memoize()
+internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map { KspAnnotationImpl(it) }.memoize()
 
 internal fun parametersSequenceFor(
     declaration: KSFunctionDeclaration,
@@ -209,7 +254,7 @@ internal fun parametersSequenceFor(
         yield(KspParameterImpl(
             impl = parameters[i],
             jvmSignatureSupplier = { jvmMethodSignature.parameterTypes?.get(i) },
-            refinedType = types[i]!!,
+            refinedType = types[i] ?: ErrorTypeImpl,
         ))
     }
 }
@@ -242,5 +287,60 @@ internal class JvmMethodSignature(
     companion object {
         private val MethodSignatureRegex = """^\((.*)\)(.*)$""".toRegex()
         private val ParamSignatureRegex = """\[*(?:B|C|D|F|I|J|S|Z|L.*?;)""".toRegex()
+    }
+}
+
+internal object ErrorTypeImpl : KSType {
+    override val annotations get() = emptySequence<Nothing>()
+    override val arguments get() = emptyList<Nothing>()
+    override val declaration: KSDeclaration get() = ErrorDeclarationImpl
+    override val isError: Boolean get() = true
+    override val isFunctionType: Boolean get() = false
+    override val isMarkedNullable: Boolean get() = false
+    override val isSuspendFunctionType: Boolean get() = false
+    override val nullability: Nullability get() = Nullability.NOT_NULL
+    override fun isAssignableFrom(that: KSType): Boolean = false
+    override fun isCovarianceFlexible(): Boolean = false
+    override fun isMutabilityFlexible(): Boolean = false
+    override fun makeNotNullable(): KSType = this
+    override fun makeNullable(): KSType = this
+    override fun replace(arguments: List<KSTypeArgument>): KSType = this
+    override fun starProjection(): KSType = this
+}
+
+private object ErrorDeclarationImpl : KSClassDeclaration {
+    override val annotations get() = emptySequence<Nothing>()
+    override val classKind: ClassKind get() = ClassKind.CLASS
+    override val containingFile: Nothing? get() = null
+    override val declarations get() = emptySequence<Nothing>()
+    override val docString: Nothing? get() = null
+    override val isActual: Boolean get() = false
+    override val isCompanionObject: Boolean get() = false
+    override val isExpect: Boolean get() = false
+    override val location: Location get() = NonExistLocation
+    override val modifiers: Set<Modifier> get() = emptySet()
+    override val origin: Origin get() = Origin.SYNTHETIC
+    override val packageName: KSName get() = Utils.resolver.getKSNameFromString("")
+    override val parent: Nothing? get() = null
+    override val parentDeclaration: Nothing? get() = null
+    override val primaryConstructor: Nothing? get() = null
+    override val qualifiedName: Nothing? get() = null
+    override val simpleName: KSName get() = Utils.resolver.getKSNameFromString("<Error>")
+    override val superTypes get() = emptySequence<Nothing>()
+    override val typeParameters get() = emptyList<Nothing>()
+    override fun asStarProjectedType() = ErrorTypeImpl
+    override fun findActuals() = emptySequence<Nothing>()
+    override fun findExpects() = emptySequence<Nothing>()
+    override fun getAllFunctions() = emptySequence<Nothing>()
+    override fun getAllProperties() = emptySequence<Nothing>()
+    override fun getSealedSubclasses() = emptySequence<Nothing>()
+
+    override fun <D, R> accept(visitor: KSVisitor<D, R>, data: D): R {
+        return visitor.visitClassDeclaration(this, data)
+    }
+
+    override fun asType(typeArguments: List<KSTypeArgument>): KSType {
+        check(typeArguments.isEmpty()) { "Not reached" }
+        return ErrorTypeImpl
     }
 }

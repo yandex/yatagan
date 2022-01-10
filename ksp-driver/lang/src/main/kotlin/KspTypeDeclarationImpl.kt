@@ -30,6 +30,9 @@ internal class KspTypeDeclarationImpl private constructor(
 
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
 
+    override val isInterface: Boolean
+        get() = impl.classKind == ClassKind.INTERFACE
+
     override val isAbstract: Boolean
         get() = impl.isAbstract()
 
@@ -41,7 +44,10 @@ internal class KspTypeDeclarationImpl private constructor(
         }
 
     override val qualifiedName: String
-        get() = impl.qualifiedName!!.asString()
+        get() = impl.qualifiedName?.asString() ?: ""
+
+    override val enclosingType: TypeDeclarationLangModel?
+        get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { Factory(it.asType(emptyList())) }
 
     override val implementedInterfaces: Sequence<TypeLangModel> = sequence {
         val queue = ArrayDeque<Sequence<KSTypeReference>>()
@@ -99,9 +105,8 @@ internal class KspTypeDeclarationImpl private constructor(
     override val allPublicFields: Sequence<FieldLangModel> =
         impl.getDeclaredProperties().filter(KSPropertyDeclaration::isField).map { KspFieldImpl(it, this) }.memoize()
 
-    override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.declarations
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> = impl.declarations
         .filterIsInstance<KSClassDeclaration>()
-        .filter { it.classKind == ClassKind.INTERFACE }
         .map { Factory(it.asType(emptyList())) }
         .memoize()
 

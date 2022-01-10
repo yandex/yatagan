@@ -5,6 +5,11 @@ package com.yandex.daggerlite.core.lang
  */
 interface TypeDeclarationLangModel : AnnotatedLangModel {
     /**
+     * Whether the declaration is an interface.
+     */
+    val isInterface: Boolean
+
+    /**
      * Whether the declaration is abstract (abstract class or interface).
      */
     val isAbstract: Boolean
@@ -18,6 +23,11 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
      * Qualified/Canonical name of the represented class from the Java point of view.
      */
     val qualifiedName: String
+
+    /**
+     * If this declaration is nested, returns enclosing declaration. `null` otherwise.
+     */
+    val enclosingType: TypeDeclarationLangModel?
 
     /**
      * All implemented interfaces, recursively.
@@ -46,7 +56,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel {
     /**
      * Interfaces that are declared inside this declaration.
      */
-    val nestedInterfaces: Sequence<TypeDeclarationLangModel>
+    val nestedClasses: Sequence<TypeDeclarationLangModel>
 
     /**
      * Creates [TypeLangModel] based on the declaration **assuming, that no type arguments are required**.

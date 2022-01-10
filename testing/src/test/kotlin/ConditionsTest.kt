@@ -103,25 +103,30 @@ class ConditionsTest(
 
             @Singleton
             @Conditional([Conditions.FeatureA::class, Conditions.FeatureB::class])
-            class MyClass @Inject constructor()
+            class MyClass @Inject constructor(a: ClassA, b: ClassB)
+
+            @Conditional([Conditions.FeatureA::class])
+            class ClassA @Inject constructor()
+
+            @Conditional([Conditions.FeatureB::class])
+            class ClassB @Inject constructor()
 
             @Singleton
             @Component
             interface TestComponent {
                 val opt: Optional<MyClass>
-                val provider: Provider<MyClass>
-                val direct: MyClass
+                val provider: Optional<Provider<MyClass>>
             }
 
             fun test() {
-                val component = DaggerTestComponent()
+                val component = DaggerTestComponent.create()
                 assert(!component.opt.isPresent)
                 Features.enabledA = true
-                assert(!DaggerTestComponent().opt.isPresent)
+                assert(!DaggerTestComponent.create().opt.isPresent)
                 Features.isEnabledB = true
-                val new = DaggerTestComponent()
+                val new = DaggerTestComponent.create()
                 assert(new.opt.isPresent)
-                assert(new.opt.get() === new.direct && new.direct === new.provider.get())
+                assert(new.opt.get() === new.provider.get().get())
 
                 // Condition is not re-requested.
                 assert(!component.opt.isPresent)
@@ -138,7 +143,6 @@ class ConditionsTest(
         }
     }
 
-
     @Test
     fun `flavors test`() {
         useSourceSet(features)
@@ -154,26 +158,24 @@ class ConditionsTest(
             import com.yandex.daggerlite.Conditionals
             import com.yandex.daggerlite.Optional
 
-            @Conditionals([
-                Conditional([Conditions.FeatureA::class], onlyIn = [DeviceType.Phone::class]),
-                Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class]),
-            ])
+            @Conditional([Conditions.FeatureA::class], onlyIn = [DeviceType.Phone::class])
+            @Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class])
             class MyClass @Inject constructor()
 
             @Singleton
             @Component(variant = [DeviceType.Phone::class])
             interface TestPhoneComponent {
                 val opt: Optional<MyClass>
-                val provider: Provider<MyClass>
-                val direct: MyClass
+                val provider: Optional<Provider<MyClass>>
+                val direct: Optional<MyClass>
             }
 
             @Singleton
             @Component(variant = [DeviceType.Tablet::class])
             interface TestTabletComponent {
                 val opt: Optional<MyClass>
-                val provider: Provider<MyClass>
-                val direct: MyClass
+                val provider: Optional<Provider<MyClass>>
+                val direct: Optional<MyClass>
             }
 
             fun test() {
@@ -224,8 +226,8 @@ class ConditionsTest(
             }
 
             fun test() {
-                val phone = DaggerTestPhoneComponent()
-                val tablet = DaggerTestTabletComponent()
+                val phone = DaggerTestPhoneComponent.create()
+                val tablet = DaggerTestTabletComponent.create()
 
                 assert(phone.phone.isPresent)
                 assert(!phone.tablet.isPresent)
@@ -290,10 +292,8 @@ class ConditionsTest(
             interface TestTabletComponent : TestComponent
 
             @ActivityScoped
-            @Conditionals([
-                Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class]),
-            ])
-            @Component(isRoot = false, variant = [MyFeatureActivity::class])  // TODO: not Custom.
+            @Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class])
+            @Component(isRoot = false, variant = [MyFeatureActivity::class])
             interface MyFeatureActivityComponent {
                 @Component.Builder
                 interface Factory {
@@ -303,8 +303,8 @@ class ConditionsTest(
 
             fun test() {
                 Features.isEnabledB = true
-                val phone: TestComponent = DaggerTestPhoneComponent()
-                val tablet: TestComponent = DaggerTestTabletComponent()
+                val phone: TestComponent = DaggerTestPhoneComponent.create()
+                val tablet: TestComponent = DaggerTestTabletComponent.create()
 
                 assert(!phone.myFeatureActivity.isPresent)
                 assert(tablet.myFeatureActivity.isPresent)
@@ -431,7 +431,7 @@ class ConditionsTest(
             
             fun test() {
                 Features.isEnabledB = true
-                val c = DaggerTestComponent()
+                val c = DaggerTestComponent.create()
                 assert(!c.apiV1.isPresent)
                 assert(c.apiV2.get() is Stub)
                 assert(c.apiV3.get() is ImplB)
@@ -463,6 +463,7 @@ class ConditionsTest(
         useSourceSet(features)
         useSourceSet(flavors)
         givenKotlinSource("test.TestCase", """
+            import javax.inject.Named
             import com.yandex.daggerlite.Component
             import com.yandex.daggerlite.Provides
             import com.yandex.daggerlite.Module
@@ -482,34 +483,52 @@ class ConditionsTest(
                 fun provideApi(): Api {
                     return Impl()
                 }
+                
+                @Named
+                @Provides([
+                    Conditional(onlyIn = [ActivityType.Main::class]),
+                    // Nowhere else
+                ])
+                fun provideNamedApi(): Api {
+                    return Impl()
+                }
             }
             
             @Component(modules = [MyModule::class], variant = [ActivityType.Main::class])
             interface TestMainComponent {
                 val api: Optional<Api>
                 val apiLazy: Optional<Lazy<Api>>
+                
+                @get:Named
+                val namedApi: Optional<Api>
             }
             
             @Component(modules = [MyModule::class], variant = [ActivityType.Custom::class])
             interface TestCustomComponent {
                 val api: Optional<Api>
                 val apiLazy: Optional<Lazy<Api>>
+                
+                @get:Named
+                val namedApi: Optional<Api>
             }
             
             fun test() {
-                assert(!DaggerTestMainComponent().api.isPresent)
+                assert(DaggerTestMainComponent.create().namedApi.isPresent)
+                assert(!DaggerTestCustomComponent.create().namedApi.isPresent)
+            
+                assert(!DaggerTestMainComponent.create().api.isPresent)
             
                 Features.isEnabledB = true
-                assert(!DaggerTestMainComponent().api.isPresent)
+                assert(!DaggerTestMainComponent.create().api.isPresent)
             
                 Features.enabledA = true
                 Features.isEnabledB = false
-                assert(DaggerTestMainComponent().api.isPresent)
-                assert(!DaggerTestCustomComponent().api.isPresent)
+                assert(DaggerTestMainComponent.create().api.isPresent)
+                assert(!DaggerTestCustomComponent.create().api.isPresent)
                 
                 Features.enabledA = false
                 Features.isEnabledB = true
-                assert(DaggerTestCustomComponent().api.isPresent)
+                assert(DaggerTestCustomComponent.create().api.isPresent)
             }
         """.trimIndent())
 
@@ -561,8 +580,8 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = DaggerMyBrowserComponent()
-                val searchAppC = DaggerMySearchAppComponent()
+                val browserC = DaggerMyBrowserComponent.create()
+                val searchAppC = DaggerMySearchAppComponent.create()
                 
                 assert(browserC.myC.create().impl.isPresent)
                 assert(!searchAppC.myC.create().impl.isPresent)
@@ -578,6 +597,57 @@ class ConditionsTest(
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
             }
+        }
+    }
+
+    @Test
+    fun `complex condition expression`() {
+        useSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*            
+            import javax.inject.*
+            
+            private const val EnabledB = "isEnabledB" 
+            
+            @Condition(Features::class, "enabledA")
+            @Condition(Features::class, "isEnabledB")
+            @AnyCondition([
+                Condition(Features::class, "FeatureC.isEnabled"),                                
+                Condition(Features::class, "isEnabledB"),                                
+            ])
+            annotation class ComplexFeature1
+            
+            @AnyCondition([
+                Condition(Features::class, "enabledA"),
+            ])
+            @AnyCondition([
+                Condition(Features::class, EnabledB),
+            ])
+            @AnyCondition([
+                Condition(Features::class, "FeatureC.isEnabled"),                                
+                Condition(Features::class, condition = EnabledB),                                
+            ])
+            @AnyCondition([
+                Condition(Features::class, "FeatureC.isEnabled"),                                
+                Condition(value = Features::class, condition = "isEnabledB"),                                
+            ])            
+            annotation class ComplexFeature2
+            
+            @Conditional([ComplexFeature1::class])               
+            class ClassA @Inject constructor(b: ClassB)
+            @Conditional([ComplexFeature2::class])
+            class ClassB @Inject constructor(a: Provider<ClassA>)
+            
+            @Component            
+            interface MyComponent {
+                val a: Optional<ClassA>                        
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            withNoErrors()
         }
     }
 
@@ -637,9 +707,9 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = DaggerMyBrowserComponent()
-                val searchAppC = DaggerMySearchAppComponent()
-                val myProductC = DaggerMyProductComponent()
+                val browserC = DaggerMyBrowserComponent.create()
+                val searchAppC = DaggerMySearchAppComponent.create()
+                val myProductC = DaggerMyProductComponent.create()
                 
                 assert(browserC.apiC.create().api.get() is ImplA)
                 assert(searchAppC.apiC.create().api.get() is ImplB)

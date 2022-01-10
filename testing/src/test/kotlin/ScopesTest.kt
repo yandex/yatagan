@@ -32,7 +32,7 @@ class ScopesTest(
            }
 
            fun test() {
-              val component = DaggerTestComponent()
+              val component = DaggerTestComponent.create()
               assert(component.getA() === component.getA())
            }
         """.trimIndent()
@@ -62,7 +62,7 @@ class ScopesTest(
             }
             
             fun test() {
-            val component = DaggerTestComponent()
+            val component = DaggerTestComponent.create()
             assert(component.getA() !== component.getA())
             }
         """.trimIndent()

@@ -7,10 +7,10 @@ import javax.tools.Diagnostic.Kind.MANDATORY_WARNING
 
 class JapLogger(private val messager: Messager) : Logger {
     override fun error(message: String) {
-        messager.printMessage(ERROR, ">>>[error]\n$message\n>>>")
+        messager.printMessage(ERROR, message)
     }
 
     override fun warning(message: String) {
-        messager.printMessage(MANDATORY_WARNING, ">>>[warning]\n$message\n>>>")
+        messager.printMessage(MANDATORY_WARNING, message)
     }
 }

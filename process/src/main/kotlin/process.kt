@@ -3,41 +3,46 @@ package com.yandex.daggerlite.process
 import com.yandex.daggerlite.base.ObjectCacheRegistry
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
-import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.BindingRequester
-import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.EntryPointRequester
-import com.yandex.daggerlite.graph.BindingGraph.NodeRequester.MemberInjectRequester
 import com.yandex.daggerlite.graph.impl.BindingGraph
+import com.yandex.daggerlite.validation.ValidationMessage.Kind.Error
+import com.yandex.daggerlite.validation.ValidationMessage.Kind.Warning
+import com.yandex.daggerlite.validation.impl.Strings
+import com.yandex.daggerlite.validation.impl.validate
 
 fun <Source> process(
     sources: Sequence<Source>,
     delegate: ProcessorDelegate<Source>,
 ) {
-    fun reportMissingBindings(graph: BindingGraph): Boolean {
-        var hasMissing = false
-        if (graph.missingBindings.isNotEmpty()) {
-            graph.missingBindings.forEach { (node, requesters) ->
-                delegate.logger.error(buildString {
-                    appendLine("Missing binding for $node in $graph")
-                    requesters.forEach {
-                        val requestedDescription = when(it) {
-                            is BindingRequester -> it.binding.toString()
-                            is EntryPointRequester -> it.entryPoint.getter.let { func -> "${func.owner}.${func.name}" }
-                            is MemberInjectRequester -> it.injector.injector.toString()
-                        }
-                        appendLine(" - Requested from here: $requestedDescription")
-                    }
-                })
-                hasMissing = true
+    ObjectCacheRegistry.use {
+        val graphRoots = sources.mapNotNull { source ->
+            ComponentModel(delegate.createDeclaration(source)).takeIf { it.isRoot }
+        }.map { model ->
+            BindingGraph(root = model)
+        }.sortedBy {
+            // To ensure stable aggregated error messages
+            it.model.type.declaration.qualifiedName
+        }.toList()
+
+        val logger = LoggerDecorator(delegate.logger)
+
+        val validationResults = validate(graphRoots)
+
+        validationResults.forEach { locatedMessage ->
+            val message = Strings.formatMessage(
+                message = locatedMessage.message.contents,
+                encounterPaths = locatedMessage.encounterPaths,
+                notes = locatedMessage.message.notes
+            )
+            when (locatedMessage.message.kind) {
+                Error -> logger.error(message)
+                Warning -> logger.warning(message)
             }
         }
-        for (child in graph.children) {
-            hasMissing = hasMissing || reportMissingBindings(child)
-        }
-        return hasMissing
-    }
 
-    ObjectCacheRegistry.use {
+        if (validationResults.any { it.message.kind == Error }) {
+            return
+        }
+
         for (source in sources) {
             try {
                 val model = ComponentModel(delegate.createDeclaration(source))
@@ -47,12 +52,7 @@ fun <Source> process(
 
                 val graph = BindingGraph(
                     root = model,
-                    modelFactory = delegate.langModelFactory,
                 )
-
-                if (reportMissingBindings(graph)) {
-                    continue
-                }
 
                 ComponentGeneratorFacade(
                     graph = graph,
@@ -64,9 +64,10 @@ fun <Source> process(
                     ).use(generator::generateTo)
                 }
 
-            } catch (e: Exception) {
-                delegate.logger.error(buildString {
-                    appendLine("While processing $source")
+            } catch (e: Throwable) {
+                logger.error(buildString {
+                    appendLine("Internal Processor Error while processing $source")
+                    appendLine("Please, report this to the maintainers, along with the code (diff) that triggered this.")
                     appendLine(e.message)
                     appendLine(e.stackTraceToString())
                 })

@@ -18,11 +18,18 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
 class KspModelFactoryImpl : LangModelFactory {
-    private val listDeclaration = Utils.resolver.getClassDeclarationByName(List::class.java.canonicalName)!!
+    private val listDeclaration = checkNotNull(Utils.resolver.getClassDeclarationByName(List::class.java.canonicalName)) {
+        "Not reached: unable to define list declaration"
+    }
+    private val collectionDeclaration = checkNotNull(Utils.resolver.getClassDeclarationByName(Collection::class.java.canonicalName)) {
+        "Not reached: unable to define collection declaration"
+    }
 
     override fun getAnnotation(clazz: Class<out Annotation>): AnnotationLangModel {
         return KspAnnotationImpl(FakeKsAnnotationImpl(
-            Utils.resolver.getClassDeclarationByName(clazz.canonicalName)!!
+            checkNotNull(Utils.resolver.getClassDeclarationByName(clazz.canonicalName)) {
+                "Not reached: unable to define $clazz annotation"
+            }
         ))
     }
 
@@ -33,6 +40,17 @@ class KspModelFactoryImpl : LangModelFactory {
             return KspTypeImpl(listDeclaration.asType(listOf(argument)))
         }
     }
+
+    override fun getCollectionType(type: TypeLangModel): TypeLangModel {
+        with(Utils.resolver) {
+            val reference = createKSTypeReferenceFromKSType((type as KspTypeImpl).impl)
+            val argument = getTypeArgument(reference, Variance.INVARIANT)
+            return KspTypeImpl(collectionDeclaration.asType(listOf(argument)))
+        }
+    }
+
+    override val errorType: TypeLangModel
+        get() = KspTypeImpl(ErrorTypeImpl)
 
     private class FakeKsAnnotationImpl(
         annotationClassDeclaration: KSClassDeclaration,

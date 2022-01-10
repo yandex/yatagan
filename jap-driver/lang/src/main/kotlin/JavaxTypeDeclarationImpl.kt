@@ -18,6 +18,7 @@ import kotlinx.metadata.jvm.getterSignature
 import kotlinx.metadata.jvm.setterSignature
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.NestingKind
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import kotlin.LazyThreadSafetyMode.NONE
@@ -30,6 +31,9 @@ internal class JavaxTypeDeclarationImpl private constructor(
     private val kotlinClass: KmClass? by lazy(NONE) {
         impl.obtainKotlinClassIfApplicable()
     }
+
+    override val isInterface: Boolean
+        get() = impl.kind == ElementKind.INTERFACE
 
     override val isAbstract: Boolean
         get() = impl.isAbstract
@@ -45,6 +49,12 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
+
+    override val enclosingType: TypeDeclarationLangModel?
+        get() = when (impl.nestingKind) {
+            NestingKind.MEMBER -> Factory(impl.enclosingElement.asType().asDeclaredType())
+            else -> null
+        }
 
     override val implementedInterfaces: Sequence<TypeLangModel> = impl.allImplementedInterfaces()
         .map { JavaxTypeImpl(it) }
@@ -68,7 +78,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         kotlinClass?.companionObject?.let { companionName: String ->
             val companionClass = checkNotNull(impl.enclosedElements.find {
                 it.kind == ElementKind.CLASS && it.simpleName.contentEquals(companionName)
-            }) { "Inconsistent metadata interpreting: No companion $companionName detected in $impl" }
+            }) { "Not reached: inconsistent metadata interpreting: No companion $companionName detected in $impl" }
             val companionType = JavaxTypeDeclarationImpl(companionClass.asType().asDeclaredType())
             companionClass.asTypeElement().allMethods(Utils.types, Utils.elements)
                 .filter {
@@ -88,9 +98,14 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .map { JavaxFieldImpl(owner = this, impl = it.asVariableElement()) }
         .memoize()
 
-    override val nestedInterfaces: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
         .asSequence()
-        .filter { it.kind == ElementKind.INTERFACE }
+        .filter {
+            when (it.kind) {
+                ElementKind.ENUM, ElementKind.CLASS, ElementKind.ANNOTATION_TYPE, ElementKind.INTERFACE -> true
+                else -> false
+            }
+        }
         .map { Factory(it.asType().asDeclaredType()) }
         .memoize()
 
