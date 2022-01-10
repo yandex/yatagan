@@ -8,7 +8,6 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportWarning
 import kotlin.LazyThreadSafetyMode.NONE
@@ -40,7 +39,7 @@ internal class ComponentDependencyModelImpl private constructor(
     }
 
     override fun validate(validator: Validator) {
-        validator.child(node = asNode(), kind = Inline)
+        validator.inline(node = asNode())
 
         if (!type.declaration.isAbstract) {
             validator.reportWarning(Strings.Warnings.`non-abstract dependency declaration`())

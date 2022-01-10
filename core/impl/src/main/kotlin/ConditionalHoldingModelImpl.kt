@@ -9,7 +9,6 @@ import com.yandex.daggerlite.core.lang.ConditionLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
 
@@ -36,7 +35,7 @@ internal open class ConditionalHoldingModelImpl(
     }
 
     override fun validate(validator: Validator) {
-        conditionals.forEach { validator.child(it, Inline) }
+        conditionals.forEach(validator::inline)
     }
 
     private class FeatureModelImpl private constructor(

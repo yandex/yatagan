@@ -15,7 +15,6 @@ import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.ConditionScope.Literal
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
@@ -119,7 +118,7 @@ private class ConditionLiteralImpl private constructor(
     override val root get() = payload.root
 
     override fun validate(validator: Validator) {
-        validator.child(payload, kind = Inline)
+        validator.inline(payload)
     }
 
     override fun toString(): String {

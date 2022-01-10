@@ -15,7 +15,6 @@ import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportError
 
@@ -186,8 +185,8 @@ internal class BindingGraphImpl(
     override fun toString() = component.toString()
 
     override fun validate(validator: Validator) {
-        validator.child(component, kind = Inline)
-        validator.child(bindings, kind = Inline)
+        validator.inline(component)
+        validator.inline(bindings)
         validator.child(variant)
         children.forEach(validator::child)
 

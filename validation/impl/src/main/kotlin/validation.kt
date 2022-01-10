@@ -3,8 +3,6 @@ package com.yandex.daggerlite.validation.impl
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Nested
 import kotlin.LazyThreadSafetyMode.NONE
 
 interface LocatedMessage {
@@ -24,11 +22,12 @@ private class ValidatorImpl : Validator {
         _messages.value += message
     }
 
-    override fun child(node: MayBeInvalid, kind: Validator.ChildValidationKind) {
-        when (kind) {
-            Nested -> _children += node
-            Inline -> node.validate(this)
-        }
+    override fun child(node: MayBeInvalid) {
+        _children += node
+    }
+
+    override fun inline(node: MayBeInvalid) {
+        node.validate(this)
     }
 }
 

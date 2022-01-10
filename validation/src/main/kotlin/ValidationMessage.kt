@@ -26,8 +26,7 @@ interface ValidationMessage {
     val kind: Kind
 
     /**
-     * Message payload.
-     * TODO: String is too inflexible for message.
+     * Message text.
      */
     val contents: String
 

@@ -14,7 +14,6 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
@@ -126,7 +125,7 @@ internal class ProvidesImpl(
     override fun validate(validator: Validator) {
         super.validate(validator)
 
-        validator.child(conditionalHolder, kind = Inline)
+        validator.inline(conditionalHolder)
 
         for (dependency in inputs) {
             validator.child(dependency.node)

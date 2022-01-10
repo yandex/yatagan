@@ -29,7 +29,6 @@ import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
@@ -177,7 +176,7 @@ internal class InjectConstructorProvisionBindingImpl(
 
     override fun validate(validator: Validator) {
         super.validate(validator)
-        validator.child(impl, Inline)
+        validator.inline(impl)
     }
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {

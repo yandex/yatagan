@@ -20,7 +20,6 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.Validator.ChildValidationKind.Inline
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
@@ -61,7 +60,7 @@ internal class ComponentFactoryModelImpl private constructor(
             override val builderSetter get() = method
 
             override fun validate(validator: Validator) {
-                validator.child(payload, kind = Inline)
+                validator.inline(payload)
                 if (method.parameters.first().isAnnotatedWith<BindsInstance>()) {
                     validator.reportWarning(Strings.Warnings.`@BindsInstance on builder method's parameter`())
                 }
@@ -85,7 +84,7 @@ internal class ComponentFactoryModelImpl private constructor(
                 override val name get() = param.name
 
                 override fun validate(validator: Validator) {
-                    validator.child(payload, Inline)
+                    validator.inline(payload)
                 }
 
                 override fun toString() = "[param] ${factoryMethod.name}(.., $name: $payload, ..)"
@@ -110,7 +109,7 @@ internal class ComponentFactoryModelImpl private constructor(
     override fun toString() = "[creator] $factoryDeclaration"
 
     override fun validate(validator: Validator) {
-        validator.child(asNode(), kind = Inline)
+        validator.inline(asNode())
         for (input in allInputs) {
             validator.child(input)
         }
@@ -172,7 +171,7 @@ internal class ComponentFactoryModelImpl private constructor(
         override val node: NodeModel,
     ) : InputPayload.Instance, ClassBackedModel by node {
         override fun validate(validator: Validator) {
-            validator.child(node, kind = Inline)
+            validator.inline(node)
         }
 
         override fun toString() = node.toString()
