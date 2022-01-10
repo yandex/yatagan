@@ -88,6 +88,7 @@ internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean
                 type = originalArgType,
                 varianceAsWildcard = varianceAsWildcard,
             )
+            // TODO: Use `Utils.resolver.getJavaWildcard()` on reference
             return Utils.resolver.getTypeArgument(
                 typeRef = Utils.resolver.createKSTypeReferenceFromKSType(mappedArgType),
                 variance = if (varianceAsWildcard) {

@@ -819,4 +819,63 @@ class CoreBindingsFailureTest(
             withNoWarnings()
         }
     }
+
+    @Test
+    fun `manual framework type usage`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            class WithInject @Inject constructor()
+
+            @Module
+            interface MyModule {
+                @Provides fun illegalOptional(): Optional<Any> = Optional.empty()
+                @Provides fun illegalLazy(): Lazy<Int> = throw AssertionError()
+                @Provides fun illegalProvider(): Provider<String> = throw AssertionError()
+            }
+
+            @Component(modules = [MyModule::class])
+            interface RootComponent {
+                val o1: Optional<Optional<WithInject>>
+                val o2: Provider<Optional<WithInject>>
+                val o3: Optional<Lazy<Optional<WithInject>>>
+                
+                @Component.Builder
+                interface Builder {
+                    fun create(
+                        @BindsInstance flagProvider: Provider<Boolean>,
+                        @BindsInstance optionalFloat: Optional<Float>,
+                    ): RootComponent
+                }
+            }
+        """.trimIndent())
+
+        failsToCompile { 
+            withError(formatMessage(
+                message = Errors.`missing binding`(`for` = "com.yandex.daggerlite.Optional<test.WithInject>"),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "[entry-point] getO1", "[missing: com.yandex.daggerlite.Optional<test.WithInject>]"),
+                    listOf("test.RootComponent", "[entry-point] getO2", "[missing: com.yandex.daggerlite.Optional<test.WithInject>]"),
+                    listOf("test.RootComponent", "[entry-point] getO3", "[missing: com.yandex.daggerlite.Optional<test.WithInject>]"),
+                ),
+                notes = listOf(
+                    Strings.Notes.`nested framework type`("com.yandex.daggerlite.Optional<test.WithInject>")
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`framework type is manually managed`(),
+                encounterPaths = listOf(
+                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalOptional(): com.yandex.daggerlite.Optional<java.lang.Object>", "com.yandex.daggerlite.Optional<java.lang.Object>"),
+                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalLazy(): com.yandex.daggerlite.Lazy<java.lang.Integer>", "com.yandex.daggerlite.Lazy<java.lang.Integer>"),
+                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalProvider(): javax.inject.Provider<java.lang.String>", "javax.inject.Provider<java.lang.String>"),
+                    listOf("test.RootComponent", "[entry-point] getO1", "com.yandex.daggerlite.Optional<test.WithInject>"),
+                    listOf("test.RootComponent", "[entry-point] getO2", "com.yandex.daggerlite.Optional<test.WithInject>"),
+                    listOf("test.RootComponent", "[entry-point] getO3", "com.yandex.daggerlite.Optional<test.WithInject>"),
+                    listOf("test.RootComponent", "[creator] test.RootComponent.Builder", "[param] create(.., flagProvider: javax.inject.Provider<java.lang.Boolean>, ..)"),
+                    listOf("test.RootComponent", "[creator] test.RootComponent.Builder", "[param] create(.., optionalFloat: com.yandex.daggerlite.Optional<java.lang.Float>, ..)"),
+                ),
+            ))
+        }
+    }
 }

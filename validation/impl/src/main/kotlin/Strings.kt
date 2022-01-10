@@ -176,10 +176,12 @@ object Strings {
             "Type declaration is used as a component flavor, yet not annotated with @ComponentFlavor"
 
 
+        @Covered
         fun `declaration is not annotated with @Module`() =
             "Type declaration is used as a module, yet not annotated with @Module"
 
 
+        @Covered
         fun `framework type is manually managed`() =
             "Framework types (Lazy, Provider, Optional) can't be manually managed (provided/bound)"
 
@@ -221,11 +223,13 @@ object Strings {
         fun `root component can not be a subcomponent`() =
             "Root component can not be a subcomponent"
 
+        @Covered
         fun `duplicate component scope`(scope: Any) =
             "A single scope `$scope` can not be present on more than one component in a hierarchy"
 
+        @Covered
         fun `component hierarchy loop`() =
-            "component hierarchy loop"
+            "Component hierarchy loop detected"
 
         @Covered
         fun `dependency loop`(chain: List<Pair<Any, Any>>) = buildString {
@@ -284,6 +288,14 @@ object Strings {
         @Covered
         fun `duplicate binding`(binding: Any) =
             "Conflicting binding: `$binding`"
+
+        @Covered
+        fun `duplicate scope component`(component: Any) =
+            "In component `$component`"
+
+        @Covered
+        fun `nested framework type`(target: Any) =
+            "`$target` can't be requested in any way (lazy/provider/optional) but *directly*"
     }
 
     object Bindings {

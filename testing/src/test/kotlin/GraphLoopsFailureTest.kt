@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.Strings.formatMessage
 import org.junit.Before
@@ -191,6 +192,56 @@ class GraphLoopsFailureTest(
                 )
             ))
             // @formatter:on
+            withNoMoreErrors()
+            withNoWarnings()
+        }
+    }
+
+    @Test
+    fun `looped component hierarchy`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            interface NotAModule
+
+            @Singleton
+            @Component(modules = [MyRootComponent.RootModule::class])
+            interface MyRootComponent {
+                @Module(subcomponents = [MySubComponentA::class]) interface RootModule
+            }
+
+            @Component(isRoot = false, modules = [MySubComponentA.SubModule::class])
+            interface MySubComponentA {
+                @Module(subcomponents = [MySubComponentB::class]) interface SubModule
+                @Component.Builder interface Builder { fun create(): MySubComponentA }
+            }
+
+            @Singleton
+            @Component(isRoot = false, modules = [MySubComponentB.SubModule::class, NotAModule::class])
+            interface MySubComponentB {
+                @Module(subcomponents = [MySubComponentA::class]) interface SubModule
+                @Component.Builder interface Builder { fun create(): MySubComponentB }
+            }
+        """.trimIndent())
+
+        failsToCompile { 
+            withError(formatMessage(
+                message = Errors.`component hierarchy loop`(),
+                encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB", "test.MySubComponentA"))
+            ))
+            withError(formatMessage(
+                message = Errors.`declaration is not annotated with @Module`(),
+                encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB", "test.NotAModule"))
+            ))
+            withError(formatMessage(
+                message = Errors.`duplicate component scope`(scope = "@javax.inject.Singleton"),
+                encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB")),
+                notes = listOf(
+                    Strings.Notes.`duplicate scope component`("test.MyRootComponent"),
+                    Strings.Notes.`duplicate scope component`("test.MySubComponentB"),
+                ),
+            ))
             withNoMoreErrors()
             withNoWarnings()
         }

@@ -77,7 +77,7 @@ internal class BindingGraphImpl(
 
     init {
         // Build children
-        children = modules
+        children = if (parents().any { it.component == component }) /*loop guard*/ emptyList() else modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
             .distinct()
@@ -198,19 +198,22 @@ internal class BindingGraphImpl(
         // Reachable via members-inject.
         memberInjectors.forEach(validator::child)
 
+        // Check component root status
         if (parent != null && isRoot) {
             validator.reportError(Strings.Errors.`root component can not be a subcomponent`())
         }
 
+        // Check for duplicate scopes
         scope?.let { scope ->
             parents().find { parent -> parent.scope == scope }?.let { withDuplicateScope ->
                 validator.reportError(Strings.Errors.`duplicate component scope`(scope)) {
-                    addNote("In component $withDuplicateScope")
-                    addNote("In component ${this@BindingGraphImpl}")
+                    addNote(Strings.Notes.`duplicate scope component`(component = withDuplicateScope))
+                    addNote(Strings.Notes.`duplicate scope component`(component = this@BindingGraphImpl))
                 }
             }
         }
 
+        // Report hierarchy loops
         if (parents().find { parent -> parent.component == component } != null) {
             validator.reportError(Strings.Errors.`component hierarchy loop`())
         }

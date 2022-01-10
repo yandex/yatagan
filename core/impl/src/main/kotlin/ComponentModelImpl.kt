@@ -62,6 +62,8 @@ internal class ComponentModelImpl private constructor(
             override fun validate(validator: Validator) {
                 validator.child(dependency.node)
             }
+
+            override fun toString() = "[entry-point] ${getter.name}"
         }
 
         declaration.allPublicFunctions.filter {

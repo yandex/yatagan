@@ -428,17 +428,23 @@ internal data class MissingBindingImpl(
         } else {
             validator.reportError(Errors.`missing binding`(`for` = target)) {
                 val factory = target.superModel as? ComponentFactoryModel
-                if (factory != null) {
-                    val component = factory.createdComponent
-                    if (!component.isRoot) {
-                        addNote("$target is a factory for $component, ensure that this component is specified " +
-                                "via `@Module(subcomponents=..)` and that module is included into $owner")
-                    } else {
-                        addNote("$target is a factory for a root component, " +
-                                "injecting such factory is not supported")
+                when {
+                    target.hintIsFrameworkType -> {
+                        addNote(Strings.Notes.`nested framework type`(target))
                     }
-                } else {
-                    addNote(Strings.Notes.`no known way to infer a binding`())
+                    factory != null -> {
+                        val component = factory.createdComponent
+                        if (!component.isRoot) {
+                            addNote("$target is a factory for $component, ensure that this component is specified " +
+                                    "via `@Module(subcomponents=..)` and that module is included into $owner")
+                        } else {
+                            addNote("$target is a factory for a root component, " +
+                                    "injecting such factory is not supported")
+                        }
+                    }
+                    else -> {
+                        addNote(Strings.Notes.`no known way to infer a binding`())
+                    }
                 }
                 // TODO: implement hint about how to provide a binding
                 //  - maybe the same differently qualified binding exists

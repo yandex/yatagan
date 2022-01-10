@@ -37,4 +37,10 @@ interface NodeModel : ClassBackedModel, MayBeInvalid {
      * If `this` node already has no qualifier, `this` is returned.
      */
     fun dropQualifier(): NodeModel
+
+    /**
+     * `true` if such node can not be satisfied by definition for whatever reason, e.g. framework type.
+     * `false` for any normal node.
+     */
+    val hintIsFrameworkType: Boolean
 }

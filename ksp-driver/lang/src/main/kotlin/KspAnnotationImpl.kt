@@ -79,6 +79,7 @@ internal class KspAnnotationImpl private constructor(
                     postfix = "}",
                     transform = ::formatValue,
                 )
+                is KSType -> KspTypeImpl(impl = value).toString()
                 is KSAnnotation -> Factory(value).toString()
                 else -> value.toString()
             }

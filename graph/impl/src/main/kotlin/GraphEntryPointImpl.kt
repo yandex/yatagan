@@ -16,5 +16,5 @@ internal class GraphEntryPointImpl(
     override val dependency: NodeDependency
         get() = impl.dependency
 
-    override fun toString() = "[entry-point] ${getter.name}"
+    override fun toString() = impl.toString()
 }

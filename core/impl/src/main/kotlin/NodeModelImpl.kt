@@ -77,6 +77,9 @@ internal class NodeModelImpl private constructor(
         return Factory(type = LangModelFactory.getListType(type), qualifier = qualifier)
     }
 
+    override val hintIsFrameworkType: Boolean
+        get() = isFrameworkType(type)
+
     override fun validate(validator: Validator) {
         if (isFrameworkType(type)) {
             validator.reportError(Errors.`framework type is manually managed`())
@@ -107,6 +110,7 @@ internal class NodeModelImpl private constructor(
             override fun dropQualifier(): NodeModel = this
             override fun multiBoundListNode(): NodeModel = this
             override fun validate(validator: Validator) = Unit // No need to report an error here
+            override val hintIsFrameworkType: Boolean get() = false
             override fun toString() = "[invalid]"
         }
 
