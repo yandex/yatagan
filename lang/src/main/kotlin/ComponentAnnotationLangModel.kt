@@ -8,4 +8,5 @@ interface ComponentAnnotationLangModel {
     val modules: Sequence<TypeLangModel>
     val dependencies: Sequence<TypeLangModel>
     val variant: Sequence<TypeLangModel>
+    val multiThreadAccess: Boolean
 }

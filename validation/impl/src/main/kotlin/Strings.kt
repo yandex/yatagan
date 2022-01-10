@@ -232,6 +232,11 @@ object Strings {
             "Component hierarchy loop detected"
 
         @Covered
+        fun `multi-threading status mismatch`(parent: Any) =
+            "Component declares a multi-threaded requirement, but its parent `$parent` does not. " +
+                    "Please, specify the same requirement for the parent."
+
+        @Covered
         fun `dependency loop`(chain: List<Pair<Any, Any>>) = buildString {
             appendLine("Binding dependency loop detected:")
             chain.forEachIndexed { index, (target, binding) ->

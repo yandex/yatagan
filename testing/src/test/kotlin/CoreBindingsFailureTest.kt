@@ -568,7 +568,8 @@ class CoreBindingsFailureTest(
             interface AnotherComponent { @Component.Builder interface C { fun c(): AnotherComponent } }
         """.trimIndent())
 
-        failsToCompile { 
+        failsToCompile {
+            // @formatter:off
             withError(formatMessage(
                 message = Errors.`no conditions on feature`(),
                 encounterPaths = listOf(
@@ -616,6 +617,7 @@ class CoreBindingsFailureTest(
                     listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA"),
                 ),
             ))
+            // @formatter:on
             withNoWarnings()
             withNoMoreErrors()
         }
@@ -652,6 +654,7 @@ class CoreBindingsFailureTest(
         """.trimIndent())
 
         failsToCompile {
+            // @formatter:off
             withError(formatMessage(
                 message = Errors.`invalid condition`("#invalid"),
                 encounterPaths = listOf(
@@ -670,6 +673,7 @@ class CoreBindingsFailureTest(
                     listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "test.Foo.foo")
                 ),
             ))
+            // @formatter:on
             withNoMoreErrors()
             withNoWarnings()
         }
@@ -745,6 +749,7 @@ class CoreBindingsFailureTest(
         """.trimIndent())
 
         failsToCompile {
+            // @formatter:off
             withError(formatMessage(
                 message = Errors.`conflicting bindings`(`for` = "@test.MyQualifier(named=@javax.inject.Named(\"hello\")) java.lang.Object"),
                 encounterPaths = listOf(
@@ -815,6 +820,7 @@ class CoreBindingsFailureTest(
                     Strings.Notes.`duplicate binding`(binding = Strings.Bindings.instance("[setter] withAnotherString(java.lang.String)")),
                 ),
             ))
+            // @formatter:on
             withNoMoreErrors()
             withNoWarnings()
         }
@@ -829,7 +835,7 @@ class CoreBindingsFailureTest(
             class WithInject @Inject constructor()
 
             @Module
-            interface MyModule {
+            class MyModule {
                 @Provides fun illegalOptional(): Optional<Any> = Optional.empty()
                 @Provides fun illegalLazy(): Lazy<Int> = throw AssertionError()
                 @Provides fun illegalProvider(): Provider<String> = throw AssertionError()
@@ -851,7 +857,8 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile { 
+        failsToCompile {
+            // @formatter:off
             withError(formatMessage(
                 message = Errors.`missing binding`(`for` = "com.yandex.daggerlite.Optional<test.WithInject>"),
                 encounterPaths = listOf(
@@ -876,6 +883,38 @@ class CoreBindingsFailureTest(
                     listOf("test.RootComponent", "[creator] test.RootComponent.Builder", "[param] create(.., optionalFloat: com.yandex.daggerlite.Optional<java.lang.Float>, ..)"),
                 ),
             ))
+            withNoMoreErrors()
+            withNoWarnings()
+            // @formatter:off
+        }
+    }
+
+    @Test
+    fun `multi-threading status mismatch`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            
+            @Module(subcomponents = SubComponent1::class) interface RootModule
+            @Component(modules = [RootModule::class]) interface RootComponent
+            
+            @Component(multiThreadAccess = true, isRoot = false)
+            interface SubComponent1 {
+                @Component.Builder interface B { fun c(): SubComponent1 } 
+            }
+            
+            @Component(isRoot = false)
+            interface SubComponent2 { 
+                @Component.Builder interface B { fun c(): SubComponent2 }
+            }
+        """.trimIndent())
+
+        failsToCompile {
+            withError(formatMessage(
+                message = Errors.`multi-threading status mismatch`("test.RootComponent"),
+                encounterPaths = listOf(listOf("test.RootComponent", "test.SubComponent1")),
+            ))
+            withNoMoreErrors()
+            withNoWarnings()
         }
     }
 }

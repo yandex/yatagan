@@ -50,6 +50,12 @@ interface ComponentModel : ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
     val variant: Variant
 
     /**
+     * `true` if this component entry-points and/or their dependencies can be accessed from multiple threads.
+     * `false` otherwise.
+     */
+    val requiresSynchronizedAccess: Boolean
+
+    /**
      * Represents a function/property exposed from a component interface.
      * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
      */

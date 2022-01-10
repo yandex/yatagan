@@ -8,6 +8,7 @@ import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import javax.lang.model.element.Modifier.PRIVATE
+import javax.lang.model.element.Modifier.VOLATILE
 
 internal class InlineCachingStrategy(
     private val binding: Binding,
@@ -25,17 +26,39 @@ internal class InlineCachingStrategy(
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
-        field(targetType, instanceFieldName) { modifiers(PRIVATE) }
+        field(targetType, instanceFieldName) {
+            modifiers(PRIVATE)
+            if (binding.owner.requiresSynchronizedAccess) {
+                modifiers(VOLATILE)
+            }
+        }
         method(instanceAccessorName) {
             modifiers(PRIVATE)
             returnType(targetType)
             +"%T local = this.%N".formatCode(targetType, instanceFieldName)
             controlFlow("if (local == null)") {
-                +buildExpression {
-                    +"local = "
-                    binding.generateCreation(builder = this, inside = binding.owner)
+                if (binding.owner.requiresSynchronizedAccess) {
+                    // Synchronizing on `this` will be a huge performance bottleneck in
+                    // heavily multi-threaded environments. Yet when multi-threaded access occurs occasionally,
+                    // this approach is sufficient to guarantee basic correctness.
+                    // TODO(perf): devise a better strategy for this.
+                    controlFlow("synchronized (this)") {
+                        +"local = this.%N".formatCode(instanceFieldName)
+                        controlFlow("if (local == null)") {
+                            +buildExpression {
+                                +"local = "
+                                binding.generateCreation(builder = this, inside = binding.owner)
+                            }
+                            +"this.%N = local".formatCode(instanceFieldName)
+                        }
+                    }
+                } else {
+                    +buildExpression {
+                        +"local = "
+                        binding.generateCreation(builder = this, inside = binding.owner)
+                    }
+                    +"this.%N = local".formatCode(instanceFieldName)
                 }
-                +"this.%N = local".formatCode(instanceFieldName)
             }
             +"return local"
         }
@@ -76,14 +99,29 @@ internal class ScopedProviderStrategy(
     }
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
-        field(providerName, providerFieldName) { modifiers(PRIVATE) }
+        field(providerName, providerFieldName) {
+            modifiers(PRIVATE)
+            if (binding.owner.requiresSynchronizedAccess) {
+                modifiers(VOLATILE)
+            }
+        }
         method(providerAccessorName) {
             modifiers(PRIVATE)
             returnType(providerName)
-            +"%T local = this.$providerFieldName".formatCode(providerName)
+            +"%T local = this.%L".formatCode(providerName, providerFieldName)
             controlFlow("if (local == null)") {
-                +"local = new %T(this, $slot)".formatCode(providerName)
-                +"this.$providerFieldName = local"
+                if (binding.owner.requiresSynchronizedAccess) {
+                    controlFlow("synchronized (this)") {
+                        +"local = this.%L".formatCode(providerFieldName)
+                        controlFlow("if (local == null)") {
+                            +"local = new %T(this, $slot)".formatCode(providerName)
+                            +"this.%L = local".formatCode(providerFieldName)
+                        }
+                    }
+                } else {
+                    +"local = new %T(this, $slot)".formatCode(providerName)
+                    +"this.%L = local".formatCode(providerFieldName)
+                }
             }
             +"return local"
         }

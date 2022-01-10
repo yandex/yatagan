@@ -68,6 +68,8 @@ interface BindingGraph : MayBeInvalid {
 
     val conditionScope: ConditionScope
 
+    val requiresSynchronizedAccess: Boolean
+
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *

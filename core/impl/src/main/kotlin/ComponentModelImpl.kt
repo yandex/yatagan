@@ -98,6 +98,9 @@ internal class ComponentModelImpl private constructor(
 
     override val isRoot: Boolean = impl?.isRoot ?: false
 
+    override val requiresSynchronizedAccess: Boolean
+        get() = impl?.multiThreadAccess ?: false
+
     override val variant: Variant by lazy(NONE) {
         VariantImpl(impl?.variant ?: emptySequence())
     }

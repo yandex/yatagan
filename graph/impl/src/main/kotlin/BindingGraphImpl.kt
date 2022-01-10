@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.graph.impl
 
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
@@ -46,6 +47,9 @@ internal class BindingGraphImpl(
     override val entryPoints = component.entryPoints.map { GraphEntryPointImpl(owner = this, impl = it) }
 
     override val memberInjectors = component.memberInjectors.map { GraphMemberInjectorImpl(owner = this, impl = it) }
+
+    override val requiresSynchronizedAccess: Boolean
+        get() = component.requiresSynchronizedAccess
 
     private val bindings: GraphBindingsFactory = GraphBindingsFactory(
         graph = this,
@@ -202,9 +206,20 @@ internal class BindingGraphImpl(
             validator.reportError(Strings.Errors.`root component can not be a subcomponent`())
         }
 
+        val parents = parents().memoize()
+
+        // Check MT status is set explicitly
+        if (component.requiresSynchronizedAccess) {
+            parents.filter {
+                !it.component.requiresSynchronizedAccess
+            }.forEach { parent ->
+                validator.reportError(Strings.Errors.`multi-threading status mismatch`(parent = parent))
+            }
+        }
+
         // Check for duplicate scopes
         scope?.let { scope ->
-            parents().find { parent -> parent.scope == scope }?.let { withDuplicateScope ->
+            parents.find { parent -> parent.scope == scope }?.let { withDuplicateScope ->
                 validator.reportError(Strings.Errors.`duplicate component scope`(scope)) {
                     addNote(Strings.Notes.`duplicate scope component`(component = withDuplicateScope))
                     addNote(Strings.Notes.`duplicate scope component`(component = this@BindingGraphImpl))
@@ -213,7 +228,7 @@ internal class BindingGraphImpl(
         }
 
         // Report hierarchy loops
-        if (parents().find { parent -> parent.component == component } != null) {
+        if (parents.find { parent -> parent.component == component } != null) {
             validator.reportError(Strings.Errors.`component hierarchy loop`())
         }
 
