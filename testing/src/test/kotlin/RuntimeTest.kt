@@ -167,4 +167,66 @@ class RuntimeTest(
             }
         }
     }
+
+    @Test
+    fun `thread assertions`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            import kotlin.concurrent.thread
+            
+            @Singleton class MyClassA @Inject constructor()
+            @Singleton class MyClassB @Inject constructor()
+            
+            @Component @Singleton interface MySTComponent {
+                fun getA(): Lazy<MyClassA>
+                fun getB(): MyClassB
+            }
+
+            fun test() {
+                val c: MySTComponent = DaggerMySTComponent.create()
+                val mainTid = Thread.currentThread().id
+                ThreadAssertions.asserter = ThreadAssertions.Asserter {
+                    if (Thread.currentThread().id != mainTid) {
+                        throw AssertionError("Access on non-main thread")
+                    }
+                }
+                try {
+                    var success = true
+                    val t1 = thread {
+                        try {
+                            c.getA().get()
+                            success = false
+                        } catch (_: AssertionError) { }
+                    }
+                    val t2 = thread {
+                        try {
+                            c.getB()
+                            success = false
+                        } catch (_: AssertionError) { }
+                    }
+                    try {
+                        c.getA().get()
+                        c.getB()
+                    } catch (_: AssertionError) {
+                        success = false
+                    }
+                    t1.join()
+                    t2.join()
+                    
+                    if (!success) {
+                        throw AssertionError("Test failed")
+                    }
+                } catch (e: Throwable) {
+                    ThreadAssertions.asserter = null
+                }
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            inspectGeneratedClass("test.TestCaseKt") { clazz ->
+                clazz["test"](null)
+            }
+        }
+    }
 }

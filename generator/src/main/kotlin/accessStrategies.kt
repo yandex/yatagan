@@ -53,6 +53,7 @@ internal class InlineCachingStrategy(
                         }
                     }
                 } else {
+                    +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
                     +buildExpression {
                         +"local = "
                         binding.generateCreation(builder = this, inside = binding.owner)
@@ -119,6 +120,7 @@ internal class ScopedProviderStrategy(
                         }
                     }
                 } else {
+                    +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
                     +"local = new %T(this, $slot)".formatCode(providerName)
                     +"this.%L = local".formatCode(providerFieldName)
                 }

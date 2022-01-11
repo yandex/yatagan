@@ -114,7 +114,6 @@ class ScopesTest(
                         cd.countDown()
                         cd.await()
                         repeat(100) {
-                            println(Thread.currentThread().id)
                             assert(c.a === c.a && c.a === c.b.get().a &&
                                    c.a === c.c.get().a && c.a === c.d.get().b.a)
                             assert(c.b.get() === c.b.get())
