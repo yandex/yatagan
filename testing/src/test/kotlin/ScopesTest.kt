@@ -75,4 +75,64 @@ class ScopesTest(
             }
         }
     }
+
+    @Test
+    fun `multi-threaded mode`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import java.util.concurrent.CountDownLatch
+            import javax.inject.*
+            import kotlin.concurrent.thread
+            
+            @Singleton
+            class ClassA @Inject constructor()
+            
+            @Singleton
+            class ClassB @Inject constructor(val a: ClassA)
+            
+            @Singleton
+            class ClassC @Inject constructor(val a: ClassA)
+            
+            class ClassD @Inject constructor(val b: ClassB)
+            class ClassE @Inject constructor(val b: ClassB)
+             
+            @Component(multiThreadAccess = true) @Singleton
+            interface TestComponent {
+                val a: ClassA
+                val b: Lazy<ClassB>
+                val c: Provider<ClassC>
+                val d: Provider<ClassD>
+                val e: Lazy<ClassE>
+            }
+            
+            fun test() {
+                val c: TestComponent = DaggerTestComponent.create()
+                val threads = arrayListOf<Thread>()
+                val cd = CountDownLatch(8)
+                repeat(8) {
+                    threads += thread {
+                        cd.countDown()
+                        cd.await()
+                        repeat(100) {
+                            assert(c.a === c.a && c.a === c.b.get().a &&
+                                   c.a === c.c.get().a && c.a === c.d.get().b.a)
+                            assert(c.b.get() === c.b.get())
+                            assert(c.d.get() !== c.d.get())
+                            assert(c.e.get() !== c.e.get())
+                            val e = c.e
+                            assert(e.get() === e.get())
+                        }
+                    }
+                }
+                threads.forEach(Thread::join)
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") { testCase ->
+                testCase["test"](null)
+            }
+        }
+    }
 }

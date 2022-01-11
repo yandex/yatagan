@@ -36,15 +36,16 @@ Explicitly not supported API
 - [x] `@Condition`, `@AnyCondition`, ...
 - [x] `@BindsFeatureScoped` -> `@Binds`
 - [x] `@ProvidesFeatureScoped` -> `@Provides([Conditional(...), ...])`
-- [ ] Short-circuit condition evaluation preservation.
 
 ## Full solution
 
-- [ ] Validation and full-blown error messages.
-- [ ] Whetstone Validation
+- [x] Validation and full-blown error messages.
+- [x] Whetstone Validation
+- [x] Multi-threading support
 - [x] Multi-bindings
   - [x] `@IntoSet` -> `@IntoList`
   - [x] `@ElementsIntoSet` -> `@IntoList(flatten=true)`
+- [ ] Short-circuit condition evaluation preservation.
 
 Very low priority
 - [x] `@Multibinds` -> `@DeclareList`

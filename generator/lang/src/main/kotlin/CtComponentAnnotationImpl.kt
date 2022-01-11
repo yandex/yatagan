@@ -10,5 +10,6 @@ internal class CtComponentAnnotationImpl(
     override val modules: Sequence<TypeLangModel> = impl.getTypes("modules")
     override val dependencies: Sequence<TypeLangModel> = impl.getTypes("dependencies")
     override val variant: Sequence<TypeLangModel> = impl.getTypes("variant")
+    override val multiThreadAccess: Boolean = impl.getBoolean("multiThreadAccess")
 }
 

@@ -43,6 +43,7 @@ internal class ComponentGenerator(
     private val scopedProviderGenerator = lazyProvider {
         ScopedProviderGenerator(
             componentImplName = generatedClassName,
+            useDoubleChecking = graph.requiresSynchronizedAccess,
         ).also(this::registerContributor)
     }
 

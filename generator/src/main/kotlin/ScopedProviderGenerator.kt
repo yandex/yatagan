@@ -7,11 +7,13 @@ import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.Modifier.STATIC
+import javax.lang.model.element.Modifier.VOLATILE
 
 internal class ScopedProviderGenerator(
     private val componentImplName: ClassName,
+    private val useDoubleChecking: Boolean,
 ) : ComponentGenerator.Contributor {
-    val name: ClassName = componentImplName.nestedClass("CachingProvider")
+    val name: ClassName = componentImplName.nestedClass(if (useDoubleChecking) "DoubleCheck" else "CachingProvider")
 
     override fun generate(builder: TypeSpecBuilder) {
         builder.nestedType {
@@ -20,7 +22,12 @@ internal class ScopedProviderGenerator(
                 modifiers(PRIVATE, STATIC, FINAL)
                 field(componentImplName, "mFactory") { modifiers(PRIVATE, FINAL) }
                 field(ClassName.INT, "mIndex") { modifiers(PRIVATE, FINAL) }
-                field(ClassName.OBJECT, "mValue") { modifiers(PRIVATE) }
+                field(ClassName.OBJECT, "mValue") {
+                    modifiers(PRIVATE)
+                    if (useDoubleChecking) {
+                        modifiers(VOLATILE)
+                    }
+                }
                 constructor {
                     parameter(componentImplName, "factory")
                     parameter(ClassName.INT, "index")
@@ -32,10 +39,23 @@ internal class ScopedProviderGenerator(
                     modifiers(PUBLIC)
                     annotation<Override>()
                     returnType(ClassName.OBJECT)
+                    if (!useDoubleChecking) {
+                        +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+                    }
                     +"%T local = mValue".formatCode(ClassName.OBJECT)
                     controlFlow("if (local == null)") {
-                        +"local = mFactory.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
-                        +"mValue = local"
+                        if (useDoubleChecking) {
+                            controlFlow("synchronized (this)") {
+                                +"local = mValue"
+                                controlFlow("if (local == null)") {
+                                    +"local = mFactory.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
+                                    +"mValue = local"
+                                }
+                            }
+                        } else {
+                            +"local = mFactory.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
+                            +"mValue = local"
+                        }
                     }
                     +"return local"
                 }

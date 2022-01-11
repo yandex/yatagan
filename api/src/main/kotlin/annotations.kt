@@ -40,6 +40,7 @@ annotation class Component(
     val modules: Array<KClass<*>> = [],
     val dependencies: Array<KClass<*>> = [],
     val variant: Array<KClass<*>> = [],
+    val multiThreadAccess: Boolean = false,
 ) {
     @MustBeDocumented
     @Retention(AnnotationRetention.RUNTIME)
