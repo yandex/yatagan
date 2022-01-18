@@ -15,19 +15,25 @@ include("validation-impl")
 
 include("lang")
 
+include("lang-ksp")
+project(":lang-ksp").projectDir = file("lang/ksp")
+
+include("lang-jap")
+project(":lang-jap").projectDir = file("lang/jap")
+
 include("core")
 include("core-impl")
 
 include("graph")
 include("graph-impl")
 
-include("process")
+include("processor")
 
-include("ksp-driver")
-include("ksp-driver-lang")
+include("processor-jap")
+project(":processor-jap").projectDir = file("processor/jap")
 
-include("jap-driver")
-include("jap-driver-lang")
+include("processor-ksp")
+project(":processor-ksp").projectDir = file("processor/ksp")
 
 include("generator")
 include("generator-poetry")
@@ -41,9 +47,6 @@ project(":core-impl").projectDir = file("core/impl")
 
 project(":graph").projectDir = file("graph")
 project(":graph-impl").projectDir = file("graph/impl")
-
-project(":ksp-driver-lang").projectDir = file("ksp-driver/lang")
-project(":jap-driver-lang").projectDir = file("jap-driver/lang")
 
 project(":generator-poetry").projectDir = file("generator/poetry")
 project(":generator-lang").projectDir = file("generator/lang")

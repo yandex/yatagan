@@ -3,15 +3,15 @@ plugins {
     id("java-test-fixtures")
 }
 
-val kspVersion: String by extra
+val autoCommonVersion: String by extra
 
 dependencies {
     implementation(project(":api"))
-    implementation(project(":process"))
-    implementation(project(":ksp-driver-lang"))
-
+    implementation(project(":processor"))
+    implementation(project(":lang-jap"))
     implementation(kotlin("stdlib"))
-    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+
+    api("com.google.auto:auto-common:$autoCommonVersion")
 
     testFixturesImplementation(testFixtures(project(":testing")))
     testFixturesImplementation(kotlin("test"))
