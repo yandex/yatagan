@@ -80,7 +80,7 @@ private class ConditionScopeImpl(
         get() = this === Unscoped || expression.isEmpty()
 
     override val isNever: Boolean
-        get() = this === NeverScoped || expression.singleOrNull()?.isEmpty() == true
+        get() = this === NeverScoped || emptySet() in expression
 
     override fun toString() = when (this) {
         Unscoped -> "[unconditional]"

@@ -575,6 +575,7 @@ class CoreBindingsTest(
             import java.util.List;
             import javax.inject.Provider;
             import javax.inject.Inject;
+            import javax.inject.Singleton;
             import com.yandex.daggerlite.Binds;
             import com.yandex.daggerlite.Provides;
             import com.yandex.daggerlite.Component;
@@ -588,7 +589,7 @@ class CoreBindingsTest(
             interface MySpecificDeferredEvent {}
 
             class MyClass1 implements MySpecificDeferredEvent { @Inject MyClass1 () {} }
-            class MyClass2 implements MySpecificDeferredEvent { @Inject MyClass2 () {} }
+            @Singleton class MyClass2 implements MySpecificDeferredEvent { @Inject MyClass2 () {} }
             class MyClass3 implements MySpecificDeferredEvent { @Inject MyClass3 () {} }
 
             @Module
@@ -600,12 +601,17 @@ class CoreBindingsTest(
                 @IntoList @Provides static Deferred<? extends MySpecificDeferredEvent> foo5(Provider<MyClass3> p) {
                     return new Deferred<>(p);
                 }
+                @IntoList(flatten = true) @Singleton
+                @Provides static Collection<Deferred<? extends MySpecificDeferredEvent>> collection1() {
+                    return Collections.emptyList();
+                }
                 @IntoList(flatten = true)
-                @Provides static Collection<Deferred<? extends MySpecificDeferredEvent>> collection() {
+                @Provides static Collection<Deferred<? extends MySpecificDeferredEvent>> collection2() {
                     return Collections.emptyList();
                 }
             }
             
+            @Singleton
             @Component(modules = MyModule.class)
             interface MyComponent {
                 List<Deferred<? extends MySpecificDeferredEvent>> deferred();

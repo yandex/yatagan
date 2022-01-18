@@ -3,10 +3,9 @@ package com.yandex.daggerlite.core.impl
 import com.yandex.daggerlite.Binds
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
-import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
+import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -25,23 +24,33 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         impl.annotations.find(AnnotationLangModel::isScope)
     }
 
-    override val target: NodeModel by lazy(NONE) {
-        val type = if (multiBinding == MultiBindingKind.Flatten) {
-            impl.returnType.typeArguments.firstOrNull() ?: impl.returnType
-        } else impl.returnType
+    override val target: BindingTargetModel by lazy(NONE) {
         if (impl.returnType.isVoid) {
-            NodeModelImpl.Factory.NoNode()
-        } else NodeModelImpl(type = type, forQualifier = impl)
+            BindingTargetModel.Plain(NodeModelImpl.Factory.NoNode())
+        } else {
+            val target = NodeModelImpl(type = impl.returnType, forQualifier = impl)
+            val intoList = impl.intoListAnnotationIfPresent
+            if (intoList != null) {
+                if (intoList.flatten) {
+                    BindingTargetModel.FlattenMultiContribution(
+                        node = target,
+                        flattened = NodeModelImpl(
+                            type = impl.returnType.typeArguments.firstOrNull() ?: impl.returnType,
+                            qualifier = target.qualifier,
+                        )
+                    )
+                } else {
+                    BindingTargetModel.DirectMultiContribution(node = target)
+                }
+            } else {
+                BindingTargetModel.Plain(node = target)
+            }
+        }
     }
 
-    override val multiBinding: MultiBindingKind?
-        get() = impl.intoListAnnotationIfPresent?.let {
-            if (it.flatten) MultiBindingKind.Flatten else MultiBindingKind.Direct
-        }
-
     override fun validate(validator: Validator) {
-        validator.child(target)
-        if (multiBinding == MultiBindingKind.Flatten) {
+        validator.child(target.node)
+        if (target is BindingTargetModel.FlattenMultiContribution) {
             val firstArg = impl.returnType.typeArguments.firstOrNull()
             if (firstArg == null || !LangModelFactory.getCollectionType(firstArg).isAssignableFrom(impl.returnType)) {
                 validator.reportError(Errors.`invalid flattening multibinding`(insteadOf = impl.returnType))

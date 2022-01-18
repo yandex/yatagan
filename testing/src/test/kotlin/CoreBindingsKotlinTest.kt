@@ -524,27 +524,24 @@ class CoreBindingsKotlinTest(
     @Test
     fun `basic members inject`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Module
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
-            import javax.inject.Inject
-            import javax.inject.Named
-            
-            class ClassA @Inject constructor()
-            class ClassB @Inject constructor()
+            interface Api
+            @Singleton class ClassA @Inject constructor() : Api
+            @Singleton class ClassB @Inject constructor(): Api
             
             @Module
             interface MyModule {
-                @Named("hello") @Binds fun classAHello(i: ClassA): ClassA
-                @Named("bye") @Binds fun classABye(i: ClassA): ClassA
+                @Named("hello") @Binds fun classAHello(i: ClassA): Api
+                @Named("bye") @Binds fun classBBye(i: ClassB): Api
             }
             
             class Foo {
-                @set:Inject @Named("hello")
-                lateinit var helloA: ClassA
-                @set:Inject @Named("bye")
-                lateinit var bye: ClassA
+                @set:Inject @set:Named("hello")
+                lateinit var helloA: Provider<Api>
+                @set:Inject @set:Named("bye")
+                lateinit var bye: Provider<Api>
                 
                 lateinit var b: ClassB
                     private set
@@ -559,6 +556,7 @@ class CoreBindingsKotlinTest(
                     set(value) { _a = value }
             }
             
+            @Singleton
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun injectFoo(foo: Foo)

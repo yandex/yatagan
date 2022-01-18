@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.testing
 
-import com.yandex.daggerlite.validation.impl.Strings
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -153,14 +152,6 @@ class RuntimeTest(
 
         compilesSuccessfully {
             generatesJavaSources("test.DaggerTestComponent")
-            withWarning(Strings.formatMessage(
-                message = Strings.Warnings.`custom binding shadow @Inject constructor`(
-                    target = "test.Wrapper", binding = "@Provides test.MyModule::wrapper(): test.Wrapper",
-                ),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "[entry-point] wrapper", "@Provides test.MyModule::wrapper(): test.Wrapper")
-                ),
-            ))
             withNoMoreWarnings()
             inspectGeneratedClass("test.TestCaseKt") { tc ->
                 tc["test"](null)

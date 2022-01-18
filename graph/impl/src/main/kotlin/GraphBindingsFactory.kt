@@ -9,7 +9,7 @@ import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
-import com.yandex.daggerlite.core.ModuleHostedBindingModel.MultiBindingKind
+import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
@@ -37,7 +37,7 @@ internal class GraphBindingsFactory(
     private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
         val bindingModelVisitor = object : ModuleHostedBindingModel.Visitor<BaseBinding> {
             override fun visitBinds(model: BindsBindingModel): BaseBinding {
-                return if (model.target in model.sources) {
+                return if (model.target.node in model.sources) {
                     SelfDependentInvalidBinding(
                         owner = graph,
                         impl = model,
@@ -59,7 +59,7 @@ internal class GraphBindingsFactory(
             }
 
             override fun visitProvides(model: ProvidesBindingModel): BaseBinding {
-                return if (model.target in model.inputs.map(NodeDependency::node)) SelfDependentInvalidBinding(
+                return if (model.target.node in model.inputs.map(NodeDependency::node)) SelfDependentInvalidBinding(
                     owner = graph,
                     impl = model,
                 ) else ProvisionBindingImpl(
@@ -79,11 +79,16 @@ internal class GraphBindingsFactory(
                 val binding = bindingModel.accept(bindingModelVisitor)
                 add(binding)
                 // Handle multi-bindings
-                bindingModel.multiBinding?.let { kind ->
-                    multiBindings.getOrPut(bindingModel.target, ::mutableMapOf)[binding.target] = when (kind) {
-                        MultiBindingKind.Direct -> ContributionType.Element
-                        MultiBindingKind.Flatten -> ContributionType.Collection
+                when (val target = bindingModel.target) {
+                    is BindingTargetModel.DirectMultiContribution -> {
+                        multiBindings.getOrPut(target.node, ::mutableMapOf)[binding.target] =
+                            ContributionType.Element
                     }
+                    is BindingTargetModel.FlattenMultiContribution -> {
+                        multiBindings.getOrPut(target.flattened, ::mutableMapOf)[binding.target] =
+                            ContributionType.Collection
+                    }
+                    is BindingTargetModel.Plain -> Unit // Nothing to do
                 }
             }
             // Subcomponent factories (distinct).

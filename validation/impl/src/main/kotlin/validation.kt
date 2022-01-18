@@ -39,6 +39,7 @@ fun validate(
     val result: MutableMap<ValidationMessage, MutableSet<List<MayBeInvalid>>> = mutableMapOf()
 
     val markedGray = hashSetOf<MayBeInvalid>()
+    val markedBlack = hashSetOf<MayBeInvalid>()
     val stack = arrayListOf<MutableList<MayBeInvalid>>()
 
     stack.add(roots.toMutableList())
@@ -51,10 +52,13 @@ fun validate(
             continue
         }
         when (val node = subStack.last()) {
-            // No black marks here, as we want to discover all paths referencing messages.
-            // This might be not the most efficient way.
+            in markedBlack -> {
+                // TODO: Report already encountered errors if any.
+                subStack.removeLast()
+            }
             in markedGray -> {
                 subStack.removeLast()
+                markedBlack += node
                 markedGray -= node
             }
             else -> {

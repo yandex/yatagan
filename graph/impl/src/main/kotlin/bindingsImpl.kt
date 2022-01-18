@@ -6,6 +6,7 @@ import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
 import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
+import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
@@ -79,12 +80,6 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
         if (scope != null && scope != owner.scope) {
             validator.reportError(Errors.`no matching scope for binding`(binding = this@BindingMixin, scope = scope))
         }
-        if (!isImplicitBinding && target.implicitBinding != null) {
-            validator.reportWarning(Strings.Warnings.`custom binding shadow @Inject constructor`(
-                target = target,
-                binding = this@BindingMixin,
-            ))
-        }
     }
 
     override fun dependencies(): Collection<NodeDependency> = emptyList()
@@ -115,9 +110,11 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
     final override val originModule get() = impl.originModule
 
     final override val target: NodeModel by lazy(NONE) {
-        if (impl.multiBinding != null)
-            MultiBindingContributionNode(impl.target)
-        else impl.target
+        when(val target = impl.target) {
+            is BindingTargetModel.DirectMultiContribution,
+            is BindingTargetModel.FlattenMultiContribution -> MultiBindingContributionNode(target.node)
+            is BindingTargetModel.Plain -> target.node
+        }
     }
 
     private class MultiBindingContributionNode(
@@ -434,8 +431,9 @@ internal data class MissingBindingImpl(
                     factory != null -> {
                         val component = factory.createdComponent
                         if (!component.isRoot) {
-                            addNote("$target is a factory for $component, ensure that this component is specified " +
-                                    "via `@Module(subcomponents=..)` and that module is included into $owner")
+                            addNote(Strings.Notes.`subcomponent factory injection hint`(
+                                factory = factory, component = component, owner = owner,
+                            ))
                         } else {
                             addNote("$target is a factory for a root component, " +
                                     "injecting such factory is not supported")

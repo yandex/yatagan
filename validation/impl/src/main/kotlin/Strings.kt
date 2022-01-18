@@ -28,7 +28,7 @@ object Strings {
                 }
             }
             appendLine("Encountered in:")
-            encounterPaths.joinTo(this, separator = "\n") { path ->
+            encounterPaths.asSequence().take(10).joinTo(this, separator = "\n") { path ->
                 val pathElement = path.joinToString(separator = " ⟶ ") {
                     cyan(it.toString())
                 }
@@ -251,12 +251,6 @@ object Strings {
     }
 
     object Warnings {
-        @Covered
-        fun `custom binding shadow @Inject constructor`(target: Any, binding: Any) =
-            "`$target` has an inject constructor, yet a custom binding\n$Indent`$binding`\nis used " +
-                    "instead. This is usually confusing and error-prone. Please, either tweak an " +
-                    "inject constructor/conditionals and remove this binding, or remove inject constructor in " +
-                    "favor of this binding."
 
         @Covered
         fun `exposed dependency of a framework type`(function: Any) =
@@ -301,6 +295,10 @@ object Strings {
         @Covered
         fun `nested framework type`(target: Any) =
             "`$target` can't be requested in any way (lazy/provider/optional) but *directly*"
+
+        fun `subcomponent factory injection hint`(factory: Any, component: Any, owner: Any) =
+            "`$factory` is a factory for `$component`, ensure that this component is specified " +
+                    "via `@Module(subcomponents=..)` and that module is included into `$owner`"
     }
 
     object Bindings {

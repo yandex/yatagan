@@ -131,6 +131,7 @@ internal class ComponentModelImpl private constructor(
         factory?.let(validator::child)
 
         for (function in declaration.allPublicFunctions) {
+            if (!function.isAbstract) continue
             if (function.parameters.count() > 1) {
                 validator.reportError(Errors.`invalid method in component`(method = function))
             }

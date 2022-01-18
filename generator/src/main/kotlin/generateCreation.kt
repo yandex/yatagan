@@ -100,7 +100,8 @@ private class CreationGeneratorVisitor(
 
     override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding) {
         with(builder) {
-            +"%N.%N()".formatCode(
+            +"%N.%N.%N()".formatCode(
+                componentForBinding(binding),
                 Generators[binding.owner].factoryGenerator.fieldNameFor(binding.dependency),
                 binding.getter.name,
             )

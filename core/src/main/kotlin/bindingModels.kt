@@ -11,13 +11,20 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  */
 interface ModuleHostedBindingModel : MayBeInvalid {
     val originModule: ModuleModel
-    val target: NodeModel
-    val multiBinding: MultiBindingKind?
+    val target: BindingTargetModel
     val scope: AnnotationLangModel?
 
-    enum class MultiBindingKind {
-        Direct,
-        Flatten,
+    sealed class BindingTargetModel {
+        abstract val node: NodeModel
+
+        override fun toString() = node.toString()
+
+        class Plain(override val node: NodeModel) : BindingTargetModel()
+        class DirectMultiContribution(override val node: NodeModel) : BindingTargetModel()
+        class FlattenMultiContribution(
+            override val node: NodeModel,
+            val flattened: NodeModel,
+        ) : BindingTargetModel()
     }
 
     interface Visitor<R> {
