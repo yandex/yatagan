@@ -11,30 +11,30 @@ import javax.lang.model.element.Modifier.STATIC
 internal class UnscopedProviderGenerator(
     private val componentImplName: ClassName,
 ) : ComponentGenerator.Contributor {
-    val name: ClassName = componentImplName.nestedClass("FactoryImpl")
+    val name: ClassName = componentImplName.nestedClass("ProviderImpl")
 
     override fun generate(builder: TypeSpecBuilder) {
         builder.nestedType {
             buildClass(name) {
-                implements(Names.Provider)
+                implements(Names.Lazy)
                 modifiers(PRIVATE, STATIC, FINAL)
-                field(componentImplName, "mFactory") {
+                field(componentImplName, "mDelegate") {
                     modifiers(PRIVATE, FINAL)
                 }
                 field(ClassName.INT, "mIndex") {
                     modifiers(PRIVATE, FINAL)
                 }
                 constructor {
-                    parameter(componentImplName, "factory")
+                    parameter(componentImplName, "delegate")
                     parameter(ClassName.INT, "index")
-                    +"mFactory = factory"
-                    +"mIndex = index"
+                    +"this.mDelegate = delegate"
+                    +"this.mIndex = index"
                 }
                 method("get") {
                     modifiers(PUBLIC)
                     annotation<Override>()
                     returnType(ClassName.OBJECT)
-                    +"return mFactory.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
+                    +"return this.mDelegate.%N(this.mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                 }
             }
         }

@@ -46,6 +46,11 @@ internal class ComponentGenerator(
             useDoubleChecking = graph.requiresSynchronizedAccess,
         ).also(this::registerContributor)
     }
+    private val lockGeneratorProvider = lazyProvider {
+        LockGenerator(
+            componentImplName = generatedClassName,
+        ).also(this@ComponentGenerator::registerContributor)
+    }
 
     init {
         Generators[graph] = object : GeneratorContainer {
@@ -58,6 +63,7 @@ internal class ComponentGenerator(
                 multiFactory = slotSwitchingGenerator,
                 unscopedProviderGenerator = unscopedProviderGenerator,
                 scopedProviderGenerator = scopedProviderGenerator,
+                lockGenerator = lockGeneratorProvider,
             ).also(this@ComponentGenerator::registerContributor)
 
             override val conditionGenerator = ConditionGenerator(
