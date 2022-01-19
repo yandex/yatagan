@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.generator
 
+import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
@@ -10,59 +11,18 @@ import com.yandex.daggerlite.graph.BindingGraph
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.VOLATILE
 
-internal class InlineCachingStrategy(
-    private val binding: Binding,
+internal abstract class CachingStrategyBase(
+    protected val binding: Binding,
     fieldsNs: Namespace,
     methodsNs: Namespace,
 ) : AccessStrategy {
-    private val instanceFieldName: String
-    private val instanceAccessorName: String
+    protected val instanceFieldName: String
+    protected val instanceAccessorName: String
 
     init {
         val target = binding.target
         instanceFieldName = fieldsNs.name(target.name, suffix = "instance", qualifier = target.qualifier)
         instanceAccessorName = methodsNs.name(target.name, prefix = "cache", qualifier = target.qualifier)
-    }
-
-    override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
-        val targetType = binding.target.typeName()
-        field(targetType, instanceFieldName) {
-            modifiers(PRIVATE)
-            if (binding.owner.requiresSynchronizedAccess) {
-                modifiers(VOLATILE)
-            }
-        }
-        method(instanceAccessorName) {
-            modifiers(PRIVATE)
-            returnType(targetType)
-            +"%T local = this.%N".formatCode(targetType, instanceFieldName)
-            controlFlow("if (local == null)") {
-                if (binding.owner.requiresSynchronizedAccess) {
-                    // Synchronizing on `this` will be a huge performance bottleneck in
-                    // heavily multi-threaded environments. Yet when multi-threaded access occurs occasionally,
-                    // this approach is sufficient to guarantee basic correctness.
-                    // TODO(perf): devise a better strategy for this.
-                    controlFlow("synchronized (this)") {
-                        +"local = this.%N".formatCode(instanceFieldName)
-                        controlFlow("if (local == null)") {
-                            +buildExpression {
-                                +"local = "
-                                binding.generateCreation(builder = this, inside = binding.owner)
-                            }
-                            +"this.%N = local".formatCode(instanceFieldName)
-                        }
-                    }
-                } else {
-                    +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
-                    +buildExpression {
-                        +"local = "
-                        binding.generateCreation(builder = this, inside = binding.owner)
-                    }
-                    +"this.%N = local".formatCode(instanceFieldName)
-                }
-            }
-            +"return local"
-        }
     }
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
@@ -78,73 +38,87 @@ internal class InlineCachingStrategy(
     }
 }
 
-internal class ScopedProviderStrategy(
-    private val binding: Binding,
-    multiFactory: SlotSwitchingGenerator,
-    cachingProvider: ScopedProviderGenerator,
+internal class CachingStrategySingleThread(
+    binding: Binding,
     fieldsNs: Namespace,
     methodsNs: Namespace,
-) : AccessStrategy {
-    private val providerName = cachingProvider.name
-    private val slot = multiFactory.requestSlot(binding)
-    private val providerFieldName: String
-    private val providerAccessorName: String
-    private val instanceAccessorName: String
-
-    init {
-        val target = binding.target
-        providerFieldName = fieldsNs.name(target.name, suffix = "provider", qualifier = target.qualifier)
-        providerAccessorName = methodsNs.name(target.name, prefix = "scopedProviderFor", qualifier = target.qualifier)
-        // TODO: Here we assume binding has `Direct` requests, which may not be true - unneeded code is generated.
-        instanceAccessorName = methodsNs.name(target.name, prefix = "unwrapProvider", qualifier = target.qualifier)
-    }
-
+) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
-        field(providerName, providerFieldName) {
+        val targetType = binding.target.typeName()
+        field(targetType, instanceFieldName) {
             modifiers(PRIVATE)
-            if (binding.owner.requiresSynchronizedAccess) {
-                modifiers(VOLATILE)
-            }
-        }
-        method(providerAccessorName) {
-            modifiers(PRIVATE)
-            returnType(providerName)
-            +"%T local = this.%L".formatCode(providerName, providerFieldName)
-            controlFlow("if (local == null)") {
-                if (binding.owner.requiresSynchronizedAccess) {
-                    controlFlow("synchronized (this)") {
-                        +"local = this.%L".formatCode(providerFieldName)
-                        controlFlow("if (local == null)") {
-                            +"local = new %T(this, $slot)".formatCode(providerName)
-                            +"this.%L = local".formatCode(providerFieldName)
-                        }
-                    }
-                } else {
-                    +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
-                    +"local = new %T(this, $slot)".formatCode(providerName)
-                    +"this.%L = local".formatCode(providerFieldName)
-                }
-            }
-            +"return local"
         }
         method(instanceAccessorName) {
             modifiers(PRIVATE)
-            val typeName = binding.target.typeName()
-            returnType(typeName)
-            +"return (%T) $providerAccessorName().get()".formatCode(typeName)
+            returnType(targetType)
+            +"%T local = this.%N".formatCode(targetType, instanceFieldName)
+            controlFlow("if (local == null)") {
+                +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+                +buildExpression {
+                    +"local = "
+                    binding.generateCreation(builder = this, inside = binding.owner)
+                }
+                +"this.%N = local".formatCode(instanceFieldName)
+            }
+            +"return (%T) local".formatCode(targetType)
         }
     }
+}
+
+internal class CachingStrategyMultiThread(
+    binding: Binding,
+    fieldsNs: Namespace,
+    methodsNs: Namespace,
+    lock: LockGenerator,
+) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
+    private val lockName = lock.name
+
+    override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
+        val targetType = binding.target.typeName()
+        field(ClassName.OBJECT, instanceFieldName) {
+            modifiers(PRIVATE, VOLATILE)
+            initializer {
+                +"new %T()".formatCode(lockName)
+            }
+        }
+        method(instanceAccessorName) {
+            modifiers(PRIVATE)
+            returnType(targetType)
+            +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
+            controlFlow("if (local instanceof %T)".formatCode(lockName)) {
+                controlFlow("synchronized (local)") {
+                    +"local = this.%N".formatCode(instanceFieldName)
+                    controlFlow("if (local instanceof %T)".formatCode(lockName)) {
+                        +buildExpression {
+                            +"local = "
+                            binding.generateCreation(builder = this, inside = binding.owner)
+                        }
+                        +"this.%N = local".formatCode(instanceFieldName)
+                    }
+                }
+            }
+            +"return (%T) local".formatCode(targetType)
+        }
+    }
+}
+
+internal class SlotProviderStrategy(
+    private val binding: Binding,
+    multiFactory: SlotSwitchingGenerator,
+    cachingProvider: UnscopedProviderGenerator,
+) : AccessStrategy {
+
+    private val providerName = cachingProvider.name
+    private val slot = multiFactory.requestSlot(binding)
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
-        // Generate access either to provider, lazy or direct.
-        builder.apply {
-            val component = componentForBinding(inside = inside, binding = binding)
-            when (kind) {
-                DependencyKind.Direct -> +"$component.$instanceAccessorName()"
-                DependencyKind.Lazy, DependencyKind.Provider -> +"$component.$providerAccessorName()"
-                else -> throw AssertionError()
-            }.let { /*exhaustive*/ }
-        }
+        when (kind) {
+            DependencyKind.Lazy, DependencyKind.Provider -> builder.apply {
+                val component = componentForBinding(inside = inside, binding = binding)
+                +"new %T($component, $slot)".formatCode(providerName)
+            }
+            else -> throw AssertionError()
+        }.let { /*exhaustive*/ }
     }
 }
 
@@ -192,7 +166,7 @@ internal class WrappingAccessorStrategy(
 internal class CompositeStrategy(
     private val directStrategy: AccessStrategy,
     private val lazyStrategy: AccessStrategy? = directStrategy,
-    private val providerStrategy: AccessStrategy? = directStrategy,
+    private val providerStrategy: AccessStrategy? = lazyStrategy,
     private val conditionalStrategy: AccessStrategy? = null,
     private val conditionalLazyStrategy: AccessStrategy? = null,
     private val conditionalProviderStrategy: AccessStrategy? = null,

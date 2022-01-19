@@ -13,14 +13,14 @@ internal class ScopedProviderGenerator(
     private val componentImplName: ClassName,
     private val useDoubleChecking: Boolean,
 ) : ComponentGenerator.Contributor {
-    val name: ClassName = componentImplName.nestedClass(if (useDoubleChecking) "DoubleCheck" else "CachingProvider")
+    val name: ClassName = componentImplName.nestedClass(if (useDoubleChecking) "DoubleCheck" else "CachingProviderImpl")
 
     override fun generate(builder: TypeSpecBuilder) {
         builder.nestedType {
             buildClass(name) {
                 implements(Names.Lazy)
                 modifiers(PRIVATE, STATIC, FINAL)
-                field(componentImplName, "mFactory") { modifiers(PRIVATE, FINAL) }
+                field(componentImplName, "mDelegate") { modifiers(PRIVATE, FINAL) }
                 field(ClassName.INT, "mIndex") { modifiers(PRIVATE, FINAL) }
                 field(ClassName.OBJECT, "mValue") {
                     modifiers(PRIVATE)
@@ -31,7 +31,7 @@ internal class ScopedProviderGenerator(
                 constructor {
                     parameter(componentImplName, "factory")
                     parameter(ClassName.INT, "index")
-                    +"mFactory = factory"
+                    +"mDelegate = factory"
                     +"mIndex = index"
                 }
 
@@ -48,12 +48,12 @@ internal class ScopedProviderGenerator(
                             controlFlow("synchronized (this)") {
                                 +"local = mValue"
                                 controlFlow("if (local == null)") {
-                                    +"local = mFactory.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
+                                    +"local = mDelegate.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                                     +"mValue = local"
                                 }
                             }
                         } else {
-                            +"local = mFactory.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
+                            +"local = mDelegate.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                             +"mValue = local"
                         }
                     }

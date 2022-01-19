@@ -13,6 +13,7 @@ internal class AccessStrategyManager(
     multiFactory: Provider<SlotSwitchingGenerator>,
     unscopedProviderGenerator: Provider<UnscopedProviderGenerator>,
     scopedProviderGenerator: Provider<ScopedProviderGenerator>,
+    lockGenerator: Provider<LockGenerator>,
 ) : ComponentGenerator.Contributor {
 
     private val strategies: Map<Binding, AccessStrategy> = thisGraph.localBindings.entries.associateBy(
@@ -23,25 +24,31 @@ internal class AccessStrategyManager(
                 return EmptyAccessStrategy
             }
             val strategy = if (binding.scope != null) {
-                if (usage.lazy + usage.provider == 0) {
-                    // No need to generate actual provider instance, inline caching would do.
-                    // TODO: There's a theoretical possibility to use inline strategy here if it can be proven,
-                    //  that this binding has *a single direct usage as a dependency of a binding of the same scope*.
-                    InlineCachingStrategy(
-                        binding = binding,
-                        fieldsNs = fieldsNs,
-                        methodsNs = methodsNs,
-                    )
-                } else {
-                    // Generate actual provider instance.
-                    ScopedProviderStrategy(
-                        binding = binding,
-                        multiFactory = multiFactory.get(),
-                        cachingProvider = scopedProviderGenerator.get(),
-                        fieldsNs = fieldsNs,
-                        methodsNs = methodsNs,
-                    )
-                }
+                // TODO: There's a theoretical possibility to use inline strategy here if it can be proven,
+                //  that this binding has *a single direct usage as a dependency of a binding of the same scope*.
+                CompositeStrategy(
+                    directStrategy = if (thisGraph.requiresSynchronizedAccess) {
+                        CachingStrategyMultiThread(
+                            binding = binding,
+                            fieldsNs = fieldsNs,
+                            methodsNs = methodsNs,
+                            lock = lockGenerator.get(),
+                        )
+                    } else {
+                        CachingStrategySingleThread(
+                            binding = binding,
+                            fieldsNs = fieldsNs,
+                            methodsNs = methodsNs,
+                        )
+                    },
+                    lazyStrategy = if (usage.lazy + usage.provider > 0) {
+                        SlotProviderStrategy(
+                            binding = binding,
+                            multiFactory = multiFactory.get(),
+                            cachingProvider = unscopedProviderGenerator.get(),
+                        )
+                    } else null
+                )
             } else {
                 if (usage.lazy + usage.provider == 0) {
                     // Inline instance creation does the trick.

@@ -27,7 +27,7 @@ internal class SlotSwitchingGenerator(
                 boundSlots.forEach { (binding, slot) ->
                     +buildExpression {
                         +"case $slot: return "
-                        binding.generateCreation(builder = this, inside = thisGraph)
+                        binding.generateAccess(builder = this, inside = thisGraph)
                     }
                 }
                 +"default: throw new %T()".formatCode(Names.AssertionError)
@@ -36,6 +36,6 @@ internal class SlotSwitchingGenerator(
     }
 
     companion object {
-        const val FactoryMethodName = "switch\$\$new"
+        const val FactoryMethodName = "switch\$\$access"
     }
 }
