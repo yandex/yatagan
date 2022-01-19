@@ -158,7 +158,6 @@ internal class ComponentFactoryModelImpl private constructor(
     ) : InputPayload.Module, ClassBackedModel by module {
         override fun validate(validator: Validator) {
             if (!module.requiresInstance ||
-                module.isTriviallyConstructable ||
                 module !in createdComponent.modules) {
                 validator.reportError(Errors.`unneeded module`())
             }
