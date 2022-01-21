@@ -29,7 +29,7 @@ object Strings {
             }
             appendLine("Encountered in:")
             encounterPaths.asSequence().take(10).joinTo(this, separator = "\n") { path ->
-                val pathElement = path.joinToString(separator = " ⟶ ") {
+                val pathElement = path.joinToString(separator = " -> ") {
                     cyan(it.toString())
                 }
                 "$Indent$pathElement"
