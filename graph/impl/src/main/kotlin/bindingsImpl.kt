@@ -209,7 +209,7 @@ internal class AliasBindingImpl(
     override fun toString() = "[alias] $impl"
 
     override fun validate(validator: Validator) {
-        validator.child(source)
+        validator.child(owner.resolveRaw(source))
         if (impl.scope != null) {
             validator.reportWarning("Scope has no effect on 'alias' binding") {
                 addNote("Scope is inherited from source graph node and can not be overridden")

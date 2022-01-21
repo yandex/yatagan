@@ -262,6 +262,62 @@ class CoreBindingsFailureTest(
     }
 
     @Test
+    fun `condition propagates through alias and is validated`() {
+        useSourceSet(features)
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            annotation class NotAFeature
+
+            interface Api
+            @Conditional([NotAFeature::class, A::class]) class Impl @Inject constructor() : Api
+            @Module interface TestModule {
+                @Binds fun impl(i: Impl): Api
+                companion object {
+                    @IntoList @Provides fun toAny(i: Api): Any {
+                        return i
+                    }
+                }
+            }
+            @Component(modules = [TestModule::class]) interface TestComponent {
+                val any: List<Any>
+            }
+        """.trimIndent())
+
+        failsToCompile {
+            withError(formatMessage(
+                message = Errors.`no conditions on feature`(),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] getAny",
+                        "[intrinsic] multi-bound `java.util.List<java.lang.Object>` list:\n" +
+                            "    @Provides test.TestModule::toAny(test.Api): java.lang.Object\n",
+                        "@Provides test.TestModule::toAny(test.Api): java.lang.Object",
+                        "[alias] @Binds test.TestModule::impl(test.Impl): test.Api", "@Inject test.Impl",
+                        "[feature] test.NotAFeature")
+                ),
+            ))
+            withError(formatMessage(
+                message = Errors.`incompatible condition scope`(
+                    aCondition = "[test.Foo.isEnabledA]",
+                    bCondition = "[unconditional]",
+                    a = "test.Api",
+                    b = "@Provides test.TestModule::toAny(test.Api): java.lang.Object",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] getAny",
+                        "[intrinsic] multi-bound `java.util.List<java.lang.Object>` list:\n" +
+                                "    @Provides test.TestModule::toAny(test.Api): java.lang.Object\n",
+                        "@Provides test.TestModule::toAny(test.Api): java.lang.Object",
+                    )
+                ),
+            ))
+            withNoWarnings()
+            withNoMoreErrors()
+        }
+    }
+
+    @Test
     fun `incompatible conditions`() {
         useSourceSet(features)
 

@@ -210,7 +210,7 @@ class MultibindingsTest(
             interface Create
             
             @Singleton
-            class ClassA @Inject constructor (b: ClassB) : Create
+            class ClassA @Inject constructor (b: Optional<ClassB>) : Create
             
             @Singleton
             @Conditional([Features.Feature::class])
