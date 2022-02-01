@@ -71,7 +71,7 @@ internal class ModuleModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (impl == null) {
-            validator.reportError(Errors.`declaration is not annotated with @Module`())
+            validator.reportError(Errors.nonModule())
         }
         for (binding in bindings) {
             validator.child(binding)

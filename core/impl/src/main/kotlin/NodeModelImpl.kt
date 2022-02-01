@@ -82,7 +82,7 @@ internal class NodeModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (isFrameworkType(type)) {
-            validator.reportError(Errors.`framework type is manually managed`())
+            validator.reportError(Errors.manualFrameworkType())
         }
     }
 

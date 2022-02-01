@@ -48,7 +48,7 @@ internal class MembersInjectorModelImpl private constructor(
             validator.child(dependency.node)
         }
         if (!injector.returnType.isVoid) {
-            validator.reportError(Strings.Errors.`non-void injector method return type`())
+            validator.reportError(Strings.Errors.invalidInjectorReturn())
         }
     }
 

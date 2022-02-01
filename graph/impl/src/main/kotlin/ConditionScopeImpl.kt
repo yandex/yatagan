@@ -144,7 +144,7 @@ private class ConditionLiteralImpl private constructor(
                     override val path: List<MemberLangModel> get() = emptyList()
                     override fun validate(validator: Validator) {
                         // Always invalid
-                        validator.reportError(Errors.`invalid condition`(expression = condition))
+                        validator.reportError(Errors.invalidCondition(expression = condition))
                     }
 
                     override fun toString() = "<invalid>"
@@ -193,13 +193,13 @@ private class LiteralPayloadImpl private constructor(
 
             pathSource.split('.').forEach { name ->
                 if (finished) {
-                    pathParsingError = Errors.`invalid condition - unable to reach boolean`()
+                    pathParsingError = Errors.invalidConditionNoBoolean()
                     return@forEach
                 }
 
                 val member = findAccessor(currentType.declaration, name)
                 if (member == null) {
-                    pathParsingError = Errors.`invalid condition - missing member`(name = name, type = currentType)
+                    pathParsingError = Errors.invalidConditionMissingMember(name = name, type = currentType)
                     return@forEach
                 }
                 add(member)
@@ -212,7 +212,7 @@ private class LiteralPayloadImpl private constructor(
                 }
             }
             if (!finished && pathParsingError == null) {
-                pathParsingError = Errors.`invalid condition - unable to reach boolean`()
+                pathParsingError = Errors.invalidConditionNoBoolean()
             }
         }
     }

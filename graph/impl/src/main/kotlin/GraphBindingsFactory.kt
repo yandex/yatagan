@@ -210,9 +210,9 @@ internal class GraphBindingsFactory(
 
             bindings.ifContainsDuplicates { duplicates ->
                 validator.report(buildMessage(Kind.Error, fun ValidationMessageBuilder.() {
-                    contents = Strings.Errors.`conflicting bindings`(`for` = node)
+                    contents = Strings.Errors.conflictingBindings(`for` = node)
                     duplicates.forEach { binding ->
-                        addNote(Strings.Notes.`duplicate binding`(binding))
+                        addNote(Strings.Notes.duplicateBinding(binding))
                     }
                 }))
             }

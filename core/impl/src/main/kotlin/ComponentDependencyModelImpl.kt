@@ -42,12 +42,12 @@ internal class ComponentDependencyModelImpl private constructor(
         validator.inline(node = asNode())
 
         if (!type.declaration.isAbstract) {
-            validator.reportWarning(Strings.Warnings.`non-abstract dependency declaration`())
+            validator.reportWarning(Strings.Warnings.nonAbstractDependency())
         }
 
         exposedEntryPoints.forEach { (dependency, function) ->
             if (dependency.kind != DependencyKind.Direct) {
-                validator.reportWarning(Strings.Warnings.`exposed dependency of a framework type`(
+                validator.reportWarning(Strings.Warnings.ignoredDependencyOfFrameworkType(
                     function = function,
                 ))
             }

@@ -17,7 +17,7 @@ internal abstract class GraphEntryPointBase : MayBeInvalid {
         val resolved = owner.resolveBinding(node)
         if (!kind.isOptional) {
             if (resolved.conditionScope /* no component scope */ !in owner.conditionScope) {
-                validator.reportError(Strings.Errors.`incompatible condition scope for entry-point`(
+                validator.reportError(Strings.Errors.incompatibleConditionEntyPoint(
                     aCondition = resolved.conditionScope, bCondition = owner.conditionScope,
                     binding = resolved, component = owner,
                 ))

@@ -18,7 +18,7 @@ internal class FlavorImpl private constructor(
         validator.child(dimension)
 
         if (type.declaration.componentFlavorIfPresent == null) {
-            validator.reportError(Errors.`declaration is not annotated with @ComponentFlavor`())
+            validator.reportError(Errors.nonFlavor())
         }
     }
 

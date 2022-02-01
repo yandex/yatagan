@@ -62,10 +62,10 @@ internal class ComponentFactoryModelImpl private constructor(
             override fun validate(validator: Validator) {
                 validator.inline(payload)
                 if (method.parameters.first().isAnnotatedWith<BindsInstance>()) {
-                    validator.reportWarning(Strings.Warnings.`@BindsInstance on builder method's parameter`())
+                    validator.reportWarning(Strings.Warnings.ignoredBindsInstance())
                 }
                 if (!method.returnType.isVoid && !method.returnType.isAssignableFrom(factoryDeclaration.asType())) {
-                    validator.reportError(Errors.`invalid builder setter return type`(
+                    validator.reportError(Errors.invalidBuilderSetterReturn(
                         creatorType = factoryDeclaration.asType(),
                     ))
                 }
@@ -115,17 +115,17 @@ internal class ComponentFactoryModelImpl private constructor(
         }
 
         if (!factoryDeclaration.isInterface) {
-            validator.reportError(Errors.`component creator must be an interface`())
+            validator.reportError(Errors.nonInterfaceCreator())
         }
         val factory = factoryMethod
         if (factory == null) {
-            validator.reportError(Errors.`missing component creating method`())
+            validator.reportError(Errors.missingCreatingMethod())
         }
 
         for (function in factoryDeclaration.allPublicFunctions) {
             if (function == factoryMethod || function.parameters.count() == 1 || !function.isAbstract)
                 continue
-            validator.reportError(Errors.`invalid method in component creator`(method = function))
+            validator.reportError(Errors.unknownMethodInCreator(method = function))
         }
 
         // TODO: check for duplicates in modules, dependencies.
@@ -137,7 +137,7 @@ internal class ComponentFactoryModelImpl private constructor(
             .map { it.dependency }
             .toSet()
         for (missingDependency in createdComponent.dependencies - providedDependencies) {
-            validator.reportError(Errors.`missing component dependency`(missing = missingDependency))
+            validator.reportError(Errors.missingComponentDependency(missing = missingDependency))
         }
 
         // Check for missing modules, that require instance and not trivially constructable
@@ -149,7 +149,7 @@ internal class ComponentFactoryModelImpl private constructor(
         val allModulesRequiresInstance = createdComponent.modules.asSequence()
             .filter(ModuleModel::requiresInstance).toMutableSet()
         for (missingModule in (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }) {
-            validator.reportError(Errors.`missing module`(missing = missingModule))
+            validator.reportError(Errors.missingModule(missing = missingModule))
         }
     }
 
@@ -159,7 +159,7 @@ internal class ComponentFactoryModelImpl private constructor(
         override fun validate(validator: Validator) {
             if (!module.requiresInstance ||
                 module !in createdComponent.modules) {
-                validator.reportError(Errors.`unneeded module`())
+                validator.reportError(Errors.extraModule())
             }
         }
 
@@ -181,7 +181,7 @@ internal class ComponentFactoryModelImpl private constructor(
     ) : InputPayload.Dependency, ClassBackedModel by dependency {
         override fun validate(validator: Validator) {
             if (dependency !in createdComponent.dependencies) {
-                validator.reportError(Errors.`unneeded component dependency`())
+                validator.reportError(Errors.extraComponentDependency())
             }
         }
 
