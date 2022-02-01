@@ -13,6 +13,7 @@ import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.validation.Validator
@@ -57,7 +58,7 @@ internal class BindingGraphImpl(
     )
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
-    override val localConditionLiterals = mutableSetOf<ConditionScope.Literal>()
+    override val localConditionLiterals = mutableMapOf<ConditionScope.Literal, LiteralUsage>()
     override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
 
@@ -134,14 +135,23 @@ internal class BindingGraphImpl(
         }
 
         // Add all condition literals from all local bindings.
+        var isEager = true
         for (binding in localBindings.keys) for (clause in binding.conditionScope.expression) for (literal in clause) {
-            localConditionLiterals += literal.normalized()
+            val normalized = literal.normalized()
+            if (isEager) {
+                localConditionLiterals[normalized] = LiteralUsage.Eager
+                isEager = false
+            } else {
+                if (normalized !in localConditionLiterals) {
+                    localConditionLiterals[normalized] = LiteralUsage.Lazy
+                }
+            }
         }
         // Remove all local condition literals from every child (in-depth).
         val graphQueue = ArrayDeque(children)
         while (graphQueue.isNotEmpty()) {
             val child = graphQueue.removeFirst()
-            if (child.localConditionLiterals.removeAll(localConditionLiterals)) {
+            if (child.localConditionLiterals.keys.removeAll(localConditionLiterals.keys)) {
                 // This will never be seen by materialization and that's okay, because no bindings are required here.
                 child.usedParents += this
             }
