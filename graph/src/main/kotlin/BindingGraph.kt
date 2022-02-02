@@ -8,6 +8,8 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage.Eager
+import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage.Lazy
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 interface BindingGraph : MayBeInvalid {
@@ -26,7 +28,7 @@ interface BindingGraph : MayBeInvalid {
     /**
      * TODO: doc
      */
-    val localConditionLiterals: Set<ConditionScope.Literal>
+    val localConditionLiterals: Map<ConditionScope.Literal, LiteralUsage>
 
     /**
      * Child graphs (or Subcomponents). Empty if no children present.
@@ -84,5 +86,24 @@ interface BindingGraph : MayBeInvalid {
         val optional: Int
         val optionalLazy: Int
         val optionalProvider: Int
+    }
+
+    /**
+     * Literal usage kind depending on expression position.
+     *
+     * In expression `A && B || C`, `A` is [Eager], while `B`, `C` are [Lazy].
+     * In other words, a literal is [Eager] iff it is present in eager position at in at least one expression.
+     */
+    enum class LiteralUsage {
+        /**
+         * When a literal is certainly going to be evaluated.
+         */
+        Eager,
+
+        /**
+         * When a literal evaluation may be skipped due to a short-circuit expression evaluation.
+         * Such literal should be evaluated according to the short-circuit rules.
+         */
+        Lazy,
     }
 }

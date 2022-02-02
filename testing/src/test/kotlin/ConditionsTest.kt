@@ -728,4 +728,41 @@ class ConditionsTest(
             }
         }
     }
+
+    @Test
+    fun `lazy condition evaluation`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            object Features {
+                val notReached: Boolean get() = throw AssertionError("Not reached")
+                val disabled: Boolean get() = false
+            }
+
+            @AllConditions([
+                Condition(Features::class, condition = "disabled"),
+                Condition(Features::class, condition = "notReached"),
+            ])
+            annotation class A
+            
+            @Conditional([A::class])
+            class ClassA @Inject constructor()
+
+            @Component
+            interface MyComponent { val a: Optional<ClassA> }
+
+            fun test() {
+                val c: MyComponent = DaggerMyComponent.create() 
+                assert(!c.a.isPresent)
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
+            }
+        }
+    }
 }

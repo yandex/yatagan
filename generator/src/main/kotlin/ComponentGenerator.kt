@@ -68,6 +68,7 @@ internal class ComponentGenerator(
 
             override val conditionGenerator = ConditionGenerator(
                 fieldsNs = fieldsNs,
+                methodsNs = methodsNs,
                 thisGraph = graph,
             ).also(this@ComponentGenerator::registerContributor)
 

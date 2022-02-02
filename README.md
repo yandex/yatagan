@@ -45,7 +45,7 @@ Explicitly not supported API
 - [x] Multi-bindings
   - [x] `@IntoSet` -> `@IntoList`
   - [x] `@ElementsIntoSet` -> `@IntoList(flatten=true)`
-- [ ] Short-circuit condition evaluation preservation.
+- [x] Short-circuit condition evaluation preservation.
 
 Very low priority
 - [x] `@Multibinds` -> `@DeclareList`
