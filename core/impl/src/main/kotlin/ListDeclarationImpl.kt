@@ -1,28 +1,25 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.DeclareList
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.lang.DeclareListAnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.isAnnotatedWith
 
-internal class ListDeclarationImpl(
-    private val impl: FunctionLangModel,
-    private val declareList: DeclareListAnnotationLangModel,
+internal class ListDeclarationImpl private constructor(
+    override val listType: NodeModel,
 ) : ListDeclarationModel {
-    override val listType: NodeModel
-        get() = NodeModelImpl(impl.returnType)
-    override val orderByDependency: Boolean
-        get() = declareList.orderByDependency
 
-    override fun equals(other: Any?): Boolean {
-        return this === other || (other is ListDeclarationImpl &&
-                listType == other.listType &&
-                orderByDependency == other.orderByDependency)
-    }
+    companion object Factory : ObjectCache<NodeModel, ListDeclarationImpl>() {
+        operator fun invoke(function: FunctionLangModel): ListDeclarationImpl {
+            require(function.isAnnotatedWith<DeclareList>()) { "Not reached" }
+            return Factory(NodeModelImpl(
+                type = function.returnType,
+                forQualifier = function,
+            ))
+        }
 
-    override fun hashCode(): Int {
-        var result = listType.hashCode()
-        result = 31 * result + orderByDependency.hashCode()
-        return result
+        operator fun invoke(listType: NodeModel) = createCached(listType, ::ListDeclarationImpl)
     }
 }

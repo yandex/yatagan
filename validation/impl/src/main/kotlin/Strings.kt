@@ -212,9 +212,6 @@ object Strings {
             "Can not find accessible `$name` member in $type"
 
 
-        fun `conflicting list declarations`(`for`: Any) =
-            "Conflicting list declarations for $`for`"
-
         @Covered
         fun `conflicting bindings`(`for`: Any) =
             "Conflicting bindings for `$`for``"
@@ -311,11 +308,8 @@ object Strings {
         fun instance(origin: Any) =
             "[intrinsic] pre-provided instance via `$origin`"
 
-        fun multibinding(elementType: Any, declaration: Any? = null, contributions: Iterable<Any>) = buildString {
+        fun multibinding(elementType: Any, contributions: Iterable<Any>) = buildString {
             append("[intrinsic] multi-bound `$elementType` list")
-            if (declaration != null) {
-                append(" declared by `$declaration`")
-            }
             appendLine(":")
             contributions.forEach {
                 append(Indent).appendLine(it)

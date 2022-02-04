@@ -5,7 +5,7 @@ package com.yandex.daggerlite.core.lang
  * Contains additional information, like type arguments.
  * **Represents only non-nullable type**. It must be an error to try and represent a nullable type.
  */
-interface TypeLangModel {
+interface TypeLangModel : Comparable<TypeLangModel> {
     /**
      * The corresponding type declaration.
      */

@@ -126,7 +126,6 @@ annotation class ComponentFlavor(
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class DeclareList(
-    val orderByDependency: Boolean = false,
 )
 
 @MustBeDocumented

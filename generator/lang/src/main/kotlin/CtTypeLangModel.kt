@@ -11,4 +11,9 @@ interface CtTypeLangModel : TypeLangModel {
      * @see CtTypeNameModel
      */
     val nameModel: CtTypeNameModel
+
+    override fun compareTo(other: TypeLangModel): Int {
+        if (other !is CtTypeLangModel) return -1
+        return nameModel.toString().compareTo(other.nameModel.toString())
+    }
 }

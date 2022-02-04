@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.DeclareList
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.ComponentModel
@@ -9,6 +10,7 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
@@ -32,14 +34,13 @@ internal class ModuleModelImpl private constructor(
     }
 
     override val listDeclarations: Sequence<ListDeclarationModel> =
-        declaration.allPublicFunctions.mapNotNull { method ->
-            method.declareListAnnotationIfPresent?.let { declareList ->
+        declaration.allPublicFunctions
+            .filter { it.isAnnotatedWith<DeclareList>() }
+            .map { method ->
                 ListDeclarationImpl(
-                    impl = method,
-                    declareList = declareList,
+                    function = method,
                 )
-            }
-        }.memoize()
+            }.memoize()
 
     override val requiresInstance: Boolean by lazy(NONE) {
         mayRequireInstance && bindings.any { it is ProvidesBindingModel && it.requiresModuleInstance }

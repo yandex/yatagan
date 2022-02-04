@@ -33,11 +33,6 @@ interface FunctionLangModel : MemberLangModel, CallableLangModel {
     val intoListAnnotationIfPresent: IntoListAnnotationLangModel?
 
     /**
-     * [com.yandex.daggerlite.DeclareList] annotation model if present. `null` if absent.
-     */
-    val declareListAnnotationIfPresent: DeclareListAnnotationLangModel?
-
-    /**
      * The [kotlin property accessor info][PropertyAccessorInfo] for which this function.
      * `null` if no kotlin property corresponds to this function.
      */

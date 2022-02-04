@@ -4,7 +4,6 @@ import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
-import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
@@ -308,21 +307,16 @@ internal class SubComponentFactoryBindingImpl(
 internal class MultiBindingImpl(
     override val owner: BindingGraphImpl,
     override val target: NodeModel,
-    private val declaration: ListDeclarationModel?,
     contributions: Map<NodeModel, ContributionType>,
 ) : MultiBinding, BindingMixin {
     private val _contributions = contributions
     override val contributions: Map<NodeModel, ContributionType> by lazy(NONE) {
-        if (declaration?.orderByDependency == true) {
-            // Resolve aliases as multi-bindings often work with @Binds
-            val resolved = _contributions.mapKeys { (node, _) -> owner.resolveBinding(node).target }
-            topologicalSort(
-                nodes = resolved.keys,
-                inside = owner,
-            ).associateWith(resolved::getValue)
-        } else {
-            _contributions
-        }
+        // Resolve aliases as multi-bindings often work with @Binds
+        val resolved = _contributions.mapKeys { (node, _) -> owner.resolveBinding(node).target }
+        topologicalSort(
+            nodes = resolved.keys,
+            inside = owner,
+        ).associateWith(resolved::getValue)
     }
 
     override fun dependencies() = _contributions.keys.map(::NodeDependency)
@@ -330,7 +324,6 @@ internal class MultiBindingImpl(
 
     override fun toString() = Strings.Bindings.multibinding(
         elementType = target,
-        declaration = declaration,
         contributions = contributions.map { (node, _) -> owner.resolveRaw(node) }
     )
 

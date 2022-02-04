@@ -31,7 +31,7 @@ internal fun topologicalSort(
         }
     }
 
-    for (node in nodes) {
+    for (node in nodes.sorted()) {
         visit(node)
     }
 
