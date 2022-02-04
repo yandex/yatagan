@@ -24,18 +24,26 @@ class Optional<out T : Any> private constructor(
 
     // region Java API
 
-    @JavaApi
-    fun ifPresent(consumer: Consumer<T>) {
+    fun interface Consumer<in T> {
+        fun accept(value: T)
+    }
+
+    fun interface Function<in T, out R> {
+        fun apply(value: T): R
+    }
+
+    @JvmName("ifPresent")
+    fun ifPresentJava(consumer: Consumer<T>) {
         ifPresent(consumer::accept)
     }
 
-    @JavaApi
-    fun ifPresentOrElse(consumer: Consumer<T>, onEmpty: Runnable) {
+    @JvmName("ifPresentOrElse")
+    fun ifPresentOrElseJava(consumer: Consumer<T>, onEmpty: Runnable) {
         ifPresentOrElse(consumer::accept, onEmpty::run)
     }
 
-    @JavaApi
-    fun <U : Any> map(mapper: Function<T, U?>): Optional<U> = map(mapper::apply)
+    @JvmName("map")
+    fun <U : Any> mapJava(mapper: Function<T, U?>): Optional<U> = map(mapper::apply)
 
     // endregion Java API
 

@@ -64,7 +64,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
         }
 
         if (checkDependenciesConditionScope) {
-            val conditionScope = conditionScope
+            val conditionScope = graphConditionScope()
             for ((node, kind) in dependencies) {
                 if (kind.isOptional) continue
                 val resolved = owner.resolveBinding(node)
