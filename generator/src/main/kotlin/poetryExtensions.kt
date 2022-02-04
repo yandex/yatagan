@@ -50,6 +50,11 @@ internal fun TypeLangModel.typeName(): TypeName {
     return name.asTypeName()
 }
 
+internal fun TypeName.asRawType(): TypeName = when(this) {
+    is ParameterizedTypeName -> this.rawType
+    else -> this
+}
+
 private fun ClassNameModel.asTypeName(): ClassName {
     return when (simpleNames.size) {
         0 -> throw IllegalArgumentException()
@@ -102,7 +107,7 @@ internal inline fun <A> ExpressionBuilder.generateCall(
     crossinline argumentBuilder: ExpressionBuilder.(A) -> Unit,
 ) {
     when (callable) {
-        is ConstructorLangModel -> +"new %T(".formatCode(callable.constructee.asType().typeName())
+        is ConstructorLangModel -> +"new %T(".formatCode(callable.constructee.asType().typeName().asRawType())
         is FunctionLangModel -> {
             if (instance != null) {
                 +"%L.%N(".formatCode(instance, callable.name)
