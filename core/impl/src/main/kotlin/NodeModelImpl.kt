@@ -101,6 +101,10 @@ internal class NodeModelImpl private constructor(
         return Factory(type = type, qualifier = null)
     }
 
+    override fun compareTo(other: NodeModel): Int {
+        return type.compareTo(other.type)
+    }
+
     companion object Factory : BiObjectCache<TypeLangModel, AnnotationLangModel?, NodeModelImpl>() {
         class NoNode : NodeModel {
             override val type get() = LangModelFactory.errorType
@@ -112,6 +116,7 @@ internal class NodeModelImpl private constructor(
             override fun validate(validator: Validator) = Unit // No need to report an error here
             override val hintIsFrameworkType: Boolean get() = false
             override fun toString() = "[invalid]"
+            override fun compareTo(other: NodeModel): Int = hashCode() - other.hashCode()
         }
 
         operator fun invoke(

@@ -1,13 +1,11 @@
 package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.base.duplicateAwareAssociateBy
 import com.yandex.daggerlite.base.ifContainsDuplicates
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
@@ -128,20 +126,12 @@ internal class GraphBindingsFactory(
             }
         }
 
-        val declaredLists: Map<NodeModel, ListDeclarationModel> = graph.modules.asSequence()
+        graph.modules.asSequence()
             .flatMap { it.listDeclarations }
-            .onEach {
+            .forEach {
                 // Provide empty map for an empty list
                 multiBindings.getOrPut(it.listType, ::mutableMapOf)
             }
-            .duplicateAwareAssociateBy(onDuplicates = { listNode, duplicateDeclarations ->
-                validationMessages += buildMessage(Kind.Error) {
-                    contents = Strings.Errors.`conflicting list declarations`(`for` = listNode)
-                    duplicateDeclarations.forEachIndexed { i, duplicate ->
-                        addNote("${i + 1}. $duplicate")
-                    }
-                }
-            }, keySelector = ListDeclarationModel::listType)
 
         // Multi-bindings
         for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {
@@ -149,7 +139,6 @@ internal class GraphBindingsFactory(
                 owner = graph,
                 target = target.multiBoundListNode(),
                 contributions = contributions,
-                declaration = declaredLists[target]
             ))
         }
 

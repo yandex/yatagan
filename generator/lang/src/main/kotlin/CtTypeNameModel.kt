@@ -1,5 +1,7 @@
 package com.yandex.daggerlite.generator.lang
 
+import kotlin.LazyThreadSafetyMode.NONE
+
 /**
  *  Represents a [com.yandex.daggerlite.generator.lang.CtTypeLangModel] via its name and type arguments.
  */
@@ -13,22 +15,30 @@ data class ClassNameModel(
         require(simpleNames.isNotEmpty()) { "class with no name?" }
     }
 
-    override fun toString() = buildString {
-        append(packageName).append('.')
-        simpleNames.joinTo(this, separator = ".")
+    private val asString by lazy(NONE) {
+        buildString {
+            append(packageName).append('.')
+            simpleNames.joinTo(this, separator = ".")
+        }
     }
+
+    override fun toString() = asString
 }
 
 data class ParameterizedNameModel(
     val raw: ClassNameModel,
     val typeArguments: List<CtTypeNameModel>,
 ) : CtTypeNameModel {
-    override fun toString() = buildString {
-        append(raw)
-        append('<')
-        typeArguments.joinTo(this, separator = ".")
-        append('>')
+    private val asString by lazy(NONE) {
+        buildString {
+            append(raw)
+            append('<')
+            typeArguments.joinTo(this, separator = ".")
+            append('>')
+        }
     }
+
+    override fun toString() = asString
 }
 
 data class WildcardNameModel(
@@ -41,11 +51,15 @@ data class WildcardNameModel(
         }
     }
 
-    override fun toString() = buildString {
-        append("?")
-        upperBound?.let { append(" extends ").append(it) }
-        lowerBound?.let { append(" super ").append(it) }
+    private val asString by lazy(NONE) {
+        buildString {
+            append("?")
+            upperBound?.let { append(" extends ").append(it) }
+            lowerBound?.let { append(" super ").append(it) }
+        }
     }
+
+    override fun toString() = asString
 
     companion object {
         val Star = WildcardNameModel()

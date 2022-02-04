@@ -35,7 +35,7 @@ class MultibindingsTest(
             
             @Module
             interface MyModule {
-                @DeclareList(orderByDependency = true) fun createList(): Create
+                @DeclareList fun createList(): Create
             
                 @IntoList @Binds fun createClassA(a: ClassA): Create
                 @IntoList @Binds fun createClassB(b: ClassB): Create
@@ -97,7 +97,7 @@ class MultibindingsTest(
             
             @Module
             interface MyModule {                
-                @DeclareList(orderByDependency = true) fun create(): Create
+                @DeclareList fun create(): Create
                 @Binds @IntoList fun create(i: CreateA): Create
                 @Binds @IntoList fun create(i: CreateB): Create
                 @Binds @IntoList fun create(i: CreateDestroyA): Create
@@ -105,7 +105,7 @@ class MultibindingsTest(
                 @Binds @IntoList fun create(i: CreateDestroyC): Create
                 @Binds @IntoList fun create(i: CreateDestroyD): Create
                 
-                @DeclareList(orderByDependency = true) fun destroy(): Destroy
+                @DeclareList fun destroy(): Destroy
                 @Binds @IntoList fun destroy(i: CreateDestroyA): Destroy
                 @Binds @IntoList fun destroy(i: CreateDestroyB): Destroy
                 @Binds @IntoList fun destroy(i: CreateDestroyC): Destroy
@@ -164,7 +164,7 @@ class MultibindingsTest(
             
             @Module
             interface MyModule {
-                @DeclareList(orderByDependency = true) fun create(): Create
+                @DeclareList fun create(): Create
             }
             
             @Singleton @Component(modules = [MyModule::class])
@@ -221,7 +221,7 @@ class MultibindingsTest(
             
             @Module
             interface MyModule {
-                @DeclareList(orderByDependency = true) fun create(): Create
+                @DeclareList fun create(): Create
                 @Binds @IntoList fun create(i: ClassA): Create
                 @Binds @IntoList fun create(i: ClassB): Create
                 @Binds @IntoList fun create(i: ClassC): Create

@@ -7,7 +7,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  * Represents a node in a Dagger Graph, that can be resolved.
  * Basically, it's a type with some other information to fine tune resolution.
  */
-interface NodeModel : ClassBackedModel, MayBeInvalid {
+interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel> {
     /**
      * Optional qualifier.
      * An opaque object representing additional qualifier information that can help to disambiguate nodes with the

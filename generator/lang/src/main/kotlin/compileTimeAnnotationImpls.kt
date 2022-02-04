@@ -5,7 +5,6 @@ import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
-import com.yandex.daggerlite.core.lang.DeclareListAnnotationLangModel
 import com.yandex.daggerlite.core.lang.IntoListAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -79,18 +78,5 @@ internal class CtIntoListAnnotationImpl private constructor(
 
     companion object Factory : ObjectCache<CtAnnotationLangModel, CtIntoListAnnotationImpl>() {
         operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtIntoListAnnotationImpl)
-    }
-}
-
-internal class CtDeclareListAnnotationImpl private constructor(
-    private val impl: CtAnnotationLangModel,
-) : DeclareListAnnotationLangModel {
-    override val orderByDependency: Boolean
-        get() = impl.getBoolean("orderByDependency")
-
-    override fun toString() = impl.toString()
-
-    companion object Factory : ObjectCache<CtAnnotationLangModel, CtDeclareListAnnotationImpl>() {
-        operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtDeclareListAnnotationImpl)
     }
 }
