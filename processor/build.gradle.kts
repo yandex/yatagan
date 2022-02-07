@@ -8,5 +8,6 @@ dependencies {
     implementation(project(":graph-impl"))
     implementation(project(":core-impl"))
     implementation(project(":generator"))
+    implementation(project(":spi"))
     implementation(kotlin("stdlib"))
 }

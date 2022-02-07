@@ -41,6 +41,8 @@ include("generator-lang")
 
 include("testing")
 
+include("spi")
+
 project(":validation-impl").projectDir = file("validation/impl")
 
 project(":core-impl").projectDir = file("core/impl")

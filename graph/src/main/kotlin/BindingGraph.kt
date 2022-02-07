@@ -12,6 +12,12 @@ import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage.Eager
 import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage.Lazy
 import com.yandex.daggerlite.validation.MayBeInvalid
 
+/**
+ * A Fully built dagger-lite graph of [Binding]s.
+ *
+ * Each [BindingGraph] is built around [ComponentModel]. For each given [ComponentModel] multiple different
+ * [BindingGraph]s may exist if [ComponentModel.isRoot] is `false`, because the model may have different parents.
+ */
 interface BindingGraph : MayBeInvalid {
     /**
      * A model behind this graph.
@@ -19,14 +25,20 @@ interface BindingGraph : MayBeInvalid {
     val model: HasNodeModel
 
     /**
-     * Requested bindings that belong to this component.
+     * Requested bindings that are **hosted** in this component.
      * Consists of bindings directly requested by entryPoints plus bindings requested by sub-graphs.
-     * TODO: doc
+     *
+     * Thus, every binding that is present in this collection has it [owner][Binding.owner] set to `this` graph.
+     *
+     * The associated info is [BindingUsage].
      */
     val localBindings: Map<Binding, BindingUsage>
 
     /**
-     * TODO: doc
+     * All [condition literals][ConditionScope.Literal]s that are **hosted** in this component.
+     * Consists of literals directly used by bindings in this and children graphs.
+     *
+     * The associated info is [LiteralUsage].
      */
     val localConditionLiterals: Map<ConditionScope.Literal, LiteralUsage>
 
@@ -36,10 +48,14 @@ interface BindingGraph : MayBeInvalid {
     val children: Collection<BindingGraph>
 
     /**
-     * TODO: doc
+     * A collection of parent (not necessarily direct) [BindingGraph]s, from which bindings and/or conditions are used
+     * to satisfy dependencies from `this` graph.
      */
     val usedParents: Set<BindingGraph>
 
+    /**
+     * See [ComponentModel.isRoot].
+     */
     val isRoot: Boolean
 
     /**
@@ -56,29 +72,77 @@ interface BindingGraph : MayBeInvalid {
      */
     val parent: BindingGraph?
 
+    /**
+     * Modules of the underlying model.
+     *
+     * @see ComponentModel.modules
+     */
     val modules: Collection<ModuleModel>
 
+    /**
+     * Component dependencies declared in the underlying model.
+     *
+     * @see ComponentModel.dependencies
+     */
     val dependencies: Collection<ComponentDependencyModel>
 
+    /**
+     * Graph scope (optional)
+     *
+     * @see ComponentModel.scope
+     */
     val scope: AnnotationLangModel?
 
+    /**
+     * Component creator model declared in the underlying model.
+     *
+     * @see [ComponentModel.factory]
+     */
     val creator: ComponentFactoryModel?
 
+    /**
+     * All explicit graph entry-points - getter functions declared in the underlying model.
+     *
+     * @see [ComponentModel.entryPoints]
+     */
     val entryPoints: Collection<GraphEntryPoint>
 
+    /**
+     * All injector functions (a kind of entry-points) declared in the underlying model.
+     *
+     * @see [ComponentModel.memberInjectors]
+     */
     val memberInjectors: Collection<GraphMemberInjector>
 
+    /**
+     * A condition for this graph.
+     *
+     * Equals [Always][ConditionScope.isAlways] for [root][BindingGraph.isRoot] components.
+     * Arbitrary for non-root components.
+     */
     val conditionScope: ConditionScope
 
+    /**
+     * Multi-thread access status declared in the underlying model.
+     *
+     * @see ComponentModel.requiresSynchronizedAccess
+     */
     val requiresSynchronizedAccess: Boolean
 
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *
-     * @return resolved binding with a graph to which it's a local binding.
+     * @return resolved binding (it may be [EmptyBinding] due to [ConditionScope.isNever] or because it was requested
+     * and could not be satisfied)
+     * @throws IllegalStateException if no such binding is found at all (requested but missing bindings are still safe
+     * to request).
      */
     fun resolveBinding(node: NodeModel): Binding
 
+    /**
+     * Provides counts of each dependency [kind][com.yandex.daggerlite.core.DependencyKind] requests for the
+     * [target][Binding.target].
+     */
     interface BindingUsage {
         val direct: Int
         val provider: Int

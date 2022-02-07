@@ -23,7 +23,7 @@ import com.yandex.daggerlite.validation.impl.reportError
 internal class BindingGraphImpl(
     private val component: ComponentModel,
     override val parent: BindingGraphImpl? = null,
-    override val conditionScope: ConditionScope,
+    override val conditionScope: ConditionScope = ConditionScope.Unscoped,
 ) : BindingGraph {
     override val model: ComponentModel
         get() = component
@@ -73,7 +73,7 @@ internal class BindingGraphImpl(
     internal fun resolveRaw(node: NodeModel): BaseBinding {
         return bindings.getBindingFor(node)
             ?: parent?.resolveRaw(node)
-            ?: throw AssertionError("Not reached: missing binding for $node")
+            ?: throw IllegalStateException("Not reached: missing binding for $node")
     }
 
     // MAYBE: write algorithm in such a way that this is local variable.
@@ -91,7 +91,7 @@ internal class BindingGraphImpl(
                 BindingGraphImpl(
                     component = childComponent,
                     parent = this,
-                    conditionScope = conditionScope and childConditionScope
+                    conditionScope = conditionScope and childConditionScope,
                 )
             }
             .toList()

@@ -10,6 +10,5 @@ fun BindingGraph(root: ComponentModel): BindingGraph {
     require(root.isRoot) { "Not reached: can't use non-root component as a root of a binding graph" }
     return BindingGraphImpl(
         component = root,
-        conditionScope = com.yandex.daggerlite.graph.ConditionScope.Unscoped,
     )
 }
