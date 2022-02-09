@@ -17,6 +17,19 @@ class MultibindingsTest(
 
     @Test
     fun `basic test`() {
+        givenJavaSource("test.Create", """
+            public interface Create {}
+        """.trimIndent())
+        givenJavaSource("test.ConsumerJava", """
+            import javax.inject.Inject;
+            import javax.inject.Provider;
+            import java.util.List;
+            
+            public class ConsumerJava {
+                public @Inject ConsumerJava(List<Create> i1, Provider<List<Create>> i2) {
+                }
+            }
+        """.trimIndent())
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.Binds
             import com.yandex.daggerlite.Module
@@ -27,11 +40,10 @@ class MultibindingsTest(
             import javax.inject.Inject
             import javax.inject.Provider
             
-            interface Create
-            
             @Singleton class ClassA @Inject constructor (b: ClassB) : Create
             @Singleton class ClassB @Inject constructor() : Create
             @Singleton class ClassC @Inject constructor (a: ClassA) : Create
+            class Consumer @Inject constructor(list: List<Create>, later: Provider<List<Create>>)
             
             @Module
             interface MyModule {
@@ -46,6 +58,8 @@ class MultibindingsTest(
             interface TestComponent {
                 fun bootstrap(): List<Create>
                 fun bootstrapLater(): Provider<List<Create>>
+                val c: Consumer
+                val c2: ConsumerJava
             }
             
             fun test() {

@@ -28,6 +28,8 @@ internal class JavaxFunctionImpl private constructor(
         owner.findKotlinPropertyAccessorFor(impl)
     }
 
+    override val platformModel: ExecutableElement get() = impl
+
     companion object Factory : BiObjectCache<JavaxTypeDeclarationImpl, ExecutableElement, JavaxFunctionImpl>() {
         operator fun invoke(
             owner: JavaxTypeDeclarationImpl,

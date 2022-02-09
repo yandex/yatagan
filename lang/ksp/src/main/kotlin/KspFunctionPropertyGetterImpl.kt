@@ -30,6 +30,9 @@ internal class KspFunctionPropertyGetterImpl private constructor(
     override val kind: PropertyAccessorKind
         get() = PropertyAccessorKind.Getter
 
+    override val platformModel: Any?
+        get() = null
+
     companion object Factory : ObjectCache<KSPropertyGetter, KspFunctionPropertyGetterImpl>() {
         private val PropNameIsRegex = "^is[^a-z].*$".toRegex()
 

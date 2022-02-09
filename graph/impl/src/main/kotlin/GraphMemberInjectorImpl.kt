@@ -28,7 +28,7 @@ internal class GraphMemberInjectorImpl(
         val member: MemberLangModel,
         override val dependency: NodeDependency,
     ) : MemberLangModel by member, GraphEntryPointBase() {
-        override val owner: BindingGraph
+        override val graph: BindingGraph
             get() = this@GraphMemberInjectorImpl.owner
 
         override fun toString() = "[member-to-inject] ${member.name}"

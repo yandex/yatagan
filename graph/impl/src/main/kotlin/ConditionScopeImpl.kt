@@ -113,9 +113,11 @@ private class ConditionLiteralImpl private constructor(
         payload = payload,
     )
 
-    override val path get() = payload.path
+    override val path
+        get() = payload.path
 
-    override val root get() = payload.root
+    override val root
+        get() = payload.path.firstOrNull()?.owner ?: LangModelFactory.errorType.declaration
 
     override fun validate(validator: Validator) {
         validator.inline(payload)
@@ -140,7 +142,6 @@ private class ConditionLiteralImpl private constructor(
             } ?: this(
                 negated = false,
                 payload = object : LiteralPayload {
-                    override val root: TypeDeclarationLangModel get() = LangModelFactory.errorType.declaration
                     override val path: List<MemberLangModel> get() = emptyList()
                     override fun validate(validator: Validator) {
                         // Always invalid
@@ -165,7 +166,6 @@ private class ConditionLiteralImpl private constructor(
 
 private interface LiteralPayload : MayBeInvalid {
     val path: List<MemberLangModel>
-    val root: TypeDeclarationLangModel
 }
 
 private val MemberTypeVisitor = object : MemberLangModel.Visitor<TypeLangModel> {
@@ -174,7 +174,7 @@ private val MemberTypeVisitor = object : MemberLangModel.Visitor<TypeLangModel> 
 }
 
 private class LiteralPayloadImpl private constructor(
-    override val root: TypeDeclarationLangModel,
+    private val root: TypeDeclarationLangModel,
     private val pathSource: String,
 ) : LiteralPayload {
     private var pathParsingError: String? = null
@@ -218,7 +218,7 @@ private class LiteralPayloadImpl private constructor(
     }
 
     companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
-        operator fun invoke(root: TypeDeclarationLangModel, pathSource: String) : LiteralPayload {
+        operator fun invoke(root: TypeDeclarationLangModel, pathSource: String): LiteralPayload {
             return createCached(root, pathSource) {
                 LiteralPayloadImpl(root, pathSource)
             }

@@ -46,7 +46,7 @@ interface BindsBindingModel : ModuleHostedBindingModel {
  * [com.yandex.daggerlite.Provides] binding model.
  */
 interface ProvidesBindingModel : ModuleHostedBindingModel, ConditionalHoldingModel {
-    val inputs: Sequence<NodeDependency>
+    val inputs: List<NodeDependency>
     val provision: FunctionLangModel
     val requiresModuleInstance: Boolean
 }
@@ -58,5 +58,5 @@ interface InjectConstructorBindingModel : ConditionalHoldingModel {
     val target: NodeModel
     val constructor: ConstructorLangModel
     val scope: AnnotationLangModel?
-    val inputs: Sequence<NodeDependency>
+    val inputs: List<NodeDependency>
 }

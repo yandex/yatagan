@@ -7,7 +7,7 @@ import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.GraphEntryPoint
 
 internal class GraphEntryPointImpl(
-    override val owner: BindingGraph,
+    override val graph: BindingGraph,
     private val impl: ComponentModel.EntryPoint,
 ) : GraphEntryPoint, GraphEntryPointBase() {
     override val getter: FunctionLangModel

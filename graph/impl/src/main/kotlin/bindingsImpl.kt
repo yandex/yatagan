@@ -156,7 +156,7 @@ internal class InjectConstructorProvisionBindingImpl(
     override val originModule: Nothing? get() = null
     override val scope: AnnotationLangModel? get() = impl.scope
     override val provision get() = impl.constructor
-    override val inputs: Sequence<NodeDependency> get() = impl.inputs
+    override val inputs: List<NodeDependency> get() = impl.inputs
     override val requiresModuleInstance: Boolean = false
     override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
 
@@ -182,6 +182,26 @@ internal class InjectConstructorProvisionBindingImpl(
     override fun toString() = impl.toString()
 }
 
+internal class SyntheticAliasBindingImpl(
+    override val source: NodeModel,
+    override val target: NodeModel,
+    override val owner: BindingGraphImpl,
+): AliasBinding {
+    override val originModule: ModuleModel? get() = null
+    override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
+        return visitor.visitAlias(this)
+    }
+
+    override fun validate(validator: Validator) {
+        validator.inline(owner.resolveRaw(source))
+    }
+
+    override fun toString(): String {
+        // Fully transparent alias
+        return owner.resolveRaw(source).toString()
+    }
+}
+
 internal class AliasBindingImpl(
     override val impl: BindsBindingModel,
     override val owner: BindingGraphImpl,
@@ -195,7 +215,7 @@ internal class AliasBindingImpl(
     override val source get() = impl.sources.single()
 
     override fun equals(other: Any?): Boolean {
-        return this === other || (other is AliasBindingImpl &&
+        return this === other || (other is AliasBinding &&
                 source == other.source && target == other.target)
     }
 

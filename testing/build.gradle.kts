@@ -6,7 +6,7 @@ plugins {
 val kotlinCompileTestingVersion: String by extra
 
 dependencies {
-    testFixturesApi(project(":api"))
+    testFixturesApi(project(":api-compiled"))
     testFixturesApi("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
     testFixturesImplementation(project(":processor"))
     testFixturesImplementation(project(":base"))

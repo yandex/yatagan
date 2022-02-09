@@ -8,6 +8,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.core.lang.LangModelFactory
+import com.yandex.daggerlite.core.lang.use
 import com.yandex.daggerlite.ksp.lang.KspModelFactoryImpl
 import com.yandex.daggerlite.ksp.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.ksp.lang.Utils

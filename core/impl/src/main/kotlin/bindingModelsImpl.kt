@@ -122,14 +122,11 @@ internal class ProvidesImpl(
 
     override val conditionals get() = conditionalHolder.conditionals
 
-    private val paramsToDependencies by lazy(NONE) {
-        impl.parameters.associateWith { param ->
+    override val inputs: List<NodeDependency> by lazy(NONE) {
+        impl.parameters.map { param ->
             NodeDependency(type = param.type, forQualifier = param)
-        }
+        }.toList()
     }
-
-    override val inputs: Sequence<NodeDependency>
-        get() = paramsToDependencies.values.asSequence()
 
     override fun validate(validator: Validator) {
         super.validate(validator)

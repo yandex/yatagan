@@ -22,6 +22,8 @@ class RuntimeTest(
             import com.yandex.daggerlite.Component
             import com.yandex.daggerlite.Provides
             import com.yandex.daggerlite.Module
+            import com.yandex.daggerlite.Dagger
+            import com.yandex.daggerlite.testing.create
 
             class Simple(val value: String)
 
@@ -40,7 +42,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = DaggerTestComponent.create()
+                val c = Dagger.create<TestComponent>()
                 assert(c.simple().value == "simple")
                 assert(c.one().value == "one")
                 assert(c.two().value == "two")

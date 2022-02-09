@@ -50,7 +50,7 @@ interface EmptyBinding : Binding
  */
 interface ProvisionBinding : Binding {
     val provision: CallableLangModel
-    val inputs: Sequence<NodeDependency>
+    val inputs: List<NodeDependency>
     val requiresModuleInstance: Boolean
 }
 

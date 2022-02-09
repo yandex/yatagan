@@ -1,14 +1,12 @@
-package com.yandex.daggerlite.generator.lang
-
-import com.yandex.daggerlite.base.ObjectCache
+package com.yandex.daggerlite.core.lang
 
 /**
- * A [CtTypeDeclarationLangModel] implementation, that is convenient to return when no declaration makes sense at all,
+ * A [TypeDeclarationLangModel] implementation, that is convenient to return when no declaration makes sense at all,
  * e.g. for primitive types, `void` type, array type, etc.
  */
-class CtNoDeclaration private constructor(
-    private val type: CtTypeLangModel,
-) : CtTypeDeclarationLangModel() {
+class NoDeclaration (
+    private val type: TypeLangModel,
+) : TypeDeclarationLangModel {
     override val isAbstract get() = false
     override val isInterface get() = false
 
@@ -26,15 +24,16 @@ class CtNoDeclaration private constructor(
     override val componentAnnotationIfPresent: Nothing? get() = null
     override val moduleAnnotationIfPresent: Nothing? get() = null
     override val componentFlavorIfPresent: Nothing? get() = null
+    override val platformModel: Nothing? get() = null
 
     override val qualifiedName: String
-        get() = type.nameModel.toString()
+        get() = type.toString()
 
-    override fun asType(): CtTypeLangModel {
-        return type
-    }
+    override fun asType(): TypeLangModel = type
 
-    companion object Factory : ObjectCache<CtTypeLangModel, CtNoDeclaration>() {
-        operator fun invoke(type: CtTypeLangModel) = createCached(type, ::CtNoDeclaration)
+
+    override fun hashCode(): Int = type.hashCode()
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is NoDeclaration && type == other.type)
     }
 }

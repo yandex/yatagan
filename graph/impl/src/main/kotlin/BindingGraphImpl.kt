@@ -45,7 +45,7 @@ internal class BindingGraphImpl(
     override val dependencies: Collection<ComponentDependencyModel>
         get() = component.dependencies
 
-    override val entryPoints = component.entryPoints.map { GraphEntryPointImpl(owner = this, impl = it) }
+    override val entryPoints = component.entryPoints.map { GraphEntryPointImpl(graph = this, impl = it) }
 
     override val memberInjectors = component.memberInjectors.map { GraphMemberInjectorImpl(owner = this, impl = it) }
 

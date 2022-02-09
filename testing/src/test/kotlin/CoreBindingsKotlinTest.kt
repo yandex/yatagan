@@ -463,9 +463,11 @@ class CoreBindingsKotlinTest(
             import com.yandex.daggerlite.Component
             import com.yandex.daggerlite.BindsInstance
 
+            const val BAR = "bar"
+
             class MyClass @Inject constructor (
                     @Named("foo") o1: Object,
-                    @Named("bar") o2: Object,
+                    @Named(BAR) o2: Object,
                     @Named("baz") o3: Object,
                     foos: Set<Foo>,
                     bazs: Set<Baz>,
