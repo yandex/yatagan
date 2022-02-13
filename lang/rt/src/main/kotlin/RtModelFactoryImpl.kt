@@ -35,8 +35,12 @@ class RtModelFactoryImpl : LangModelFactory {
         })
     }
 
-    override fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel {
-        return RtTypeDeclarationImpl(RtTypeImpl(Class.forName(qualifiedName)))
+    override fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel? {
+        return try {
+            RtTypeDeclarationImpl(RtTypeImpl(Class.forName(qualifiedName)))
+        } catch (e: ClassNotFoundException) {
+            null
+        }
     }
 
     override val errorType: TypeLangModel

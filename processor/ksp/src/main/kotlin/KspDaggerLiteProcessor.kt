@@ -38,20 +38,25 @@ internal class KspDaggerLiteProcessor(
     override fun createDeclaration(source: KSClassDeclaration) = TypeDeclarationLangModel(source)
 
     override fun openFileForGenerating(
-        source: KSClassDeclaration,
+        sources: Sequence<KSClassDeclaration>,
         packageName: String,
         className: String,
     ): Writer {
-        val sourceFile = source.containingFile
-        return environment.codeGenerator.createNewFile(
+        val newFile = environment.codeGenerator.createNewFile(
             Dependencies(
                 aggregating = false,
-                *(sourceFile?.let { arrayOf(sourceFile) } ?: emptyArray()),
             ),
             packageName = packageName,
             fileName = className,
             extensionName = "java",
-        ).bufferedWriter()
+        )
+        environment.codeGenerator.associateWithClasses(
+            classes = sources.toList(),
+            packageName = packageName,
+            fileName = className,
+            extensionName = "java",
+        )
+        return newFile.bufferedWriter()
     }
 }
 

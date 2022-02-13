@@ -17,7 +17,7 @@ internal class KspFieldImpl private constructor(
     override val isStatic: Boolean get() = impl.isStatic
     override val type: TypeLangModel by lazy(NONE) {
         KspTypeImpl(
-            impl = impl.type.resolve(),
+            reference = impl.type,
             jvmSignatureHint = Utils.resolver.mapToJvmSignature(impl),
         )
     }

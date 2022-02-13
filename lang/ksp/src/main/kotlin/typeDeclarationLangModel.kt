@@ -4,5 +4,5 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 
 fun TypeDeclarationLangModel(declaration: KSClassDeclaration): TypeDeclarationLangModel {
-    return KspTypeDeclarationImpl(declaration.asType(emptyList()))
+    return KspTypeDeclarationImpl(KspTypeImpl(declaration.asType(emptyList())))
 }

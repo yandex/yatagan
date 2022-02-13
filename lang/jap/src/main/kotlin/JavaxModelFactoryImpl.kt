@@ -25,8 +25,9 @@ class JavaxModelFactoryImpl : LangModelFactory {
         return JavaxTypeImpl(Utils.types.getDeclaredType(collectionElement, (type as JavaxTypeImpl).impl))
     }
 
-    override fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel {
-        return JavaxTypeDeclarationImpl(Utils.elements.getTypeElement(qualifiedName).asType().asDeclaredType())
+    override fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel? {
+        val element = Utils.elements.getTypeElement(qualifiedName) ?: return null
+        return JavaxTypeDeclarationImpl(element.asType().asDeclaredType())
     }
 
     override val errorType: TypeLangModel

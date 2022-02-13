@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.testing
 
+import org.junit.Assume.assumeFalse
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -722,6 +723,58 @@ class ConditionsTest(
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
             }
+        }
+    }
+
+    @Test
+    fun `const val conditions`() {
+        // Disable for KSP, because of the following issues:
+        // https://github.com/google/ksp/issues/850
+        // https://github.com/google/ksp/issues/839
+        // TODO: Enable for KSP once the issues are fixed.
+        assumeFalse(backendUnderTest == CompileTestDriver.Backend.Ksp)
+
+        precompile(givenSourceSet {
+            givenKotlinSource("test.CompiledCondition", """
+                object CompiledCondition {
+                    const val HELLO = true
+                }
+                // top level
+                const val FOO = true
+            """.trimIndent())
+        })
+
+        givenJavaSource("test.IsEnabled0", """
+            import com.yandex.daggerlite.Condition;
+            
+            @Condition(value = CompiledConditionKt.class, condition = "FOO")
+            @interface IsEnabled3 {}
+        """.trimIndent())
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            object Constants {
+                const val IS_ENABLED = true
+            }
+            
+            @Condition(CompiledCondition::class, "HELLO")
+            annotation class IsEnabled
+            
+            @Condition(Constants::class, "IS_ENABLED")
+            annotation class IsEnabled2
+            
+            @Conditional([IsEnabled::class, IsEnabled2::class, IsEnabled3::class])
+            class TestClass @Inject constructor()
+            
+            @Component interface TestComponent {
+                val test: Optional<TestClass>
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
         }
     }
 }

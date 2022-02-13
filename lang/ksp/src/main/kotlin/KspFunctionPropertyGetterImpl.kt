@@ -13,7 +13,10 @@ internal class KspFunctionPropertyGetterImpl private constructor(
 ) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter) {
 
     override val returnType: TypeLangModel by lazy(NONE) {
-        KspTypeImpl(property.asMemberOf(owner.type), jvmSignatureHint = jvmSignature)
+        KspTypeImpl(
+            reference = property.type.replaceType(property.asMemberOf(owner.type.impl)),
+            jvmSignatureHint = jvmSignature,
+        )
     }
 
     @Suppress("DEPRECATION")  // capitalize

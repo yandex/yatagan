@@ -3,11 +3,11 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.getConstructors
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isAbstract
+import com.google.devtools.ksp.isPrivate
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Modifier
 import com.yandex.daggerlite.base.ObjectCache
@@ -24,9 +24,9 @@ import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 
 internal class KspTypeDeclarationImpl private constructor(
-    val type: KSType,
+    val type: KspTypeImpl,
 ) : CtTypeDeclarationLangModel() {
-    private val impl: KSClassDeclaration = type.declaration as KSClassDeclaration
+    private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
 
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
 
@@ -47,18 +47,17 @@ internal class KspTypeDeclarationImpl private constructor(
         get() = impl.qualifiedName?.asString() ?: ""
 
     override val enclosingType: TypeDeclarationLangModel?
-        get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { Factory(it.asType(emptyList())) }
+        get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { Factory(KspTypeImpl(it.asType(emptyList()))) }
 
     override val implementedInterfaces: Sequence<TypeLangModel> = sequence {
         val queue = ArrayDeque<Sequence<KSTypeReference>>()
         queue += impl.superTypes
         while (queue.isNotEmpty()) {
             for (typeRef in queue.removeFirst()) {
-                val type = typeRef.resolve()
-                val declaration = type.declaration as KSClassDeclaration
+                val declaration = typeRef.resolve().declaration as KSClassDeclaration
                 queue += declaration.superTypes
                 if (declaration.classKind == ClassKind.INTERFACE) {
-                    yield(KspTypeImpl(type))
+                    yield(KspTypeImpl(typeRef))
                 }
             }
         }
@@ -78,7 +77,7 @@ internal class KspTypeDeclarationImpl private constructor(
             explodeProperty(it, owner = this@KspTypeDeclarationImpl)
         }
         impl.getCompanionObject()?.let { companion ->
-            val companionDeclaration = KspTypeDeclarationImpl(companion.asType(emptyList()))
+            val companionDeclaration = KspTypeDeclarationImpl(KspTypeImpl(companion.asType(emptyList())))
             yieldAll(companion.allPublicFunctions().map {
                 KspFunctionImpl(owner = companionDeclaration, impl = it)
             })
@@ -103,23 +102,25 @@ internal class KspTypeDeclarationImpl private constructor(
     }
 
     override val allPublicFields: Sequence<FieldLangModel> =
-        impl.getDeclaredProperties().filter(KSPropertyDeclaration::isField).map { KspFieldImpl(it, this) }.memoize()
+        impl.getDeclaredProperties()
+            .filter { it.isField && !it.isPrivate() }
+            .map { KspFieldImpl(it, this) }.memoize()
 
     override val nestedClasses: Sequence<TypeDeclarationLangModel> = impl.declarations
         .filterIsInstance<KSClassDeclaration>()
-        .map { Factory(it.asType(emptyList())) }
+        .map { Factory(KspTypeImpl(it.asType(emptyList()))) }
         .memoize()
 
     override fun asType(): TypeLangModel {
-        return KspTypeImpl(type)
+        return type
     }
 
     override val platformModel: KSClassDeclaration
         get() = impl
 
-    companion object Factory : ObjectCache<KSType, KspTypeDeclarationImpl>() {
-        operator fun invoke(impl: KSType) =
-            createCached(mapToJavaPlatformIfNeeded(impl), ::KspTypeDeclarationImpl)
+    companion object Factory : ObjectCache<KspTypeImpl, KspTypeDeclarationImpl>() {
+        operator fun invoke(impl: KspTypeImpl) =
+            createCached(impl, ::KspTypeDeclarationImpl)
     }
 
     private inner class ConstructorImpl(
@@ -131,7 +132,7 @@ internal class KspTypeDeclarationImpl private constructor(
         override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
             declaration = impl,
-            containing = type,
+            containing = type.impl,
             jvmMethodSignature = jvmSignature,
         )
         override val platformModel: KSFunctionDeclaration get() = impl

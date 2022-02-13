@@ -52,10 +52,15 @@ class JapCompileTestDriver : CompileTestDriverBase() {
         }
     }
 
+    override val backendUnderTest: CompileTestDriver.Backend
+        get() = CompileTestDriver.Backend.Jap
+
     private fun setupCompilation() = KotlinCompilation().apply {
+        precompileIfNeeded()?.let { precompiled ->
+            classpaths = classpaths + precompiled
+        }
         basicKotlinCompilationSetup()
         sources = sourceFiles
-        inheritClassPath = true
         annotationProcessors = listOf(JapDaggerLiteProcessor())
     }
 
