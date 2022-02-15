@@ -17,21 +17,27 @@ class MultibindingsTest(
 
     @Test
     fun `basic test`() {
-        givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.DeclareList
-            import com.yandex.daggerlite.IntoList
-            import javax.inject.Singleton
-            import javax.inject.Inject
-            import javax.inject.Provider
+        givenJavaSource("test.Create", """
+            public interface Create {}
+        """.trimIndent())
+        givenJavaSource("test.ConsumerJava", """
+            import javax.inject.Inject;
+            import javax.inject.Provider;
+            import java.util.List;
             
-            interface Create
+            public class ConsumerJava {
+                public @Inject ConsumerJava(List<Create> i1, Provider<List<Create>> i2) {
+                }
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             @Singleton class ClassA @Inject constructor (b: ClassB) : Create
             @Singleton class ClassB @Inject constructor() : Create
             @Singleton class ClassC @Inject constructor (a: ClassA) : Create
+            class Consumer @Inject constructor(list: List<Create>, later: Provider<List<Create>>)
             
             @Module
             interface MyModule {
@@ -46,10 +52,12 @@ class MultibindingsTest(
             interface TestComponent {
                 fun bootstrap(): List<Create>
                 fun bootstrapLater(): Provider<List<Create>>
+                val c: Consumer
+                val c2: ConsumerJava
             }
             
             fun test() {
-                val c = DaggerTestComponent.create()
+                val c = Dagger.create(TestComponent::class.java)
                 
                 val bootstrapList = c.bootstrap()
                 assert(bootstrapList !== c.bootstrap())
@@ -61,7 +69,7 @@ class MultibindingsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
 
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
@@ -72,14 +80,8 @@ class MultibindingsTest(
     @Test
     fun `class implements multiple interfaces`() {
         givenKotlinSource("test.TestCase", """
-            import javax.inject.Inject
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Provides
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.IntoList
-            import com.yandex.daggerlite.DeclareList
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             interface Create
             interface Destroy
@@ -125,7 +127,7 @@ class MultibindingsTest(
             }
             
             fun test() {
-                val c = DaggerMyComponent.create()
+                val c = Dagger.create(MyComponent::class.java)
                 val create = c.bootstrapCreate
                 val destroy = c.bootstrapDestroy
             
@@ -139,7 +141,7 @@ class MultibindingsTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerMyComponent")
+            generatesJavaSources("test.Dagger\$MyComponent")
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
             }
@@ -149,16 +151,8 @@ class MultibindingsTest(
     @Test
     fun `list declaration binds empty list`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Condition
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Optional
-            import javax.inject.Inject
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.IntoList
-            import com.yandex.daggerlite.DeclareList
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             interface Create
             
@@ -173,13 +167,13 @@ class MultibindingsTest(
             }
             
             fun test() {
-                assert(DaggerTestComponent.create().bootstrap().isEmpty())
+                assert(Dagger.create(TestComponent::class.java).bootstrap().isEmpty())
             }
         """.trimIndent())
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
             }
@@ -235,7 +229,7 @@ class MultibindingsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
         }
     }
 }

@@ -45,7 +45,7 @@ internal class BindingGraphImpl(
     override val dependencies: Collection<ComponentDependencyModel>
         get() = component.dependencies
 
-    override val entryPoints = component.entryPoints.map { GraphEntryPointImpl(owner = this, impl = it) }
+    override val entryPoints = component.entryPoints.map { GraphEntryPointImpl(graph = this, impl = it) }
 
     override val memberInjectors = component.memberInjectors.map { GraphMemberInjectorImpl(owner = this, impl = it) }
 
@@ -213,7 +213,7 @@ internal class BindingGraphImpl(
 
         // Check component root status
         if (parent != null && isRoot) {
-            validator.reportError(Strings.Errors.`root component can not be a subcomponent`())
+            validator.reportError(Strings.Errors.rootAsChild())
         }
 
         val parents = parents().memoize()
@@ -223,23 +223,23 @@ internal class BindingGraphImpl(
             parents.filter {
                 !it.component.requiresSynchronizedAccess
             }.forEach { parent ->
-                validator.reportError(Strings.Errors.`multi-threading status mismatch`(parent = parent))
+                validator.reportError(Strings.Errors.multiThreadStatusMismatch(parent = parent))
             }
         }
 
         // Check for duplicate scopes
         scope?.let { scope ->
             parents.find { parent -> parent.scope == scope }?.let { withDuplicateScope ->
-                validator.reportError(Strings.Errors.`duplicate component scope`(scope)) {
-                    addNote(Strings.Notes.`duplicate scope component`(component = withDuplicateScope))
-                    addNote(Strings.Notes.`duplicate scope component`(component = this@BindingGraphImpl))
+                validator.reportError(Strings.Errors.duplicateComponentScope(scope)) {
+                    addNote(Strings.Notes.duplicateScopeComponent(component = withDuplicateScope))
+                    addNote(Strings.Notes.duplicateScopeComponent(component = this@BindingGraphImpl))
                 }
             }
         }
 
         // Report hierarchy loops
         if (parents.find { parent -> parent.component == component } != null) {
-            validator.reportError(Strings.Errors.`component hierarchy loop`())
+            validator.reportError(Strings.Errors.componentLoop())
         }
 
         validateNoLoops(this, validator)

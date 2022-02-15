@@ -121,9 +121,9 @@ internal class ComponentModelImpl private constructor(
             validator.child(memberInjector)
         }
         if (declaration.nestedClasses.count(ComponentFactoryModelImpl::canRepresent) > 1) {
-            validator.reportError(Errors.`multiple component creators`()) {
+            validator.reportError(Errors.multipleCreators()) {
                 declaration.nestedClasses.filter(ComponentFactoryModelImpl::canRepresent).forEach {
-                    addNote(Strings.Notes.`conflicting component creator declared`(it))
+                    addNote(Strings.Notes.conflictingCreator(it))
                 }
             }
         }
@@ -133,33 +133,33 @@ internal class ComponentModelImpl private constructor(
         for (function in declaration.allPublicFunctions) {
             if (!function.isAbstract) continue
             if (function.parameters.count() > 1) {
-                validator.reportError(Errors.`invalid method in component`(method = function))
+                validator.reportError(Errors.unknownMethodInComponent(method = function))
             }
         }
 
         if (impl == null) {
-            validator.reportError(Errors.`declaration is not annotated with @Component`())
+            validator.reportError(Errors.nonComponent())
         }
 
         if (!declaration.isInterface) {
-            validator.reportError(Errors.`component must be an interface`())
+            validator.reportError(Errors.nonInterfaceComponent())
         }
 
         if (factory == null) {
             if (!isRoot) {
-                validator.reportError(Errors.`missing component creator - non-root`())
+                validator.reportError(Errors.missingCreatorForNonRoot())
             }
 
             if (dependencies.isNotEmpty()) {
-                validator.reportError(Errors.`missing component creator - dependencies`())
+                validator.reportError(Errors.missingCreatorForDependencies())
             }
 
             if (modules.any { it.requiresInstance && !it.isTriviallyConstructable }) {
-                validator.reportError(Errors.`missing component creator - modules`()) {
+                validator.reportError(Errors.missingCreatorForModules()) {
                     modules.filter {
                         it.requiresInstance && !it.isTriviallyConstructable
                     }.forEach { module ->
-                        addNote(Strings.Notes.`missing module instance`(module))
+                        addNote(Strings.Notes.missingModuleInstance(module))
                     }
                 }
             }

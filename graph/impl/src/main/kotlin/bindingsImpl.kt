@@ -69,7 +69,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
                 val resolved = owner.resolveBinding(node)
                 val resolvedScope = resolved.graphConditionScope()
                 if (resolvedScope !in conditionScope) {
-                    validator.reportError(Errors.`incompatible condition scope`(
+                    validator.reportError(Errors.incompatibleCondition(
                         aCondition = resolvedScope, bCondition = conditionScope, a = node, b = this,
                     ))
                 }
@@ -77,7 +77,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
         }
 
         if (scope != null && scope != owner.scope) {
-            validator.reportError(Errors.`no matching scope for binding`(binding = this@BindingMixin, scope = scope))
+            validator.reportError(Errors.noMatchingScopeForBinding(binding = this@BindingMixin, scope = scope))
         }
     }
 
@@ -156,7 +156,7 @@ internal class InjectConstructorProvisionBindingImpl(
     override val originModule: Nothing? get() = null
     override val scope: AnnotationLangModel? get() = impl.scope
     override val provision get() = impl.constructor
-    override val inputs: Sequence<NodeDependency> get() = impl.inputs
+    override val inputs: List<NodeDependency> get() = impl.inputs
     override val requiresModuleInstance: Boolean = false
     override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
 
@@ -182,6 +182,26 @@ internal class InjectConstructorProvisionBindingImpl(
     override fun toString() = impl.toString()
 }
 
+internal class SyntheticAliasBindingImpl(
+    override val source: NodeModel,
+    override val target: NodeModel,
+    override val owner: BindingGraphImpl,
+): AliasBinding {
+    override val originModule: ModuleModel? get() = null
+    override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
+        return visitor.visitAlias(this)
+    }
+
+    override fun validate(validator: Validator) {
+        validator.inline(owner.resolveRaw(source))
+    }
+
+    override fun toString(): String {
+        // Fully transparent alias
+        return owner.resolveRaw(source).toString()
+    }
+}
+
 internal class AliasBindingImpl(
     override val impl: BindsBindingModel,
     override val owner: BindingGraphImpl,
@@ -195,7 +215,7 @@ internal class AliasBindingImpl(
     override val source get() = impl.sources.single()
 
     override fun equals(other: Any?): Boolean {
-        return this === other || (other is AliasBindingImpl &&
+        return this === other || (other is AliasBinding &&
                 source == other.source && target == other.target)
     }
 
@@ -381,7 +401,7 @@ internal class SelfDependentInvalidBinding(
     override fun validate(validator: Validator) {
         super.validate(validator)
         // Always invalid
-        validator.reportError(Errors.`self-dependent binding`())
+        validator.reportError(Errors.selfDependentBinding())
     }
 
     override fun toString() = "[invalid] $impl"
@@ -398,7 +418,7 @@ internal class AliasLoopStubBinding(
 
     override fun validate(validator: Validator) {
         super.validate(validator)
-        validator.reportError(Errors.`dependency loop`(aliasLoop.map { it.target to it }))
+        validator.reportError(Errors.dependencyLoop(aliasLoop.map { it.target to it }))
     }
 
     override fun toString() = "[invalid] ${aliasLoop.first()}"
@@ -412,19 +432,19 @@ internal data class MissingBindingImpl(
     override fun validate(validator: Validator) {
         val failedInject = target.implicitBinding
         if (failedInject != null) {
-            validator.reportError(Errors.`no matching scope for binding`(
+            validator.reportError(Errors.noMatchingScopeForBinding(
                 binding = failedInject, scope = failedInject.scope))
         } else {
-            validator.reportError(Errors.`missing binding`(`for` = target)) {
+            validator.reportError(Errors.missingBinding(`for` = target)) {
                 val factory = target.superModel as? ComponentFactoryModel
                 when {
                     target.hintIsFrameworkType -> {
-                        addNote(Strings.Notes.`nested framework type`(target))
+                        addNote(Strings.Notes.nestedFrameworkType(target))
                     }
                     factory != null -> {
                         val component = factory.createdComponent
                         if (!component.isRoot) {
-                            addNote(Strings.Notes.`subcomponent factory injection hint`(
+                            addNote(Strings.Notes.subcomponentFactoryInjectionHint(
                                 factory = factory, component = component, owner = owner,
                             ))
                         } else {
@@ -433,7 +453,7 @@ internal data class MissingBindingImpl(
                         }
                     }
                     else -> {
-                        addNote(Strings.Notes.`no known way to infer a binding`())
+                        addNote(Strings.Notes.unknownBinding())
                     }
                 }
                 // TODO: implement hint about how to provide a binding

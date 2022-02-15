@@ -18,7 +18,7 @@ internal class DimensionImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (!type.declaration.isAnnotatedWith<ComponentVariantDimension>()) {
-            validator.reportError(Errors.`declaration is not annotated with @ComponentVariantDimension`())
+            validator.reportError(Errors.nonComponentVariantDimension())
         }
     }
 
@@ -33,7 +33,7 @@ internal class MissingDimension(private val flavor: Variant.FlavorModel) : Varia
 
     override fun validate(validator: Validator) {
         // Always invalid
-        validator.reportError(Errors.`missing component variant dimension`())
+        validator.reportError(Errors.missingDimension())
     }
 
     override fun toString() = "[missing dimension]"

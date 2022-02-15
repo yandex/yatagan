@@ -57,7 +57,7 @@ class GraphLoopsFailureTest(
 
         failsToCompile {
             withError(formatMessage(
-                message = Errors.`dependency loop`(listOf(
+                message = Errors.dependencyLoop(listOf(
                     "test.ClassB" to "@Inject test.ClassB",
                     "test.ClassA" to "@Inject test.ClassA",
                 )),
@@ -93,7 +93,7 @@ class GraphLoopsFailureTest(
 
         failsToCompile {
             withError(formatMessage(
-                message = Errors.`dependency loop`(listOf(
+                message = Errors.dependencyLoop(listOf(
                     "test.ApiA" to "[alias] @Binds test.MyModule::a(test.ClassA): test.ApiA",
                     "test.ClassA" to "@Inject test.ClassA",
                     "test.ApiB" to "[alias] @Binds test.MyModule::b(test.ClassB): test.ApiB",
@@ -137,7 +137,7 @@ class GraphLoopsFailureTest(
         failsToCompile {
             // @formatter:off
             withError(formatMessage(
-                message = Errors.`self-dependent binding`(),
+                message = Errors.selfDependentBinding(),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "[entry-point] getA", "[invalid] @Binds test.MyModule::a(test.AImpl, test.ApiA): test.ApiA"),
                     listOf("test.RootComponent", "[entry-point] getB", "[invalid] @Provides test.MyModule::b(test.ApiA, test.ApiB): test.ApiB"),
@@ -175,7 +175,7 @@ class GraphLoopsFailureTest(
         failsToCompile {
             // @formatter:off
             withError(formatMessage(
-                message = Errors.`binds param type is incompatible with return type`(
+                message = Errors.inconsistentBinds(
                     param = "test.ApiB", returnType = "test.ApiA",
                 ),
                 encounterPaths = listOf(
@@ -183,7 +183,7 @@ class GraphLoopsFailureTest(
                 )
             ))
             withError(formatMessage(
-                message = Errors.`dependency loop`(chain = listOf(
+                message = Errors.dependencyLoop(chain = listOf(
                     "test.ApiA" to "[alias] @Binds test.MyModule::a(test.ApiB): test.ApiA",
                     "test.ApiB" to "[alias] @Binds test.MyModule::b(test.ApiA): test.ApiB",
                 )),
@@ -227,19 +227,19 @@ class GraphLoopsFailureTest(
 
         failsToCompile { 
             withError(formatMessage(
-                message = Errors.`component hierarchy loop`(),
+                message = Errors.componentLoop(),
                 encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB", "test.MySubComponentA"))
             ))
             withError(formatMessage(
-                message = Errors.`declaration is not annotated with @Module`(),
+                message = Errors.nonModule(),
                 encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB", "test.NotAModule"))
             ))
             withError(formatMessage(
-                message = Errors.`duplicate component scope`(scope = "@javax.inject.Singleton"),
+                message = Errors.duplicateComponentScope(scope = "@javax.inject.Singleton"),
                 encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB")),
                 notes = listOf(
-                    Strings.Notes.`duplicate scope component`("test.MyRootComponent"),
-                    Strings.Notes.`duplicate scope component`("test.MySubComponentB"),
+                    Strings.Notes.duplicateScopeComponent("test.MyRootComponent"),
+                    Strings.Notes.duplicateScopeComponent("test.MySubComponentB"),
                 ),
             ))
             withNoMoreErrors()

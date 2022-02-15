@@ -41,6 +41,8 @@ internal class KspFunctionImpl private constructor(
         jvmMethodSignature = jvmSignature,
     )
 
+    override val platformModel: KSFunctionDeclaration get() = impl
+
     companion object Factory : BiObjectCache<KSFunctionDeclaration, KspTypeDeclarationImpl, KspFunctionImpl>() {
         operator fun invoke(
             impl: KSFunctionDeclaration,

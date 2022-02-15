@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.validation.impl
 
-@Suppress("FunctionName")
 object Strings {
     private fun red(string: String): String = string.lines().joinToString(separator = "\n") {
         "\u001b[31m$it\u001b[0m"
@@ -45,196 +44,196 @@ object Strings {
 
     object Errors {
         @Covered
-        fun `missing binding`(`for`: Any) =
+        fun missingBinding(`for`: Any) =
             "Missing binding for $`for`"
 
         @Covered
-        fun `no matching scope for binding`(binding: Any, scope: Any?) =
+        fun noMatchingScopeForBinding(binding: Any, scope: Any?) =
             "No components in the hierarchy match binding -> \n$Indent`$binding`\n -> with scope $scope"
 
         @Covered
-        fun `invalid flattening multibinding`(insteadOf: Any) =
+        fun invalidFlatteningMultibinding(insteadOf: Any) =
             "Flattening multi-binding must return `Collection` or any of its subtypes instead of `$insteadOf`"
 
         @Covered
-        fun `binding must not return void`() =
+        fun voidBinding() =
             "Binding method must not return `void`"
 
         @Covered
-        fun `binds must be abstract`() =
+        fun nonAbstractBinds() =
             "@Binds annotated method must be abstract"
 
         @Covered
-        fun `provides must not be abstract`() =
+        fun abstractProvides() =
             "@Provides annotated method must not be abstract (must have a body)"
 
         @Covered
-        fun `self-dependent binding`() =
+        fun selfDependentBinding() =
             "Binding depends on itself"
 
         @Covered
-        fun `binds param type is incompatible with return type`(param: Any, returnType: Any) =
+        fun inconsistentBinds(param: Any, returnType: Any) =
             "@Binds parameter $param is not compatible with its return type $returnType"
 
         @Covered
-        fun `incompatible condition scope`(aCondition: Any, bCondition: Any, a: Any, b: Any) =
+        fun incompatibleCondition(aCondition: Any, bCondition: Any, a: Any, b: Any) =
             "Condition $aCondition is not always true, given $bCondition is true,\n" +
                     "$Indent=> `$a` can not be injected into `$b` without `Optional<>` wrapper."
 
         @Covered
-        fun `incompatible condition scope for entry-point`(aCondition: Any, bCondition: Any,
+        fun incompatibleConditionEntyPoint(aCondition: Any, bCondition: Any,
                                                            binding: Any, component: Any) =
             "Entry-point condition $aCondition is not always true, given component's condition $bCondition is true,\n" +
                     "$Indent=> `$binding` can not be exposed from `$component` without `Optional<>` wrapper."
 
 
         @Covered
-        fun `invalid builder setter return type`(creatorType: Any) =
+        fun invalidBuilderSetterReturn(creatorType: Any) =
             "Setter method in component creator must return either `void` or creator type itself ($creatorType)"
 
         @Covered
-        fun `component creator must be an interface`() =
+        fun nonInterfaceCreator() =
             "Component creator declaration must be an `interface`"
 
         @Covered
-        fun `missing component creating method`() =
+        fun missingCreatingMethod() =
             "Component creator is missing a creating method - an abstract method which returns the component interface"
 
         @Covered
-        fun `invalid method in component creator`(method: Any) =
+        fun unknownMethodInCreator(method: Any) =
             "Unexpected/unrecognized method \n$Indent`$method`\n for component creator interface"
 
         @Covered
-        fun `missing component dependency`(missing: Any) =
+        fun missingComponentDependency(missing: Any) =
             "Declared dependency $missing is missing"
 
         @Covered
-        fun `unneeded component dependency`() =
+        fun extraComponentDependency() =
             "Unrecognized type (component dependency?) is present"
 
         @Covered
-        fun `missing module`(missing: Any) =
+        fun missingModule(missing: Any) =
             "Declared module $missing requires object instance and it is not provided"
 
         @Covered
-        fun `unneeded module`() =
+        fun extraModule() =
             "Extra/unneeded module instance is present"
 
 
         @Covered
-        fun `non-void injector method return type`() =
+        fun invalidInjectorReturn() =
             "Injector method should return `void`/`Unit`."
 
 
         @Covered
-        fun `multiple component creators`() =
+        fun multipleCreators() =
             "Multiple component factories detected declared"
 
         @Covered
-        fun `invalid method in component`(method: Any) =
+        fun unknownMethodInComponent(method: Any) =
             "Unexpected method \n$Indent`$method`\n in component declaration"
 
         @Covered
-        fun `declaration is not annotated with @Component`() =
+        fun nonComponent() =
             "Type declaration is used as a component yet not annotated with `@Component`"
 
         @Covered
-        fun `component must be an interface`() =
+        fun nonInterfaceComponent() =
             "Component declaration must be an `interface`"
 
         @Covered
-        fun `missing component creator - non-root`() =
+        fun missingCreatorForNonRoot() =
             "Non-root component declaration must include creator declaration"
 
         @Covered
-        fun `missing component creator - dependencies`() =
+        fun missingCreatorForDependencies() =
             "Component declares dependencies, yet no creator declaration is present"
 
         @Covered
-        fun `missing component creator - modules`() =
+        fun missingCreatorForModules() =
             "Component includes non-trivially constructable modules that require object instance, " +
                     "yet no creator declaration is present"
 
 
         @Covered
-        fun `no conditions on feature`() =
+        fun noConditionsOnFeature() =
             "Feature declaration has no `@Condition`-family annotations on it."
 
 
         @Covered
-        fun `declaration is not annotated with @ComponentVariantDimension`() =
+        fun nonComponentVariantDimension() =
             "Type declaration is used as a component variant dimension, " +
                     "yet not annotated with @ComponentVariantDimension"
 
         @Covered
-        fun `missing component variant dimension`() =
+        fun missingDimension() =
             "Component variant dimension is missing"
 
 
         @Covered
-        fun `declaration is not annotated with @ComponentFlavor`() =
+        fun nonFlavor() =
             "Type declaration is used as a component flavor, yet not annotated with @ComponentFlavor"
 
 
         @Covered
-        fun `declaration is not annotated with @Module`() =
+        fun nonModule() =
             "Type declaration is used as a module, yet not annotated with @Module"
 
 
         @Covered
-        fun `framework type is manually managed`() =
+        fun manualFrameworkType() =
             "Framework types (Lazy, Provider, Optional) can't be manually managed (provided/bound)"
 
 
         @Covered
-        fun `conflicting or duplicate flavors for dimension`(dimension: Any) =
+        fun conflictingOrDuplicateFlavors(dimension: Any) =
             "Duplicate flavors for a single `$dimension`"
 
 
         @Covered
-        fun `undeclared dimension in variant`(dimension: Any) =
+        fun undeclaredDimension(dimension: Any) =
             "No flavor is declared for `$dimension` in a variant"
 
-        fun `variant matching ambiguity`(one: Any, two: Any) =
+        fun variantMatchingAmbiguity(one: Any, two: Any) =
             "Variant matching ambiguity: `$one` vs `$two` could not be resolved"
 
 
         @Covered
-        fun `invalid condition`(expression: Any) =
+        fun invalidCondition(expression: Any) =
             "Invalid condition expression '$expression'"
 
         @Covered
-        fun `invalid condition - unable to reach boolean`() =
+        fun invalidConditionNoBoolean() =
             "Unable to reach boolean result in the given expression"
 
         @Covered
-        fun `invalid condition - missing member`(name: Any, type: Any) =
+        fun invalidConditionMissingMember(name: Any, type: Any) =
             "Can not find accessible `$name` member in $type"
 
 
         @Covered
-        fun `conflicting bindings`(`for`: Any) =
+        fun conflictingBindings(`for`: Any) =
             "Conflicting bindings for `$`for``"
 
         @Covered
-        fun `root component can not be a subcomponent`() =
+        fun rootAsChild() =
             "Root component can not be a subcomponent"
 
         @Covered
-        fun `duplicate component scope`(scope: Any) =
+        fun duplicateComponentScope(scope: Any) =
             "A single scope `$scope` can not be present on more than one component in a hierarchy"
 
         @Covered
-        fun `component hierarchy loop`() =
+        fun componentLoop() =
             "Component hierarchy loop detected"
 
         @Covered
-        fun `multi-threading status mismatch`(parent: Any) =
+        fun multiThreadStatusMismatch(parent: Any) =
             "Component declares a multi-threaded requirement, but its parent `$parent` does not. " +
                     "Please, specify the same requirement for the parent."
 
         @Covered
-        fun `dependency loop`(chain: List<Pair<Any, Any>>) = buildString {
+        fun dependencyLoop(chain: List<Pair<Any, Any>>) = buildString {
             appendLine("Binding dependency loop detected:")
             chain.forEachIndexed { index, (target, binding) ->
                 if (index == 0) append("(*) ") else append("    ")
@@ -250,50 +249,50 @@ object Strings {
     object Warnings {
 
         @Covered
-        fun `exposed dependency of a framework type`(function: Any) =
+        fun ignoredDependencyOfFrameworkType(function: Any) =
             "function\n$Indent`$function`\nreturns a framework type and such type can not be directly " +
                     "introduced to the graph via component dependency - the function will be ignored. " +
                     "If you need this to form a binding - change the return type, or use a wrapper type. " +
                     "Otherwise remove the function from the dependency interface entirely."
 
         @Covered
-        fun `non-abstract dependency declaration`() =
+        fun nonAbstractDependency() =
             "Component dependency declaration is not abstract. If it is already known how to provide necessary " +
                     "dependencies for the graph, consider using Inject-constructors or a @Module with " +
                     "regular provisions instead."
 
         @Covered
-        fun `@BindsInstance on builder method's parameter`() =
+        fun ignoredBindsInstance() =
             "A parameter of a builder's method is annotated with @BindsInstance, which has no effect. " +
                     "Maybe you meant to annotate the method itself for it to work as a binding?"
     }
 
     object Notes {
         @Covered
-        fun `no known way to infer a binding`() =
+        fun unknownBinding() =
             "No known way to infer the binding"
 
         @Covered
-        fun `missing module instance`(module: Any) =
+        fun missingModuleInstance(module: Any) =
             "Instance of `$module` must be provided"
 
         @Covered
-        fun `conflicting component creator declared`(creator: Any) =
+        fun conflictingCreator(creator: Any) =
             "Declared $creator"
 
         @Covered
-        fun `duplicate binding`(binding: Any) =
+        fun duplicateBinding(binding: Any) =
             "Conflicting binding: `$binding`"
 
         @Covered
-        fun `duplicate scope component`(component: Any) =
+        fun duplicateScopeComponent(component: Any) =
             "In component `$component`"
 
         @Covered
-        fun `nested framework type`(target: Any) =
+        fun nestedFrameworkType(target: Any) =
             "`$target` can't be requested in any way (lazy/provider/optional) but *directly*"
 
-        fun `subcomponent factory injection hint`(factory: Any, component: Any, owner: Any) =
+        fun subcomponentFactoryInjectionHint(factory: Any, component: Any, owner: Any) =
             "`$factory` is a factory for `$component`, ensure that this component is specified " +
                     "via `@Module(subcomponents=..)` and that module is included into `$owner`"
     }

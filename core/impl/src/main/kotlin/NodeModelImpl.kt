@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.base.BiObjectCache
-import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.InjectConstructorBindingModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -44,9 +43,11 @@ internal class NodeModelImpl private constructor(
             require(constructor.isAnnotatedWith<Inject>())
         }
 
-        override val inputs: Sequence<NodeDependency> = constructor.parameters.map { param ->
-            NodeDependency(type = param.type, forQualifier = param)
-        }.memoize()
+        override val inputs: List<NodeDependency> by lazy {
+            constructor.parameters.map { param ->
+                NodeDependency(type = param.type, forQualifier = param)
+            }.toList()
+        }
 
         override val target: NodeModel
             get() = this@NodeModelImpl
@@ -73,8 +74,11 @@ internal class NodeModelImpl private constructor(
         append(type)
     }
 
-    override fun multiBoundListNode(): NodeModel {
-        return Factory(type = LangModelFactory.getListType(type), qualifier = qualifier)
+    override fun multiBoundListNodes(): Array<NodeModel> {
+        return arrayOf(
+            Factory(type = LangModelFactory.getListType(type, isCovariant = false), qualifier = qualifier),
+            Factory(type = LangModelFactory.getListType(type, isCovariant = true), qualifier = qualifier),
+        )
     }
 
     override val hintIsFrameworkType: Boolean
@@ -82,7 +86,7 @@ internal class NodeModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (isFrameworkType(type)) {
-            validator.reportError(Errors.`framework type is manually managed`())
+            validator.reportError(Errors.manualFrameworkType())
         }
     }
 
@@ -112,7 +116,7 @@ internal class NodeModelImpl private constructor(
             override val implicitBinding: Nothing? get() = null
             override val superModel: Nothing? get() = null
             override fun dropQualifier(): NodeModel = this
-            override fun multiBoundListNode(): NodeModel = this
+            override fun multiBoundListNodes(): Array<NodeModel> = emptyArray()
             override fun validate(validator: Validator) = Unit // No need to report an error here
             override val hintIsFrameworkType: Boolean get() = false
             override fun toString() = "[invalid]"

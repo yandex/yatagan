@@ -15,6 +15,7 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
@@ -25,6 +26,7 @@ import com.google.devtools.ksp.symbol.NonExistLocation
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Variance
+import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.generator.lang.ArrayNameModel
@@ -72,47 +74,59 @@ private fun mapToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassD
     return declaration.qualifiedName?.let(Utils.resolver::getJavaClassByName) ?: declaration
 }
 
-internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean = false): KSType {
-    // MAYBE: Perf: implement caching for non-trivial mappings?
-    if (type.isError) return type
-    val originalDeclaration = type.declaration as? KSClassDeclaration ?: return type
-    val mappedDeclaration = mapToJavaPlatformIfNeeded(declaration = originalDeclaration)
-    if (mappedDeclaration == originalDeclaration && type.arguments.isEmpty()) {
-        return type
-    }
-    val mappedArguments = type.arguments.zip(originalDeclaration.typeParameters)
-        .map(fun(argAndParam: Pair<KSTypeArgument, KSTypeParameter>): KSTypeArgument {
-            val (arg, param) = argAndParam
-            val originalArgType = arg.type?.resolve() ?: return arg
-            val mappedArgType = mapToJavaPlatformIfNeeded(
-                type = originalArgType,
-                varianceAsWildcard = varianceAsWildcard,
-            )
-            // TODO: Use `Utils.resolver.getJavaWildcard()` on reference
-            return Utils.resolver.getTypeArgument(
-                typeRef = Utils.resolver.createKSTypeReferenceFromKSType(mappedArgType),
-                variance = if (varianceAsWildcard) {
-                    mergeVariance(
-                        declarationSite = param.variance,
-                        useSite = arg.variance,
-                        isTypeOpen = { mappedArgType.declaration.isOpen() },
-                    )
-                } else {
-                    if (param.variance == arg.variance) {
-                        // redundant projection
-                        Variance.INVARIANT
+private fun KSType.getNonAliasDeclaration(): KSClassDeclaration? = when (val declaration = declaration) {
+    is KSClassDeclaration -> declaration
+    is KSTypeAlias -> declaration.type.resolve().getNonAliasDeclaration()
+    else -> null
+}
+
+private object TypeMapCache : BiObjectCache<KSType, Boolean, KSType>() {
+    fun obtain(type: KSType, varianceAsWildcard: Boolean): KSType = createCached(type, varianceAsWildcard) {
+        if (type.isError) return type
+        val originalDeclaration = type.getNonAliasDeclaration() ?: return@createCached type
+        val mappedDeclaration = mapToJavaPlatformIfNeeded(declaration = originalDeclaration)
+        if (mappedDeclaration == originalDeclaration && type.arguments.isEmpty()) {
+            return type.makeNotNullable()
+        }
+        val mappedArguments = type.arguments.zip(originalDeclaration.typeParameters)
+            .map(fun(argAndParam: Pair<KSTypeArgument, KSTypeParameter>): KSTypeArgument {
+                val (arg, param) = argAndParam
+                val varianceAsWildcard = varianceAsWildcard && !arg.isAnnotationPresent<JvmSuppressWildcards>()
+                val originalArgType = arg.type?.resolve() ?: return arg
+                val mappedArgType = mapToJavaPlatformIfNeeded(
+                    type = originalArgType,
+                    varianceAsWildcard = varianceAsWildcard,
+                )
+                // TODO: Use `Utils.resolver.getJavaWildcard()` on reference
+                return Utils.resolver.getTypeArgument(
+                    typeRef = Utils.resolver.createKSTypeReferenceFromKSType(mappedArgType),
+                    variance = if (varianceAsWildcard) {
+                        mergeVariance(
+                            declarationSite = param.variance,
+                            useSite = arg.variance,
+                            isTypeOpen = { mappedArgType.declaration.isOpen() },
+                        )
                     } else {
-                        arg.variance
-                    }
-                },
-            )
-        })
-    return try {
-        mappedDeclaration.asType(mappedArguments)
-    } catch (e: ClassCastException) {
-        // fixme: think of a better way to handle it
-        type  // Internal KSP error, likely due to an ErrorType in mappedArguments, so return unmapped type.
+                        if (param.variance == arg.variance) {
+                            // redundant projection
+                            Variance.INVARIANT
+                        } else {
+                            arg.variance
+                        }
+                    },
+                )
+            })
+        return try {
+            mappedDeclaration.asType(mappedArguments).makeNotNullable()
+        } catch (e: ClassCastException) {
+            // fixme: think of a better way to handle it
+            type  // Internal KSP error, likely due to an ErrorType in mappedArguments, so return unmapped type.
+        }
     }
+}
+
+internal fun mapToJavaPlatformIfNeeded(type: KSType, varianceAsWildcard: Boolean = false): KSType {
+    return TypeMapCache.obtain(type = type, varianceAsWildcard = varianceAsWildcard)
 }
 
 private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {

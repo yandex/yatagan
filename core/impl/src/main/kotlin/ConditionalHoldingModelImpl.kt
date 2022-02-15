@@ -45,7 +45,7 @@ internal open class ConditionalHoldingModelImpl(
 
         override fun validate(validator: Validator) {
             if (conditions.none()) {
-                validator.reportError(Errors.`no conditions on feature`())
+                validator.reportError(Errors.noConditionsOnFeature())
             }
         }
 

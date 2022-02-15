@@ -3,9 +3,9 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.base.BiObjectCache
+import com.yandex.daggerlite.core.lang.NoDeclaration
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtNoDeclaration
 import com.yandex.daggerlite.generator.lang.CtTypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import kotlin.LazyThreadSafetyMode.NONE
@@ -23,7 +23,7 @@ internal class KspTypeImpl private constructor(
     override val declaration: TypeDeclarationLangModel by lazy(NONE) {
         when (jvmType) {
             JvmTypeInfo.Declared -> KspTypeDeclarationImpl(impl)
-            else -> CtNoDeclaration(this)
+            else -> NoDeclaration(this)
         }
     }
 

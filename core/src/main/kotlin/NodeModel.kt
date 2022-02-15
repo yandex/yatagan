@@ -23,7 +23,7 @@ interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel> {
     /**
      * TODO: doc.
      */
-    fun multiBoundListNode(): NodeModel
+    fun multiBoundListNodes(): Array<NodeModel>
 
     /**
      * What specific core-level model the node represents. `null` if none.

@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.core.lang.NoDeclaration
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtNoDeclaration
 import com.yandex.daggerlite.generator.lang.CtTypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import javax.lang.model.type.TypeKind
@@ -18,7 +18,7 @@ internal class JavaxTypeImpl private constructor(
     override val declaration: TypeDeclarationLangModel by lazy(NONE) {
         if (impl.kind == TypeKind.DECLARED) {
             JavaxTypeDeclarationImpl(impl.asDeclaredType())
-        } else CtNoDeclaration(this)
+        } else NoDeclaration(this)
     }
 
     override val isBoolean: Boolean

@@ -8,11 +8,6 @@ package com.yandex.daggerlite.core.lang
  */
 interface FunctionLangModel : MemberLangModel, CallableLangModel {
     /**
-     * Type that this function is associated with.
-     */
-    val owner: TypeDeclarationLangModel
-
-    /**
      * Whether the function is abstract.
      */
     val isAbstract: Boolean
@@ -39,6 +34,10 @@ interface FunctionLangModel : MemberLangModel, CallableLangModel {
     val propertyAccessorInfo: PropertyAccessorInfo?
 
     override fun <R> accept(visitor: MemberLangModel.Visitor<R>): R {
+        return visitor.visitFunction(this)
+    }
+
+    override fun <T> accept(visitor: CallableLangModel.Visitor<T>): T {
         return visitor.visitFunction(this)
     }
 

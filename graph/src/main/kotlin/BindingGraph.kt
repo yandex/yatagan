@@ -38,6 +38,8 @@ interface BindingGraph : MayBeInvalid {
      * All [condition literals][ConditionScope.Literal]s that are **hosted** in this component.
      * Consists of literals directly used by bindings in this and children graphs.
      *
+     * All literals are [normalized][ConditionScope.Literal.normalized].
+     *
      * The associated info is [LiteralUsage].
      */
     val localConditionLiterals: Map<ConditionScope.Literal, LiteralUsage>

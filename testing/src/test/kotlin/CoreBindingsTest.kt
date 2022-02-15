@@ -86,7 +86,7 @@ class CoreBindingsTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -124,15 +124,16 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Dagger
             fun test() {
-                val c = DaggerTestComponent.create()
+                val c = Dagger.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """.trimIndent()
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
             inspectGeneratedClass("test.TestCaseKt") { testCase ->
                 testCase["test"](null)
@@ -174,15 +175,16 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Dagger
             fun test() {
-                val c = DaggerTestComponent.create()
+                val c = Dagger.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
             inspectGeneratedClass("test.TestCaseKt") { testCase ->
                 testCase["test"](null)
@@ -226,15 +228,16 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Dagger
             fun test() {
-                val c = DaggerTestComponent.create()
+                val c = Dagger.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
             inspectGeneratedClass("test.TestCaseKt") { testCase ->
                 testCase["test"](null)
@@ -265,7 +268,7 @@ class CoreBindingsTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -302,7 +305,7 @@ class CoreBindingsTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -339,7 +342,7 @@ class CoreBindingsTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -373,7 +376,7 @@ class CoreBindingsTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -403,7 +406,7 @@ class CoreBindingsTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -463,7 +466,7 @@ class CoreBindingsTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -493,7 +496,7 @@ class CoreBindingsTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -563,7 +566,7 @@ class CoreBindingsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerMyComponent")
+            generatesJavaSources("test.Dagger\$MyComponent")
         }
     }
 

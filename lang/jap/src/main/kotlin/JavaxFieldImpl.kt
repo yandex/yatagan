@@ -18,6 +18,8 @@ internal class JavaxFieldImpl private constructor(
 
     override val name: String get() = impl.simpleName.toString()
 
+    override val platformModel: VariableElement get() = impl
+
     companion object Factory : BiObjectCache<JavaxTypeDeclarationImpl, VariableElement, JavaxFieldImpl>() {
         operator fun invoke(
             owner: JavaxTypeDeclarationImpl,

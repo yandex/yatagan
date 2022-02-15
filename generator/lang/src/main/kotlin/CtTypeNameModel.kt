@@ -33,7 +33,7 @@ data class ParameterizedNameModel(
         buildString {
             append(raw)
             append('<')
-            typeArguments.joinTo(this, separator = ".")
+            typeArguments.joinTo(this, separator = ", ")
             append('>')
         }
     }

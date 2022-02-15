@@ -53,11 +53,11 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         if (target is BindingTargetModel.FlattenMultiContribution) {
             val firstArg = impl.returnType.typeArguments.firstOrNull()
             if (firstArg == null || !LangModelFactory.getCollectionType(firstArg).isAssignableFrom(impl.returnType)) {
-                validator.reportError(Errors.`invalid flattening multibinding`(insteadOf = impl.returnType))
+                validator.reportError(Errors.invalidFlatteningMultibinding(insteadOf = impl.returnType))
             }
         }
         if (impl.returnType.isVoid) {
-            validator.reportError(Errors.`binding must not return void`())
+            validator.reportError(Errors.voidBinding())
         }
     }
 }
@@ -84,7 +84,7 @@ internal class BindsImpl(
 
         for (param in impl.parameters) {
             if (!impl.returnType.isAssignableFrom(param.type)) {
-                validator.reportError(Errors.`binds param type is incompatible with return type`(
+                validator.reportError(Errors.inconsistentBinds(
                     param = param.type,
                     returnType = impl.returnType,
                 ))
@@ -92,7 +92,7 @@ internal class BindsImpl(
         }
 
         if (!impl.isAbstract) {
-            validator.reportError(Errors.`binds must be abstract`())
+            validator.reportError(Errors.nonAbstractBinds())
         }
     }
 
@@ -122,14 +122,11 @@ internal class ProvidesImpl(
 
     override val conditionals get() = conditionalHolder.conditionals
 
-    private val paramsToDependencies by lazy(NONE) {
-        impl.parameters.associateWith { param ->
+    override val inputs: List<NodeDependency> by lazy(NONE) {
+        impl.parameters.map { param ->
             NodeDependency(type = param.type, forQualifier = param)
-        }
+        }.toList()
     }
-
-    override val inputs: Sequence<NodeDependency>
-        get() = paramsToDependencies.values.asSequence()
 
     override fun validate(validator: Validator) {
         super.validate(validator)
@@ -141,7 +138,7 @@ internal class ProvidesImpl(
         }
 
         if (impl.isAbstract) {
-            validator.reportError(Errors.`provides must not be abstract`())
+            validator.reportError(Errors.abstractProvides())
         }
     }
 

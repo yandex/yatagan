@@ -40,7 +40,7 @@ internal fun VariantMatch(
         var currentMatch = 0
         for ((dimension: DimensionModel, allowedFlavors: List<FlavorModel>) in constraints) {
             val flavor = forVariant[dimension] ?: return VariantMatch.Error(buildMessage(Kind.Error) {
-                contents = Strings.Errors.`undeclared dimension in variant`(
+                contents = Strings.Errors.undeclaredDimension(
                     dimension = dimension,
                 )
             })
@@ -52,7 +52,7 @@ internal fun VariantMatch(
         }
         if (maxMatched == currentMatch) {
             return VariantMatch.Error(buildMessage(Kind.Error) {
-                contents = Strings.Errors.`variant matching ambiguity`(one = bestMatch!!, two = conditional)
+                contents = Strings.Errors.variantMatchingAmbiguity(one = bestMatch!!, two = conditional)
             })
         }
         if (maxMatched < currentMatch) {

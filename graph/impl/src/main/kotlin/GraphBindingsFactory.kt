@@ -135,11 +135,23 @@ internal class GraphBindingsFactory(
 
         // Multi-bindings
         for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {
+            val iterator = target.multiBoundListNodes().iterator()
+            if (!iterator.hasNext()) continue
+            var current = iterator.next()
             add(MultiBindingImpl(
                 owner = graph,
-                target = target.multiBoundListNode(),
+                target = current,
                 contributions = contributions,
             ))
+            while(iterator.hasNext()) {
+                val old = current
+                current = iterator.next()
+                add(SyntheticAliasBindingImpl(
+                    owner = graph,
+                    target = current,
+                    source = old,
+                ))
+            }
         }
 
         // This component binding
@@ -210,9 +222,9 @@ internal class GraphBindingsFactory(
 
             bindings.ifContainsDuplicates { duplicates ->
                 validator.report(buildMessage(Kind.Error, fun ValidationMessageBuilder.() {
-                    contents = Strings.Errors.`conflicting bindings`(`for` = node)
+                    contents = Strings.Errors.conflictingBindings(`for` = node)
                     duplicates.forEach { binding ->
-                        addNote(Strings.Notes.`duplicate binding`(binding))
+                        addNote(Strings.Notes.duplicateBinding(binding))
                     }
                 }))
             }

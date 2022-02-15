@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.jap.lang
 
-import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.lang.model.AnnotatedConstruct
 import javax.lang.model.element.AnnotationMirror
@@ -11,7 +10,7 @@ internal open class JavaxAnnotatedImpl<T : AnnotatedConstruct>(
 ) : JavaxAnnotatedLangModel {
 
     override val annotations: Sequence<CtAnnotationLangModel> by lazy(NONE) {
-        impl.annotationMirrors.asSequence().map { JavaxAnnotationImpl(it) }.memoize()
+        impl.annotationMirrors.asSequence().map { JavaxAnnotationImpl(it) }
     }
 
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {

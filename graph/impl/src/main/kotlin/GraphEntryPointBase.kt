@@ -9,17 +9,17 @@ import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportError
 
 internal abstract class GraphEntryPointBase : MayBeInvalid {
-    abstract val owner: BindingGraph
+    abstract val graph: BindingGraph
     abstract val dependency: NodeDependency
 
     override fun validate(validator: Validator) {
         val (node, kind) = dependency
-        val resolved = owner.resolveBinding(node)
+        val resolved = graph.resolveBinding(node)
         if (!kind.isOptional) {
-            if (resolved.conditionScope /* no component scope */ !in owner.conditionScope) {
-                validator.reportError(Strings.Errors.`incompatible condition scope for entry-point`(
-                    aCondition = resolved.conditionScope, bCondition = owner.conditionScope,
-                    binding = resolved, component = owner,
+            if (resolved.conditionScope /* no component scope */ !in graph.conditionScope) {
+                validator.reportError(Strings.Errors.incompatibleConditionEntyPoint(
+                    aCondition = resolved.conditionScope, bCondition = graph.conditionScope,
+                    binding = resolved, component = graph,
                 ))
             }
         }

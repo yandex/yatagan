@@ -93,13 +93,8 @@ class ConditionsTest(
         useSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import javax.inject.Inject
-            import javax.inject.Provider
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Condition
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Optional
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
             @Singleton
             @Conditional([Conditions.FeatureA::class, Conditions.FeatureB::class])
@@ -119,12 +114,12 @@ class ConditionsTest(
             }
 
             fun test() {
-                val component = DaggerTestComponent.create()
+                val component = Dagger.create(TestComponent::class.java)
                 assert(!component.opt.isPresent)
                 Features.enabledA = true
-                assert(!DaggerTestComponent.create().opt.isPresent)
+                assert(!Dagger.create(TestComponent::class.java).opt.isPresent)
                 Features.isEnabledB = true
-                val new = DaggerTestComponent.create()
+                val new = Dagger.create(TestComponent::class.java)
                 assert(new.opt.isPresent)
                 assert(new.opt.get() === new.provider.get().get())
 
@@ -136,7 +131,7 @@ class ConditionsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             inspectGeneratedClass("test.TestCaseKt") { case ->
                 case["test"](null)
             }
@@ -185,8 +180,8 @@ class ConditionsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestPhoneComponent")
-            generatesJavaSources("test.DaggerTestTabletComponent")
+            generatesJavaSources("test.Dagger\$TestPhoneComponent")
+            generatesJavaSources("test.Dagger\$TestTabletComponent")
             inspectGeneratedClass("test.TestCaseKt") { case ->
                 case["test"](null)
             }
@@ -199,13 +194,8 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import javax.inject.Inject
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Condition
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Conditionals
-            import com.yandex.daggerlite.Optional
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
             @Conditional(onlyIn = [DeviceType.Phone::class])
             class MyPhoneSpecificClass @Inject constructor()
@@ -226,8 +216,8 @@ class ConditionsTest(
             }
 
             fun test() {
-                val phone = DaggerTestPhoneComponent.create()
-                val tablet = DaggerTestTabletComponent.create()
+                val phone = Dagger.create(TestPhoneComponent::class.java)
+                val tablet = Dagger.create(TestTabletComponent::class.java)
 
                 assert(phone.phone.isPresent)
                 assert(!phone.tablet.isPresent)
@@ -240,8 +230,8 @@ class ConditionsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestPhoneComponent")
-            generatesJavaSources("test.DaggerTestTabletComponent")
+            generatesJavaSources("test.Dagger\$TestPhoneComponent")
+            generatesJavaSources("test.Dagger\$TestTabletComponent")
             inspectGeneratedClass("test.TestCaseKt") { case ->
                 case["test"](null)
             }
@@ -254,15 +244,8 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import javax.inject.Scope
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Condition
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Conditionals
-            import com.yandex.daggerlite.ComponentFlavor
-            import com.yandex.daggerlite.Optional
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
             @Scope
             annotation class ActivityScoped
@@ -303,8 +286,8 @@ class ConditionsTest(
 
             fun test() {
                 Features.isEnabledB = true
-                val phone: TestComponent = DaggerTestPhoneComponent.create()
-                val tablet: TestComponent = DaggerTestTabletComponent.create()
+                val phone: TestComponent = Dagger.create(TestPhoneComponent::class.java)
+                val tablet: TestComponent = Dagger.create(TestTabletComponent::class.java)
 
                 assert(!phone.myFeatureActivity.isPresent)
                 assert(tablet.myFeatureActivity.isPresent)
@@ -314,8 +297,8 @@ class ConditionsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestPhoneComponent")
-            generatesJavaSources("test.DaggerTestTabletComponent")
+            generatesJavaSources("test.Dagger\$TestPhoneComponent")
+            generatesJavaSources("test.Dagger\$TestTabletComponent")
             inspectGeneratedClass("test.TestCaseKt") { case ->
                 case["test"](null)
             }
@@ -355,7 +338,7 @@ class ConditionsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
         }
     }
 
@@ -363,16 +346,8 @@ class ConditionsTest(
     fun `@Binds with multiple alternatives`() {
         useSourceSet(features)
         givenKotlinSource("test.TestCase", """
-            import javax.inject.Inject
-            import javax.inject.Named
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Optional
-            import javax.inject.Provider
-            import com.yandex.daggerlite.Lazy
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
             interface SomeApiBase
             
@@ -431,7 +406,7 @@ class ConditionsTest(
             
             fun test() {
                 Features.isEnabledB = true
-                val c = DaggerTestComponent.create()
+                val c = Dagger.create(TestComponent::class.java)
                 assert(!c.apiV1.isPresent)
                 assert(c.apiV2.get() is Stub)
                 assert(c.apiV3.get() is ImplB)
@@ -451,7 +426,7 @@ class ConditionsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
             }
@@ -463,13 +438,8 @@ class ConditionsTest(
         useSourceSet(features)
         useSourceSet(flavors)
         givenKotlinSource("test.TestCase", """
-            import javax.inject.Named
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Provides
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Optional
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Lazy
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             interface Api
             class Impl: Api
@@ -513,22 +483,22 @@ class ConditionsTest(
             }
             
             fun test() {
-                assert(DaggerTestMainComponent.create().namedApi.isPresent)
-                assert(!DaggerTestCustomComponent.create().namedApi.isPresent)
+                assert(Dagger.create(TestMainComponent::class.java).namedApi.isPresent)
+                assert(!Dagger.create(TestCustomComponent::class.java).namedApi.isPresent)
             
-                assert(!DaggerTestMainComponent.create().api.isPresent)
+                assert(!Dagger.create(TestMainComponent::class.java).api.isPresent)
             
                 Features.isEnabledB = true
-                assert(!DaggerTestMainComponent.create().api.isPresent)
+                assert(!Dagger.create(TestMainComponent::class.java).api.isPresent)
             
                 Features.enabledA = true
                 Features.isEnabledB = false
-                assert(DaggerTestMainComponent.create().api.isPresent)
-                assert(!DaggerTestCustomComponent.create().api.isPresent)
+                assert(Dagger.create(TestMainComponent::class.java).api.isPresent)
+                assert(!Dagger.create(TestCustomComponent::class.java).api.isPresent)
                 
                 Features.enabledA = false
                 Features.isEnabledB = true
-                assert(DaggerTestCustomComponent.create().api.isPresent)
+                assert(Dagger.create(TestCustomComponent::class.java).api.isPresent)
             }
         """.trimIndent())
 
@@ -545,13 +515,8 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import javax.inject.Inject
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.ComponentFlavor
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Optional
-            import com.yandex.daggerlite.Condition
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             @Conditional(onlyIn = [ProductType.Browser::class])
             class Impl @Inject constructor()
@@ -580,8 +545,8 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = DaggerMyBrowserComponent.create()
-                val searchAppC = DaggerMySearchAppComponent.create()
+                val browserC = Dagger.create(MyBrowserComponent::class.java)
+                val searchAppC = Dagger.create(MySearchAppComponent::class.java)
                 
                 assert(browserC.myC.create().impl.isPresent)
                 assert(!searchAppC.myC.create().impl.isPresent)
@@ -591,8 +556,8 @@ class ConditionsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerMyBrowserComponent")
-            generatesJavaSources("test.DaggerMySearchAppComponent")
+            generatesJavaSources("test.Dagger\$MyBrowserComponent")
+            generatesJavaSources("test.Dagger\$MySearchAppComponent")
 
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
@@ -656,14 +621,8 @@ class ConditionsTest(
         useSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import javax.inject.Inject
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.ComponentFlavor
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Optional
-            import javax.inject.Provider
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             interface Api
             @Conditional(onlyIn = [ProductType.Browser::class])
@@ -707,9 +666,9 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = DaggerMyBrowserComponent.create()
-                val searchAppC = DaggerMySearchAppComponent.create()
-                val myProductC = DaggerMyProductComponent.create()
+                val browserC = Dagger.create(MyBrowserComponent::class.java)
+                val searchAppC = Dagger.create(MySearchAppComponent::class.java)
+                val myProductC = Dagger.create(MyProductComponent::class.java)
                 
                 assert(browserC.apiC.create().api.get() is ImplA)
                 assert(searchAppC.apiC.create().api.get() is ImplB)
@@ -719,9 +678,9 @@ class ConditionsTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerMyBrowserComponent")
-            generatesJavaSources("test.DaggerMySearchAppComponent")
-            generatesJavaSources("test.DaggerMyProductComponent")
+            generatesJavaSources("test.Dagger\$MyBrowserComponent")
+            generatesJavaSources("test.Dagger\$MySearchAppComponent")
+            generatesJavaSources("test.Dagger\$MyProductComponent")
 
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
@@ -753,7 +712,7 @@ class ConditionsTest(
             interface MyComponent { val a: Optional<ClassA> }
 
             fun test() {
-                val c: MyComponent = DaggerMyComponent.create() 
+                val c: MyComponent = Dagger.create(MyComponent::class.java) 
                 assert(!c.a.isPresent)
             }
         """.trimIndent())

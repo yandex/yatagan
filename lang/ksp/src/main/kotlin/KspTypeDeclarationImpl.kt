@@ -114,13 +114,16 @@ internal class KspTypeDeclarationImpl private constructor(
         return KspTypeImpl(type)
     }
 
+    override val platformModel: KSClassDeclaration
+        get() = impl
+
     companion object Factory : ObjectCache<KSType, KspTypeDeclarationImpl>() {
         operator fun invoke(impl: KSType) =
             createCached(mapToJavaPlatformIfNeeded(impl), ::KspTypeDeclarationImpl)
     }
 
     private inner class ConstructorImpl(
-        impl: KSFunctionDeclaration,
+        private val impl: KSFunctionDeclaration,
     ) : ConstructorLangModel {
         private val jvmSignature = JvmMethodSignature(impl)
 
@@ -131,5 +134,6 @@ internal class KspTypeDeclarationImpl private constructor(
             containing = type,
             jvmMethodSignature = jvmSignature,
         )
+        override val platformModel: KSFunctionDeclaration get() = impl
     }
 }

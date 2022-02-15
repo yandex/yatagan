@@ -19,7 +19,7 @@ import javax.lang.model.element.Modifier.STATIC
 
 internal class ComponentGenerator(
     private val graph: BindingGraph,
-    val generatedClassName: ClassName = graph.model.name.asClassName { "Dagger$it" },
+    val generatedClassName: ClassName = graph.model.name.asClassName { "Dagger$$it" },
 ) {
     interface Contributor {
         fun generate(builder: TypeSpecBuilder)

@@ -4,6 +4,7 @@ import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.ImmutableSetMultimap
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.core.lang.LangModelFactory
+import com.yandex.daggerlite.core.lang.use
 import com.yandex.daggerlite.jap.lang.JavaxModelFactoryImpl
 import com.yandex.daggerlite.jap.lang.ProcessingUtils
 import com.yandex.daggerlite.jap.lang.TypeDeclarationLangModel

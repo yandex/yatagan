@@ -23,6 +23,8 @@ internal class KspFieldImpl private constructor(
     }
     override val name: String get() = impl.simpleName.asString()
 
+    override val platformModel: KSPropertyDeclaration get() = impl
+
     companion object Factory : ObjectCache<KSPropertyDeclaration, KspFieldImpl>() {
         operator fun invoke(
             impl: KSPropertyDeclaration,

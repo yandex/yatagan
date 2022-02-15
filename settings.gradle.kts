@@ -7,6 +7,10 @@ pluginManagement {
 rootProject.name = "dagger-lite"
 
 include("api")
+include("api-compiled")
+project(":api-compiled").projectDir = file("api/compiled")
+include("api-dynamic")
+project(":api-dynamic").projectDir = file("api/dynamic")
 
 include("base")
 
@@ -20,6 +24,9 @@ project(":lang-ksp").projectDir = file("lang/ksp")
 
 include("lang-jap")
 project(":lang-jap").projectDir = file("lang/jap")
+
+include("lang-rt")
+project(":lang-rt").projectDir = file("lang/rt")
 
 include("core")
 include("core-impl")
@@ -40,6 +47,8 @@ include("generator-poetry")
 include("generator-lang")
 
 include("testing")
+
+include("dynamic")
 
 include("spi")
 

@@ -39,7 +39,7 @@ internal class VariantImpl private constructor(
             flavors.forEach(validator::child)
             if (flavors.size > 1) {
                 validator.reportError(
-                    Strings.Errors.`conflicting or duplicate flavors for dimension`(dimension = dimension)) {
+                    Strings.Errors.conflictingOrDuplicateFlavors(dimension = dimension)) {
                     for (conflict in flavors) {
                         addNote("Conflicting flavor: `$conflict`")
                     }

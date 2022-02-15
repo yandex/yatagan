@@ -30,6 +30,8 @@ internal class KspFunctionPropertySetterImpl private constructor(
     override val kind: PropertyAccessorKind
         get() = PropertyAccessorKind.Setter
 
+    override val platformModel: Any?
+        get() = null
 
     companion object Factory : ObjectCache<KSPropertySetter, KspFunctionPropertySetterImpl>() {
         operator fun invoke(

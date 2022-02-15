@@ -41,31 +41,31 @@ class ComponentCreatorFailureTest(
 
         failsToCompile {
             withError(formatMessage(
-                message = Strings.Errors.`component must be an interface`(),
+                message = Strings.Errors.nonInterfaceComponent(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.SubComponent")),
             ))
             withError(formatMessage(
-                message = Strings.Errors.`missing component creator - non-root`(),
+                message = Strings.Errors.missingCreatorForNonRoot(),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "test.SubComponent"),
                     listOf("test.RootComponent", "test.NotAComponent"),
                 ),
             ))
             withError(formatMessage(
-                message = Strings.Errors.`missing component creator - dependencies`(),
+                message = Strings.Errors.missingCreatorForDependencies(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.SubComponent")),
             ))
             withError(formatMessage(
-                message = Strings.Errors.`missing component creator - modules`(),
+                message = Strings.Errors.missingCreatorForModules(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.SubComponent")),
-                notes = listOf(Strings.Notes.`missing module instance`("test.MyModule"))
+                notes = listOf(Strings.Notes.missingModuleInstance("test.MyModule"))
             ))
             withError(formatMessage(
-                message = Strings.Errors.`declaration is not annotated with @Component`(),
+                message = Strings.Errors.nonComponent(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.NotAComponent")),
             ))
             withError(formatMessage(
-                message = Strings.Errors.`root component can not be a subcomponent`(),
+                message = Strings.Errors.rootAsChild(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.AnotherRootComponent")),
             ))
         }
@@ -88,11 +88,11 @@ class ComponentCreatorFailureTest(
 
         failsToCompile {
             withError(formatMessage(
-                message = Strings.Errors.`non-void injector method return type`(),
+                message = Strings.Errors.invalidInjectorReturn(),
                 encounterPaths = listOf(listOf("test.MyComponent", "[injector-fun] inject"))
             ))
             withError(formatMessage(
-                message = Strings.Errors.`invalid method in component`(
+                message = Strings.Errors.unknownMethodInComponent(
                     method = "test.MyComponent::misc(i: test.Injectee, extra: int): void"),
                 encounterPaths = listOf(listOf("test.MyComponent"))
             ))
@@ -141,37 +141,37 @@ class ComponentCreatorFailureTest(
 
         failsToCompile {
             withError(formatMessage(
-                message = Strings.Errors.`component creator must be an interface`(),
+                message = Strings.Errors.nonInterfaceCreator(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
             ))
             withError(formatMessage(
-                message = Strings.Errors.`missing component dependency`(missing = "test.MyDependency"),
+                message = Strings.Errors.missingComponentDependency(missing = "test.MyDependency"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
             ))
             withError(formatMessage(
-                message = Strings.Errors.`missing module`(missing = "test.RequiresInstance"),
+                message = Strings.Errors.missingModule(missing = "test.RequiresInstance"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
             ))
             withError(formatMessage(
-                message = Strings.Errors.`unneeded module`(),
+                message = Strings.Errors.extraModule(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Builder", "[param] create(.., module: test.Unknown, ..)"),
                 )
             ))
             withWarning(formatMessage(
-                message = Strings.Warnings.`non-abstract dependency declaration`(),
+                message = Strings.Warnings.nonAbstractDependency(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "test.MyDependency"),
                 )
             ))
             withWarning(formatMessage(
-                message = Strings.Warnings.`exposed dependency of a framework type`(
+                message = Strings.Warnings.ignoredDependencyOfFrameworkType(
                     function = "test.MyDependency::getNotGonnaBeUsed(): com.yandex.daggerlite.Optional<java.lang.Object>"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "test.MyDependency"),
@@ -222,49 +222,49 @@ class ComponentCreatorFailureTest(
 
         failsToCompile {
             withError(formatMessage(
-                message = Strings.Errors.`missing component creating method`(),
+                message = Strings.Errors.missingCreatingMethod(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo"),
                 )
             ))
             withError(formatMessage(
-                message = Strings.Errors.`unneeded component dependency`(),
+                message = Strings.Errors.extraComponentDependency(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setInt(int)"),
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )
             ))
             withError(formatMessage(
-                message = Strings.Errors.`invalid builder setter return type`("test.MyComponent.Foo"),
+                message = Strings.Errors.invalidBuilderSetterReturn("test.MyComponent.Foo"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )
             ))
             withError(formatMessage(
-                message = Strings.Errors.`invalid method in component creator`(
+                message = Strings.Errors.unknownMethodInCreator(
                     method = "test.MyComponent.Foo::create(): void"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo"),
                 )
             ))
             withError(formatMessage(
-                message = Strings.Errors.`unneeded module`(),
+                message = Strings.Errors.extraModule(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setModule(test.Unnecessary)"),
                 )
             ))
             withError(formatMessage(
-                message = Strings.Errors.`multiple component creators`(),
+                message = Strings.Errors.multipleCreators(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent"),
                 ),
                 notes = listOf(
-                    Strings.Notes.`conflicting component creator declared`("test.MyComponent.Foo"),
-                    Strings.Notes.`conflicting component creator declared`("test.MyComponent.Builder"),
+                    Strings.Notes.conflictingCreator("test.MyComponent.Foo"),
+                    Strings.Notes.conflictingCreator("test.MyComponent.Builder"),
                 ),
             ))
             withWarning(formatMessage(
-                message = Strings.Warnings.`@BindsInstance on builder method's parameter`(),
+                message = Strings.Warnings.ignoredBindsInstance(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )

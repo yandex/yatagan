@@ -106,20 +106,23 @@ internal inline fun <A> ExpressionBuilder.generateCall(
     instance: CodeBlock?,
     crossinline argumentBuilder: ExpressionBuilder.(A) -> Unit,
 ) {
-    when (callable) {
-        is ConstructorLangModel -> +"new %T(".formatCode(callable.constructee.asType().typeName().asRawType())
-        is FunctionLangModel -> {
+    callable.accept(object : CallableLangModel.Visitor<Unit> {
+        override fun visitFunction(function: FunctionLangModel) {
             if (instance != null) {
-                +"%L.%N(".formatCode(instance, callable.name)
+                +"%L.%N(".formatCode(instance, function.name)
             } else {
-                val ownerObject = when (callable.owner.kotlinObjectKind) {
+                val ownerObject = when (function.owner.kotlinObjectKind) {
                     KotlinObjectKind.Object -> ".INSTANCE"
                     else -> ""
                 }
-                +"%T%L.%L(".formatCode(callable.ownerName.asTypeName(), ownerObject, callable.name)
+                +"%T%L.%L(".formatCode(function.ownerName.asTypeName(), ownerObject, function.name)
             }
         }
-    }
+
+        override fun visitConstructor(constructor: ConstructorLangModel) {
+            +"new %T(".formatCode(constructor.constructee.asType().typeName().asRawType())
+        }
+    })
     join(arguments) { arg ->
         argumentBuilder(arg)
     }

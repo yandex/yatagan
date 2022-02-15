@@ -1,6 +1,11 @@
 package com.yandex.daggerlite.core.lang
 
-interface MemberLangModel : AnnotatedLangModel {
+interface MemberLangModel : AnnotatedLangModel, HasPlatformModel {
+    /**
+     * Type declaration that this entity is member of.
+     */
+    val owner: TypeDeclarationLangModel
+
     /**
      * Whether the member is truly static (@[JvmStatic] or `static`).
      */

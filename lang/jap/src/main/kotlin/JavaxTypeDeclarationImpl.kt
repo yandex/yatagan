@@ -19,6 +19,7 @@ import kotlinx.metadata.jvm.setterSignature
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.NestingKind
+import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import kotlin.LazyThreadSafetyMode.NONE
@@ -140,6 +141,8 @@ internal class JavaxTypeDeclarationImpl private constructor(
         return null
     }
 
+    override val platformModel: TypeElement get() = impl
+
     companion object Factory : ObjectCache<TypeMirrorEquivalence, JavaxTypeDeclarationImpl>() {
         operator fun invoke(
             impl: DeclaredType,
@@ -155,5 +158,6 @@ internal class JavaxTypeDeclarationImpl private constructor(
     ) : ConstructorLangModel, JavaxAnnotatedImpl<ExecutableElement>(impl) {
         override val constructee: TypeDeclarationLangModel get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(impl, type)
+        override val platformModel: ExecutableElement get() = impl
     }
 }
