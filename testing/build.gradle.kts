@@ -19,4 +19,5 @@ dependencies {
     testImplementation(project(":validation-impl"))
     testImplementation(project(":lang-ksp"))
     testImplementation(project(":lang-jap"))
+    testRuntimeOnly(project(":api-compiled"))
 }

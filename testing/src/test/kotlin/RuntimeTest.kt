@@ -51,7 +51,7 @@ class RuntimeTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
             inspectGeneratedClass("test.TestCaseKt") { tc ->
                 tc["test"](null)
@@ -76,7 +76,7 @@ class RuntimeTest(
             }
         """)
 
-        givenJavaSource("test.TestCase", """
+        givenJavaSource("test.TestComponent", """
             import javax.inject.Named;
             import com.yandex.daggerlite.Component;
             import com.yandex.daggerlite.Provides;
@@ -104,8 +104,10 @@ class RuntimeTest(
         """)
 
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Dagger
+
             fun test() {
-                val c = DaggerTestComponent.create()
+                val c = Dagger.create(TestComponent::class.java)
                 assert(c.hello().value == "hello")
                 assert(c.bye().value == "bye")
                 assert(c.foo().value == "foo")
@@ -113,7 +115,7 @@ class RuntimeTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)
@@ -124,10 +126,8 @@ class RuntimeTest(
     @Test
     fun `check @Provides used instead of @Inject constructor if exists`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Provides
-            import com.yandex.daggerlite.Module
-            import javax.inject.Inject
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
             class Impl(val value: Int)
             class Wrapper @Inject constructor(val i: Impl)
@@ -145,7 +145,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = DaggerTestComponent.create()
+                val c = Dagger.create(TestComponent::class.java)
                 assert(c.impl().value == 1)
                 assert(c.wrapper().i.value == 2)
             }
@@ -153,7 +153,7 @@ class RuntimeTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoMoreWarnings()
             inspectGeneratedClass("test.TestCaseKt") { tc ->
                 tc["test"](null)
@@ -177,7 +177,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c: MySTComponent = DaggerMySTComponent.create()
+                val c: MySTComponent = Dagger.create(MySTComponent::class.java)
                 val mainTid = Thread.currentThread().id
                 ThreadAssertions.asserter = ThreadAssertions.Asserter {
                     if (Thread.currentThread().id != mainTid) {

@@ -57,7 +57,7 @@ class CoreBindingsKotlinTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -106,7 +106,7 @@ class CoreBindingsKotlinTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -152,7 +152,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -163,8 +163,7 @@ class CoreBindingsKotlinTest(
 
         givenKotlinSource(
             "test.MyModule", """
-        import com.yandex.daggerlite.Provides
-        import com.yandex.daggerlite.Module
+        import com.yandex.daggerlite.*
 
         @Module
         class MyModule(private val myId: Int) {
@@ -175,9 +174,8 @@ class CoreBindingsKotlinTest(
         )
         givenKotlinSource(
             "test.TestComponent", """
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Lazy
-            import javax.inject.Provider
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
             @Component(modules = [MyModule::class])
             interface TestComponent {
@@ -194,15 +192,17 @@ class CoreBindingsKotlinTest(
         )
 
         givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             fun test() {
                 val m = MyModule(52)
-                val c = DaggerTestComponent.builder().create(m)
+                val c = Dagger.builder(TestComponent.Factory::class.java).create(m)
                 assert(c.get().id == 52)
             }
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
             inspectGeneratedClass("test.TestCaseKt") { testCase ->
                 testCase["test"](null)
@@ -238,7 +238,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -270,7 +270,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -301,7 +301,7 @@ class CoreBindingsKotlinTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -331,7 +331,7 @@ class CoreBindingsKotlinTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -366,7 +366,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -395,7 +395,7 @@ class CoreBindingsKotlinTest(
         """)
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -450,7 +450,7 @@ class CoreBindingsKotlinTest(
             """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -518,7 +518,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
             withNoWarnings()
         }
     }
@@ -566,7 +566,7 @@ class CoreBindingsKotlinTest(
             
             fun test() {
                 val foo = Foo()
-                DaggerTestComponent.create().injectFoo(foo)
+                Dagger.create(TestComponent::class.java).injectFoo(foo)
                 foo.helloA; foo.bye; foo.b; foo.a
             }""".trimIndent())
         compilesSuccessfully {
@@ -611,8 +611,8 @@ class CoreBindingsKotlinTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerMyComponent")
-            generatesJavaSources("test.DaggerMyComponent2")
+            generatesJavaSources("test.Dagger\$MyComponent")
+            generatesJavaSources("test.Dagger\$MyComponent2")
         }
     }
 
@@ -649,7 +649,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent())
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerMyComponent")
+            generatesJavaSources("test.Dagger\$MyComponent")
         }
     }
 }

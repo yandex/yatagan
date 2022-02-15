@@ -13,14 +13,14 @@ object Dagger {
             "$builderClass is not a builder for a dagger-lite component"
         }
         val daggerComponentClass = builderClass.classLoader.loadClass(
-            "${componentClass.`package`.name}.Dagger${componentClass.simpleName}")
+            "${componentClass.`package`.name}.Dagger$${componentClass.simpleName}")
         return builderClass.cast(daggerComponentClass.getDeclaredMethod("builder").invoke(null))
     }
 
     @JvmStatic
     fun<T : Any> create(componentClass: Class<T>): T {
         val daggerComponentClass = componentClass.classLoader.loadClass(
-            "${componentClass.`package`.name}.Dagger${componentClass.simpleName}")
+            "${componentClass.`package`.name}.Dagger$${componentClass.simpleName}")
         return componentClass.cast(daggerComponentClass.getDeclaredMethod("create").invoke(null))
     }
 }

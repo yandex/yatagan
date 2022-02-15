@@ -68,7 +68,7 @@ class ComponentHierarchyKotlinTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerMyApplicationComponent")
+            generatesJavaSources("test.Dagger\$MyApplicationComponent")
             withNoWarnings()
         }
     }
@@ -169,9 +169,10 @@ class ComponentHierarchyKotlinTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerMyApplicationComponent")
+            generatesJavaSources("test.Dagger\$MyApplicationComponent")
             withNoWarnings()
-            inspectGeneratedClass("test.DaggerMyApplicationComponent") {
+            inspectGeneratedClass("test.Dagger\$MyApplicationComponent") {
+                // FIXME: rewrite this in compiled code
                 val factory = it["builder"](null)
                 val appComponent = factory.clz["create", String::class](factory, /*app_id*/"foo")
                 val activityFactory = appComponent.clz["getActivityFactory"](appComponent)
@@ -241,7 +242,7 @@ class ComponentHierarchyKotlinTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerTestComponent")
+            generatesJavaSources("test.Dagger\$TestComponent")
         }
     }
 
@@ -250,13 +251,8 @@ class ComponentHierarchyKotlinTest(
         givenKotlinSource(
             "test.TestCase",
             """
-            import javax.inject.Inject
-            import javax.inject.Scope
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Provides
-            import com.yandex.daggerlite.Module
+            import javax.inject.*
+            import com.yandex.daggerlite.*
             import kotlin.test.assertEquals
 
             @Scope annotation class ActivityScoped
@@ -388,7 +384,7 @@ class ComponentHierarchyKotlinTest(
             }
             
             fun test() {
-                val c = DaggerApplicationComponent.create()
+                val c = Dagger.create(ApplicationComponent::class.java)
                 val settingsActivityFragmentModule = SettingsActivityFragmentModule(SettingsActivity())
                 
                 val mainActivityC = c.mainActivity.create()
@@ -417,7 +413,7 @@ class ComponentHierarchyKotlinTest(
         )
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerApplicationComponent")
+            generatesJavaSources("test.Dagger\$ApplicationComponent")
             withNoWarnings()
             inspectGeneratedClass("test.TestCaseKt") {
                 it["test"](null)

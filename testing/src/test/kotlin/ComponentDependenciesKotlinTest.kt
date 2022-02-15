@@ -65,8 +65,8 @@ class ComponentDependenciesKotlinTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerMyApplicationComponent")
-            generatesJavaSources("test.DaggerMyActivityComponent")
+            generatesJavaSources("test.Dagger\$MyApplicationComponent")
+            generatesJavaSources("test.Dagger\$MyActivityComponent")
             withNoWarnings()
         }
     }
@@ -96,7 +96,7 @@ class ComponentDependenciesKotlinTest(
 
         compilesSuccessfully {
             withNoWarnings()
-            generatesJavaSources("test.DaggerMyComponent")
+            generatesJavaSources("test.Dagger\$MyComponent")
         }
     }
 
@@ -137,8 +137,8 @@ class ComponentDependenciesKotlinTest(
         """.trimIndent())
 
         compilesSuccessfully {
-            generatesJavaSources("test.DaggerMyApplicationComponent")
-            generatesJavaSources("test.DaggerMyActivityComponent")
+            generatesJavaSources("test.Dagger\$MyApplicationComponent")
+            generatesJavaSources("test.Dagger\$MyActivityComponent")
             withNoWarnings()
         }
     }

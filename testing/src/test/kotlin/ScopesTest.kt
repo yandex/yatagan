@@ -19,9 +19,8 @@ class ScopesTest(
     fun `singleton implicit binding is cached`() {
         givenKotlinSource(
             "test.TestCase", """
-            import javax.inject.Inject
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
            @Singleton 
            class ClassA @Inject constructor()
@@ -32,7 +31,7 @@ class ScopesTest(
            }
 
            fun test() {
-              val component = DaggerTestComponent.create()
+              val component = Dagger.create(TestComponent::class.java)
               assert(component.getA() === component.getA())
            }
         """.trimIndent()
@@ -50,9 +49,8 @@ class ScopesTest(
     fun `unscoped implicit binding is not cached`() {
         givenKotlinSource(
             "test.TestCase", """
-            import javax.inject.Inject
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             class ClassA @Inject constructor()
             
@@ -62,7 +60,7 @@ class ScopesTest(
             }
             
             fun test() {
-            val component = DaggerTestComponent.create()
+            val component = Dagger.create(TestComponent::class.java)
             assert(component.getA() !== component.getA())
             }
         """.trimIndent()
@@ -106,7 +104,7 @@ class ScopesTest(
             }
             
             fun test() {
-                val c: TestComponent = DaggerTestComponent.create()
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
                 val threads = arrayListOf<Thread>()
                 val cd = CountDownLatch(8)
                 repeat(8) {
