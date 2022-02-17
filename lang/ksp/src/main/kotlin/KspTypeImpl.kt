@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.Variance
+import com.google.devtools.ksp.symbol.KSTypeReference
 import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.lang.NoDeclaration
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
@@ -13,7 +13,6 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspTypeImpl private constructor(
     val impl: KSType,
     private val jvmType: JvmTypeInfo,
-    private val varianceAsWildcard: Boolean,
 ) : CtTypeLangModel {
 
     override val nameModel: CtTypeNameModel by lazy(NONE) {
@@ -22,7 +21,7 @@ internal class KspTypeImpl private constructor(
 
     override val declaration: TypeDeclarationLangModel by lazy(NONE) {
         when (jvmType) {
-            JvmTypeInfo.Declared -> KspTypeDeclarationImpl(impl)
+            JvmTypeInfo.Declared -> KspTypeDeclarationImpl(this)
             else -> NoDeclaration(this)
         }
     }
@@ -30,8 +29,7 @@ internal class KspTypeImpl private constructor(
     override val typeArguments: List<TypeLangModel> by lazy(NONE) {
         when (jvmType) {
             JvmTypeInfo.Declared -> impl.arguments.map { arg ->
-                val type = (arg.type?.resolve()?.makeNotNullable() ?: Utils.resolver.builtIns.anyType)
-                Factory(type)
+                Factory(arg.type?.resolve() ?: Utils.resolver.builtIns.anyType)
             }
             else -> emptyList()
         }
@@ -45,7 +43,10 @@ internal class KspTypeImpl private constructor(
 
     override fun isAssignableFrom(another: TypeLangModel): Boolean {
         return when (another) {
-            is KspTypeImpl -> impl.isAssignableFrom(another.impl)
+            is KspTypeImpl -> impl.isAssignableFrom(when (val type = another.impl) {
+                is TypeMapCache.RawType -> type.underlying
+                else -> type
+            })
             else -> false
         }
     }
@@ -54,86 +55,53 @@ internal class KspTypeImpl private constructor(
 
     override fun decay(): TypeLangModel {
         return when (jvmType) {
-            JvmTypeInfo.Void -> this
             JvmTypeInfo.Boolean, JvmTypeInfo.Byte, JvmTypeInfo.Char, JvmTypeInfo.Double,
             JvmTypeInfo.Float, JvmTypeInfo.Int, JvmTypeInfo.Long, JvmTypeInfo.Short,
             JvmTypeInfo.Declared,
-            -> Factory(impl = impl.makeNotNullable(), varianceAsWildcard = varianceAsWildcard)
-            is JvmTypeInfo.Array -> Factory(impl = when (jvmType.elementInfo) {
-                JvmTypeInfo.Declared -> {
-                    // Make array's element type also not-nullable
-                    impl.makeNotNullable().replace(impl.arguments.map { arg ->
-                        with(Utils.resolver) {
-                            val type = (arg.type?.resolve()?.makeNotNullable() ?: builtIns.anyType)
-                            getTypeArgument(createKSTypeReferenceFromKSType(type), Variance.INVARIANT)
-                        }
-                    })
-                }
-                else -> impl.makeNotNullable()
-            })
+            -> {
+                // Use direct factory function, as type mapping is already done
+                // Discarding jvmType leads to boxing of primitive types.
+                obtainType(type = impl, jvmSignatureHint = null /* drop jvm info*/)
+            }
+            JvmTypeInfo.Void, is JvmTypeInfo.Array -> this
         }
     }
 
     companion object Factory : BiObjectCache<JvmTypeInfo, KSType, KspTypeImpl>() {
         operator fun invoke(
+            reference: KSTypeReference,
+            jvmSignatureHint: String? = null,
+            typePosition: TypeMapCache.Position = TypeMapCache.Position.Other,
+        ): KspTypeImpl = obtainType(
+            type = TypeMapCache.normalizeType(
+                reference = reference,
+                position = typePosition,
+            ),
+            jvmSignatureHint = jvmSignatureHint,
+        )
+
+        operator fun invoke(
             impl: KSType,
             jvmSignatureHint: String? = null,
-            varianceAsWildcard: Boolean = false,
-        ): KspTypeImpl {
-            val mappedType = mapToJavaPlatformIfNeeded(
+        ): KspTypeImpl = obtainType(
+            type = TypeMapCache.normalizeType(
                 type = impl,
-                varianceAsWildcard = varianceAsWildcard,
-            )
-            val jvmTypeKind = parseJvmSignature(jvmSignatureHint, typeSupplier = { mappedType })
-            return createCached(jvmTypeKind, mappedType) {
-                KspTypeImpl(
-                    impl = mappedType,
-                    jvmType = jvmTypeKind,
-                    varianceAsWildcard = varianceAsWildcard,
-                )
-            }
-        }
+            ),
+            jvmSignatureHint = jvmSignatureHint,
+        )
 
-        private fun parseJvmSignature(jvmSignatureHint: CharSequence?, typeSupplier: () -> KSType): JvmTypeInfo {
-            return when (jvmSignatureHint?.first()) {
-                'B' -> JvmTypeInfo.Byte
-                'C' -> JvmTypeInfo.Char
-                'D' -> JvmTypeInfo.Double
-                'F' -> JvmTypeInfo.Float
-                'I' -> JvmTypeInfo.Int
-                'J' -> JvmTypeInfo.Long
-                'S' -> JvmTypeInfo.Short
-                'Z' -> JvmTypeInfo.Boolean
-                '[' -> JvmTypeInfo.Array(elementInfo = parseJvmSignature(
-                    jvmSignatureHint = jvmSignatureHint.subSequence(startIndex = 1, endIndex = jvmSignatureHint.length),
-                    typeSupplier = { typeSupplier().arguments.first().type.resolveOrError() },
-                ))
-                'L' -> JvmTypeInfo.Declared
-                'V' -> JvmTypeInfo.Void
-                null -> inferJvmInfoFrom(typeSupplier())
-                else -> throw AssertionError("Not reached: unexpected jvm signature: $jvmSignatureHint")
+        private fun obtainType(
+            type: KSType,
+            jvmSignatureHint: String?,
+        ): KspTypeImpl {
+            val jvmTypeInfo = JvmTypeInfo(jvmSignature = jvmSignatureHint, type = type)
+            return createCached(jvmTypeInfo, type) {
+                KspTypeImpl(
+                    impl = type,
+                    jvmType = jvmTypeInfo,
+                )
             }
         }
     }
 }
 
-internal sealed interface JvmTypeInfo {
-    // Primitive
-    object Byte : JvmTypeInfo
-    object Char : JvmTypeInfo
-    object Double : JvmTypeInfo
-    object Float : JvmTypeInfo
-    object Int : JvmTypeInfo
-    object Long : JvmTypeInfo
-    object Short : JvmTypeInfo
-    object Boolean : JvmTypeInfo
-
-    // Void
-    object Void : JvmTypeInfo
-
-    // Declared, relies on mapped KSType
-    object Declared : JvmTypeInfo
-
-    // Array
-    data class Array(val elementInfo: JvmTypeInfo) : JvmTypeInfo
-}

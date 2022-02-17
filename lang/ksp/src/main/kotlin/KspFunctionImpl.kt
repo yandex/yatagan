@@ -24,8 +24,9 @@ internal class KspFunctionImpl private constructor(
 
     override val returnType: TypeLangModel by lazy(NONE) {
         KspTypeImpl(
-            impl = impl.asMemberOf(owner.type).returnType ?: ErrorTypeImpl,
-            jvmSignatureHint = jvmSignature.returnType,
+            reference = impl.returnType.orError().replaceType(
+                impl.asMemberOf(owner.type.impl).returnType ?: ErrorTypeImpl),
+            jvmSignatureHint = jvmSignature.returnTypeSignature,
         )
     }
 
@@ -37,7 +38,7 @@ internal class KspFunctionImpl private constructor(
 
     override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
         declaration = impl,
-        containing = owner.type,
+        containing = owner.type.impl,
         jvmMethodSignature = jvmSignature,
     )
 

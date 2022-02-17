@@ -157,17 +157,13 @@ internal class ConditionGenerator(
                 val rootType = literal.root.asType()
                 literal.path.asSequence().forEachIndexed { index, member ->
                     if (index == 0) {
-                        val kotlinObjectKind = rootType.declaration.kotlinObjectKind
-                        when {
-                            kotlinObjectKind == KotlinObjectKind.Object -> {
+                        when (rootType.declaration.kotlinObjectKind) {
+                            KotlinObjectKind.Object -> {
                                 +"%T.INSTANCE.%N".formatCode(rootType.typeName(), member.name)
                             }
-                            kotlinObjectKind == KotlinObjectKind.Companion || member.isStatic -> {
+                            else -> {
                                 +"%T.%N".formatCode(rootType.typeName(), member.name)
                             }
-                            else -> throw IllegalStateException(
-                                "Member '${member.name}' in $rootType must be accessible from the static context"
-                            )
                         }
                         if (member is FunctionLangModel) +"()"
                     } else {

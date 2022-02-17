@@ -15,7 +15,9 @@ import kotlin.test.expect
 class KspCompileTestDriver : CompileTestDriverBase() {
     override fun failsToCompile(block: CompileTestDriver.CompilationResultClause.() -> Unit) {
         expect(KotlinCompilation.ExitCode.COMPILATION_ERROR) {
-            val compilation = setupFirstRoundCompilation()
+            val compilation = setupFirstRoundCompilation(
+                precompiled = precompileIfNeeded(),
+            )
             val result = compilation.compile()
             KspCompilationResultClause(
                 generation = compilation,
@@ -27,7 +29,8 @@ class KspCompileTestDriver : CompileTestDriverBase() {
     }
 
     override fun compilesSuccessfully(block: CompileTestDriver.CompilationResultClause.() -> Unit) {
-        val firstRound = setupFirstRoundCompilation()
+        val precompiled = precompileIfNeeded()
+        val firstRound = setupFirstRoundCompilation(precompiled)
         try {
             expect(KotlinCompilation.ExitCode.OK) {
                 val result = firstRound.compile()
@@ -45,6 +48,9 @@ class KspCompileTestDriver : CompileTestDriverBase() {
                 // Second round is required to validate that generated code compiles successfully
                 val secondRound = KotlinCompilation().apply {
                     basicKotlinCompilationSetup()
+                    if (precompiled != null) {
+                        classpaths = classpaths + precompiled
+                    }
                     sources = firstRound.sources + firstRound.kspGeneratedSources().map(SourceFile::fromPath)
                 }
                 val result = secondRound.compile()
@@ -69,7 +75,15 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         }
     }
 
-    private fun setupFirstRoundCompilation() = KotlinCompilation().apply {
+    override val backendUnderTest: CompileTestDriver.Backend
+        get() = CompileTestDriver.Backend.Ksp
+
+    private fun setupFirstRoundCompilation(
+        precompiled: File?,
+    ) = KotlinCompilation().apply {
+        if (precompiled != null) {
+            classpaths = classpaths + precompiled
+        }
         basicKotlinCompilationSetup()
         sources = sourceFiles
         symbolProcessorProviders = listOf(KspDaggerLiteProcessorProvider())

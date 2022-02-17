@@ -13,8 +13,17 @@ interface CompileTestDriver : SourceSet {
     fun givenSourceSet(block: SourceSet.() -> Unit): SourceSet
     fun useSourceSet(sources: SourceSet)
 
+    fun precompile(sources: SourceSet)
+
     fun failsToCompile(block: CompilationResultClause.() -> Unit)
     fun compilesSuccessfully(block: CompilationResultClause.() -> Unit)
+
+    val backendUnderTest: Backend
+
+    enum class Backend {
+        Jap,
+        Ksp,
+    }
 }
 
 fun CompileTestDriver.CompilationResultClause.withNoMoreErrors() = withNoErrors()

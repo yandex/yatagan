@@ -11,6 +11,10 @@ internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
 ) : CtFunctionLangModel(), PropertyAccessorInfo {
     protected val property = accessor.receiver
 
+    init {
+        require(!property.isField) { "Not reached: field can't be modeled as a property"}
+    }
+
     protected val jvmSignature by lazy(NONE) {
         Utils.resolver.mapToJvmSignature(property)
     }

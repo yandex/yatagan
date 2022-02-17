@@ -30,11 +30,9 @@ class KspModelFactoryImpl : LangModelFactory {
         }
     }
 
-    override fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel {
-        val declaration = checkNotNull(Utils.resolver.getClassDeclarationByName(qualifiedName)) {
-            "Type $qualifiedName is not found"
-        }
-        return KspTypeDeclarationImpl(declaration.asType(emptyList()))
+    override fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel? {
+        val declaration = Utils.resolver.getClassDeclarationByName(qualifiedName) ?: return null
+        return KspTypeDeclarationImpl(KspTypeImpl(declaration.asType(emptyList())))
     }
 
     override val errorType: TypeLangModel

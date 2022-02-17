@@ -4,11 +4,13 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.process.LoggerDecorator
+import java.io.File
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 abstract class CompileTestDriverBase : CompileTestDriver {
     private val sourceSet = SourceSetImpl()
+    private var precompileSourceSet: SourceSetImpl? = null
 
     final override val sourceFiles: List<SourceFile>
         get() = sourceSet.sourceFiles
@@ -29,10 +31,35 @@ abstract class CompileTestDriverBase : CompileTestDriver {
         sourceSet.sourceFiles += sources.sourceFiles
     }
 
+    final override fun precompile(sources: SourceSet) {
+        var sourceSet = precompileSourceSet
+        if (sourceSet == null) {
+            sourceSet = SourceSetImpl()
+            precompileSourceSet = sourceSet
+        }
+        sourceSet.sourceFiles += sources.sourceFiles
+    }
+
     protected fun KotlinCompilation.basicKotlinCompilationSetup() {
         verbose = false
         inheritClassPath = true
         javacArguments += "-Xdiags:verbose"
+    }
+
+    protected fun precompileIfNeeded(): File? {
+        val sourcesToPrecompile = precompileSourceSet?.sourceFiles
+        if (sourcesToPrecompile.isNullOrEmpty()) {
+            return null
+        }
+        val compilation = KotlinCompilation().apply {
+            basicKotlinCompilationSetup()
+            sources = sourcesToPrecompile
+        }
+        val result = compilation.compile()
+        if (result.exitCode != KotlinCompilation.ExitCode.OK) {
+            throw RuntimeException("Pre-compilation failed, check the code")
+        }
+        return result.outputDirectory
     }
 
     protected abstract class CompilationResultClauseBase(

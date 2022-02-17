@@ -12,28 +12,27 @@ import com.yandex.daggerlite.validation.ValidationMessage.Kind.Warning
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.validate
 
+/**
+ * Main processor routine. Takes [sources] and processes them using [delegate].
+ */
 fun <Source> process(
     sources: Sequence<Source>,
     delegate: ProcessorDelegate<Source>,
 ) {
     ObjectCacheRegistry.use {
-        val graphRoots = buildMap<BindingGraph, Source> {
-            for (source in sources) {
-                val model = ComponentModel(delegate.createDeclaration(source))
-                if (!model.isRoot) {
-                    continue
-                }
-                val graph = BindingGraph(
-                    root = model,
+        val graphRoots = sources.mapNotNull { source ->
+            val model = ComponentModel(delegate.createDeclaration(source))
+            if (model.isRoot) {
+                BindingGraph(
+                        root = model,
                 )
-                put(graph, source)
-            }
-        }
+            } else null
+        }.toList()
 
         val validationPluginProviders = loadServices<ValidationPluginProvider>()
         val toValidate: List<MayBeInvalid> = buildList {
             // Sorting is used to ensure stable aggregated error messages
-            for (graphRoot: BindingGraph in graphRoots.keys.sortedBy { it.model.type }) {
+            for (graphRoot: BindingGraph in graphRoots.sortedBy { it.model.type }) {
                 // Add graph itself
                 add(graphRoot)
                 // Add graph extension
@@ -64,13 +63,26 @@ fun <Source> process(
             return
         }
 
-        for ((graph, source) in graphRoots) {
+        for (graph in graphRoots) {
             try {
                 ComponentGeneratorFacade(
                     graph = graph,
                 ).use { generator ->
+                    // Cast relies on the fact that `HasPlatformModel.platformModel` is the Source type.
+                    @Suppress("UNCHECKED_CAST")
                     delegate.openFileForGenerating(
-                        source = source,
+                        sources = sequence {
+                            suspend fun SequenceScope<Any?>.forGraph(graph: BindingGraph) {
+                                yield(graph.model.type.declaration.platformModel)
+                                for (module in graph.modules) {
+                                    yield(module.type.declaration.platformModel)
+                                }
+                                for (child in graph.children) {
+                                    forGraph(child)
+                                }
+                            }
+                            forGraph(graph)
+                        } as Sequence<Source>,
                         packageName = generator.targetPackageName,
                         className = generator.targetClassName,
                     ).use(generator::generateTo)
@@ -78,7 +90,7 @@ fun <Source> process(
 
             } catch (e: Throwable) {
                 logger.error(buildString {
-                    appendLine("Internal Processor Error while processing $source")
+                    appendLine("Internal Processor Error while processing $graph")
                     appendLine("Please, report this to the maintainers, along with the code (diff) that triggered this.")
                     appendLine(e.message)
                     appendLine(e.stackTraceToString())

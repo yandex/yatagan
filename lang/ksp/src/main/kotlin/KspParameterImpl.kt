@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.ksp.lang
 
-import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
@@ -9,7 +9,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspParameterImpl(
     private val impl: KSValueParameter,
-    private val refinedType: KSType,
+    private val refinedTypeRef: KSTypeReference,
     private val jvmSignatureSupplier: () -> String?,
 ) : ParameterLangModel {
     override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
@@ -17,10 +17,9 @@ internal class KspParameterImpl(
         get() = impl.name?.asString() ?: "unnamed"
     override val type: TypeLangModel by lazy(NONE) {
         KspTypeImpl(
-            impl = refinedType,
+            reference = refinedTypeRef,
             jvmSignatureHint = jvmSignatureSupplier(),
-            // In parameter position, kotlin declaration-/use-site variance is mapped to a Java's wildcard type.
-            varianceAsWildcard = true,
+            typePosition = TypeMapCache.Position.Parameter,
         )
     }
 
