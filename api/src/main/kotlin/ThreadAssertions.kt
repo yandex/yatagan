@@ -4,6 +4,7 @@ package com.yandex.daggerlite
  * A delegate holder for Dagger Lite thread checking for single-thread components.
  *
  * @see Component.multiThreadAccess
+ * @see asserter
  */
 object ThreadAssertions {
     fun interface Asserter {
