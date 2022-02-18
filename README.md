@@ -1,52 +1,63 @@
 # Dagger Lite
-Like Dagger2 only lighter (supports only specific subset of original API). Supports dynamic graphs with feature-scopes
-(merged functionality of the former Dagger Whetstone).
 
-# Roadmap
+## Summary
 
-## MVP
-Solution _only works with valid Dagger code_ for fast and flexible prototyping.
-It is undefined behavior when the code is invalid: crashes, incorrect code generation, etc. may occur.
-Such behaviour should later be fixed with validation steps.
+Dagger 2 API implementation (with slight changes) with addition of Dynamic conditions API and Component Variant system.
+Tuned for build and component initialization performance.
 
-### Core Dagger API
+Supports multiple backends first class:
 
-- [x] `@Component` - only interface allowed
-    - [x] `@Component.Builder` - only interface allowed, merged functionality of vanilla `@Builder` and `@Factory`.
-- [x] `@Subcomponent` - implemented as `@Component(isRoot=false)`
-- [x] `@Component(dependencies=...)`
-- [x] `@Module`
-    - [x] `@Binds` - no scope allowed
-    - [x] `@Provides`
-    - [x] kotlin objects support
-    - [x] companion object support
-    - [x] module with instance support
+- APT/KAPT
+- KSP (experimental, unstable due to KSP utter inconvenience to use for Java code generation)
+- Reflection (experimental)
 
-Explicitly not supported API
-- `@BindsOptionalOf`
-- `@IntoMap`, `@MapKey`, ..
+## Differences from vanilla Dagger2 in core API
 
-### Whetstone API
+[Base developer guide][base-doc] for Dagger2 is a good start, as dagger-lite philosophy and API was based on it.
 
-- [x] `@BindIn` is replaced by:
-  - [x] `@Conditional(/*features*/, /*variant*/` - variant - new conception instead of target modules
-  - [x] Features for subcomponents
-  - [x] `@Module(bootstrap=[...])` - fully blown events are dropped, replaced with simple bootstrap lists. 
-- [x] `@ConditionHolder` - dropped and replaced by automatic implementation.
-- [x] `@Condition`, `@AnyCondition`, ...
-- [x] `@BindsFeatureScoped` -> `@Binds`
-- [x] `@ProvidesFeatureScoped` -> `@Provides([Conditional(...), ...])`
+| Vanilla API                            | Status in DL   | Notes                                      |
+|----------------------------------------|----------------|--------------------------------------------|
+| `dagger.Component`                     | 🟢 as is       |                                            |
+| `dagger.Component.Builder`             | 🟢 as is       | supports factory method as well            |
+| `dagger.Component.Factory`             | 🟠 converged   | functionality merged into `Builder`        |
+| `dagger.Subcomponent`                  | 🟠 converged   | replaced by `Component(isRoot = false)`    |
+| `dagger.Subcomponent.Builder`          | 🟠 converged   | replaced by `Component.Builder`            |
+| `dagger.Subcomponent.Factory`          | 🟠 converged   | replaced by `Component.Builder`            |
+| `dagger.Lazy`                          | 🟢 as is       | now extends `Provider`                     |
+| `dagger.Module`                        | 🟢 as is       |                                            |
+| `dagger.Binds`                         | 🟡 tweaked     | rebinding scope is not supported           |
+| `dagger.BindsInstance`                 | 🟢 as is       |                                            |
+| `dagger.Provides`                      | 🟢 as is       |                                            |
+| `dagger.BindsOptionalOf`               | 🔴 replaced    | replaced with Variant/Condition API        |
+| `dagger.Reusable`                      | 🔴 unsupported |                                            |
+| `dagger.MembersInjector`               | 🔴 unsupported |                                            |
+| `dagger.MapKey`                        | 🔴 unsupported | multi-bindings for `Map` are not supported |
+| `dagger.multibindings.IntoSet`         | 🟡 renamed     | `IntoList`, now binds `List<T>`            |
+| `dagger.multibindings.ElementsIntoSet` | 🟠 converged   | `IntoList(flatten = true)`                 |
+| `dagger.multibindings.Multibinds`      | 🟡 renamed     | `DeclareList`                              |
+| `dagger.multibindings.{IntoMap-ish}`   | 🔴 unsupported | multi-bindings for `Map` are not supported |
+| `dagger.assisted.*`                    | 🔴 unsupported |                                            |
+| `dagger.producers.*`                   | 🔴 unsupported |                                            |
+| `dagger.hilt.*`                        | 🔴 unsupported |                                            |
+| `dagger.spi.*`                         | 🟠 replaced    | dagger-lite has its own model for SPI      |
 
-## Full solution
+----------------
+Other behavioral changes: 
 
-- [x] Validation and full-blown error messages.
-- [x] Whetstone Validation
-- [x] Multi-threading support
-- [x] Multi-bindings
-  - [x] `@IntoSet` -> `@IntoList`
-  - [x] `@ElementsIntoSet` -> `@IntoList(flatten=true)`
-- [x] Short-circuit condition evaluation preservation.
+- Declaring subcomponents now only works explicitly via `Module.subcomponents` list. 
+Implicit bindings for subcomponent factory, when declaring entry-point of its type in a parent component, 
+are not supported.
 
-Very low priority
-- [x] `@Multibinds` -> `@DeclareList`
-- [ ] `@Reusable` - _low priority - not used in our project._
+- Automatic factory/builder generation is not supported - an explicit one must be written if required.
+
+- `@IntoList` bindings contributions are not inherited from parent component.
+Clients will get "duplicate bindings" error instead.
+
+- Generated components are not named `Dagger<component-name>`; the names are mangled, and the access should be made via
+`Dagger.builder()`/`Dagger.create()` invocations. This is made to support reflection backend.
+
+## New features
+
+TODO
+
+[base-doc]: https://dagger.dev/dev-guide/
