@@ -232,4 +232,55 @@ class MultibindingsTest(
             generatesJavaSources("test.Dagger\$TestComponent")
         }
     }
+
+    @Test
+    fun `flattening contribution`() {
+        givenJavaSource("test.TestModule", """
+            import com.yandex.daggerlite.IntoList;
+            import com.yandex.daggerlite.Module;
+            import com.yandex.daggerlite.Provides;
+            import java.util.Set;
+            import java.util.List;
+            import java.util.Collection;
+
+            @Module
+            public class TestModule {
+                @Provides @IntoList(flatten = true)
+                static Set<Integer> setOfInts() { return null; }
+
+                @Provides @IntoList(flatten = true)
+                List<Integer> listOfInts() { return null; }
+
+                @Provides @IntoList(flatten = true)
+                Collection<Integer> collectionOfInts() { return null; }
+            }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestModuleKotlin", """
+            import com.yandex.daggerlite.*
+   
+            @Module
+            class TestModuleKotlin {
+                @Provides @IntoList(flatten = true) 
+                fun setOfInts(): Set<Int> { throw NotImplementedError() }
+                @Provides @IntoList(flatten = true)
+                fun listOfInts(): List<Int> { throw NotImplementedError() }
+                @Provides @IntoList(flatten = true)
+                fun collectionOfInts(): Collection<Int> { throw NotImplementedError() }
+            }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestComponent", """
+            import com.yandex.daggerlite.*
+            
+            @Component(modules = [TestModule::class, TestModuleKotlin::class])
+            interface TestComponent {
+                val ints: List<Int>    
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+        }
+    }
 }

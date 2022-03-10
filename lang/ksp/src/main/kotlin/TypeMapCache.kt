@@ -2,6 +2,7 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getJavaClassByName
+import com.google.devtools.ksp.getKotlinClassByName
 import com.google.devtools.ksp.isOpen
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -20,15 +21,6 @@ import com.yandex.daggerlite.base.ObjectCache
  * @see [TypeMapCache.normalizeType].
  */
 internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
-    /**
-     * Attempts to resolve [KSClassDeclaration], resolving type aliases as needed.
-     */
-    private fun KSType.getNonAliasDeclaration(): KSClassDeclaration? = when (val declaration = declaration) {
-        is KSClassDeclaration -> declaration
-        is KSTypeAlias -> declaration.type.resolve().getNonAliasDeclaration()
-        else -> null
-    }
-
     private fun mapDeclarationToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
         if (!declaration.packageName.asString().startsWith("kotlin")) {
             // Heuristic: only types from `kotlin` package can have different java counterparts.
@@ -183,6 +175,33 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
         type = type,
         bakeVarianceAsWildcard = false,
     )
+
+    /**
+     * Inverse operation to [normalizeType]. The two-way conversion is not lossless though.
+     *
+     * @return Kotlin-specific counterpart of the given type.
+     */
+    fun mapToKotlinType(
+        type: KSType,
+    ): KSType {
+        val declaration = type.getNonAliasDeclaration()
+        val qualifiedName = declaration?.qualifiedName ?: return type
+        if (!qualifiedName.asString().startsWith("java")) {
+            // Only java.* types may have kotlin counterparts.
+            return type
+        }
+        return Utils.resolver.getKotlinClassByName(qualifiedName)?.asType(
+            type.arguments.map { arg ->
+                when (val typeRef = arg.type) {
+                    null -> arg
+                    else -> Utils.resolver.getTypeArgument(
+                        typeRef = typeRef.replaceType(mapToKotlinType(typeRef.resolve())),
+                        variance = arg.variance,
+                    )
+                }
+            }
+        ) ?: type
+    }
 
     /**
      * The nature of a typed construct in a syntactic tree.

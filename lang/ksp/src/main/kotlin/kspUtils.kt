@@ -14,6 +14,7 @@ import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.KSVisitor
@@ -64,6 +65,15 @@ internal val KSNode.isFromJava
         Origin.JAVA, Origin.JAVA_LIB -> true
         else -> false
     }
+
+/**
+ * Attempts to resolve [KSClassDeclaration], resolving type aliases as needed.
+ */
+internal fun KSType.getNonAliasDeclaration(): KSClassDeclaration? = when (val declaration = declaration) {
+    is KSClassDeclaration -> declaration
+    is KSTypeAlias -> declaration.type.resolve().getNonAliasDeclaration()
+    else -> null
+}
 
 private class MappedReference private constructor(
     val original: KSTypeReference,

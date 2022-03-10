@@ -43,16 +43,15 @@ internal class KspTypeImpl private constructor(
 
     override fun isAssignableFrom(another: TypeLangModel): Boolean {
         return when (another) {
-            is KspTypeImpl -> impl.isAssignableFrom(when (val type = another.impl) {
-                is TypeMapCache.RawType -> type.underlying
-                else -> type
-            })
+            // `mapToKotlinType` is required as `isAssignableFrom` doesn't work properly
+            // with related Java platform types.
+            // https://github.com/google/ksp/issues/890
+            is KspTypeImpl -> TypeMapCache.mapToKotlinType(impl)
+                .isAssignableFrom(TypeMapCache.mapToKotlinType(another.impl))
             else -> false
         }
     }
-
     override fun toString() = nameModel.toString()
-
     override fun decay(): TypeLangModel {
         return when (jvmType) {
             JvmTypeInfo.Boolean, JvmTypeInfo.Byte, JvmTypeInfo.Char, JvmTypeInfo.Double,
