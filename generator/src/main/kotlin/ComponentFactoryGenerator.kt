@@ -85,8 +85,7 @@ internal class ComponentFactoryGenerator(
                 creator.allInputs.forEach { input ->
                     val name = paramsNs.name(input.name)
                     parameter(input.payload.typeName(), name)
-                    +"this.%N = %T.requireNonNull(%N, %S)".formatCode(inputFieldNames[input]!!, Names.Objects, name,
-                        "Component input for `${input.name}` is null or unspecified")
+                    +"this.%N = %T.checkInputNotNull(%N)".formatCode(inputFieldNames[input]!!, Names.Checks, name)
                 }
                 generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
             }

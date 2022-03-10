@@ -9,5 +9,5 @@ internal object Names {
     val ThreadAssertions: ClassName = ClassName.get(com.yandex.daggerlite.ThreadAssertions::class.java)
     val AssertionError: ClassName = ClassName.get(java.lang.AssertionError::class.java)
     val ArrayList: ClassName = ClassName.get(java.util.ArrayList::class.java)
-    val Objects: ClassName = ClassName.get(java.util.Objects::class.java)
+    val Checks: ClassName = ClassName.get("com.yandex.daggerlite.internal", "Checks")
 }

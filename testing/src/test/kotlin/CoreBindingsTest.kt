@@ -628,7 +628,7 @@ class CoreBindingsTest(
     }
 
     @Test
-    fun `primitive types in creator`() {
+    fun `creator inputs are null-checked`() {
         givenJavaSource("test.MyComponentBase", """
             import com.yandex.daggerlite.BindsInstance;
             
@@ -664,15 +664,52 @@ class CoreBindingsTest(
                 builder().run { 
                     setChar('A')
                     setDouble(null)
-                    val e = assertFailsWith<java.lang.NullPointerException> { create(1, 2L) }
-                    assertEquals("Component input for `setDouble` is null or unspecified", e.message)
+                    val e = assertFailsWith<AssertionError> { create(1, 2L) }
+                    assertEquals("Component input is null or unspecified", e.message)
                 }
                 // Input omitted
                 builder().run { 
                     setDouble(0.0)
-                    val e = assertFailsWith<java.lang.NullPointerException> { create(1, 2L) }
-                    assertEquals("Component input for `setChar` is null or unspecified", e.message)
+                    val e = assertFailsWith<AssertionError> { create(1, 2L) }
+                    assertEquals("Component input is null or unspecified", e.message)
                 }
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
+            }
+        }
+    }
+
+    @Test
+    fun `provision results are null-checked`() {
+        givenJavaSource("test.MyModule", """
+            @com.yandex.daggerlite.Module
+            public interface MyModule {
+                @com.yandex.daggerlite.Provides
+                static Integer provideNullInt() {
+                    return null;
+                }
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import kotlin.test.*
+
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                val integer: Int
+            }
+
+            fun test() {
+                val c = Dagger.create(TestComponent::class.java)
+                val e = assertFailsWith<AssertionError> { 
+                    c.integer
+                }
+                assertEquals("Provision result is null", e.message)
             }
         """.trimIndent())
 
