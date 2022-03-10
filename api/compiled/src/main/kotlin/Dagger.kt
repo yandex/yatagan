@@ -7,7 +7,7 @@ object Dagger {
             "$builderClass is not a builder for a dagger-lite component"
         }
         val componentClass = checkNotNull(builderClass.enclosingClass) {
-            "No enclosing component class found"
+            "No enclosing component class found for $builderClass"
         }
         require(componentClass.isAnnotationPresent(Component::class.java)) {
             "$builderClass is not a builder for a dagger-lite component"
