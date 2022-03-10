@@ -626,5 +626,62 @@ class CoreBindingsTest(
             withNoWarnings()
         }
     }
+
+    @Test
+    fun `primitive types in creator`() {
+        givenJavaSource("test.MyComponentBase", """
+            import com.yandex.daggerlite.BindsInstance;
+            
+            public interface MyComponentBase {
+                char getChar();
+                double getDouble();
+                int getInt();
+                long getLong();
+                interface Builder<T extends MyComponentBase> {
+                    @BindsInstance void setChar(char c);
+                    @BindsInstance void setDouble(Double d);
+                    T create(@BindsInstance int i1, @BindsInstance long i2);
+                }
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import kotlin.test.*
+
+            @Component interface MyComponent : MyComponentBase {
+                @Component.Builder interface Builder : MyComponentBase.Builder<MyComponent>
+            }
+
+            fun test() {
+                fun builder() = Dagger.builder(MyComponent.Builder::class.java)
+                // Creates normally
+                builder().run { 
+                    setChar('A')
+                    setDouble(0.0)
+                    create(1, 2L)
+                }
+                // Explicit null
+                builder().run { 
+                    setChar('A')
+                    setDouble(null)
+                    val e = assertFailsWith<java.lang.NullPointerException> { create(1, 2L) }
+                    assertEquals("Component input for `setDouble` is null or unspecified", e.message)
+                }
+                // Input omitted
+                builder().run { 
+                    setDouble(0.0)
+                    val e = assertFailsWith<java.lang.NullPointerException> { create(1, 2L) }
+                    assertEquals("Component input for `setChar` is null or unspecified", e.message)
+                }
+            }
+        """.trimIndent())
+
+        compilesSuccessfully {
+            withNoWarnings()
+            inspectGeneratedClass("test.TestCaseKt") {
+                it["test"](null)
+            }
+        }
+    }
 }
 
