@@ -1,6 +1,10 @@
 package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.lang.CallableLangModel
+import com.yandex.daggerlite.core.lang.ConstructorLangModel
+import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.AlternativesBinding
@@ -14,25 +18,49 @@ import com.yandex.daggerlite.graph.InstanceBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
+import org.jetbrains.annotations.Contract
 
 private class CreationGeneratorVisitor(
     private val builder: ExpressionBuilder,
     private val inside: BindingGraph,
 ) : Binding.Visitor<Unit> {
+    @Contract
     override fun visitProvision(binding: ProvisionBinding) {
         with(builder) {
-            generateCall(
-                callable = binding.provision,
-                arguments = binding.inputs.asIterable(),
-                instance = if (binding.requiresModuleInstance) {
-                    "%N.%N".formatCode(
-                        componentForBinding(binding),
-                        Generators[binding.owner].factoryGenerator.fieldNameFor(binding.originModule!!),
-                    )
-                } else null,
-            ) { (node, kind) ->
-                inside.resolveBinding(node).generateAccess(builder = this, inside = inside, kind = kind)
-            }
+            val instance = if (binding.requiresModuleInstance) {
+                "%N.%N".formatCode(
+                    componentForBinding(binding),
+                    Generators[binding.owner].factoryGenerator.fieldNameFor(binding.originModule!!),
+                )
+            } else null
+            binding.provision.accept(object : CallableLangModel.Visitor<Unit> {
+                fun genArgs() {
+                    join(seq = binding.inputs.asIterable()) { (node, kind) ->
+                        inside.resolveBinding(node).generateAccess(builder = this, inside = inside, kind = kind)
+                    }
+                }
+
+                override fun visitFunction(function: FunctionLangModel) {
+                    +"%T.checkProvisionNotNull(".formatCode(Names.Checks)
+                    if (instance != null) {
+                        +"%L.%N(".formatCode(instance, function.name)
+                    } else {
+                        val ownerObject = when (function.owner.kotlinObjectKind) {
+                            KotlinObjectKind.Object -> ".INSTANCE"
+                            else -> ""
+                        }
+                        +"%T%L.%L(".formatCode(function.ownerName.asTypeName(), ownerObject, function.name)
+                    }
+                    genArgs()
+                    +"))"
+                }
+
+                override fun visitConstructor(constructor: ConstructorLangModel) {
+                    +"new %T(".formatCode(constructor.constructee.asType().typeName().asRawType())
+                    genArgs()
+                    +")"
+                }
+            })
         }
     }
 

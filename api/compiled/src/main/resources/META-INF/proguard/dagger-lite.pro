@@ -10,3 +10,8 @@
 
 # Keep component builder interfaces, to allow finding their component interfaces.
 -keep @com.yandex.daggerlite.Component$Builder interface *
+
+# Remove null-checks in release.
+-assumenosideeffects class com.yandex.daggerlite.internal.Checks {
+    public static void assertNotNull(...);
+}

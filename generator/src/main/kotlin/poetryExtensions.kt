@@ -2,15 +2,11 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.WildcardTypeName
 import com.yandex.daggerlite.core.ClassBackedModel
-import com.yandex.daggerlite.core.lang.CallableLangModel
-import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.ArrayNameModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
@@ -19,7 +15,6 @@ import com.yandex.daggerlite.generator.lang.ErrorNameModel
 import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
 import com.yandex.daggerlite.generator.lang.WildcardNameModel
-import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.MethodSpecBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 
@@ -63,7 +58,7 @@ private fun ClassNameModel.asTypeName(): ClassName {
     }
 }
 
-private fun CtTypeNameModel.asTypeName(): TypeName {
+internal fun CtTypeNameModel.asTypeName(): TypeName {
     return when (this) {
         is ClassNameModel -> asTypeName()
         is ParameterizedNameModel -> ParameterizedTypeName.get(
@@ -98,33 +93,4 @@ internal inline fun TypeSpecBuilder.overrideMethod(
         }
         block()
     }
-}
-
-internal inline fun <A> ExpressionBuilder.generateCall(
-    callable: CallableLangModel,
-    arguments: Iterable<A>,
-    instance: CodeBlock?,
-    crossinline argumentBuilder: ExpressionBuilder.(A) -> Unit,
-) {
-    callable.accept(object : CallableLangModel.Visitor<Unit> {
-        override fun visitFunction(function: FunctionLangModel) {
-            if (instance != null) {
-                +"%L.%N(".formatCode(instance, function.name)
-            } else {
-                val ownerObject = when (function.owner.kotlinObjectKind) {
-                    KotlinObjectKind.Object -> ".INSTANCE"
-                    else -> ""
-                }
-                +"%T%L.%L(".formatCode(function.ownerName.asTypeName(), ownerObject, function.name)
-            }
-        }
-
-        override fun visitConstructor(constructor: ConstructorLangModel) {
-            +"new %T(".formatCode(constructor.constructee.asType().typeName().asRawType())
-        }
-    })
-    join(arguments) { arg ->
-        argumentBuilder(arg)
-    }
-    +")"
 }
