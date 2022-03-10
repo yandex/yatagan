@@ -1,9 +1,3 @@
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-    }
-}
-
 rootProject.name = "dagger-lite"
 
 include("api")
