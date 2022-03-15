@@ -4,7 +4,6 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.yandex.daggerlite.testing.CompileTestDriver
 import com.yandex.daggerlite.testing.CompileTestDriverBase
 import java.io.File
-import java.net.URLClassLoader
 import kotlin.test.assertContains
 import kotlin.test.expect
 
@@ -35,10 +34,7 @@ class JapCompileTestDriver : CompileTestDriverBase() {
                 JapCompilationResultClause(
                     generation = compilation,
                     result = result,
-                    compiledClassesLoader = URLClassLoader(
-                        arrayOf(compilation.classesDir.toURI().toURL()),
-                        JapCompileTestDriver::class.java.classLoader
-                    ),
+                    compiledClassesLoader = makeClassLoader(compilation),
                 ).apply {
                     withNoErrors()
                     block()

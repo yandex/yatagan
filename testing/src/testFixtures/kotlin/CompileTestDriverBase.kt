@@ -3,12 +3,17 @@ package com.yandex.daggerlite.testing
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.generated.CompiledApiClasspath
+import com.yandex.daggerlite.generated.DynamicApiClasspath
 import com.yandex.daggerlite.process.LoggerDecorator
 import java.io.File
+import java.net.URLClassLoader
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-abstract class CompileTestDriverBase : CompileTestDriver {
+abstract class CompileTestDriverBase protected constructor(
+    private val apiType: ApiType = ApiType.Compiled
+) : CompileTestDriver {
     private val sourceSet = SourceSetImpl()
     private var precompileSourceSet: SourceSetImpl? = null
 
@@ -42,8 +47,24 @@ abstract class CompileTestDriverBase : CompileTestDriver {
 
     protected fun KotlinCompilation.basicKotlinCompilationSetup() {
         verbose = false
-        inheritClassPath = true
+        inheritClassPath = false
         javacArguments += "-Xdiags:verbose"
+        classpaths = classpaths + when (apiType) {
+            ApiType.Compiled -> CompiledApiClasspath
+            ApiType.Dynamic -> DynamicApiClasspath
+        }.split(':').map(::File).toList()
+    }
+
+    protected fun makeClassLoader(compilation: KotlinCompilation): ClassLoader {
+        return URLClassLoader(
+            Array(compilation.classpaths.size + 1) { i ->
+                when (i) {
+                    0 -> compilation.classesDir.toURI().toURL()
+                    else -> compilation.classpaths[i - 1].toURI().toURL()
+                }
+            },
+            this.javaClass.classLoader,
+        )
     }
 
     protected fun precompileIfNeeded(): File? {
@@ -60,6 +81,11 @@ abstract class CompileTestDriverBase : CompileTestDriver {
             throw RuntimeException("Pre-compilation failed, check the code")
         }
         return result.outputDirectory
+    }
+
+    protected enum class ApiType {
+        Compiled,
+        Dynamic,
     }
 
     protected abstract class CompilationResultClauseBase(

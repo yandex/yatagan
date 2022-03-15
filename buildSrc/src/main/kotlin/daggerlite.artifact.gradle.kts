@@ -1,3 +1,5 @@
+import com.yandex.daggerlite.gradle.isValidSemVerString
+
 plugins {
     id("daggerlite.base-module")
     `maven-publish`

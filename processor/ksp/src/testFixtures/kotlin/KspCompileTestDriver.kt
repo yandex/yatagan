@@ -8,7 +8,6 @@ import com.yandex.daggerlite.ksp.KspDaggerLiteProcessorProvider
 import com.yandex.daggerlite.testing.CompileTestDriver
 import com.yandex.daggerlite.testing.CompileTestDriverBase
 import java.io.File
-import java.net.URLClassLoader
 import kotlin.test.assertContains
 import kotlin.test.expect
 
@@ -57,10 +56,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
                 KspCompilationResultClause(
                     generation = null,
                     result = result,
-                    compiledClassesLoader = URLClassLoader(
-                        arrayOf(secondRound.classesDir.toURI().toURL()),
-                        KspCompileTestDriver::class.java.classLoader
-                    ),
+                    compiledClassesLoader = makeClassLoader(secondRound),
                     checkMessageText = false,
                 ).apply {
                     block()

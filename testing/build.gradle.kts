@@ -1,3 +1,6 @@
+import com.yandex.daggerlite.gradle.ClasspathSourceGeneratorTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("daggerlite.base-module")
     id("java-test-fixtures")
@@ -5,6 +8,16 @@ plugins {
 
 val kotlinCompileTestingVersion: String by extra
 val kspVersion: String by extra
+
+val baseTestRuntime: Configuration by configurations.creating
+val dynamicTestRuntime: Configuration by configurations.creating {
+    extendsFrom(baseTestRuntime)
+}
+val compiledTestRuntime: Configuration by configurations.creating {
+    extendsFrom(baseTestRuntime)
+}
+
+val generatedSourceDir: Provider<Directory> = project.layout.buildDirectory.dir("generated-sources")
 
 configurations.all {
     resolutionStrategy {
@@ -15,7 +28,7 @@ configurations.all {
 }
 
 dependencies {
-    testFixturesApi(project(":api-compiled"))
+    testFixturesApi(project(":api"))
     testFixturesApi("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
     testFixturesImplementation(project(":processor"))
     testFixturesImplementation(project(":base"))
@@ -28,5 +41,36 @@ dependencies {
     testImplementation(project(":validation-impl"))
     testImplementation(project(":lang-ksp"))
     testImplementation(project(":lang-jap"))
-    testRuntimeOnly(project(":api-compiled"))
+
+    baseTestRuntime(kotlin("test"))
+    dynamicTestRuntime(project(":api-dynamic"))
+    compiledTestRuntime(project(":api-compiled"))
+}
+
+kotlin {
+    sourceSets {
+        testFixtures {
+            kotlin.srcDir(generatedSourceDir)
+        }
+    }
+}
+
+tasks {
+    val dynamicApiClasspathTask = register<ClasspathSourceGeneratorTask>("generateDynamicApiClasspath") {
+        packageName = "com.yandex.daggerlite.generated"
+        propertyName = "DynamicApiClasspath"
+        classpath = dynamicTestRuntime
+        generatedSource = generatedSourceDir.map { it.file("dynamicClasspath.kt") }
+    }
+
+    val compiledApiClasspathTask = register<ClasspathSourceGeneratorTask>("generateCompiledApiClasspath") {
+        packageName = "com.yandex.daggerlite.generated"
+        propertyName = "CompiledApiClasspath"
+        classpath = compiledTestRuntime
+        generatedSource = generatedSourceDir.map { it.file("compiledClasspath.kt") }
+    }
+
+    withType<KotlinCompile>().configureEach {
+        dependsOn(dynamicApiClasspathTask, compiledApiClasspathTask)
+    }
 }

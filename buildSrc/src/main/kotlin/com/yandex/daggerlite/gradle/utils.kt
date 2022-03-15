@@ -1,3 +1,4 @@
+package com.yandex.daggerlite.gradle
 
 // See https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 // See https://regex101.com/r/vkijKf/1/
