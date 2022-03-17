@@ -23,6 +23,7 @@ interface CompileTestDriver : SourceSet {
     enum class Backend {
         Jap,
         Ksp,
+        Rt,
     }
 }
 

@@ -2,6 +2,7 @@ package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
 import java.lang.reflect.Executable
+import java.lang.reflect.GenericArrayType
 import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -10,6 +11,8 @@ import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
 import java.lang.reflect.WildcardType
 import kotlin.LazyThreadSafetyMode.NONE
+
+private typealias ArraysReflectionUtils = java.lang.reflect.Array
 
 internal fun Type.equivalence() = TypeEquivalenceWrapper(this)
 
@@ -23,6 +26,18 @@ internal fun Type.tryAsClass(): Class<*>? = when (this) {
     is Class<*> -> this
     is ParameterizedType -> rawType.asClass()
     else -> null
+}
+
+internal fun Type.formatString(): String = when (this) {
+    is Class<*> -> canonicalName ?: "<unnamed>"
+    is ParameterizedType -> "${rawType.formatString()}<${actualTypeArguments.joinToString { it.formatString() }}>"
+    is WildcardType -> when {
+        lowerBounds.isNotEmpty() -> "? super ${lowerBounds.first().formatString()}"
+        upperBounds.isNotEmpty() -> "? extends ${upperBounds.first().formatString()}"
+        else -> "?"
+    }
+    is GenericArrayType -> "${genericComponentType.formatString()}[]"
+    else -> toString()
 }
 
 internal fun Type.resolve(
@@ -59,6 +74,9 @@ private fun Type.resolveTypeVar(withInfo: () -> Map<TypeVariable<*>, Type>): Typ
     is WildcardType -> replaceBounds { bound ->
         bound.resolveTypeVar(withInfo)
     }
+    is GenericArrayType -> replaceComponentType(
+        componentType = genericComponentType.resolveTypeVar(withInfo)
+    )
     else -> this
 }
 
@@ -67,6 +85,16 @@ private fun ParameterizedType.resolveTypeParameters(): Map<TypeVariable<*>, Type
     val typeArgs = actualTypeArguments
     for (i in typeParams.indices) {
         put(typeParams[i], typeArgs[i])
+    }
+}
+
+private fun GenericArrayType.replaceComponentType(
+    componentType: Type,
+): Type = when(componentType) {
+    genericComponentType -> this
+    is Class<*> -> ArraysReflectionUtils.newInstance(componentType, 0).javaClass
+    else -> @Suppress("ObjectLiteralToLambda") object : GenericArrayType {
+        override fun getGenericComponentType(): Type = componentType
     }
 }
 
@@ -161,6 +189,15 @@ private fun hashCode(type: Type): Int = when (type) {
     else -> type.hashCode()
 }
 
+private fun arrayEquals(one: Array<Type>, other: Array<Type>): Boolean {
+    if (one.size != other.size) return false
+    for (i in one.indices) {
+        if (one[i] != other[i])
+            return false
+    }
+    return true
+}
+
 private fun equals(one: Type, other: Type): Boolean = with(one) {
     when (this) {
         other -> {
@@ -170,12 +207,15 @@ private fun equals(one: Type, other: Type): Boolean = with(one) {
         is ParameterizedType -> {
             // Take synthetic parameterized types into account.
             other is ParameterizedType &&
-                    rawType == other.rawType && actualTypeArguments.contentEquals(other.actualTypeArguments)
+                    rawType == other.rawType && arrayEquals(actualTypeArguments, other.actualTypeArguments)
         }
         is WildcardType -> {
             // Take synthetic wildcard types into account
-            other is WildcardType && upperBounds.contentEquals(other.upperBounds) &&
-                    lowerBounds.contentEquals(other.lowerBounds)
+            other is WildcardType && arrayEquals(upperBounds, other.upperBounds) &&
+                    arrayEquals(lowerBounds, other.lowerBounds)
+        }
+        is GenericArrayType -> {
+            other is GenericArrayType && equals(genericComponentType, other.genericComponentType)
         }
         else -> {
             false

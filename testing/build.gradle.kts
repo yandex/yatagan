@@ -37,6 +37,7 @@ dependencies {
 
     testImplementation(testFixtures(project(":processor-ksp")))
     testImplementation(testFixtures(project(":processor-jap")))
+    testImplementation(testFixtures(project(":dynamic")))
     testImplementation(kotlin("test"))
     testImplementation(project(":validation-impl"))
     testImplementation(project(":lang-ksp"))

@@ -47,7 +47,7 @@ internal class RtTypeImpl private constructor(
         }
     }
 
-    override fun toString(): String = impl.toString()
+    override fun toString(): String = impl.formatString()
 
     override fun compareTo(other: TypeLangModel): Int {
         return when (other) {

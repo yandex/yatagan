@@ -32,7 +32,7 @@ class ComponentCreatorFailureTest(
             @Module class MyModule(@get:Provides val obj: Any)
             @Component(isRoot = false, dependencies = [MyDependency::class], modules = [MyModule::class])
             abstract class SubComponent {
-                val obj: Any
+                abstract val obj: Any
             }
             interface NotAComponent
             @Component
@@ -123,7 +123,7 @@ class ComponentCreatorFailureTest(
                 val number: Double get() = i
             }
             class MyDependency {
-                val notGonnaBeUsed: Optional<Any>
+                val notGonnaBeUsed: Optional<Any> = Optional.empty()
             }
             @Component(dependencies = [
                 MyDependency::class,

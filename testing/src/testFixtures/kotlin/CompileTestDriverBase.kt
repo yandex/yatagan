@@ -12,7 +12,7 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 abstract class CompileTestDriverBase protected constructor(
-    private val apiType: ApiType = ApiType.Compiled
+    private val apiType: ApiType = ApiType.Compiled,
 ) : CompileTestDriver {
     private val sourceSet = SourceSetImpl()
     private var precompileSourceSet: SourceSetImpl? = null
@@ -92,9 +92,15 @@ abstract class CompileTestDriverBase protected constructor(
         private val result: KotlinCompilation.Result,
         private val compiledClassesLoader: ClassLoader?,
     ) : CompileTestDriver.CompilationResultClause {
-        private val messages = result.parsedMessages().toMutableList()
+        private val messages by lazy {
+            populateMessages().toMutableList()
+        }
 
         open val checkMessageText: Boolean get() = true
+
+        open fun populateMessages(): Sequence<Message> {
+            return result.parsedMessages()
+        }
 
         override fun withError(message: String) {
             if (!checkMessageText) return

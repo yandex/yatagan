@@ -51,7 +51,7 @@ class CoreBindingsFailureTest(
             class Foo2 @Inject constructor(obj: Any)
             class ToInject {
                 @set:Inject
-                var obj: Any
+                lateinit var obj: Any
             }
             
             @Component
@@ -204,8 +204,8 @@ class CoreBindingsFailureTest(
                 fun bindTwo(): Int = 2
                 @Provides @IntoList(flatten = true)
                 fun bindThreeForFive(): Int = 3
-                @Provides fun hello()
-                @Binds fun hello2()
+                @Provides fun hello() = Unit
+                @Binds fun hello2() = Unit
             }
             @Module
             interface TestModule2 {
@@ -650,7 +650,7 @@ class CoreBindingsFailureTest(
             import javax.inject.*
 
             object Foo {
-                val foo: String
+                val foo: String = ""
             }
 
             @Condition(Foo::class, "!hello")
@@ -910,7 +910,7 @@ class CoreBindingsFailureTest(
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             
-            @Module(subcomponents = SubComponent1::class) interface RootModule
+            @Module(subcomponents = [SubComponent1::class]) interface RootModule
             @Component(modules = [RootModule::class]) interface RootComponent
             
             @Component(multiThreadAccess = true, isRoot = false)
