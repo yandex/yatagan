@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.support
 
 import com.tschuchort.compiletesting.SourceFile
 import org.intellij.lang.annotations.Language
 
-internal class SourceSetImpl : SourceSet {
+class SourceSetImpl : SourceSet {
     override val sourceFiles: MutableList<SourceFile> = arrayListOf()
 
     override fun givenJavaSource(name: String, @Language("java") source: String) {
@@ -21,4 +21,9 @@ $source"""
 $source"""
         )
     }
+
+    override fun includeFromSourceSet(sourceSet: SourceSet) {
+        sourceFiles += sourceSet.sourceFiles
+    }
 }
+

@@ -1,12 +1,12 @@
 package com.yandex.daggerlite.testing
 
-import com.yandex.daggerlite.Lazy
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import javax.inject.Provider
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 @RunWith(Parameterized::class)
 class ComponentHierarchyKotlinTest(
@@ -67,26 +67,16 @@ class ComponentHierarchyKotlinTest(
         """
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$MyApplicationComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `subcomponents - advanced case`() {
         givenKotlinSource(
-            "test.TestCase", """
-            import javax.inject.Inject
-            import javax.inject.Named
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Module
-            import javax.inject.Provider
-            import com.yandex.daggerlite.Lazy
-            import javax.inject.Scope
-            import com.yandex.daggerlite.BindsInstance
+            "test.TestCase",
+            """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
             @Scope annotation class ActivityScoped
             @Scope annotation class FragmentScoped
@@ -165,42 +155,35 @@ class ComponentHierarchyKotlinTest(
                     fun create(): MyFragmentComponent 
                 }
             }
+
+            fun test() {
+                val factory: MyApplicationComponent.Factory = Dagger.builder(MyApplicationComponent.Factory::class.java)
+                val appComponent = factory.create("foo")
+                 
+                with(appComponent.activityFactory.create("bar")) {
+                    val appManager = appManager
+                    val appManagerLazy = appManagerLazy
+                    val appManagerProvider = appManagerProvider
+                    assert(appManager != appManagerLazy.get())
+                    assert(appManager != appManagerProvider.get())
+                    assert(appManagerLazy.get() == appManagerLazy.get())
+                    assert(appManagerProvider.get() != appManagerProvider.get())
+                }
+
+                with(appComponent.activityFactory.create("bar").fragmentFactory.create()) {
+                    val appManager = appManager
+                    val appManagerLazy = appManagerLazy
+                    val appManagerProvider = appManagerProvider
+                    assert(appManager != appManagerLazy.get())
+                    assert(appManager != appManagerProvider.get())
+                    assert(appManagerLazy.get() == appManagerLazy.get())
+                    assert(appManagerProvider.get() != appManagerProvider.get())
+                }
+            }
         """,
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$MyApplicationComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.Dagger\$MyApplicationComponent") {
-                // FIXME: rewrite this in compiled code
-                val factory = it["builder"](null)
-                val appComponent = factory.clz["create", String::class](factory, /*app_id*/"foo")
-                val activityFactory = appComponent.clz["getActivityFactory"](appComponent)
-                val activityComponent =
-                    activityFactory.clz["create", String::class](activityFactory, /*activity_id*/"bar")
-
-                with(activityComponent) {
-                    val appManager = clz["getAppManager"](activityComponent)
-                    val appManagerLazy = clz["getAppManagerLazy"](activityComponent) as Lazy<*>
-                    val appManagerProvider = clz["getAppManagerProvider"](activityComponent) as Provider<*>
-                    assertNotEquals(illegal = appManager, actual = appManagerLazy.get())
-                    assertNotEquals(illegal = appManager, actual = appManagerProvider.get())
-                    assertEquals(expected = appManagerLazy.get(), actual = appManagerLazy.get())
-                }
-
-                val fragmentFactory = activityComponent.clz["getFragmentFactory"](activityComponent)
-                val fragmentComponent = fragmentFactory.clz["create"](fragmentFactory)
-
-                with(fragmentComponent) {
-                    val appManager = clz["getAppManager"](fragmentComponent)
-                    val appManagerLazy = clz["getAppManagerLazy"](fragmentComponent) as Lazy<*>
-                    val appManagerProvider = clz["getAppManagerProvider"](fragmentComponent) as Provider<*>
-                    assertNotEquals(illegal = appManager, actual = appManagerLazy.get())
-                    assertNotEquals(illegal = appManager, actual = appManagerProvider.get())
-                    assertEquals(expected = appManagerLazy.get(), actual = appManagerLazy.get())
-                }
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -240,10 +223,7 @@ class ComponentHierarchyKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -253,7 +233,6 @@ class ComponentHierarchyKotlinTest(
             """
             import javax.inject.*
             import com.yandex.daggerlite.*
-            import kotlin.test.assertEquals
 
             @Scope annotation class ActivityScoped
              
@@ -398,26 +377,20 @@ class ComponentHierarchyKotlinTest(
             
                 assert(mainActivityC.rootClass() !== settingsActivityC.rootClass())
 
-                assertEquals(profileFragmentC.activity()::class, Activity::class)
-                assertEquals<Any>(profileFragmentFromSettingsC.activity()::class, SettingsActivity::class)
+                assert(profileFragmentC.activity()::class == Activity::class)
+                assert(profileFragmentFromSettingsC.activity()::class == SettingsActivity::class)
 
                 assert(profileFragmentC.activityScoped() === profileFragmentC.activityScoped())
                 assert(profileFragmentFromSettingsC.activityScoped() === profileFragmentFromSettingsC.activityScoped())
                 assert(profileFragmentFromSettingsC.activityScoped() !== profileFragmentC.activityScoped())
 
                 assert(profileFragmentC.singleton() === profileFragmentFromSettingsC.singleton())
-                assertEquals(cameraFragmentC.cameraSettings().theme::class, DefaultTheme::class)
-                assertEquals(profileSettingsFragmentC.cameraSettings().theme::class, DarkTheme::class)
+                assert(cameraFragmentC.cameraSettings().theme::class == DefaultTheme::class)
+                assert(profileSettingsFragmentC.cameraSettings().theme::class == DarkTheme::class)
             }
         """,
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$ApplicationComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 }

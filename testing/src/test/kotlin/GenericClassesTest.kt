@@ -1,5 +1,9 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.SourceSet
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -42,10 +46,7 @@ class GenericClassesTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -78,10 +79,7 @@ class GenericClassesTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -115,10 +113,7 @@ class GenericClassesTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -143,10 +138,7 @@ class GenericClassesTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -193,14 +185,12 @@ class GenericClassesTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `java raw types`() {
-        precompile(givenSourceSet {
+        givenPrecompiledModule(SourceSet {
             givenJavaSource("test.TestComponentBase", """
                 public interface TestComponentBase {
                     interface Api {}
@@ -228,8 +218,6 @@ class GenericClassesTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 }

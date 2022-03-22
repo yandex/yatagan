@@ -32,6 +32,7 @@ val javaPoetVersion by extra("1.13.0")
 val kotlinCompileTestingVersion by extra("1.4.7")
 val autoCommonVersion by extra("1.2.1")
 val kotlinxMetadataVersion by extra("0.4.0")
+val junitVersion by extra("4.13.2")
 
 java {
     toolchain {

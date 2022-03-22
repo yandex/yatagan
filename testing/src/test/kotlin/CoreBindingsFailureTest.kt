@@ -1,5 +1,10 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.SourceSet
+import com.yandex.daggerlite.testing.support.compileTestDrivers
+import com.yandex.daggerlite.testing.support.errorMessage
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.Strings.formatMessage
@@ -23,7 +28,7 @@ class CoreBindingsFailureTest(
 
     @Before
     fun setUp() {
-        features = givenSourceSet {
+        features = SourceSet {
             givenKotlinSource("test.features", """
                 import com.yandex.daggerlite.Condition                
 
@@ -64,8 +69,8 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Errors.missingBinding("java.lang.Object"),
                 encounterPaths = listOf(
                     // @formatter:off
@@ -73,10 +78,8 @@ class CoreBindingsFailureTest(
                     // @formatter:on
                 ),
                 notes = listOf(Strings.Notes.unknownBinding()),
-            ))
-            withNoMoreErrors()
-            withNoWarnings()
-        }
+            )),
+        )
     }
 
     @Test
@@ -112,22 +115,20 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Errors.noMatchingScopeForBinding(
                     binding = "@Inject test.Foo",
                     scope = "@javax.inject.Singleton",
                 ),
                 encounterPaths = listOf(
                     // @formatter:off
-                    listOf("test.RootComponent", "test.SubComponent", "[entry-point] getFooForSub", "[missing: test.Foo]"),
                     listOf("test.RootComponent", "[entry-point] getFooForRoot", "[missing: test.Foo]"),
+                    listOf("test.RootComponent", "test.SubComponent", "[entry-point] getFooForSub", "[missing: test.Foo]"),
                     // @formatter:on
                 )
-            ))
-            withNoWarnings()
-            withNoMoreErrors()
-        }
+            )),
+        )
     }
 
     @Test
@@ -168,27 +169,28 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            val binding =
-                "@Provides test.RootModule::provideFoo(java.lang.Integer): @javax.inject.Named(\"foo\") test.Foo"
-            withError(formatMessage(
+        val binding = "@Provides test.RootModule::provideFoo(java.lang.Integer): @javax.inject.Named(value=\"foo\") test.Foo"
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Errors.noMatchingScopeForBinding(
                     binding = binding,
                     scope = "@javax.inject.Singleton"),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "test.SubComponent", "[entry-point] getFooForSub", binding),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.missingBinding(`for` = "java.lang.Integer"),
                 encounterPaths = listOf(
-                    listOf("test.RootComponent", "test.SubComponent", "[entry-point] getFooForSub", binding, "[missing: java.lang.Integer]"),
+                    listOf("test.RootComponent",
+                        "test.SubComponent",
+                        "[entry-point] getFooForSub",
+                        binding,
+                        "[missing: java.lang.Integer]"),
                 ),
                 notes = listOf(Strings.Notes.unknownBinding())
-            ))
-            withNoWarnings()
-            withNoMoreErrors()
-        }
+            )),
+        )
     }
 
     @Test
@@ -218,52 +220,52 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Errors.inconsistentBinds(
                     param = "java.util.List<java.lang.Integer>",
                     returnType = "java.lang.String",
                 ),
                 encounterPaths = listOf(
-                    listOf("test.TestComponent", "test.TestModule2", "@Binds test.TestModule2::bindListToString(java.util.List<java.lang.Integer>): java.lang.String"),
+                    listOf("test.TestComponent",
+                        "test.TestModule2",
+                        "@Binds test.TestModule2::bindListToString(java.util.List<java.lang.Integer>): java.lang.String"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.abstractProvides(),
                 encounterPaths = listOf(
                     listOf("test.TestComponent",
                         "test.TestModule2",
                         "@Provides test.TestModule2::provides(): java.lang.Long"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.voidBinding(),
                 encounterPaths = listOf(
-                    listOf("test.TestComponent", "test.TestModule", "@Provides test.TestModule::hello(): [invalid]"),
                     listOf("test.TestComponent", "test.TestModule", "@Binds test.TestModule::hello2(): [invalid]"),
+                    listOf("test.TestComponent", "test.TestModule", "@Provides test.TestModule::hello(): [invalid]"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.nonAbstractBinds(),
                 encounterPaths = listOf(
                     listOf("test.TestComponent", "test.TestModule", "@Binds test.TestModule::hello2(): [invalid]"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.invalidFlatteningMultibinding("int"),
                 encounterPaths = listOf(
                     listOf("test.TestComponent", "test.TestModule",
                         "@Provides test.TestModule::bindThreeForFive(): java.lang.Integer")
                 )
-            ))
-            withNoWarnings()
-            withNoMoreErrors()
-        }
+            )),
+        )
     }
 
     @Test
     fun `condition propagates through alias and is validated`() {
-        useSourceSet(features)
+        includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             import javax.inject.*
@@ -285,19 +287,19 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Errors.noConditionsOnFeature(),
                 encounterPaths = listOf(
                     listOf("test.TestComponent", "[entry-point] getAny",
                         "[intrinsic] multi-bound `java.util.List<java.lang.Object>` list:\n" +
-                            "    @Provides test.TestModule::toAny(test.Api): java.lang.Object\n",
+                                "    @Provides test.TestModule::toAny(test.Api): java.lang.Object\n",
                         "@Provides test.TestModule::toAny(test.Api): java.lang.Object",
                         "[alias] @Binds test.TestModule::impl(test.Impl): test.Api", "@Inject test.Impl",
                         "[feature] test.NotAFeature")
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
                     aCondition = "[test.Foo.isEnabledA]",
                     bCondition = "[unconditional]",
@@ -305,21 +307,20 @@ class CoreBindingsFailureTest(
                     b = "@Provides test.TestModule::toAny(test.Api): java.lang.Object",
                 ),
                 encounterPaths = listOf(
-                    listOf("test.TestComponent", "[entry-point] getAny",
+                    listOf(
+                        "test.TestComponent", "[entry-point] getAny",
                         "[intrinsic] multi-bound `java.util.List<java.lang.Object>` list:\n" +
                                 "    @Provides test.TestModule::toAny(test.Api): java.lang.Object\n",
                         "@Provides test.TestModule::toAny(test.Api): java.lang.Object",
                     )
                 ),
-            ))
-            withNoWarnings()
-            withNoMoreErrors()
-        }
+            )),
+        )
     }
 
     @Test
     fun `incompatible conditions`() {
-        useSourceSet(features)
+        includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
@@ -375,8 +376,8 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
                     aCondition = "[test.Foo.isEnabledA && test.Foo.isEnabledB]",
                     bCondition = "[test.Foo.isEnabledA]",
@@ -385,11 +386,11 @@ class CoreBindingsFailureTest(
                 ),
                 encounterPaths = listOf(
                     // @formatter:off
-                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(value=\"ok2\") java.lang.Object", "@Inject test.UnderA"),
                     // @formatter:on
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
                     aCondition = "[test.Foo.isEnabledA]",
                     bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
@@ -398,11 +399,11 @@ class CoreBindingsFailureTest(
                 ),
                 encounterPaths = listOf(
                     // @formatter:off
-                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(value=\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
                     // @formatter:on
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
                     aCondition = "[test.Foo.isEnabledA && test.Foo.isEnabledB && (test.Foo.isEnabledA || test.Foo.isEnabledB)]",
                     bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
@@ -411,11 +412,11 @@ class CoreBindingsFailureTest(
                 ),
                 encounterPaths = listOf(
                     // @formatter:off
-                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(value=\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB", "@Inject test.UnderB"),
                     // @formatter:on
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
                     aCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
                     bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledA]",
@@ -424,31 +425,29 @@ class CoreBindingsFailureTest(
                 ),
                 encounterPaths = listOf(
                     // @formatter:off
-                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB"),
+                    listOf("test.MyComponent", "[entry-point] getObject3", "@Provides test.MyModule::provideObject3(test.UnderA): @javax.inject.Named(value=\"ok2\") java.lang.Object", "@Inject test.UnderA", "@Inject test.UnderAorB"),
                     // @formatter:on
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 // @formatter:off
                 message = Errors.incompatibleCondition(
                     aCondition = "[test.Foo.isEnabledA]",
                     bCondition = "[unconditional]",
                     a = "test.UnderA",
-                    b = "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object",
+                    b = "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(value=\"error\") java.lang.Object",
                 ),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(\"error\") java.lang.Object"),
+                    listOf("test.MyComponent", "[entry-point] getObject1", "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(value=\"error\") java.lang.Object"),
                 ),
                 // @formatter:on
-            ))
-            withNoMoreErrors()
-            withNoWarnings()
-        }
+            )),
+        )
     }
 
     @Test
     fun `component features`() {
-        useSourceSet(features)
+        includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
@@ -518,9 +517,9 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
+        expectValidationResults(
             // @formatter:off
-            withError(formatMessage(
+            errorMessage(formatMessage(
                 Errors.incompatibleConditionEntyPoint(
                     aCondition = "[test.Foo.isEnabledA]", bCondition = "[unconditional]",
                     binding = "@Inject test.ElectricHeater", component = "test.RootComponent",
@@ -529,8 +528,8 @@ class CoreBindingsFailureTest(
                     listOf("test.RootComponent", "[entry-point] getElectric"),
                     listOf("test.RootComponent", "[injector-fun] injectConsumer", "[member-to-inject] setElectricHeater")
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 Errors.incompatibleConditionEntyPoint(
                     aCondition = "[test.Foo.isEnabledB]", bCondition = "[unconditional]",
                     binding = "@Inject test.GasHeater", component = "test.RootComponent",
@@ -539,8 +538,8 @@ class CoreBindingsFailureTest(
                     listOf("test.RootComponent", "[entry-point] getGas"),
                     listOf("test.RootComponent", "[injector-fun] injectConsumer", "[member-to-inject] setGasHeater"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 Errors.incompatibleConditionEntyPoint(
                     aCondition = "[test.Foo.isEnabledB]", bCondition = "[test.Foo.isEnabledA]",
                     binding = "@Inject test.GasHeater", component = "test.SubComponentA",
@@ -549,8 +548,8 @@ class CoreBindingsFailureTest(
                     listOf("test.RootComponent", "test.SubComponentA", "[entry-point] getGas"),
                     listOf("test.RootComponent", "test.SubComponentA", "[injector-fun] injectConsumer", "[member-to-inject] setGasHeater"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 Errors.incompatibleConditionEntyPoint(
                     aCondition = "[test.Foo.isEnabledA]", bCondition = "[test.Foo.isEnabledB]",
                     binding = "@Inject test.ElectricHeater", component = "test.SubComponentB",
@@ -559,11 +558,9 @@ class CoreBindingsFailureTest(
                     listOf("test.RootComponent", "test.SubComponentB", "[entry-point] getElectric"),
                     listOf("test.RootComponent", "test.SubComponentB", "[injector-fun] injectConsumer", "[member-to-inject] setElectricHeater")
                 ),
-            ))
-            withNoMoreErrors()
-            withNoWarnings()
+            )),
             // @formatter:on
-        }
+        )
     }
 
     @Test
@@ -593,22 +590,22 @@ class CoreBindingsFailureTest(
             interface AnotherComponent { @Component.Builder interface C { fun c(): AnotherComponent } }
         """.trimIndent())
 
-        failsToCompile {
+        expectValidationResults(
             // @formatter:off
-            withError(formatMessage(
+            errorMessage(formatMessage(
                 message = Errors.noConditionsOnFeature(),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[feature] test.NotAFeature"),
                     listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[feature] test.NotAFeature2"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.nonComponentVariantDimension(),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[flavor] test.InvalidFlavor", "[dimension] test.NotADimension"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.conflictingOrDuplicateFlavors(dimension = "[dimension] test.NotADimension"),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "test.AnotherComponent", "Variant{...}"),
@@ -618,29 +615,27 @@ class CoreBindingsFailureTest(
                     "Conflicting flavor: `[flavor] test.InvalidFlavor2`",
                     "Conflicting flavor: `[flavor] test.InvalidFlavor`",
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.nonFlavor(),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[flavor] test.NotAFlavor"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.missingDimension(),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA", "[flavor] test.NotAFlavor", "[missing dimension]"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.undeclaredDimension(dimension = "[missing dimension]"),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "[entry-point] getA", "@Inject test.ClassA"),
                 ),
-            ))
+            )),
             // @formatter:on
-            withNoWarnings()
-            withNoMoreErrors()
-        }
+        )
     }
 
     @Test
@@ -673,30 +668,28 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
+        expectValidationResults(
             // @formatter:off
-            withError(formatMessage(
+            errorMessage(formatMessage(
                 message = Errors.invalidCondition("#invalid"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "<invalid>")
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.invalidConditionMissingMember(name = "hello", type = "test.Foo"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "!test.Foo.hello")
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.invalidConditionNoBoolean(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "test.Foo.foo")
                 ),
-            ))
+            )),
             // @formatter:on
-            withNoMoreErrors()
-            withNoWarnings()
-        }
+        )
     }
 
     @Test
@@ -731,8 +724,8 @@ class CoreBindingsFailureTest(
             @Module(includes = [MyModule::class], subcomponents = [SubComponent::class])
             class MyModule2 {
                 @Provides @IntoList fun one(): Number = 1L
-                @Provides @IntoList fun two(): Number = 2.0
                 @Provides @IntoList fun three(): Number = 3f
+                @Provides @IntoList fun two(): Number = 2.0
             
                 @Provides fun numbers(): List<Number> = emptyList()
                 @Provides fun builder(): SubComponent.Builder = throw AssertionError()
@@ -768,44 +761,44 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
+        expectValidationResults(
             // @formatter:off
-            withError(formatMessage(
-                message = Errors.conflictingBindings(`for` = "@test.MyQualifier(named=@javax.inject.Named(\"hello\")) java.lang.Object"),
+            errorMessage(formatMessage(
+                message = Errors.conflictingBindings(`for` = "@test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent1"),
                     listOf("test.MyComponent2"),
                 ),
                 notes = listOf(
-                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject(): @test.MyQualifier(named=@javax.inject.Named(\"hello\")) java.lang.Object"),
-                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject2(): @test.MyQualifier(named=@javax.inject.Named(\"hello\")) java.lang.Object"),
+                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject(): @test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
+                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject2(): @test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.conflictingBindings(`for` = "test.MyComponent1"),
                 encounterPaths = listOf(listOf("test.MyComponent1")),
                 notes = listOf(
                     Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::c1(): test.MyComponent1"),
                     Strings.Notes.duplicateBinding(binding = Strings.Bindings.componentInstance("test.MyComponent1")),
                 ),
-            ))
-            withError(formatMessage(
-                message = Errors.conflictingBindings(`for` = "@javax.inject.Named(\"flag\") java.lang.Boolean"),
+            )),
+            errorMessage(formatMessage(
+                message = Errors.conflictingBindings(`for` = "@javax.inject.Named(value=\"flag\") java.lang.Boolean"),
                 encounterPaths = listOf(listOf("test.MyComponent2")),
                 notes = listOf(
-                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::bool(): @javax.inject.Named(\"flag\") java.lang.Boolean"),
-                    Strings.Notes.duplicateBinding(binding = Strings.Bindings.instance("[setter] setFlag(@javax.inject.Named(\"flag\") java.lang.Boolean)")),
+                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::bool(): @javax.inject.Named(value=\"flag\") java.lang.Boolean"),
+                    Strings.Notes.duplicateBinding(binding = Strings.Bindings.instance("[setter] setFlag(@javax.inject.Named(value=\"flag\") java.lang.Boolean)")),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.conflictingBindings(`for` = "test.Dependency"),
                 encounterPaths = listOf(listOf("test.MyComponent2")),
                 notes = listOf(
                     Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::dep(): test.Dependency"),
                     Strings.Notes.duplicateBinding(binding = Strings.Bindings.componentDependencyInstance("test.Dependency")),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.conflictingBindings(`for` = "java.util.List<java.lang.Number>"),
                 encounterPaths = listOf(listOf("test.MyComponent2")),
                 notes = listOf(
@@ -815,35 +808,33 @@ class CoreBindingsFailureTest(
                         elementType = "java.util.List<java.lang.Number>",
                         contributions = listOf(
                             "@Provides test.MyModule2::one(): java.lang.Number",
-                            "@Provides test.MyModule2::two(): java.lang.Number",
                             "@Provides test.MyModule2::three(): java.lang.Number",
+                            "@Provides test.MyModule2::two(): java.lang.Number",
                         ),
                     )),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.conflictingBindings(`for` = "test.SubComponent.Builder"),
                 encounterPaths = listOf(listOf("test.MyComponent2")),
                 notes = listOf(
                     Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule2::builder(): test.SubComponent.Builder"),
                     Strings.Notes.duplicateBinding(binding = Strings.Bindings.subcomponentFactory("[creator] test.SubComponent.Builder")),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.conflictingBindings(`for` = "java.lang.String"),
                 encounterPaths = listOf(listOf("test.MyComponent2")),
                 notes = listOf(
                     Strings.Notes.duplicateBinding(binding = Strings.Bindings.componentDependencyEntryPoint(
                         entryPoint = "test.Dependency::getMyString(): java.lang.String",
                     )),
-                    Strings.Notes.duplicateBinding(binding = Strings.Bindings.instance("[setter] withString(java.lang.String)")),
                     Strings.Notes.duplicateBinding(binding = Strings.Bindings.instance("[setter] withAnotherString(java.lang.String)")),
+                    Strings.Notes.duplicateBinding(binding = Strings.Bindings.instance("[setter] withString(java.lang.String)")),
                 ),
-            ))
+            )),
             // @formatter:on
-            withNoMoreErrors()
-            withNoWarnings()
-        }
+        )
     }
 
     @Test
@@ -877,9 +868,9 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
+        expectValidationResults(
             // @formatter:off
-            withError(formatMessage(
+            errorMessage(formatMessage(
                 message = Errors.missingBinding(`for` = "com.yandex.daggerlite.Optional<test.WithInject>"),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "[entry-point] getO3", "[missing: com.yandex.daggerlite.Optional<test.WithInject>]"),
@@ -887,26 +878,24 @@ class CoreBindingsFailureTest(
                 notes = listOf(
                     Strings.Notes.nestedFrameworkType("com.yandex.daggerlite.Optional<test.WithInject>")
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Errors.manualFrameworkType(),
                 encounterPaths = listOf(
-                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalOptional(): com.yandex.daggerlite.Optional<java.lang.Object>", "com.yandex.daggerlite.Optional<java.lang.Object>"),
-                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalLazy(): com.yandex.daggerlite.Lazy<java.lang.Integer>", "com.yandex.daggerlite.Lazy<java.lang.Integer>"),
-                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalProvider(): javax.inject.Provider<java.lang.String>", "javax.inject.Provider<java.lang.String>"),
-                    listOf("test.RootComponent", "[entry-point] getO3", "com.yandex.daggerlite.Optional<test.WithInject>"),
                     listOf("test.RootComponent", "[creator] test.RootComponent.Builder", "[param] create(.., flagProvider: javax.inject.Provider<java.lang.Boolean>, ..)"),
                     listOf("test.RootComponent", "[creator] test.RootComponent.Builder", "[param] create(.., optionalFloat: com.yandex.daggerlite.Optional<java.lang.Float>, ..)"),
+                    listOf("test.RootComponent", "[entry-point] getO3", "com.yandex.daggerlite.Optional<test.WithInject>"),
+                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalLazy(): com.yandex.daggerlite.Lazy<java.lang.Integer>", "com.yandex.daggerlite.Lazy<java.lang.Integer>"),
+                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalOptional(): com.yandex.daggerlite.Optional<java.lang.Object>", "com.yandex.daggerlite.Optional<java.lang.Object>"),
+                    listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalProvider(): javax.inject.Provider<java.lang.String>", "javax.inject.Provider<java.lang.String>"),
                 ),
-            ))
-            withNoMoreErrors()
-            withNoWarnings()
+            )),
             // @formatter:off
-        }
+        )
     }
 
     @Test
-    fun multiThreadStatusMismatch() {
+    fun `multi-thread status mismatch`() {
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             
@@ -924,13 +913,69 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Errors.multiThreadStatusMismatch("test.RootComponent"),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.SubComponent1")),
+            )),
+        )
+    }
+
+    @Test
+    fun `unresolved complex annotation as qualifier`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            enum class MyEnum {
+                Red, Green, Blue,
+            }
+
+            @Qualifier
+            @Retention(AnnotationRetention.RUNTIME)
+            annotation class ComplexQualifier(
+                val value: Int,
+                val number: Long,
+                val name: String,
+                val arrayString: Array<String>,
+                val arrayInt: IntArray,
+                val arrayChar: CharArray = ['A', 'B', 'C'],
+                val nested: Named,
+                val arrayNested: Array<Named>,
+                val enumValue: MyEnum,
+            )
+
+            @Component
+            interface TestComponent {
+                @get:ComplexQualifier(
+                    228,
+                    number = -22,
+                    name = "hello" + " world",
+                    arrayString = ["hello", "world"],
+                    arrayInt = [1,2,3],
+                    nested = Named("nested-named"),
+                    arrayChar = ['A', 'B', 'C'],
+                    arrayNested = [Named("array-nested")],
+                    enumValue = MyEnum.Red,
+                )
+                val any: Any
+            }
+        """.trimIndent())
+
+        val missing = "@test.ComplexQualifier(arrayChar={A, B, C}, arrayInt={1, 2, 3}, " +
+                "arrayNested={@javax.inject.Named(value=\"array-nested\")}, " +
+                "arrayString={\"hello\", \"world\"}, enumValue=test.MyEnum.Red, " +
+                "name=\"hello world\", nested=@javax.inject.Named(value=\"nested-named\"), " +
+                "number=-22, value=228) java.lang.Object"
+        expectValidationResults(
+            errorMessage(formatMessage(
+                message = Errors.missingBinding(
+                    `for` = missing),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] getAny", "[missing: $missing]")
+                ),
+                notes = listOf(Strings.Notes.unknownBinding()),
             ))
-            withNoMoreErrors()
-            withNoWarnings()
-        }
+        )
     }
 }

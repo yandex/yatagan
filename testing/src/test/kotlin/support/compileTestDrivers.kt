@@ -1,8 +1,5 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.support
 
-import com.yandex.daggerlite.compiler.KspCompileTestDriver
-import com.yandex.daggerlite.dynamic.DynamicCompileTestDriver
-import com.yandex.daggerlite.jap.JapCompileTestDriver
 import javax.inject.Provider
 
 internal fun compileTestDrivers(): Collection<Provider<CompileTestDriverBase>> {

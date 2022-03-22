@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -67,14 +70,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -140,12 +136,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$MyComponent")
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -171,13 +162,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -227,10 +212,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -279,8 +261,6 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 }

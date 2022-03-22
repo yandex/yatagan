@@ -1,5 +1,9 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.SourceSet
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,12 +20,13 @@ class CoreBindingsTest(
         fun parameters() = compileTestDrivers()
     }
 
+
     private lateinit var classes: SourceSet
     private lateinit var apiImpl: SourceSet
 
     @Before
     fun setUp() {
-        classes = givenSourceSet {
+        classes = SourceSet {
             givenJavaSource(
                 "test.MyScopedClass", """
             import javax.inject.Inject;
@@ -44,7 +49,7 @@ class CoreBindingsTest(
             )
         }
 
-        apiImpl = givenSourceSet {
+        apiImpl = SourceSet {
             givenJavaSource(
                 "test.Api", """
         public interface Api {}    
@@ -64,7 +69,7 @@ class CoreBindingsTest(
 
     @Test
     fun `basic component - direct, Provider and Lazy entry points`() {
-        useSourceSet(classes)
+        includeFromSourceSet(classes)
 
         givenJavaSource(
             "test.TestComponent", """
@@ -85,15 +90,12 @@ class CoreBindingsTest(
         """.trimIndent()
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `basic component - simple @Binds`() {
-        useSourceSet(apiImpl)
+        includeFromSourceSet(apiImpl)
 
         givenJavaSource(
             "test.MyModule", """
@@ -132,18 +134,12 @@ class CoreBindingsTest(
         """.trimIndent()
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { testCase ->
-                testCase["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `basic component - simple @Provides`() {
-        useSourceSet(apiImpl)
+        includeFromSourceSet(apiImpl)
 
         givenJavaSource(
             "test.MyModule", """
@@ -183,19 +179,13 @@ class CoreBindingsTest(
         """
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { testCase ->
-                testCase["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `basic component - @Provides with dependencies`() {
-        useSourceSet(classes)
-        useSourceSet(apiImpl)
+        includeFromSourceSet(classes)
+        includeFromSourceSet(apiImpl)
 
         givenJavaSource(
             "test.MyModule", """
@@ -236,19 +226,13 @@ class CoreBindingsTest(
         """
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { testCase ->
-                testCase["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test(timeout = 10_000)
     fun `basic component - cyclic reference with Provider edge`() {
-        useSourceSet(classes)
-        useSourceSet(apiImpl)
+        includeFromSourceSet(classes)
+        includeFromSourceSet(apiImpl)
 
         givenJavaSource("test.Classes", """
         import javax.inject.Inject;
@@ -267,10 +251,7 @@ class CoreBindingsTest(
             }
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -304,15 +285,12 @@ class CoreBindingsTest(
             }
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `basic component - module includes inherited methods`() {
-        useSourceSet(apiImpl)
+        includeFromSourceSet(apiImpl)
 
         givenJavaSource("test.MyModule", """
             import com.yandex.daggerlite.Module;
@@ -341,10 +319,7 @@ class CoreBindingsTest(
             }
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -375,10 +350,7 @@ class CoreBindingsTest(
             }
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -405,10 +377,7 @@ class CoreBindingsTest(
             }
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -465,10 +434,7 @@ class CoreBindingsTest(
             }
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -495,10 +461,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -539,9 +502,8 @@ class CoreBindingsTest(
                 void injectFoo(Foo foo);
             }
         """.trimIndent())
-        compilesSuccessfully {
-            withNoWarnings()
-        }
+
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -564,10 +526,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$MyComponent")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -622,9 +581,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -646,7 +603,6 @@ class CoreBindingsTest(
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
-            import kotlin.test.*
 
             @Component interface MyComponent : MyComponentBase {
                 @Component.Builder interface Builder : MyComponentBase.Builder<MyComponent>
@@ -661,27 +617,31 @@ class CoreBindingsTest(
                     create(1, 2L)
                 }
                 // Explicit null
-                builder().run { 
+                builder().run {
                     setChar('A')
-                    setDouble(null)
-                    val e = assertFailsWith<AssertionError> { create(1, 2L) }
-                    assertEquals("Component input is null or unspecified", e.message)
+                    try {
+                        // Implementations are free to throw on either setter or creation invocation. 
+                        setDouble(null)
+                        create(1, 2L)
+                        throw AssertionError("Fail expected, but not occurred")
+                    } catch (e: IllegalStateException) { 
+                        // Ok
+                    }
                 }
                 // Input omitted
                 builder().run { 
                     setDouble(0.0)
-                    val e = assertFailsWith<AssertionError> { create(1, 2L) }
-                    assertEquals("Component input is null or unspecified", e.message)
+                    try {
+                        create(1, 2L)
+                        throw AssertionError("Fail expected, but not occurred")
+                    } catch (e: IllegalStateException) {
+                        // Ok
+                    }
                 }
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -697,7 +657,6 @@ class CoreBindingsTest(
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
-            import kotlin.test.*
 
             @Component(modules = [MyModule::class])
             interface TestComponent {
@@ -706,19 +665,16 @@ class CoreBindingsTest(
 
             fun test() {
                 val c = Dagger.create(TestComponent::class.java)
-                val e = assertFailsWith<AssertionError> { 
+                try { 
                     c.integer
+                    throw AssertionError("Fail expected, but not occurred")
+                } catch (e: IllegalStateException) {
+                    // Ok
                 }
-                assertEquals("Provision result is null", e.message)
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 }
 
