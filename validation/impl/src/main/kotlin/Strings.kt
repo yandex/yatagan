@@ -1,38 +1,42 @@
 package com.yandex.daggerlite.validation.impl
 
 object Strings {
-    private fun red(string: String): String = string.lines().joinToString(separator = "\n") {
-        "\u001b[31m$it\u001b[0m"
+    enum class StringColor(val ansiCode: Int) {
+        Red(31),
+        Yellow(33),
+        Cyan(36),
     }
 
-    private fun cyan(string: String): String = "\u001b[36m$string\u001b[0m"
+    private fun String.colorize(color: StringColor) = lines().joinToString(separator = "\n") {
+        "\u001b[${color.ansiCode}m$this\u001b[0m"
+    }
 
     private const val Indent = "    "
 
-
     fun formatMessage(
         message: String,
+        color: StringColor = StringColor.Red,
         encounterPaths: Collection<List<Any>>,
         notes: Collection<String> = emptyList(),
     ): String {
         return buildString {
-            appendLine(red(message))
+            appendLine(message.colorize(color))
             if (notes.size == 1) {
-                append(cyan("• NOTE: "))
+                append("• NOTE: ".colorize(StringColor.Cyan))
                 appendLine(notes.first())
             } else {
-                notes.forEachIndexed { index, note ->
-                    append(cyan("• NOTE #${index + 1}:")).append(' ')
+                notes.sorted().forEachIndexed { index, note ->
+                    append("• NOTE #${index + 1}:".colorize(StringColor.Cyan)).append(' ')
                     appendLine(note)
                 }
             }
             appendLine("Encountered in:")
-            encounterPaths.asSequence().take(10).joinTo(this, separator = "\n") { path ->
+            encounterPaths.asSequence().take(10).map { path ->
                 val pathElement = path.joinToString(separator = " -> ") {
-                    cyan(it.toString())
+                    it.toString().colorize(StringColor.Cyan)
                 }
                 "$Indent$pathElement"
-            }
+            }.sorted().joinTo(this, separator = "\n")
         }
     }
 
@@ -81,9 +85,10 @@ object Strings {
                     "$Indent=> `$a` can not be injected into `$b` without `Optional<>` wrapper."
 
         @Covered
-        fun incompatibleConditionEntyPoint(aCondition: Any, bCondition: Any,
-                                                           binding: Any, component: Any) =
-            "Entry-point condition $aCondition is not always true, given component's condition $bCondition is true,\n" +
+        fun incompatibleConditionEntyPoint(
+            aCondition: Any, bCondition: Any,
+            binding: Any, component: Any,
+        ) = "Entry-point condition $aCondition is not always true, given component's condition $bCondition is true,\n" +
                     "$Indent=> `$binding` can not be exposed from `$component` without `Optional<>` wrapper."
 
 

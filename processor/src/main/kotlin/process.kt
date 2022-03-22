@@ -24,7 +24,7 @@ fun <Source> process(
             val model = ComponentModel(delegate.createDeclaration(source))
             if (model.isRoot) {
                 BindingGraph(
-                        root = model,
+                    root = model,
                 )
             } else null
         }.toList()
@@ -50,6 +50,10 @@ fun <Source> process(
         validationResults.forEach { locatedMessage ->
             val message = Strings.formatMessage(
                 message = locatedMessage.message.contents,
+                color = when (locatedMessage.message.kind) {
+                    Error -> Strings.StringColor.Red
+                    Warning -> Strings.StringColor.Yellow
+                },
                 encounterPaths = locatedMessage.encounterPaths,
                 notes = locatedMessage.message.notes
             )
