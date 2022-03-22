@@ -42,13 +42,16 @@ internal class RuntimeComponent(
 ) : InvocationHandlerBase(), Binding.Visitor<Any> {
     lateinit var thisProxy: Any
     private val accessStrategies = hashMapOf<Binding, AccessStrategy>()
-    private val conditionLiterals = buildMap<Literal, Boolean> {
-        for ((literal, _) in graph.localConditionLiterals) {
-            var instance: Any? = if (literal.root.isKotlinObject) literal.root.rt.kotlin.objectInstance else null
-            for (member in literal.path) {
-                instance = member.accept(MemberEvaluator(instance))
+    private val conditionLiterals = HashMap<Literal, Boolean>().apply {
+        for ((literal, usage) in graph.localConditionLiterals) {
+            when (usage) {
+                BindingGraph.LiteralUsage.Eager -> {
+                    put(literal, doEvaluateLiteral(literal))
+                }
+                BindingGraph.LiteralUsage.Lazy -> {
+                    // To be computed on demand.
+                }
             }
-            put(literal, instance as Boolean)
         }
     }
     private val moduleInstances = buildMap<ModuleModel, Any> {
@@ -77,10 +80,25 @@ internal class RuntimeComponent(
         }
     }
 
+    private fun doEvaluateLiteral(literal: Literal): Boolean {
+        var instance: Any? = if (literal.root.isKotlinObject) literal.root.rt.kotlin.objectInstance else null
+        for (member in literal.path) {
+            instance = member.accept(MemberEvaluator(instance))
+        }
+        return instance as Boolean
+    }
+
     private fun evaluateLiteral(literal: Literal): Boolean {
-        return conditionLiterals[literal.normalized()]?.let { value -> value xor literal.negated }
-            ?: parent?.evaluateLiteral(literal)
-            ?: throw IllegalStateException("Not reached: unexpected literal $literal")
+        val normalized = literal.normalized()
+        return if (normalized in graph.localConditionLiterals) {
+            conditionLiterals.getOrPut(normalized) {
+                doEvaluateLiteral(normalized)
+            } xor literal.negated
+        } else {
+            checkNotNull(parent) {
+                "Not reached: unexpected literal $literal"
+            }.evaluateLiteral(literal)
+        }
     }
 
     private fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {
@@ -92,11 +110,7 @@ internal class RuntimeComponent(
         return true
     }
 
-    private fun evaluate(binding: Binding): Any = try {
-        binding.accept(this)
-    } catch (e: Throwable) {
-        throw RuntimeException("Error occurred while evaluating $binding", e)
-    }
+    private fun evaluate(binding: Binding): Any = binding.accept(this)
 
     init {
         for ((binding: Binding, _) in graph.localBindings) {

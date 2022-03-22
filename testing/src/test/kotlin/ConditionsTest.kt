@@ -1,5 +1,9 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.Backend
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.SourceSet
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Assume.assumeFalse
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -8,7 +12,7 @@ import javax.inject.Provider
 
 @RunWith(Parameterized::class)
 class ConditionsTest(
-    driverProvider: Provider<CompileTestDriverBase>
+    driverProvider: Provider<CompileTestDriver>,
 ) : CompileTestDriver by driverProvider.get() {
     companion object {
         @JvmStatic
@@ -17,7 +21,7 @@ class ConditionsTest(
     }
 
     private val flavors by lazy {
-        givenSourceSet {
+        SourceSet {
             givenKotlinSource("test.Flavors", """
                 import com.yandex.daggerlite.ComponentVariantDimension
                 import com.yandex.daggerlite.ComponentFlavor
@@ -57,7 +61,7 @@ class ConditionsTest(
     }
 
     private val features by lazy {
-        givenSourceSet {
+        SourceSet {
             givenKotlinSource("test.Features", """
                 import com.yandex.daggerlite.Condition
                 import javax.inject.Singleton
@@ -91,7 +95,7 @@ class ConditionsTest(
 
     @Test
     fun `conditions test`() {
-        useSourceSet(features)
+        includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
@@ -130,19 +134,13 @@ class ConditionsTest(
         """
         )
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-            inspectGeneratedClass("test.TestCaseKt") { case ->
-                case["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `flavors test`() {
-        useSourceSet(features)
-        useSourceSet(flavors)
+        includeFromSourceSet(features)
+        includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
             import javax.inject.Inject
@@ -179,20 +177,13 @@ class ConditionsTest(
         """
         )
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestPhoneComponent")
-            generatesJavaSources("test.Dagger\$TestTabletComponent")
-            inspectGeneratedClass("test.TestCaseKt") { case ->
-                case["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `flavors test - ruled-out variant binding requested as optional`() {
-        useSourceSet(features)
-        useSourceSet(flavors)
+        includeFromSourceSet(features)
+        includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
@@ -229,20 +220,13 @@ class ConditionsTest(
         """
         )
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestPhoneComponent")
-            generatesJavaSources("test.Dagger\$TestTabletComponent")
-            inspectGeneratedClass("test.TestCaseKt") { case ->
-                case["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `flavors test - subcomponents under feature`() {
-        useSourceSet(features)
-        useSourceSet(flavors)
+        includeFromSourceSet(features)
+        includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
@@ -296,19 +280,12 @@ class ConditionsTest(
         """
         )
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestPhoneComponent")
-            generatesJavaSources("test.Dagger\$TestTabletComponent")
-            inspectGeneratedClass("test.TestCaseKt") { case ->
-                case["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `conditions in component hierarchy`() {
-        useSourceSet(features)
+        includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
             import javax.inject.Inject
             import javax.inject.Singleton
@@ -337,15 +314,12 @@ class ConditionsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `@Binds with multiple alternatives`() {
-        useSourceSet(features)
+        includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             import javax.inject.*
@@ -425,19 +399,13 @@ class ConditionsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$TestComponent")
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `conditional provide - basic case`() {
-        useSourceSet(features)
-        useSourceSet(flavors)
+        includeFromSourceSet(features)
+        includeFromSourceSet(flavors)
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             import javax.inject.*
@@ -503,17 +471,12 @@ class ConditionsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `flavors inheritance in component hierarchy`() {
-        useSourceSet(flavors)
+        includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
@@ -555,20 +518,12 @@ class ConditionsTest(
 
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$MyBrowserComponent")
-            generatesJavaSources("test.Dagger\$MySearchAppComponent")
-
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `complex condition expression`() {
-        useSourceSet(features)
+        includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*            
@@ -611,15 +566,12 @@ class ConditionsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            withNoErrors()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
     fun `flavor-based alternative binding in component hierarchy`() {
-        useSourceSet(flavors)
+        includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
@@ -677,16 +629,7 @@ class ConditionsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$MyBrowserComponent")
-            generatesJavaSources("test.Dagger\$MySearchAppComponent")
-            generatesJavaSources("test.Dagger\$MyProductComponent")
-
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -718,12 +661,7 @@ class ConditionsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -732,9 +670,9 @@ class ConditionsTest(
         // https://github.com/google/ksp/issues/850
         // https://github.com/google/ksp/issues/839
         // TODO: Enable for KSP once the issues are fixed.
-        assumeFalse(backendUnderTest == CompileTestDriver.Backend.Ksp)
+        assumeFalse(backendUnderTest == Backend.Ksp)
 
-        precompile(givenSourceSet {
+        givenPrecompiledModule(SourceSet {
             givenKotlinSource("test.CompiledCondition", """
                 object CompiledCondition {
                     const val HELLO = true
@@ -773,8 +711,6 @@ class ConditionsTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 }

@@ -2,6 +2,7 @@ package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
 import java.lang.reflect.Executable
+import java.lang.reflect.GenericArrayType
 import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -10,6 +11,8 @@ import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
 import java.lang.reflect.WildcardType
 import kotlin.LazyThreadSafetyMode.NONE
+
+private typealias ArraysReflectionUtils = java.lang.reflect.Array
 
 internal fun Type.equivalence() = TypeEquivalenceWrapper(this)
 
@@ -25,14 +28,56 @@ internal fun Type.tryAsClass(): Class<*>? = when (this) {
     else -> null
 }
 
-internal fun Type.resolve(
-    asMemberOf: Type,
-): Type = when (asMemberOf) {
-    is ParameterizedType -> {
-        val resolvedTypeParameters = lazy(NONE, asMemberOf::resolveTypeParameters)
-        resolveTypeVar(withInfo = resolvedTypeParameters::value)
+internal fun Type.formatString(): String = when (this) {
+    is Class<*> -> canonicalName ?: "<unnamed>"
+    is ParameterizedType -> "${rawType.formatString()}<${actualTypeArguments.joinToString { it.formatString() }}>"
+    is WildcardType -> when {
+        lowerBounds.isNotEmpty() -> "? super ${lowerBounds.first().formatString()}"
+        upperBounds.isNotEmpty() -> "? extends ${upperBounds.first().formatString()}"
+        else -> "?"
     }
-    else -> this
+    is GenericArrayType -> "${genericComponentType.formatString()}[]"
+    else -> toString()
+}
+
+internal fun Type.superTypesSequence(): Sequence<Type> = sequence {
+    val queue = ArrayDeque<Type>()
+    queue += this@superTypesSequence
+    while(queue.isNotEmpty()) {
+        val type = queue.removeFirst()
+        yield(type)
+        when(type) {
+            is ParameterizedType -> {
+                val resolvedTypeParameters = lazy(NONE, type::resolveTypeParameters)
+                val clazz = type.rawType.asClass()
+                clazz.genericSuperclass?.let { superClass ->
+                    queue += superClass.resolveTypeVar(resolvedTypeParameters::value)
+                }
+                for (genericInterface in clazz.genericInterfaces) {
+                    queue += genericInterface.resolveTypeVar(resolvedTypeParameters::value)
+                }
+            }
+            is Class<*> -> {
+                type.genericSuperclass?.let(queue::add)
+                queue.addAll(type.genericInterfaces)
+            }
+            else -> { /* Do nothing */}
+        }
+    }
+}
+
+internal fun Type.resolve(
+    member: Member,
+    asMemberOf: Type,
+): Type {
+    val declaringClass = member.declaringClass
+    return when (val refinedAsMemberOf = asMemberOf.superTypesSequence().find { it.asClass() == declaringClass }) {
+        is ParameterizedType -> {
+            val resolvedTypeParameters = lazy(NONE, refinedAsMemberOf::resolveTypeParameters)
+            resolveTypeVar(withInfo = resolvedTypeParameters::value)
+        }
+        else -> this
+    }
 }
 
 internal fun Executable.resolveParameters(
@@ -59,6 +104,9 @@ private fun Type.resolveTypeVar(withInfo: () -> Map<TypeVariable<*>, Type>): Typ
     is WildcardType -> replaceBounds { bound ->
         bound.resolveTypeVar(withInfo)
     }
+    is GenericArrayType -> replaceComponentType(
+        componentType = genericComponentType.resolveTypeVar(withInfo)
+    )
     else -> this
 }
 
@@ -67,6 +115,16 @@ private fun ParameterizedType.resolveTypeParameters(): Map<TypeVariable<*>, Type
     val typeArgs = actualTypeArguments
     for (i in typeParams.indices) {
         put(typeParams[i], typeArgs[i])
+    }
+}
+
+private fun GenericArrayType.replaceComponentType(
+    componentType: Type,
+): Type = when(componentType) {
+    genericComponentType -> this
+    is Class<*> -> ArraysReflectionUtils.newInstance(componentType, 0).javaClass
+    else -> @Suppress("ObjectLiteralToLambda") object : GenericArrayType {
+        override fun getGenericComponentType(): Type = componentType
     }
 }
 
@@ -148,38 +206,44 @@ internal fun Class<*>.getMethodsOverrideAware(): List<Method> = buildList {
         clazz.interfaces.forEach(::handleClass)
     }
     handleClass(this@getMethodsOverrideAware)
+    sortWith(ExecutableSignatureComparator)
 }
 
+private fun arrayHashCode(types: Array<Type>): Int = types.fold(1) { hash, type -> 31 * hash + hashCode(type) }
+
 private fun hashCode(type: Type): Int = when (type) {
-    is ParameterizedType -> {
-        var hash = type.rawType.hashCode()
-        for (param in type.actualTypeArguments) {
-            hash = hash * 31 + hashCode(param)
-        }
-        hash
-    }
+    is ParameterizedType -> 31 * type.rawType.hashCode() + arrayHashCode(type.actualTypeArguments)
+    is WildcardType -> 31 * arrayHashCode(type.lowerBounds) + arrayHashCode(type.upperBounds)
+    is GenericArrayType -> hashCode(type.genericComponentType)
     else -> type.hashCode()
+}
+
+private fun arrayEquals(one: Array<Type>, other: Array<Type>): Boolean {
+    if (one.size != other.size) return false
+    for (i in one.indices) {
+        if (!equals(one[i], other[i]))
+            return false
+    }
+    return true
 }
 
 private fun equals(one: Type, other: Type): Boolean = with(one) {
     when (this) {
-        other -> {
-            // If types are equal via regular `equals`, we're good.
-            true
-        }
         is ParameterizedType -> {
             // Take synthetic parameterized types into account.
             other is ParameterizedType &&
-                    rawType == other.rawType && actualTypeArguments.contentEquals(other.actualTypeArguments)
+                    rawType == other.rawType && arrayEquals(actualTypeArguments, other.actualTypeArguments)
         }
         is WildcardType -> {
             // Take synthetic wildcard types into account
-            other is WildcardType && upperBounds.contentEquals(other.upperBounds) &&
-                    lowerBounds.contentEquals(other.lowerBounds)
+            other is WildcardType && arrayEquals(upperBounds, other.upperBounds) &&
+                    arrayEquals(lowerBounds, other.lowerBounds)
         }
-        else -> {
-            false
+        is GenericArrayType -> {
+            other is GenericArrayType && equals(genericComponentType, other.genericComponentType)
         }
+        other -> true
+        else -> false
     }
 }
 

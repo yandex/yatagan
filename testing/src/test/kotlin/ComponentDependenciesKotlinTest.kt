@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -64,11 +67,7 @@ class ComponentDependenciesKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$MyApplicationComponent")
-            generatesJavaSources("test.Dagger\$MyActivityComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -94,10 +93,7 @@ class ComponentDependenciesKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$MyComponent")
-        }
+        expectSuccessfulValidation()
     }
 
 
@@ -136,10 +132,6 @@ class ComponentDependenciesKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$MyApplicationComponent")
-            generatesJavaSources("test.Dagger\$MyActivityComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 }

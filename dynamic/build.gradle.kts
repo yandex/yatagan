@@ -2,6 +2,8 @@ plugins {
     id("daggerlite.artifact")
 }
 
+val junitVersion: String by extra
+
 dependencies {
     api(project(":api"))
 

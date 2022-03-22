@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -23,7 +26,6 @@ class RuntimeTest(
             import com.yandex.daggerlite.Provides
             import com.yandex.daggerlite.Module
             import com.yandex.daggerlite.Dagger
-            import com.yandex.daggerlite.testing.create
 
             class Simple(val value: String)
 
@@ -42,7 +44,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = Dagger.create<TestComponent>()
+                val c = Dagger.create(TestComponent::class.java)
                 assert(c.simple().value == "simple")
                 assert(c.one().value == "one")
                 assert(c.two().value == "two")
@@ -50,15 +52,8 @@ class RuntimeTest(
         """
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { tc ->
-                tc["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
-
 
     @Test
     fun `basic component - included modules are deduplicated`() {
@@ -76,27 +71,50 @@ class RuntimeTest(
             }
         """)
 
-        givenJavaSource("test.TestComponent", """
+        givenJavaSource("test.MyModuleHello", """
             import javax.inject.Named;
             import com.yandex.daggerlite.Component;
             import com.yandex.daggerlite.Provides;
             import com.yandex.daggerlite.Module;
 
             @Module(includes = {MyModuleBye.class, MyModuleFoo.class})
-            interface MyModuleHello {
+            public interface MyModuleHello {
                 @Provides @Named("hello") static Simple hello() { return new Simple("hello"); } 
             }
+        """)
+
+        givenJavaSource("test.MyModuleBye", """
+            import javax.inject.Named;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+            
             @Module(includes = {MyModuleFoo.class})
-            interface MyModuleBye{
+            public interface MyModuleBye{
                 @Provides @Named("bye") static Simple bye() { return new Simple("bye"); } 
             }
+        """)
+
+        givenJavaSource("test.MyModuleFoo", """
+            import javax.inject.Named;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
+            
             @Module
-            interface MyModuleFoo{
+            public interface MyModuleFoo{
                 @Provides @Named("foo") static Simple foo() { return new Simple("foo"); } 
             }
+        """)
+
+        givenJavaSource("test.TestComponent", """
+            import javax.inject.Named;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Provides;
+            import com.yandex.daggerlite.Module;
             
             @Component(modules = {MyModuleHello.class, MyModuleBye.class})
-            interface TestComponent {
+            public interface TestComponent {
                 @Named("hello") Simple hello();
                 @Named("bye") Simple bye();
                 @Named("foo") Simple foo();
@@ -114,13 +132,7 @@ class RuntimeTest(
             } 
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -152,13 +164,7 @@ class RuntimeTest(
         """
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoMoreWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { tc ->
-                tc["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -216,10 +222,6 @@ class RuntimeTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            inspectGeneratedClass("test.TestCaseKt") { clazz ->
-                clazz["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 }

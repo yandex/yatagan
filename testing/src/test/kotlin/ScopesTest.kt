@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -37,12 +40,7 @@ class ScopesTest(
         """.trimIndent()
         )
 
-        compilesSuccessfully {
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { testCase ->
-                testCase["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -66,12 +64,7 @@ class ScopesTest(
         """.trimIndent()
         )
 
-        compilesSuccessfully {
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { testCase ->
-                testCase["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -126,11 +119,6 @@ class ScopesTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { testCase ->
-                testCase["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 }

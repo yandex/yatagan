@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -56,10 +59,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent()
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -105,10 +105,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent()
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -151,10 +148,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -201,13 +195,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") { testCase ->
-                testCase["test"](null)
-            }
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -237,10 +225,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -269,10 +254,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -300,10 +282,7 @@ class CoreBindingsKotlinTest(
         """
         )
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -330,10 +309,7 @@ class CoreBindingsKotlinTest(
             }
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -365,10 +341,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -394,10 +367,7 @@ class CoreBindingsKotlinTest(
             }
         """)
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -449,10 +419,7 @@ class CoreBindingsKotlinTest(
             }
             """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -517,10 +484,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            generatesJavaSources("test.Dagger\$TestComponent")
-            withNoWarnings()
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -569,12 +533,8 @@ class CoreBindingsKotlinTest(
                 Dagger.create(TestComponent::class.java).injectFoo(foo)
                 foo.helloA; foo.bye; foo.b; foo.a
             }""".trimIndent())
-        compilesSuccessfully {
-            withNoWarnings()
-            inspectGeneratedClass("test.TestCaseKt") {
-                it["test"](null)
-            }
-        }
+
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -609,11 +569,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$MyComponent")
-            generatesJavaSources("test.Dagger\$MyComponent2")
-        }
+        expectSuccessfulValidation()
     }
 
     @Test
@@ -647,10 +603,71 @@ class CoreBindingsKotlinTest(
                 val provider: Provider<SomeClass<DependencyB<DependencyA>>>
             }
         """.trimIndent())
-        compilesSuccessfully {
-            withNoWarnings()
-            generatesJavaSources("test.Dagger\$MyComponent")
-        }
+
+        expectSuccessfulValidation()
+    }
+
+    @Test
+    fun `complex annotation as qualifier`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            enum class MyEnum {
+                Red, Green, Blue,
+            }
+
+            @Qualifier
+            @Retention(AnnotationRetention.RUNTIME)
+            annotation class ComplexQualifier(
+                val value: Int,
+                val number: Long,
+                val name: String,
+                val arrayString: Array<String>,
+                val arrayInt: IntArray,
+                val arrayChar: CharArray = ['A', 'B', 'C'],
+                val nested: Named,
+                val arrayNested: Array<Named>,
+                val enumValue: MyEnum,
+            )
+
+            class ClassA @Inject constructor(
+                @ComplexQualifier(
+                    228,
+                    number = -22,
+                    name = "hello" + " world",
+                    arrayString = ["hello", "world"],
+                    arrayInt = [1,2,3],
+                    nested = Named("nested-named"),
+                    arrayChar = ['A', 'B', 'C'],
+                    arrayNested = [Named("array-nested")],
+                    enumValue = MyEnum.Red,
+                )
+                val errorDependency: Any
+            )
+
+            @Module
+            class MyModule {
+                @get:Provides @get:ComplexQualifier(
+                    value = 200 + 28,
+                    name = "hello" + " world",
+                    number = -11 - 11,
+                    arrayString = ["hel" + "lo", "world"],
+                    arrayInt = [1,2, 6 - 3],
+                    nested = Named("" + "nested-named"),
+                    arrayChar = ['A', 'B', 'C'],
+                    arrayNested = [Named("array-nested")],
+                    enumValue = MyEnum.Red,
+                )
+                val any: Any = Any()
+            }
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                val a: ClassA
+            }
+        """.trimIndent())
+
+        expectSuccessfulValidation()
     }
 }
 

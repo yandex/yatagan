@@ -90,10 +90,12 @@ internal class KspAnnotationImpl private constructor(
                 append('@')
                 append(CtTypeNameModel(impl.annotationType.resolve()))
                 if (impl.arguments.isNotEmpty()) {
-                    impl.arguments.joinTo(this, prefix = "(", separator = ", ", postfix = ")") { arg ->
+                    impl.arguments
+                        .sortedBy { it.name?.asString() ?: "value" }
+                        .joinTo(this, prefix = "(", separator = ", ", postfix = ")") { arg ->
                         val value = formatValue(arg.value)
                         when (val name = arg.name?.asString()) {
-                            null, "value" -> value
+                            null -> "value=$value"
                             else -> "$name=$value"
                         }
                     }

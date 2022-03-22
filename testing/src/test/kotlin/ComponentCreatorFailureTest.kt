@@ -1,5 +1,10 @@
 package com.yandex.daggerlite.testing
 
+import com.yandex.daggerlite.testing.support.CompileTestDriver
+import com.yandex.daggerlite.testing.support.CompileTestDriverBase
+import com.yandex.daggerlite.testing.support.compileTestDrivers
+import com.yandex.daggerlite.testing.support.errorMessage
+import com.yandex.daggerlite.testing.support.warningMessage
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.formatMessage
 import org.junit.Test
@@ -32,43 +37,43 @@ class ComponentCreatorFailureTest(
             @Module class MyModule(@get:Provides val obj: Any)
             @Component(isRoot = false, dependencies = [MyDependency::class], modules = [MyModule::class])
             abstract class SubComponent {
-                val obj: Any
+                abstract val obj: Any
             }
             interface NotAComponent
             @Component
             interface AnotherRootComponent
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Strings.Errors.nonInterfaceComponent(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.SubComponent")),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.missingCreatorForNonRoot(),
                 encounterPaths = listOf(
-                    listOf("test.RootComponent", "test.SubComponent"),
                     listOf("test.RootComponent", "test.NotAComponent"),
+                    listOf("test.RootComponent", "test.SubComponent"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.missingCreatorForDependencies(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.SubComponent")),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.missingCreatorForModules(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.SubComponent")),
                 notes = listOf(Strings.Notes.missingModuleInstance("test.MyModule"))
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.nonComponent(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.NotAComponent")),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.rootAsChild(),
                 encounterPaths = listOf(listOf("test.RootComponent", "test.AnotherRootComponent")),
-            ))
-        }
+            )),
+        )
     }
 
     @Test
@@ -86,19 +91,17 @@ class ComponentCreatorFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Strings.Errors.invalidInjectorReturn(),
                 encounterPaths = listOf(listOf("test.MyComponent", "[injector-fun] inject"))
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.unknownMethodInComponent(
                     method = "test.MyComponent::misc(i: test.Injectee, extra: int): void"),
                 encounterPaths = listOf(listOf("test.MyComponent"))
-            ))
-            withNoMoreWarnings()
-            withNoMoreErrors()
-        }
+            )),
+        )
     }
 
     @Test
@@ -123,7 +126,7 @@ class ComponentCreatorFailureTest(
                 val number: Double get() = i
             }
             class MyDependency {
-                val notGonnaBeUsed: Optional<Any>
+                val notGonnaBeUsed: Optional<Any> = Optional.empty()
             }
             @Component(dependencies = [
                 MyDependency::class,
@@ -139,47 +142,47 @@ class ComponentCreatorFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Strings.Errors.nonInterfaceCreator(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.missingComponentDependency(missing = "test.MyDependency"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.missingModule(missing = "test.RequiresInstance"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Builder"),
                 ),
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.extraModule(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Builder", "[param] create(.., module: test.Unknown, ..)"),
                 )
-            ))
-            withWarning(formatMessage(
+            )),
+            warningMessage(formatMessage(
                 message = Strings.Warnings.nonAbstractDependency(),
+                color = Strings.StringColor.Yellow,
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "test.MyDependency"),
                 )
-            ))
-            withWarning(formatMessage(
+            )),
+            warningMessage(formatMessage(
                 message = Strings.Warnings.ignoredDependencyOfFrameworkType(
                     function = "test.MyDependency::getNotGonnaBeUsed(): com.yandex.daggerlite.Optional<java.lang.Object>"),
+                color = Strings.StringColor.Yellow,
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "test.MyDependency"),
                 )
             ))
-            withNoMoreWarnings()
-            withNoMoreErrors()
-        }
+        )
     }
 
     @Test
@@ -220,40 +223,40 @@ class ComponentCreatorFailureTest(
             }
         """.trimIndent())
 
-        failsToCompile {
-            withError(formatMessage(
+        expectValidationResults(
+            errorMessage(formatMessage(
                 message = Strings.Errors.missingCreatingMethod(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.extraComponentDependency(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setInt(int)"),
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.invalidBuilderSetterReturn("test.MyComponent.Foo"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.unknownMethodInCreator(
                     method = "test.MyComponent.Foo::create(): void"),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.extraModule(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setModule(test.Unnecessary)"),
                 )
-            ))
-            withError(formatMessage(
+            )),
+            errorMessage(formatMessage(
                 message = Strings.Errors.multipleCreators(),
                 encounterPaths = listOf(
                     listOf("test.MyComponent"),
@@ -262,15 +265,14 @@ class ComponentCreatorFailureTest(
                     Strings.Notes.conflictingCreator("test.MyComponent.Foo"),
                     Strings.Notes.conflictingCreator("test.MyComponent.Builder"),
                 ),
-            ))
-            withWarning(formatMessage(
+            )),
+            warningMessage(formatMessage(
                 message = Strings.Warnings.ignoredBindsInstance(),
+                color = Strings.StringColor.Yellow,
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )
-            ))
-            withNoMoreErrors()
-            withNoMoreWarnings()
-        }
+            )),
+        )
     }
 }
