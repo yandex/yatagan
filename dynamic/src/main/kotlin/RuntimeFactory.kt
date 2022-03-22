@@ -4,6 +4,7 @@ import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.lang.rt.rt
 import java.lang.reflect.Proxy
@@ -49,6 +50,19 @@ internal class RuntimeFactory(
                     consumePayload(payload = input.payload, arg = arg!!)
                 }
             }
+            for (input in creator.allInputs) {
+                when (val payload = input.payload) {
+                    is ComponentFactoryModel.InputPayload.Dependency -> check(payload.dependency in givenDependencies) {
+                        "No value for $payload was provided"
+                    }
+                    is ComponentFactoryModel.InputPayload.Instance -> check(payload.node in givenInstances) {
+                        "No value for $payload was provided"
+                    }
+                    is ComponentFactoryModel.InputPayload.Module -> check(payload.module in givenModuleInstances) {
+                        "No value for $payload was provided"
+                    }
+                }
+            }
             val componentClass = creator.createdComponent.type.declaration.rt
             val runtimeComponent = RuntimeComponent(
                 graph = graph,
@@ -69,7 +83,9 @@ internal class RuntimeFactory(
 
     private inner class BuilderSetterHandler(private val input: ComponentFactoryModel.InputModel) : MethodHandler {
         override fun invoke(proxy: Any, args: Array<Any?>?): Any {
-            consumePayload(payload = input.payload, arg = args!!.first()!!)
+            consumePayload(payload = input.payload, arg = checkNotNull(args!!.first()) {
+                "Creator input `$input` is null"
+            })
             return proxy
         }
     }

@@ -19,7 +19,10 @@ internal class RtFunctionImpl(
     }
 
     override val returnType: TypeLangModel by lazy {
-        RtTypeImpl(impl.genericReturnType.resolve(asMemberOf = owner.type.impl))
+        RtTypeImpl(impl.genericReturnType.resolve(
+            member = impl,
+            asMemberOf = owner.type.impl,
+        ))
     }
 
     override val propertyAccessorInfo: FunctionLangModel.PropertyAccessorInfo? by lazy {

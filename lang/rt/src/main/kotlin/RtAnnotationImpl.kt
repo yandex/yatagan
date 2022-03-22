@@ -21,9 +21,40 @@ internal class RtAnnotationImpl private constructor(
         return impl.annotationClass.java == type
     }
 
-    override fun toString() = impl.toString()
+    override fun toString() = formatString(impl)
 
     companion object Factory : ObjectCache<Annotation, RtAnnotationImpl>() {
         operator fun invoke(annotation: Annotation) = createCached(annotation, ::RtAnnotationImpl)
+
+        private fun formatString(value: Any?): String = when (value) {
+            is String -> "\"$value\""
+            is ByteArray -> value.joinToString(prefix = "{", postfix = "}")
+            is CharArray -> value.joinToString(prefix = "{", postfix = "}")
+            is DoubleArray -> value.joinToString(prefix = "{", postfix = "}")
+            is FloatArray -> value.joinToString(prefix = "{", postfix = "}")
+            is IntArray -> value.joinToString(prefix = "{", postfix = "}")
+            is LongArray -> value.joinToString(prefix = "{", postfix = "}")
+            is ShortArray -> value.joinToString(prefix = "{", postfix = "}")
+            is BooleanArray -> value.joinToString(prefix = "{", postfix = "}")
+            is Array<*> -> value.joinToString(prefix = "{", postfix = "}", transform = ::formatString)
+            is Class<*> -> value.canonicalName
+            is Enum<*> -> "${value.declaringClass.canonicalName}.${value.name}"
+            is Annotation -> buildString {
+                append('@')
+                append(value.annotationClass.java.canonicalName)
+                val attributes = value.annotationClass.java.methods
+                    .asSequence()
+                    .filter { it.declaringClass.isAnnotation }
+                if (attributes.any()) {
+                    attributes
+                        .sortedBy { it.name }
+                        .joinTo(this, prefix = "(", postfix = ")") {
+                            val attributeValue = formatString(it.invoke(value))
+                            "${it.name}=$attributeValue"
+                        }
+                }
+            }
+            else -> value.toString()
+        }
     }
 }

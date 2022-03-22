@@ -10,7 +10,7 @@ internal fun assertNotNull(instance: Any?, message: String) {
         returns() implies (instance != null)
     }
     if (instance == null) {
-        throw AssertionError(message)
+        throw IllegalStateException(message)
     }
 }
 

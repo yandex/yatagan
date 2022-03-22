@@ -21,7 +21,7 @@ class RtModelFactoryImpl : LangModelFactory {
             override fun getActualTypeArguments(): Array<Type> = arrayOf(arg)
             override fun getRawType(): Type = List::class.java
             override fun getOwnerType(): Type? = null
-            override fun toString() = "java.util.List<$type>"
+            override fun toString() = "java.util.List<$arg>"
         })
     }
 

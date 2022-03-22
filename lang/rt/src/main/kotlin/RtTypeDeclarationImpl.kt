@@ -70,6 +70,7 @@ internal class RtTypeDeclarationImpl private constructor(
     }
 
     override val constructors: Sequence<ConstructorLangModel> by lazy {
+        // TODO: ensure stable order (sort)
         impl.declaredConstructors.map { constructor ->
             ConstructorImpl(
                 impl = constructor,
@@ -80,6 +81,9 @@ internal class RtTypeDeclarationImpl private constructor(
 
     override val allPublicFunctions: Sequence<FunctionLangModel> by lazy {
         buildList<FunctionLangModel> {
+            for (method in impl.getMethodsOverrideAware()) {
+                add(RtFunctionImpl(impl = method, owner = this@RtTypeDeclarationImpl))
+            }
             kotlinClass.companionObject?.let { companion ->
                 val companionDeclaration = RtTypeDeclarationImpl(RtTypeImpl(companion.java))
                 for (method in companion.java.methods) {
@@ -90,13 +94,11 @@ internal class RtTypeDeclarationImpl private constructor(
                     add(RtFunctionImpl(impl = method, owner = companionDeclaration))
                 }
             }
-            for (method in impl.getMethodsOverrideAware()) {
-                add(RtFunctionImpl(impl = method, owner = this@RtTypeDeclarationImpl))
-            }
         }.asSequence()
     }
 
     override val allPublicFields: Sequence<FieldLangModel> by lazy {
+        // TODO: ensure stable order (sort)
         impl.fields.map {
             RtFieldImpl(
                 impl = it,

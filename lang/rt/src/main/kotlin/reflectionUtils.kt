@@ -40,14 +40,44 @@ internal fun Type.formatString(): String = when (this) {
     else -> toString()
 }
 
-internal fun Type.resolve(
-    asMemberOf: Type,
-): Type = when (asMemberOf) {
-    is ParameterizedType -> {
-        val resolvedTypeParameters = lazy(NONE, asMemberOf::resolveTypeParameters)
-        resolveTypeVar(withInfo = resolvedTypeParameters::value)
+internal fun Type.superTypesSequence(): Sequence<Type> = sequence {
+    val queue = ArrayDeque<Type>()
+    queue += this@superTypesSequence
+    while(queue.isNotEmpty()) {
+        val type = queue.removeFirst()
+        yield(type)
+        when(type) {
+            is ParameterizedType -> {
+                val resolvedTypeParameters = lazy(NONE, type::resolveTypeParameters)
+                val clazz = type.rawType.asClass()
+                clazz.genericSuperclass?.let { superClass ->
+                    queue += superClass.resolveTypeVar(resolvedTypeParameters::value)
+                }
+                for (genericInterface in clazz.genericInterfaces) {
+                    queue += genericInterface.resolveTypeVar(resolvedTypeParameters::value)
+                }
+            }
+            is Class<*> -> {
+                type.genericSuperclass?.let(queue::add)
+                queue.addAll(type.genericInterfaces)
+            }
+            else -> { /* Do nothing */}
+        }
     }
-    else -> this
+}
+
+internal fun Type.resolve(
+    member: Member,
+    asMemberOf: Type,
+): Type {
+    val declaringClass = member.declaringClass
+    return when (val refinedAsMemberOf = asMemberOf.superTypesSequence().find { it.asClass() == declaringClass }) {
+        is ParameterizedType -> {
+            val resolvedTypeParameters = lazy(NONE, refinedAsMemberOf::resolveTypeParameters)
+            resolveTypeVar(withInfo = resolvedTypeParameters::value)
+        }
+        else -> this
+    }
 }
 
 internal fun Executable.resolveParameters(
@@ -176,23 +206,22 @@ internal fun Class<*>.getMethodsOverrideAware(): List<Method> = buildList {
         clazz.interfaces.forEach(::handleClass)
     }
     handleClass(this@getMethodsOverrideAware)
+    sortWith(ExecutableSignatureComparator)
 }
 
+private fun arrayHashCode(types: Array<Type>): Int = types.fold(1) { hash, type -> 31 * hash + hashCode(type) }
+
 private fun hashCode(type: Type): Int = when (type) {
-    is ParameterizedType -> {
-        var hash = type.rawType.hashCode()
-        for (param in type.actualTypeArguments) {
-            hash = hash * 31 + hashCode(param)
-        }
-        hash
-    }
+    is ParameterizedType -> 31 * type.rawType.hashCode() + arrayHashCode(type.actualTypeArguments)
+    is WildcardType -> 31 * arrayHashCode(type.lowerBounds) + arrayHashCode(type.upperBounds)
+    is GenericArrayType -> hashCode(type.genericComponentType)
     else -> type.hashCode()
 }
 
 private fun arrayEquals(one: Array<Type>, other: Array<Type>): Boolean {
     if (one.size != other.size) return false
     for (i in one.indices) {
-        if (one[i] != other[i])
+        if (!equals(one[i], other[i]))
             return false
     }
     return true
@@ -200,10 +229,6 @@ private fun arrayEquals(one: Array<Type>, other: Array<Type>): Boolean {
 
 private fun equals(one: Type, other: Type): Boolean = with(one) {
     when (this) {
-        other -> {
-            // If types are equal via regular `equals`, we're good.
-            true
-        }
         is ParameterizedType -> {
             // Take synthetic parameterized types into account.
             other is ParameterizedType &&
@@ -217,9 +242,8 @@ private fun equals(one: Type, other: Type): Boolean = with(one) {
         is GenericArrayType -> {
             other is GenericArrayType && equals(genericComponentType, other.genericComponentType)
         }
-        else -> {
-            false
-        }
+        other -> true
+        else -> false
     }
 }
 
