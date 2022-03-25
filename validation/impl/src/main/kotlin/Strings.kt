@@ -8,7 +8,7 @@ object Strings {
     }
 
     private fun String.colorize(color: StringColor) = lines().joinToString(separator = "\n") {
-        "\u001b[${color.ansiCode}m$this\u001b[0m"
+        "\u001b[${color.ansiCode}m$it\u001b[0m"
     }
 
     private const val Indent = "    "
