@@ -12,6 +12,7 @@ internal fun topologicalSort(
 
     val result = mutableListOf<NodeModel>()
     val remainingNodes = HashSet(nodes)
+    val seenNodes = HashSet<NodeModel>()
 
     fun visit(node: NodeModel) {
         if (remainingNodes.isEmpty()) {
@@ -21,9 +22,17 @@ internal fun topologicalSort(
 
         val binding = inside.resolveBinding(node)
         for (dependency in binding.dependencies()) {
-            if (dependency.kind.isEager) {
-                visit(dependency.node)
+            val (dependencyNode, kind) = dependency
+            if (!kind.isEager) {
+                continue
             }
+
+            if (!seenNodes.add(dependencyNode)) {
+                // graph may be invalid and contain loops
+                continue
+            }
+
+            visit(dependencyNode)
         }
 
         if (remainingNodes.remove(node)) {
