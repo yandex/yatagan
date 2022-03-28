@@ -15,31 +15,31 @@ Supports multiple backends first class:
 
 [Base developer guide][base-doc] for Dagger2 is a good start, as dagger-lite philosophy and API was based on it.
 
-| Vanilla API                            | Status in DL   | Notes                                      |
-|----------------------------------------|----------------|--------------------------------------------|
-| `dagger.Component`                     | 🟢 as is       |                                            |
-| `dagger.Component.Builder`             | 🟢 as is       | supports factory method as well            |
-| `dagger.Component.Factory`             | 🟠 converged   | functionality merged into `Builder`        |
-| `dagger.Subcomponent`                  | 🟠 converged   | replaced by `Component(isRoot = false)`    |
-| `dagger.Subcomponent.Builder`          | 🟠 converged   | replaced by `Component.Builder`            |
-| `dagger.Subcomponent.Factory`          | 🟠 converged   | replaced by `Component.Builder`            |
-| `dagger.Lazy`                          | 🟢 as is       | now extends `Provider`                     |
-| `dagger.Module`                        | 🟢 as is       |                                            |
-| `dagger.Binds`                         | 🟡 tweaked     | rebinding scope is not supported           |
-| `dagger.BindsInstance`                 | 🟢 as is       |                                            |
-| `dagger.Provides`                      | 🟢 as is       |                                            |
-| `dagger.BindsOptionalOf`               | 🔴 replaced    | replaced with Variant/Condition API        |
-| `dagger.Reusable`                      | 🔴 unsupported |                                            |
-| `dagger.MembersInjector`               | 🔴 unsupported |                                            |
-| `dagger.MapKey`                        | 🔴 unsupported | multi-bindings for `Map` are not supported |
-| `dagger.multibindings.IntoSet`         | 🟡 renamed     | `IntoList`, now binds `List<T>`            |
-| `dagger.multibindings.ElementsIntoSet` | 🟠 converged   | `IntoList(flatten = true)`                 |
-| `dagger.multibindings.Multibinds`      | 🟡 renamed     | `DeclareList`                              |
-| `dagger.multibindings.{IntoMap-ish}`   | 🔴 unsupported | multi-bindings for `Map` are not supported |
-| `dagger.assisted.*`                    | 🔴 unsupported |                                            |
-| `dagger.producers.*`                   | 🔴 unsupported |                                            |
-| `dagger.hilt.*`                        | 🔴 unsupported |                                            |
-| `dagger.spi.*`                         | 🟠 replaced    | dagger-lite has its own model for SPI      |
+| Vanilla API                            | Status in DL    | Notes                                      |
+|----------------------------------------|-----------------|--------------------------------------------|
+| `dagger.Component`                     | (+) as is       |                                            |
+| `dagger.Component.Builder`             | (+) as is       | supports factory method as well            |
+| `dagger.Component.Factory`             | (+*) converged  | functionality merged into `Builder`        |
+| `dagger.Subcomponent`                  | (+*) converged  | replaced by `Component(isRoot = false)`    |
+| `dagger.Subcomponent.Builder`          | (+*) converged  | replaced by `Component.Builder`            |
+| `dagger.Subcomponent.Factory`          | (+*) converged  | replaced by `Component.Builder`            |
+| `dagger.Lazy`                          | (+) as is       | now extends `Provider`                     |
+| `dagger.Module`                        | (+) as is       |                                            |
+| `dagger.Binds`                         | (+*) tweaked    | rebinding scope is not supported           |
+| `dagger.BindsInstance`                 | (+) as is       |                                            |
+| `dagger.Provides`                      | (+) as is       |                                            |
+| `dagger.BindsOptionalOf`               | (+*) replaced   | replaced with Variant/Condition API        |
+| `dagger.Reusable`                      | (-) unsupported |                                            |
+| `dagger.MembersInjector`               | (-) unsupported |                                            |
+| `dagger.MapKey`                        | (-) unsupported | multi-bindings for `Map` are not supported |
+| `dagger.multibindings.IntoSet`         | (+*) renamed    | `IntoList`, now binds `List<T>`            |
+| `dagger.multibindings.ElementsIntoSet` | (+*) converged  | `IntoList(flatten = true)`                 |
+| `dagger.multibindings.Multibinds`      | (+*) renamed    | `DeclareList`                              |
+| `dagger.multibindings.{IntoMap-ish}`   | (-) unsupported | multi-bindings for `Map` are not supported |
+| `dagger.assisted.*`                    | (-) unsupported |                                            |
+| `dagger.producers.*`                   | (-) unsupported |                                            |
+| `dagger.hilt.*`                        | (-) unsupported |                                            |
+| `dagger.spi.*`                         | (+*) replaced   | dagger-lite has its own model for SPI      |
 
 ----------------
 Other behavioral changes: 
