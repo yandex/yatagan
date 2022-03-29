@@ -68,7 +68,7 @@ internal class KspTypeDeclarationImpl private constructor(
             ConstructorImpl(impl = it)
         }.memoize()
 
-    override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
+    override val functions: Sequence<FunctionLangModel> = sequence {
         val owner = this@KspTypeDeclarationImpl
         yieldAll(impl.allPublicFunctions().map {
             KspFunctionImpl(owner = owner, impl = it)
@@ -101,7 +101,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    override val allPublicFields: Sequence<FieldLangModel> =
+    override val fields: Sequence<FieldLangModel> =
         impl.getDeclaredProperties()
             .filter { it.isField && !it.isPrivate() }
             .map { KspFieldImpl(it, this) }.memoize()

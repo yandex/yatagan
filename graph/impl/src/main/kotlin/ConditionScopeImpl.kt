@@ -225,12 +225,12 @@ private class LiteralPayloadImpl private constructor(
         }
 
         private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
-            val field = type.allPublicFields.find { it.name == name }
+            val field = type.fields.find { it.name == name }
             if (field != null) {
                 return field
             }
 
-            val allMethods = type.allPublicFunctions
+            val allMethods = type.functions
             val method = allMethods.find { function ->
                 function.propertyAccessorInfo?.let {
                     // If this is a kotlin property getter, then look for property name

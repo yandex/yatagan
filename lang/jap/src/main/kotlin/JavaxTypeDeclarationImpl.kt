@@ -68,7 +68,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
             ConstructorImpl(impl = it.asExecutableElement())
         }.memoize()
 
-    override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
+    override val functions: Sequence<FunctionLangModel> = sequence {
         val owner = this@JavaxTypeDeclarationImpl
         yieldAll(impl.allMethods(Utils.types, Utils.elements).map {
             JavaxFunctionImpl(
@@ -94,7 +94,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         }
     }.memoize()
 
-    override val allPublicFields: Sequence<FieldLangModel> = impl.enclosedElements.asSequence()
+    override val fields: Sequence<FieldLangModel> = impl.enclosedElements.asSequence()
         .filter { it.kind == ElementKind.FIELD && it.isPublic }
         .map { JavaxFieldImpl(owner = this, impl = it.asVariableElement()) }
         .memoize()

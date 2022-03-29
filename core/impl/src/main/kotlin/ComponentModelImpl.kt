@@ -66,7 +66,7 @@ internal class ComponentModelImpl private constructor(
             override fun toString() = "[entry-point] ${getter.name}"
         }
 
-        declaration.allPublicFunctions.filter {
+        declaration.functions.filter {
             it.isAbstract && it.parameters.none()
         }.map { function ->
             EntryPointImpl(
@@ -80,7 +80,7 @@ internal class ComponentModelImpl private constructor(
     }
 
     override val memberInjectors: Set<MembersInjectorModel> by lazy(NONE) {
-        declaration.allPublicFunctions.filter {
+        declaration.functions.filter {
             MembersInjectorModelImpl.canRepresent(it)
         }.map { function ->
             MembersInjectorModelImpl(
@@ -130,7 +130,7 @@ internal class ComponentModelImpl private constructor(
 
         factory?.let(validator::child)
 
-        for (function in declaration.allPublicFunctions) {
+        for (function in declaration.functions) {
             if (!function.isAbstract) continue
             if (function.parameters.count() > 1) {
                 validator.reportError(Errors.unknownMethodInComponent(method = function))

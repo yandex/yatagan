@@ -21,6 +21,8 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
 
     /**
      * Qualified/Canonical name of the represented class from the Java point of view.
+     *
+     * Example: `"com.example.TopLevel.Nested"`.
      */
     val qualifiedName: String
 
@@ -35,26 +37,30 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
     val implementedInterfaces: Sequence<TypeLangModel>
 
     /**
-     * All constructors declared.
+     * Declared constructors.
+     * Includes only public/internal/package-private constructors.
      */
     val constructors: Sequence<ConstructorLangModel>
 
     /**
-     * All public functions (including static and inherited ones, functions from kotlin companion object).
+     * Functions (including static and inherited ones, functions from kotlin companion object).
+     * Includes only public/internal/package-private functions.
      *
      * All returned functions (including inherited or overridden ones) have [owner][FunctionLangModel.owner] defined
      * as `this`. Only companion object's functions have the [owner][FunctionLangModel.owner] defined as component
      * object declaration and not `this`.
      */
-    val allPublicFunctions: Sequence<FunctionLangModel>
+    val functions: Sequence<FunctionLangModel>
 
     /**
-     * All public fields (including static and inherited ones).
+     * Fields (including static). Does NOT include inherited ones.
+     * Includes only public/internal/package-private fields.
      */
-    val allPublicFields: Sequence<FieldLangModel>
+    val fields: Sequence<FieldLangModel>
 
     /**
-     * Interfaces that are declared inside this declaration.
+     * Nested classes that are declared inside this declaration.
+     * Includes only public/internal/package-private declarations.
      */
     val nestedClasses: Sequence<TypeDeclarationLangModel>
 
@@ -80,12 +86,12 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
     val conditions: Sequence<ConditionLangModel>
 
     /**
-     * TODO: doc.
+     * [com.yandex.daggerlite.Conditional] annotations. If none present, the sequence is empty.
      */
     val conditionals: Sequence<ConditionalAnnotationLangModel>
 
     /**
-     * TODO: doc.
+     * [com.yandex.daggerlite.ComponentFlavor] annotation if present.
      */
     val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel?
 }

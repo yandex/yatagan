@@ -79,7 +79,7 @@ internal class RtTypeDeclarationImpl private constructor(
         }.asSequence()
     }
 
-    override val allPublicFunctions: Sequence<FunctionLangModel> by lazy {
+    override val functions: Sequence<FunctionLangModel> by lazy {
         buildList<FunctionLangModel> {
             for (method in impl.getMethodsOverrideAware()) {
                 add(RtFunctionImpl(impl = method, owner = this@RtTypeDeclarationImpl))
@@ -97,7 +97,7 @@ internal class RtTypeDeclarationImpl private constructor(
         }.asSequence()
     }
 
-    override val allPublicFields: Sequence<FieldLangModel> by lazy {
+    override val fields: Sequence<FieldLangModel> by lazy {
         // TODO: ensure stable order (sort)
         impl.fields.map {
             RtFieldImpl(

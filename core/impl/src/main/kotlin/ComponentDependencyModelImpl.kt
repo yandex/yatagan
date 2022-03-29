@@ -17,7 +17,7 @@ internal class ComponentDependencyModelImpl private constructor(
 ) : ComponentDependencyModel {
 
     private val exposedEntryPoints: Map<NodeDependency, FunctionLangModel> by lazy(NONE) {
-        type.declaration.allPublicFunctions.filter {
+        type.declaration.functions.filter {
             it.parameters.none() && !it.returnType.isVoid
         }.associateBy { function ->
             NodeDependency(type = function.returnType, forQualifier = function)
