@@ -228,13 +228,13 @@ class MultibindingsTest(
             @Module
             public class TestModule {
                 @Provides @IntoList(flatten = true)
-                static Set<Integer> setOfInts() { return null; }
+                public static Set<Integer> setOfInts() { return null; }
 
                 @Provides @IntoList(flatten = true)
-                List<Integer> listOfInts() { return null; }
+                public List<Integer> listOfInts() { return null; }
 
                 @Provides @IntoList(flatten = true)
-                Collection<Integer> collectionOfInts() { return null; }
+                public Collection<Integer> collectionOfInts() { return null; }
             }
         """.trimIndent())
 

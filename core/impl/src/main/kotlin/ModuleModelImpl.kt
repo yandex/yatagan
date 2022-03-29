@@ -3,6 +3,7 @@ package com.yandex.daggerlite.core.impl
 import com.yandex.daggerlite.DeclareList
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
@@ -14,7 +15,7 @@ import com.yandex.daggerlite.core.lang.functionsWithCompanion
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings.Errors
+import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -44,11 +45,11 @@ internal class ModuleModelImpl private constructor(
             }.memoize()
 
     override val requiresInstance: Boolean by lazy(NONE) {
-        mayRequireInstance && bindings.any { it is ProvidesBindingModel && it.requiresModuleInstance }
+        mayRequireInstance && bindings.any { it.accept(AsProvides)?.requiresModuleInstance == true }
     }
 
     override val isTriviallyConstructable: Boolean
-        get() = mayRequireInstance && declaration.constructors.any { it.parameters.none() }
+        get() = mayRequireInstance && declaration.constructors.any { it.isEffectivelyPublic && it.parameters.none() }
 
     override val bindings: Sequence<ModuleHostedBindingModel> = declaration.functionsWithCompanion.mapNotNull { method ->
         when {
@@ -72,7 +73,7 @@ internal class ModuleModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (impl == null) {
-            validator.reportError(Errors.nonModule())
+            validator.reportError(Strings.Errors.nonModule())
         }
         for (binding in bindings) {
             validator.child(binding)
@@ -80,6 +81,14 @@ internal class ModuleModelImpl private constructor(
         for (module in includes) {
             validator.child(module)
         }
+        if (!declaration.isEffectivelyPublic && bindings.any { it.accept(AsProvides) != null }) {
+            validator.reportError(Strings.Errors.invalidAccessForModuleClass())
+        }
+    }
+
+    private object AsProvides : ModuleHostedBindingModel.Visitor<ProvidesBindingModel?> {
+        override fun visitBinds(model: BindsBindingModel) = null
+        override fun visitProvides(model: ProvidesBindingModel) = model
     }
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ModuleModelImpl>() {

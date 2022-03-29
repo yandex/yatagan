@@ -44,11 +44,17 @@ internal class MembersInjectorModelImpl private constructor(
     }
 
     override fun validate(validator: Validator) {
-        membersToInject.forEach { (_, dependency) ->
+        membersToInject.forEach { (member, dependency) ->
             validator.child(dependency.node)
+            if (!member.isEffectivelyPublic) {
+                validator.reportError(Strings.Errors.invalidAccessForMemberToInject(member = member))
+            }
         }
         if (!injector.returnType.isVoid) {
             validator.reportError(Strings.Errors.invalidInjectorReturn())
+        }
+        if (!injectee.declaration.isEffectivelyPublic) {
+            validator.reportError(Strings.Errors.invalidAccessForMemberInject())
         }
     }
 

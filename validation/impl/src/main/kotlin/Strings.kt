@@ -249,6 +249,36 @@ object Strings {
             }
             append(" (*)")
         }
+
+        private const val AccessMessage = "public (internal is allowed for Kotlin)"
+
+        @Covered
+        fun invalidAccessForProvides() =
+            "@Provides-annotated methods must be $AccessMessage."
+
+        @Covered
+        fun invalidAccessForMemberToInject(member: Any) =
+            "@Inject member `$member` must be $AccessMessage."
+
+        @Covered
+        fun invalidAccessForModuleClass() =
+            "Module contains provisions and thus must be $AccessMessage."
+
+        @Covered
+        fun invalidAccessForConditionClass(`class`: Any) =
+            "Class `$`class`` is not accessible for condition computation, make it $AccessMessage"
+
+        @Covered
+        fun invalidAccessForConditionMember(member: Any) =
+            "Member `$member` is not accessible for condition computation, make it $AccessMessage"
+
+        @Covered
+        fun invalidAccessInjectConstructor() =
+            "@Inject constructor and the class it is defined in must be $AccessMessage."
+
+        @Covered
+        fun invalidAccessForMemberInject() =
+            "A class for members injection must be $AccessMessage."
     }
 
     object Warnings {
@@ -300,6 +330,10 @@ object Strings {
         fun subcomponentFactoryInjectionHint(factory: Any, component: Any, owner: Any) =
             "`$factory` is a factory for `$component`, ensure that this component is specified " +
                     "via `@Module(subcomponents=..)` and that module is included into `$owner`"
+
+        fun inaccessibleAutoConstructorForMissingModule(constructor: Any) =
+            "found effectively not public parameterless constructor here: `$constructor`" +
+                    "maybe make it public or internal to allow automatic module creation?"
     }
 
     object Bindings {

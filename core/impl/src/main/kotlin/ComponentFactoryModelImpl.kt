@@ -149,7 +149,13 @@ internal class ComponentFactoryModelImpl private constructor(
         val allModulesRequiresInstance = createdComponent.modules.asSequence()
             .filter(ModuleModel::requiresInstance).toMutableSet()
         for (missingModule in (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }) {
-            validator.reportError(Errors.missingModule(missing = missingModule))
+            validator.reportError(Errors.missingModule(missing = missingModule)) {
+                missingModule.type.declaration.constructors
+                    .filter { it.parameters.none() }
+                    .forEach {
+                        addNote(Strings.Notes.inaccessibleAutoConstructorForMissingModule(constructor = it))
+                    }
+            }
         }
     }
 

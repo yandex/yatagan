@@ -28,7 +28,7 @@ class GenericClassesTest(
             import com.yandex.daggerlite.Provides;
             import com.yandex.daggerlite.Module;
            
-            @Module interface MyModule {
+            @Module public interface MyModule {
                 @Provides static MyClass<Integer> getMyClassInt() {
                     return new MyClass<>();
                 }
@@ -57,7 +57,7 @@ class GenericClassesTest(
             import com.yandex.daggerlite.Provides;
             import com.yandex.daggerlite.Module;
 
-            @Module interface MyModule {
+            @Module public interface MyModule {
                 @Provides static MyClass<Integer> getMyClassInt() {
                     return new MyClass<>();
                 }
@@ -91,7 +91,7 @@ class GenericClassesTest(
             import com.yandex.daggerlite.Provides;
             import com.yandex.daggerlite.Module;
 
-            @Module interface MyModule {
+            @Module public interface MyModule {
                 @Provides static MyClass<MySecondClass<Object>> getMyClassObj() {
                     return new MyClass<>();
                 }
@@ -124,7 +124,7 @@ class GenericClassesTest(
             import com.yandex.daggerlite.Provides;
             import com.yandex.daggerlite.Module;        
 
-            @Module interface MyModule {
+            @Module public interface MyModule {
                 @Provides static MyClass getMyClassObj() {
                     return new MyClass<>();
                 }
@@ -202,19 +202,35 @@ class GenericClassesTest(
             """.trimIndent())
         })
 
-        givenJavaSource("test.TestCase", """
-            import com.yandex.daggerlite.Component;
+        givenJavaSource("test.MyGenericClass", """
             import javax.inject.Inject;
-            
+
             interface MyApi {}
-            class MyGenericClass<T extends MyApi> { @Inject public MyGenericClass() {} }
-            class MyGenericClass2<T> { @Inject public MyGenericClass2() {} }
+            public class MyGenericClass<T extends MyApi> { @Inject public MyGenericClass() {} }
+        """.trimIndent())
+
+        givenJavaSource("test.MyGenericClass2", """
+            import javax.inject.Inject;
+
+            public class MyGenericClass2<T> { @Inject public MyGenericClass2() {} }
+        """.trimIndent())
+
+        givenJavaSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component;
 
             @SuppressWarnings({"rawtypes", "RedundantSuppression"})
             @Component
-            interface TestComponent extends TestComponentBase {
+            public interface TestComponent extends TestComponentBase {
                 MyGenericClass get();
                 MyGenericClass2 get2();
+            }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = com.yandex.daggerlite.Dagger.create(TestComponent::class.java)
+                c.get()
+                c.get2()
             }
         """.trimIndent())
 

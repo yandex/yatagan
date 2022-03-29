@@ -198,10 +198,20 @@ private class LiteralPayloadImpl private constructor(
                     return@forEach
                 }
 
-                val member = findAccessor(currentType.declaration, name)
+                val currentDeclaration = currentType.declaration
+                if (!currentDeclaration.isEffectivelyPublic) {
+                    pathParsingError = Errors.invalidAccessForConditionClass(`class` = currentDeclaration)
+                    return@buildList
+                }
+
+                val member = findAccessor(currentDeclaration, name)
                 if (member == null) {
                     pathParsingError = Errors.invalidConditionMissingMember(name = name, type = currentType)
-                    return@forEach
+                    return@buildList
+                }
+                if (!member.isEffectivelyPublic) {
+                    pathParsingError = Errors.invalidAccessForConditionMember(member = member)
+                    return@buildList
                 }
                 add(member)
 

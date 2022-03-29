@@ -140,6 +140,10 @@ internal class ProvidesImpl(
         if (impl.isAbstract) {
             validator.reportError(Errors.abstractProvides())
         }
+
+        if (!impl.isEffectivelyPublic) {
+            validator.reportError(Errors.invalidAccessForProvides())
+        }
     }
 
     override val provision: FunctionLangModel
