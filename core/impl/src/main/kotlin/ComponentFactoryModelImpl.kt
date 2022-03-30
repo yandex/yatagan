@@ -34,7 +34,7 @@ internal class ComponentFactoryModelImpl private constructor(
         ComponentModelImpl(factoryDeclaration.enclosingType ?: LangModelFactory.errorType.declaration)
     }
 
-    override val factoryMethod = factoryDeclaration.allPublicFunctions.find {
+    override val factoryMethod = factoryDeclaration.functions.find {
         it.isAbstract && it.returnType == createdComponent.type
     }
 
@@ -46,7 +46,7 @@ internal class ComponentFactoryModelImpl private constructor(
         forQualifier = null,
     )
 
-    override val builderInputs: Collection<BuilderInputModel> = factoryDeclaration.allPublicFunctions.filter {
+    override val builderInputs: Collection<BuilderInputModel> = factoryDeclaration.functions.filter {
         it.isAbstract && it != factoryMethod && it.parameters.count() == 1
     }.map { method ->
         object : BuilderInputModel {
@@ -122,7 +122,7 @@ internal class ComponentFactoryModelImpl private constructor(
             validator.reportError(Errors.missingCreatingMethod())
         }
 
-        for (function in factoryDeclaration.allPublicFunctions) {
+        for (function in factoryDeclaration.functions) {
             if (function == factoryMethod || function.parameters.count() == 1 || !function.isAbstract)
                 continue
             validator.reportError(Errors.unknownMethodInCreator(method = function))
@@ -149,7 +149,13 @@ internal class ComponentFactoryModelImpl private constructor(
         val allModulesRequiresInstance = createdComponent.modules.asSequence()
             .filter(ModuleModel::requiresInstance).toMutableSet()
         for (missingModule in (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }) {
-            validator.reportError(Errors.missingModule(missing = missingModule))
+            validator.reportError(Errors.missingModule(missing = missingModule)) {
+                missingModule.type.declaration.constructors
+                    .filter { it.parameters.none() }
+                    .forEach {
+                        addNote(Strings.Notes.inaccessibleAutoConstructorForMissingModule(constructor = it))
+                    }
+            }
         }
     }
 

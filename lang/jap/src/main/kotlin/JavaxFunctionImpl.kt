@@ -17,6 +17,9 @@ internal class JavaxFunctionImpl private constructor(
 
     override val isStatic: Boolean get() = impl.isStatic
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublic
+
     override val returnType: TypeLangModel by lazy(NONE) {
         JavaxTypeImpl(impl.asMemberOf(owner.type).asExecutableType().returnType)
     }

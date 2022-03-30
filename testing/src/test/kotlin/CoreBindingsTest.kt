@@ -234,13 +234,14 @@ class CoreBindingsTest(
         includeFromSourceSet(classes)
         includeFromSourceSet(apiImpl)
 
-        givenJavaSource("test.Classes", """
-        import javax.inject.Inject;
-        import javax.inject.Provider;
+        givenJavaSource("test.MyClassA", """
+            public class MyClassA { public @javax.inject.Inject MyClassA(MyClassB dep) {} }
+        """.trimIndent())
+        givenJavaSource("test.MyClassB", """
+            import javax.inject.Provider;
+            public class MyClassB { public @javax.inject.Inject MyClassB(Provider<MyClassA> dep) {} }
+        """.trimIndent())
 
-        class MyClassA { public @Inject MyClassA(MyClassB dep) {} }
-        class MyClassB { public @Inject MyClassB(Provider<MyClassA> dep) {} }
-        """)
         givenJavaSource("test.TestComponent", """
             import javax.inject.Singleton;
             import com.yandex.daggerlite.Component;
@@ -405,17 +406,22 @@ class CoreBindingsTest(
             }
         """)
 
+        givenJavaSource("test.Consumer", """
+            import javax.inject.Provider;
+            import javax.inject.Inject;
+
+            public class Consumer<T> {
+                @Inject
+                public Consumer(int[] i1, Provider<int[]> i2, T[] i3, Provider<T[]> i4, String[] i5,
+                                Provider<String[]> i6) {}
+            }
+        """.trimIndent())
+
         givenJavaSource("test.TestComponent", """
             import javax.inject.Inject;
             import javax.inject.Provider;
             import com.yandex.daggerlite.Component;
             import com.yandex.daggerlite.Lazy;
-            
-            class Consumer<T> {
-                @Inject
-                public Consumer(int[] i1, Provider<int[]> i2, T[] i3, Provider<T[]> i4, String[] i5,
-                                Provider<String[]> i6) {}
-            }
             
             @Component(modules = MyModule.class)
             public interface TestComponent {
@@ -466,24 +472,30 @@ class CoreBindingsTest(
 
     @Test
     fun `basic members inject`() {
-        givenJavaSource("test.TestCase", """
-            import com.yandex.daggerlite.Binds;
-            import com.yandex.daggerlite.Component;
-            import com.yandex.daggerlite.Module;
-            
+        givenJavaSource("test.ClassA", """
             import javax.inject.Inject;
+            public class ClassA { public @Inject ClassA() {} }
+        """.trimIndent())
+        givenJavaSource("test.ClassB", """
+            import javax.inject.Inject;
+            public class ClassB { public @Inject ClassB() {} }
+        """.trimIndent())
+        givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Module;
+            import com.yandex.daggerlite.Binds;
             import javax.inject.Named;
             
-            class ClassA { @Inject ClassA() {} }
-            class ClassB { @Inject ClassB() {} }
-            
             @Module
-            interface MyModule {
+            public interface MyModule {
                 @Named("hello") @Binds ClassA classAHello(ClassA i);
                 @Named("bye") @Binds ClassA classABye(ClassA i);
             }
-            
-            class Foo {
+        """.trimIndent())
+        givenJavaSource("test.Foo", """
+            import javax.inject.Inject;
+            import javax.inject.Named;
+
+            public class Foo {
                 @Inject @Named("hello")
                 public ClassA helloA;
                 
@@ -496,10 +508,19 @@ class CoreBindingsTest(
                 @Inject @Named("bye")
                 public void setClassA(ClassA classA) { bye = classA; }
             }
+        """.trimIndent())
+        givenJavaSource("test.TestCase", """
+            import com.yandex.daggerlite.Component;
             
             @Component(modules = {MyModule.class})
             interface TestComponent {
                 void injectFoo(Foo foo);
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = com.yandex.daggerlite.Dagger.create(TestComponent::class.java)
+                c.injectFoo(Foo())
             }
         """.trimIndent())
 
@@ -508,18 +529,21 @@ class CoreBindingsTest(
 
     @Test
     fun `trivially constructable module`() {
-        givenJavaSource("test.TestCase", """
-            import com.yandex.daggerlite.Component;
+        givenJavaSource("test.MyModule", """
             import com.yandex.daggerlite.Module;
             import com.yandex.daggerlite.Provides;
             
             @Module
-            class MyModule {
+            public class MyModule {
                 private final Object mObj = new Object();
                 @Provides
                 public Object provides() { return mObj; }
             }
-            
+        """.trimIndent())
+
+        givenJavaSource("test.MyComponent", """
+            import com.yandex.daggerlite.Component;
+
             @Component(modules = MyModule.class)
             interface MyComponent {
                 Object get();
@@ -531,31 +555,18 @@ class CoreBindingsTest(
 
     @Test
     fun `type parameters and multi-bindings`() {
-        givenJavaSource("test.TestCase", """
-            import java.util.Collections;
+        givenJavaSource("test.MyModule", """
             import java.util.Collection;
-            import java.util.List;
+            import java.util.Collections;
             import javax.inject.Provider;
-            import javax.inject.Inject;
             import javax.inject.Singleton;
             import com.yandex.daggerlite.Binds;
             import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Component;
             import com.yandex.daggerlite.Module;
             import com.yandex.daggerlite.IntoList;
-            
-            class Deferred<T> {
-                @Inject Deferred(Provider<T> provider) { }
-            }
-
-            interface MySpecificDeferredEvent {}
-
-            class MyClass1 implements MySpecificDeferredEvent { @Inject MyClass1 () {} }
-            @Singleton class MyClass2 implements MySpecificDeferredEvent { @Inject MyClass2 () {} }
-            class MyClass3 implements MySpecificDeferredEvent { @Inject MyClass3 () {} }
 
             @Module
-            interface MyModule {
+            public interface MyModule {
                 @IntoList @Binds Deferred<? extends MySpecificDeferredEvent> foo1(Deferred<MyClass1> i);
                 @IntoList @Binds Deferred<? extends MySpecificDeferredEvent> foo2(Deferred<MyClass2> i);
                 @IntoList @Binds Deferred<? extends MySpecificDeferredEvent> foo3(Deferred<MyClass3> i);
@@ -572,12 +583,46 @@ class CoreBindingsTest(
                     return Collections.emptyList();
                 }
             }
-            
+        """.trimIndent())
+        givenJavaSource("test.MyClass1", """
+            public class MyClass1 implements MySpecificDeferredEvent { public @javax.inject.Inject MyClass1 () {} }
+        """.trimIndent())
+        givenJavaSource("test.MyClass2", """
+            @javax.inject.Singleton 
+            public class MyClass2 implements MySpecificDeferredEvent { public @javax.inject.Inject MyClass2 () {} }
+        """.trimIndent())
+        givenJavaSource("test.MyClass3", """
+            public class MyClass3 implements MySpecificDeferredEvent { public @javax.inject.Inject MyClass3 () {} }
+        """.trimIndent())
+        givenJavaSource("test.Deferred", """
+            import javax.inject.Provider;
+            public class Deferred<T> { public @javax.inject.Inject Deferred (Provider<T> provider) {} }
+        """.trimIndent())
+
+        givenJavaSource("test.TestCase", """
+            import java.util.Collections;
+            import java.util.Collection;
+            import java.util.List;
+            import javax.inject.Provider;
+            import javax.inject.Inject;
+            import javax.inject.Singleton;
+            import com.yandex.daggerlite.Component;
+    
+            interface MySpecificDeferredEvent {}
+
             @Singleton
             @Component(modules = MyModule.class)
             interface MyComponent {
                 List<Deferred<? extends MySpecificDeferredEvent>> deferred();
                 Provider<List<Deferred<? extends MySpecificDeferredEvent>>> deferredProvider();
+            }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = com.yandex.daggerlite.Dagger.create(MyComponent::class.java)
+                c.deferred();
+                c.deferredProvider().get();
             }
         """.trimIndent())
 

@@ -3,7 +3,7 @@ package com.yandex.daggerlite.core.lang
 /**
  * Models a type declaration. Can represent class/primitive/array/... types.
  */
-interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
+interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Accessible {
     /**
      * Whether the declaration is an interface.
      */
@@ -21,6 +21,8 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
 
     /**
      * Qualified/Canonical name of the represented class from the Java point of view.
+     *
+     * Example: `"com.example.TopLevel.Nested"`.
      */
     val qualifiedName: String
 
@@ -35,28 +37,32 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
     val implementedInterfaces: Sequence<TypeLangModel>
 
     /**
-     * All constructors declared.
+     * All declared non-private constructors.
      */
     val constructors: Sequence<ConstructorLangModel>
 
     /**
-     * All public functions (including static and inherited ones, functions from kotlin companion object).
+     * All non-private functions (including static and inherited ones).
      *
      * All returned functions (including inherited or overridden ones) have [owner][FunctionLangModel.owner] defined
-     * as `this`. Only companion object's functions have the [owner][FunctionLangModel.owner] defined as component
-     * object declaration and not `this`.
+     * as `this`.
      */
-    val allPublicFunctions: Sequence<FunctionLangModel>
+    val functions: Sequence<FunctionLangModel>
 
     /**
-     * All public fields (including static and inherited ones).
+     * Non-private declared fields (including static). Does NOT include inherited ones.
      */
-    val allPublicFields: Sequence<FieldLangModel>
+    val fields: Sequence<FieldLangModel>
 
     /**
-     * Interfaces that are declared inside this declaration.
+     * Nested non-private classes that are declared inside this declaration.
      */
     val nestedClasses: Sequence<TypeDeclarationLangModel>
+
+    /**
+     * Kotlin's companion object declaration, if one exists for the type.
+     */
+    val companionObjectDeclaration: TypeDeclarationLangModel?
 
     /**
      * Creates [TypeLangModel] based on the declaration **assuming, that no type arguments are required**.
@@ -80,12 +86,12 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
     val conditions: Sequence<ConditionLangModel>
 
     /**
-     * TODO: doc.
+     * [com.yandex.daggerlite.Conditional] annotations. If none present, the sequence is empty.
      */
     val conditionals: Sequence<ConditionalAnnotationLangModel>
 
     /**
-     * TODO: doc.
+     * [com.yandex.daggerlite.ComponentFlavor] annotation if present.
      */
     val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel?
 }

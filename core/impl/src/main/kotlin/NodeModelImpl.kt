@@ -58,6 +58,9 @@ internal class NodeModelImpl private constructor(
 
         override fun validate(validator: Validator) {
             super.validate(validator)
+            if (!constructor.isEffectivelyPublic || !constructor.constructee.isEffectivelyPublic) {
+                validator.reportError(Errors.invalidAccessInjectConstructor())
+            }
             for (input in inputs) {
                 validator.child(input.node)
             }

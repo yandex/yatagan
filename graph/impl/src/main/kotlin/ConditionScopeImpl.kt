@@ -10,6 +10,7 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.lang.functionsWithCompanion
 import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.ConditionScope.Literal
@@ -197,10 +198,20 @@ private class LiteralPayloadImpl private constructor(
                     return@forEach
                 }
 
-                val member = findAccessor(currentType.declaration, name)
+                val currentDeclaration = currentType.declaration
+                if (!currentDeclaration.isEffectivelyPublic) {
+                    pathParsingError = Errors.invalidAccessForConditionClass(`class` = currentDeclaration)
+                    return@buildList
+                }
+
+                val member = findAccessor(currentDeclaration, name)
                 if (member == null) {
                     pathParsingError = Errors.invalidConditionMissingMember(name = name, type = currentType)
-                    return@forEach
+                    return@buildList
+                }
+                if (!member.isEffectivelyPublic) {
+                    pathParsingError = Errors.invalidAccessForConditionMember(member = member)
+                    return@buildList
                 }
                 add(member)
 
@@ -225,13 +236,12 @@ private class LiteralPayloadImpl private constructor(
         }
 
         private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
-            val field = type.allPublicFields.find { it.name == name }
+            val field = type.fields.find { it.name == name }
             if (field != null) {
                 return field
             }
 
-            val allMethods = type.allPublicFunctions
-            val method = allMethods.find { function ->
+            val method = type.functionsWithCompanion.find { function ->
                 function.propertyAccessorInfo?.let {
                     // If this is a kotlin property getter, then look for property name
                     it.isGetter && it.propertyName == name

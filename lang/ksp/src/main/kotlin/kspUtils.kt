@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.getDeclaredFunctions
+import com.google.devtools.ksp.getVisibility
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isPrivate
 import com.google.devtools.ksp.symbol.ClassKind
@@ -23,6 +24,7 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.NonExistLocation
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
+import com.google.devtools.ksp.symbol.Visibility
 import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ParameterLangModel
@@ -51,6 +53,11 @@ internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classK
 internal val KSPropertyDeclaration.isField
     get() = isFromJava || (getter == null && setter == null) ||
             isAnnotationPresent<JvmField>() || Modifier.CONST in modifiers
+
+internal fun KSDeclaration.isPublicOrInternal() = when (getVisibility()) {
+    Visibility.PUBLIC, Visibility.INTERNAL -> true
+    else -> false
+}
 
 internal fun KSTypeReference?.resolveOrError(): KSType {
     return this?.resolve() ?: ErrorTypeImpl
@@ -105,34 +112,31 @@ internal fun KSType.reference(): KSTypeReference = Utils.resolver.createKSTypeRe
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
     declarations.filterIsInstance<KSClassDeclaration>().find(KSClassDeclaration::isCompanionObject)
 
-internal fun KSClassDeclaration.allPublicFunctions(): Sequence<KSFunctionDeclaration> = sequence {
-    if (classKind == ClassKind.INTERFACE) {
-        for (function in getAllFunctions()) {
-            when (function.simpleName.asString()) {
+internal fun KSClassDeclaration.allNonPrivateFunctions(): Sequence<KSFunctionDeclaration> =
+    when (classKind) {
+        ClassKind.INTERFACE -> {
+            getAllFunctions().filter {
                 // This is necessary to drop `equals`, `hashCode`, `toString` from `Any`.
                 // KSP implicitly adds them to the interface functions for some reason.
                 // TODO: invent something more subtle
-                "equals", "hashCode", "toString" -> Unit
-                else -> yield(function)
+                when (it.simpleName.asString()) {
+                    "equals", "hashCode", "toString" -> false
+                    else -> true
+                }
             }
         }
-    } else {
-        // For non-interface, return everything public, except constructors.
-        for (function in getAllFunctions()) {
-            if (!function.isConstructor() && !function.isPrivate()) {
-                yield(function)
+        else -> {
+            // For non-interface, return everything public, except constructors.
+            getAllFunctions().filter {
+                !it.isConstructor() && !it.isPrivate()
             }
         }
+    } + getDeclaredFunctions().filter {
+        // Include static functions.
+        it.functionKind == FunctionKind.STATIC && !it.isPrivate()
     }
-    // Yield all declared static functions
-    for (declaredFunction in getDeclaredFunctions()) {
-        if (declaredFunction.functionKind == FunctionKind.STATIC) {
-            yield(declaredFunction)
-        }
-    }
-}
 
-internal fun KSClassDeclaration.allPublicProperties(): Sequence<KSPropertyDeclaration> {
+internal fun KSClassDeclaration.allNonPrivateProperties(): Sequence<KSPropertyDeclaration> {
     return getAllProperties().filter { !it.isPrivate() && !it.isField }
 }
 

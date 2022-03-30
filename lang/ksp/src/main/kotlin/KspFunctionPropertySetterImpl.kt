@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSPropertySetter
+import com.google.devtools.ksp.symbol.Modifier
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
@@ -8,9 +9,14 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspFunctionPropertySetterImpl private constructor(
-    setter: KSPropertySetter,
+    private val setter: KSPropertySetter,
     override val owner: KspTypeDeclarationImpl,
 ) : KspFunctionPropertyAccessorBase<KSPropertySetter>(setter) {
+
+    override val isEffectivelyPublic: Boolean
+        get() = super.isEffectivelyPublic && setter.modifiers.let {
+            Modifier.PRIVATE !in it && Modifier.PROTECTED !in it
+        }
 
     override val returnType: TypeLangModel = KspTypeImpl(Utils.resolver.builtIns.unitType)
 

@@ -33,6 +33,9 @@ internal class JavaxTypeDeclarationImpl private constructor(
         impl.obtainKotlinClassIfApplicable()
     }
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublic
+
     override val isInterface: Boolean
         get() = impl.kind == ElementKind.INTERFACE
 
@@ -57,58 +60,71 @@ internal class JavaxTypeDeclarationImpl private constructor(
             else -> null
         }
 
-    override val implementedInterfaces: Sequence<TypeLangModel> = impl.allImplementedInterfaces()
+    override val implementedInterfaces: Sequence<TypeLangModel> by lazy(NONE) {
+        impl.allImplementedInterfaces()
         .map { JavaxTypeImpl(it) }
         .memoize()
+    }
 
-    override val constructors: Sequence<ConstructorLangModel> = impl.enclosedElements
+    override val constructors: Sequence<ConstructorLangModel> by lazy(NONE) {
+        impl.enclosedElements
         .asSequence()
-        .filter { it.kind == ElementKind.CONSTRUCTOR }
+        .filter { it.kind == ElementKind.CONSTRUCTOR && !it.isPrivate }
         .map {
             ConstructorImpl(impl = it.asExecutableElement())
         }.memoize()
+    }
 
-    override val allPublicFunctions: Sequence<FunctionLangModel> = sequence {
-        val owner = this@JavaxTypeDeclarationImpl
-        yieldAll(impl.allMethods(Utils.types, Utils.elements).map {
+    override val functions: Sequence<FunctionLangModel> by lazy(NONE) {
+        impl.allNonPrivateMethods()
+        .run {
+            when (kotlinObjectKind) {
+                KotlinObjectKind.Companion -> filterNot {
+                    // Such methods already have a truly static counterpart so skip them.
+                    it.isAnnotatedWith<JvmStatic>()
+                }
+                else -> this
+            }
+        }
+        .map {
             JavaxFunctionImpl(
-                owner = owner,
+                owner = this@JavaxTypeDeclarationImpl,
                 impl = it,
             )
-        })
-        kotlinClass?.companionObject?.let { companionName: String ->
-            val companionClass = checkNotNull(impl.enclosedElements.find {
-                it.kind == ElementKind.CLASS && it.simpleName.contentEquals(companionName)
-            }) { "Not reached: inconsistent metadata interpreting: No companion $companionName detected in $impl" }
-            val companionType = JavaxTypeDeclarationImpl(companionClass.asType().asDeclaredType())
-            companionClass.asTypeElement().allMethods(Utils.types, Utils.elements)
-                .filter {
-                    // Such methods already have a truly static counterpart so skip them.
-                    !it.isAnnotatedWith<JvmStatic>()
-                }.forEach {
-                    yield(JavaxFunctionImpl(
-                        owner = companionType,
-                        impl = it,
-                    ))
-                }
         }
-    }.memoize()
+    }
 
-    override val allPublicFields: Sequence<FieldLangModel> = impl.enclosedElements.asSequence()
-        .filter { it.kind == ElementKind.FIELD && it.isPublic }
+    override val fields: Sequence<FieldLangModel> by lazy(NONE) {
+        impl.enclosedElements
+        .asSequence()
+        .filter { it.kind == ElementKind.FIELD && !it.isPrivate }
         .map { JavaxFieldImpl(owner = this, impl = it.asVariableElement()) }
         .memoize()
+    }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> = impl.enclosedElements
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy(NONE) {
+        impl.enclosedElements
         .asSequence()
         .filter {
             when (it.kind) {
-                ElementKind.ENUM, ElementKind.CLASS, ElementKind.ANNOTATION_TYPE, ElementKind.INTERFACE -> true
+                ElementKind.ENUM, ElementKind.CLASS,
+                ElementKind.ANNOTATION_TYPE, ElementKind.INTERFACE,
+                -> !it.isPrivate
                 else -> false
             }
         }
         .map { Factory(it.asType().asDeclaredType()) }
         .memoize()
+    }
+
+    override val companionObjectDeclaration: TypeDeclarationLangModel? by lazy(NONE) {
+        kotlinClass?.companionObject?.let { companionName: String ->
+            val companionClass = checkNotNull(impl.enclosedElements.find {
+                it.kind == ElementKind.CLASS && it.simpleName.contentEquals(companionName)
+            }) { "Not reached: inconsistent metadata interpreting: No companion $companionName detected in $impl" }
+            JavaxTypeDeclarationImpl(companionClass.asType().asDeclaredType())
+        }
+    }
 
     override fun asType(): TypeLangModel {
         return JavaxTypeImpl(type)
@@ -133,7 +149,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         }
         val signature = jvmSignatureOf(element = element, type = Utils.types.asMemberOf(type, element))
         allKotlinProperties.forEach { kmProperty ->
-            when(signature) {
+            when (signature) {
                 kmProperty.setterSignature -> return JavaxPropertyAccessorImpl(property = kmProperty, kind = Setter)
                 kmProperty.getterSignature -> return JavaxPropertyAccessorImpl(property = kmProperty, kind = Getter)
             }
@@ -156,6 +172,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
     private inner class ConstructorImpl(
         impl: ExecutableElement,
     ) : ConstructorLangModel, JavaxAnnotatedImpl<ExecutableElement>(impl) {
+        override val isEffectivelyPublic: Boolean get() = impl.isPublic
         override val constructee: TypeDeclarationLangModel get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(impl, type)
         override val platformModel: ExecutableElement get() = impl

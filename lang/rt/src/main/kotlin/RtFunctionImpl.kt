@@ -29,6 +29,9 @@ internal class RtFunctionImpl(
         owner.findKotlinPropertyAccessorFor(impl)
     }
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublic
+
     override val isStatic: Boolean
         get() = impl.isStatic
 

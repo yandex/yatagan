@@ -16,6 +16,9 @@ internal class KspFunctionImpl private constructor(
 
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublicOrInternal()
+
     override val isAbstract: Boolean
         get() = impl.isAbstract
 
