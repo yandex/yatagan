@@ -14,7 +14,11 @@ internal class KspFieldImpl private constructor(
 ) : FieldLangModel {
     override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublicOrInternal()
+
     override val isStatic: Boolean get() = impl.isStatic
+
     override val type: TypeLangModel by lazy(NONE) {
         KspTypeImpl(
             reference = impl.type,
@@ -24,6 +28,8 @@ internal class KspFieldImpl private constructor(
     override val name: String get() = impl.simpleName.asString()
 
     override val platformModel: KSPropertyDeclaration get() = impl
+
+    override fun toString() = "$owner::$name: $type"
 
     companion object Factory : ObjectCache<KSPropertyDeclaration, KspFieldImpl>() {
         operator fun invoke(

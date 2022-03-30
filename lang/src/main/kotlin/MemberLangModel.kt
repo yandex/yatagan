@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.core.lang
 
-interface MemberLangModel : AnnotatedLangModel, HasPlatformModel {
+interface MemberLangModel : AnnotatedLangModel, HasPlatformModel, Accessible {
     /**
      * Type declaration that this entity is member of.
      */

@@ -10,6 +10,7 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Modifier
+import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
@@ -30,6 +31,9 @@ internal class KspTypeDeclarationImpl private constructor(
     private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
 
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
+
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublicOrInternal()
 
     override val isInterface: Boolean
         get() = impl.classKind == ClassKind.INTERFACE
@@ -134,6 +138,17 @@ internal class KspTypeDeclarationImpl private constructor(
     ) : ConstructorLangModel {
         private val jvmSignature = JvmMethodSignature(impl)
 
+        override val isEffectivelyPublic: Boolean
+            get() {
+                if (impl.origin == Origin.SYNTHETIC) {
+                    val constructeeOrigin = this@KspTypeDeclarationImpl.impl.origin
+                    if (constructeeOrigin == Origin.JAVA || constructeeOrigin == Origin.JAVA_LIB) {
+                        // Java synthetic constructor has the same visibility as the class.
+                        return this@KspTypeDeclarationImpl.isEffectivelyPublic
+                    }
+                }
+                return impl.isPublicOrInternal()
+            }
         override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
         override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(

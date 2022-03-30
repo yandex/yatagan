@@ -9,6 +9,7 @@ class NoDeclaration (
 ) : TypeDeclarationLangModel {
     override val isAbstract get() = false
     override val isInterface get() = false
+    override val isEffectivelyPublic get() = false
 
     override val annotations get() = emptySequence<Nothing>()
     override val implementedInterfaces get() = emptySequence<Nothing>()

@@ -33,6 +33,9 @@ internal class JavaxTypeDeclarationImpl private constructor(
         impl.obtainKotlinClassIfApplicable()
     }
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublic
+
     override val isInterface: Boolean
         get() = impl.kind == ElementKind.INTERFACE
 
@@ -169,6 +172,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
     private inner class ConstructorImpl(
         impl: ExecutableElement,
     ) : ConstructorLangModel, JavaxAnnotatedImpl<ExecutableElement>(impl) {
+        override val isEffectivelyPublic: Boolean get() = impl.isPublic
         override val constructee: TypeDeclarationLangModel get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(impl, type)
         override val platformModel: ExecutableElement get() = impl

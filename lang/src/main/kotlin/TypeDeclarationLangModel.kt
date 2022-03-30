@@ -3,7 +3,7 @@ package com.yandex.daggerlite.core.lang
 /**
  * Models a type declaration. Can represent class/primitive/array/... types.
  */
-interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
+interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Accessible {
     /**
      * Whether the declaration is an interface.
      */

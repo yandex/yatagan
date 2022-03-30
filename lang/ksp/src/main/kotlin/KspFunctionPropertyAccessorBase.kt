@@ -19,6 +19,9 @@ internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
         Utils.resolver.mapToJvmSignature(property)
     }
 
+    override val isEffectivelyPublic: Boolean
+        get() = property.isPublicOrInternal()
+
     // NOTE: We can't use annotations from |property| as they aren't properly accessible from Kapt.
     //  See https://youtrack.jetbrains.com/issue/KT-34684
     final override val annotations = annotationsFrom(accessor)

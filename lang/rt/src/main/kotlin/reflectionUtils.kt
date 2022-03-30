@@ -20,6 +20,10 @@ internal val Member.isStatic get() = Modifier.isStatic(modifiers)
 
 internal val Member.isAbstract get() = Modifier.isAbstract(modifiers)
 
+internal val Member.isPublic get() = Modifier.isPublic(modifiers)
+
+internal val Class<*>.isPublic get() = Modifier.isPublic(modifiers)
+
 internal val Member.isPrivate get() = Modifier.isPrivate(modifiers)
 
 internal val Class<*>.isPrivate get() = Modifier.isPrivate(modifiers)

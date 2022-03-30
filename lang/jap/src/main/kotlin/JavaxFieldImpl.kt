@@ -12,6 +12,9 @@ internal class JavaxFieldImpl private constructor(
 ) : FieldLangModel, JavaxAnnotatedImpl<VariableElement>(impl) {
     override val isStatic: Boolean get() = impl.isStatic
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublic
+
     override val type: TypeLangModel by lazy(NONE) {
         JavaxTypeImpl(impl.asMemberOf(owner.type))
     }
@@ -19,6 +22,8 @@ internal class JavaxFieldImpl private constructor(
     override val name: String get() = impl.simpleName.toString()
 
     override val platformModel: VariableElement get() = impl
+
+    override fun toString() = "$owner::$name: $type"
 
     companion object Factory : BiObjectCache<JavaxTypeDeclarationImpl, VariableElement, JavaxFieldImpl>() {
         operator fun invoke(

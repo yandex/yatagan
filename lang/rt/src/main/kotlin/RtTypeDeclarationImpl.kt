@@ -39,6 +39,9 @@ internal class RtTypeDeclarationImpl private constructor(
 
     private val kotlinClass: KClass<*> by lazy { impl.kotlin }
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublic
+
     override val isInterface: Boolean
         get() = impl.isInterface
 
@@ -159,6 +162,8 @@ internal class RtTypeDeclarationImpl private constructor(
         impl: Constructor<*>,
         override val constructee: TypeDeclarationLangModel,
     ) : ConstructorLangModel, RtAnnotatedImpl<Constructor<*>>(impl) {
+        override val isEffectivelyPublic: Boolean
+            get() = impl.isPublic
         override val parameters: Sequence<ParameterLangModel> by lazy {
             impl.resolveParameters(asMemberOf = type.impl).asSequence()
         }

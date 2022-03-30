@@ -15,6 +15,9 @@ internal class RtFieldImpl(
         ))
     }
 
+    override val isEffectivelyPublic: Boolean
+        get() = impl.isPublic
+
     override val isStatic: Boolean
         get() = impl.isStatic
 
@@ -23,4 +26,6 @@ internal class RtFieldImpl(
 
     override val platformModel: Field
         get() = impl
+
+    override fun toString() = "$owner::$name: $type"
 }
