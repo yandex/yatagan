@@ -285,8 +285,8 @@ object Strings {
 
         @Covered
         fun ignoredDependencyOfFrameworkType(function: Any) =
-            "function\n$Indent`$function`\nreturns a framework type and such type can not be directly " +
-                    "introduced to the graph via component dependency - the function will be ignored. " +
+            "function\n$Indent`$function`\nreturns a framework type (Provider/Lazy/Optional) and such type can not be " +
+                    "directly introduced to the graph via component dependency - the function will be ignored. " +
                     "If you need this to form a binding - change the return type, or use a wrapper type. " +
                     "Otherwise remove the function from the dependency interface entirely."
 
