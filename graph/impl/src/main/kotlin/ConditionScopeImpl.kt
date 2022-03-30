@@ -10,6 +10,7 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.lang.functionsWithCompanion
 import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.ConditionScope.Literal
@@ -230,8 +231,7 @@ private class LiteralPayloadImpl private constructor(
                 return field
             }
 
-            val allMethods = type.functions
-            val method = allMethods.find { function ->
+            val method = type.functionsWithCompanion.find { function ->
                 function.propertyAccessorInfo?.let {
                     // If this is a kotlin property getter, then look for property name
                     it.isGetter && it.propertyName == name

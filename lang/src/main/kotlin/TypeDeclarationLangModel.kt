@@ -37,32 +37,32 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel {
     val implementedInterfaces: Sequence<TypeLangModel>
 
     /**
-     * Declared constructors.
-     * Includes only public/internal/package-private constructors.
+     * All declared non-private constructors.
      */
     val constructors: Sequence<ConstructorLangModel>
 
     /**
-     * Functions (including static and inherited ones, functions from kotlin companion object).
-     * Includes only public/internal/package-private functions.
+     * All non-private functions (including static and inherited ones).
      *
      * All returned functions (including inherited or overridden ones) have [owner][FunctionLangModel.owner] defined
-     * as `this`. Only companion object's functions have the [owner][FunctionLangModel.owner] defined as component
-     * object declaration and not `this`.
+     * as `this`.
      */
     val functions: Sequence<FunctionLangModel>
 
     /**
-     * Fields (including static). Does NOT include inherited ones.
-     * Includes only public/internal/package-private fields.
+     * Non-private declared fields (including static). Does NOT include inherited ones.
      */
     val fields: Sequence<FieldLangModel>
 
     /**
-     * Nested classes that are declared inside this declaration.
-     * Includes only public/internal/package-private declarations.
+     * Nested non-private classes that are declared inside this declaration.
      */
     val nestedClasses: Sequence<TypeDeclarationLangModel>
+
+    /**
+     * Kotlin's companion object declaration, if one exists for the type.
+     */
+    val companionObjectDeclaration: TypeDeclarationLangModel?
 
     /**
      * Creates [TypeLangModel] based on the declaration **assuming, that no type arguments are required**.

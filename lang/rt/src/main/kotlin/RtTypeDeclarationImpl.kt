@@ -34,7 +34,7 @@ import kotlin.reflect.full.staticProperties
 import kotlin.reflect.jvm.javaGetter
 
 internal class RtTypeDeclarationImpl private constructor(
-        val type: RtTypeImpl,
+    val type: RtTypeImpl,
 ) : RtAnnotatedImpl<Class<*>>(type.impl.asClass()), TypeDeclarationLangModel {
 
     private val kotlinClass: KClass<*> by lazy { impl.kotlin }
@@ -66,45 +66,58 @@ internal class RtTypeDeclarationImpl private constructor(
     }
 
     override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy {
-        impl.declaredClasses.asSequence().map { Factory(RtTypeImpl(it)) }
+        impl.declaredClasses.asSequence()
+            .filter { !it.isPrivate }
+            .map { Factory(RtTypeImpl(it)) }
+            .toList().asSequence()
     }
 
     override val constructors: Sequence<ConstructorLangModel> by lazy {
-        // TODO: ensure stable order (sort)
-        impl.declaredConstructors.map { constructor ->
-            ConstructorImpl(
-                impl = constructor,
-                constructee = this,
-            )
-        }.asSequence()
+        impl.declaredConstructors
+            .asSequence()
+            .filter { !it.isPrivate }
+            .sortedWith(ExecutableSignatureComparator)
+            .map {
+                ConstructorImpl(
+                    impl = it,
+                    constructee = this,
+                )
+            }.toList().asSequence()
     }
 
     override val functions: Sequence<FunctionLangModel> by lazy {
-        buildList<FunctionLangModel> {
-            for (method in impl.getMethodsOverrideAware()) {
-                add(RtFunctionImpl(impl = method, owner = this@RtTypeDeclarationImpl))
-            }
-            kotlinClass.companionObject?.let { companion ->
-                val companionDeclaration = RtTypeDeclarationImpl(RtTypeImpl(companion.java))
-                for (method in companion.java.methods) {
-                    if (method.isAnnotationPresent(JvmStatic::class.java)) {
-                        // Skip the @JvmStatic companion object member, as there is a static counterpart for it.
-                        continue
+        impl.getMethodsOverrideAware()
+            .run {
+                when (kotlinObjectKind) {
+                    KotlinObjectKind.Companion -> filterNot {
+                        // Such methods already have a truly static counterpart so skip them.
+                        it.isAnnotationPresent(JvmStatic::class.java)
                     }
-                    add(RtFunctionImpl(impl = method, owner = companionDeclaration))
+                    else -> this
                 }
             }
-        }.asSequence()
+            .map {
+                RtFunctionImpl(impl = it, owner = this)
+            }.asSequence()
     }
 
     override val fields: Sequence<FieldLangModel> by lazy {
-        // TODO: ensure stable order (sort)
-        impl.fields.map {
-            RtFieldImpl(
-                impl = it,
-                owner = this,
-            )
-        }.asSequence()
+        impl.declaredFields
+            .asSequence()
+            .filter { !it.isPrivate }
+            .sortedBy { it.name }
+            .map {
+                RtFieldImpl(
+                    impl = it,
+                    owner = this,
+                )
+            }.toList().asSequence()
+    }
+
+    override val companionObjectDeclaration: TypeDeclarationLangModel? by lazy {
+        kotlinClass.companionObject?.let { companion ->
+            RtTypeDeclarationImpl(RtTypeImpl(companion.java))
+        }
     }
 
     override val platformModel: Class<*>

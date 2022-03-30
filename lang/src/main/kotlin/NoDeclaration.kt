@@ -19,6 +19,7 @@ class NoDeclaration (
     override val conditions get() = emptySequence<Nothing>()
     override val conditionals get() = emptySequence<Nothing>()
 
+    override val companionObjectDeclaration: Nothing? get() = null
     override val enclosingType: Nothing? get() = null
     override val kotlinObjectKind: Nothing? get() = null
     override val componentAnnotationIfPresent: Nothing? get() = null

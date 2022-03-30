@@ -33,9 +33,7 @@ import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.type.TypeVisitor
 import javax.lang.model.type.WildcardType
-import javax.lang.model.util.Elements
 import javax.lang.model.util.SimpleAnnotationValueVisitor8
-import javax.lang.model.util.Types
 
 internal inline fun <reified T : Annotation> Element.isAnnotatedWith() =
     MoreElements.getAnnotationMirror(this, T::class.java).isPresent
@@ -130,17 +128,23 @@ internal val Element.isAbstract
 internal val Element.isPublic
     get() = Modifier.PUBLIC in modifiers
 
+internal val Element.isPrivate
+    get() = Modifier.PRIVATE in modifiers
+
 internal val Element.isStatic
     get() = Modifier.STATIC in modifiers
 
 @Suppress("UNCHECKED_CAST")
-internal fun TypeElement.allMethods(typeUtils: Types, elementUtils: Elements): Sequence<ExecutableElement> =
-    sequence<ExecutableElement> {
-        yieldAll(MoreElements.getLocalAndInheritedMethods(this@allMethods, typeUtils, elementUtils))
-        yieldAll(enclosedElements.filter {
-            it.kind == ElementKind.METHOD && Modifier.STATIC in it.modifiers
-        }.map { it.asExecutableElement() })
-    }
+internal fun TypeElement.allNonPrivateMethods(): Sequence<ExecutableElement> =
+    sequenceOf(
+        MoreElements.getLocalAndInheritedMethods(this, Utils.types, Utils.elements)
+            .asSequence(),
+        enclosedElements
+            .asSequence()
+            .filter {
+                it.kind == ElementKind.METHOD && it.isStatic && !it.isPrivate
+            }.map(Element::asExecutableElement),
+    ).flatten()
 
 internal fun TypeElement.allImplementedInterfaces(): Sequence<TypeMirror> = sequence {
     val queue = ArrayDeque<TypeMirror>()

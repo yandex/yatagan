@@ -22,6 +22,7 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
+import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
@@ -63,53 +64,58 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }.memoize()
 
-    override val constructors: Sequence<ConstructorLangModel> =
-        impl.getConstructors().map {
-            ConstructorImpl(impl = it)
-        }.memoize()
-
-    override val functions: Sequence<FunctionLangModel> = sequence {
-        val owner = this@KspTypeDeclarationImpl
-        yieldAll(impl.allPublicFunctions().map {
-            KspFunctionImpl(owner = owner, impl = it)
-        })
-        impl.allPublicProperties().forEach {
-            explodeProperty(it, owner = this@KspTypeDeclarationImpl)
-        }
-        impl.getCompanionObject()?.let { companion ->
-            val companionDeclaration = KspTypeDeclarationImpl(KspTypeImpl(companion.asType(emptyList())))
-            yieldAll(companion.allPublicFunctions().map {
-                KspFunctionImpl(owner = companionDeclaration, impl = it)
-            })
-            companion.allPublicProperties().forEach {
-                explodeProperty(it, owner = companionDeclaration)
-            }
-        }
-    }.memoize()
-
-    private suspend fun SequenceScope<FunctionLangModel>.explodeProperty(
-        property: KSPropertyDeclaration,
-        owner: KspTypeDeclarationImpl,
-    ) {
-        property.getter?.let { getter ->
-            yield(KspFunctionPropertyGetterImpl(owner = owner, getter = getter))
-        }
-        property.setter?.let { setter ->
-            if (Modifier.PRIVATE !in setter.modifiers && Modifier.PROTECTED !in setter.modifiers) {
-                yield(KspFunctionPropertySetterImpl(owner = owner, setter = setter))
-            }
-        }
+    override val constructors: Sequence<ConstructorLangModel> by lazy(NONE) {
+        impl.getConstructors()
+            .filter { !it.isPrivate() }
+            .map { ConstructorImpl(impl = it) }
+            .memoize()
     }
 
-    override val fields: Sequence<FieldLangModel> =
-        impl.getDeclaredProperties()
-            .filter { it.isField && !it.isPrivate() }
-            .map { KspFieldImpl(it, this) }.memoize()
+    override val functions: Sequence<FunctionLangModel> by lazy(NONE) {
+        sequenceOf(
+            this.impl.allNonPrivateFunctions().map { KspFunctionImpl(owner = this, impl = it) },
+            this.impl.allNonPrivateProperties().flatMap {
+                explodeProperty(
+                    property = it,
+                    owner = this,
+                )
+            },
+        ).flatten().memoize()
+    }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> = impl.declarations
+    private fun explodeProperty(
+        property: KSPropertyDeclaration,
+        owner: KspTypeDeclarationImpl,
+    ): Sequence<FunctionLangModel> = sequenceOf(
+        property.getter?.let { getter ->
+            KspFunctionPropertyGetterImpl(owner = owner, getter = getter)
+        },
+        property.setter?.let { setter ->
+            if (Modifier.PRIVATE !in setter.modifiers && Modifier.PROTECTED !in setter.modifiers) {
+                KspFunctionPropertySetterImpl(owner = owner, setter = setter)
+            } else null
+        },
+    ).filterNotNull()
+
+    override val fields: Sequence<FieldLangModel> by lazy(NONE) {
+        impl.getDeclaredProperties()
+            .filter { !it.isPrivate() && it.isField }
+            .map { KspFieldImpl(it, this) }.memoize()
+    }
+
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy(NONE) {
+        impl.declarations
         .filterIsInstance<KSClassDeclaration>()
+        .filter { !it.isPrivate() }
         .map { Factory(KspTypeImpl(it.asType(emptyList()))) }
         .memoize()
+    }
+
+    override val companionObjectDeclaration: TypeDeclarationLangModel? by lazy(NONE) {
+        impl.getCompanionObject()?.let { companion ->
+            KspTypeDeclarationImpl(KspTypeImpl(companion.asType(emptyList())))
+        }
+    }
 
     override fun asType(): TypeLangModel {
         return type

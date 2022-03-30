@@ -10,6 +10,7 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.lang.functionsWithCompanion
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
@@ -49,7 +50,7 @@ internal class ModuleModelImpl private constructor(
     override val isTriviallyConstructable: Boolean
         get() = mayRequireInstance && declaration.constructors.any { it.parameters.none() }
 
-    override val bindings: Sequence<ModuleHostedBindingModel> = declaration.functions.mapNotNull { method ->
+    override val bindings: Sequence<ModuleHostedBindingModel> = declaration.functionsWithCompanion.mapNotNull { method ->
         when {
             BindsImpl.canRepresent(method) -> BindsImpl(
                 impl = method,
