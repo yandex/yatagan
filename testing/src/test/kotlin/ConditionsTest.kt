@@ -638,9 +638,21 @@ class ConditionsTest(
             import com.yandex.daggerlite.*
             import javax.inject.*
 
+            var disabled1Requested = false
+            var disabled2Requested = false
+
             object Features {
                 val notReached: Boolean get() = throw AssertionError("Not reached")
-                val disabled: Boolean get() = false
+                val disabled: Boolean get() {
+                    disabled1Requested = true
+                    return false
+                }
+
+                val notReached2: Boolean get() = throw AssertionError("Not reached")
+                val disabled2: Boolean get() {
+                    disabled2Requested = true
+                    return false
+                }
             }
 
             @AllConditions([
@@ -648,16 +660,33 @@ class ConditionsTest(
                 Condition(Features::class, condition = "notReached"),
             ])
             annotation class A
+
+            @AllConditions([
+                Condition(Features::class, condition = "disabled2"),
+                Condition(Features::class, condition = "notReached2"),
+            ])
+            annotation class B
+
             
             @Conditional([A::class])
             class ClassA @Inject constructor()
 
+            @Conditional([B::class])
+            class ClassB @Inject constructor()
+
             @Component
-            interface MyComponent { val a: Optional<ClassA> }
+            interface MyComponent { 
+                val a: Optional<ClassA> 
+                val b: Optional<ClassB> 
+            }
 
             fun test() {
-                val c: MyComponent = Dagger.create(MyComponent::class.java) 
+                assert(!disabled1Requested && !disabled2Requested)
+                val c: MyComponent = Dagger.create(MyComponent::class.java)
+                assert(disabled1Requested && disabled2Requested)
+
                 assert(!c.a.isPresent)
+                assert(!c.b.isPresent)
             }
         """.trimIndent())
 

@@ -135,15 +135,17 @@ internal class BindingGraphImpl(
         }
 
         // Add all condition literals from all local bindings.
-        var isEager = true
-        for (binding in localBindings.keys) for (clause in binding.conditionScope.expression) for (literal in clause) {
-            val normalized = literal.normalized()
-            if (isEager) {
-                localConditionLiterals[normalized] = LiteralUsage.Eager
-                isEager = false
-            } else {
-                if (normalized !in localConditionLiterals) {
-                    localConditionLiterals[normalized] = LiteralUsage.Lazy
+        for (binding in localBindings.keys) {
+            var isEager = true
+            for (clause in binding.conditionScope.expression) for (literal in clause) {
+                val normalized = literal.normalized()
+                if (isEager) {
+                    localConditionLiterals[normalized] = LiteralUsage.Eager
+                    isEager = false
+                } else {
+                    if (normalized !in localConditionLiterals) {
+                        localConditionLiterals[normalized] = LiteralUsage.Lazy
+                    }
                 }
             }
         }
