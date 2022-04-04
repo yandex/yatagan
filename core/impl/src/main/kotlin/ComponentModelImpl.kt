@@ -37,17 +37,17 @@ internal class ComponentModelImpl private constructor(
     override val scope = declaration.annotations.find(AnnotationLangModel::isScope)
 
     override val modules: Set<ModuleModel> by lazy(NONE) {
-        val seenModules = hashSetOf<ModuleModel>()
+        val allModules = mutableSetOf<ModuleModel>()
         val moduleQueue: ArrayDeque<ModuleModel> = ArrayDeque(
             impl?.modules?.map(TypeLangModel::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList())
         while (moduleQueue.isNotEmpty()) {
             val module = moduleQueue.removeFirst()
-            if (!seenModules.add(module)) {
+            if (!allModules.add(module)) {
                 continue
             }
             moduleQueue += module.includes
         }
-        seenModules
+        allModules
     }
 
     override val dependencies: Set<ComponentDependencyModel> by lazy(NONE) {
