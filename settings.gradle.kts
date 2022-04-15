@@ -41,6 +41,8 @@ include("generator-poetry")
 include("generator-lang")
 
 include("testing")
+include("testing-generator")
+project(":testing-generator").projectDir = file("testing/generator")
 
 include("dynamic")
 

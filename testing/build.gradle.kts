@@ -8,9 +8,15 @@ plugins {
 val kotlinCompileTestingVersion: String by extra
 val kspVersion: String by extra
 val junitVersion: String by extra
+val mockitoKotlinVersion: String by extra
 
-val dynamicTestRuntime: Configuration by configurations.creating
-val compiledTestRuntime: Configuration by configurations.creating
+val baseTestRuntime: Configuration by configurations.creating
+val dynamicTestRuntime: Configuration by configurations.creating {
+    extendsFrom(baseTestRuntime)
+}
+val compiledTestRuntime: Configuration by configurations.creating {
+    extendsFrom(baseTestRuntime)
+}
 
 val generatedSourceDir: Provider<Directory> = project.layout.buildDirectory.dir("generated-sources")
 
@@ -46,6 +52,10 @@ dependencies {
     // RT dependencies
     testImplementation(project(":lang-rt"))
 
+    // Heavy test dependencies
+    testImplementation(project(":testing-generator"))
+
+    baseTestRuntime("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")  // required for heavy tests
     dynamicTestRuntime(project(":api-dynamic"))
     compiledTestRuntime(project(":api-compiled"))
 }
@@ -75,5 +85,10 @@ tasks {
 
     withType<KotlinCompile>().configureEach {
         dependsOn(dynamicApiClasspathTask, compiledApiClasspathTask)
+    }
+
+    test {
+        // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
+        jvmArgs = listOf("-Xmx4G", "-Xms256m")
     }
 }
