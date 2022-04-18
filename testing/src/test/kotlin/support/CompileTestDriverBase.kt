@@ -31,6 +31,10 @@ abstract class CompileTestDriverBase protected constructor(
         mainSourceSet.includeFromSourceSet(sourceSet)
     }
 
+    override fun includeAllFromDirectory(sourceDir: File) {
+        mainSourceSet.includeAllFromDirectory(sourceDir)
+    }
+
     final override fun givenPrecompiledModule(sources: SourceSet) {
         check(precompiledModuleOutputDir == null) {
             "Can't have multiple precompiled modules"
