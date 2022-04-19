@@ -3,6 +3,7 @@ package com.yandex.daggerlite.lang.rt
 import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.base.BiObjectCache
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.IntoListAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
@@ -14,14 +15,18 @@ internal class RtFunctionImpl(
     impl: Method,
     override val owner: RtTypeDeclarationImpl,
 ) : FunctionLangModel, RtAnnotatedImpl<Method>(impl) {
+    private val parametersAnnotations by lazy { impl.parameterAnnotations }
+    private val parametersTypes by lazy { impl.genericParameterTypes }
+    private val parameterNames by lazy { impl.parameterNamesCompat() }
+
     override val parameters: Sequence<ParameterLangModel> by lazy {
-        impl.resolveParameters(asMemberOf = owner.type.impl).asSequence()
+        Array(impl.getParameterCountCompat(), ::ParameterImpl).asSequence()
     }
 
     override val returnType: TypeLangModel by lazy {
-        RtTypeImpl(impl.genericReturnType.resolve(
-            member = impl,
-            asMemberOf = owner.type.impl,
+        RtTypeImpl(impl.genericReturnType.resolveGenericsHierarchyAware(
+            declaringClass = impl.declaringClass,
+            asMemberOf = owner,
         ))
     }
 
@@ -61,6 +66,26 @@ internal class RtFunctionImpl(
         parameters.joinTo(this)
         append("): ")
         append(returnType)
+    }
+
+    private inner class ParameterImpl(
+        val index: Int,
+    ) : ParameterLangModel {
+        override val annotations: Sequence<AnnotationLangModel> by lazy {
+            parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
+        }
+
+        override val name: String
+            get() = parameterNames[index]
+
+        override val type: TypeLangModel by lazy {
+            RtTypeImpl(parametersTypes[index].resolveGenericsHierarchyAware(
+                declaringClass = impl.declaringClass,
+                asMemberOf = owner,
+            ))
+        }
+
+        override fun toString() = "$name: $type"
     }
 
     companion object Factory : BiObjectCache<RtTypeDeclarationImpl, Method, RtFunctionImpl>() {

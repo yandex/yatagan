@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
-import java.lang.reflect.Executable
+import java.lang.reflect.Constructor
 import java.lang.reflect.GenericArrayType
 import java.lang.reflect.Member
 import java.lang.reflect.Method
@@ -10,7 +10,6 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
 import java.lang.reflect.WildcardType
-import kotlin.LazyThreadSafetyMode.NONE
 
 private typealias ArraysReflectionUtils = java.lang.reflect.Array
 
@@ -27,6 +26,34 @@ internal val Class<*>.isPublic get() = Modifier.isPublic(modifiers)
 internal val Member.isPrivate get() = Modifier.isPrivate(modifiers)
 
 internal val Class<*>.isPrivate get() = Modifier.isPrivate(modifiers)
+
+/**
+ * This API is available since JVM 1.8, yet for Android it's not that simple, so
+ * perform a runtime check.
+ */
+private val isExecutableApiAvailable = try {
+    with(ClassLoader.getSystemClassLoader()) {
+        loadClass("java.lang.reflect.Executable")
+        loadClass("java.lang.reflect.Parameter")
+    }
+    true
+} catch (e: ClassNotFoundException) {
+    false
+}
+
+internal fun Method.getParameterCountCompat(): Int =
+    if (isExecutableApiAvailable) parameterCount8() else parameterTypes.size
+
+internal fun Constructor<*>.getParameterCountCompat(): Int =
+    if (isExecutableApiAvailable) parameterCount8() else parameterTypes.size
+
+internal fun Method.parameterNamesCompat(): Array<String> {
+    return if (isExecutableApiAvailable) parameterNames8() else Array(parameterTypes.size) { index -> "p$index" }
+}
+
+internal fun Constructor<*>.parameterNamesCompat(): Array<String> {
+    return if (isExecutableApiAvailable) parameterNames8() else Array(parameterTypes.size) { index -> "p$index" }
+}
 
 internal fun Type.asClass(): Class<*> = tryAsClass() ?: throw AssertionError("Not reached: not a class")
 
@@ -48,81 +75,36 @@ internal fun Type.formatString(): String = when (this) {
     else -> toString()
 }
 
-internal fun Type.superTypesSequence(): Sequence<Type> = sequence {
-    val queue = ArrayDeque<Type>()
-    queue += this@superTypesSequence
-    while(queue.isNotEmpty()) {
-        val type = queue.removeFirst()
-        yield(type)
-        when(type) {
-            is ParameterizedType -> {
-                val resolvedTypeParameters = lazy(NONE, type::resolveTypeParameters)
-                val clazz = type.rawType.asClass()
-                clazz.genericSuperclass?.let { superClass ->
-                    queue += superClass.resolveTypeVar(resolvedTypeParameters::value)
-                }
-                for (genericInterface in clazz.genericInterfaces) {
-                    queue += genericInterface.resolveTypeVar(resolvedTypeParameters::value)
-                }
-            }
-            is Class<*> -> {
-                type.genericSuperclass?.let(queue::add)
-                queue.addAll(type.genericInterfaces)
-            }
-            else -> { /* Do nothing */}
-        }
-    }
-}
-
-internal fun Type.resolve(
-    member: Member,
-    asMemberOf: Type,
+/**
+ * @param declaringClass class that directly contains [this type][Type] in its declaration.
+ * @param asMemberOf type declaration, that this type was obtained from.
+ */
+internal fun Type.resolveGenericsHierarchyAware(
+    declaringClass: Class<*>,
+    asMemberOf: RtTypeDeclarationImpl,
 ): Type {
-    val declaringClass = member.declaringClass
-    return when (val refinedAsMemberOf = asMemberOf.superTypesSequence().find { it.asClass() == declaringClass }) {
-        is ParameterizedType -> {
-            val resolvedTypeParameters = lazy(NONE, refinedAsMemberOf::resolveTypeParameters)
-            resolveTypeVar(withInfo = resolvedTypeParameters::value)
+    return asMemberOf.typeHierarchy.find {
+        // Find a type declaration that directly declares the type.
+        it.type.impl.asClass() == declaringClass
+    }?.genericsInfo?.let(::resolveGenerics) ?: this
+}
+
+internal fun Type.resolveGenerics(genericsInfo: Lazy<Map<TypeVariable<*>, Type>>?): Type {
+    if (genericsInfo == null) {
+        return this
+    }
+    return when (this) {
+        is TypeVariable<*> -> genericsInfo.value[this] ?: this
+        is ParameterizedType -> replaceTypeArguments { argument ->
+            argument.resolveGenerics(genericsInfo)
         }
+        is WildcardType -> replaceBounds { bound ->
+            bound.resolveGenerics(genericsInfo)
+        }
+        is GenericArrayType -> replaceComponentType(
+            componentType = genericComponentType.resolveGenerics(genericsInfo)
+        )
         else -> this
-    }
-}
-
-internal fun Executable.resolveParameters(
-    asMemberOf: Type,
-): List<RtParameterImpl> = when (asMemberOf) {
-    is ParameterizedType -> {
-        // Some type variables may be matched
-        val resolvedTypeParameters = lazy(NONE, asMemberOf::resolveTypeParameters)
-        parameters.map {
-            RtParameterImpl(
-                impl = it,
-                refinedType = it.parameterizedType.resolveTypeVar(withInfo = resolvedTypeParameters::value)
-            )
-        }
-    }
-    else -> parameters.map { RtParameterImpl(impl = it) }
-}
-
-private fun Type.resolveTypeVar(withInfo: () -> Map<TypeVariable<*>, Type>): Type = when (this) {
-    is TypeVariable<*> -> withInfo()[this] ?: this
-    is ParameterizedType -> replaceTypeArguments { argument ->
-        argument.resolveTypeVar(withInfo)
-    }
-    is WildcardType -> replaceBounds { bound ->
-        bound.resolveTypeVar(withInfo)
-    }
-    is GenericArrayType -> replaceComponentType(
-        componentType = genericComponentType.resolveTypeVar(withInfo)
-    )
-    else -> this
-}
-
-private fun ParameterizedType.resolveTypeParameters(): Map<TypeVariable<*>, Type> = buildMap(actualTypeArguments.size) {
-    val typeParams = rawType.asClass().typeParameters
-    val typeArgs = actualTypeArguments
-    for (i in typeParams.indices) {
-        put(typeParams[i], typeArgs[i])
     }
 }
 
