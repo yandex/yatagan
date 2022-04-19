@@ -19,29 +19,29 @@ import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind.Getter
+import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind.Setter
 import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import kotlinx.metadata.KmClass
+import kotlinx.metadata.jvm.getterSignature
+import kotlinx.metadata.jvm.setterSignature
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
-import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.full.companionObject
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.staticProperties
-import kotlin.reflect.jvm.javaGetter
 
 internal class RtTypeDeclarationImpl private constructor(
     val type: RtTypeImpl,
 ) : RtAnnotatedImpl<Class<*>>(type.impl.asClass()), TypeDeclarationLangModel {
 
-    private val kotlinClass: KClass<*> by lazy { impl.kotlin }
+    private val kotlinClass: KmClass? by lazy {
+        impl.obtainKotlinClassIfApplicable()
+    }
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
@@ -56,10 +56,12 @@ internal class RtTypeDeclarationImpl private constructor(
         get() = impl.canonicalName
 
     override val kotlinObjectKind: KotlinObjectKind?
-        get() = when {
-            kotlinClass.isCompanion -> KotlinObjectKind.Companion
-            kotlinClass.objectInstance != null -> KotlinObjectKind.Object
-            else -> null
+        get() = kotlinClass?.let {
+            when {
+                it.isCompanionObject -> KotlinObjectKind.Companion
+                it.isObject -> KotlinObjectKind.Object
+                else -> null
+            }
         }
 
     override val enclosingType: TypeDeclarationLangModel?
@@ -122,8 +124,9 @@ internal class RtTypeDeclarationImpl private constructor(
     }
 
     override val companionObjectDeclaration: TypeDeclarationLangModel? by lazy {
-        kotlinClass.companionObject?.let { companion ->
-            RtTypeDeclarationImpl(RtTypeImpl(companion.java))
+        kotlinClass?.companionObject?.let { companion ->
+            val companionClass = impl.classLoader.loadClass("${impl.canonicalName}$$companion")
+            RtTypeDeclarationImpl(RtTypeImpl(companionClass))
         }
     }
 
@@ -228,20 +231,25 @@ internal class RtTypeDeclarationImpl private constructor(
         else -> null
     }
 
+    private val kotlinPropertySetters by lazy {
+        buildMap {
+            kotlinClass?.properties?.forEach { kmProperty ->
+                kmProperty.setterSignature?.let { put(it, kmProperty) }
+                kmProperty.getterSignature?.let { put(it, kmProperty) }
+            }
+        }
+    }
+
     internal fun findKotlinPropertyAccessorFor(method: Method): RtPropertyAccessorImpl? {
-        val parameterCount = method.getParameterCountCompat()
-        if (parameterCount > 1) return null
-        val kotlin = method.declaringClass.kotlin
-        val properties = if (method.isStatic) kotlin.staticProperties else kotlin.declaredMemberProperties
-        when (parameterCount) {
-            0 -> properties.forEach {
-                if (it.javaGetter == method)
-                    return RtPropertyAccessorImpl(Getter, it)
-            }
-            1 -> properties.forEach {
-                if (it is KMutableProperty<*> && it.javaGetter == method)
-                    return RtPropertyAccessorImpl(Getter, it)
-            }
+        val signature by lazy(LazyThreadSafetyMode.NONE) {
+            jvmSignatureOf(method)
+        }
+        for (declaration in typeHierarchy) {
+            val property = declaration.kotlinPropertySetters[signature] ?: continue
+            return RtPropertyAccessorImpl(
+                property = property,
+                kind = if (property.setterSignature == signature) Setter else Getter,
+            )
         }
         return null
     }

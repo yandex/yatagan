@@ -1,5 +1,3 @@
-@file:Suppress("NO_REFLECTION_IN_CLASS_PATH")  // reflection is in runtime classpath, not in compile one.
-
 package com.yandex.daggerlite.dynamic
 
 import com.yandex.daggerlite.core.ComponentDependencyModel
@@ -30,6 +28,7 @@ import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import com.yandex.daggerlite.graph.component1
 import com.yandex.daggerlite.graph.component2
 import com.yandex.daggerlite.graph.normalized
+import com.yandex.daggerlite.lang.rt.kotlinObjectInstanceOrNull
 import com.yandex.daggerlite.lang.rt.rt
 import java.lang.reflect.Proxy
 
@@ -81,7 +80,7 @@ internal class RuntimeComponent(
     }
 
     private fun doEvaluateLiteral(literal: Literal): Boolean {
-        var instance: Any? = if (literal.root.isKotlinObject) literal.root.rt.kotlin.objectInstance else null
+        var instance: Any? = literal.root.rt.kotlinObjectInstanceOrNull()
         for (member in literal.path) {
             instance = member.accept(MemberEvaluator(instance))
         }
@@ -233,7 +232,7 @@ internal class RuntimeComponent(
                 }
             }
             function.owner.isKotlinObject -> {
-                function.owner.rt.kotlin.objectInstance
+                function.owner.rt.kotlinObjectInstanceOrNull()
             }
             else -> null
         }, /* function arguments*/ *args())

@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import java.lang.reflect.Constructor
 import java.lang.reflect.GenericArrayType
 import java.lang.reflect.Member
@@ -73,6 +74,18 @@ internal fun Type.formatString(): String = when (this) {
     }
     is GenericArrayType -> "${genericComponentType.formatString()}[]"
     else -> toString()
+}
+
+fun Class<*>.kotlinObjectInstanceOrNull(): Any? {
+    val model = RtTypeDeclarationImpl(this)
+    return when(model.kotlinObjectKind) {
+        KotlinObjectKind.Object -> declaredFields.first { it.name == "INSTANCE" }
+        KotlinObjectKind.Companion -> {
+            val companionName = simpleName
+            enclosingClass.declaredFields.first { it.name == companionName }
+        }
+        null -> null
+    }?.get(null)
 }
 
 /**
