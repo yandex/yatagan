@@ -13,7 +13,6 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import kotlinx.metadata.KmClass
-import kotlinx.metadata.KmProperty
 import kotlinx.metadata.jvm.getterSignature
 import kotlinx.metadata.jvm.setterSignature
 import javax.lang.model.element.ElementKind
@@ -130,29 +129,44 @@ internal class JavaxTypeDeclarationImpl private constructor(
         return JavaxTypeImpl(type)
     }
 
-    private val allKotlinProperties: Sequence<KmProperty> = sequence {
-        val kotlinClass = kotlinClass ?: return@sequence
-        for (property in kotlinClass.properties) if (!property.isOverride) {
-            yield(property)
+    private val typeHierarchy: Sequence<JavaxTypeDeclarationImpl> by lazy(NONE) {
+        sequence {
+            val queue = ArrayList<JavaxTypeDeclarationImpl>(4)
+            queue += this@JavaxTypeDeclarationImpl
+            do {
+                val declaration = queue.removeLast()
+                yield(declaration)
+                declaration.impl.superclass?.let { superClass ->
+                    if (superClass.kind != TypeKind.NONE) {
+                        queue += Factory(superClass.asDeclaredType())
+                    }
+                }
+                for (superInterface in declaration.impl.interfaces) {
+                    queue += Factory(superInterface.asDeclaredType())
+                }
+            } while (queue.isNotEmpty())
         }
-        for (implemented in impl.interfaces) {
-            yieldAll(Factory(implemented.asDeclaredType()).allKotlinProperties)
+    }
+
+    private val kotlinPropertySetters by lazy(NONE) {
+        buildMap {
+            kotlinClass?.properties?.forEach { kmProperty ->
+                kmProperty.setterSignature?.let { put(it, kmProperty) }
+                kmProperty.getterSignature?.let { put(it, kmProperty) }
+            }
         }
-        if (impl.superclass.kind != TypeKind.NONE) {
-            yieldAll(Factory(impl.superclass.asDeclaredType()).allKotlinProperties)
-        }
-    }.memoize()
+    }
 
     internal fun findKotlinPropertyAccessorFor(element: ExecutableElement): JavaxPropertyAccessorImpl? {
-        if (allKotlinProperties.none()) {
-            return null
+        val signature by lazy(NONE) {
+            jvmSignatureOf(element = element, type = Utils.types.asMemberOf(type, element))
         }
-        val signature = jvmSignatureOf(element = element, type = Utils.types.asMemberOf(type, element))
-        allKotlinProperties.forEach { kmProperty ->
-            when (signature) {
-                kmProperty.setterSignature -> return JavaxPropertyAccessorImpl(property = kmProperty, kind = Setter)
-                kmProperty.getterSignature -> return JavaxPropertyAccessorImpl(property = kmProperty, kind = Getter)
-            }
+        for (declaration in typeHierarchy) {
+            val property = declaration.kotlinPropertySetters[signature] ?: continue
+            return JavaxPropertyAccessorImpl(
+                property = property,
+                kind = if (property.setterSignature == signature) Setter else Getter,
+            )
         }
         return null
     }
