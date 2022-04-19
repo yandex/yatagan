@@ -10,6 +10,7 @@ import com.yandex.daggerlite.Conditional
 import com.yandex.daggerlite.Conditionals
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionLangModel
@@ -26,6 +27,9 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.lang.reflect.TypeVariable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.companionObject
@@ -162,19 +166,74 @@ internal class RtTypeDeclarationImpl private constructor(
         impl: Constructor<*>,
         override val constructee: TypeDeclarationLangModel,
     ) : ConstructorLangModel, RtAnnotatedImpl<Constructor<*>>(impl) {
+        private val parametersAnnotations by lazy { impl.parameterAnnotations }
+        private val parametersTypes by lazy { impl.genericParameterTypes }
+        private val parametersNames by lazy { impl.parameterNamesCompat() }
+
         override val isEffectivelyPublic: Boolean
             get() = impl.isPublic
         override val parameters: Sequence<ParameterLangModel> by lazy {
-            impl.resolveParameters(asMemberOf = type.impl).asSequence()
+            Array(impl.getParameterCountCompat(), ::ParameterImpl).asSequence()
         }
         override val platformModel: Constructor<*> get() = impl
+
+        private inner class ParameterImpl(
+            private val index: Int,
+        ) : ParameterLangModel {
+            override val annotations: Sequence<AnnotationLangModel> by lazy {
+                parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
+            }
+
+            override val name: String
+                get() = parametersNames[index]
+
+            override val type: TypeLangModel by lazy {
+                genericsInfo?.let { params ->
+                    // No need to use "hierarchy aware" variant, as constructor can't be inherited.
+                    RtTypeImpl(parametersTypes[index].resolveGenerics(params))
+                } ?: RtTypeImpl(parametersTypes[index])
+            }
+
+            override fun toString() = "$name: $type"
+        }
+    }
+
+    internal val typeHierarchy: Sequence<RtTypeDeclarationImpl> by lazy {
+        sequence {
+            val queue = ArrayList<RtTypeDeclarationImpl>(4)
+            queue += this@RtTypeDeclarationImpl
+            do {
+                val declaration = queue.removeLast()
+                yield(declaration)
+                declaration.impl.genericSuperclass?.let { superClass ->
+                    queue += Factory(superClass.resolveGenerics(declaration.genericsInfo))
+                }
+                for (superInterface in declaration.impl.genericInterfaces) {
+                    queue += Factory(superInterface.resolveGenerics(declaration.genericsInfo))
+                }
+            } while (queue.isNotEmpty())
+        }
+    }
+
+    internal val genericsInfo: Lazy<Map<TypeVariable<*>, Type>>? = when (val type = type.impl) {
+        is ParameterizedType -> lazy {
+            buildMap(type.actualTypeArguments.size) {
+                val typeParams = impl.typeParameters
+                val typeArgs = type.actualTypeArguments
+                for (i in typeParams.indices) {
+                    put(typeParams[i], typeArgs[i])
+                }
+            }
+        }
+        else -> null
     }
 
     internal fun findKotlinPropertyAccessorFor(method: Method): RtPropertyAccessorImpl? {
-        if (method.parameterCount > 1) return null
+        val parameterCount = method.getParameterCountCompat()
+        if (parameterCount > 1) return null
         val kotlin = method.declaringClass.kotlin
         val properties = if (method.isStatic) kotlin.staticProperties else kotlin.declaredMemberProperties
-        when (method.parameterCount) {
+        when (parameterCount) {
             0 -> properties.forEach {
                 if (it.javaGetter == method)
                     return RtPropertyAccessorImpl(Getter, it)
@@ -189,5 +248,6 @@ internal class RtTypeDeclarationImpl private constructor(
 
     companion object Factory : ObjectCache<RtTypeImpl, RtTypeDeclarationImpl>() {
         operator fun invoke(type: RtTypeImpl) = createCached(type, ::RtTypeDeclarationImpl)
+        operator fun invoke(type: Type) = createCached(RtTypeImpl(type), ::RtTypeDeclarationImpl)
     }
 }

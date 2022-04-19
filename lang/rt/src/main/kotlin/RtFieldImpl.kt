@@ -9,9 +9,9 @@ internal class RtFieldImpl(
     override val owner: RtTypeDeclarationImpl,
 ) : FieldLangModel, RtAnnotatedImpl<Field>(impl) {
     override val type: TypeLangModel by lazy {
-        RtTypeImpl(impl.genericType.resolve(
-            member = impl,
-            asMemberOf = owner.type.impl,
+        RtTypeImpl(impl.genericType.resolveGenericsHierarchyAware(
+            declaringClass = impl.declaringClass,
+            asMemberOf = owner,
         ))
     }
 
