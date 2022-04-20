@@ -11,6 +11,7 @@ import com.yandex.daggerlite.Conditionals
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionLangModel
@@ -186,6 +187,9 @@ internal class RtTypeDeclarationImpl private constructor(
             override val annotations: Sequence<AnnotationLangModel> by lazy {
                 parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
             }
+
+            override val assistedAnnotationIfPresent: AssistedAnnotationLangModel?
+                get() = null
 
             override val name: String
                 get() = parametersNames[index]

@@ -1,9 +1,11 @@
 package com.yandex.daggerlite.lang.rt
 
+import com.yandex.daggerlite.Assisted
 import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.IntoListAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
@@ -84,6 +86,13 @@ internal class RtFunctionImpl(
                 asMemberOf = owner,
             ))
         }
+
+        // region Annotations
+
+        override val assistedAnnotationIfPresent: AssistedAnnotationLangModel?
+            get() = impl.getAnnotation(Assisted::class.java)?.let { RtAssistedAnnotationImpl(it) }
+
+        // endregion
 
         override fun toString() = "$name: $type"
     }
