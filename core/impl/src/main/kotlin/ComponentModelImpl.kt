@@ -5,6 +5,7 @@ import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ComponentModel.EntryPoint
+import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -33,6 +34,10 @@ internal class ComponentModelImpl private constructor(
         type = declaration.asType(),
         forQualifier = null,
     )
+
+    override fun <R> accept(visitor: HasNodeModel.Visitor<R>): R {
+        return visitor.visitComponent(this)
+    }
 
     override val scope = declaration.annotations.find(AnnotationLangModel::isScope)
 

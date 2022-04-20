@@ -1,15 +1,19 @@
 package com.yandex.daggerlite.graph.impl
 
+import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.InjectConstructorBindingModel
+import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.HasNodeModel
+import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
+import com.yandex.daggerlite.core.accept
 import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -31,6 +35,7 @@ import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
+import com.yandex.daggerlite.validation.impl.ValidationMessageBuilder
 import com.yandex.daggerlite.validation.impl.reportError
 import com.yandex.daggerlite.validation.impl.reportWarning
 import kotlin.LazyThreadSafetyMode.NONE
@@ -109,9 +114,10 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
     final override val originModule get() = impl.originModule
 
     final override val target: NodeModel by lazy(NONE) {
-        when(val target = impl.target) {
+        when (val target = impl.target) {
             is BindingTargetModel.DirectMultiContribution,
-            is BindingTargetModel.FlattenMultiContribution -> MultiBindingContributionNode(target.node)
+            is BindingTargetModel.FlattenMultiContribution,
+            -> MultiBindingContributionNode(target.node)
             is BindingTargetModel.Plain -> target.node
         }
     }
@@ -119,7 +125,7 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
     private class MultiBindingContributionNode(
         private val node: NodeModel,
     ) : NodeModel by node {
-        override val implicitBinding: Nothing? get() = null
+        override fun getSpecificModel(): Nothing? = null
         override fun toString() = "$node [multi-binding contributor]"
     }
 }
@@ -149,10 +155,10 @@ internal class ProvisionBindingImpl(
 }
 
 internal class InjectConstructorProvisionBindingImpl(
-    private val impl: InjectConstructorBindingModel,
+    private val impl: InjectConstructorModel,
     override val owner: BindingGraphImpl,
 ) : ProvisionBinding, ConditionalBindingMixin {
-    override val target get() = impl.target
+    override val target get() = impl.asNode()
     override val originModule: Nothing? get() = null
     override val scope: AnnotationLangModel? get() = impl.scope
     override val provision get() = impl.constructor
@@ -186,7 +192,7 @@ internal class SyntheticAliasBindingImpl(
     override val source: NodeModel,
     override val target: NodeModel,
     override val owner: BindingGraphImpl,
-): AliasBinding {
+) : AliasBinding {
     override val originModule: ModuleModel? get() = null
     override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
         return visitor.visitAlias(this)
@@ -274,8 +280,6 @@ internal class ComponentDependencyEntryPointBindingImpl(
     override val getter: FunctionLangModel,
     override val target: NodeModel,
 ) : ComponentDependencyEntryPointBinding, BindingMixin {
-    override fun dependencies() = listOf(NodeDependency(dependency.asNode()))
-
     override fun toString() = Strings.Bindings.componentDependencyEntryPoint(getter)
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -395,7 +399,7 @@ internal class InstanceBindingImpl(
 internal class SelfDependentInvalidBinding(
     override val impl: ModuleHostedBindingModel,
     override val owner: BindingGraphImpl,
-): EmptyBinding, BindingMixin, ModuleHostedMixin() {
+) : EmptyBinding, BindingMixin, ModuleHostedMixin() {
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)
     }
@@ -432,37 +436,10 @@ internal data class MissingBindingImpl(
 ) : EmptyBinding, BindingMixin {
 
     override fun validate(validator: Validator) {
-        val failedInject = target.implicitBinding
-        if (failedInject != null) {
-            validator.reportError(Errors.noMatchingScopeForBinding(
-                binding = failedInject, scope = failedInject.scope))
-        } else {
-            validator.reportError(Errors.missingBinding(`for` = target)) {
-                val factory = target.superModel as? ComponentFactoryModel
-                when {
-                    target.hintIsFrameworkType -> {
-                        addNote(Strings.Notes.nestedFrameworkType(target))
-                    }
-                    factory != null -> {
-                        val component = factory.createdComponent
-                        if (!component.isRoot) {
-                            addNote(Strings.Notes.subcomponentFactoryInjectionHint(
-                                factory = factory, component = component, owner = owner,
-                            ))
-                        } else {
-                            addNote("$target is a factory for a root component, " +
-                                    "injecting such factory is not supported")
-                        }
-                    }
-                    else -> {
-                        addNote(Strings.Notes.unknownBinding())
-                    }
-                }
-                // TODO: implement hint about how to provide a binding
-                //  - maybe the same differently qualified binding exists
-                //  - binding exists in a sibling component hierarchy path
-            }
-        }
+        target.getSpecificModel().accept(ModelBasedHint(validator))
+        // TODO: implement hint about how to provide a binding
+        //  - maybe the same differently qualified binding exists
+        //  - binding exists in a sibling component hierarchy path
     }
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -470,4 +447,48 @@ internal data class MissingBindingImpl(
     }
 
     override fun toString() = "[missing: $target]"
+
+    private inner class ModelBasedHint(
+        private val validator: Validator,
+    ) : HasNodeModel.Visitor<Unit> {
+        private inline fun reportMissingBinding(block: ValidationMessageBuilder.() -> Unit) {
+            validator.reportError(Errors.missingBinding(`for` = target)) {
+                if (target.hintIsFrameworkType) {
+                    addNote(Strings.Notes.nestedFrameworkType(target))
+                } else {
+                    block()
+                }
+            }
+        }
+
+        override fun visitDefault() = reportMissingBinding {
+            addNote(Strings.Notes.unknownBinding())
+        }
+
+        override fun visitInjectConstructor(model: InjectConstructorModel) {
+            // This @inject was not used, the problem is in scope then.
+            validator.reportError(Errors.noMatchingScopeForBinding(
+                binding = model, scope = model.scope))
+        }
+
+        override fun visitComponent(model: ComponentModel) = reportMissingBinding {
+            addNote("A dependency seems to be a component, though it does not belong to the current hierarchy.")
+        }
+
+        override fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): Nothing {
+            throw AssertionError("Not reached: assisted inject factory can't be missing")
+        }
+
+        override fun visitComponentFactory(model: ComponentFactoryModel) = reportMissingBinding {
+            addNote(if (!model.createdComponent.isRoot) {
+                Strings.Notes.subcomponentFactoryInjectionHint(
+                    factory = model,
+                    component = model.createdComponent,
+                    owner = owner,
+                )
+            } else {
+                "$target is a factory for a root component, injecting such factory is not supported"
+            })
+        }
+    }
 }

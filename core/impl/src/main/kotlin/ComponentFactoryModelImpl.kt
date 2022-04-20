@@ -10,6 +10,7 @@ import com.yandex.daggerlite.core.ComponentFactoryModel.BuilderInputModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.FactoryInputModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.allInputs
@@ -45,6 +46,10 @@ internal class ComponentFactoryModelImpl private constructor(
         type = factoryDeclaration.asType(),
         forQualifier = null,
     )
+
+    override fun <R> accept(visitor: HasNodeModel.Visitor<R>): R {
+        return visitor.visitComponentFactory(this)
+    }
 
     override val builderInputs: Collection<BuilderInputModel> = factoryDeclaration.functions.filter {
         it.isAbstract && it != factoryMethod && it.parameters.count() == 1

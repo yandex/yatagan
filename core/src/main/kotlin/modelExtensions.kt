@@ -22,3 +22,11 @@ val DependencyKind.isEager
         Direct, Optional -> true
         Lazy, Provider, OptionalLazy, OptionalProvider -> false
     }
+
+fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
+    return if (this == null) {
+        visitor.visitDefault()
+    } else {
+        accept(visitor)
+    }
+}

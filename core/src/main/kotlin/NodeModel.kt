@@ -16,19 +16,15 @@ interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel> {
     val qualifier: AnnotationLangModel?
 
     /**
-     * self-provision binding if supported by underlying type.
-     */
-    val implicitBinding: InjectConstructorBindingModel?
-
-    /**
      * TODO: doc.
      */
     fun multiBoundListNodes(): Array<NodeModel>
 
     /**
      * What specific core-level model the node represents. `null` if none.
+     * Use [HasNodeModel.accept] to determine which specific model it is.
      */
-    val superModel: HasNodeModel?
+    fun getSpecificModel(): HasNodeModel?
 
     /**
      * Returns a node that is equal to this one without qualifier.

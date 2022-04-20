@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
@@ -51,12 +50,3 @@ interface ProvidesBindingModel : ModuleHostedBindingModel, ConditionalHoldingMod
     val requiresModuleInstance: Boolean
 }
 
-/**
- * [javax.inject.Inject]-annotated constructor binding model.
- */
-interface InjectConstructorBindingModel : ConditionalHoldingModel {
-    val target: NodeModel
-    val constructor: ConstructorLangModel
-    val scope: AnnotationLangModel?
-    val inputs: List<NodeDependency>
-}

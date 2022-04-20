@@ -6,12 +6,15 @@ import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.HasNodeModel
+import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
+import com.yandex.daggerlite.core.accept
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.graph.AliasBinding
@@ -30,6 +33,7 @@ internal class GraphBindingsFactory(
     private val graph: BindingGraphImpl,
     private val parent: GraphBindingsFactory?,
 ) : MayBeInvalid {
+    private val implicitBindingDeduct = ImplicitBindingDeduct()
     private val validationMessages = arrayListOf<ValidationMessage>()
 
     private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
@@ -185,16 +189,7 @@ internal class GraphBindingsFactory(
             if (node.qualifier != null) {
                 return null
             }
-            val inject = node.implicitBinding ?: return null
-
-            if (inject.scope != null && inject.scope != graph.scope) {
-                return null
-            }
-
-            return InjectConstructorProvisionBindingImpl(
-                impl = inject,
-                owner = graph,
-            )
+            return node.getSpecificModel().accept(implicitBindingDeduct)
         })
     }
 
@@ -228,6 +223,21 @@ internal class GraphBindingsFactory(
                     }
                 }))
             }
+        }
+    }
+
+    private inner class ImplicitBindingDeduct : HasNodeModel.Visitor<Binding?> {
+        override fun visitDefault(): Binding? = null
+
+        override fun visitInjectConstructor(model: InjectConstructorModel): Binding? {
+            if (model.scope != null && model.scope != graph.scope) {
+                return null
+            }
+
+            return InjectConstructorProvisionBindingImpl(
+                impl = model,
+                owner = graph,
+            )
         }
     }
 }
