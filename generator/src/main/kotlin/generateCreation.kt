@@ -19,13 +19,11 @@ import com.yandex.daggerlite.graph.InstanceBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
-import org.jetbrains.annotations.Contract
 
 private class CreationGeneratorVisitor(
     private val builder: ExpressionBuilder,
     private val inside: BindingGraph,
 ) : Binding.Visitor<Unit> {
-    @Contract
     override fun visitProvision(binding: ProvisionBinding) {
         with(builder) {
             val instance = if (binding.requiresModuleInstance) {
