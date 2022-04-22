@@ -8,4 +8,5 @@ internal interface GeneratorContainer {
     val accessStrategyManager: AccessStrategyManager
     val conditionGenerator: ConditionGenerator
     val multiBindingGenerator: MultiBindingGenerator
+    val assistedInjectFactoryGenerator: AssistedInjectFactoryGenerator
 }

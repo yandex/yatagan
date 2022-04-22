@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
@@ -10,10 +11,12 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.graph.AliasBinding
+import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage
+import com.yandex.daggerlite.graph.BindingVisitorAdapter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.validation.Validator
@@ -59,6 +62,7 @@ internal class BindingGraphImpl(
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableMapOf<ConditionScope.Literal, LiteralUsage>()
+    override val localAssistedInjectFactories = mutableSetOf<AssistedInjectFactoryModel>()
     override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
 
@@ -134,6 +138,16 @@ internal class BindingGraphImpl(
             }
         }
 
+        // Add all local assisted binding factories.
+        for (binding in localBindings.keys) {
+            binding.accept(object : BindingVisitorAdapter<Unit> {
+                override fun visitDefault() = Unit
+                override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
+                    localAssistedInjectFactories += binding.model
+                }
+            })
+        }
+
         // Add all condition literals from all local bindings.
         for (binding in localBindings.keys) {
             var isEager = true
@@ -149,11 +163,13 @@ internal class BindingGraphImpl(
                 }
             }
         }
-        // Remove all local condition literals from every child (in-depth).
+        // Remove all local condition literals/assisted inject factories from every child (in-depth).
         val graphQueue = ArrayDeque(children)
         while (graphQueue.isNotEmpty()) {
             val child = graphQueue.removeFirst()
-            if (child.localConditionLiterals.keys.removeAll(localConditionLiterals.keys)) {
+            val usesConditions = child.localConditionLiterals.keys.removeAll(localConditionLiterals.keys)
+            val usesAssistedInjectFactories = child.localAssistedInjectFactories.removeAll(localAssistedInjectFactories)
+            if (usesConditions || usesAssistedInjectFactories) {
                 // This will never be seen by materialization and that's okay, because no bindings are required here.
                 child.usedParents += this
             }

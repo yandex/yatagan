@@ -90,7 +90,9 @@ internal class RtFunctionImpl(
         // region Annotations
 
         override val assistedAnnotationIfPresent: AssistedAnnotationLangModel?
-            get() = impl.getAnnotation(Assisted::class.java)?.let { RtAssistedAnnotationImpl(it) }
+            get() = parametersAnnotations[index]
+                .find { it.annotationClass === Assisted::class }
+                ?.let { RtAssistedAnnotationImpl(it as Assisted) }
 
         // endregion
 

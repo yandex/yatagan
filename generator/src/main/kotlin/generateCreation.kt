@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.AlternativesBinding
+import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ComponentDependencyBinding
@@ -62,6 +63,14 @@ private class CreationGeneratorVisitor(
                 }
             })
         }
+    }
+
+    override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
+        Generators[binding.owner].assistedInjectFactoryGenerator.generateCreation(
+            builder = builder,
+            binding = binding,
+            inside = inside,
+        )
     }
 
     override fun visitInstance(binding: InstanceBinding) {

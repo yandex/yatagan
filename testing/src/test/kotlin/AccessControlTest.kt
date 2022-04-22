@@ -245,4 +245,58 @@ class AccessControlTest(
             // @formatter:on
         )
     }
+
+    @Test
+    fun `assisted inject constructor must be publicly accessible`() {
+        givenJavaSource("test.FooFactory", """
+            import com.yandex.daggerlite.AssistedFactory;
+            import com.yandex.daggerlite.Assisted;
+            @AssistedFactory
+            public interface FooFactory {
+                Foo create();
+            }
+        """.trimIndent())
+        givenJavaSource("test.BarFactory", """
+            import com.yandex.daggerlite.AssistedFactory;
+            import com.yandex.daggerlite.Assisted;
+            @AssistedFactory
+            public interface BarFactory {
+                Bar create();
+            }
+        """.trimIndent())
+        givenJavaSource("test.Foo", """
+            import com.yandex.daggerlite.AssistedInject;
+            public class Foo { @AssistedInject Foo() {} }
+        """.trimIndent())
+        givenJavaSource("test.Bar", """
+            import com.yandex.daggerlite.AssistedInject;
+            class Bar { @AssistedInject Bar() {} }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+
+            @Component
+            interface TestComponent {
+                fun fooFactory(): FooFactory 
+                fun barFactory(): BarFactory 
+            }
+
+            fun test() {
+                val c = Dagger.create(TestComponent::class.java)
+                c.fooFactory().create()
+                c.barFactory().create()
+            }
+        """.trimIndent())
+
+        expectValidationResults(
+            errorMessage(Strings.formatMessage(
+                message = Strings.Errors.invalidAccessForAssistedInject(),
+                encounterPaths = listOf(
+                  listOf("test.TestComponent", "[entry-point] barFactory", "[assisted factory] test.BarFactory"),  
+                  listOf("test.TestComponent", "[entry-point] fooFactory", "[assisted factory] test.FooFactory"),
+                ),
+            ))
+        )
+    }
 }

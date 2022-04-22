@@ -3,6 +3,7 @@ package com.yandex.daggerlite.lang.rt
 import com.yandex.daggerlite.AllConditions
 import com.yandex.daggerlite.AnyCondition
 import com.yandex.daggerlite.AnyConditions
+import com.yandex.daggerlite.Assisted
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.ComponentFlavor
 import com.yandex.daggerlite.Condition
@@ -188,8 +189,14 @@ internal class RtTypeDeclarationImpl private constructor(
                 parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
             }
 
+            // region Annotations
+
             override val assistedAnnotationIfPresent: AssistedAnnotationLangModel?
-                get() = null
+                get() = parametersAnnotations[index]
+                    .find { it.annotationClass === Assisted::class }
+                    ?.let { RtAssistedAnnotationImpl(it as Assisted) }
+
+            // endregion
 
             override val name: String
                 get() = parametersNames[index]

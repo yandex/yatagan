@@ -14,11 +14,13 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.accept
+import com.yandex.daggerlite.core.allInjectedParameters
 import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.AlternativesBinding
+import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
@@ -55,8 +57,6 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
 
     override val scope: AnnotationLangModel?
         get() = null
-
-    val isImplicitBinding: Boolean get() = false
 
     val checkDependenciesConditionScope: Boolean get() = false
 
@@ -166,9 +166,6 @@ internal class InjectConstructorProvisionBindingImpl(
     override val requiresModuleInstance: Boolean = false
     override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
 
-    override val isImplicitBinding: Boolean
-        get() = true
-
     override val checkDependenciesConditionScope: Boolean
         get() = true
 
@@ -186,6 +183,29 @@ internal class InjectConstructorProvisionBindingImpl(
     }
 
     override fun toString() = impl.toString()
+}
+
+internal class AssistedInjectFactoryBindingImpl(
+    override val owner: BindingGraphImpl,
+    override val model: AssistedInjectFactoryModel,
+) : AssistedInjectFactoryBinding, BindingMixin {
+    override val target: NodeModel
+        get() = model.asNode()
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitAssistedInjectFactory(this)
+    }
+
+    override fun dependencies() = model.allInjectedParameters().map { it.dependency }
+
+    override fun validate(validator: Validator) {
+        super.validate(validator)
+        validator.inline(model)
+    }
+
+    override val checkDependenciesConditionScope get() = true
+
+    override fun toString() = model.toString()
 }
 
 internal class SyntheticAliasBindingImpl(

@@ -30,3 +30,9 @@ fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
         accept(visitor)
     }
 }
+
+fun AssistedInjectFactoryModel.allAssistedParameters() = assistedConstructorParameters
+    .filterIsInstance<AssistedInjectFactoryModel.Parameter.Assisted>()
+
+fun AssistedInjectFactoryModel.allInjectedParameters() = assistedConstructorParameters
+    .filterIsInstance<AssistedInjectFactoryModel.Parameter.Injected>()

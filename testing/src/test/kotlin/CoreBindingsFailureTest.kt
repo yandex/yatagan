@@ -978,4 +978,97 @@ class CoreBindingsFailureTest(
             ))
         )
     }
+
+    @Test
+    fun `invalid assisted inject`() {
+        givenJavaSource("test.ClassI", """
+            import javax.inject.Inject;
+
+            public class ClassI {
+                @Inject public ClassI() {}
+            }
+        """.trimIndent())
+        givenJavaSource("test.FactoryA", """
+            import com.yandex.daggerlite.Assisted;
+            import com.yandex.daggerlite.AssistedFactory;
+
+            @AssistedFactory
+            public abstract class FactoryA {
+                abstract void someMethod(@Assisted("id") int a, @Assisted("id") int b);
+            }
+        """.trimIndent())
+        givenJavaSource("test.FactoryB", """
+            @com.yandex.daggerlite.AssistedFactory
+            public interface FactoryB {}
+        """.trimIndent())
+        givenJavaSource("test.ClassA", """
+            import com.yandex.daggerlite.AssistedInject;
+            import com.yandex.daggerlite.Assisted;
+
+            public class ClassA {
+                @AssistedInject public ClassA(@Assisted("A") int a, ClassI i, @Assisted("A") int b) {}
+            }
+        """.trimIndent())
+        givenJavaSource("test.FactoryC", """
+            import com.yandex.daggerlite.Assisted;
+            import com.yandex.daggerlite.AssistedFactory;
+            @AssistedFactory
+            public interface FactoryC {
+                ClassA createA(@Assisted("A") int a, @Assisted("B") int b);
+            }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestComponent", """
+            import com.yandex.daggerlite.*
+            @Component
+            interface TestComponent {
+                fun a(): FactoryA
+                fun b(): FactoryB
+                fun c(): FactoryC
+            }
+        """.trimIndent())
+
+        expectValidationResults(
+            errorMessage(formatMessage(
+                message = Errors.assistedInjectFactoryNotInterface(),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] a", "[assisted factory] test.FactoryA"),
+                ),
+            )),
+            errorMessage(formatMessage(
+                message = Errors.assistedInjectTypeNoConstructor("void"),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] a", "[assisted factory] test.FactoryA"),
+                ),
+            )),
+            errorMessage(formatMessage(
+                message = Errors.assistedInjectFactoryNoMethod(),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] b", "[assisted factory] test.FactoryB"),
+                ),
+            )),
+            errorMessage(formatMessage(
+                message = Errors.assistedInjectFactoryDuplicateParameters(),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] a", "[assisted factory] test.FactoryA"),
+                ),
+            )),
+            errorMessage(formatMessage(
+                message = Errors.assistedInjectDuplicateParameters(),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] c", "[assisted factory] test.FactoryC"),
+                ),
+            )),
+            errorMessage(formatMessage(
+                message = Errors.assistedInjectMismatch(),
+                notes = listOf(
+                  """From constructor: [@Assisted("A") int]""",
+                  """From factory: [@Assisted("A") int, @Assisted("B") int]""",
+                ),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] c", "[assisted factory] test.FactoryC"),
+                ),
+            )),
+        )
+    }
 }

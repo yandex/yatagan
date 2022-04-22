@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.graph
 
+import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -32,6 +33,7 @@ interface Binding : BaseBinding {
 
     interface Visitor<R> {
         fun visitProvision(binding: ProvisionBinding): R
+        fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R
         fun visitInstance(binding: InstanceBinding): R
         fun visitAlternatives(binding: AlternativesBinding): R
         fun visitSubComponentFactory(binding: SubComponentFactoryBinding): R
@@ -52,6 +54,10 @@ interface ProvisionBinding : Binding {
     val provision: CallableLangModel
     val inputs: List<NodeDependency>
     val requiresModuleInstance: Boolean
+}
+
+interface AssistedInjectFactoryBinding : Binding {
+    val model: AssistedInjectFactoryModel
 }
 
 /**
