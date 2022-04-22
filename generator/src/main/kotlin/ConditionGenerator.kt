@@ -27,21 +27,19 @@ internal class ConditionGenerator(
         }
     }
 
-    private fun access(literal: ConditionScope.Literal, builder: ExpressionBuilder) {
+    private fun access(
+        literal: ConditionScope.Literal,
+        builder: ExpressionBuilder,
+        inside: BindingGraph,
+    ) {
         require(!literal.negated) { "Not reached: must be normalized" }
 
-        literalAccess[literal]?.let {
-            it.access(builder)
-            return
+        val localLiteralAccess = literalAccess[literal]
+        if (localLiteralAccess != null) {
+            localLiteralAccess.access(builder = builder, inside = inside)
+        } else {
+            thisGraph.parent!!.let(Generators::get).conditionGenerator.access(literal, builder, inside)
         }
-
-        val parent = thisGraph.parent?.let(Generators::get)?.conditionGenerator!!
-        with(builder) {
-            val component = explicitComponentInstance(inside = thisGraph, graph = parent.thisGraph)!!
-            +component
-            +"."
-        }
-        parent.access(literal, builder)
     }
 
     override fun generate(builder: TypeSpecBuilder) {
@@ -50,15 +48,18 @@ internal class ConditionGenerator(
         }
     }
 
-    fun expression(builder: ExpressionBuilder, conditionScope: ConditionScope) = with(builder) {
+    fun expression(
+        builder: ExpressionBuilder,
+        conditionScope: ConditionScope,
+        inside: BindingGraph,
+    ) = with(builder) {
         join(conditionScope.expression, separator = " && ") { clause ->
             +"("
             join(clause, separator = " || ") { literal ->
                 if (literal.negated) {
                     +"!"
                 }
-                +"this."
-                access(literal.normalized(), this)
+                access(literal = literal.normalized(), builder = this, inside = inside)
             }
             +")"
         }
@@ -66,7 +67,7 @@ internal class ConditionGenerator(
 
     private interface ConditionAccessStrategy {
         fun generateInComponent(builder: TypeSpecBuilder)
-        fun access(builder: ExpressionBuilder)
+        fun access(builder: ExpressionBuilder, inside: BindingGraph)
     }
 
     /**
@@ -92,8 +93,10 @@ internal class ConditionGenerator(
             }
         }
 
-        override fun access(builder: ExpressionBuilder) {
+        override fun access(builder: ExpressionBuilder, inside: BindingGraph) {
             with(builder) {
+                +componentInstance(inside = inside, graph = thisGraph)
+                +"."
                 +name
             }
         }
@@ -142,8 +145,10 @@ internal class ConditionGenerator(
             }
         }
 
-        override fun access(builder: ExpressionBuilder) {
+        override fun access(builder: ExpressionBuilder, inside: BindingGraph) {
             with(builder) {
+                +componentInstance(inside = inside, graph = thisGraph)
+                +"."
                 +accessorName
                 +"()"
             }

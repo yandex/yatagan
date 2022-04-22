@@ -49,7 +49,7 @@ internal class MultiBindingGenerator(
                         } else {
                             val expression = buildExpression {
                                 val gen = Generators[nodeBinding.owner].conditionGenerator
-                                gen.expression(this, nodeBinding.conditionScope)
+                                gen.expression(this, nodeBinding.conditionScope, inside = thisGraph)
                             }
                             controlFlow("if (%L) ".formatCode(expression)) {
                                 +generateAccess()

@@ -247,7 +247,7 @@ internal class ConditionalAccessStrategy(
                 !binding.conditionScope.isAlways -> {
                     val expression = buildExpression {
                         val gen = Generators[binding.owner].conditionGenerator
-                        gen.expression(this, binding.conditionScope)
+                        gen.expression(builder = this, conditionScope = binding.conditionScope, inside = binding.owner)
                     }
                     +buildExpression {
                         +"return %L ? %T.of(".formatCode(expression, Names.Optional)

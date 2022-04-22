@@ -93,7 +93,7 @@ private class CreationGeneratorVisitor(
                     }
                     val expression = buildExpression {
                         val gen = Generators[inside].conditionGenerator
-                        gen.expression(this, altBinding.conditionScope)
+                        gen.expression(builder = this, conditionScope = altBinding.conditionScope, inside = inside)
                     }
                     +"%L ? ".formatCode(expression)
                     altBinding.generateAccess(builder = builder, inside = inside)
