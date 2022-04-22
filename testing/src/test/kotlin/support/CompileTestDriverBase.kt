@@ -54,7 +54,8 @@ abstract class CompileTestDriverBase protected constructor(
     data class ValidationResult(
         val runtimeClasspath: List<File>,
         val messageLog: String,
-        val exitCode: KotlinCompilation.ExitCode,
+        val success: Boolean,
+        val generatedFiles: Collection<File>,
     )
 
     protected open fun doValidate(): ValidationResult {
@@ -63,26 +64,39 @@ abstract class CompileTestDriverBase protected constructor(
         return ValidationResult(
             runtimeClasspath = compilation.classpaths + compilation.classesDir,
             messageLog = result.messages,
-            exitCode = result.exitCode,
+            success = result.exitCode == KotlinCompilation.ExitCode.OK,
+            generatedFiles = compilation.kaptSourceDir.walk()
+                .filter { it.isFile && it.extension == "java" }
+                .toList(),
         )
     }
 
     override fun expectValidationResults(vararg messages: Message) {
-        val (runtimeClasspath, messageLog, exitCode) = doValidate()
-        Assert.assertFalse("No errors expected, yet compilation failed",
-            messages.none { it.kind == MessageKind.Error } && exitCode != KotlinCompilation.ExitCode.OK)
-        val actualMessages = parseMessages(messageLog).sorted().toList()
-        val expectedMessages = messages.sorted()
-        Assert.assertArrayEquals(expectedMessages.toTypedArray(), actualMessages.toTypedArray())
-
-        // find runtime test
-        val classLoader = makeClassLoader(runtimeClasspath)
+        val (runtimeClasspath, messageLog, success, generatedFiles) = doValidate()
         try {
-            classLoader.loadClass("test.TestCaseKt").getDeclaredMethod("test").invoke(null)
-        } catch (e: ClassNotFoundException) {
-            // No runtime test case, okay
-        } catch (e: NoSuchMethodException) {
-            // No test method, okay
+            Assert.assertFalse("No errors expected, yet compilation failed",
+                messages.none { it.kind == MessageKind.Error } && !success)
+            val actualMessages = parseMessages(messageLog).sorted().toList()
+            val expectedMessages = messages.sorted()
+            Assert.assertArrayEquals(expectedMessages.toTypedArray(), actualMessages.toTypedArray())
+
+            if (success) {
+                // find runtime test
+                val classLoader = makeClassLoader(runtimeClasspath)
+                try {
+                    classLoader.loadClass("test.TestCaseKt").getDeclaredMethod("test").invoke(null)
+                } catch (e: ClassNotFoundException) {
+                    println("NOTE: No runtime test detected.")
+                } catch (e: NoSuchMethodException) {
+                    println("NOTE: No runtime test detected in TestCaseKt class.")
+                }
+            }
+
+        } finally {
+            // print generated files
+            for (generatedFile in generatedFiles) {
+                println("Generated file://${generatedFile.absolutePath}")
+            }
         }
     }
 
