@@ -1,5 +1,6 @@
 plugins {
     id("daggerlite.artifact")
+    id("daggerlite.documented")
 }
 
 val kspVersion: String by extra

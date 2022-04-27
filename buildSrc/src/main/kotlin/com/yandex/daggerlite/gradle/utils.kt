@@ -8,3 +8,5 @@ private val semVerRegex = ("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((
 fun isValidSemVerString(string: String): Boolean {
     return semVerRegex.matches(string)
 }
+
+const val RepositoryBrowseUrl = "https://bitbucket.browser.yandex-team.ru/projects/ML/repos/dagger-lite/browse"

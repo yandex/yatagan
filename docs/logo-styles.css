@@ -1,0 +1,7 @@
+.library-name a {
+    position: relative;
+}
+
+.library-name a::before {
+    /** TODO: Provide an actual icon one day. */
+}

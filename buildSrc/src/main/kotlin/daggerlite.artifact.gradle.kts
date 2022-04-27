@@ -5,12 +5,10 @@ plugins {
     `maven-publish`
 }
 
-// dagger-lite version
-val versionString: String = providers.fileContents(rootProject.layout.projectDirectory.file("daggerlite.version"))
-    .asText.forUseAtConfigurationTime().get().trim()
+val daggerLiteVersion: String by extra
 
-check(isValidSemVerString(versionString)) {
-    "`$versionString` is not a valid version"
+check(isValidSemVerString(daggerLiteVersion)) {
+    "`$daggerLiteVersion` is not a valid version"
 }
 
 // For release publications
@@ -29,7 +27,7 @@ val mavenUsername: Provider<String> = providers.environmentVariable("MAVEN_USERN
 val mavenPassword: Provider<String> = providers.environmentVariable("MAVEN_PASSWORD")
     .forUseAtConfigurationTime()
 
-version = versionString
+version = daggerLiteVersion
 group = "com.yandex.daggerlite"
 
 java {
@@ -50,7 +48,7 @@ publishing {
                 }
             }
 
-            val isSnapshotVersion = versionString.endsWith("SNAPSHOT")
+            val isSnapshotVersion = daggerLiteVersion.endsWith("SNAPSHOT")
             when {
                 !isSnapshotVersion && mavenUrl.isPresent -> maven {
                     url = uri(mavenUrl.get())

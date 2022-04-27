@@ -20,6 +20,10 @@ val kotlinVersion: String = providers
     .asText.forUseAtConfigurationTime()
     .get().trimEnd()
 
+val dokkaVersion = kotlinVersion
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    implementation("org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion")
+    implementation("org.jetbrains.dokka:dokka-base:$dokkaVersion")
 }
