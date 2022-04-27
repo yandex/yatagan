@@ -9,6 +9,8 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  *
  * @see com.yandex.daggerlite.Component.dependencies
  */
-interface ComponentDependencyModel : MayBeInvalid, HasNodeModel {
+interface ComponentDependencyModel : MayBeInvalid, ClassBackedModel {
     val exposedDependencies: Map<NodeModel, FunctionLangModel>
+
+    fun asNode(): NodeModel
 }

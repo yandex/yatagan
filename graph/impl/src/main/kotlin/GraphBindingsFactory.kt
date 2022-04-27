@@ -1,17 +1,20 @@
 package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.base.ifContainsDuplicates
+import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.HasNodeModel
+import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
+import com.yandex.daggerlite.core.accept
 import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.graph.AliasBinding
@@ -20,16 +23,15 @@ import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.ValidationMessage
-import com.yandex.daggerlite.validation.ValidationMessage.Kind
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.ValidationMessageBuilder
-import com.yandex.daggerlite.validation.impl.buildMessage
+import com.yandex.daggerlite.validation.impl.reportError
 
 internal class GraphBindingsFactory(
     private val graph: BindingGraphImpl,
     private val parent: GraphBindingsFactory?,
 ) : MayBeInvalid {
+    private val implicitBindingCreator = ImplicitBindingCreator()
     private val validationMessages = arrayListOf<ValidationMessage>()
 
     private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
@@ -143,7 +145,7 @@ internal class GraphBindingsFactory(
                 target = current,
                 contributions = contributions,
             ))
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 val old = current
                 current = iterator.next()
                 add(SyntheticAliasBindingImpl(
@@ -181,26 +183,16 @@ internal class GraphBindingsFactory(
     }
 
     fun materializeImplicitBindingFor(node: NodeModel): Binding? {
-        return implicitBindings.getOrPut(node, fun(): Binding? {
-            if (node.qualifier != null) {
-                return null
-            }
-            val inject = node.implicitBinding ?: return null
-
-            if (inject.scope != null && inject.scope != graph.scope) {
-                return null
-            }
-
-            return InjectConstructorProvisionBindingImpl(
-                impl = inject,
-                owner = graph,
-            )
-        })
+        return implicitBindings.getOrPut(node) {
+            if (node.qualifier == null) {
+                node.getSpecificModel().accept(implicitBindingCreator)
+            } else null
+        }
     }
 
-    private fun localAndParentExplicitBindings(): Map<NodeModel, List<BaseBinding>> {
-        return buildMap<NodeModel, MutableList<BaseBinding>> {
-            parent?.localAndParentExplicitBindings()?.forEach { (node, bindings) ->
+    private val localAndParentExplicitBindings: Map<NodeModel, List<BaseBinding>> by lazy {
+        buildMap<NodeModel, MutableList<BaseBinding>> {
+            parent?.localAndParentExplicitBindings?.forEach { (node, bindings) ->
                 getOrPut(node, ::arrayListOf) += bindings
             }
             providedBindings.forEach { (node, bindings) ->
@@ -213,21 +205,45 @@ internal class GraphBindingsFactory(
         validationMessages.forEach(validator::report)
 
         val locallyRequestedNodes = graph.localBindings.map { (binding, _) -> binding.target }.toHashSet()
-        for ((node, bindings) in localAndParentExplicitBindings()) {
+        for ((node, bindings) in localAndParentExplicitBindings) {
             if (node !in locallyRequestedNodes) {
                 // Check duplicates only for locally requested bindings - no need to report parent duplicates.
                 // As a side effect, if duplicates are present for an unused binding - we don't care.
                 continue
             }
 
-            bindings.ifContainsDuplicates { duplicates ->
-                validator.report(buildMessage(Kind.Error, fun ValidationMessageBuilder.() {
-                    contents = Strings.Errors.conflictingBindings(`for` = node)
-                    duplicates.forEach { binding ->
-                        addNote(Strings.Notes.duplicateBinding(binding))
+            if (bindings.size > 1) {
+                val distinct = bindings.toSet()
+                if (distinct.size > 1) {
+                    validator.reportError(Strings.Errors.conflictingBindings(`for` = node)) {
+                        distinct.forEach { binding ->
+                            addNote(Strings.Notes.duplicateBinding(binding))
+                        }
                     }
-                }))
+                }
             }
+        }
+    }
+
+    private inner class ImplicitBindingCreator : HasNodeModel.Visitor<Binding?> {
+        override fun visitDefault(): Binding? = null
+
+        override fun visitInjectConstructor(model: InjectConstructorModel): Binding? {
+            if (model.scope != null && model.scope != graph.scope) {
+                return null
+            }
+
+            return InjectConstructorProvisionBindingImpl(
+                impl = model,
+                owner = graph,
+            )
+        }
+
+        override fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): Binding {
+            return AssistedInjectFactoryBindingImpl(
+                model = model,
+                owner = graph,
+            )
         }
     }
 }

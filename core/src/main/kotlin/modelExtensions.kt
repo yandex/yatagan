@@ -22,3 +22,17 @@ val DependencyKind.isEager
         Direct, Optional -> true
         Lazy, Provider, OptionalLazy, OptionalProvider -> false
     }
+
+fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
+    return if (this == null) {
+        visitor.visitDefault()
+    } else {
+        accept(visitor)
+    }
+}
+
+fun AssistedInjectFactoryModel.allAssistedParameters() = assistedConstructorParameters
+    .filterIsInstance<AssistedInjectFactoryModel.Parameter.Assisted>()
+
+fun AssistedInjectFactoryModel.allInjectedParameters() = assistedConstructorParameters
+    .filterIsInstance<AssistedInjectFactoryModel.Parameter.Injected>()

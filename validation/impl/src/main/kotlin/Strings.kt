@@ -250,6 +250,30 @@ object Strings {
             append(" (*)")
         }
 
+        @Covered
+        fun assistedInjectFactoryNotInterface() =
+            "Assisted inject factory must be an interface."
+
+        @Covered
+        fun assistedInjectTypeNoConstructor(type: Any) =
+            "Type `$type` doesn't have an @AssistedInject constructor."
+
+        @Covered
+        fun assistedInjectFactoryNoMethod() =
+            "Assisted inject factory must contain exactly one abstract factory method."
+
+        @Covered
+        fun assistedInjectDuplicateParameters() =
+            "@AssistedInject constructor's @Assisted parameters contain duplicate types/ids."
+
+        @Covered
+        fun assistedInjectFactoryDuplicateParameters() =
+            "factory method's @Assisted parameters contain duplicate types/ids."
+
+        @Covered
+        fun assistedInjectMismatch() =
+            "@AssistedInject constructor @Assisted parameters and factory function @Assisted parameters do not match."
+
         private const val AccessMessage = "public (internal is allowed for Kotlin)"
 
         @Covered
@@ -279,6 +303,10 @@ object Strings {
         @Covered
         fun invalidAccessForMemberInject() =
             "A class for members injection must be $AccessMessage."
+
+        @Covered
+        fun invalidAccessForAssistedInject() =
+            "An @AssistedInject constructor and the declaring class must be $AccessMessage"
     }
 
     object Warnings {

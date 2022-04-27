@@ -39,13 +39,17 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
             throw RuntimeException("Test source compilation failed, check the code")
         }
         val runtimeClasspath = compilation.classpaths + compilation.classesDir
+        val log = StringBuilder()
+        val success = validateRuntimeComponents(
+            componentNames = accumulator.componentNames,
+            runtimeClasspath = runtimeClasspath,
+            log = log,
+        )
         return ValidationResult(
             runtimeClasspath = runtimeClasspath,
-            messageLog = validateRuntimeComponents(
-                componentNames = accumulator.componentNames,
-                runtimeClasspath = runtimeClasspath,
-            ),
-            exitCode = KotlinCompilation.ExitCode.OK,
+            messageLog = log.toString(),
+            success = success,
+            generatedFiles = emptyList(),
         )
     }
 
@@ -68,8 +72,8 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
     private fun validateRuntimeComponents(
         componentNames: Set<String>,
         runtimeClasspath: List<File>,
-    ): String {
-        val log = StringBuilder()
+        log: StringBuilder,
+    ): Boolean {
         val classLoader = makeClassLoader(runtimeClasspath)
         val graphs = buildList {
             for (componentName in componentNames) {
@@ -83,13 +87,17 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
                 add(graph)
             }
         }
+        var success = true
         val logger = LoggerDecorator(object : Logger {
             override fun error(message: String) {
+                success = false
                 log.appendLine(message)
+                println(message)
             }
 
             override fun warning(message: String) {
                 log.appendLine(message)
+                println(message)
             }
         })
         for (message in validate(graphs)) {
@@ -108,9 +116,7 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
                 ))
             }
         }
-        return log.toString().also {
-            println(it)
-        }
+        return success
     }
 
     private inline fun dynamicRuntimeScope(block: () -> Unit) {

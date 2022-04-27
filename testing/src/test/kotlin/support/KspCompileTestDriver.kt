@@ -5,6 +5,7 @@ import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.ksp.KspDaggerLiteProcessorProvider
 import java.io.File
 
@@ -17,8 +18,9 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         }
         val firstStageResult = firstStageCompilation.compile()
 
+        val kspGeneratedSources = firstStageCompilation.kspGeneratedSources().memoize()
         val secondStageCompilation = createKotlinCompilation().apply {
-            sources = sourceFiles + firstStageCompilation.kspGeneratedSources().map(SourceFile::fromPath)
+            sources = sourceFiles + kspGeneratedSources.map(SourceFile::fromPath)
         }
         val secondStageResult = secondStageCompilation.compile()
         return ValidationResult(
@@ -28,7 +30,8 @@ class KspCompileTestDriver : CompileTestDriverBase() {
                 add(secondStageCompilation.classesDir)
             },
             messageLog = firstStageResult.messages,
-            exitCode = firstStageResult.exitCode and secondStageResult.exitCode,
+            success = (firstStageResult.exitCode and secondStageResult.exitCode) == ExitCode.OK,
+            generatedFiles = kspGeneratedSources.toList()
         )
     }
 

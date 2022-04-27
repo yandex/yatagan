@@ -721,5 +721,90 @@ class CoreBindingsTest(
 
         expectSuccessfulValidation()
     }
+
+    @Test
+    fun `basic assisted inject`() {
+        givenJavaSource("test.BarFactory", """
+            import com.yandex.daggerlite.AssistedFactory;
+            import com.yandex.daggerlite.Assisted;
+            @AssistedFactory
+            public interface BarFactory {
+                Bar buildBar(@Assisted("c2") int count2, @Assisted("c1") int count1, String value);
+            }
+        """.trimIndent())
+        givenJavaSource("test.FooFactory", """
+            import com.yandex.daggerlite.AssistedFactory;
+            import com.yandex.daggerlite.Assisted;
+            @AssistedFactory
+            public interface FooFactory {
+                Foo createFoo(@Assisted("c1") int count1, @Assisted("c2") int count2, String value);
+            }
+        """.trimIndent())
+        givenJavaSource("test.Foo", """
+            import com.yandex.daggerlite.AssistedInject;
+            import com.yandex.daggerlite.Assisted;
+            
+            public class Foo { 
+                public final Bar bar;
+                @AssistedInject public Foo(
+                    @Assisted("c2") int c2,
+                    BarFactory factory,
+                    @Assisted("c1") int c1,
+                    @Assisted String v
+                ) {
+                    bar = factory.buildBar(c2, c1, v);
+                }
+            }
+        """.trimIndent())
+        givenJavaSource("test.Bar", """
+            import com.yandex.daggerlite.AssistedInject;
+            import com.yandex.daggerlite.Assisted;            
+
+            public class Bar { 
+                public final int c1;
+                public final int c2;
+                public final String v;
+                @AssistedInject public Bar(
+                    @Assisted("c1") int c1,
+                    @Assisted("c2") int c2,
+                    @Assisted String v
+                ) {
+                    this.c1 = c1;
+                    this.c2 = c2;
+                    this.v = v;
+                }
+            }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            
+            @Module(subcomponents = [SubComponent::class])
+            interface TestModule
+
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                fun fooFactory(): FooFactory 
+            }
+            
+            fun test() {
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                val f = c.fooFactory().createFoo(1, 2, "hello")
+                assert(f.bar.c1 == 1)
+                assert(f.bar.c2 == 2)
+                assert(f.bar.v == "hello")
+            }
+        """.trimIndent())
+        givenKotlinSource("test.SubComponent", """
+            import com.yandex.daggerlite.*
+            @Component(isRoot = false)
+            interface SubComponent {
+                fun fooFactory(): FooFactory
+                @Component.Builder interface Builder { fun create(): SubComponent }
+            }
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
 }
 

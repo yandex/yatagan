@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.AnyCondition
+import com.yandex.daggerlite.Assisted
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.ComponentFlavor
 import com.yandex.daggerlite.Condition
@@ -9,6 +10,7 @@ import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
+import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
@@ -89,4 +91,11 @@ internal class RtComponentFlavorAnnotationImpl(
 ) : RtAnnotationImplBase<ComponentFlavor>(impl), ComponentFlavorAnnotationLangModel {
     override val dimension: TypeLangModel
         get() = RtTypeImpl(impl.dimension.java)
+}
+
+internal class RtAssistedAnnotationImpl(
+    impl: Assisted,
+) : RtAnnotationImplBase<Assisted>(impl), AssistedAnnotationLangModel {
+    override val value: String
+        get() = impl.value
 }

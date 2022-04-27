@@ -2,6 +2,7 @@ package com.yandex.daggerlite.generator.lang
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
+import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
@@ -78,5 +79,18 @@ internal class CtIntoListAnnotationImpl private constructor(
 
     companion object Factory : ObjectCache<CtAnnotationLangModel, CtIntoListAnnotationImpl>() {
         operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtIntoListAnnotationImpl)
+    }
+}
+
+internal class CtAssistedAnnotationImpl private constructor(
+    private val impl: CtAnnotationLangModel,
+) : AssistedAnnotationLangModel {
+    override val value: String
+        get() = impl.getString("value")
+
+    override fun toString() = impl.toString()
+
+    companion object Factory : ObjectCache<CtAnnotationLangModel, CtAssistedAnnotationImpl>() {
+        operator fun invoke(impl: CtAnnotationLangModel) = createCached(impl, ::CtAssistedAnnotationImpl)
     }
 }

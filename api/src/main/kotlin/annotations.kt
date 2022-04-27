@@ -465,6 +465,39 @@ annotation class ComponentFlavor(
 
 // endregion Conditions API
 
+// region Assisted Inject API
+
+/**
+ * TODO: doc.
+ */
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CONSTRUCTOR)
+annotation class AssistedInject
+
+/**
+ * TODO: doc.
+ */
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class Assisted(
+    /**
+     * TODO: doc.
+     */
+    val value: String = "",
+)
+
+/**
+ * TODO: doc.
+ */
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CLASS)
+annotation class AssistedFactory
+
+// endregion
+
 /**
  * TODO: doc.
  */

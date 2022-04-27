@@ -30,7 +30,7 @@ internal class ComponentGenerator(
     private val fieldsNs = Namespace(prefix = "m")
     private val subcomponentNs = Namespace()
 
-    private val slotSwitchingGenerator: Provider<SlotSwitchingGenerator> = lazyProvider {
+    private val slotSwitchingGenerator = lazyProvider {
         SlotSwitchingGenerator(
             thisGraph = graph,
         ).also(this::registerContributor)
@@ -49,7 +49,7 @@ internal class ComponentGenerator(
     private val lockGeneratorProvider = lazyProvider {
         LockGenerator(
             componentImplName = generatedClassName,
-        ).also(this@ComponentGenerator::registerContributor)
+        ).also(this::registerContributor)
     }
 
     init {
@@ -81,6 +81,11 @@ internal class ComponentGenerator(
                 thisGraph = graph,
                 fieldsNs = fieldsNs,
                 componentImplName = implName,
+            ).also(this@ComponentGenerator::registerContributor)
+
+            override val assistedInjectFactoryGenerator = AssistedInjectFactoryGenerator(
+                thisGraph = graph,
+                componentImplName = generatedClassName,
             ).also(this@ComponentGenerator::registerContributor)
         }
     }

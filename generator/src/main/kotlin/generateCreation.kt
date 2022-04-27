@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.AlternativesBinding
+import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ComponentDependencyBinding
@@ -18,13 +19,11 @@ import com.yandex.daggerlite.graph.InstanceBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
-import org.jetbrains.annotations.Contract
 
 private class CreationGeneratorVisitor(
     private val builder: ExpressionBuilder,
     private val inside: BindingGraph,
 ) : Binding.Visitor<Unit> {
-    @Contract
     override fun visitProvision(binding: ProvisionBinding) {
         with(builder) {
             val instance = if (binding.requiresModuleInstance) {
@@ -64,6 +63,14 @@ private class CreationGeneratorVisitor(
         }
     }
 
+    override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
+        Generators[binding.owner].assistedInjectFactoryGenerator.generateCreation(
+            builder = builder,
+            binding = binding,
+            inside = inside,
+        )
+    }
+
     override fun visitInstance(binding: InstanceBinding) {
         with(builder) {
             val component = componentForBinding(binding)
@@ -84,7 +91,7 @@ private class CreationGeneratorVisitor(
                     }
                     val expression = buildExpression {
                         val gen = Generators[inside].conditionGenerator
-                        gen.expression(this, altBinding.conditionScope)
+                        gen.expression(builder = this, conditionScope = altBinding.conditionScope, inside = inside)
                     }
                     +"%L ? ".formatCode(expression)
                     altBinding.generateAccess(builder = builder, inside = inside)

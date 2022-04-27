@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.graph
 
+import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
@@ -43,6 +44,11 @@ interface BindingGraph : MayBeInvalid {
      * The associated info is [LiteralUsage].
      */
     val localConditionLiterals: Map<ConditionScope.Literal, LiteralUsage>
+
+    /**
+     * [AssistedInjectFactoryModel]s that are hosted in this graph.
+     */
+    val localAssistedInjectFactories: Collection<AssistedInjectFactoryModel>
 
     /**
      * Child graphs (or Subcomponents). Empty if no children present.

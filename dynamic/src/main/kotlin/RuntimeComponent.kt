@@ -12,6 +12,7 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.graph.AlternativesBinding
+import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ComponentDependencyBinding
@@ -60,6 +61,19 @@ internal class RuntimeComponent(
                 put(module, module.type.declaration.rt.getConstructor().newInstance())
             }
         }
+    }
+
+    fun resolveAndAccess(dependency: NodeDependency): Any {
+        val (node, kind) = dependency
+        val binding = graph.resolveBinding(node)
+        return componentForGraph(binding.owner).access(binding, kind)
+    }
+
+    private fun resolveAndAccessIfCondition(node: NodeModel): Any? {
+        val binding = graph.resolveBinding(node)
+        return if (evaluateConditionScope(binding.conditionScope)) {
+            componentForGraph(binding.owner).access(binding, DependencyKind.Direct)
+        } else null
     }
 
     private fun componentForGraph(graph: BindingGraph): RuntimeComponent {
@@ -146,6 +160,15 @@ internal class RuntimeComponent(
         }
     }
 
+    override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): Any {
+        val model = binding.model
+        return Proxy.newProxyInstance(javaClass.classLoader, arrayOf(model.type.declaration.rt),
+            RuntimeAssistedInjectFactory(
+                model = model,
+                owner = this,
+            ))
+    }
+
     override fun visitInstance(binding: InstanceBinding): Any {
         return checkNotNull(givenInstances[binding.target]) {
             "Provided instance for ${binding.target} is null"
@@ -154,10 +177,8 @@ internal class RuntimeComponent(
 
     override fun visitAlternatives(binding: AlternativesBinding): Any {
         for (alternative: NodeModel in binding.alternatives) {
-            val altBinding = graph.resolveBinding(alternative)
-            if (evaluateConditionScope(altBinding.conditionScope)) {
-                return componentForGraph(altBinding.owner)
-                    .access(binding = altBinding, kind = DependencyKind.Direct)
+            resolveAndAccessIfCondition(alternative)?.let {
+                return it
             }
         }
         throw AssertionError("Not reached: inconsistent condition")
@@ -196,15 +217,11 @@ internal class RuntimeComponent(
     override fun visitMulti(binding: MultiBinding): Any {
         return buildList(capacity = binding.contributions.size) {
             for ((node: NodeModel, kind: MultiBinding.ContributionType) in binding.contributions) {
-                val contributionBinding = graph.resolveBinding(node)
-                if (!evaluateConditionScope(contributionBinding.conditionScope)) {
-                    continue
-                }
-                val contribution = componentForGraph(contributionBinding.owner)
-                    .access(binding = contributionBinding, kind = DependencyKind.Direct)
-                when (kind) {
-                    MultiBinding.ContributionType.Element -> add(contribution)
-                    MultiBinding.ContributionType.Collection -> addAll(contribution as Collection<*>)
+                resolveAndAccessIfCondition(node)?.let { contribution ->
+                    when (kind) {
+                        MultiBinding.ContributionType.Element -> add(contribution)
+                        MultiBinding.ContributionType.Collection -> addAll(contribution as Collection<*>)
+                    }
                 }
             }
         }
@@ -218,9 +235,7 @@ internal class RuntimeComponent(
     private inner class ProvisionEvaluator(val binding: ProvisionBinding) : CallableLangModel.Visitor<Any?> {
         private fun args(): Array<Any> = binding.inputs.let { inputs ->
             Array(inputs.size) { index ->
-                val (node, kind) = inputs[index]
-                val dependencyBinding = graph.resolveBinding(node)
-                componentForGraph(dependencyBinding.owner).access(binding = dependencyBinding, kind = kind)
+                resolveAndAccess(inputs[index])
             }
         }
 
@@ -246,9 +261,7 @@ internal class RuntimeComponent(
 
     private inner class EntryPointHandler(val dependency: NodeDependency) : MethodHandler {
         override fun invoke(proxy: Any, args: Array<Any?>?): Any {
-            val (node, kind) = dependency
-            val binding = graph.resolveBinding(node)
-            return componentForGraph(binding.owner).access(binding, kind = kind)
+            return resolveAndAccess(dependency)
         }
     }
 
@@ -256,9 +269,7 @@ internal class RuntimeComponent(
         override fun invoke(proxy: Any, args: Array<Any?>?): Any? {
             val (injectee) = args!!
             for ((member, dependency) in memberInject.membersToInject) {
-                val (node, kind) = dependency
-                val binding = graph.resolveBinding(node)
-                val value = componentForGraph(binding.owner).access(binding, kind = kind)
+                val value = resolveAndAccess(dependency)
                 member.accept(object : MemberLangModel.Visitor<Unit> {
                     override fun visitField(model: FieldLangModel) = model.rt.set(injectee, value)
                     override fun visitFunction(model: FunctionLangModel) {

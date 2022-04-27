@@ -1,15 +1,15 @@
 package com.yandex.daggerlite.jap.lang
 
-import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.generator.lang.CtParameterLangModel
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.TypeMirror
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxParameterImpl(
-    impl: VariableElement,
+    private val impl: VariableElement,
     refinedType: TypeMirror,
-) : JavaxAnnotatedImpl<VariableElement>(impl), ParameterLangModel {
+) : CtParameterLangModel(), JavaxAnnotatedLangModel by JavaxAnnotatedImpl(impl) {
     override val name: String get() = impl.simpleName.toString()
     override val type: TypeLangModel by lazy(NONE) { JavaxTypeImpl(refinedType) }
 
