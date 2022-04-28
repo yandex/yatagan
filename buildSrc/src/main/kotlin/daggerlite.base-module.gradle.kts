@@ -36,6 +36,11 @@ val kotlinxMetadataVersion by extra("0.4.0")
 val junitVersion by extra("4.13.2")
 val mockitoKotlinVersion by extra("4.0.0")
 
+val daggerLiteVersion: String by extra(
+    providers.fileContents(rootProject.layout.projectDirectory.file("daggerlite.version"))
+        .asText.forUseAtConfigurationTime().get().trim()
+)
+
 java {
     toolchain {
         sourceCompatibility = JavaVersion.VERSION_1_8

@@ -36,39 +36,39 @@ annotation class Module(
  *
  * There are three cases for `@Binds` in dagger-lite:
  * - a method with *exactly one parameter* (e. g. `@Binds fun api(i: Impl): Api`) constitutes
- *  an **alias** binding. Wherever `Api` is requested, `Impl` will be injected.
- *    ```kotlin
- *    // The general idea behind the ALIAS binding, though @Binds will behave more efficiently.
- *    @Provides
- *    fun api(i: Impl): Api = i
- *    ```
+ * an **alias** binding. Wherever `Api` is requested, `Impl` will be injected.
+ * ```kotlin
+ * // The general idea behind the ALIAS binding, though @Binds will behave more efficiently.
+ * @Provides
+ * fun api(i: Impl): Api = i
+ * ```
  *
  * - a method with *more than one parameter* (e. g. `@Binds fun api(i1: Impl1, i2: Impl2, stub: Stub): Api`)
- *  constitutes an **alternatives** binding. Wherever `Api` is requested, *the first available alternative*
- *  (in the order of declaration) will be injected. Availability is checked in terms of [condition system][Conditional].
- *    ```kotlin
- *    // This is the general idea behind ALTERNATIVES binding, though @Binds will behave more efficiently.
- *    // This doesn't handle Provider/Lazy/Optional dependencies, as @Binds does.
- *    @Provides
- *    fun api(i1: Optional<Provider<Impl1>>, i2: Optional<Provider<Impl2>>, stub: Provider<Stub>): Api {
- *        if (i1.isPresent) {
- *            return i1.get().get()
- *        }
- *        if (i2.isPresent) {
- *            return i2.get().get()
- *        }
- *        return stub.get()
- *    }
- *    ```
+ * constitutes an **alternatives** binding. Wherever `Api` is requested, *the first available alternative*
+ * (in the order of declaration) will be injected. Availability is checked in terms of [condition system][Conditional].
+ * ```kotlin
+ * // This is the general idea behind ALTERNATIVES binding, though @Binds will behave more efficiently.
+ * // This doesn't handle Provider/Lazy/Optional dependencies, as @Binds does.
+ * @Provides
+ * fun api(i1: Optional<Provider<Impl1>>, i2: Optional<Provider<Impl2>>, stub: Provider<Stub>): Api {
+ *     if (i1.isPresent) {
+ *         return i1.get().get()
+ *     }
+ *     if (i2.isPresent) {
+ *         return i2.get().get()
+ *     }
+ *     return stub.get()
+ * }
+ * ```
  * - a method with *zero parameters* (e. g. `@Binds fun noApi(): Api`) constitutes an **explicit absent** binding.
- *  Its condition will be intrinsic *"never"* condition - it would be an error to request `Api` directly, and all
- *  [Optional] requests will always yield [Optional.empty].
- *    ```kotlin
- *    // This is the general idea behind EXPLICIT ABSENT binding.
- *    // The following code is more of a pseudocode, as such @Provides is not valid in terms of dagger-lite
- *    @Provides
- *    fun noApi(): Optional<Api> = Optional.empty()
- *    ```
+ * Its condition will be intrinsic *"never"* condition - it would be an error to request `Api` directly, and all
+ * [Optional] requests will always yield [Optional.empty].
+ * ```kotlin
+ * // This is the general idea behind EXPLICIT ABSENT binding.
+ * // The following code is more of a pseudocode, as such @Provides is not valid in terms of dagger-lite
+ * @Provides
+ * fun noApi(): Optional<Api> = Optional.empty()
+ * ```
  *
  * `@Binds` bindings family is never implemented or called - they just carry the necessary type info for the framework.
  *

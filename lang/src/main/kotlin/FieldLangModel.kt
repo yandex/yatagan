@@ -1,5 +1,9 @@
 package com.yandex.daggerlite.core.lang
 
+/**
+ * Models a field from a JVM point of view.
+ * Properties are not modeled by this.
+ */
 interface FieldLangModel : MemberLangModel {
 
     /**

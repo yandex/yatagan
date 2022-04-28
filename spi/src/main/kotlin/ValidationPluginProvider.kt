@@ -4,6 +4,8 @@ import com.yandex.daggerlite.graph.BindingGraph
 
 /**
  * Service Provider Interface for [ValidationPlugin].
+ *
+ * @see create
  */
 interface ValidationPluginProvider {
     /**
