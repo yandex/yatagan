@@ -35,3 +35,43 @@ interface ConditionalAnnotationLangModel {
 interface ComponentFlavorAnnotationLangModel {
     val dimension: TypeLangModel
 }
+
+/**
+ * [com.yandex.daggerlite.Assisted] annotation model.
+ */
+interface AssistedAnnotationLangModel {
+    val value: String
+}
+
+/**
+ * Models [com.yandex.daggerlite.Component] annotation.
+ */
+interface ComponentAnnotationLangModel {
+    val isRoot: Boolean
+    val modules: Sequence<TypeLangModel>
+    val dependencies: Sequence<TypeLangModel>
+    val variant: Sequence<TypeLangModel>
+    val multiThreadAccess: Boolean
+}
+
+/**
+ * Models [com.yandex.daggerlite.IntoList] annotation.
+ */
+interface IntoListAnnotationLangModel {
+    val flatten: Boolean
+}
+
+/**
+ * Models [com.yandex.daggerlite.Module] annotation.
+ */
+interface ModuleAnnotationLangModel {
+    val includes: Sequence<TypeLangModel>
+    val subcomponents: Sequence<TypeLangModel>
+}
+
+/**
+ * Models [com.yandex.daggerlite.Provides] annotation.
+ */
+interface ProvidesAnnotationLangModel {
+    val conditionals: Sequence<ConditionalAnnotationLangModel>
+}

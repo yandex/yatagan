@@ -11,6 +11,8 @@ interface AnnotatedLangModel {
 
     /**
      * Checks whether the construct is annotated with an [AnnotationLangModel] of the given [type].
+     *
+     * @param type Java annotation class to check
      */
     fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {
         return annotations.any { it.hasType(type) }

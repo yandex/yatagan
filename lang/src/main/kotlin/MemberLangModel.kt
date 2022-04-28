@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.core.lang
 
+/**
+ * Models a type declaration member.
+ */
 interface MemberLangModel : AnnotatedLangModel, HasPlatformModel, Accessible {
     /**
      * Type declaration that this entity is member of.

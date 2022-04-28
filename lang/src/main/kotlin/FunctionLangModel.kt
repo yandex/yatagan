@@ -4,7 +4,7 @@ package com.yandex.daggerlite.core.lang
  * Represents a function/method associated with a class from **the Java point of view**.
  * - Constructor is modeled separately by [ConstructorLangModel].
  * - Top-level kotlin functions are not covered.
- * - Kotlin properties (setters and getters) are represented by this.
+ * - Kotlin properties (setters and getters) are also represented by this, see [propertyAccessorInfo].
  */
 interface FunctionLangModel : MemberLangModel, CallableLangModel {
     /**

@@ -2,7 +2,7 @@ package com.yandex.daggerlite.validation
 
 /**
  * Validation message, issued by [MayBeInvalid].
- * Should have reasonable [equals]/[hashCode] implementation.
+ * Should have reasonable [equals]/[hashCode] implementation for grouping.
  */
 interface ValidationMessage {
     /**

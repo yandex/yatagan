@@ -1,5 +1,8 @@
 package com.yandex.daggerlite.core.lang
 
+/**
+ * A trait for models that encodes a language construct's accessibility.
+ */
 interface Accessible {
     /**
      * `true` is the entity is practically accessible from any package or module. `false` otherwise.

@@ -24,7 +24,7 @@ DL can work in multiple modes (use different "backends"):
 #### Build speed (the origin of "Lite")
 
 The most significant optimization point for DL is **build speed.**
-Measurements show build speed increase by at least 50% for kapt backend for a large multi-module mixed-language project,
+Measurements show build time decrease by at least 50% for kapt backend for a large multi-module mixed-language project,
 though numbers may, of course, vary across projects and D2 usage patterns.
 
 This is achieved mostly due to the fact, that DL doesn't generate a factory class for every `@Inject` constructor and
@@ -55,6 +55,7 @@ DL may slightly improve runtime performance for graphs, that are known to be use
 For graphs, that are used from multiple threads, one should explicitly declare it:
 [@Component(multiThreadAccess = true)][com.yandex.daggerlite/Component#multiThreadAccess@:api]
 Also, some other small optimizations are made and there are plans to keep researching for more opportunities.
+See the corresponding research [issue](https://st.yandex-team.ru/DAGGERLITE-34).
 
 #### Reflection for local development
 
@@ -65,11 +66,7 @@ Depending on graph size and complexity, application startup/responsiveness time 
 so RT is advised to be used only during local development.
 Release builds should always use codegen for maximum runtime performance and full compile-time validation.
 
-There's a separate `dagger-reflect` project for D2 which does essentially the same,
-yet RT for DL is a first-class citizen;
-DL is designed in a way that makes codegen and reflection behave identically (to a reasonable extent), by sharing as
-much code as possible between codegen and RT. So any new feature implemented for DL is automatically available for all
-supported backends with very little backend-specific code.
+Read more on RT in the [:api-dynamic] doc.
 
 ### Compatibility & Migration
 
@@ -96,7 +93,7 @@ The general idea of steps one needs to take to migrate from DL to D2:
    If you are unsure, if a component is accessed from a single thread, but ideally it should be,
    you can set up [ThreadAssertions][com.yandex.daggerlite/ThreadAssertions@:api].
 
-DL was written from scratch, and as major known inconsistencies are documented in [:api] doc,
+DL was written from scratch, and as major known inconsistencies are documented in the [:api] doc,
 there is a possibility for differences that are overlooked.
 If you happen to discover one, please report it.
 
@@ -182,7 +179,7 @@ Current **Kotlin version** for KSP: **%%kotlin_version%%**
 
 ## Useful links
 
-- [Code repository](%%repo_link%%)
+- Code: [repository](%%repo_link%%)
 - Startrek queue: [DAGGERLITE](https://st.yandex-team.ru/DAGERLITE)
 - Dagger2 [docs](https://dagger.dev/dev-guide/)
 - Old [slides](https://nda.ya.ru/t/DPG9wglr4sj2v6) about DL in SuperApp

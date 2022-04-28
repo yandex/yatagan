@@ -15,7 +15,9 @@ interface AnnotationLangModel {
     val isQualifier: Boolean
 
     /**
-     * Checks whether the annotation has given JVM type.
+     * Checks whether the annotation has the given JVM type.
+     *
+     * @param type Java class to check
      */
     fun <A : Annotation> hasType(type: Class<A>): Boolean
 }
