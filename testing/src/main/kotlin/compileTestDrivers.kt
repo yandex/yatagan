@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.support
+package com.yandex.daggerlite.testing
 
 import javax.inject.Provider
 

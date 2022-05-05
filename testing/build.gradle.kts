@@ -30,27 +30,27 @@ configurations.all {
 
 dependencies {
     // Third-party test dependencies
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
-    testImplementation("junit:junit:$junitVersion")
+    implementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
+    implementation("junit:junit:$junitVersion")
 
     // Base test dependencies
-    testImplementation(project(":processor"))
-    testImplementation(project(":validation-impl"))
-    testImplementation(project(":core-impl"))
-    testImplementation(project(":graph-impl"))
-    testImplementation(project(":api"))
-    testImplementation(project(":base"))
+    implementation(project(":processor"))
+    implementation(project(":validation-impl"))
+    implementation(project(":core-impl"))
+    implementation(project(":graph-impl"))
+    implementation(project(":api"))
+    implementation(project(":base"))
 
     // KSP dependencies
-    testImplementation(project(":lang-ksp"))
-    testImplementation(project(":processor-ksp"))
+    implementation(project(":lang-ksp"))
+    implementation(project(":processor-ksp"))
 
     // JAP dependencies
-    testImplementation(project(":lang-jap"))
-    testImplementation(project(":processor-jap"))
+    implementation(project(":lang-jap"))
+    implementation(project(":processor-jap"))
 
     // RT dependencies
-    testImplementation(project(":lang-rt"))
+    implementation(project(":lang-rt"))
 
     // Heavy test dependencies
     testImplementation(project(":testing-generator"))

@@ -1,9 +1,5 @@
 package com.yandex.daggerlite.testing
 
-import com.yandex.daggerlite.testing.support.Backend
-import com.yandex.daggerlite.testing.support.CompileTestDriver
-import com.yandex.daggerlite.testing.support.SourceSet
-import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Assume.assumeFalse
 import org.junit.Test
 import org.junit.runner.RunWith

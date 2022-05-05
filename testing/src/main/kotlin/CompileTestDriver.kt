@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.support
+package com.yandex.daggerlite.testing
 
 interface CompileTestDriver : SourceSet {
     fun givenPrecompiledModule(
