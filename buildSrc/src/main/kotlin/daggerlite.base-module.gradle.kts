@@ -27,6 +27,7 @@ val kotlinVersion: String by extra(
     providers.fileContents(rootProject.layout.projectDirectory.file("kotlin.version"))
         .asText.forUseAtConfigurationTime().get().trimEnd()
 )
+val dokkaVersion: String by extra(kotlinVersion)
 val kspVersion by extra("$kotlinVersion-1.0.4")
 val javaPoetVersion by extra("1.13.0")
 val kotlinPoetVersion by extra("1.11.0")

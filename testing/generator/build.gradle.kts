@@ -4,9 +4,10 @@ plugins {
 }
 
 val kotlinPoetVersion: String by extra
+val kotlinxCliVersion: String by extra
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
     implementation("com.squareup:kotlinpoet:$kotlinPoetVersion")
 }
 

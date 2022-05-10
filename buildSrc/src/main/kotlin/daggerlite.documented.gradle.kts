@@ -1,5 +1,6 @@
 import com.yandex.daggerlite.gradle.PatchModuleDocTask
 import com.yandex.daggerlite.gradle.RepositoryBrowseUrl
+import org.intellij.lang.annotations.Language
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.DokkaBaseConfiguration
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
@@ -16,6 +17,8 @@ val samplesDir = file("samples/")
 val patchModuleDoc by tasks.registering(PatchModuleDocTask::class) {
     inputFile.set(file("module.md"))
 }
+
+val kdocsTestsDir = layout.buildDirectory.dir("kdocs-tests-dir")
 
 fun gitCommitHash(): String {
     return ByteArrayOutputStream().apply bytes@ {
@@ -34,14 +37,19 @@ kotlin {
     }
 }
 
-tasks.withType<DokkaTaskPartial> {
+val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
     dependsOn(patchModuleDoc)
+
+    dependencies {
+        plugins(project(":testing-dokka"))
+    }
+
     dokkaSourceSets {
         named("main") {
             noStdlibLink.set(true)
             noJdkLink.set(true)
 
-            includes.from(patchModuleDoc.map { it.outputFile })
+            includes.from("module.md")
 
             // Include all samples from `samples` project directory, if present
             if (samplesDir.isDirectory) {
@@ -63,4 +71,40 @@ tasks.withType<DokkaTaskPartial> {
         footerMessage = "<div>Copyright 2022 Yandex LLC. All rights reserved.<p/>" +
                 """Slack: <a href="https://yndx-browser.slack.com/archives/C02J7BZLY0L">#dagger-lite-dev</a></div>"""
     }
+
+    @Language("JSON")
+    val config = """
+        {
+          "codeBlockTestsOutputDirectory": "${kdocsTestsDir.get().asFile}"
+        }
+    """.trimIndent()
+    pluginsMapConfiguration.set(mapOf(
+        "com.yandex.daggerlite.testing.dokka.DLDokkaPlugin" to config
+    ))
+
+    outputs.dir(kdocsTestsDir)
+}
+
+val runCodeBlockTestsClasspath by configurations.creating
+
+dependencies {
+    runCodeBlockTestsClasspath(project(":testing"))
+}
+
+val testDocumentationCodeBlocks by tasks.registering(JavaExec::class) {
+    description = "Runs code block tests to verify documentation sample code's integrity"
+    group = "verification"
+
+    dependsOn(dokkaTask)
+    inputs.dir(kdocsTestsDir)
+
+    classpath = runCodeBlockTestsClasspath
+    mainClass.set("com.yandex.daggerlite.testing.Standalone")
+    argumentProviders += CommandLineArgumentProvider {
+        listOf("--backend", "ksp", "--test-cases-dir", kdocsTestsDir.get().asFile.toString())
+    }
+}
+
+tasks.check {
+    dependsOn(testDocumentationCodeBlocks)
 }
