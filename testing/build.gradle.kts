@@ -8,6 +8,7 @@ val kotlinCompileTestingVersion: String by extra
 val kspVersion: String by extra
 val junitVersion: String by extra
 val mockitoKotlinVersion: String by extra
+val kotlinxCliVersion: String by extra
 
 val baseTestRuntime: Configuration by configurations.creating
 val dynamicTestRuntime: Configuration by configurations.creating {
@@ -48,6 +49,9 @@ dependencies {
 
     // RT dependencies
     implementation(project(":lang-rt"))
+
+    // Standalone launcher dependencies
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
 
     // Heavy test dependencies
     testImplementation(project(":testing-generator"))
