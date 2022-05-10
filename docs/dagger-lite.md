@@ -8,13 +8,13 @@ Dagger Lite (**DL** in docs) is a **Dependency Injection framework** based on Go
 DL's API is based on that of Google Dagger2 (D2 further in docs), fully mimicking it in some parts.
 
 Additionally, DL extends its base API with Conditions and Variants APIs.
-Read <a href="#additional-apis">this section</a> for more info on that.
+Read <a href="#AdditionalAPIs">this section</a> for more info on that.
 
 DL can work in multiple modes (use different "backends"):
 
 - Code generation
-  - APT/KAPT
-  - KSP _(experimental, unstable due to KSP utter inconvenience to use for Java code generation)_
+    - APT/KAPT
+    - KSP _(experimental, unstable due to KSP utter inconvenience to use for Java code generation)_
 - Reflection _(experimental)_
 
 ## DL and D2
@@ -145,13 +145,17 @@ dependencies {
 
 ## Additional APIs
 
-TODO(jeffset): Describe conditions API and Variant API.
-For now see [@Conditional][com.yandex.daggerlite/Conditional@:api] and its members.
+DL has some extensions to the vanilla D2 API:
 
-Usage of these APIs often lead to questionable architectural solutions; 
+**Condition API** (see [@Conditional][com.yandex.daggerlite/Conditional@:api]),
+and **Variant API** (see [@Conditional.onlyIn][com.yandex.daggerlite/Conditional#onlyIn@:api]).
+
+_NOTE:_ Usage of these APIs often leads to questionable architectural solutions;
 All these APIs were introduced to solve SuperApp-specific needs due to its pre-Dagger history.
-These APIs are planned to be marked as `@Incubating` in 1.0.0, 
-so it's advised for clients to use other techniques if possible.
+These APIs are planned to be marked as `@Incubating` in 1.0.0,
+so it's advised for clients to use other techniques if possible. The general advice is: 
+use an interface and its real and stub implementations via `@Binds` instead of conditional binding. 
+This way the API is clean and there's no need for clients to know about conditional bindings and use `Optional`.
 
 ## Other similar third-party solutions
 

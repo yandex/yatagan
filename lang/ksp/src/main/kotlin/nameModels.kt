@@ -65,7 +65,9 @@ private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     return ClassNameModel(
         packageName = packageName,
         simpleNames = declaration.qualifiedName?.asString()
-            ?.substring(startIndex = packageName.length + 1)
+            ?.run {
+                if (packageName.isNotEmpty()) substring(packageName.length + 1) else this
+            }
             ?.split('.') ?: listOf("<unnamed>"),
     )
 }

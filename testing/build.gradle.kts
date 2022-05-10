@@ -1,5 +1,4 @@
 import com.yandex.daggerlite.gradle.ClasspathSourceGeneratorTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("daggerlite.base-module")
@@ -9,6 +8,7 @@ val kotlinCompileTestingVersion: String by extra
 val kspVersion: String by extra
 val junitVersion: String by extra
 val mockitoKotlinVersion: String by extra
+val kotlinxCliVersion: String by extra
 
 val baseTestRuntime: Configuration by configurations.creating
 val dynamicTestRuntime: Configuration by configurations.creating {
@@ -17,8 +17,6 @@ val dynamicTestRuntime: Configuration by configurations.creating {
 val compiledTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
-
-val generatedSourceDir: Provider<Directory> = project.layout.buildDirectory.dir("generated-sources")
 
 configurations.all {
     resolutionStrategy {
@@ -30,27 +28,30 @@ configurations.all {
 
 dependencies {
     // Third-party test dependencies
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
-    testImplementation("junit:junit:$junitVersion")
+    implementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
+    implementation("junit:junit:$junitVersion")
 
     // Base test dependencies
-    testImplementation(project(":processor"))
-    testImplementation(project(":validation-impl"))
-    testImplementation(project(":core-impl"))
-    testImplementation(project(":graph-impl"))
-    testImplementation(project(":api"))
-    testImplementation(project(":base"))
+    implementation(project(":processor"))
+    implementation(project(":validation-impl"))
+    implementation(project(":core-impl"))
+    implementation(project(":graph-impl"))
+    implementation(project(":api"))
+    implementation(project(":base"))
 
     // KSP dependencies
-    testImplementation(project(":lang-ksp"))
-    testImplementation(project(":processor-ksp"))
+    implementation(project(":lang-ksp"))
+    implementation(project(":processor-ksp"))
 
     // JAP dependencies
-    testImplementation(project(":lang-jap"))
-    testImplementation(project(":processor-jap"))
+    implementation(project(":lang-jap"))
+    implementation(project(":processor-jap"))
 
     // RT dependencies
-    testImplementation(project(":lang-rt"))
+    implementation(project(":lang-rt"))
+
+    // Standalone launcher dependencies
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
 
     // Heavy test dependencies
     testImplementation(project(":testing-generator"))
@@ -60,35 +61,32 @@ dependencies {
     compiledTestRuntime(project(":api-compiled"))
 }
 
-kotlin {
-    sourceSets {
-        test {
-            kotlin.srcDir(generatedSourceDir)
-        }
-    }
+val dynamicApiClasspathTask = tasks.register<ClasspathSourceGeneratorTask>("generateDynamicApiClasspath") {
+    packageName.set("com.yandex.daggerlite.generated")
+    propertyName.set("DynamicApiClasspath")
+    classpath.set(dynamicTestRuntime)
 }
 
-tasks {
-    val dynamicApiClasspathTask = register<ClasspathSourceGeneratorTask>("generateDynamicApiClasspath") {
-        packageName = "com.yandex.daggerlite.generated"
-        propertyName = "DynamicApiClasspath"
-        classpath = dynamicTestRuntime
-        generatedSource = generatedSourceDir.map { it.file("dynamicClasspath.kt") }
-    }
+val compiledApiClasspathTask = tasks.register<ClasspathSourceGeneratorTask>("generateCompiledApiClasspath") {
+    packageName.set("com.yandex.daggerlite.generated")
+    propertyName.set("CompiledApiClasspath")
+    classpath.set(compiledTestRuntime)
+}
 
-    val compiledApiClasspathTask = register<ClasspathSourceGeneratorTask>("generateCompiledApiClasspath") {
-        packageName = "com.yandex.daggerlite.generated"
-        propertyName = "CompiledApiClasspath"
-        classpath = compiledTestRuntime
-        generatedSource = generatedSourceDir.map { it.file("compiledClasspath.kt") }
-    }
+tasks.named("compileKotlin") {
+    dependsOn(dynamicApiClasspathTask, compiledApiClasspathTask)
+}
 
-    withType<KotlinCompile>().configureEach {
-        dependsOn(dynamicApiClasspathTask, compiledApiClasspathTask)
-    }
+tasks.test {
+    // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
+    jvmArgs = listOf("-Xmx4G", "-Xms256m")
+}
 
-    test {
-        // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
-        jvmArgs = listOf("-Xmx4G", "-Xms256m")
+kotlin {
+    sourceSets {
+        main {
+            kotlin.srcDir(dynamicApiClasspathTask.map { it.generatedSourceDir })
+            kotlin.srcDir(compiledApiClasspathTask.map { it.generatedSourceDir })
+        }
     }
 }

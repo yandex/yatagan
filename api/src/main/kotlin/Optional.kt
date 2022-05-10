@@ -6,10 +6,11 @@ import kotlin.contracts.contract
 /**
  * Denotes a holder type, that may have a value, or it may not.
  *
- * [java.util.Optional] is not used because it may not be available on some platforms.
+ * `java.util.Optional` is not used because it may not be available on some platforms.
  *
  * NOTE: This is the framework interface, that has special treatment in dagger-lite graphs.
- * An explicit [provision][Provides] for `Optional<...>` is ill formed - framework manages optional instances by itself.
+ * An explicit [provision][Provides] or any other binding for `Optional<...>` is ill formed -
+ * framework manages optional instances by itself.
  */
 class Optional<out T : Any> private constructor(
     @PublishedApi
@@ -48,10 +49,16 @@ class Optional<out T : Any> private constructor(
 
     // region Java API
 
+    /**
+     * A function consumer interface designed to be used with [Optional] in Java code.
+     */
     fun interface Consumer<in T> {
         fun accept(value: T)
     }
 
+    /**
+     * A function interface designed to be used with [Optional] in Java code.
+     */
     fun interface Function<in T, out R> {
         fun apply(value: T): R
     }

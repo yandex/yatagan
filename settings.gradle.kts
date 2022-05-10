@@ -44,6 +44,9 @@ include("testing")
 include("testing-generator")
 project(":testing-generator").projectDir = file("testing/generator")
 
+include("testing-dokka")
+project(":testing-dokka").projectDir = file("testing/dokka")
+
 include("dynamic")
 
 include("spi")

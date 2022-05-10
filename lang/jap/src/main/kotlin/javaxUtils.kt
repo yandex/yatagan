@@ -204,7 +204,9 @@ internal fun CtTypeNameModel(type: TypeMirror): CtTypeNameModel {
 
 internal fun ClassNameModel(type: TypeElement): ClassNameModel {
     val packageName = type.getPackageElement().qualifiedName.toString()
-    val simpleNames = type.qualifiedName.substring(packageName.length + 1).split('.')
+    val simpleNames = type.qualifiedName.run {
+        if (packageName.isNotEmpty()) substring(packageName.length + 1) else this
+    }.split('.')
     return ClassNameModel(packageName, simpleNames)
 }
 

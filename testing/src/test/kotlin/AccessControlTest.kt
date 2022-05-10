@@ -1,9 +1,5 @@
 package com.yandex.daggerlite.testing
 
-import com.yandex.daggerlite.testing.support.CompileTestDriver
-import com.yandex.daggerlite.testing.support.CompileTestDriverBase
-import com.yandex.daggerlite.testing.support.compileTestDrivers
-import com.yandex.daggerlite.testing.support.errorMessage
 import com.yandex.daggerlite.validation.impl.Strings
 import org.junit.Test
 import org.junit.runner.RunWith

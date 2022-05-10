@@ -37,7 +37,8 @@ internal class JapComponentProcessingStep(
         packageName: String,
         className: String,
     ): Writer {
-        return filer.createSourceFile("$packageName.$className", sources.first()).openWriter().buffered()
+        val name = if (packageName.isNotEmpty()) "$packageName.$className" else className
+        return filer.createSourceFile(name, sources.first()).openWriter().buffered()
     }
 
     override fun process(elementsByAnnotation: ImmutableSetMultimap<String, Element>): Set<Element> {

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.support
+package com.yandex.daggerlite.testing
 
 import com.tschuchort.compiletesting.SourceFile
 import org.intellij.lang.annotations.Language

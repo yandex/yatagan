@@ -4,9 +4,6 @@ import com.yandex.daggerlite.testing.generation.Distribution
 import com.yandex.daggerlite.testing.generation.ExperimentalGenerationApi
 import com.yandex.daggerlite.testing.generation.GenerationParams
 import com.yandex.daggerlite.testing.generation.generate
-import com.yandex.daggerlite.testing.support.CompileTestDriver
-import com.yandex.daggerlite.testing.support.CompileTestDriverBase
-import com.yandex.daggerlite.testing.support.compileTestDrivers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
