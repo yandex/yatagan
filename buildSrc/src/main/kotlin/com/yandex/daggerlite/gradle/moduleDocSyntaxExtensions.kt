@@ -42,7 +42,7 @@ internal class MacroSyntaxExtension(
  * `[:<module-path:child>]`
  */
 internal class ModuleReferenceSyntaxExtension(
-    private val currentProjectPath: String,
+    currentProjectPath: String,
 ) : PatchModuleDocTask.DocSyntaxExtension {
     private val currentPath = File(currentProjectPath.replace(':', '/'))
 
@@ -79,10 +79,8 @@ internal class ForeignClassReferenceSyntaxExtension(
         for (simpleName in clazz.splitToSequence('.')) {
             path = path.resolve(simpleName)
         }
-        if (member.isNotEmpty()) {
-            path = path.resolve(member + ".html")
-        }
-        val relativePath = path.toRelativeString(currentPath).escapeCapitals()
+        path = path.resolve(if (member.isNotEmpty()) member + ".html"  else "index.html")
+        var relativePath = path.toRelativeString(currentPath).escapeCapitals()
         val displayName = display.ifEmpty { "$packaje.$clazz" }
         return """<a href="./$relativePath">`$displayName`</a>"""
     }
@@ -151,6 +149,7 @@ internal class HeaderReferenceSyntaxExtension(
 
 /**
  * Generates table of contents on `{{TOC}}` marker.
+ * Depends on [HeaderReferenceSyntaxExtension] being run before.
  */
 internal class TableOfContentsSyntaxExtension(
     private val headers: HeaderReferenceSyntaxExtension,
