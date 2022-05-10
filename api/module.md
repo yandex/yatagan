@@ -3,6 +3,8 @@
 Contains all client DL API - annotations and helpers. It doesn't contain DL entry-point code
 (`com.yandex.daggerlite.Dagger`) though, as that is backend-specific.
 
+One can start reading DL's docs from [the docs on @Component][com.yandex.daggerlite.Component].
+
 It makes sense to use this module as a direct
 dependency as a part of a _public api_ of a project module/library. Such choice won't confine clients of the module
 to a specific backend kind (compiled or dynamic). It will not, however, allow the code in the module to
@@ -57,7 +59,7 @@ Other behavioral changes:
   See [:api-dynamic] and [:api-compiled] for actual `Dagger` implementations.
 
 - DL does not support `@Nullable` provisions. If a binding returns `null`, or a `@BindsInstance` is supplied with
-  `null`, an error run-time will be thrown. Currently, no compile-time validation is done in the matter.
+  `null`, an error will be thrown as run-time. Currently, no compile-time validation is done in the matter.
 
 - Declaring subcomponents now only works explicitly via `Module.subcomponents` list.
   Implicit bindings for subcomponent factory, when declaring entry-point of its type in a parent component,
@@ -67,3 +69,39 @@ Other behavioral changes:
 
 - `@IntoList` bindings contributions are not inherited from parent component.
   Clients will get "duplicate bindings" error instead. An obscure case, yet worth mentioning.
+
+## Basic sample
+
+```kotlin
+ /*@*/ package test
+ /*@*/ import com.yandex.daggerlite.*
+ /*@*/ import javax.inject.*
+ 
+ // Assume we have an interface and its implementation 
+
+ interface Api
+ class Impl @Inject constructor() : Api {}
+ 
+ // Add a DL module to a project:
+ 
+ @Module
+ interface MyModule {
+     @Binds
+     fun bindImpl(i: Impl): Api
+ }
+ 
+ // Add a DL root component declaration:
+ 
+ @Component(modules = [MyModule::class])
+ interface MyComponent {
+     val api: Api
+ }
+ 
+ // To test a component:
+ 
+ /*@*/ fun test() {
+ val myComponent = Dagger.create(MyComponent::class.java)
+ assert(myComponent.api is Impl)  
+ /*@*/ }
+
+```
