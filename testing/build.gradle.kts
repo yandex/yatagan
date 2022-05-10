@@ -1,5 +1,4 @@
 import com.yandex.daggerlite.gradle.ClasspathSourceGeneratorTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("daggerlite.base-module")
@@ -17,8 +16,6 @@ val dynamicTestRuntime: Configuration by configurations.creating {
 val compiledTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
-
-val generatedSourceDir: Provider<Directory> = project.layout.buildDirectory.dir("generated-sources")
 
 configurations.all {
     resolutionStrategy {
@@ -60,35 +57,32 @@ dependencies {
     compiledTestRuntime(project(":api-compiled"))
 }
 
-kotlin {
-    sourceSets {
-        test {
-            kotlin.srcDir(generatedSourceDir)
-        }
-    }
+val dynamicApiClasspathTask = tasks.register<ClasspathSourceGeneratorTask>("generateDynamicApiClasspath") {
+    packageName.set("com.yandex.daggerlite.generated")
+    propertyName.set("DynamicApiClasspath")
+    classpath.set(dynamicTestRuntime)
 }
 
-tasks {
-    val dynamicApiClasspathTask = register<ClasspathSourceGeneratorTask>("generateDynamicApiClasspath") {
-        packageName = "com.yandex.daggerlite.generated"
-        propertyName = "DynamicApiClasspath"
-        classpath = dynamicTestRuntime
-        generatedSource = generatedSourceDir.map { it.file("dynamicClasspath.kt") }
-    }
+val compiledApiClasspathTask = tasks.register<ClasspathSourceGeneratorTask>("generateCompiledApiClasspath") {
+    packageName.set("com.yandex.daggerlite.generated")
+    propertyName.set("CompiledApiClasspath")
+    classpath.set(compiledTestRuntime)
+}
 
-    val compiledApiClasspathTask = register<ClasspathSourceGeneratorTask>("generateCompiledApiClasspath") {
-        packageName = "com.yandex.daggerlite.generated"
-        propertyName = "CompiledApiClasspath"
-        classpath = compiledTestRuntime
-        generatedSource = generatedSourceDir.map { it.file("compiledClasspath.kt") }
-    }
+tasks.named("compileKotlin") {
+    dependsOn(dynamicApiClasspathTask, compiledApiClasspathTask)
+}
 
-    withType<KotlinCompile>().configureEach {
-        dependsOn(dynamicApiClasspathTask, compiledApiClasspathTask)
-    }
+tasks.test {
+    // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
+    jvmArgs = listOf("-Xmx4G", "-Xms256m")
+}
 
-    test {
-        // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
-        jvmArgs = listOf("-Xmx4G", "-Xms256m")
+kotlin {
+    sourceSets {
+        main {
+            kotlin.srcDir(dynamicApiClasspathTask.map { it.generatedSourceDir })
+            kotlin.srcDir(compiledApiClasspathTask.map { it.generatedSourceDir })
+        }
     }
 }
