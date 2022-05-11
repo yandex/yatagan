@@ -602,7 +602,7 @@ annotation class ComponentFlavor(
 // region Assisted Inject API
 
 /**
- * TODO: doc.
+ * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/AssistedInject.html), behavior should be identical.
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
@@ -610,20 +610,21 @@ annotation class ComponentFlavor(
 annotation class AssistedInject
 
 /**
- * TODO: doc.
+ * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/Assisted.html), behavior should be identical.
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Assisted(
     /**
-     * TODO: doc.
+     * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/Assisted.html#value--),
+     * behavior should be identical.
      */
     val value: String = "",
 )
 
 /**
- * TODO: doc.
+ * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/AssistedFactory.html), behavior should be identical.
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
