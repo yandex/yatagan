@@ -59,7 +59,7 @@ Other behavioral changes:
   See [:api-dynamic] and [:api-compiled] for actual `Dagger` implementations.
 
 - DL does not support `@Nullable` provisions. If a binding returns `null`, or a `@BindsInstance` is supplied with
-  `null`, an error will be thrown as run-time. Currently, no compile-time validation is done in the matter.
+  `null`, an error will be thrown at run-time. Currently, no compile-time validation is done in the matter.
 
 - Declaring subcomponents now only works explicitly via `Module.subcomponents` list.
   Implicit bindings for subcomponent factory, when declaring entry-point of its type in a parent component,
@@ -80,7 +80,7 @@ Other behavioral changes:
  // Assume we have an interface and its implementation 
 
  interface Api
- class Impl @Inject constructor() : Api {}
+ class Impl @Inject constructor() : Api
  
  // Add a DL module to a project:
  

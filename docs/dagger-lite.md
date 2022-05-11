@@ -55,7 +55,7 @@ DL may slightly improve runtime performance for graphs, that are known to be use
 For graphs, that are used from multiple threads, one should explicitly declare it:
 [@Component(multiThreadAccess = true)][com.yandex.daggerlite/Component#multiThreadAccess@:api]
 Also, some other small optimizations are made and there are plans to keep researching for more opportunities.
-See the corresponding research [issue](https://st.yandex-team.ru/DAGGERLITE-34).
+See the corresponding [issues](https://st.yandex-team.ru/issues/?queue=%22DAGGERLITE%22&tags=%22RuntimeSpeed%22).
 
 #### Reflection for local development
 
@@ -152,10 +152,15 @@ and **Variant API** (see [@Conditional.onlyIn][com.yandex.daggerlite/Conditional
 
 _NOTE:_ Usage of these APIs often leads to questionable architectural solutions;
 All these APIs were introduced to solve SuperApp-specific needs due to its pre-Dagger history.
-These APIs are planned to be marked as `@Incubating` in 1.0.0,
-so it's advised for clients to use other techniques if possible. The general advice is: 
-use an interface and its real and stub implementations via `@Binds` instead of conditional binding. 
+These APIs are planned to be marked as "incubating" in 1.0.0,
+so it's advised for clients to use other techniques if possible.
+
+The general advice for replacing Condition API is:
+use an interface and its real and stub implementations via `@Provides` instead of conditional binding.
 This way the API is clean and there's no need for clients to know about conditional bindings and use `Optional`.
+
+These APIs usage is justified if your project *heavily* uses runtime conditions (e. g. for AB experiments)
+and/or builds different applications from a single codebase, that partially share Dagger graphs.
 
 ## Other similar third-party solutions
 
@@ -169,6 +174,7 @@ This way the API is clean and there's no need for clients to know about conditio
    by sharing as much code as possible between codegen and RT.
    So any new feature implemented for DL is automatically available for all
    supported backends with very little backend-specific code.
+   See the corresponding research [issue](https://st.yandex-team.ru/DAGGERLITE-34) for DL.
 
 ## Regarding KSP support status
 
