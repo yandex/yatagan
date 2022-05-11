@@ -50,7 +50,9 @@ internal class ModuleReferenceSyntaxExtension(
 
     override fun substitute(match: MatchResult): String {
         val module by match
-        val relativeModulePath = File(module.replace(':', '/')).toRelativeString(currentPath).escapeCapitals()
+        val relativeModulePath = File(module.replace(':', '/'))
+            .resolve("index.html")
+            .toRelativeString(currentPath).escapeCapitals()
         return """<b><a href="./$relativeModulePath">$module</a></b>"""
     }
 }
