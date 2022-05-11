@@ -1,6 +1,8 @@
 # Dagger Lite (DL)
 
-Latest User documentation - TODO Link
+This is the developer and contributor doc.
+
+For the user docs, see [the latest user documentation](https://teamcity.browser.yandex-team.ru/repository/download/Mobile_DaggerLite_Publish/lastSuccessful/kdocs.zip!/index.html).
 
 ## Assembling
 
