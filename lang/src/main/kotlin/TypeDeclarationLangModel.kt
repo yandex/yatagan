@@ -46,6 +46,8 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
      *
      * All returned functions (including inherited or overridden ones) have [owner][FunctionLangModel.owner] defined
      * as `this`.
+     *
+     * Never includes functions defined in `java.lang.Object`/`kotlin.Any`, as they are of no interest to DL.
      */
     val functions: Sequence<FunctionLangModel>
 

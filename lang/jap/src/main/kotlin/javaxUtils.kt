@@ -134,11 +134,14 @@ internal val Element.isPrivate
 internal val Element.isStatic
     get() = Modifier.STATIC in modifiers
 
-@Suppress("UNCHECKED_CAST")
 internal fun TypeElement.allNonPrivateMethods(): Sequence<ExecutableElement> =
     sequenceOf(
         MoreElements.getLocalAndInheritedMethods(this, Utils.types, Utils.elements)
-            .asSequence(),
+            .asSequence()
+            .filter {
+                // Skip methods from Object.
+                it.enclosingElement != Utils.objectType
+            },
         enclosedElements
             .asSequence()
             .filter {

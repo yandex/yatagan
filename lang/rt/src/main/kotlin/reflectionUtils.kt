@@ -196,6 +196,10 @@ internal fun Class<*>.boxed(): Type {
 internal fun Class<*>.getMethodsOverrideAware(): List<Method> = buildList {
     val overrideControl = hashSetOf<MethodSignatureEquivalenceWrapper>()
     fun handleClass(clazz: Class<*>) {
+        if (clazz === Any::class.java) {
+            // Do not add methods from java.lang.Object.
+            return
+        }
         for (declaredMethod in clazz.declaredMethods) {
             if (declaredMethod.isPrivate || declaredMethod.isSynthetic) {
                 // Skip private/synthetic methods
