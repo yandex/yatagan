@@ -5,6 +5,7 @@ import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ComponentModel.EntryPoint
+import com.yandex.daggerlite.core.ConditionalHoldingModel
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.ModuleModel
@@ -23,9 +24,15 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
-) : ComponentModel, ConditionalHoldingModelImpl(declaration.conditionals) {
-
+) : ComponentModel, ConditionalHoldingModel {
     private val impl = declaration.componentAnnotationIfPresent
+
+    private val conditionalsModel by lazy {
+        ConditionalHoldingModelImpl(declaration.conditionals)
+    }
+
+    override val conditionals
+        get() = conditionalsModel.conditionals
 
     override val type: TypeLangModel
         get() = declaration.asType()
@@ -111,7 +118,7 @@ internal class ComponentModelImpl private constructor(
     }
 
     override fun validate(validator: Validator) {
-        super.validate(validator)
+        validator.inline(conditionalsModel)
 
         for (module in modules) {
             validator.child(module)
