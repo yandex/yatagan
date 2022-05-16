@@ -6,6 +6,9 @@ import kotlin.reflect.KClass
 
 /**
  * Annotates a class/object/interface that contains explicit bindings that contribute to the object graph.
+ *
+ * If Module declaration contain a *companion object with the default name*, methods from it are also treated like
+ * static bindings.
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
@@ -390,11 +393,49 @@ annotation class Condition(
      * A string consisting from plain Java identifiers, separated by '.' and optionally staring with
      * '!'.
      *
-     * Each identifier in chain represents a non-private field, method or property, resolved on a
+     * Each identifier in chain represents a non-private field, method, resolved on a
      * resulting type of previous identifier or the root class if this is the first identifier.
      * The last identifier must resolve into a primitive boolean result.
      *
+     * Names are considered from Java point of view, not Kotlin! So property names are not a thing, getters should be
+     * used instead.
+     *
      * If starts with '!', the result value will be negated.
+     *
+     * Examples:
+     * ```kotlin
+     * /*@*/ package test
+     * /*@*/ import com.yandex.daggerlite.*
+     * /*@*/ import javax.inject.*
+     * /*@*/ object SomeObject { val isEnabled = false }
+     * /*@*/ object SomeClass {
+     * /*@*/   @JvmStatic fun staticComputeCondition() = false
+     * /*@*/   @JvmStatic fun staticGetSubObject() = AnotherClass()
+     * /*@*/ }
+     * /*@*/ class AnotherClass { val memberCondition = false }
+     * /*@*/ class WithCompanion { companion object { val prop = false } }
+     *
+     * // Kotlin's singletons require explicit INSTANCE identifier:
+     * @Condition(SomeObject::class, "INSTANCE.isEnabled")
+     * /*@*/ annotation class A
+     *
+     * // Static function from a class:
+     * @Condition(SomeClass::class, "staticComputeCondition")
+     * /*@*/ annotation class B
+     *
+     * // Calls can be chained. Properties are accessible through explicit getters:
+     * @Condition(SomeClass::class, "staticGetSubObject.getMemberCondition")
+     * /*@*/ annotation class C
+     *
+     * // Companion object must be mentioned explicitly:
+     * @Condition(WithCompanion::class, "Companion.getProp")
+     * /*@*/ annotation class D
+     *
+     * /*@*/ @Conditional([A::class, B::class, C::class, D::class])
+     * /*@*/ class Sample @Inject constructor() {}
+     * /*@*/ @Component interface SampleComponent { val s: Optional<Sample> }
+     * /*@*/ fun test() { Dagger.create(SampleComponent::class.java).s }
+     * ```
      */
     val condition: String,
 )

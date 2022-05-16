@@ -32,10 +32,6 @@ internal class RtFunctionImpl(
         ))
     }
 
-    override val propertyAccessorInfo: FunctionLangModel.PropertyAccessorInfo? by lazy {
-        owner.findKotlinPropertyAccessorFor(impl)
-    }
-
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
 

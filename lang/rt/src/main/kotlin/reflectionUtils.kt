@@ -2,6 +2,7 @@ package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.KotlinObjectKind
+import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import java.lang.reflect.Constructor
 import java.lang.reflect.GenericArrayType
 import java.lang.reflect.Member
@@ -17,6 +18,10 @@ private typealias ArraysReflectionUtils = java.lang.reflect.Array
 internal fun Type.equivalence() = TypeEquivalenceWrapper(this)
 
 internal val Member.isStatic get() = Modifier.isStatic(modifiers)
+
+internal val Member.isPublicStaticFinal get() = modifiers.let {
+    Modifier.isStatic(it) && Modifier.isFinal(it) && Modifier.isPublic(it)
+}
 
 internal val Member.isAbstract get() = Modifier.isAbstract(modifiers)
 
@@ -64,6 +69,8 @@ internal fun Type.tryAsClass(): Class<*>? = when (this) {
     else -> null
 }
 
+internal fun Class<*>.isFromKotlin() = isAnnotationPresent(Metadata::class.java)
+
 internal fun Type.formatString(): String = when (this) {
     is Class<*> -> canonicalName ?: "<unnamed>"
     is ParameterizedType -> "${rawType.formatString()}<${actualTypeArguments.joinToString { it.formatString() }}>"
@@ -76,13 +83,14 @@ internal fun Type.formatString(): String = when (this) {
     else -> toString()
 }
 
-fun Class<*>.kotlinObjectInstanceOrNull(): Any? {
-    val model = RtTypeDeclarationImpl(this)
+fun TypeDeclarationLangModel.kotlinObjectInstanceOrNull(): Any? {
+    val model = this as RtTypeDeclarationImpl
+    val impl = model.type.impl.asClass()
     return when(model.kotlinObjectKind) {
-        KotlinObjectKind.Object -> declaredFields.first { it.name == "INSTANCE" }
+        KotlinObjectKind.Object -> impl.declaredFields.first { it.name == "INSTANCE" }
         KotlinObjectKind.Companion -> {
-            val companionName = simpleName
-            enclosingClass.declaredFields.first { it.name == companionName }
+            val companionName = impl.simpleName
+            impl.enclosingClass.declaredFields.first { it.name == companionName }
         }
         null -> null
     }?.get(null)

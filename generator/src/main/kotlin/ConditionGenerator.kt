@@ -2,7 +2,6 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.TypeName
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -162,19 +161,10 @@ internal class ConditionGenerator(
                 val rootType = literal.root.asType()
                 literal.path.asSequence().forEachIndexed { index, member ->
                     if (index == 0) {
-                        when (rootType.declaration.kotlinObjectKind) {
-                            KotlinObjectKind.Object -> {
-                                +"%T.INSTANCE.%N".formatCode(rootType.typeName(), member.name)
-                            }
-                            else -> {
-                                +"%T.%N".formatCode(rootType.typeName(), member.name)
-                            }
-                        }
-                        if (member is FunctionLangModel) +"()"
-                    } else {
-                        +".%N".formatCode(member.name)
-                        if (member is FunctionLangModel) +"()"
+                        +"%T".formatCode(rootType.typeName())
                     }
+                    +".%N".formatCode(member.name)
+                    if (member is FunctionLangModel) +"()"
                 }
             }
         }

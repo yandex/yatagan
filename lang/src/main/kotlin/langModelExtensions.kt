@@ -10,14 +10,10 @@ inline fun <reified A : Annotation> AnnotationLangModel.hasType() = hasType(A::c
 val TypeDeclarationLangModel.isKotlinObject get() = kotlinObjectKind != null
 
 val TypeDeclarationLangModel.functionsWithCompanion: Sequence<FunctionLangModel>
-    get() = when (val companion = companionObjectDeclaration) {
+    get() = when (val companion = defaultCompanionObjectDeclaration) {
         null -> functions
         else -> functions + companion.functions
     }
-
-val FunctionLangModel.PropertyAccessorInfo.isGetter get() = kind == FunctionLangModel.PropertyAccessorKind.Getter
-
-val FunctionLangModel.PropertyAccessorInfo.isSetter get() = kind == FunctionLangModel.PropertyAccessorKind.Setter
 
 @OptIn(InternalLangApi::class)
 inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -> Unit) {

@@ -2,7 +2,6 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSPropertyGetter
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import kotlin.LazyThreadSafetyMode.NONE
@@ -10,11 +9,16 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspFunctionPropertyGetterImpl private constructor(
     getter: KSPropertyGetter,
     override val owner: KspTypeDeclarationImpl,
-) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter) {
+    isStatic: Boolean,
+) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter, isStatic) {
 
     override val returnType: TypeLangModel by lazy(NONE) {
+        var typeReference = property.type
+        if (!isStatic) {
+            typeReference = typeReference.replaceType(property.asMemberOf(owner.type.impl))
+        }
         KspTypeImpl(
-            reference = property.type.replaceType(property.asMemberOf(owner.type.impl)),
+            reference = typeReference,
             jvmSignatureHint = jvmSignature,
         )
     }
@@ -30,9 +34,6 @@ internal class KspFunctionPropertyGetterImpl private constructor(
 
     override val parameters: Sequence<ParameterLangModel> = emptySequence()
 
-    override val kind: PropertyAccessorKind
-        get() = PropertyAccessorKind.Getter
-
     override val platformModel: Any?
         get() = null
 
@@ -42,10 +43,12 @@ internal class KspFunctionPropertyGetterImpl private constructor(
         operator fun invoke(
             getter: KSPropertyGetter,
             owner: KspTypeDeclarationImpl,
+            isStatic: Boolean,
         ) = createCached(getter) {
             KspFunctionPropertyGetterImpl(
                 getter = getter,
                 owner = owner,
+                isStatic = isStatic
             )
         }
     }

@@ -36,7 +36,9 @@ internal class KspTypeImpl private constructor(
     }
 
     override val isBoolean: Boolean
-        get() = jvmType == JvmTypeInfo.Boolean || impl.declaration == Utils.javaLangBoolean
+        get() {
+            return jvmType == JvmTypeInfo.Boolean || impl.declaration.qualifiedName?.asString() == "java.lang.Boolean"
+        }
 
     override val isVoid: Boolean
         get() = jvmType == JvmTypeInfo.Void || impl == Utils.resolver.builtIns.unitType

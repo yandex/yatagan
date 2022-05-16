@@ -67,21 +67,23 @@ class ConditionsTest(
                 }
 
                 object Features {
-                    @get:JvmName("fooBar")
+                    @get:JvmName("fooBar") @get:JvmStatic
                     var enabledA: Boolean = false 
+                    @get:JvmStatic
                     var isEnabledB: Boolean = false
+                    @get:JvmStatic
                     val FeatureC = FeatureC()
                 }
 
                 @Singleton
                 interface Conditions {
-                    @Condition(Features::class, condition = "enabledA")
+                    @Condition(Features::class, condition = "fooBar")
                     annotation class FeatureA
     
                     @Condition(Features::class, condition = "isEnabledB")
                     annotation class FeatureB
     
-                    @Condition(Features::class, condition = "FeatureC.isEnabled")
+                    @Condition(Features::class, condition = "getFeatureC.isEnabled")
                     annotation class FeatureC
                 }
             """
@@ -527,26 +529,49 @@ class ConditionsTest(
             
             private const val EnabledB = "isEnabledB" 
             
-            @Condition(Features::class, "enabledA")
+            class SomeClass {
+                companion object Conditions {
+                    var someCondition1: Boolean = false
+            
+                    lateinit var someCondition6: java.lang.Boolean
+                    @JvmField
+                    var someCondition2: Boolean = false
+                    @JvmStatic
+                    var someCondition3: Boolean = false
+                    @get:JvmStatic
+                    var someCondition4: Boolean = false
+                    @JvmStatic
+                    fun someCondition5(): Boolean = false
+                }
+            }
+            
+            @Condition(Features::class, "fooBar")
             @Condition(Features::class, "isEnabledB")
             @AnyCondition([
-                Condition(Features::class, "FeatureC.isEnabled"),                                
-                Condition(Features::class, "isEnabledB"),                                
+                Condition(Features::class, "getFeatureC.isEnabled"),                                
+                Condition(Features::class, "isEnabledB"),
+                Condition(SomeClass::class, "Conditions.getSomeCondition1"),
+                Condition(SomeClass::class, "someCondition2"),
+                Condition(SomeClass::class, "getSomeCondition3"),
+                Condition(SomeClass::class, "getSomeCondition4"),
+                Condition(SomeClass::class, "someCondition5"),
+                Condition(SomeClass::class, "someCondition6"),
+                Condition(SomeClass::class, "Conditions.getSomeCondition6"),
             ])
             annotation class ComplexFeature1
             
             @AnyCondition([
-                Condition(Features::class, "enabledA"),
+                Condition(Features::class, "fooBar"),
             ])
             @AnyCondition([
                 Condition(Features::class, EnabledB),
             ])
             @AnyCondition([
-                Condition(Features::class, "FeatureC.isEnabled"),                                
+                Condition(Features::class, "getFeatureC.isEnabled"),                                
                 Condition(Features::class, condition = EnabledB),                                
             ])
             @AnyCondition([
-                Condition(Features::class, "FeatureC.isEnabled"),                                
+                Condition(Features::class, "getFeatureC.isEnabled"),                                
                 Condition(value = Features::class, condition = "isEnabledB"),                                
             ])            
             annotation class ComplexFeature2
@@ -652,14 +677,14 @@ class ConditionsTest(
             }
 
             @AllConditions([
-                Condition(Features::class, condition = "disabled"),
-                Condition(Features::class, condition = "notReached"),
+                Condition(Features::class, condition = "INSTANCE.getDisabled"),
+                Condition(Features::class, condition = "INSTANCE.getNotReached"),
             ])
             annotation class A
 
             @AllConditions([
-                Condition(Features::class, condition = "disabled2"),
-                Condition(Features::class, condition = "notReached2"),
+                Condition(Features::class, condition = "INSTANCE.getDisabled2"),
+                Condition(Features::class, condition = "INSTANCE.getNotReached2"),
             ])
             annotation class B
 

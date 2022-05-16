@@ -44,15 +44,14 @@ internal operator fun KSAnnotation.get(name: String): Any? {
 internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean =
     annotations.any { it.hasType(T::class) }
 
-internal val KSDeclaration.isStatic get() = Modifier.JAVA_STATIC in modifiers || isAnnotationPresent<JvmStatic>()
+internal fun KSPropertyDeclaration.isLateInit(): Boolean {
+    return Modifier.LATEINIT in modifiers
+}
 
-internal val KSFunctionDeclaration.isStatic get() = functionKind == FunctionKind.STATIC
-
-internal val KSDeclaration.isObject get() = this is KSClassDeclaration && classKind == ClassKind.OBJECT
-
-internal val KSPropertyDeclaration.isField
-    get() = isFromJava || (getter == null && setter == null) ||
-            isAnnotationPresent<JvmField>() || Modifier.CONST in modifiers
+internal fun KSPropertyDeclaration.isKotlinField(): Boolean {
+    val modifiers = modifiers
+    return Modifier.CONST in modifiers || isAnnotationPresent<JvmField>()
+}
 
 internal fun KSDeclaration.isPublicOrInternal() = when (getVisibility()) {
     Visibility.PUBLIC, Visibility.INTERNAL -> true
@@ -138,7 +137,10 @@ internal fun KSClassDeclaration.allNonPrivateFunctions(): Sequence<KSFunctionDec
     }
 
 internal fun KSClassDeclaration.allNonPrivateProperties(): Sequence<KSPropertyDeclaration> {
-    return getAllProperties().filter { !it.isPrivate() && !it.isField }
+    return when (origin) {
+        Origin.JAVA_LIB, Origin.JAVA -> emptySequence()  // No properties in Java
+        else /* kotlin */ -> getAllProperties().filter { !it.isPrivate() && !it.isKotlinField() }
+    }
 }
 
 internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map { KspAnnotationImpl(it) }.memoize()
@@ -146,17 +148,19 @@ internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map { KspAnno
 internal fun parametersSequenceFor(
     declaration: KSFunctionDeclaration,
     jvmMethodSignature: JvmMethodSignature,
-    containing: KSType,
+    containing: KSType?,
 ) = sequence<ParameterLangModel> {
     val parameters = declaration.parameters
-    val types = declaration.asMemberOf(containing).parameterTypes
+    val types = containing?.let { declaration.asMemberOf(it).parameterTypes }
     for (i in parameters.indices) {
         val parameter = parameters[i]
         yield(
             KspParameterImpl(
                 impl = parameter,
                 jvmSignatureSupplier = { jvmMethodSignature.parameterTypesSignatures?.get(i) },
-                refinedTypeRef = parameter.type.replaceType(types[i] ?: ErrorTypeImpl),
+                refinedTypeRef = parameter.type.run {
+                    if (types != null) replaceType(types[i] ?: ErrorTypeImpl) else this
+                },
             )
         )
     }

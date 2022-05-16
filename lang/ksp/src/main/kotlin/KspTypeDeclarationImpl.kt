@@ -5,8 +5,11 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.isPrivate
 import com.google.devtools.ksp.symbol.ClassKind
+import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSModifierListOwner
+import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Modifier
@@ -43,8 +46,8 @@ internal class KspTypeDeclarationImpl private constructor(
 
     override val kotlinObjectKind: KotlinObjectKind?
         get() = when {
-            impl.isCompanionObject -> KotlinObjectKind.Companion
-            impl.isObject -> KotlinObjectKind.Object
+            impl.isCompanionObject && impl.simpleName.asString() == "Companion" -> KotlinObjectKind.Companion
+            impl.classKind == ClassKind.OBJECT -> KotlinObjectKind.Object
             else -> null
         }
 
@@ -75,48 +78,225 @@ internal class KspTypeDeclarationImpl private constructor(
             .memoize()
     }
 
-    override val functions: Sequence<FunctionLangModel> by lazy(NONE) {
-        sequenceOf(
-            this.impl.allNonPrivateFunctions().map { KspFunctionImpl(owner = this, impl = it) },
-            this.impl.allNonPrivateProperties().flatMap {
-                explodeProperty(
-                    property = it,
-                    owner = this,
-                )
-            },
-        ).flatten().memoize()
+    private interface FunctionFilter {
+        fun filterFunction(func: KSFunctionDeclaration): Boolean = filterAll(func)
+        fun filterProperty(prop: KSPropertyDeclaration): Boolean = filterAll(prop)
+        fun filterAccessor(accessor: KSPropertyAccessor): Boolean = filterAll(accessor)
+        fun filterAll(it: KSAnnotated) = true
     }
 
-    private fun explodeProperty(
+    override val functions: Sequence<FunctionLangModel> by lazy(NONE) {
+        sequence {
+            when (kotlinObjectKind) {
+                KotlinObjectKind.Object -> {
+                    functionsImpl(
+                        declaration = impl,
+                        filter = object : FunctionFilter {},
+                        isStatic = { it.isAnnotationPresent<JvmStatic>() }
+                    )
+                }
+                KotlinObjectKind.Companion -> {
+                    functionsImpl(
+                        declaration = impl,
+                        filter = object : FunctionFilter {
+                            override fun filterAll(it: KSAnnotated): Boolean {
+                                // Skip jvm-static methods in companion
+                                return !it.isAnnotationPresent<JvmStatic>()
+                            }
+                        },
+                        isStatic = { false }
+                    )
+                }
+                null -> {
+                    functionsImpl(
+                        declaration = impl,
+                        filter = object : FunctionFilter {},
+                        isStatic = { it is KSModifierListOwner && Modifier.JAVA_STATIC in it.modifiers }
+                    )
+                    impl.getCompanionObject()?.let { companion ->
+                        functionsImpl(
+                            declaration = companion,
+                            filter = object : FunctionFilter {
+                                // Include jvm static from companion
+                                override fun filterFunction(func: KSFunctionDeclaration): Boolean {
+                                    return func.isAnnotationPresent<JvmStatic>()
+                                }
+
+                                override fun filterProperty(prop: KSPropertyDeclaration): Boolean {
+                                    return true
+                                }
+
+                                override fun filterAccessor(accessor: KSPropertyAccessor): Boolean {
+                                    return accessor.isAnnotationPresent<JvmStatic>() ||
+                                            accessor.receiver.isAnnotationPresent<JvmStatic>()
+                                }
+                            },
+                            isStatic = { true },
+                        )
+                    }
+                }
+            }
+        }.memoize()
+    }
+
+    private suspend fun SequenceScope<FunctionLangModel>.functionsImpl(
+        declaration: KSClassDeclaration,
+        filter: FunctionFilter,
+        isStatic: (KSAnnotated) -> Boolean,
+    ) {
+        for (function in declaration.allNonPrivateFunctions()) {
+            if (!filter.filterFunction(function)) continue
+            yield(
+                KspFunctionImpl(
+                    owner = this@KspTypeDeclarationImpl,
+                    impl = function,
+                    isStatic = isStatic(function),
+                )
+            )
+        }
+
+        for (property in declaration.allNonPrivateProperties()) {
+            if (!filter.filterProperty(property)) continue
+            explodeProperty(
+                property = property,
+                owner = this@KspTypeDeclarationImpl,
+                filter = filter,
+                isStatic = isStatic,
+            )
+        }
+    }
+
+    private suspend fun SequenceScope<FunctionLangModel>.explodeProperty(
         property: KSPropertyDeclaration,
         owner: KspTypeDeclarationImpl,
-    ): Sequence<FunctionLangModel> = sequenceOf(
+        filter: FunctionFilter,
+        isStatic: (KSAnnotated) -> Boolean,
+    ) {
+        val isPropertyStatic = isStatic(property)
         property.getter?.let { getter ->
-            KspFunctionPropertyGetterImpl(owner = owner, getter = getter)
-        },
+            if (filter.filterAccessor(getter)) {
+                yield(
+                    KspFunctionPropertyGetterImpl(
+                        owner = owner, getter = getter,
+                        isStatic = isPropertyStatic || isStatic(getter)
+                    )
+                )
+            }
+        }
         property.setter?.let { setter ->
-            if (Modifier.PRIVATE !in setter.modifiers && Modifier.PROTECTED !in setter.modifiers) {
-                KspFunctionPropertySetterImpl(owner = owner, setter = setter)
-            } else null
-        },
-    ).filterNotNull()
+            val modifiers = setter.modifiers
+            if (Modifier.PRIVATE !in modifiers && Modifier.PROTECTED !in modifiers && filter.filterAccessor(setter)) {
+                yield(
+                    KspFunctionPropertySetterImpl(
+                        owner = owner, setter = setter,
+                        isStatic = isPropertyStatic || isStatic(setter)
+                    )
+                )
+            }
+        }
+    }
 
     override val fields: Sequence<FieldLangModel> by lazy(NONE) {
-        impl.getDeclaredProperties()
-            .filter { !it.isPrivate() && it.isField }
-            .map { KspFieldImpl(it, this) }.memoize()
+        sequence {
+            when (kotlinObjectKind) {
+                KotlinObjectKind.Object -> {
+                    for (property in impl.getDeclaredProperties()) {
+                        // `lateinit` generates exposed field
+                        if (property.isPrivate() || (!property.isKotlinField() && !property.isLateInit())) {
+                            continue  // Not a field
+                        }
+                        yield(
+                            KspFieldImpl(
+                                impl = property,
+                                owner = this@KspTypeDeclarationImpl,
+                                isStatic = true,  // Every field is static in kotlin object.
+                            )
+                        )
+                    }
+                    // Simulate INSTANCE field for static kotlin singleton.
+                    yield(
+                        PSFSyntheticField(
+                            owner = this@KspTypeDeclarationImpl,
+                            name = "INSTANCE",
+                        )
+                    )
+                }
+                KotlinObjectKind.Companion -> {
+                    // Nothing here, no fields are actually generated in companion,
+                    //  they are all generated in the enclosing class.
+                }
+                null -> {
+                    when (impl.origin) {
+                        Origin.JAVA, Origin.JAVA_LIB -> {
+                            // Then any "property" represents a field in Java
+                            for (field in impl.getDeclaredProperties()) {
+                                if (field.isPrivate()) continue
+                                yield(
+                                    KspFieldImpl(
+                                        impl = field,
+                                        owner = this@KspTypeDeclarationImpl,
+                                        isStatic = Modifier.JAVA_STATIC in field.modifiers,
+                                    )
+                                )
+                            }
+                        }
+                        Origin.KOTLIN, Origin.KOTLIN_LIB, Origin.SYNTHETIC -> {
+                            // Assume kotlin origin.
+                            for (property in impl.getDeclaredProperties()) {
+                                if (property.isPrivate() || !property.isKotlinField()) {
+                                    continue
+                                }
+                                yield(
+                                    KspFieldImpl(
+                                        impl = property,
+                                        owner = this@KspTypeDeclarationImpl,
+                                        isStatic = false,
+                                    )
+                                )
+                            }
+                            impl.getCompanionObject()?.let { companion ->
+                                // Include fields from companion (if any) as they are generated as static fields
+                                //  in the enclosing class.
+                                for (property in companion.getDeclaredProperties()) {
+                                    if (property.isPrivate() || (!property.isKotlinField() && !property.isLateInit())) {
+                                        continue
+                                    }
+                                    yield(
+                                        KspFieldImpl(
+                                            impl = property,
+                                            owner = this@KspTypeDeclarationImpl,
+                                            isStatic = true,  // Every field is static in companion
+                                        )
+                                    )
+                                }
+                                // Simulate companion object instance field.
+                                yield(
+                                    PSFSyntheticField(
+                                        owner = this@KspTypeDeclarationImpl,
+                                        type = KspTypeImpl(companion.asType(emptyList())),
+                                        name = companion.simpleName.asString(),
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }.memoize()
     }
 
     override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy(NONE) {
         impl.declarations
-        .filterIsInstance<KSClassDeclaration>()
-        .filter { !it.isPrivate() }
-        .map { Factory(KspTypeImpl(it.asType(emptyList()))) }
-        .memoize()
+            .filterIsInstance<KSClassDeclaration>()
+            .filter { !it.isPrivate() }
+            .map { Factory(KspTypeImpl(it.asType(emptyList()))) }
+            .memoize()
     }
 
-    override val companionObjectDeclaration: TypeDeclarationLangModel? by lazy(NONE) {
-        impl.getCompanionObject()?.let { companion ->
+    override val defaultCompanionObjectDeclaration: KspTypeDeclarationImpl? by lazy(NONE) {
+        impl.getCompanionObject()?.takeIf {
+            it.simpleName.asString() == "Companion"
+        }?.let { companion ->
             KspTypeDeclarationImpl(KspTypeImpl(companion.asType(emptyList())))
         }
     }
@@ -157,5 +337,16 @@ internal class KspTypeDeclarationImpl private constructor(
             jvmMethodSignature = jvmSignature,
         )
         override val platformModel: KSFunctionDeclaration get() = impl
+    }
+
+    private class PSFSyntheticField(
+        override val owner: TypeDeclarationLangModel,
+        override val type: TypeLangModel = owner.asType(),
+        override val name: String,
+    ) : FieldLangModel {
+        override val isEffectivelyPublic: Boolean get() = true
+        override val annotations: Sequence<Nothing> get() = emptySequence()
+        override val platformModel: Any? get() = null
+        override val isStatic: Boolean get() = true
     }
 }

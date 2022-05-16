@@ -11,13 +11,12 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspFieldImpl private constructor(
     private val impl: KSPropertyDeclaration,
     override val owner: TypeDeclarationLangModel,
+    override val isStatic: Boolean,
 ) : FieldLangModel {
     override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()
-
-    override val isStatic: Boolean get() = impl.isStatic
 
     override val type: TypeLangModel by lazy(NONE) {
         KspTypeImpl(
@@ -35,8 +34,13 @@ internal class KspFieldImpl private constructor(
         operator fun invoke(
             impl: KSPropertyDeclaration,
             owner: TypeDeclarationLangModel,
+            isStatic: Boolean,
         ) = createCached(impl) {
-            KspFieldImpl(impl, owner)
+            KspFieldImpl(
+                impl = impl,
+                owner = owner,
+                isStatic = isStatic,
+            )
         }
     }
 }

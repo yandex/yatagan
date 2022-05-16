@@ -2,6 +2,7 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.yandex.daggerlite.base.BiObjectCache
+import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
@@ -11,7 +12,8 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspFunctionImpl private constructor(
     private val impl: KSFunctionDeclaration,
     override val owner: KspTypeDeclarationImpl,
-) : CtFunctionLangModel() {
+    override val isStatic: Boolean,
+    ) : CtFunctionLangModel() {
     private val jvmSignature = JvmMethodSignature(impl)
 
     override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
@@ -22,18 +24,18 @@ internal class KspFunctionImpl private constructor(
     override val isAbstract: Boolean
         get() = impl.isAbstract
 
-    override val isStatic: Boolean
-        get() = impl.isStatic
 
     override val returnType: TypeLangModel by lazy(NONE) {
+        var typeReference = impl.returnType.orError()
+        if (!isStatic) {
+            // No need to resolve generics for static functions.
+            typeReference = typeReference.replaceType(impl.asMemberOf(owner.type.impl).returnType ?: ErrorTypeImpl)
+        }
         KspTypeImpl(
-            reference = impl.returnType.orError().replaceType(
-                impl.asMemberOf(owner.type.impl).returnType ?: ErrorTypeImpl),
+            reference = typeReference,
             jvmSignatureHint = jvmSignature.returnTypeSignature,
         )
     }
-
-    override val propertyAccessorInfo: Nothing? get() = null
 
     override val name: String by lazy(NONE) {
         Utils.resolver.getJvmName(impl) ?: impl.simpleName.asString()
@@ -41,7 +43,7 @@ internal class KspFunctionImpl private constructor(
 
     override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
         declaration = impl,
-        containing = owner.type.impl,
+        containing = ifOrElseNull(!isStatic) { owner.type.impl },
         jvmMethodSignature = jvmSignature,
     )
 
@@ -51,10 +53,12 @@ internal class KspFunctionImpl private constructor(
         operator fun invoke(
             impl: KSFunctionDeclaration,
             owner: KspTypeDeclarationImpl,
+            isStatic: Boolean = false,
         ) = createCached(impl, owner) {
             KspFunctionImpl(
                 impl = impl,
                 owner = owner,
+                isStatic = isStatic
             )
         }
     }
