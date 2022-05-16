@@ -6,7 +6,6 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
-import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportError
@@ -33,7 +32,7 @@ internal class MembersInjectorModelImpl private constructor(
                 ))
             }
             injectee.declaration.functions.filter {
-                it.isAnnotatedWith<Inject>() && it.propertyAccessorInfo?.isGetter != true
+                it.isAnnotatedWith<Inject>()
             }.forEach { functionInjectee ->
                 put(functionInjectee, NodeDependency(
                     type = functionInjectee.parameters.single().type,

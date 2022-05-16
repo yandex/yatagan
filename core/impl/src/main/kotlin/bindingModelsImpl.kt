@@ -117,10 +117,11 @@ internal class ProvidesImpl(
 ) : ProvidesBindingModel,
     ModuleHostedBindingBase() {
 
-    private val conditionalHolder = ConditionalHoldingModelImpl(
-        checkNotNull(impl.providesAnnotationIfPresent) { "Not reached" }.conditionals)
+    private val conditionalsModel by lazy {
+        ConditionalHoldingModelImpl(checkNotNull(impl.providesAnnotationIfPresent) { "Not reached" }.conditionals)
+    }
 
-    override val conditionals get() = conditionalHolder.conditionals
+    override val conditionals get() = conditionalsModel.conditionals
 
     override val inputs: List<NodeDependency> by lazy(NONE) {
         impl.parameters.map { param ->
@@ -131,7 +132,7 @@ internal class ProvidesImpl(
     override fun validate(validator: Validator) {
         super.validate(validator)
 
-        validator.inline(conditionalHolder)
+        validator.inline(conditionalsModel)
 
         for (dependency in inputs) {
             validator.child(dependency.node)

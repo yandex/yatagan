@@ -3,7 +3,6 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.symbol.KSPropertySetter
 import com.google.devtools.ksp.symbol.Modifier
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import kotlin.LazyThreadSafetyMode.NONE
@@ -11,7 +10,8 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class KspFunctionPropertySetterImpl private constructor(
     private val setter: KSPropertySetter,
     override val owner: KspTypeDeclarationImpl,
-) : KspFunctionPropertyAccessorBase<KSPropertySetter>(setter) {
+    isStatic: Boolean,
+) : KspFunctionPropertyAccessorBase<KSPropertySetter>(setter, isStatic) {
 
     override val isEffectivelyPublic: Boolean
         get() = super.isEffectivelyPublic && setter.modifiers.let {
@@ -33,9 +33,6 @@ internal class KspFunctionPropertySetterImpl private constructor(
         ))
     }
 
-    override val kind: PropertyAccessorKind
-        get() = PropertyAccessorKind.Setter
-
     override val platformModel: Any?
         get() = null
 
@@ -43,10 +40,12 @@ internal class KspFunctionPropertySetterImpl private constructor(
         operator fun invoke(
             setter: KSPropertySetter,
             owner: KspTypeDeclarationImpl,
+            isStatic: Boolean,
         ) = createCached(setter) {
             KspFunctionPropertySetterImpl(
                 setter = setter,
                 owner = owner,
+                isStatic = isStatic,
             )
         }
     }

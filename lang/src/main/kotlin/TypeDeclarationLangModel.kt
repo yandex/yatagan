@@ -46,6 +46,8 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
      *
      * All returned functions (including inherited or overridden ones) have [owner][FunctionLangModel.owner] defined
      * as `this`.
+     *
+     * Never includes functions defined in `java.lang.Object`/`kotlin.Any`, as they are of no interest to DL.
      */
     val functions: Sequence<FunctionLangModel>
 
@@ -60,9 +62,10 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     val nestedClasses: Sequence<TypeDeclarationLangModel>
 
     /**
-     * Kotlin's companion object declaration, if one exists for the type.
+     * Kotlin's default companion object declaration, if one exists for the type.
+     * If a companion object has non-default name (`"Companion"`), it won't be found here.
      */
-    val companionObjectDeclaration: TypeDeclarationLangModel?
+    val defaultCompanionObjectDeclaration: TypeDeclarationLangModel?
 
     /**
      * Creates [TypeLangModel] based on the declaration **assuming, that no type arguments are required**.

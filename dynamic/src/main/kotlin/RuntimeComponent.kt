@@ -94,7 +94,7 @@ internal class RuntimeComponent(
     }
 
     private fun doEvaluateLiteral(literal: Literal): Boolean {
-        var instance: Any? = literal.root.rt.kotlinObjectInstanceOrNull()
+        var instance: Any? = null
         for (member in literal.path) {
             instance = member.accept(MemberEvaluator(instance))
         }
@@ -247,7 +247,7 @@ internal class RuntimeComponent(
                 }
             }
             function.owner.isKotlinObject -> {
-                function.owner.rt.kotlinObjectInstanceOrNull()
+                function.owner.kotlinObjectInstanceOrNull()
             }
             else -> null
         }, /* function arguments*/ *args())

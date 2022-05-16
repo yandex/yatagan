@@ -176,10 +176,12 @@ class MultibindingsTest(
             import com.yandex.daggerlite.IntoList
             import com.yandex.daggerlite.DeclareList
             
-            object Features {
-                var isEnabled = false
+            class Features {
+                companion object {
+                    var isEnabled = false
+                }
             
-                @Condition(Features::class, "isEnabled")
+                @Condition(Features::class, "Companion.isEnabled")
                 annotation class Feature
             }
             

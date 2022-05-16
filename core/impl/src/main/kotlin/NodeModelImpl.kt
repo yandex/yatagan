@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.base.BiObjectCache
+import com.yandex.daggerlite.core.ConditionalHoldingModel
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -29,10 +30,17 @@ internal class NodeModelImpl private constructor(
 
     private inner class InjectConstructorImpl(
         override val constructor: ConstructorLangModel,
-    ) : InjectConstructorModel, ConditionalHoldingModelImpl(constructor.constructee.conditionals) {
+    ) : InjectConstructorModel, ConditionalHoldingModel {
         init {
             require(constructor.isAnnotatedWith<Inject>())
         }
+
+        private val conditionalModel by lazy {
+            ConditionalHoldingModelImpl(constructor.constructee.conditionals)
+        }
+
+        override val conditionals: Sequence<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
+            get() = conditionalModel.conditionals
 
         override val inputs: List<NodeDependency> by lazy {
             constructor.parameters.map { param ->
@@ -53,7 +61,7 @@ internal class NodeModelImpl private constructor(
         }
 
         override fun validate(validator: Validator) {
-            super.validate(validator)
+            validator.inline(conditionalModel)
             if (!constructor.isEffectivelyPublic || !constructor.constructee.isEffectivelyPublic) {
                 validator.reportError(Errors.invalidAccessInjectConstructor())
             }

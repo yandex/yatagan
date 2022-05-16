@@ -10,8 +10,6 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.functionsWithCompanion
-import com.yandex.daggerlite.core.lang.isGetter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.ConditionScope.Literal
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -192,6 +190,7 @@ private class LiteralPayloadImpl private constructor(
             var currentType = root.asType()
             var finished = false
 
+            var isFirst = true
             pathSource.split('.').forEach { name ->
                 if (finished) {
                     pathParsingError = Errors.invalidConditionNoBoolean()
@@ -208,6 +207,13 @@ private class LiteralPayloadImpl private constructor(
                 if (member == null) {
                     pathParsingError = Errors.invalidConditionMissingMember(name = name, type = currentType)
                     return@buildList
+                }
+                if (isFirst) {
+                    if (!member.isStatic) {
+                        pathParsingError = Errors.invalidNonStaticMember(name = name, type = currentType)
+                        return@buildList
+                    }
+                    isFirst = false
                 }
                 if (!member.isEffectivelyPublic) {
                     pathParsingError = Errors.invalidAccessForConditionMember(member = member)
@@ -241,11 +247,8 @@ private class LiteralPayloadImpl private constructor(
                 return field
             }
 
-            val method = type.functionsWithCompanion.find { function ->
-                function.propertyAccessorInfo?.let {
-                    // If this is a kotlin property getter, then look for property name
-                    it.isGetter && it.propertyName == name
-                } ?: (function.name == name)
+            val method = type.functions.find { function ->
+                function.name == name
             }
             if (method != null) {
                 return method

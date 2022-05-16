@@ -33,9 +33,9 @@ class CoreBindingsFailureTest(
                     val isEnabledC = true 
                 }
                 
-                @Condition(Foo::class, "isEnabledA") annotation class A
-                @Condition(Foo::class, "isEnabledB") annotation class B
-                @Condition(Foo::class, "isEnabledC") annotation class C
+                @Condition(Foo::class, "INSTANCE.isEnabledA") annotation class A
+                @Condition(Foo::class, "INSTANCE.isEnabledB") annotation class B
+                @Condition(Foo::class, "INSTANCE.isEnabledC") annotation class C
             """.trimIndent())
         }
     }
@@ -296,7 +296,7 @@ class CoreBindingsFailureTest(
             )),
             errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
-                    aCondition = "[test.Foo.isEnabledA]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledA]",
                     bCondition = "[unconditional]",
                     a = "test.Api",
                     b = "@Provides test.TestModule::toAny(test.Api): java.lang.Object",
@@ -322,14 +322,14 @@ class CoreBindingsFailureTest(
             import javax.inject.*
             
             @AllConditions([
-                Condition(Foo::class, "isEnabledA"),
-                Condition(Foo::class, "isEnabledB"),
+                Condition(Foo::class, "INSTANCE.isEnabledA"),
+                Condition(Foo::class, "INSTANCE.isEnabledB"),
             ])
             annotation class AandB
             
             @AnyCondition([
-                Condition(Foo::class, "isEnabledA"),
-                Condition(Foo::class, "isEnabledB"),
+                Condition(Foo::class, "INSTANCE.isEnabledA"),
+                Condition(Foo::class, "INSTANCE.isEnabledB"),
             ])
             annotation class AorB
             
@@ -374,8 +374,8 @@ class CoreBindingsFailureTest(
         expectValidationResults(
             errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
-                    aCondition = "[test.Foo.isEnabledA && test.Foo.isEnabledB]",
-                    bCondition = "[test.Foo.isEnabledA]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledA && test.Foo.INSTANCE.isEnabledB]",
+                    bCondition = "[test.Foo.INSTANCE.isEnabledA]",
                     a = "test.UnderAandB",
                     b = "@Inject test.UnderA",
                 ),
@@ -387,8 +387,8 @@ class CoreBindingsFailureTest(
             )),
             errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
-                    aCondition = "[test.Foo.isEnabledA]",
-                    bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledA]",
+                    bCondition = "[(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledB]",
                     a = "test.UnderA",
                     b = "@Inject test.UnderB",
                 ),
@@ -400,8 +400,8 @@ class CoreBindingsFailureTest(
             )),
             errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
-                    aCondition = "[test.Foo.isEnabledA && test.Foo.isEnabledB && (test.Foo.isEnabledA || test.Foo.isEnabledB)]",
-                    bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledA && test.Foo.INSTANCE.isEnabledB && (test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB)]",
+                    bCondition = "[(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledB]",
                     a = "test.UnderComplex",
                     b = "@Inject test.UnderB",
                 ),
@@ -413,8 +413,8 @@ class CoreBindingsFailureTest(
             )),
             errorMessage(formatMessage(
                 message = Errors.incompatibleCondition(
-                    aCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledB]",
-                    bCondition = "[(test.Foo.isEnabledA || test.Foo.isEnabledB) && test.Foo.isEnabledA]",
+                    aCondition = "[(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledB]",
+                    bCondition = "[(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledA]",
                     a = "test.UnderB",
                     b = "@Inject test.UnderAorB",
                 ),
@@ -427,7 +427,7 @@ class CoreBindingsFailureTest(
             errorMessage(formatMessage(
                 // @formatter:off
                 message = Errors.incompatibleCondition(
-                    aCondition = "[test.Foo.isEnabledA]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledA]",
                     bCondition = "[unconditional]",
                     a = "test.UnderA",
                     b = "@Provides test.MyModule::provideObject(test.UnderA): @javax.inject.Named(value=\"error\") java.lang.Object",
@@ -516,7 +516,7 @@ class CoreBindingsFailureTest(
             // @formatter:off
             errorMessage(formatMessage(
                 Errors.incompatibleConditionEntyPoint(
-                    aCondition = "[test.Foo.isEnabledA]", bCondition = "[unconditional]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledA]", bCondition = "[unconditional]",
                     binding = "@Inject test.ElectricHeater", component = "test.RootComponent",
                 ),
                 encounterPaths = listOf(
@@ -526,7 +526,7 @@ class CoreBindingsFailureTest(
             )),
             errorMessage(formatMessage(
                 Errors.incompatibleConditionEntyPoint(
-                    aCondition = "[test.Foo.isEnabledB]", bCondition = "[unconditional]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledB]", bCondition = "[unconditional]",
                     binding = "@Inject test.GasHeater", component = "test.RootComponent",
                 ),
                 encounterPaths = listOf(
@@ -536,7 +536,7 @@ class CoreBindingsFailureTest(
             )),
             errorMessage(formatMessage(
                 Errors.incompatibleConditionEntyPoint(
-                    aCondition = "[test.Foo.isEnabledB]", bCondition = "[test.Foo.isEnabledA]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledB]", bCondition = "[test.Foo.INSTANCE.isEnabledA]",
                     binding = "@Inject test.GasHeater", component = "test.SubComponentA",
                 ),
                 encounterPaths = listOf(
@@ -546,7 +546,7 @@ class CoreBindingsFailureTest(
             )),
             errorMessage(formatMessage(
                 Errors.incompatibleConditionEntyPoint(
-                    aCondition = "[test.Foo.isEnabledA]", bCondition = "[test.Foo.isEnabledB]",
+                    aCondition = "[test.Foo.INSTANCE.isEnabledA]", bCondition = "[test.Foo.INSTANCE.isEnabledB]",
                     binding = "@Inject test.ElectricHeater", component = "test.SubComponentB",
                 ),
                 encounterPaths = listOf(
@@ -647,13 +647,16 @@ class CoreBindingsFailureTest(
             annotation class Invalid1
             @Condition(Int::class, "#invalid")
             annotation class Invalid2
-            @Condition(Foo::class, "foo")
+            @Condition(Foo::class, "INSTANCE.getFoo")
             annotation class Invalid3
+            @Condition(Foo::class, "getFoo")
+            annotation class Invalid4
 
             @Conditional([
                 Invalid1::class,
                 Invalid2::class,
                 Invalid3::class,
+                Invalid4::class,
             ])
             class ClassA @Inject constructor()
             
@@ -668,19 +671,25 @@ class CoreBindingsFailureTest(
             errorMessage(formatMessage(
                 message = Errors.invalidCondition("#invalid"),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "<invalid>")
+                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.INSTANCE.getFoo && test.Foo.getFoo]", "<invalid>")
                 ),
             )),
             errorMessage(formatMessage(
                 message = Errors.invalidConditionMissingMember(name = "hello", type = "test.Foo"),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "!test.Foo.hello")
+                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.INSTANCE.getFoo && test.Foo.getFoo]", "!test.Foo.hello")
                 ),
             )),
             errorMessage(formatMessage(
                 message = Errors.invalidConditionNoBoolean(),
                 encounterPaths = listOf(
-                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.foo]", "test.Foo.foo")
+                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.INSTANCE.getFoo && test.Foo.getFoo]", "test.Foo.INSTANCE.getFoo")
+                ),
+            )),
+            errorMessage(formatMessage(
+                message = Errors.invalidNonStaticMember(name = "getFoo", type = "test.Foo"),
+                encounterPaths = listOf(
+                    listOf("test.MyComponent", "[entry-point] getA", "@Inject test.ClassA", "[!test.Foo.hello && <invalid> && test.Foo.INSTANCE.getFoo && test.Foo.getFoo]", "test.Foo.getFoo")
                 ),
             )),
             // @formatter:on

@@ -5,32 +5,22 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind.Getter
-import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorKind.Setter
 import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
-import kotlinx.metadata.KmClass
-import kotlinx.metadata.jvm.getterSignature
-import kotlinx.metadata.jvm.setterSignature
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.NestingKind
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.TypeKind
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val type: DeclaredType,
 ) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationLangModel() {
     private val impl = type.asTypeElement()
-
-    private val kotlinClass: KmClass? by lazy(NONE) {
-        impl.obtainKotlinClassIfApplicable()
-    }
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
@@ -42,13 +32,11 @@ internal class JavaxTypeDeclarationImpl private constructor(
         get() = impl.isAbstract
 
     override val kotlinObjectKind: KotlinObjectKind?
-        get() = kotlinClass?.let {
-            when {
-                it.isCompanionObject -> KotlinObjectKind.Companion
-                it.isObject -> KotlinObjectKind.Object
-                else -> null
-            }
-        }
+    get() = when {
+        impl.isDefaultCompanionObject() -> KotlinObjectKind.Companion
+        impl.isKotlinSingleton() -> KotlinObjectKind.Object
+        else -> null
+    }
 
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
@@ -116,59 +104,16 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .memoize()
     }
 
-    override val companionObjectDeclaration: TypeDeclarationLangModel? by lazy(NONE) {
-        kotlinClass?.companionObject?.let { companionName: String ->
-            val companionClass = checkNotNull(impl.enclosedElements.find {
-                it.kind == ElementKind.CLASS && it.simpleName.contentEquals(companionName)
-            }) { "Not reached: inconsistent metadata interpreting: No companion $companionName detected in $impl" }
-            JavaxTypeDeclarationImpl(companionClass.asType().asDeclaredType())
-        }
+    override val defaultCompanionObjectDeclaration: TypeDeclarationLangModel? by lazy(NONE) {
+        if (impl.isFromKotlin()) {
+            impl.enclosedElements.find {
+                it.kind == ElementKind.CLASS && it.asTypeElement().isDefaultCompanionObject()
+            }?.let { JavaxTypeDeclarationImpl(it.asType().asDeclaredType()) }
+        } else null
     }
 
     override fun asType(): TypeLangModel {
         return JavaxTypeImpl(type)
-    }
-
-    private val typeHierarchy: Sequence<JavaxTypeDeclarationImpl> by lazy(NONE) {
-        sequence {
-            val queue = ArrayList<JavaxTypeDeclarationImpl>(4)
-            queue += this@JavaxTypeDeclarationImpl
-            do {
-                val declaration = queue.removeLast()
-                yield(declaration)
-                declaration.impl.superclass?.let { superClass ->
-                    if (superClass.kind != TypeKind.NONE) {
-                        queue += Factory(superClass.asDeclaredType())
-                    }
-                }
-                for (superInterface in declaration.impl.interfaces) {
-                    queue += Factory(superInterface.asDeclaredType())
-                }
-            } while (queue.isNotEmpty())
-        }
-    }
-
-    private val kotlinPropertySetters by lazy(NONE) {
-        buildMap {
-            kotlinClass?.properties?.forEach { kmProperty ->
-                kmProperty.setterSignature?.let { put(it, kmProperty) }
-                kmProperty.getterSignature?.let { put(it, kmProperty) }
-            }
-        }
-    }
-
-    internal fun findKotlinPropertyAccessorFor(element: ExecutableElement): JavaxPropertyAccessorImpl? {
-        val signature by lazy(NONE) {
-            jvmSignatureOf(element = element, type = Utils.types.asMemberOf(type, element))
-        }
-        for (declaration in typeHierarchy) {
-            val property = declaration.kotlinPropertySetters[signature] ?: continue
-            return JavaxPropertyAccessorImpl(
-                property = property,
-                kind = if (property.setterSignature == signature) Setter else Getter,
-            )
-        }
-        return null
     }
 
     override val platformModel: TypeElement get() = impl

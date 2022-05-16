@@ -215,6 +215,10 @@ object Strings {
         fun invalidConditionMissingMember(name: Any, type: Any) =
             "Can not find accessible `$name` member in $type"
 
+        @Covered
+        fun invalidNonStaticMember(name: Any, type: Any) =
+            "Member `$name` in $type is not static"
+
 
         @Covered
         fun conflictingBindings(`for`: Any) =

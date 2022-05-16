@@ -25,7 +25,7 @@ internal class RtTypeImpl private constructor(
 
     override val isBoolean: Boolean
         get() = when (impl.tryAsClass()) {
-            java.lang.Boolean.TYPE, Boolean::class.java -> true
+            java.lang.Boolean.TYPE, java.lang.Boolean::class.java -> true
             else -> false
         }
 

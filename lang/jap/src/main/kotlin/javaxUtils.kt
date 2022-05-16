@@ -36,7 +36,7 @@ import javax.lang.model.type.WildcardType
 import javax.lang.model.util.SimpleAnnotationValueVisitor8
 
 internal inline fun <reified T : Annotation> Element.isAnnotatedWith() =
-    MoreElements.getAnnotationMirror(this, T::class.java).isPresent
+    MoreElements.isAnnotationPresent(this, T::class.java)
 
 internal fun TypeMirror.asTypeElement(): TypeElement = MoreTypes.asTypeElement(this)
 
@@ -134,11 +134,56 @@ internal val Element.isPrivate
 internal val Element.isStatic
     get() = Modifier.STATIC in modifiers
 
-@Suppress("UNCHECKED_CAST")
+internal val Element.isType
+    get() = MoreElements.isType(this)
+
+private val StaticFinal = setOf(Modifier.STATIC, Modifier.FINAL)
+
+internal fun TypeElement.isDefaultCompanionObject(): Boolean {
+    if (!isFromKotlin())
+        return false
+
+    if (!simpleName.contentEquals("Companion"))
+        return false
+
+    val parent = enclosingElement
+    if (!parent.isType)
+        return false
+
+    val thisType = asType()
+    val equivalence = MoreTypes.equivalence()
+    return parent.enclosedElements.any { maybeField ->
+        maybeField.kind == ElementKind.FIELD && maybeField.simpleName.contentEquals("Companion") &&
+                maybeField.modifiers.containsAll(StaticFinal) &&
+                equivalence.equivalent(maybeField.asType(), thisType)
+    }
+}
+
+internal fun TypeElement.isKotlinSingleton(): Boolean {
+    if (!isFromKotlin())
+        return false
+
+    val thisType = asType()
+    val equivalence = MoreTypes.equivalence()
+    return enclosedElements.any { maybeField ->
+        maybeField.kind == ElementKind.FIELD && maybeField.simpleName.contentEquals("INSTANCE") &&
+                maybeField.modifiers.containsAll(StaticFinal) &&
+                equivalence.equivalent(maybeField.asType(), thisType)
+    }
+}
+
+internal fun TypeElement.isFromKotlin(): Boolean {
+    return isAnnotatedWith<Metadata>()
+}
+
 internal fun TypeElement.allNonPrivateMethods(): Sequence<ExecutableElement> =
     sequenceOf(
         MoreElements.getLocalAndInheritedMethods(this, Utils.types, Utils.elements)
-            .asSequence(),
+            .asSequence()
+            .filter {
+                // Skip methods from Object.
+                it.enclosingElement != Utils.objectType
+            },
         enclosedElements
             .asSequence()
             .filter {

@@ -2,17 +2,17 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
-import com.yandex.daggerlite.core.lang.FunctionLangModel.PropertyAccessorInfo
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
 internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
-    private val accessor: T,
-) : CtFunctionLangModel(), PropertyAccessorInfo {
+    accessor: T,
+    final override val isStatic: Boolean,
+) : CtFunctionLangModel() {
     protected val property = accessor.receiver
 
     init {
-        require(!property.isField) { "Not reached: field can't be modeled as a property"}
+        require(!property.isKotlinField()) { "Not reached: field can't be modeled as a property"}
     }
 
     protected val jvmSignature by lazy(NONE) {
@@ -28,13 +28,4 @@ internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
 
     final override val isAbstract: Boolean
         get() = property.isAbstract()
-
-    final override val isStatic: Boolean
-        get() = property.isAbstract() || accessor.isAnnotationPresent<JvmStatic>()
-
-    final override val propertyAccessorInfo: PropertyAccessorInfo
-        get() = this
-
-    final override val propertyName: String
-        get() = property.simpleName.asString()
 }
