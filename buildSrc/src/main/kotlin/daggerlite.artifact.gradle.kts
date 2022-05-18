@@ -40,6 +40,13 @@ publishing {
             from(components["java"])
         }
 
+        components.findByName("optimizedJava")?.let { optimizedJava ->
+            create<MavenPublication>("${name}Optimized") {
+                from(optimizedJava)
+                artifactId = "${project.name}-optimized"
+            }
+        }
+
         repositories {
             fun MavenArtifactRepository.setupCredentials() {
                 credentials {

@@ -8,6 +8,11 @@ Provides an entry-point implementation [Dagger][com.yandex.daggerlite.Dagger], t
 at runtime to process annotations. The components and other required interfaces are implemented using
 `java.lang.reflect.Proxy` mechanism.
 
+## Optimized variant
+
+One can depend on pre-optimized variant of this artifact: `com.yandex.daggerlite:api-dynamic-optimized:<version>`.
+ It may provide improved performance in comparison with the default variant.
+
 ## Validation
 
 Currently, no full validation is performed when using RT backend, as it's very expensive in runtime.

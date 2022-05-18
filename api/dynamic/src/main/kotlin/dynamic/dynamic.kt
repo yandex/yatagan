@@ -12,13 +12,13 @@ import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis
 
 @OptIn(InternalLangApi::class)
-fun startDaggerRtSession() {
+internal fun startDaggerRtSession() {
     LangModelFactory.delegate = RtModelFactoryImpl()
 }
 
 // TODO: This is too expensive to use validation in a straightforward way here. Invent a way to do it anyway.
 
-fun <T> createBuilderProxy(builderClass: Class<T>): T {
+internal fun <T> createBuilderProxy(builderClass: Class<T>): T {
     val builder: T
     val time = measureTimeMillis {
         require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
@@ -37,7 +37,7 @@ fun <T> createBuilderProxy(builderClass: Class<T>): T {
     return builder
 }
 
-fun <T> createComponent(componentClass: Class<T>): T {
+internal fun <T> createComponent(componentClass: Class<T>): T {
     val componentInstance: T
     val time = measureTimeMillis {
         require(componentClass.isAnnotationPresent(Component::class.java)) {

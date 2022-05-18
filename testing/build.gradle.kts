@@ -57,8 +57,8 @@ dependencies {
     testImplementation(project(":testing-generator"))
 
     baseTestRuntime("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")  // required for heavy tests
-    dynamicTestRuntime(project(":api-dynamic"))
-    compiledTestRuntime(project(":api-compiled"))
+    dynamicTestRuntime(project(":api-dynamic", configuration = "runtimeElements"))
+    compiledTestRuntime(project(":api-compiled", configuration = "runtimeElements"))
 }
 
 val dynamicApiClasspathTask = tasks.register<ClasspathSourceGeneratorTask>("generateDynamicApiClasspath") {
