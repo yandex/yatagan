@@ -69,3 +69,12 @@ publishing {
         }
     }
 }
+
+rootProject.tasks {
+    // Every actual publish task must run after the root publish task, if any.
+    findByName("publish")?.let { rootPublish ->
+        tasks.publish {
+            mustRunAfter(rootPublish)
+        }
+    }
+}
