@@ -40,6 +40,13 @@ publishing {
             from(components["java"])
         }
 
+        components.findByName("optimizedJava")?.let { optimizedJava ->
+            create<MavenPublication>("${name}Optimized") {
+                from(optimizedJava)
+                artifactId = "${project.name}-optimized"
+            }
+        }
+
         repositories {
             fun MavenArtifactRepository.setupCredentials() {
                 credentials {
@@ -59,6 +66,15 @@ publishing {
                     setupCredentials()
                 }
             }
+        }
+    }
+}
+
+rootProject.tasks {
+    // Every actual publish task must run after the root publish task, if any.
+    findByName("publish")?.let { rootPublish ->
+        tasks.publish {
+            mustRunAfter(rootPublish)
         }
     }
 }

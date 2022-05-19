@@ -32,3 +32,22 @@ tasks.dokkaHtmlMultiModule {
         customStyleSheets = listOf(file("docs/logo-styles.css"))
     }
 }
+
+val isUnderTeamcity = providers.environmentVariable("TEAMCITY_VERSION")
+    .forUseAtConfigurationTime()
+    .isPresent
+
+tasks {
+    check {
+        // Check docs generation
+        dependsOn(dokkaHtmlMultiModule)
+    }
+
+    if (isUnderTeamcity) {
+        register("publish") {
+            doLast {
+                println("##teamcity[buildStatus text='${daggerLiteVersion}: {build.status.text}']")
+            }
+        }
+    }
+}
