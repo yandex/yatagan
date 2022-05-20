@@ -9,9 +9,13 @@ val kspVersion: String by extra
 val junitVersion: String by extra
 val mockitoKotlinVersion: String by extra
 val kotlinxCliVersion: String by extra
+val javaPoetVersion: String by extra
 
 val baseTestRuntime: Configuration by configurations.creating
 val dynamicTestRuntime: Configuration by configurations.creating {
+    extendsFrom(baseTestRuntime)
+}
+val dynamicOptimizedTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
 val compiledTestRuntime: Configuration by configurations.creating {
@@ -49,6 +53,7 @@ dependencies {
 
     // RT dependencies
     implementation(project(":lang-rt"))
+    implementation("com.squareup:javapoet:$javaPoetVersion")
 
     // Standalone launcher dependencies
     implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
@@ -58,23 +63,30 @@ dependencies {
 
     baseTestRuntime("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")  // required for heavy tests
     dynamicTestRuntime(project(":api-dynamic", configuration = "runtimeElements"))
+    dynamicOptimizedTestRuntime(project(":api-dynamic", configuration = "optimizedRuntimeElements"))
     compiledTestRuntime(project(":api-compiled", configuration = "runtimeElements"))
 }
 
-val dynamicApiClasspathTask = tasks.register<ClasspathSourceGeneratorTask>("generateDynamicApiClasspath") {
+val generateDynamicApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
     packageName.set("com.yandex.daggerlite.generated")
     propertyName.set("DynamicApiClasspath")
     classpath.set(dynamicTestRuntime)
 }
 
-val compiledApiClasspathTask = tasks.register<ClasspathSourceGeneratorTask>("generateCompiledApiClasspath") {
+val generateDynamicOptimizedApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
+    packageName.set("com.yandex.daggerlite.generated")
+    propertyName.set("DynamicOptimizedApiClasspath")
+    classpath.set(dynamicOptimizedTestRuntime)
+}
+
+val generateCompiledApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
     packageName.set("com.yandex.daggerlite.generated")
     propertyName.set("CompiledApiClasspath")
     classpath.set(compiledTestRuntime)
 }
 
 tasks.named("compileKotlin") {
-    dependsOn(dynamicApiClasspathTask, compiledApiClasspathTask)
+    dependsOn(generateDynamicApiClasspath, generateDynamicOptimizedApiClasspath, generateCompiledApiClasspath)
 }
 
 tasks.test {
@@ -85,8 +97,9 @@ tasks.test {
 kotlin {
     sourceSets {
         main {
-            kotlin.srcDir(dynamicApiClasspathTask.map { it.generatedSourceDir })
-            kotlin.srcDir(compiledApiClasspathTask.map { it.generatedSourceDir })
+            kotlin.srcDir(generateDynamicApiClasspath.map { it.generatedSourceDir })
+            kotlin.srcDir(generateDynamicOptimizedApiClasspath.map { it.generatedSourceDir })
+            kotlin.srcDir(generateCompiledApiClasspath.map { it.generatedSourceDir })
         }
     }
 }

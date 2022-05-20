@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.dynamic
 
+import com.yandex.daggerlite.DynamicValidationDelegate
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.ModuleModel
@@ -38,8 +39,9 @@ internal class RuntimeComponent(
     private val parent: RuntimeComponent?,
     private val givenInstances: Map<NodeModel, Any>,
     private val givenDependencies: Map<ComponentDependencyModel, Any>,
+    validationPromise: DynamicValidationDelegate.Promise?,
     givenModuleInstances: Map<ModuleModel, Any>,
-) : InvocationHandlerBase(), Binding.Visitor<Any> {
+) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any> {
     lateinit var thisProxy: Any
     private val accessStrategies = hashMapOf<Binding, AccessStrategy>()
     private val conditionLiterals = HashMap<Literal, Boolean>().apply {
@@ -123,7 +125,11 @@ internal class RuntimeComponent(
         return true
     }
 
-    private fun evaluate(binding: Binding): Any = binding.accept(this)
+    private fun evaluate(binding: Binding): Any {
+        return validationPromise.awaitOnError {
+            binding.accept(this)
+        }
+    }
 
     init {
         for ((binding: Binding, _) in graph.localBindings) {
@@ -162,11 +168,14 @@ internal class RuntimeComponent(
 
     override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): Any {
         val model = binding.model
-        return Proxy.newProxyInstance(javaClass.classLoader, arrayOf(model.type.declaration.rt),
+        return Proxy.newProxyInstance(
+            javaClass.classLoader, arrayOf(model.type.declaration.rt),
             RuntimeAssistedInjectFactory(
                 model = model,
                 owner = this,
-            ))
+                validationPromise = validationPromise,
+            )
+        )
     }
 
     override fun visitInstance(binding: InstanceBinding): Any {
@@ -194,6 +203,7 @@ internal class RuntimeComponent(
             RuntimeFactory(
                 graph = binding.targetGraph,
                 parent = this@RuntimeComponent,
+                validationPromise = validationPromise,  // The same validation session for children.
             )
         )
     }

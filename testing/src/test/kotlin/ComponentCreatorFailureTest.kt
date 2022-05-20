@@ -164,7 +164,6 @@ class ComponentCreatorFailureTest(
             )),
             warningMessage(formatMessage(
                 message = Strings.Warnings.nonAbstractDependency(),
-                color = Strings.StringColor.Yellow,
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "test.MyDependency"),
                 )
@@ -172,7 +171,6 @@ class ComponentCreatorFailureTest(
             warningMessage(formatMessage(
                 message = Strings.Warnings.ignoredDependencyOfFrameworkType(
                     function = "test.MyDependency::getNotGonnaBeUsed(): com.yandex.daggerlite.Optional<java.lang.Object>"),
-                color = Strings.StringColor.Yellow,
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "test.MyDependency"),
                 )
@@ -263,7 +261,6 @@ class ComponentCreatorFailureTest(
             )),
             warningMessage(formatMessage(
                 message = Strings.Warnings.ignoredBindsInstance(),
-                color = Strings.StringColor.Yellow,
                 encounterPaths = listOf(
                     listOf("test.MyComponent", "[creator] test.MyComponent.Foo", "[setter] setString(java.lang.String)"),
                 )

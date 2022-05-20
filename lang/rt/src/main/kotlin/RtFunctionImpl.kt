@@ -87,7 +87,7 @@ internal class RtFunctionImpl(
 
         override val assistedAnnotationIfPresent: AssistedAnnotationLangModel?
             get() = parametersAnnotations[index]
-                .find { it.annotationClass === Assisted::class }
+                .find { it.javaAnnotationClass === Assisted::class.java }
                 ?.let { RtAssistedAnnotationImpl(it as Assisted) }
 
         // endregion

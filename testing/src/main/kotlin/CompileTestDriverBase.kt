@@ -5,13 +5,14 @@ import com.tschuchort.compiletesting.SourceFile
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.generated.CompiledApiClasspath
 import com.yandex.daggerlite.generated.DynamicApiClasspath
+import com.yandex.daggerlite.generated.DynamicOptimizedApiClasspath
 import com.yandex.daggerlite.process.LoggerDecorator
 import org.junit.Assert
 import java.io.File
 import java.net.URLClassLoader
 
 abstract class CompileTestDriverBase protected constructor(
-    protected val apiType: ApiType = ApiType.Compiled,
+    private val apiType: ApiType = ApiType.Compiled,
 ) : CompileTestDriver {
     private val mainSourceSet = SourceSetImpl()
     private var precompiledModuleOutputDir: File? = null
@@ -77,7 +78,9 @@ abstract class CompileTestDriverBase protected constructor(
             Assert.assertFalse("No errors expected, yet compilation failed",
                 messages.none { it.kind == MessageKind.Error } && !success)
             val actualMessages = parseMessages(messageLog).sorted().toList()
-            val expectedMessages = messages.sorted()
+            val expectedMessages = messages.map {
+                it.copy(text = it.text.stripColor())
+            }.sorted()
             Assert.assertArrayEquals(expectedMessages.toTypedArray(), actualMessages.toTypedArray())
 
             if (success) {
@@ -109,6 +112,7 @@ abstract class CompileTestDriverBase protected constructor(
                 when (apiType) {
                     ApiType.Compiled -> CompiledApiClasspath
                     ApiType.Dynamic -> DynamicApiClasspath
+                    ApiType.DynamicOptimized -> DynamicOptimizedApiClasspath
                 }.split(':').forEach { add(File(it)) }
                 precompiledModuleOutputDir?.let { add(it) }
             }
@@ -122,13 +126,14 @@ abstract class CompileTestDriverBase protected constructor(
     protected fun makeClassLoader(classpaths: List<File>): ClassLoader {
         return URLClassLoader(
             classpaths.map { it.toURI().toURL() }.toTypedArray(),
-            this.javaClass.classLoader,
+            null,
         )
     }
 
-    protected enum class ApiType {
+    enum class ApiType {
         Compiled,
         Dynamic,
+        DynamicOptimized,
     }
 
     private fun parseMessages(messages: String): Sequence<Message> {
@@ -140,8 +145,16 @@ abstract class CompileTestDriverBase protected constructor(
                     "warning" -> MessageKind.Warning
                     else -> throw AssertionError()
                 },
-                text = message.trimIndent(),
+                text = message.trimIndent().stripColor(),
             )
         }.memoize()
+    }
+
+    companion object {
+        private fun String.stripColor(): String {
+            return replace(AnsiColorSequenceRegex, "")
+        }
+
+        private val AnsiColorSequenceRegex = "\u001b\\[.*?m".toRegex()
     }
 }

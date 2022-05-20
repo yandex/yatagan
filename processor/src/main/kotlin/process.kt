@@ -1,11 +1,13 @@
 package com.yandex.daggerlite.process
 
 import com.yandex.daggerlite.base.ObjectCacheRegistry
+import com.yandex.daggerlite.base.loadServices
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.impl.BindingGraph
 import com.yandex.daggerlite.spi.ValidationPluginProvider
+import com.yandex.daggerlite.spi.impl.GraphValidationExtension
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.ValidationMessage.Kind.Error
 import com.yandex.daggerlite.validation.ValidationMessage.Kind.Warning

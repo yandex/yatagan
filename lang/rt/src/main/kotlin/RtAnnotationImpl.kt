@@ -9,16 +9,14 @@ internal class RtAnnotationImpl private constructor(
     private val impl: Annotation,
 ) : AnnotationLangModel {
 
-    override val isScope: Boolean by lazy {
-        impl.annotationClass.java.isAnnotationPresent(Scope::class.java)
-    }
+    override val isScope: Boolean
+        get() = impl.javaAnnotationClass.isAnnotationPresent(Scope::class.java)
 
-    override val isQualifier: Boolean by lazy {
-        impl.annotationClass.java.isAnnotationPresent(Qualifier::class.java)
-    }
+    override val isQualifier: Boolean
+        get() = impl.javaAnnotationClass.isAnnotationPresent(Qualifier::class.java)
 
     override fun <A : Annotation> hasType(type: Class<A>): Boolean {
-        return impl.annotationClass.java == type
+        return impl.javaAnnotationClass == type
     }
 
     override fun toString() = formatString(impl)
@@ -41,8 +39,8 @@ internal class RtAnnotationImpl private constructor(
             is Enum<*> -> "${value.declaringClass.canonicalName}.${value.name}"
             is Annotation -> buildString {
                 append('@')
-                append(value.annotationClass.java.canonicalName)
-                val attributes = value.annotationClass.java.methods
+                append(value.javaAnnotationClass.canonicalName)
+                val attributes = value.javaAnnotationClass.methods
                     .asSequence()
                     .filter { it.declaringClass.isAnnotation }
                 if (attributes.any()) {
@@ -54,6 +52,7 @@ internal class RtAnnotationImpl private constructor(
                         }
                 }
             }
+
             else -> value.toString()
         }
     }

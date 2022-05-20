@@ -1,35 +1,31 @@
 package com.yandex.daggerlite.testing
 
+import com.squareup.javapoet.ClassName
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.base.ObjectCacheRegistry
-import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.use
-import com.yandex.daggerlite.graph.impl.BindingGraph
+import com.yandex.daggerlite.jap.lang.asTypeElement
+import com.yandex.daggerlite.jap.lang.isAnnotatedWith
 import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
-import com.yandex.daggerlite.lang.rt.TypeDeclarationLangModel
 import com.yandex.daggerlite.process.Logger
 import com.yandex.daggerlite.process.LoggerDecorator
-import com.yandex.daggerlite.validation.ValidationMessage
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.validate
+import org.intellij.lang.annotations.Language
 import java.io.File
 import java.util.TreeSet
+import java.util.function.Supplier
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
-import javax.lang.model.element.ElementVisitor
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
-import javax.lang.model.element.TypeParameterElement
-import javax.lang.model.element.VariableElement
 
-class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic) {
+class DynamicCompileTestDriver(
+    apiType: ApiType = ApiType.Dynamic,
+) : CompileTestDriverBase(apiType) {
     override fun doValidate(): ValidationResult {
-        val accumulator = ComponentAccumulator()
+        val accumulator = ComponentBootstrapperGenerator()
         val compilation = createKotlinCompilation().apply {
             sources = sourceFiles
             annotationProcessors = listOf(accumulator)
@@ -41,7 +37,7 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
         val runtimeClasspath = compilation.classpaths + compilation.classesDir
         val log = StringBuilder()
         val success = validateRuntimeComponents(
-            componentNames = accumulator.componentNames,
+            componentBootstrapperNames = accumulator.bootstrapperNames,
             runtimeClasspath = runtimeClasspath,
             log = log,
         )
@@ -70,23 +66,11 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
         get() = Backend.Rt
 
     private fun validateRuntimeComponents(
-        componentNames: Set<String>,
+        componentBootstrapperNames: Set<ClassName>,
         runtimeClasspath: List<File>,
         log: StringBuilder,
     ): Boolean {
         val classLoader = makeClassLoader(runtimeClasspath)
-        val graphs = buildList {
-            for (componentName in componentNames) {
-                val componentClass = classLoader.loadClass(componentName)
-                val componentDeclaration = TypeDeclarationLangModel(componentClass)
-                val componentModel = ComponentModel(componentDeclaration)
-                if (!componentModel.isRoot) {
-                    continue
-                }
-                val graph = BindingGraph(root = componentModel)
-                add(graph)
-            }
-        }
         var success = true
         val logger = LoggerDecorator(object : Logger {
             override fun error(message: String) {
@@ -100,20 +84,17 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
                 println(message)
             }
         })
-        for (message in validate(graphs)) {
-            when (message.message.kind) {
-                ValidationMessage.Kind.Error -> logger.error(Strings.formatMessage(
-                    message = message.message.contents,
-                    color = Strings.StringColor.Red,
-                    encounterPaths = message.encounterPaths,
-                    notes = message.message.notes,
-                ))
-                ValidationMessage.Kind.Warning -> logger.warning(Strings.formatMessage(
-                    message = message.message.contents,
-                    color = Strings.StringColor.Yellow,
-                    encounterPaths = message.encounterPaths,
-                    notes = message.message.notes,
-                ))
+        for (bootstrapperName in componentBootstrapperNames) {
+            @Suppress("UNCHECKED_CAST")
+            val bootstrapper = classLoader.loadClass(bootstrapperName.reflectionName())
+                .getDeclaredConstructor()
+                .newInstance() as Supplier<List<Array<String>>>
+            for ((kind, message) in bootstrapper.get()) {
+                when (kind) {
+                    "error" -> logger.error(message)
+                    "warning" -> logger.warning(message)
+                    else -> throw AssertionError("not reached")
+                }
             }
         }
         return success
@@ -127,9 +108,9 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
         }
     }
 
-    private class ComponentAccumulator : AbstractProcessor() {
-        private val _componentNames: MutableSet<String> = TreeSet()
-        val componentNames: Set<String> get() = _componentNames
+    private class ComponentBootstrapperGenerator : AbstractProcessor() {
+        private val _bootstrapperNames: MutableSet<ClassName> = TreeSet()
+        val bootstrapperNames: Set<ClassName> get() = _bootstrapperNames
 
         override fun getSupportedAnnotationTypes() = setOf(Component::class.java.canonicalName)
 
@@ -138,16 +119,65 @@ class DynamicCompileTestDriver : CompileTestDriverBase(apiType = ApiType.Dynamic
 
         override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
             for (element: Element in roundEnv.getElementsAnnotatedWith(Component::class.java)) {
-                val type = element.accept(object : ElementVisitor<TypeElement?, Unit> {
-                    override fun visitType(e: TypeElement, p: Unit) = e
-                    override fun visit(e: Element, p: Unit) = null
-                    override fun visitPackage(e: PackageElement, p: Unit) = visit(e, p)
-                    override fun visitVariable(e: VariableElement, p: Unit) = visit(e, p)
-                    override fun visitExecutable(e: ExecutableElement, p: Unit) = visit(e, p)
-                    override fun visitTypeParameter(e: TypeParameterElement, p: Unit) = visit(e, p)
-                    override fun visitUnknown(e: Element, p: Unit) = visit(e, p)
-                }, Unit) ?: continue
-                _componentNames += type.qualifiedName.toString()
+                val type = element.asTypeElement()
+                if (!type.getAnnotation(Component::class.java).isRoot) continue
+
+                val componentName = ClassName.get(type)
+                val builderName = type.enclosedElements.find {
+                    it.isAnnotatedWith<Component.Builder>()
+                }?.let { "${componentName.simpleName()}.${it.simpleName}" }
+
+                val bootstrapperName = componentName.peerClass("${componentName.simpleName()}Bootstrap")
+                _bootstrapperNames += bootstrapperName
+                val bootstrapInvocation = if (builderName != null) {
+                    "builder($builderName.class)"
+                } else {
+                    "create(${componentName.simpleName()}.class)"
+                }
+
+                @Language("Java")
+                val code = """
+                    package ${componentName.packageName()};
+                    import com.yandex.daggerlite.*;
+                    import java.util.function.*;
+                    import java.util.*;
+                    public final class ${componentName.simpleName()}Bootstrap implements Supplier<List<String[]>> {
+                        public List<String[]> get() {
+                            class InvalidGraph extends RuntimeException {}
+
+                            final List<String[]> log = new ArrayList<>();
+                            Dagger.setDynamicValidationDelegate(new DynamicValidationDelegate() {
+                                private boolean hasErrors;
+                                public boolean getUsePlugins() { return true; }
+                                public DynamicValidationDelegate.Promise dispatchValidation(
+                                    String title,
+                                    DynamicValidationDelegate.Operation operation
+                                ) {
+                                    operation.validate(new DynamicValidationDelegate.ReportingDelegate() {
+                                        public void reportError(String message) {
+                                            hasErrors = true;
+                                            log.add(new String[]{"error", message});
+                                        }
+                                        public void reportWarning(String message) {
+                                            log.add(new String[]{"warning", message});
+                                        }
+                                    });
+                                    if (hasErrors) {
+                                        throw new InvalidGraph();
+                                    }
+                                    return null;
+                                }
+                            });
+                            try {
+                                Dagger.$bootstrapInvocation;
+                            } catch (InvalidGraph e) {/*nothing here*/}
+                            return log;
+                        }
+                    }
+                """.trimIndent()
+                processingEnv.filer
+                    .createSourceFile(bootstrapperName.canonicalName(), type)
+                    .openWriter().buffered().use { it.write(code) }
             }
             return true
         }

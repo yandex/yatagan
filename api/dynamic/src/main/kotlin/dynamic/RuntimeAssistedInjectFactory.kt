@@ -1,12 +1,14 @@
 package com.yandex.daggerlite.dynamic
 
+import com.yandex.daggerlite.DynamicValidationDelegate
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.lang.rt.rt
 
 internal class RuntimeAssistedInjectFactory(
     private val model: AssistedInjectFactoryModel,
     private val owner: RuntimeComponent,
-) : InvocationHandlerBase() {
+    validationPromise: DynamicValidationDelegate.Promise?,
+) : InvocationHandlerBase(validationPromise) {
     init {
         model.factoryMethod?.let { factoryMethod ->
             implementMethod(factoryMethod.rt, FactoryMethodHandler())

@@ -2,13 +2,17 @@
 
 package com.yandex.daggerlite.dynamic
 
+import com.yandex.daggerlite.DynamicValidationDelegate
 import com.yandex.daggerlite.lang.rt.MethodSignatureEquivalenceWrapper
+import com.yandex.daggerlite.lang.rt.boxed
 import com.yandex.daggerlite.lang.rt.signatureEquivalence
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 
 
-internal open class InvocationHandlerBase : InvocationHandler {
+internal open class InvocationHandlerBase(
+    protected val validationPromise: DynamicValidationDelegate.Promise?,
+) : InvocationHandler {
     private val handlers = hashMapOf<MethodSignatureEquivalenceWrapper, MethodHandler>()
 
     protected interface MethodHandler {
@@ -27,8 +31,23 @@ internal open class InvocationHandlerBase : InvocationHandler {
 
     final override fun invoke(proxy: Any, method: Method, args: Array<Any?>?): Any? {
         val handler = handlers[method.signatureEquivalence()]
-                ?: throw UnsupportedOperationException("Not reached: $method is not handled in proxy")
-        return handler(proxy, args)
+            ?: throw UnsupportedOperationException("Not reached: $method is not handled in proxy")
+        validationPromise.awaitOnError {
+            return handler(proxy, args).also { result ->
+                val returnType = method.returnType
+                if (returnType !== Void.TYPE) {
+                    if (result == null) {
+                        check(!returnType.isPrimitive) {
+                            "Can't return `null` from a method with a primitive return type: $returnType"
+                        }
+                    } else {
+                        check(returnType.boxed().isAssignableFrom(result.javaClass)) {
+                            "Expected ${returnType}, got ${result.javaClass}"
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private class HashCodeHandler : MethodHandler {
