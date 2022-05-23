@@ -7,33 +7,37 @@ object Strings {
         Cyan(36),
     }
 
-    private fun String.colorize(color: StringColor) = lines().joinToString(separator = "\n") {
-        "\u001b[${color.ansiCode}m$it\u001b[0m"
+    private fun String.colorize(color: StringColor?): String {
+        color ?: return this
+        return lines().joinToString(separator = "\n") {
+            "\u001b[${color.ansiCode}m$it\u001b[0m"
+        }
     }
 
     private const val Indent = "    "
 
     fun formatMessage(
         message: String,
-        color: StringColor = StringColor.Red,
+        color: StringColor? = StringColor.Red,
         encounterPaths: Collection<List<Any>>,
         notes: Collection<String> = emptyList(),
     ): String {
+        val accentColor = StringColor.Cyan.takeIf { color != null }
         return buildString {
             appendLine(message.colorize(color))
             if (notes.size == 1) {
-                append("• NOTE: ".colorize(StringColor.Cyan))
+                append("• NOTE: ".colorize(accentColor))
                 appendLine(notes.first())
             } else {
                 notes.sorted().forEachIndexed { index, note ->
-                    append("• NOTE #${index + 1}:".colorize(StringColor.Cyan)).append(' ')
+                    append("• NOTE #${index + 1}:".colorize(accentColor)).append(' ')
                     appendLine(note)
                 }
             }
             appendLine("Encountered in:")
             encounterPaths.asSequence().take(10).map { path ->
                 val pathElement = path.joinToString(separator = " -> ") {
-                    it.toString().colorize(StringColor.Cyan)
+                    it.toString().colorize(accentColor)
                 }
                 "$Indent$pathElement"
             }.sorted().joinTo(this, separator = "\n")

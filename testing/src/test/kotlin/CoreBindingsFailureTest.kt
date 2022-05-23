@@ -767,17 +767,25 @@ class CoreBindingsFailureTest(
 
         expectValidationResults(
             // @formatter:off
-            errorMessage(formatMessage(
-                message = Errors.conflictingBindings(`for` = "@test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
-                encounterPaths = listOf(
-                    listOf("test.MyComponent1"),
-                    listOf("test.MyComponent2"),
-                ),
-                notes = listOf(
-                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject(): @test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
-                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject2(): @test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
-                ),
-            )),
+            *Array(if (backendUnderTest == Backend.Rt) 2 else 1) { index ->
+                errorMessage(formatMessage(
+                    message = Errors.conflictingBindings(`for` = "@test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
+                    encounterPaths = when(backendUnderTest) {
+                        Backend.Rt -> listOf(
+                            // For RT errors from different roots are not grouped.
+                            listOf("test.MyComponent${index + 1}"),  // MyComponent1 and MyComponent2
+                        )
+                        else -> listOf(
+                            listOf("test.MyComponent1"),
+                            listOf("test.MyComponent2"),
+                        )
+                    },
+                    notes = listOf(
+                        Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject(): @test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
+                        Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject2(): @test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
+                    ),
+                ))
+            },
             errorMessage(formatMessage(
                 message = Errors.conflictingBindings(`for` = "test.MyComponent1"),
                 encounterPaths = listOf(listOf("test.MyComponent1")),

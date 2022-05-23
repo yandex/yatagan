@@ -186,7 +186,7 @@ private inline fun WildcardType.replaceBounds(transform: (Type) -> Type): Wildca
     ) else this
 }
 
-internal fun Class<*>.boxed(): Type {
+fun Class<*>.boxed(): Class<*> {
     @Suppress("RemoveRedundantQualifierName")
     return if (!this.isPrimitive) this else when (this) {
         java.lang.Boolean.TYPE -> java.lang.Boolean::class.java
@@ -200,6 +200,10 @@ internal fun Class<*>.boxed(): Type {
         else -> throw AssertionError("Not reached")
     }
 }
+
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
+internal inline val <reified A : Annotation> A.javaAnnotationClass: Class<A>
+    get() = (this as java.lang.annotation.Annotation).annotationType() as Class<A>
 
 internal fun Class<*>.getMethodsOverrideAware(): List<Method> = buildList {
     val overrideControl = hashSetOf<MethodSignatureEquivalenceWrapper>()

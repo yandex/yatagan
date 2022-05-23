@@ -48,6 +48,8 @@ include("testing-dokka")
 project(":testing-dokka").projectDir = file("testing/dokka")
 
 include("spi")
+include("spi-impl")
+project(":spi-impl").projectDir = file("spi/impl")
 
 project(":validation-impl").projectDir = file("validation/impl")
 

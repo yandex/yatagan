@@ -35,7 +35,7 @@ import javax.lang.model.type.TypeVisitor
 import javax.lang.model.type.WildcardType
 import javax.lang.model.util.SimpleAnnotationValueVisitor8
 
-internal inline fun <reified T : Annotation> Element.isAnnotatedWith() =
+inline fun <reified T : Annotation> Element.isAnnotatedWith() =
     MoreElements.isAnnotationPresent(this, T::class.java)
 
 internal fun TypeMirror.asTypeElement(): TypeElement = MoreTypes.asTypeElement(this)
