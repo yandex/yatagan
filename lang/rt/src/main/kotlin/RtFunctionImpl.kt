@@ -3,7 +3,6 @@ package com.yandex.daggerlite.lang.rt
 import com.yandex.daggerlite.Assisted
 import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.Provides
-import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -93,14 +92,5 @@ internal class RtFunctionImpl(
         // endregion
 
         override fun toString() = "$name: $type"
-    }
-
-    companion object Factory : BiObjectCache<RtTypeDeclarationImpl, Method, RtFunctionImpl>() {
-        operator fun invoke(
-            method: Method,
-            owner: RtTypeDeclarationImpl,
-        ) = createCached(owner, method) {
-            RtFunctionImpl(impl = method, owner = owner)
-        }
     }
 }

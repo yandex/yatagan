@@ -1,11 +1,10 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import javax.inject.Qualifier
 import javax.inject.Scope
 
-internal class RtAnnotationImpl private constructor(
+internal class RtAnnotationImpl(
     private val impl: Annotation,
 ) : AnnotationLangModel {
 
@@ -21,9 +20,13 @@ internal class RtAnnotationImpl private constructor(
 
     override fun toString() = formatString(impl)
 
-    companion object Factory : ObjectCache<Annotation, RtAnnotationImpl>() {
-        operator fun invoke(annotation: Annotation) = createCached(annotation, ::RtAnnotationImpl)
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is RtAnnotationImpl && impl == other.impl)
+    }
 
+    override fun hashCode(): Int = impl.hashCode()
+
+    companion object  {
         private fun formatString(value: Any?): String = when (value) {
             is String -> "\"$value\""
             is ByteArray -> value.joinToString(prefix = "{", postfix = "}")
