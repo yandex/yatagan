@@ -115,6 +115,7 @@ internal class SlotProviderStrategy(
         when (kind) {
             DependencyKind.Lazy, DependencyKind.Provider -> builder.apply {
                 val component = componentForBinding(inside = inside, binding = binding)
+                // Provider class is chosen based on component (delegate) type - it will be the right one.
                 +"new %T($component, $slot)".formatCode(providerName)
             }
             else -> throw AssertionError()
@@ -202,7 +203,7 @@ internal class OnTheFlyScopedProviderCreationStrategy(
     private val providerName = cachingProvider.name
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
-        require(kind == DependencyKind.Lazy)
+        require(kind == DependencyKind.Lazy || kind == DependencyKind.Provider)
         builder.apply {
             val component = componentForBinding(inside = inside, binding = binding)
             +"new %T($component, $slot)".formatCode(providerName)
