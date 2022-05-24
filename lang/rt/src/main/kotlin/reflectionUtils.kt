@@ -225,7 +225,7 @@ internal fun Class<*>.getMethodsOverrideAware(): List<Method> = buildList {
         clazz.interfaces.forEach(::handleClass)
     }
     handleClass(this@getMethodsOverrideAware)
-    sortWith(ExecutableSignatureComparator)
+    sortWith(MethodSignatureComparator)
 }
 
 private fun arrayHashCode(types: Array<Type>): Int = types.fold(1) { hash, type -> 31 * hash + hashCode(type) }

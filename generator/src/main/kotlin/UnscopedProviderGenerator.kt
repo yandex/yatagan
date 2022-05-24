@@ -17,7 +17,7 @@ internal class UnscopedProviderGenerator(
         builder.nestedType {
             buildClass(name) {
                 implements(Names.Lazy)
-                modifiers(PRIVATE, STATIC, FINAL)
+                modifiers(/*package-private*/ STATIC, FINAL)
                 field(componentImplName, "mDelegate") {
                     modifiers(PRIVATE, FINAL)
                 }

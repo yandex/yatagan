@@ -7,7 +7,6 @@ import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
-import javax.lang.model.element.Modifier.PRIVATE
 
 internal class MultiBindingGenerator(
     methodNs: Namespace,
@@ -28,7 +27,7 @@ internal class MultiBindingGenerator(
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
         for (binding in multiBindings) {
             method(accessors[binding]!!) {
-                modifiers(PRIVATE)
+                modifiers(/*package-private*/)
                 returnType(binding.target.typeName())
                 +"final %T list = new %T<>(${binding.contributions.size})"
                     .formatCode(binding.target.typeName(), Names.ArrayList)

@@ -67,13 +67,13 @@ internal class ComponentFactoryGenerator(
         val creator = thisGraph.creator
         if (creator != null) {
             inputFieldNames.forEach { (input, name) ->
-                field(input.payload.typeName(), name) { modifiers(PRIVATE, FINAL) }
+                field(input.payload.typeName(), name) { modifiers(/*package-private*/ FINAL) }
             }
             superComponentFieldNames.forEach { (input, name) ->
-                field(Generators[input].implName, name) { modifiers(PRIVATE, FINAL) }
+                field(Generators[input].implName, name) { modifiers(/*package-private*/ FINAL) }
             }
             constructor {
-                modifiers(PRIVATE)
+                modifiers(/*package-private*/)
                 val paramsNs = Namespace(prefix = "p")
                 // Firstly - used parents
                 thisGraph.usedParents.forEach { graph ->
@@ -167,7 +167,7 @@ internal class ComponentFactoryGenerator(
             val fieldName = moduleInstanceFieldNames[module]!!
             with(builder) {
                 field(module.typeName(), fieldName) {
-                    modifiers(PRIVATE, FINAL)
+                    modifiers(/*package-private*/ FINAL)
                 }
             }
             with(constructorBuilder) {

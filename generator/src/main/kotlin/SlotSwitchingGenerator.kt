@@ -5,7 +5,6 @@ import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
-import javax.lang.model.element.Modifier.PRIVATE
 
 internal class SlotSwitchingGenerator(
     private val thisGraph: BindingGraph,
@@ -20,7 +19,7 @@ internal class SlotSwitchingGenerator(
 
     override fun generate(builder: TypeSpecBuilder) {
         builder.method(FactoryMethodName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(ClassName.OBJECT)
             parameter(ClassName.INT, "slot")
             controlFlow("switch(slot)") {

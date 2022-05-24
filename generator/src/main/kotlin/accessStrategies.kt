@@ -45,13 +45,13 @@ internal class CachingStrategySingleThread(
 ) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
-        field(targetType, instanceFieldName) {
-            modifiers(PRIVATE)
+        field(ClassName.OBJECT, instanceFieldName) {
+            modifiers(PRIVATE)  // PRIVATE: only accessed via its accessor.
         }
         method(instanceAccessorName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(targetType)
-            +"%T local = this.%N".formatCode(targetType, instanceFieldName)
+            +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
             controlFlow("if (local == null)") {
                 +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
                 +buildExpression {
@@ -76,13 +76,13 @@ internal class CachingStrategyMultiThread(
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
         field(ClassName.OBJECT, instanceFieldName) {
-            modifiers(PRIVATE, VOLATILE)
+            modifiers(PRIVATE, VOLATILE)  // PRIVATE: only accessed via its accessor.
             initializer {
                 +"new %T()".formatCode(lockName)
             }
         }
         method(instanceAccessorName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(targetType)
             +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
             controlFlow("if (local instanceof %T)".formatCode(lockName)) {
@@ -115,6 +115,7 @@ internal class SlotProviderStrategy(
         when (kind) {
             DependencyKind.Lazy, DependencyKind.Provider -> builder.apply {
                 val component = componentForBinding(inside = inside, binding = binding)
+                // Provider class is chosen based on component (delegate) type - it will be the right one.
                 +"new %T($component, $slot)".formatCode(providerName)
             }
             else -> throw AssertionError()
@@ -145,7 +146,7 @@ internal class WrappingAccessorStrategy(
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         method(accessorName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(binding.target.typeName())
             +buildExpression {
                 +"return "
@@ -202,7 +203,7 @@ internal class OnTheFlyScopedProviderCreationStrategy(
     private val providerName = cachingProvider.name
 
     override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
-        require(kind == DependencyKind.Lazy)
+        require(kind == DependencyKind.Lazy || kind == DependencyKind.Provider)
         builder.apply {
             val component = componentForBinding(inside = inside, binding = binding)
             +"new %T($component, $slot)".formatCode(providerName)
@@ -241,7 +242,7 @@ internal class ConditionalAccessStrategy(
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         method(accessorName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(Names.Optional)
             when {
                 !binding.conditionScope.isAlways -> {
