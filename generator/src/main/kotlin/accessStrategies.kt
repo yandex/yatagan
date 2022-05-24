@@ -45,13 +45,13 @@ internal class CachingStrategySingleThread(
 ) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
-        field(targetType, instanceFieldName) {
+        field(ClassName.OBJECT, instanceFieldName) {
             modifiers(PRIVATE)
         }
         method(instanceAccessorName) {
             modifiers(PRIVATE)
             returnType(targetType)
-            +"%T local = this.%N".formatCode(targetType, instanceFieldName)
+            +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
             controlFlow("if (local == null)") {
                 +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
                 +buildExpression {
