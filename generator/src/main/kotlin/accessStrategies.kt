@@ -46,10 +46,10 @@ internal class CachingStrategySingleThread(
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
         field(ClassName.OBJECT, instanceFieldName) {
-            modifiers(PRIVATE)
+            modifiers(PRIVATE)  // PRIVATE: only accessed via its accessor.
         }
         method(instanceAccessorName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(targetType)
             +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
             controlFlow("if (local == null)") {
@@ -76,13 +76,13 @@ internal class CachingStrategyMultiThread(
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
         field(ClassName.OBJECT, instanceFieldName) {
-            modifiers(PRIVATE, VOLATILE)
+            modifiers(PRIVATE, VOLATILE)  // PRIVATE: only accessed via its accessor.
             initializer {
                 +"new %T()".formatCode(lockName)
             }
         }
         method(instanceAccessorName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(targetType)
             +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
             controlFlow("if (local instanceof %T)".formatCode(lockName)) {
@@ -145,7 +145,7 @@ internal class WrappingAccessorStrategy(
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         method(accessorName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(binding.target.typeName())
             +buildExpression {
                 +"return "
@@ -241,7 +241,7 @@ internal class ConditionalAccessStrategy(
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         method(accessorName) {
-            modifiers(PRIVATE)
+            modifiers(/*package-private*/)
             returnType(Names.Optional)
             when {
                 !binding.conditionScope.isAlways -> {

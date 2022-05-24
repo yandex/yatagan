@@ -84,7 +84,7 @@ internal class ConditionGenerator(
         override fun generateInComponent(builder: TypeSpecBuilder) {
             with(builder) {
                 field(TypeName.BOOLEAN, name) {
-                    modifiers(PRIVATE, FINAL)
+                    modifiers(/*package-private*/ FINAL)
                     initializer {
                         genEvaluateLiteral(literal = literal, builder = this)
                     }
@@ -119,10 +119,10 @@ internal class ConditionGenerator(
         override fun generateInComponent(builder: TypeSpecBuilder) {
             with(builder) {
                 field(TypeName.BYTE, name) {
-                    modifiers(PRIVATE)
+                    modifiers(PRIVATE)  // PRIVATE: accessed only via its accessor.
                 }
                 method(accessorName) {
-                    modifiers(PRIVATE)
+                    modifiers(/*package-private*/)
                     returnType(TypeName.BOOLEAN)
                     // NOTE: This implementation is not thread safe.
                     // In environments with multiple threads, this can lead to multiple condition computations,

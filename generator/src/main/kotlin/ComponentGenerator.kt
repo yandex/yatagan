@@ -13,7 +13,6 @@ import com.yandex.daggerlite.graph.component1
 import com.yandex.daggerlite.graph.component2
 import javax.inject.Provider
 import javax.lang.model.element.Modifier.FINAL
-import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.Modifier.STATIC
 
@@ -105,7 +104,7 @@ internal class ComponentGenerator(
         annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
         modifiers(FINAL)
         if (!graph.isRoot) {
-            modifiers(PRIVATE, STATIC)
+            modifiers(/*package-private*/ STATIC)
         } else {
             modifiers(PUBLIC)
         }
