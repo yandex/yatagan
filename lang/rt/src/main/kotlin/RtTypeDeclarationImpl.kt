@@ -83,7 +83,7 @@ internal class RtTypeDeclarationImpl private constructor(
         impl.declaredConstructors
             .asSequence()
             .filter { !it.isPrivate }
-            .sortedWith(ExecutableSignatureComparator)
+            .sortedWith(ConstructorSignatureComparator)
             .map {
                 ConstructorImpl(
                     impl = it,
