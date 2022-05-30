@@ -62,7 +62,7 @@ internal class KspTypeDeclarationImpl private constructor(
         queue += impl.superTypes
         while (queue.isNotEmpty()) {
             for (typeRef in queue.removeFirst()) {
-                val declaration = typeRef.resolve().getNonAliasDeclaration() ?: continue
+                val declaration = typeRef.resolve().resolveAliasIfNeeded() as? KSClassDeclaration ?: continue
                 queue += declaration.superTypes
                 if (declaration.classKind == ClassKind.INTERFACE) {
                     yield(KspTypeImpl(typeRef))

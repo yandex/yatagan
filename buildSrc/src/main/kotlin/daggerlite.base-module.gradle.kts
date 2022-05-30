@@ -16,9 +16,8 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + listOf(
             "-Xjvm-default=all",
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=kotlin.ExperimentalStdlibApi",
-            "-Xopt-in=kotlin.contracts.ExperimentalContracts",
+            "-opt-in=kotlin.ExperimentalStdlibApi",
+            "-opt-in=kotlin.contracts.ExperimentalContracts",
         )
     }
 }
@@ -28,10 +27,10 @@ val kotlinVersion: String by extra(
         .asText.forUseAtConfigurationTime().get().trimEnd()
 )
 val dokkaVersion: String by extra(kotlinVersion)
-val kspVersion by extra("$kotlinVersion-1.0.4")
+val kspVersion by extra("$kotlinVersion-1.0.5")
 val javaPoetVersion by extra("1.13.0")
 val kotlinPoetVersion by extra("1.11.0")
-val kotlinCompileTestingVersion by extra("1.4.7")
+val kotlinCompileTestingVersion by extra("1.4.8")
 val autoCommonVersion by extra("1.2.1")
 val kotlinxCliVersion by extra("0.3.4")
 val junitVersion by extra("4.13.2")

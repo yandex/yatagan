@@ -17,7 +17,6 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.KSTypeArgument
-import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.KSVisitor
 import com.google.devtools.ksp.symbol.Location
 import com.google.devtools.ksp.symbol.Modifier
@@ -25,7 +24,6 @@ import com.google.devtools.ksp.symbol.NonExistLocation
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
-import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import kotlin.reflect.KClass
@@ -58,55 +56,22 @@ internal fun KSDeclaration.isPublicOrInternal() = when (getVisibility()) {
     else -> false
 }
 
-internal fun KSTypeReference?.resolveOrError(): KSType {
-    return this?.resolve() ?: ErrorTypeImpl
-}
-
-internal fun KSTypeReference?.orError(): KSTypeReference {
-    return this ?: ErrorTypeImpl.reference()
-}
-
 internal val KSNode.isFromJava
     get() = when (origin) {
         Origin.JAVA, Origin.JAVA_LIB -> true
         else -> false
     }
 
-/**
- * Attempts to resolve [KSClassDeclaration], resolving type aliases as needed.
- */
-internal fun KSType.getNonAliasDeclaration(): KSClassDeclaration? = when (val declaration = declaration) {
-    is KSClassDeclaration -> declaration
-    is KSTypeAlias -> declaration.type.resolve().getNonAliasDeclaration()
-    else -> null
-}
-
-private class MappedReference private constructor(
-    val original: KSTypeReference,
-    val mappedType: KSType,
-) : KSTypeReference by original {
-    override fun resolve(): KSType = mappedType
-
-    override fun toString() = "mapped-reference{$original -> $mappedType}"
-
-    companion object Factory : BiObjectCache<KSTypeReference, KSType, MappedReference>() {
-        operator fun invoke(
-            original: KSTypeReference,
-            mappedType: KSType,
-        ): MappedReference = createCached(original, mappedType) {
-            MappedReference(original, mappedType)
-        }
+internal val KSNode.isFromKotlin
+    get() = when (origin) {
+        Origin.KOTLIN, Origin.KOTLIN_LIB -> true
+        else -> false
     }
-}
 
-fun KSTypeReference.replaceType(type: KSType): KSTypeReference {
-    return when (this) {
-        is MappedReference -> MappedReference(original = original, mappedType = type)
-        else -> MappedReference(original = this, mappedType = type)
-    }
+internal fun KSType.resolveAliasIfNeeded(): KSType = when (val declaration = declaration) {
+    is KSTypeAlias -> declaration.type.resolve().resolveAliasIfNeeded()
+    else -> this
 }
-
-internal fun KSType.reference(): KSTypeReference = Utils.resolver.createKSTypeReferenceFromKSType(this)
 
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
     declarations.filterIsInstance<KSClassDeclaration>().find(KSClassDeclaration::isCompanionObject)
@@ -138,7 +103,7 @@ internal fun KSClassDeclaration.allNonPrivateFunctions(): Sequence<KSFunctionDec
 
 internal fun KSClassDeclaration.allNonPrivateProperties(): Sequence<KSPropertyDeclaration> {
     return when (origin) {
-        Origin.JAVA_LIB, Origin.JAVA -> emptySequence()  // No properties in Java
+//        Origin.JAVA_LIB, Origin.JAVA -> emptySequence()  // No properties in Java
         else /* kotlin */ -> getAllProperties().filter { !it.isPrivate() && !it.isKotlinField() }
     }
 }
@@ -183,6 +148,7 @@ internal object ErrorTypeImpl : KSType {
     override fun makeNullable(): KSType = this
     override fun replace(arguments: List<KSTypeArgument>): KSType = this
     override fun starProjection(): KSType = this
+    val Reference get() = this.asReference()
 }
 
 private object ErrorDeclarationImpl : KSClassDeclaration {

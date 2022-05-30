@@ -467,6 +467,31 @@ class CoreBindingsTest(
     }
 
     @Test
+    fun `java component interface extends kotlin one with properties`() {
+        givenPrecompiledModule(SourceSet {
+            givenKotlinSource("mod.Precompiled", """
+                import com.yandex.daggerlite.*
+                import javax.inject.*
+
+                class SomeClass @Inject constructor()
+                interface KotlinInterface {
+                    val someClass: SomeClass
+                }
+            """.trimIndent())
+        })
+        givenJavaSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component;
+            import mod.KotlinInterface;
+            @Component
+            public interface TestComponent extends KotlinInterface {
+                
+            }
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
+
+    @Test
     fun `basic members inject`() {
         givenJavaSource("test.ClassA", """
             import javax.inject.Inject;
@@ -551,6 +576,12 @@ class CoreBindingsTest(
 
     @Test
     fun `type parameters and multi-bindings`() {
+        givenPrecompiledModule(SourceSet {
+            givenKotlinSource("test.Deferred", """
+                import javax.inject.*
+                class Deferred<out T> @Inject constructor(val provider: Provider<out T>)
+            """.trimIndent())
+        })
         givenJavaSource("test.MyModule", """
             import java.util.Collection;
             import java.util.Collections;
@@ -590,10 +621,10 @@ class CoreBindingsTest(
         givenJavaSource("test.MyClass3", """
             public class MyClass3 implements MySpecificDeferredEvent { public @javax.inject.Inject MyClass3 () {} }
         """.trimIndent())
-        givenJavaSource("test.Deferred", """
-            import javax.inject.Provider;
-            public class Deferred<T> { public @javax.inject.Inject Deferred (Provider<T> provider) {} }
-        """.trimIndent())
+//        givenJavaSource("test.Deferred", """
+//            import javax.inject.Provider;
+//            public class Deferred<T> { public @javax.inject.Inject Deferred (Provider<T> provider) {} }
+//        """.trimIndent())
 
         givenJavaSource("test.TestCase", """
             import java.util.Collections;

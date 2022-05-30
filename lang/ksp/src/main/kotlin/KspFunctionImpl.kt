@@ -26,7 +26,7 @@ internal class KspFunctionImpl private constructor(
 
 
     override val returnType: TypeLangModel by lazy(NONE) {
-        var typeReference = impl.returnType.orError()
+        var typeReference = impl.returnType ?: ErrorTypeImpl.asReference()
         if (!isStatic) {
             // No need to resolve generics for static functions.
             typeReference = typeReference.replaceType(impl.asMemberOf(owner.type.impl).returnType ?: ErrorTypeImpl)

@@ -8,7 +8,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + listOf(
             // We rely heavily on jvm types/signatures discovery, so no use scattering opt-ins throughout the code.
-            "-Xopt-in=com.google.devtools.ksp.KspExperimental",
+            "-opt-in=com.google.devtools.ksp.KspExperimental",
         )
     }
 }

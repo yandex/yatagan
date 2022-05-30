@@ -52,28 +52,30 @@ abstract class CompileTestDriverBase protected constructor(
         precompiledModuleOutputDir = result.outputDirectory
     }
 
-    data class ValidationResult(
+    data class TestCompilationResult(
         val runtimeClasspath: List<File>,
         val messageLog: String,
         val success: Boolean,
         val generatedFiles: Collection<File>,
     )
 
-    protected open fun doValidate(): ValidationResult {
+    protected open fun doCompile(): TestCompilationResult {
         val compilation = createKotlinCompilation()
         val result = compilation.compile()
-        return ValidationResult(
+        return TestCompilationResult(
             runtimeClasspath = compilation.classpaths + compilation.classesDir,
             messageLog = result.messages,
             success = result.exitCode == KotlinCompilation.ExitCode.OK,
-            generatedFiles = compilation.kaptSourceDir.walk()
-                .filter { it.isFile && it.extension == "java" }
-                .toList(),
+            generatedFiles = getGeneratedFiles(compilation),
         )
     }
 
+    protected open fun getGeneratedFiles(from: KotlinCompilation): Collection<File> {
+        return emptyList()
+    }
+
     override fun expectValidationResults(vararg messages: Message) {
-        val (runtimeClasspath, messageLog, success, generatedFiles) = doValidate()
+        val (runtimeClasspath, messageLog, success, generatedFiles) = doCompile()
         try {
             Assert.assertFalse("No errors expected, yet compilation failed",
                 messages.none { it.kind == MessageKind.Error } && !success)
