@@ -23,7 +23,7 @@ val kotlinVersion: String = providers
 val dokkaVersion = kotlinVersion
 
 val proguardVersion = "7.2.0"
-val kotlinMetadataVersion = "0.4.0"
+val kotlinMetadataVersion = "0.4.2"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")

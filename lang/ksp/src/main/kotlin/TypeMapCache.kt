@@ -20,7 +20,7 @@ import com.yandex.daggerlite.base.ObjectCache
  *
  * @see [TypeMapCache.normalizeType].
  */
-internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
+internal object TypeMapCache : BiObjectCache<Boolean, KSTypeReference, KSType>() {
     private fun mapDeclarationToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
         if (!declaration.packageName.asString().startsWith("kotlin")) {
             // Heuristic: only types from `kotlin` package can have different java counterparts.
@@ -43,21 +43,41 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
                 Variance.CONTRAVARIANT -> throw AssertionError("Not reached: covariant is projected as contravariant")
                 Variance.STAR -> Variance.STAR
             }
+
             Variance.CONTRAVARIANT -> when (projection) {
                 Variance.INVARIANT -> Variance.CONTRAVARIANT
                 Variance.CONTRAVARIANT -> Variance.CONTRAVARIANT
                 Variance.COVARIANT -> throw AssertionError("Not reached: contravariant is projected as covariant")
                 Variance.STAR -> Variance.STAR
             }
+
             Variance.STAR -> throw AssertionError("Not reached: '*' (star) is not a variance spec")
         }
     }
 
-    private fun doNormalizeType(type: KSType, bakeVarianceAsWildcard: Boolean): KSType {
-        // Early bail out for error types, as the following code is likely to fail with them
-        if (type.isError) return type
+    private fun infuseReference(
+        forType: KSTypeReference?,
+        forNature: KSTypeReference?,
+    ): KSTypeReference? {
+        if (forNature == null)
+            return forType
+        if (forType == null)
+            return forNature
+        return forNature.replaceType(forType)
+    }
 
-        val originalDeclaration = type.getNonAliasDeclaration() ?: return type
+    private fun doNormalizeType(
+        typeReference: KSTypeReference,
+        bakeVarianceAsWildcard: Boolean,
+    ): KSType {
+        val originalType = typeReference.resolve()
+
+        // Early bail out for error types, as the following code is likely to fail with them
+        if (originalType.isError) return originalType
+
+        // TODO: Support parameterized type-aliases, now broken
+        val type = originalType.resolveAliasIfNeeded()
+        val originalDeclaration = type.declaration as? KSClassDeclaration ?: return type
         val mappedDeclaration = mapDeclarationToJavaPlatformIfNeeded(declaration = originalDeclaration)
 
         // Early return, if no further mapping needed
@@ -67,18 +87,27 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
 
         // Map type arguments, recursively
         // NOTE: This routine includes logic which ideally is handled by `Resolver.getJavaWildcard`, yet we don't use
-        //  that routine here, as it works incorrectly in cases crucial to Dagger. So until it is fixed, we use custom
-        //  "lite" implementation here, which suits our needs (hopefully).
-        //  Issue list for `Resolver.getJavaWildcard` (not limited to):
-        //  - https://github.com/google/ksp/issues/774
-        //  - https://github.com/google/ksp/issues/773
-        //  - https://github.com/google/ksp/issues/772
+        //  that routine here, as we need to tweak the process.
+        val literalTypeArguments = typeReference.element?.typeArguments
         val mappedArguments = type.arguments.zip(originalDeclaration.typeParameters)
-            .map { (arg: KSTypeArgument, param: KSTypeParameter) ->
-                val argTypeRef = arg.type ?: return@map arg
+            .mapIndexed { index: Int, (arg: KSTypeArgument, param: KSTypeParameter) ->
+                // Argument, that as it was written in code. Type doesn't matter here, as it may be type variable,
+                //  and it is already resolved in `arg`. But the context (nature) of the reference is preserved.
+                val literalArg = literalTypeArguments?.getOrNull(index)
+
+                // Resolve actual projection either from usage or from type
+                val argVariance = (literalArg ?: arg).variance
+
+                // Combine an "infused" reference - a reference with the original context, yet with the refined type.
+                val argTypeReference = infuseReference(
+                    forType = arg.type,
+                    forNature = literalArg?.type,
+                ) ?: return@mapIndexed arg
+
+                // Normalize the type argument recursively via the combined reference.
                 val mappedArgType = normalizeTypeImpl(
-                    type = argTypeRef.resolve(),
-                    bakeVarianceAsWildcard = bakeVarianceAsWildcard,
+                    typeReference = argTypeReference,
+                    bakeVarianceAsWildcard = false,  // Doesn't propagate for type parameters
                 )
                 if (mappedArgType.isError) {
                     // Bail out of the mapping, as error type is present - it's known to cause crashes inside
@@ -86,16 +115,20 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
                     return type
                 }
                 Utils.resolver.getTypeArgument(
-                    typeRef = argTypeRef.replaceType(mappedArgType),
+                    typeRef = argTypeReference.replaceType(mappedArgType),
                     variance = if (bakeVarianceAsWildcard) {
+                        // Use declaration-site variance
                         computeWildcard(
                             declarationSite = param.variance,
-                            projection = arg.variance,
+                            projection = argVariance,
                             forType = mappedArgType,
                         )
                     } else {
-                        // explicit variance
-                        arg.variance
+                        // Use only use-site (literal or type) variance (projection).
+                        if (literalArg?.variance == param.variance && typeReference.isFromKotlin) {
+                            // Redundant explicit projection for Kotlin, needs to be handled specifically
+                            Variance.INVARIANT
+                        } else argVariance
                     },
                 )
             }
@@ -103,10 +136,13 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
     }
 
     private fun normalizeTypeImpl(
-        type: KSType,
+        typeReference: KSTypeReference,
         bakeVarianceAsWildcard: Boolean,
-    ): KSType = createCached(bakeVarianceAsWildcard, type) {
-        doNormalizeType(type, bakeVarianceAsWildcard)
+    ): KSType = createCached(bakeVarianceAsWildcard, typeReference) {
+        doNormalizeType(
+            typeReference = typeReference,
+            bakeVarianceAsWildcard = bakeVarianceAsWildcard,
+        )
     }
 
     private fun KSTypeReference.shouldSuppressWildcards(): Boolean {
@@ -142,9 +178,8 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
         reference: KSTypeReference,
         position: Position,
     ): KSType {
-        val originalType = reference.resolve()
         val type = normalizeTypeImpl(
-            type = originalType,
+            typeReference = reference,
             bakeVarianceAsWildcard = when (position) {
                 Position.Parameter -> !reference.shouldSuppressWildcards()
                 Position.Other -> reference.shouldForceWildcards()
@@ -156,7 +191,7 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
 
             // Try raw type detection
             if ((type.declaration as? KSClassDeclaration)?.typeParameters?.isNotEmpty() == true &&
-                "raw " in originalType.toString()
+                "raw " in reference.resolve().toString()
             ) {
                 // Raw type detected - remove synthetic arguments, that were "conveniently" added by KSP.
                 return RawType.of(type)
@@ -172,7 +207,7 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
     fun normalizeType(
         type: KSType,
     ): KSType = normalizeTypeImpl(
-        type = type,
+        typeReference = type.asReference(),
         bakeVarianceAsWildcard = false,
     )
 
@@ -184,11 +219,11 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
     fun mapToKotlinType(
         type: KSType,
     ): KSType {
-        val declaration = type.getNonAliasDeclaration()
+        val declaration = type.resolveAliasIfNeeded().declaration as? KSClassDeclaration
         val qualifiedName = declaration?.qualifiedName ?: return type
-        if (!qualifiedName.asString().startsWith("java")) {
-            // Only java.* types may have kotlin counterparts.
-            return type
+        if (qualifiedName.asString().run { !startsWith("java.") && !startsWith("kotlin.jvm.") }) {
+            // Only these types may have kotlin-specific counterparts.
+            return RawType.unwrap(type)
         }
         return Utils.resolver.getKotlinClassByName(qualifiedName)?.asType(
             type.arguments.map { arg ->
@@ -200,7 +235,7 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
                     )
                 }
             }
-        ) ?: type
+        ) ?: RawType.unwrap(type)
     }
 
     /**
@@ -224,7 +259,7 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
      * replaces them with their bounds instead.
      */
     internal class RawType private constructor(
-        val underlying: KSType,
+        private val underlying: KSType,
     ) : KSType by underlying {
         override val arguments: List<Nothing> get() = emptyList()
         override val isMarkedNullable: Boolean get() = false
@@ -234,6 +269,11 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSType, KSType>() {
 
         companion object Factory : ObjectCache<KSType, KSType>() {
             fun of(type: KSType) = createCached(type, ::RawType)
+
+            fun unwrap(type: KSType): KSType = when (type) {
+                is RawType -> type.underlying
+                else -> type
+            }
         }
     }
 }

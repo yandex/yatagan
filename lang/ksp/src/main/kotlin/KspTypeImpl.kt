@@ -29,7 +29,7 @@ internal class KspTypeImpl private constructor(
     override val typeArguments: List<TypeLangModel> by lazy(NONE) {
         when (jvmType) {
             JvmTypeInfo.Declared -> impl.arguments.map { arg ->
-                Factory(arg.type?.resolve() ?: Utils.resolver.builtIns.anyType)
+                Factory(arg.type ?: Utils.resolver.builtIns.anyType.asReference())
             }
             else -> emptyList()
         }

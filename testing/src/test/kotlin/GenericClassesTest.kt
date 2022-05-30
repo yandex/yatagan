@@ -192,8 +192,8 @@ class GenericClassesTest(
                     interface Api {}
                     class Injector<T extends Api> {}
 
-                        @SuppressWarnings({"rawtypes", "RedundantSuppression"})
-                        void inject(Injector i);
+                    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
+                    void inject(Injector i);
                 }
             """.trimIndent())
         })

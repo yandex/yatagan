@@ -18,7 +18,10 @@ class KspModelFactoryImpl : LangModelFactory {
         with(Utils.resolver) {
             val reference = createKSTypeReferenceFromKSType((type as KspTypeImpl).impl)
             val argument = getTypeArgument(reference, if (isCovariant) Variance.COVARIANT else Variance.INVARIANT)
-            return KspTypeImpl(listDeclaration.asType(listOf(argument)))
+            return KspTypeImpl(
+                reference = listDeclaration.asType(listOf(argument)).asReference(),
+                typePosition = TypeMapCache.Position.Parameter,
+            )
         }
     }
 

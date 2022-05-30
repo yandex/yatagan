@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.testing
 
 import com.squareup.javapoet.ClassName
-import com.tschuchort.compiletesting.KotlinCompilation
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.base.ObjectCacheRegistry
 import com.yandex.daggerlite.core.lang.LangModelFactory
@@ -24,28 +23,20 @@ import javax.lang.model.element.TypeElement
 class DynamicCompileTestDriver(
     apiType: ApiType = ApiType.Dynamic,
 ) : CompileTestDriverBase(apiType) {
-    override fun doValidate(): ValidationResult {
-        val accumulator = ComponentBootstrapperGenerator()
-        val compilation = createKotlinCompilation().apply {
-            sources = sourceFiles
-            annotationProcessors = listOf(accumulator)
-        }
-        val result = compilation.compile()
-        if (result.exitCode != KotlinCompilation.ExitCode.OK) {
-            throw RuntimeException("Test source compilation failed, check the code")
-        }
-        val runtimeClasspath = compilation.classpaths + compilation.classesDir
+    private val accumulator = ComponentBootstrapperGenerator()
+
+    override fun doCompile(): TestCompilationResult {
+        val testCompilationResult = super.doCompile()
+        check(testCompilationResult.success) { "Test source compilation failed, check the code" }
         val log = StringBuilder()
-        val success = validateRuntimeComponents(
+        val runtimeValidationSuccess = validateRuntimeComponents(
             componentBootstrapperNames = accumulator.bootstrapperNames,
-            runtimeClasspath = runtimeClasspath,
+            runtimeClasspath = testCompilationResult.runtimeClasspath,
             log = log,
         )
-        return ValidationResult(
-            runtimeClasspath = runtimeClasspath,
+        return testCompilationResult.copy(
+            success = runtimeValidationSuccess,
             messageLog = log.toString(),
-            success = success,
-            generatedFiles = emptyList(),
         )
     }
 
@@ -55,11 +46,11 @@ class DynamicCompileTestDriver(
         }
     }
 
-    override fun createKotlinCompilation(): KotlinCompilation {
-        return super.createKotlinCompilation().apply {
-            javacArguments += "-parameters"
-            javaParameters = true
-        }
+    override fun createKotlinCompilation() = super.createKotlinCompilation().apply {
+        sources = sourceFiles
+        javacArguments += "-parameters"
+        javaParameters = true
+        annotationProcessors = listOf(accumulator)
     }
 
     override val backendUnderTest: Backend

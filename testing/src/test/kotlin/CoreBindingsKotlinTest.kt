@@ -421,11 +421,21 @@ class CoreBindingsKotlinTest(
 
     @Test
     fun `basic component - universal builder support + variance test`() {
+        givenJavaSource("test.Wrapper", """
+            public class Wrapper<T> { public Wrapper(T dep) {} }
+        """.trimIndent())
+        givenJavaSource("test.SomeOpenClass", """
+            public class SomeOpenClass {}
+        """.trimIndent())
+        givenJavaSource("test.Dependency", """
+            import com.yandex.daggerlite.Lazy;
+            public interface Dependency {
+                Wrapper<Lazy<SomeOpenClass>> getWrapper();
+            }
+        """.trimIndent())
         givenKotlinSource("test.TestComponent", """
-            import javax.inject.Inject
-            import javax.inject.Named
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.BindsInstance
+            import com.yandex.daggerlite.*
+            import javax.inject.*
 
             const val BAR = "bar"
 
@@ -438,6 +448,7 @@ class CoreBindingsKotlinTest(
                     bars: MutableSet<Bar>,
                     fooConsumer: Consumer<Foo>,
                     bazConsumer: Consumer<Baz>,
+                    w: Wrapper<Lazy<SomeOpenClass>>,
             )
             interface Foo
             interface Bar
@@ -450,7 +461,7 @@ class CoreBindingsKotlinTest(
                 fun setFoo(@Named("foo") obj: Any): CreatorBase
             }
 
-            @Component
+            @Component(dependencies = [Dependency::class])
             interface TestComponent {
                 fun get(): MyClass
                 val foos: MutableSet<out Foo>
@@ -473,6 +484,7 @@ class CoreBindingsKotlinTest(
                     fun setSetOfBar(bars: MutableSet<Bar>): Creator
                     
                     fun create(
+                        dep: Dependency,
                         @BindsInstance fooConsumer: Consumer<Foo>,
                         @BindsInstance bazConsumer: Consumer<Baz>,
                         @BindsInstance @Named("baz") obj: Any,
