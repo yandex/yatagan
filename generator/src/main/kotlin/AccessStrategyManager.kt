@@ -190,8 +190,14 @@ internal class AccessStrategyManager(
             for (localBinding in binding.owner.localBindings.keys) {
                 for ((dependencyNode, _) in localBinding.dependencies()) {
                     if (binding.target == dependencyNode) {
-                        // Found this single dependent binding locally => it has the same scope, nice.
-                        return potentialCase
+                        return if (localBinding.scope == binding.scope) {
+                            // Found this single dependent binding locally => it has the same scope, nice.
+                            potentialCase
+                        } else {
+                            // This single usage is in the same component (logical scope),
+                            //  yet it is not scoped (cached) at all - can't use optimization.
+                            null
+                        }
                     }
                 }
             }
