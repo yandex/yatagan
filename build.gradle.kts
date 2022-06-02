@@ -33,9 +33,7 @@ tasks.dokkaHtmlMultiModule {
     }
 }
 
-val isUnderTeamcity = providers.environmentVariable("TEAMCITY_VERSION")
-    .forUseAtConfigurationTime()
-    .isPresent
+val isUnderTeamcity = providers.environmentVariable("TEAMCITY_VERSION").isPresent
 
 tasks {
     check {

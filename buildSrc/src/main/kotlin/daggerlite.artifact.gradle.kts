@@ -13,19 +13,15 @@ check(isValidSemVerString(daggerLiteVersion)) {
 
 // For release publications
 val mavenUrl: Provider<String> = providers.environmentVariable("MAVEN_REPOSITORY_URL")
-    .forUseAtConfigurationTime()
 
 // For snapshot version publications
 val mavenSnapshotUrl: Provider<String> = providers.environmentVariable("MAVEN_REPOSITORY_SNAPSHOT_URL")
-    .forUseAtConfigurationTime()
 
 // maven username - must be valid both for snapshot and release repos.
 val mavenUsername: Provider<String> = providers.environmentVariable("MAVEN_USERNAME")
-    .forUseAtConfigurationTime()
 
 // maven password - must be valid both for snapshot and release repos.
 val mavenPassword: Provider<String> = providers.environmentVariable("MAVEN_PASSWORD")
-    .forUseAtConfigurationTime()
 
 version = daggerLiteVersion
 group = "com.yandex.daggerlite"

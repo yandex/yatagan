@@ -17,8 +17,7 @@ repositories {
 
 val kotlinVersion: String = providers
     .fileContents(layout.projectDirectory.file("../kotlin.version"))
-    .asText.forUseAtConfigurationTime()
-    .get().trimEnd()
+    .asText.get().trimEnd()
 
 val dokkaVersion = kotlinVersion
 
