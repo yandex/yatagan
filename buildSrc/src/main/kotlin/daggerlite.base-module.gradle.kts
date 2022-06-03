@@ -16,15 +16,17 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + listOf(
             "-Xjvm-default=all",
+            "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=kotlin.ExperimentalStdlibApi",
             "-opt-in=kotlin.contracts.ExperimentalContracts",
+            "-Werror"
         )
     }
 }
 
 val kotlinVersion: String by extra(
     providers.fileContents(rootProject.layout.projectDirectory.file("kotlin.version"))
-        .asText.forUseAtConfigurationTime().get().trimEnd()
+        .asText.get().trimEnd()
 )
 val dokkaVersion: String by extra(kotlinVersion)
 val kspVersion by extra("$kotlinVersion-1.0.5")
@@ -38,7 +40,7 @@ val mockitoKotlinVersion by extra("4.0.0")
 
 val daggerLiteVersion: String by extra(
     providers.fileContents(rootProject.layout.projectDirectory.file("daggerlite.version"))
-        .asText.forUseAtConfigurationTime().get().trim()
+        .asText.get().trim()
 )
 
 java {
