@@ -153,7 +153,7 @@ class AccessControlTest(
         """.trimIndent())
 
         givenKotlinSource("test.UnderFeatureClass", """
-            @com.yandex.daggerlite.Conditional([Feature::class])
+            @com.yandex.daggerlite.Conditional(Feature::class)
             class UnderFeatureClass @javax.inject.Inject constructor() 
         """.trimIndent())
 

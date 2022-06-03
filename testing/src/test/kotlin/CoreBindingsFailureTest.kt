@@ -268,7 +268,7 @@ class CoreBindingsFailureTest(
             annotation class NotAFeature
 
             interface Api
-            @Conditional([NotAFeature::class, A::class]) class Impl @Inject constructor() : Api
+            @Conditional(NotAFeature::class, A::class) class Impl @Inject constructor() : Api
             @Module interface TestModule {
                 @Binds fun impl(i: Impl): Api
                 companion object {
@@ -321,32 +321,32 @@ class CoreBindingsFailureTest(
             import com.yandex.daggerlite.*
             import javax.inject.*
             
-            @AllConditions([
+            @AllConditions(
                 Condition(Foo::class, "INSTANCE.isEnabledA"),
                 Condition(Foo::class, "INSTANCE.isEnabledB"),
-            ])
+            )
             annotation class AandB
             
-            @AnyCondition([
+            @AnyCondition(
                 Condition(Foo::class, "INSTANCE.isEnabledA"),
                 Condition(Foo::class, "INSTANCE.isEnabledB"),
-            ])
+            )
             annotation class AorB
             
-            @Conditional([A::class, B::class])
+            @Conditional(A::class, B::class)
             class UnderAandB @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>)
             
-            @Conditional([AorB::class, A::class])
+            @Conditional(AorB::class, A::class)
             class UnderAorB @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>/*error*/)
             
-            @Conditional([AandB::class, AorB::class])
+            @Conditional(AandB::class, AorB::class)
             class UnderComplex @Inject constructor(a: Lazy<UnderA>, b: Provider<UnderB>)
             
-            @Conditional([A::class]) class UnderA @Inject constructor(
+            @Conditional(A::class) class UnderA @Inject constructor(
                 a: UnderAandB,  // error
                 ab: UnderAorB,  // ok
             )
-            @Conditional([AorB::class, B::class]) class UnderB @Inject constructor(
+            @Conditional(AorB::class, B::class) class UnderB @Inject constructor(
                 b: UnderA,  // error
                 c: Lazy<UnderComplex>,  // error
             )
@@ -357,7 +357,7 @@ class CoreBindingsFailureTest(
                 fun provideObject(c: UnderA): Any = c
                 @Provides @Named("ok1")
                 fun provideObject2(c: Optional<Provider<UnderA>>): Any = c
-                @Provides([Conditional([A::class])]) @Named("ok2")
+                @Provides(Conditional(A::class)) @Named("ok2")
                 fun provideObject3(c: UnderA): Any = c
             }
             
@@ -450,10 +450,10 @@ class CoreBindingsFailureTest(
             
             interface Heater
             
-            @Conditional([A::class])
+            @Conditional(A::class)
             class ElectricHeater @Inject constructor() : Heater
             
-            @Conditional([B::class])
+            @Conditional(B::class)
             class GasHeater @Inject constructor() : Heater
             
             class Stub : Heater
@@ -487,7 +487,7 @@ class CoreBindingsFailureTest(
                 fun injectConsumer(consumer: Consumer)
             }
             
-            @Conditional([A::class])
+            @Conditional(A::class)
             @Component(isRoot = false)
             interface SubComponentA {
                 val electric: ElectricHeater  // ok
@@ -499,7 +499,7 @@ class CoreBindingsFailureTest(
                 fun injectConsumer(consumer: Consumer)
             }
             
-            @Conditional([B::class])
+            @Conditional(B::class)
             @Component(isRoot = false)
             interface SubComponentB {
                 val electric: ElectricHeater  // error
@@ -573,7 +573,7 @@ class CoreBindingsFailureTest(
             @ComponentFlavor(dimension = NotADimension::class)
             annotation class InvalidFlavor2
             
-            @Conditional([NotAFeature::class, NotAFeature2::class],
+            @Conditional(NotAFeature::class, NotAFeature2::class,
                          onlyIn = [InvalidFlavor::class, NotAFlavor::class])
             class ClassA @Inject constructor()
             @Module(subcomponents = [AnotherComponent::class]) interface RootModule
@@ -652,12 +652,12 @@ class CoreBindingsFailureTest(
             @Condition(Foo::class, "getFoo")
             annotation class Invalid4
 
-            @Conditional([
+            @Conditional(
                 Invalid1::class,
                 Invalid2::class,
                 Invalid3::class,
                 Invalid4::class,
-            ])
+            )
             class ClassA @Inject constructor()
             
             @Component

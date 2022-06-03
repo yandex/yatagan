@@ -100,13 +100,13 @@ class ConditionsTest(
             import javax.inject.*
 
             @Singleton
-            @Conditional([Conditions.FeatureA::class, Conditions.FeatureB::class])
+            @Conditional(Conditions.FeatureA::class, Conditions.FeatureB::class)
             class MyClass @Inject constructor(a: ClassA, b: ClassB)
 
-            @Conditional([Conditions.FeatureA::class])
+            @Conditional(Conditions.FeatureA::class)
             class ClassA @Inject constructor()
 
-            @Conditional([Conditions.FeatureB::class])
+            @Conditional(Conditions.FeatureB::class)
             class ClassB @Inject constructor()
 
             @Singleton
@@ -150,8 +150,8 @@ class ConditionsTest(
             import com.yandex.daggerlite.Conditionals
             import com.yandex.daggerlite.Optional
 
-            @Conditional([Conditions.FeatureA::class], onlyIn = [DeviceType.Phone::class])
-            @Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class])
+            @Conditional(Conditions.FeatureA::class, onlyIn = [DeviceType.Phone::class])
+            @Conditional(Conditions.FeatureB::class, onlyIn = [DeviceType.Tablet::class])
             class MyClass @Inject constructor()
 
             @Singleton
@@ -258,7 +258,7 @@ class ConditionsTest(
             interface TestTabletComponent : TestComponent
 
             @ActivityScoped
-            @Conditional([Conditions.FeatureB::class], onlyIn = [DeviceType.Tablet::class])
+            @Conditional(Conditions.FeatureB::class, onlyIn = [DeviceType.Tablet::class])
             @Component(isRoot = false, variant = [MyFeatureActivity::class])
             interface MyFeatureActivityComponent {
                 @Component.Builder
@@ -292,8 +292,8 @@ class ConditionsTest(
             import com.yandex.daggerlite.Conditional
             import com.yandex.daggerlite.Optional
             
-            @Conditional([Conditions.FeatureA::class]) class ClassA @Inject constructor()
-            @Conditional([Conditions.FeatureB::class]) class ClassB @Inject constructor(a: Optional<ClassA>)
+            @Conditional(Conditions.FeatureA::class) class ClassA @Inject constructor()
+            @Conditional(Conditions.FeatureB::class) class ClassB @Inject constructor(a: Optional<ClassA>)
             
             @Module(subcomponents = [TestSubComponent::class]) interface SubcomponentInstallationModule
             
@@ -326,13 +326,13 @@ class ConditionsTest(
             
             interface SomeApi : SomeApiBase
             
-            @Conditional([Conditions.FeatureA::class])
+            @Conditional(Conditions.FeatureA::class)
             class BaseImpl @Inject constructor() : SomeApiBase
             
-            @Conditional([Conditions.FeatureA::class])
+            @Conditional(Conditions.FeatureA::class)
             class ImplA @Inject constructor() : SomeApi
             
-            @Conditional([Conditions.FeatureB::class])
+            @Conditional(Conditions.FeatureB::class)
             class ImplB @Inject constructor() : SomeApi
             
             class Stub @Inject constructor() : SomeApi
@@ -413,19 +413,19 @@ class ConditionsTest(
             
             @Module
             object MyModule {
-                @Provides([
-                    Conditional([Conditions.FeatureA::class], onlyIn = [ActivityType.Main::class]),
-                    Conditional([Conditions.FeatureB::class]), // in the rest
-                ])
+                @Provides(
+                    Conditional(Conditions.FeatureA::class, onlyIn = [ActivityType.Main::class]),
+                    Conditional(Conditions.FeatureB::class), // in the rest
+                )
                 fun provideApi(): Api {
                     return Impl()
                 }
                 
                 @Named
-                @Provides([
+                @Provides(
                     Conditional(onlyIn = [ActivityType.Main::class]),
                     // Nowhere else
-                ])
+                )
                 fun provideNamedApi(): Api {
                     return Impl()
                 }
@@ -547,7 +547,7 @@ class ConditionsTest(
             
             @Condition(Features::class, "fooBar")
             @Condition(Features::class, "isEnabledB")
-            @AnyCondition([
+            @AnyCondition(
                 Condition(Features::class, "getFeatureC.isEnabled"),                                
                 Condition(Features::class, "isEnabledB"),
                 Condition(SomeClass::class, "Conditions.getSomeCondition1"),
@@ -557,28 +557,28 @@ class ConditionsTest(
                 Condition(SomeClass::class, "someCondition5"),
                 Condition(SomeClass::class, "someCondition6"),
                 Condition(SomeClass::class, "Conditions.getSomeCondition6"),
-            ])
+            )
             annotation class ComplexFeature1
             
-            @AnyCondition([
+            @AnyCondition(
                 Condition(Features::class, "fooBar"),
-            ])
-            @AnyCondition([
+            )
+            @AnyCondition(
                 Condition(Features::class, EnabledB),
-            ])
-            @AnyCondition([
+            )
+            @AnyCondition(
                 Condition(Features::class, "getFeatureC.isEnabled"),                                
                 Condition(Features::class, condition = EnabledB),                                
-            ])
-            @AnyCondition([
+            )
+            @AnyCondition(
                 Condition(Features::class, "getFeatureC.isEnabled"),                                
                 Condition(value = Features::class, condition = "isEnabledB"),                                
-            ])            
+            )            
             annotation class ComplexFeature2
             
-            @Conditional([ComplexFeature1::class])               
+            @Conditional(ComplexFeature1::class)               
             class ClassA @Inject constructor(b: ClassB)
-            @Conditional([ComplexFeature2::class])
+            @Conditional(ComplexFeature2::class)
             class ClassB @Inject constructor(a: Provider<ClassA>)
             
             @Component            
@@ -676,23 +676,23 @@ class ConditionsTest(
                 }
             }
 
-            @AllConditions([
+            @AllConditions(
                 Condition(Features::class, condition = "INSTANCE.getDisabled"),
                 Condition(Features::class, condition = "INSTANCE.getNotReached"),
-            ])
+            )
             annotation class A
 
-            @AllConditions([
+            @AllConditions(
                 Condition(Features::class, condition = "INSTANCE.getDisabled2"),
                 Condition(Features::class, condition = "INSTANCE.getNotReached2"),
-            ])
+            )
             annotation class B
 
             
-            @Conditional([A::class])
+            @Conditional(A::class)
             class ClassA @Inject constructor()
 
-            @Conditional([B::class])
+            @Conditional(B::class)
             class ClassB @Inject constructor()
 
             @Component
@@ -753,7 +753,7 @@ class ConditionsTest(
             @Condition(Constants::class, "IS_ENABLED")
             annotation class IsEnabled2
             
-            @Conditional([IsEnabled::class, IsEnabled2::class, IsEnabled3::class])
+            @Conditional(IsEnabled::class, IsEnabled2::class, IsEnabled3::class)
             class TestClass @Inject constructor()
             
             @Component interface TestComponent {

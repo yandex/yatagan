@@ -191,7 +191,7 @@ class MultibindingsTest(
             class ClassA @Inject constructor (b: Optional<ClassB>) : Create
             
             @Singleton
-            @Conditional([Features.Feature::class])
+            @Conditional(Features.Feature::class)
             class ClassB @Inject constructor() : Create
             
             @Singleton
