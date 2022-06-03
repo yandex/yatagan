@@ -112,7 +112,7 @@ class GraphLoopsFailureTest(
             
             interface ApiA
             interface ApiB
-            @Conditional([A::class])
+            @Conditional(A::class)
             class AImpl @Inject constructor() : ApiA
             
             @Module

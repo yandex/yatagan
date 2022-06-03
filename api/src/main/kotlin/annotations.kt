@@ -138,7 +138,7 @@ annotation class Provides(
     /**
      * One or more [Conditional] specifiers for this provision.
      */
-    val value: Array<Conditional> = [],
+    vararg val value: Conditional = [],
 )
 
 /**
@@ -431,7 +431,7 @@ annotation class Condition(
      * @Condition(WithCompanion::class, "Companion.getProp")
      * /*@*/ annotation class D
      *
-     * /*@*/ @Conditional([A::class, B::class, C::class, D::class])
+     * /*@*/ @Conditional(A::class, B::class, C::class, D::class)
      * /*@*/ class Sample @Inject constructor() {}
      * /*@*/ @Component interface SampleComponent { val s: Optional<Sample> }
      * /*@*/ fun test() { Dagger.create(SampleComponent::class.java).s }
@@ -447,7 +447,7 @@ annotation class Condition(
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 annotation class AllConditions(
-    val value: Array<Condition>,
+    vararg val value: Condition,
 )
 
 /**
@@ -458,7 +458,7 @@ annotation class AllConditions(
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 @JvmRepeatable(AnyConditions::class)
 annotation class AnyCondition(
-    val value: Array<Condition>,
+    vararg val value: Condition,
 )
 
 /**
@@ -470,7 +470,7 @@ annotation class AnyCondition(
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 annotation class AnyConditions(
-    val value: Array<AnyCondition>,
+    vararg val value: AnyCondition,
 )
 
 /**
@@ -480,7 +480,7 @@ annotation class AnyConditions(
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
 annotation class Conditionals(
-    val value: Array<Conditional>,
+    vararg val value: Conditional,
 )
 
 /**
@@ -507,27 +507,27 @@ annotation class Conditionals(
  *
  * @Condition(Flags::class, "flagA") annotation class FeatureA
  * @Condition(Flags::class, "flagB") annotation class FeatureB
- * @AllConditions([
+ * @AllConditions(
  *  Condition(Flags::class, "flagA"),
  *  Condition(Flags::class, "flagB"),
- * ])
+ * )
  * annotation class FeatureAB
  *
  * // Then for a class under `A` it's only allowed to inject class under `B` wrapped in `Optional`:
- * @Conditional([FeatureA::class])
+ * @Conditional(FeatureA::class)
  * class UnderA @Inject constructor(
  *   val b: Optional<UnderB>
  * )
  *
  * // And so goes for an `A` from `B`:
- * @Conditional([FeatureB::class])
+ * @Conditional(FeatureB::class)
  * class UnderB @Inject constructor(
  *   val a: Optional<Provider<UnderA>>
  * )
  *
  * // Yet it's okay to inject `UnderA`, `UnderB` into a class under `A && B` feature,
  * // because `A && B` implies both `A` and `B`, so no condition violation is possible.
- * @Conditional([FeatureAB::class])
+ * @Conditional(FeatureAB::class)
  * class UnderAB @Inject constructor(
  *   val a: UnderA,
  *   val b: UnderB,
@@ -550,7 +550,7 @@ annotation class Conditional(
      *
      * The features in this list are `&&`-ed together.
      */
-    val value: Array<KClass<out Annotation>> = [],
+    vararg val value: KClass<out Annotation> = [],
 
     /**
      * Component flavor constraint within *Variant API*,
@@ -580,7 +580,7 @@ annotation class Conditional(
      * }
      *
      * // Simple runtime condition - entity is accessible in every component under FeatureA:
-     * @Conditional([FeatureA::class])
+     * @Conditional(FeatureA::class)
      * class UnderFeatureA @Inject constructor()
      *
      * // Simple compile-time filter - entity is accessible only in components, that declare Device.Watch flavor:
@@ -589,15 +589,15 @@ annotation class Conditional(
      *
      * // Entity is accessible only in components that declare `Device.Phone` in their [variant][Component.variant].
      * // Inaccessible anywhere else:
-     * @Conditional([FeatureA::class], onlyIn = [Device.Phone::class])
+     * @Conditional(FeatureA::class, onlyIn = [Device.Phone::class])
      * class PhoneSpecificUnderFeatureA @Inject constructor()
      *
      * // More complex example with multiple conditionals:
-     * @Conditional([FeatureA::class, FeatureB::class], onlyIn = [
+     * @Conditional(FeatureA::class, FeatureB::class, onlyIn = [
      *   Product.FooApp::class,
      *   Device.Phone::class, Device.Tablet::class,
      * ])  // accessible in FooApp on phones and tablets (but not on watches) under FeatureA && FeatureB.
-     * @Conditional([FeatureC::class], onlyIn = [
+     * @Conditional(FeatureC::class, onlyIn = [
      *   Product.BarApp::class
      * ])  // accessible in BarApp (in all form-factors) under FeatureC.
      * class Complex @Inject constructor()
