@@ -105,7 +105,7 @@ fun generate(
                     BindingType.ComponentDependency -> {
                         // force create new model for the `node`
                         val model = ComponentDependency(id++, node)
-                            .also(scopeTree.value.componentDependencies::add)
+                        scopeTree.value.componentDependencies += model
                         Binding.ComponentDependencyInstance(node)
                     }
                     BindingType.ComponentDependencyEntryPoint -> {
@@ -568,7 +568,7 @@ fun generate(
                             add(".setDep_$dependencyIndex(myMock())")
                         }
                         addStatement(".create()")
-                        component.value.entryPoints.entries.forEachIndexed { entryPointIndex, (node, kind) ->
+                        component.value.entryPoints.entries.forEachIndexed { entryPointIndex, (_, kind) ->
                             val unLazy = when (kind) {
                                 DependencyKind.Direct -> ""
                                 else -> ".get()"
