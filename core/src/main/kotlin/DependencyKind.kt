@@ -8,7 +8,7 @@ package com.yandex.daggerlite.core
  */
 enum class DependencyKind {
     /**
-     * Type is requested directly.
+     * Type is requested directly (eagerly).
      */
     Direct,
 

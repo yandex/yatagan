@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
@@ -16,15 +17,16 @@ import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
 import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
     protected abstract val impl: FunctionLangModel
 
-    override val scope: AnnotationLangModel? by lazy(NONE) {
+    override val scope: AnnotationLangModel? by lazy(PUBLICATION) {
         impl.annotations.find(AnnotationLangModel::isScope)
     }
 
-    override val target: BindingTargetModel by lazy(NONE) {
+    override val target: BindingTargetModel by lazy(PUBLICATION) {
         if (impl.returnType.isVoid) {
             BindingTargetModel.Plain(NodeModelImpl.Factory.NoNode())
         } else {
@@ -73,7 +75,7 @@ internal class BindsImpl(
 
     override val sources = impl.parameters.map { parameter ->
         NodeModelImpl(type = parameter.type, forQualifier = parameter)
-    }
+    }.memoize()
 
     override fun validate(validator: Validator) {
         super.validate(validator)

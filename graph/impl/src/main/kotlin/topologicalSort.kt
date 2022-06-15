@@ -1,6 +1,8 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.component1
+import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.core.isEager
 import com.yandex.daggerlite.graph.BindingGraph
 
@@ -21,7 +23,7 @@ internal fun topologicalSort(
         }
 
         val binding = inside.resolveBinding(node)
-        for (dependency in binding.dependencies()) {
+        for (dependency in binding.dependencies) {
             val (dependencyNode, kind) = dependency
             if (!kind.isEager) {
                 continue

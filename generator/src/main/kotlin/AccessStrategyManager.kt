@@ -1,6 +1,8 @@
 package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.core.DependencyKind
+import com.yandex.daggerlite.core.component1
+import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
@@ -149,7 +151,7 @@ internal class AccessStrategyManager(
                 binding = binding,
             )
 
-            if (binding.dependencies().isEmpty())
+            if (binding.dependencies.none())
                 return inline
             if (usage.provider + usage.lazy == 0) {
                 if (usage.direct == 1) {
@@ -188,7 +190,7 @@ internal class AccessStrategyManager(
             //  dependant binding. If we find it - cool, can use inline. Otherwise, this single dependant may be
             //  from the child graphs or entry-point(s)/member-injector(s), etc... - not correct to use inline.
             for (localBinding in binding.owner.localBindings.keys) {
-                for ((dependencyNode, _) in localBinding.dependencies()) {
+                for ((dependencyNode, _) in localBinding.dependencies) {
                     if (binding.target == dependencyNode) {
                         return if (localBinding.scope == binding.scope) {
                             // Found this single dependent binding locally => it has the same scope, nice.

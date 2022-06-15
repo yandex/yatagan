@@ -2,6 +2,8 @@ package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.component1
+import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.core.isEager
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
@@ -17,10 +19,10 @@ internal fun validateNoLoops(graph: BindingGraphImpl, validator: Validator) {
     val markedBlack = hashSetOf<NodeModel>()
     val stack = arrayListOf<NodeModel>()
 
-    fun BaseBinding.dependencies(): Collection<NodeDependency> {
-        class DependenciesVisitor : BaseBinding.Visitor<Collection<NodeDependency>> {
-            override fun visitAlias(alias: AliasBinding) = listOf(NodeDependency(alias.source))
-            override fun visitBinding(binding: Binding) = binding.dependencies()
+    fun BaseBinding.dependencies(): Sequence<NodeDependency> {
+        class DependenciesVisitor : BaseBinding.Visitor<Sequence<NodeDependency>> {
+            override fun visitAlias(alias: AliasBinding) = sequenceOf(alias.source)
+            override fun visitBinding(binding: Binding) = binding.dependencies
         }
         return accept(DependenciesVisitor())
     }
@@ -40,16 +42,18 @@ internal fun validateNoLoops(graph: BindingGraphImpl, validator: Validator) {
     graph.entryPoints.forEach { (_, dependency) -> tryAddToStack(dependency) }
     graph.memberInjectors.forEach { it.membersToInject.forEach { (_, dependency) -> tryAddToStack(dependency) } }
 
-    while(stack.isNotEmpty()) {
+    while (stack.isNotEmpty()) {
         when (val node = stack.last()) {
             in markedBlack -> {
                 stack.removeLast()
             }
+
             in markedGray -> {
                 stack.removeLast()
                 markedBlack += node
                 markedGray -= node
             }
+
             else -> {
                 markedGray += node
                 graph.resolveRaw(node).dependencies().forEach(::tryAddToStack)

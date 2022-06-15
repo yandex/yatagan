@@ -1,6 +1,8 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.core.NodeDependency
+import com.yandex.daggerlite.core.component1
+import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.validation.MayBeInvalid

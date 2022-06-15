@@ -7,7 +7,6 @@ import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel.Parameter
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.allAssistedParameters
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
@@ -98,8 +97,9 @@ internal class AssistedInjectFactoryModelImpl private constructor(
         }
 
 
-        val allConstructorAssistedParameters: Set<Parameter.Assisted> = allAssistedParameters().toSet()
-        if (allAssistedParameters().size > allConstructorAssistedParameters.size) {
+        val allAssistedParameters = assistedConstructorParameters.filterIsInstance<Parameter.Assisted>()
+        val allConstructorAssistedParameters: Set<Parameter.Assisted> = allAssistedParameters.toSet()
+        if (allAssistedParameters.size > allConstructorAssistedParameters.size) {
             validator.reportError(Strings.Errors.assistedInjectDuplicateParameters())
         }
 

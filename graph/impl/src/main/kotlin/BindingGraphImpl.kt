@@ -116,7 +116,7 @@ internal class BindingGraphImpl(
             class AliasMaterializeVisitor : BaseBinding.Visitor<Binding> {
                 var aliases = mutableSetOf<AliasBinding>()
                 override fun visitAlias(alias: AliasBinding): Binding {
-                    val carryDependency = dependency.copy(node = alias.source)
+                    val carryDependency = dependency.replaceNode(node = alias.source)
                     if (!aliases.add(alias)) {
                         // Alias loop detected, bail out.
                         return bindings.materializeAliasLoop(node = dependency.node, chain = aliases)
@@ -134,7 +134,7 @@ internal class BindingGraphImpl(
                 if (!seenBindings.add(nonAlias)) {
                     continue
                 }
-                materializationQueue += nonAlias.dependencies()
+                materializationQueue += nonAlias.dependencies
             }
         }
 
