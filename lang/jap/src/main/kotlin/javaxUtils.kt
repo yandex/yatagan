@@ -6,6 +6,7 @@ import com.google.auto.common.AnnotationMirrors
 import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
 import com.google.common.base.Equivalence
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.generator.lang.ArrayNameModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
@@ -268,7 +269,7 @@ internal fun parametersSequenceFor(
     for (i in parameters.indices) {
         yield(JavaxParameterImpl(impl = parameters[i], refinedType = types[i]))
     }
-}
+}.memoize()
 
 internal object ErrorTypeImpl : ErrorType {
     override fun getAnnotationMirrors(): List<AnnotationMirror> = emptyList()

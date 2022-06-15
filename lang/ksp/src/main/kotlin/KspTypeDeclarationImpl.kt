@@ -16,7 +16,6 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -32,8 +31,10 @@ internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
 ) : CtTypeDeclarationLangModel() {
     private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
+    private val annotated = KspAnnotatedImpl(impl)
 
-    override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
+    override val annotations: Sequence<CtAnnotationLangModel> = annotated.annotations
+    override fun <A : Annotation> isAnnotatedWith(type: Class<A>) = annotated.isAnnotatedWith(type)
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()
@@ -315,7 +316,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         private val impl: KSFunctionDeclaration,
-    ) : ConstructorLangModel {
+    ) : ConstructorLangModel, KspAnnotatedImpl(impl) {
         private val jvmSignature = JvmMethodSignature(impl)
 
         override val isEffectivelyPublic: Boolean
@@ -329,7 +330,6 @@ internal class KspTypeDeclarationImpl private constructor(
                 }
                 return impl.isPublicOrInternal()
             }
-        override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
         override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
             declaration = impl,

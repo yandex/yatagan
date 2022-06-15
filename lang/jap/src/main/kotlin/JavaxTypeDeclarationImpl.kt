@@ -9,6 +9,7 @@ import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -19,7 +20,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val type: DeclaredType,
-) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationLangModel() {
+) : CtAnnotatedLangModel by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationLangModel() {
     private val impl = type.asTypeElement()
 
     override val isEffectivelyPublic: Boolean

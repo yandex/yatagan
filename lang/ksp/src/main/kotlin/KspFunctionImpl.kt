@@ -5,7 +5,7 @@ import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
+import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -13,10 +13,8 @@ internal class KspFunctionImpl private constructor(
     private val impl: KSFunctionDeclaration,
     override val owner: KspTypeDeclarationImpl,
     override val isStatic: Boolean,
-    ) : CtFunctionLangModel() {
+) : CtFunctionLangModel(), CtAnnotatedLangModel by KspAnnotatedImpl(impl) {
     private val jvmSignature = JvmMethodSignature(impl)
-
-    override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()
