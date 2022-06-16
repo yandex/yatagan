@@ -17,7 +17,7 @@ import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportError
-import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class ModuleModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
@@ -27,11 +27,11 @@ internal class ModuleModelImpl private constructor(
     override val type: TypeLangModel
         get() = declaration.asType()
 
-    override val includes: Collection<ModuleModel> by lazy(NONE) {
+    override val includes: Collection<ModuleModel> by lazy {
         impl?.includes?.map(TypeLangModel::declaration)?.map(Factory::invoke)?.toSet() ?: emptySet()
     }
 
-    override val subcomponents: Collection<ComponentModel> by lazy(NONE) {
+    override val subcomponents: Collection<ComponentModel> by lazy {
         impl?.subcomponents?.map(TypeLangModel::declaration)?.map { ComponentModelImpl(it) }?.toSet() ?: emptySet()
     }
 
@@ -44,7 +44,7 @@ internal class ModuleModelImpl private constructor(
                 )
             }.memoize()
 
-    override val requiresInstance: Boolean by lazy(NONE) {
+    override val requiresInstance: Boolean by lazy {
         mayRequireInstance && bindings.any { it.accept(AsProvides)?.requiresModuleInstance == true }
     }
 
@@ -67,7 +67,7 @@ internal class ModuleModelImpl private constructor(
 
     override fun toString() = declaration.toString()
 
-    internal val mayRequireInstance by lazy(NONE) {
+    internal val mayRequireInstance by lazy(PUBLICATION) {
         !declaration.isAbstract && !declaration.isKotlinObject
     }
 

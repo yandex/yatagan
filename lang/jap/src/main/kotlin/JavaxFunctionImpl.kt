@@ -6,7 +6,6 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
 import javax.lang.model.element.ExecutableElement
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxFunctionImpl private constructor(
     private val impl: ExecutableElement,
@@ -20,7 +19,7 @@ internal class JavaxFunctionImpl private constructor(
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
 
-    override val returnType: TypeLangModel by lazy(NONE) {
+    override val returnType: TypeLangModel by lazy {
         JavaxTypeImpl(impl.asMemberOf(owner.type).asExecutableType().returnType)
     }
     override val name: String get() = impl.simpleName.toString()

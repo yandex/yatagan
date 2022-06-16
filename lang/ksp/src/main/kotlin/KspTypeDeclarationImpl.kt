@@ -25,7 +25,6 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
@@ -72,7 +71,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }.memoize()
 
-    override val constructors: Sequence<ConstructorLangModel> by lazy(NONE) {
+    override val constructors: Sequence<ConstructorLangModel> by lazy {
         impl.getConstructors()
             .filter { !it.isPrivate() }
             .map { ConstructorImpl(impl = it) }
@@ -86,7 +85,7 @@ internal class KspTypeDeclarationImpl private constructor(
         fun filterAll(it: KSAnnotated) = true
     }
 
-    override val functions: Sequence<FunctionLangModel> by lazy(NONE) {
+    override val functions: Sequence<FunctionLangModel> by lazy {
         sequence {
             when (kotlinObjectKind) {
                 KotlinObjectKind.Object -> {
@@ -197,7 +196,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    override val fields: Sequence<FieldLangModel> by lazy(NONE) {
+    override val fields: Sequence<FieldLangModel> = run {
         sequence {
             when (kotlinObjectKind) {
                 KotlinObjectKind.Object -> {
@@ -286,7 +285,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy(NONE) {
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy {
         impl.declarations
             .filterIsInstance<KSClassDeclaration>()
             .filter { !it.isPrivate() }
@@ -294,7 +293,7 @@ internal class KspTypeDeclarationImpl private constructor(
             .memoize()
     }
 
-    override val defaultCompanionObjectDeclaration: KspTypeDeclarationImpl? by lazy(NONE) {
+    override val defaultCompanionObjectDeclaration: KspTypeDeclarationImpl? by lazy {
         impl.getCompanionObject()?.takeIf {
             it.simpleName.asString() == "Companion"
         }?.let { companion ->

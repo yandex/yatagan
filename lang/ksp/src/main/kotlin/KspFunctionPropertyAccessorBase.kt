@@ -4,7 +4,6 @@ import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
     private val accessor: T,
@@ -20,7 +19,7 @@ internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
         require(!property.isKotlinField()) { "Not reached: field can't be modeled as a property" }
     }
 
-    protected val jvmSignature by lazy(NONE) {
+    protected val jvmSignature by lazy {
         Utils.resolver.mapToJvmSignature(property)
     }
 

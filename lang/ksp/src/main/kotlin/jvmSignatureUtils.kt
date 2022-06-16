@@ -3,6 +3,7 @@ package com.yandex.daggerlite.ksp.lang
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
  * This is required to correctly distinguish between Java's primitive and wrapper types, as they all are
@@ -11,7 +12,7 @@ import com.google.devtools.ksp.symbol.KSType
 internal class JvmMethodSignature(
     declaration: KSFunctionDeclaration,
 ) {
-    private val match by lazy(LazyThreadSafetyMode.NONE) {
+    private val match by lazy {
         Utils.resolver.mapToJvmSignature(declaration)?.let { descriptor ->
             checkNotNull(MethodSignatureRegex.matchEntire(descriptor)) {
                 "Not reached: invalid jvm method signature: $descriptor"
@@ -22,14 +23,14 @@ internal class JvmMethodSignature(
     /**
      * Parsed method return type signature. `null` if parsing failed.
      */
-    val returnTypeSignature: String? by lazy(LazyThreadSafetyMode.NONE) {
+    val returnTypeSignature: String? by lazy(PUBLICATION) {
         match?.groupValues?.get(2)
     }
 
     /**
      * Parsed method parameters' types' signatures. `null` if parsing failed.
      */
-    val parameterTypesSignatures: List<String>? by lazy(LazyThreadSafetyMode.NONE) {
+    val parameterTypesSignatures: List<String>? by lazy(PUBLICATION) {
         match?.groupValues?.get(1)?.let { params ->
             ParamSignatureRegex.findAll(params).map(MatchResult::value).toList()
         }

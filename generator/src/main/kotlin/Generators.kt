@@ -1,9 +1,8 @@
 package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.graph.BindingGraph
-import java.io.Closeable
 
-internal object Generators : Closeable {
+internal class GeneratorsHolder {
     private val data: MutableMap<BindingGraph, GeneratorContainer> = hashMapOf()
     private var frozen = false
 
@@ -21,9 +20,9 @@ internal object Generators : Closeable {
     fun freeze() {
         frozen = true
     }
-
-    override fun close() {
-        data.clear()
-        frozen = false
-    }
 }
+
+// FIXME: Do not use static state here, refactor it and pass where required.
+internal val GeneratorsBackingTL = ThreadLocal<GeneratorsHolder>()
+
+internal val Generators get() = GeneratorsBackingTL.get()

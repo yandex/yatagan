@@ -42,7 +42,6 @@ import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.ValidationMessageBuilder
 import com.yandex.daggerlite.validation.impl.reportError
 import com.yandex.daggerlite.validation.impl.reportWarning
-import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal interface BaseBindingMixin : BaseBinding {
@@ -116,7 +115,7 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
 
     final override val originModule get() = impl.originModule
 
-    final override val target: NodeModel by lazy(NONE) {
+    final override val target: NodeModel by lazy(PUBLICATION) {
         when (val target = impl.target) {
             is BindingTargetModel.DirectMultiContribution,
             is BindingTargetModel.FlattenMultiContribution,
@@ -143,7 +142,7 @@ internal class ProvisionBindingImpl(
     override val provision get() = impl.provision
     override val inputs get() = impl.inputs
     override val requiresModuleInstance get() = impl.requiresModuleInstance
-    override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
+    override val variantMatch: VariantMatch by lazy { VariantMatch(impl, owner.variant) }
 
     override val dependencies by lazy(PUBLICATION) {
         if (conditionScope.isNever) emptySequence() else inputs.asSequence()
@@ -168,7 +167,7 @@ internal class InjectConstructorProvisionBindingImpl(
     override val provision get() = impl.constructor
     override val inputs: List<NodeDependency> get() = impl.inputs
     override val requiresModuleInstance: Boolean = false
-    override val variantMatch: VariantMatch by lazy(NONE) { VariantMatch(impl, owner.variant) }
+    override val variantMatch: VariantMatch by lazy { VariantMatch(impl, owner.variant) }
 
     override val checkDependenciesConditionScope: Boolean
         get() = true
@@ -337,7 +336,7 @@ internal class SubComponentFactoryBindingImpl(
     override val target: NodeModel
         get() = factory.asNode()
 
-    override val targetGraph: BindingGraph by lazy(NONE) {
+    override val targetGraph: BindingGraph by lazy {
         val targetComponent = factory.createdComponent
         checkNotNull(owner.children.find { it.model == targetComponent }) {
             "Not reached: $this: Can't find child component $targetComponent among $owner's children."
@@ -349,7 +348,7 @@ internal class SubComponentFactoryBindingImpl(
         else targetGraph.usedParents.map { it.model.asNode() }.asSequence()
     }
 
-    override val variantMatch: VariantMatch by lazy(NONE) {
+    override val variantMatch: VariantMatch by lazy {
         VariantMatch(factory.createdComponent, owner.variant)
     }
 
@@ -366,7 +365,7 @@ internal class MultiBindingImpl(
     contributions: Map<NodeModel, ContributionType>,
 ) : MultiBinding, BindingMixin {
     private val _contributions = contributions
-    override val contributions: Map<NodeModel, ContributionType> by lazy(NONE) {
+    override val contributions: Map<NodeModel, ContributionType> by lazy {
         // Resolve aliases as multi-bindings often work with @Binds
         val resolved = _contributions.mapKeys { (node, _) -> owner.resolveBinding(node).target }
         topologicalSort(

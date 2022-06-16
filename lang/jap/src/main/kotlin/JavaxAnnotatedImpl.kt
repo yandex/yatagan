@@ -4,13 +4,12 @@ import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import javax.lang.model.AnnotatedConstruct
 import javax.lang.model.element.AnnotationMirror
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal open class JavaxAnnotatedImpl<T : AnnotatedConstruct>(
     protected val impl: T
 ) : CtAnnotatedLangModel {
 
-    override val annotations: Sequence<CtAnnotationLangModel> by lazy(NONE) {
+    override val annotations: Sequence<CtAnnotationLangModel> by lazy {
         impl.annotationMirrors.asSequence().map { JavaxAnnotationImpl(it) }
     }
 

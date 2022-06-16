@@ -2,6 +2,8 @@ plugins {
     id("daggerlite.artifact")
 }
 
+val kotlinCoroutinesCoreVersion: String by extra
+
 dependencies {
     implementation(project(":base"))
     implementation(project(":validation-impl"))
@@ -10,4 +12,6 @@ dependencies {
     implementation(project(":generator"))
     implementation(project(":spi-impl"))
     implementation(kotlin("stdlib"))
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesCoreVersion")
 }

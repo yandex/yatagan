@@ -4,7 +4,6 @@ import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import javax.lang.model.element.VariableElement
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxFieldImpl private constructor(
     override val owner: JavaxTypeDeclarationImpl,
@@ -15,7 +14,7 @@ internal class JavaxFieldImpl private constructor(
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
 
-    override val type: TypeLangModel by lazy(NONE) {
+    override val type: TypeLangModel by lazy {
         JavaxTypeImpl(impl.asMemberOf(owner.type))
     }
 

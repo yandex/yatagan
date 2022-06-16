@@ -6,16 +6,16 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.IntoListAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.core.lang.hasType
-import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 abstract class CtFunctionLangModel : FunctionLangModel {
     abstract override val annotations: Sequence<CtAnnotationLangModel>
 
-    final override val providesAnnotationIfPresent: ProvidesAnnotationLangModel? by lazy(NONE) {
+    final override val providesAnnotationIfPresent: ProvidesAnnotationLangModel? by lazy(PUBLICATION) {
         annotations.find { it.hasType<Provides>() }?.let { CtProvidesAnnotationImpl(it) }
     }
 
-    final override val intoListAnnotationIfPresent: IntoListAnnotationLangModel? by lazy(NONE) {
+    final override val intoListAnnotationIfPresent: IntoListAnnotationLangModel? by lazy(PUBLICATION) {
         annotations.find { it.hasType<IntoList>() }?.let { CtIntoListAnnotationImpl(it) }
     }
 

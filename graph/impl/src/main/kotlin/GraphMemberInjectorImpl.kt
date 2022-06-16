@@ -7,7 +7,7 @@ import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.GraphMemberInjector
 import com.yandex.daggerlite.validation.Validator
-import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class GraphMemberInjectorImpl(
     private val owner: BindingGraph,
@@ -16,11 +16,11 @@ internal class GraphMemberInjectorImpl(
     override val injector: FunctionLangModel
         get() = impl.injector
 
-    private val _membersToInject by lazy(NONE) {
+    private val _membersToInject by lazy(PUBLICATION) {
         impl.membersToInject.map { (member, dependency) -> MemberToInjectEntryPoint(member, dependency) }
     }
 
-    override val membersToInject: Map<out MemberLangModel, NodeDependency> by lazy(NONE) {
+    override val membersToInject: Map<out MemberLangModel, NodeDependency> by lazy(PUBLICATION) {
         _membersToInject.associateWith { it.dependency }
     }
 

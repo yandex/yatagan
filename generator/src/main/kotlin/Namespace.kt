@@ -31,7 +31,7 @@ private fun <T> singleValueIterator(value: T) = object : Iterator<T> {
 
     override fun next(): T {
         if (expired) throw NoSuchElementException()
-        expired = false
+        expired = true
         return value
     }
 }

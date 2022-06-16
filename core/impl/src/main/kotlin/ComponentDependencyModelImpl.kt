@@ -10,13 +10,12 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportWarning
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentDependencyModelImpl private constructor(
     override val type: TypeLangModel,
 ) : ComponentDependencyModel {
 
-    private val exposedEntryPoints: Map<NodeDependency, FunctionLangModel> by lazy(NONE) {
+    private val exposedEntryPoints: Map<NodeDependency, FunctionLangModel> by lazy {
         type.declaration.functions.filter {
             it.parameters.none() && !it.returnType.isVoid
         }.associateBy { function ->
@@ -24,7 +23,7 @@ internal class ComponentDependencyModelImpl private constructor(
         }
     }
 
-    override val exposedDependencies: Map<NodeModel, FunctionLangModel> by lazy(NONE) {
+    override val exposedDependencies: Map<NodeModel, FunctionLangModel> by lazy {
         buildMap {
             exposedEntryPoints.forEach { (dependency, function) ->
                 if (dependency.kind == DependencyKind.Direct) {

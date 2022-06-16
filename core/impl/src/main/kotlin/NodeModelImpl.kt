@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.base.BiObjectCache
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.ConditionalHoldingModel
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.HasNodeModel
@@ -129,7 +129,7 @@ internal class NodeModelImpl private constructor(
 
     override fun replaceNode(node: NodeModel): NodeDependency = node
 
-    companion object Factory : BiObjectCache<TypeLangModel, AnnotationLangModel?, NodeModelImpl>() {
+    companion object Factory : ObjectCache<Any, NodeModelImpl>() {
         class NoNode : NodeModel {
             override val type get() = LangModelFactory.errorType
             override val qualifier: Nothing? get() = null
@@ -155,7 +155,8 @@ internal class NodeModelImpl private constructor(
             qualifier: AnnotationLangModel? = null,
         ): NodeModelImpl {
             val decayed = type.decay()
-            return createCached(decayed, qualifier) {
+            val key: Any = if (qualifier != null) decayed to qualifier else decayed
+            return createCached(key) {
                 NodeModelImpl(
                     type = decayed,
                     qualifier = qualifier,

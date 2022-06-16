@@ -31,4 +31,9 @@ interface ProcessorDelegate<Source> {
         packageName: String,
         className: String,
     ): Writer
+
+    /**
+     * Constructed options container.
+     */
+    val options: Options
 }

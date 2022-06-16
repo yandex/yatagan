@@ -10,6 +10,7 @@ import com.yandex.daggerlite.jap.lang.ProcessingUtils
 import com.yandex.daggerlite.jap.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.jap.lang.asTypeElement
 import com.yandex.daggerlite.process.Logger
+import com.yandex.daggerlite.process.Options
 import com.yandex.daggerlite.process.ProcessorDelegate
 import com.yandex.daggerlite.process.process
 import java.io.Writer
@@ -22,11 +23,20 @@ import javax.lang.model.util.Types
 
 internal class JapComponentProcessingStep(
     messager: Messager,
-    private val filer: Filer,
-    private val types: Types,
-    private val elements: Elements,
+    filer: Filer,
+    types: Types,
+    elements: Elements,
+    options: Map<String, String>,
 ) : BasicAnnotationProcessor.Step, ProcessorDelegate<TypeElement> {
     override val logger: Logger = JapLogger(messager)
+
+    override val options: Options = Options(options)
+
+    private val useParallelProcessing by Options.UseParallelProcessing
+
+    private val filer: Filer = if (useParallelProcessing) ThreadSafeFiler(filer) else filer
+    private val types: Types = if (useParallelProcessing) ThreadSafeTypes(types) else types
+    private val elements: Elements = if (useParallelProcessing) ThreadSafeElements(elements) else elements
 
     override fun annotations(): Set<String> = setOf(Component::class.qualifiedName!!)
 
@@ -49,6 +59,7 @@ internal class JapComponentProcessingStep(
                         .map(Element::asTypeElement)
                         .asSequence(),
                     delegate = this,
+                    useParallelProcessing = useParallelProcessing,
                 )
             }
         }

@@ -4,7 +4,6 @@ import com.google.devtools.ksp.symbol.KSPropertyGetter
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspFunctionPropertyGetterImpl private constructor(
     getter: KSPropertyGetter,
@@ -12,7 +11,7 @@ internal class KspFunctionPropertyGetterImpl private constructor(
     isStatic: Boolean,
 ) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter, isStatic) {
 
-    override val returnType: TypeLangModel by lazy(NONE) {
+    override val returnType: TypeLangModel by lazy {
         var typeReference = property.type
         if (!isStatic) {
             typeReference = typeReference.replaceType(property.asMemberOf(owner.type.impl))
@@ -24,7 +23,7 @@ internal class KspFunctionPropertyGetterImpl private constructor(
     }
 
     @Suppress("DEPRECATION")  // capitalize
-    override val name: String by lazy(NONE) {
+    override val name: String by lazy {
         Utils.resolver.getJvmName(getter) ?: run {
             val propName = property.simpleName.asString()
             if (PropNameIsRegex.matches(propName)) propName

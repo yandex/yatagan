@@ -7,7 +7,6 @@ import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspFunctionImpl private constructor(
     private val impl: KSFunctionDeclaration,
@@ -23,7 +22,7 @@ internal class KspFunctionImpl private constructor(
         get() = impl.isAbstract
 
 
-    override val returnType: TypeLangModel by lazy(NONE) {
+    override val returnType: TypeLangModel by lazy {
         var typeReference = impl.returnType ?: ErrorTypeImpl.asReference()
         if (!isStatic) {
             // No need to resolve generics for static functions.
@@ -35,7 +34,7 @@ internal class KspFunctionImpl private constructor(
         )
     }
 
-    override val name: String by lazy(NONE) {
+    override val name: String by lazy {
         Utils.resolver.getJvmName(impl) ?: impl.simpleName.asString()
     }
 

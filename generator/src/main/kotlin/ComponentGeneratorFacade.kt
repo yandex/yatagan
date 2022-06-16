@@ -7,12 +7,16 @@ import java.io.Closeable
 class ComponentGeneratorFacade(
     graph: BindingGraph,
 ) : Closeable {
+    init {
+        GeneratorsBackingTL.set(GeneratorsHolder())
+    }
+
     private val generator = ComponentGenerator(
         graph = graph,
     )
 
     init {
-        Generators.freeze()
+        GeneratorsBackingTL.get().freeze()
     }
 
     val targetPackageName: String
@@ -28,6 +32,6 @@ class ComponentGeneratorFacade(
     }
 
     override fun close() {
-        Generators.close()
+        GeneratorsBackingTL.set(null)
     }
 }

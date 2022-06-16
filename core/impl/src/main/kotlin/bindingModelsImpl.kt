@@ -16,7 +16,6 @@ import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
-import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
@@ -26,7 +25,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         impl.annotations.find(AnnotationLangModel::isScope)
     }
 
-    override val target: BindingTargetModel by lazy(PUBLICATION) {
+    override val target: BindingTargetModel by lazy {
         if (impl.returnType.isVoid) {
             BindingTargetModel.Plain(NodeModelImpl.Factory.NoNode())
         } else {
@@ -125,7 +124,7 @@ internal class ProvidesImpl(
 
     override val conditionals get() = conditionalsModel.conditionals
 
-    override val inputs: List<NodeDependency> by lazy(NONE) {
+    override val inputs: List<NodeDependency> by lazy(PUBLICATION) {
         impl.parameters.map { param ->
             NodeDependency(type = param.type, forQualifier = param)
         }.toList()

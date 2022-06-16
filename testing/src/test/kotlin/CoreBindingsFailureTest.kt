@@ -767,19 +767,11 @@ class CoreBindingsFailureTest(
 
         expectValidationResults(
             // @formatter:off
-            *Array(if (backendUnderTest == Backend.Rt) 2 else 1) { index ->
+            *Array(2) { index ->
                 errorMessage(formatMessage(
                     message = Errors.conflictingBindings(`for` = "@test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
-                    encounterPaths = when(backendUnderTest) {
-                        Backend.Rt -> listOf(
-                            // For RT errors from different roots are not grouped.
-                            listOf("test.MyComponent${index + 1}"),  // MyComponent1 and MyComponent2
-                        )
-                        else -> listOf(
-                            listOf("test.MyComponent1"),
-                            listOf("test.MyComponent2"),
-                        )
-                    },
+                    // MyComponent1 and MyComponent2
+                    encounterPaths = listOf(listOf("test.MyComponent${index + 1}")),
                     notes = listOf(
                         Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject(): @test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),
                         Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule::provideObject2(): @test.MyQualifier(named=@javax.inject.Named(value=\"hello\")) java.lang.Object"),

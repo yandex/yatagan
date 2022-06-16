@@ -5,7 +5,6 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspFieldImpl private constructor(
     private val impl: KSPropertyDeclaration,
@@ -16,7 +15,7 @@ internal class KspFieldImpl private constructor(
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()
 
-    override val type: TypeLangModel by lazy(NONE) {
+    override val type: TypeLangModel by lazy {
         KspTypeImpl(
             reference = impl.type,
             jvmSignatureHint = Utils.resolver.mapToJvmSignature(impl),

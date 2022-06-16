@@ -8,14 +8,13 @@ import com.yandex.daggerlite.generator.lang.CtTypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxTypeImpl private constructor(
     val impl: TypeMirror,
 ) : CtTypeLangModel {
-    override val nameModel: CtTypeNameModel by lazy(NONE) { CtTypeNameModel(impl) }
+    override val nameModel: CtTypeNameModel by lazy { CtTypeNameModel(impl) }
 
-    override val declaration: TypeDeclarationLangModel by lazy(NONE) {
+    override val declaration: TypeDeclarationLangModel by lazy {
         if (impl.kind == TypeKind.DECLARED) {
             JavaxTypeDeclarationImpl(impl.asDeclaredType())
         } else NoDeclaration(this)
@@ -35,7 +34,7 @@ internal class JavaxTypeImpl private constructor(
         return Factory(decay(impl))
     }
 
-    override val typeArguments: Collection<TypeLangModel> by lazy(NONE) {
+    override val typeArguments: Collection<TypeLangModel> by lazy {
         when (impl.kind) {
             TypeKind.DECLARED -> impl.asDeclaredType().typeArguments.map { Factory(decay(it)) }
             else -> emptyList()

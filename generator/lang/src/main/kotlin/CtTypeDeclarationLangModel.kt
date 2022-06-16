@@ -17,7 +17,7 @@ import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.hasType
-import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
  * [TypeDeclarationLangModel] specialized for compile time implementations.
@@ -25,10 +25,10 @@ import kotlin.LazyThreadSafetyMode.NONE
 abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModel {
     abstract override val annotations: Sequence<CtAnnotationLangModel>
 
-    override val componentAnnotationIfPresent: ComponentAnnotationLangModel? by lazy(NONE) {
+    override val componentAnnotationIfPresent: ComponentAnnotationLangModel? by lazy(PUBLICATION) {
         annotations.find { it.hasType<Component>() }?.let(::CtComponentAnnotationImpl)
     }
-    override val moduleAnnotationIfPresent: ModuleAnnotationLangModel? by lazy(NONE) {
+    override val moduleAnnotationIfPresent: ModuleAnnotationLangModel? by lazy(PUBLICATION) {
         annotations.find { it.hasType<Module>() }?.let(::CtModuleAnnotationImpl)
     }
     override val conditions: Sequence<ConditionLangModel> = sequence {
@@ -54,7 +54,7 @@ abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModel {
         }
     }.memoize()
 
-    override val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel? by lazy(NONE) {
+    override val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel? by lazy(PUBLICATION) {
         annotations.find { it.hasType<ComponentFlavor>() }?.let { CtComponentFlavorAnnotationImpl(it) }
     }
 

@@ -3,12 +3,18 @@ package com.yandex.daggerlite.process
 class LoggerDecorator(
     private val wrapped: Logger,
 ) : Logger {
+    private val lock = Any()
+
     override fun error(message: String) {
-        wrapped.error(decorateError(message))
+        synchronized(lock) {
+            wrapped.error(decorateError(message))
+        }
     }
 
     override fun warning(message: String) {
-        wrapped.warning(decorateWarning(message))
+        synchronized(lock) {
+            wrapped.warning(decorateWarning(message))
+        }
     }
 
     companion object {

@@ -5,7 +5,6 @@ import com.google.devtools.ksp.symbol.KSValueParameter
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtParameterLangModel
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspParameterImpl(
     private val impl: KSValueParameter,
@@ -15,7 +14,7 @@ internal class KspParameterImpl(
 
     override val name: String
         get() = impl.name?.asString() ?: "unnamed"
-    override val type: TypeLangModel by lazy(NONE) {
+    override val type: TypeLangModel by lazy {
         KspTypeImpl(
             reference = refinedTypeRef,
             jvmSignatureHint = jvmSignatureSupplier(),
