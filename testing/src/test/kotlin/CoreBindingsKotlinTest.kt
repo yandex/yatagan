@@ -618,9 +618,15 @@ class CoreBindingsKotlinTest(
 
     @Test
     fun `complex annotation as qualifier`() {
+        givenPrecompiledModule(SourceSet {
+            givenKotlinSource("mod.Constants", """
+                const val CONSTANT = "hello-from-const-val"
+            """.trimIndent())
+        })
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             import javax.inject.*
+            import mod.CONSTANT
 
             enum class MyEnum {
                 Red, Green, Blue,
@@ -645,7 +651,7 @@ class CoreBindingsKotlinTest(
                     228,
                     number = -22,
                     name = "hello" + " world",
-                    arrayString = ["hello", "world"],
+                    arrayString = ["hello", "world", CONSTANT],
                     arrayInt = [1,2,3],
                     nested = Named("nested-named"),
                     arrayChar = ['A', 'B', 'C'],
@@ -661,7 +667,7 @@ class CoreBindingsKotlinTest(
                     value = 200 + 28,
                     name = "hello" + " world",
                     number = -11 - 11,
-                    arrayString = ["hel" + "lo", "world"],
+                    arrayString = ["hel" + "lo", "world", "hello-from-const-val"],
                     arrayInt = [1,2, 6 - 3],
                     nested = Named("" + "nested-named"),
                     arrayChar = ['A', 'B', 'C'],
@@ -673,6 +679,89 @@ class CoreBindingsKotlinTest(
             @Component(modules = [MyModule::class])
             interface TestComponent {
                 val a: ClassA
+            }
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
+
+    @Test
+    fun `complex annotation as qualifier in java`() {
+        givenPrecompiledModule(SourceSet {
+            givenKotlinSource("mod.Constants", """
+                const val CONSTANT = "hello-from-const-val"
+            """.trimIndent())
+        })
+        givenJavaSource("test.MyEnum", """
+            enum MyEnum {
+                Red, Green, Blue,
+            }
+        """.trimIndent())
+        givenJavaSource("test.ComplexQualifier", """
+            import javax.inject.Named;
+            import javax.inject.Qualifier;
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+
+            @Qualifier
+            @Retention(RetentionPolicy.RUNTIME)
+            @interface ComplexQualifier {
+                int value();
+                long number();
+                String name();
+                String[] arrayString();
+                int[] arrayInt();
+                char[] arrayChar() default {'A', 'B', 'C'};
+                Named nested();
+                Named[] arrayNested();
+                MyEnum enumValue();
+            }
+        """.trimIndent())
+        givenJavaSource("test.ClassA", """
+            import javax.inject.Named;
+            import javax.inject.Inject;
+            import mod.ConstantsKt;
+            public class ClassA {
+                @Inject public ClassA(
+                    @ComplexQualifier(
+                        value = 228,
+                        number = -22,
+                        name = "hello" + " world",
+                        arrayString = {"hello", "world", ConstantsKt.CONSTANT},
+                        arrayInt = {1,2,3},
+                        nested = @Named("nested-named"),
+                        arrayChar = {'A', 'B', 'C'},
+                        arrayNested = {@Named("array-nested")},
+                        enumValue = MyEnum.Red
+                    )
+                    Object errorDependency
+                ) {}
+            }
+        """.trimIndent())
+        givenJavaSource("test.MyModule", """
+            import com.yandex.daggerlite.Module;
+            import com.yandex.daggerlite.Component;
+            import com.yandex.daggerlite.Provides;
+            import javax.inject.Named;
+
+            @Module
+            public interface MyModule {
+                static @Provides @ComplexQualifier(
+                    value = 200 + 28,
+                    name = "hello" + " world",
+                    number = -11 - 11,
+                    arrayString = {"hel" + "lo", "world", "hello-from-const-val"},
+                    arrayInt = {1,2, 6 - 3},
+                    nested = @Named("" + "nested-named"),
+                    arrayChar = {'A', 'B', 'C'},
+                    arrayNested = {@Named("array-nested")},
+                    enumValue = MyEnum.Red
+                )
+                Object any() { return new Object(); }
+            }
+            @Component(modules = {MyModule.class})
+            interface TestComponent {
+                ClassA getA();
             }
         """.trimIndent())
 

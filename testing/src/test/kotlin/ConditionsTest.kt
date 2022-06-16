@@ -716,9 +716,7 @@ class ConditionsTest(
 
     @Test
     fun `const val conditions`() {
-        // Disable for KSP, because of the following issues:
-        // https://github.com/google/ksp/issues/850
-        // https://github.com/google/ksp/issues/839
+        // Disable for KSP, because file facades can't be resolved for now
         // TODO: Enable for KSP once the issues are fixed.
         assumeFalse(backendUnderTest == Backend.Ksp)
 

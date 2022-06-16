@@ -29,7 +29,7 @@ val kotlinVersion: String by extra(
         .asText.get().trimEnd()
 )
 val dokkaVersion: String by extra(kotlinVersion)
-val kspVersion by extra("$kotlinVersion-1.0.5")
+val kspVersion by extra("$kotlinVersion-1.0.6")
 val javaPoetVersion by extra("1.13.0")
 val kotlinPoetVersion by extra("1.11.0")
 val kotlinCompileTestingVersion by extra("1.4.8")

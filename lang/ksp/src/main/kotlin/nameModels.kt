@@ -6,6 +6,7 @@ import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.generator.lang.ArrayNameModel
 import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
+import com.yandex.daggerlite.generator.lang.ErrorNameModel
 import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
 import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
 import com.yandex.daggerlite.generator.lang.WildcardNameModel
@@ -34,6 +35,9 @@ private fun nameModelImpl(
         JvmTypeInfo.Boolean -> KeywordTypeNameModel.Boolean
         JvmTypeInfo.Declared -> {
             checkNotNull(type) { "Not reached: type info is absent for declared type" }
+            if (type.isError) {
+                return ErrorNameModel(type.toString())
+            }
             val declaration = type.declaration as KSClassDeclaration
             val raw = ClassNameModel(declaration)
             val typeArguments = type.arguments.map { argument ->
