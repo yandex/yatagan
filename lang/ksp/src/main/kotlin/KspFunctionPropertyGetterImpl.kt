@@ -1,11 +1,10 @@
 package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSPropertyGetter
-import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
-internal class KspFunctionPropertyGetterImpl private constructor(
+internal class KspFunctionPropertyGetterImpl(
     getter: KSPropertyGetter,
     override val owner: KspTypeDeclarationImpl,
     isStatic: Boolean,
@@ -36,19 +35,7 @@ internal class KspFunctionPropertyGetterImpl private constructor(
     override val platformModel: Any?
         get() = null
 
-    companion object Factory : ObjectCache<KSPropertyGetter, KspFunctionPropertyGetterImpl>() {
+    companion object {
         private val PropNameIsRegex = "^is[^a-z].*$".toRegex()
-
-        operator fun invoke(
-            getter: KSPropertyGetter,
-            owner: KspTypeDeclarationImpl,
-            isStatic: Boolean,
-        ) = createCached(getter) {
-            KspFunctionPropertyGetterImpl(
-                getter = getter,
-                owner = owner,
-                isStatic = isStatic
-            )
-        }
     }
 }
