@@ -9,17 +9,17 @@ import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.NestingKind
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val type: DeclaredType,
-) : JavaxAnnotatedLangModel by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationLangModel() {
+) : CtAnnotatedLangModel by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationLangModel() {
     private val impl = type.asTypeElement()
 
     override val isEffectivelyPublic: Boolean
@@ -47,13 +47,13 @@ internal class JavaxTypeDeclarationImpl private constructor(
             else -> null
         }
 
-    override val implementedInterfaces: Sequence<TypeLangModel> by lazy(NONE) {
+    override val implementedInterfaces: Sequence<TypeLangModel> by lazy {
         impl.allImplementedInterfaces()
         .map { JavaxTypeImpl(it) }
         .memoize()
     }
 
-    override val constructors: Sequence<ConstructorLangModel> by lazy(NONE) {
+    override val constructors: Sequence<ConstructorLangModel> by lazy {
         impl.enclosedElements
         .asSequence()
         .filter { it.kind == ElementKind.CONSTRUCTOR && !it.isPrivate }
@@ -62,7 +62,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    override val functions: Sequence<FunctionLangModel> by lazy(NONE) {
+    override val functions: Sequence<FunctionLangModel> by lazy {
         impl.allNonPrivateMethods()
         .run {
             when (kotlinObjectKind) {
@@ -81,7 +81,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         }
     }
 
-    override val fields: Sequence<FieldLangModel> by lazy(NONE) {
+    override val fields: Sequence<FieldLangModel> by lazy {
         impl.enclosedElements
         .asSequence()
         .filter { it.kind == ElementKind.FIELD && !it.isPrivate }
@@ -89,7 +89,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .memoize()
     }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy(NONE) {
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy {
         impl.enclosedElements
         .asSequence()
         .filter {
@@ -104,7 +104,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .memoize()
     }
 
-    override val defaultCompanionObjectDeclaration: TypeDeclarationLangModel? by lazy(NONE) {
+    override val defaultCompanionObjectDeclaration: TypeDeclarationLangModel? by lazy {
         if (impl.isFromKotlin()) {
             impl.enclosedElements.find {
                 it.kind == ElementKind.CLASS && it.asTypeElement().isDefaultCompanionObject()

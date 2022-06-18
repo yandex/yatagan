@@ -1,14 +1,23 @@
 package com.yandex.daggerlite.core
 
 /**
- * A [NodeModel] with a request [DependencyKind].
+ * Represents a dependency on a particular [node] with the specified dependency [kind].
  */
-data class NodeDependency(
-    val node: NodeModel,
-    val kind: DependencyKind = DependencyKind.Direct,
-) {
-    override fun toString() = when(kind) {
-        DependencyKind.Direct -> node.toString()
-        else -> "$node [$kind]"
-    }
+interface NodeDependency {
+    /**
+     * Requested node.
+     */
+    val node: NodeModel
+
+    /**
+     * The way the node is to be served.
+     */
+    val kind: DependencyKind
+
+    /**
+     * Replaces the node while preserving the [kind].
+     *
+     * @return a copy with the replaced [node] property.
+     */
+    fun replaceNode(node: NodeModel): NodeDependency
 }

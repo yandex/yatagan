@@ -1,7 +1,8 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.base.BiObjectCache
+import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.ConditionalHoldingModel
+import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -20,7 +21,7 @@ import javax.inject.Inject
 internal class NodeModelImpl private constructor(
     override val type: TypeLangModel,
     override val qualifier: AnnotationLangModel?,
-) : NodeModel {
+) : NodeModel, NodeDependency {
 
     init {
         require(!type.isVoid) {
@@ -120,7 +121,15 @@ internal class NodeModelImpl private constructor(
         return type.compareTo(other.type)
     }
 
-    companion object Factory : BiObjectCache<TypeLangModel, AnnotationLangModel?, NodeModelImpl>() {
+    override val node: NodeModel
+        get() = this
+
+    override val kind: DependencyKind
+        get() = DependencyKind.Direct
+
+    override fun replaceNode(node: NodeModel): NodeDependency = node
+
+    companion object Factory : ObjectCache<Any, NodeModelImpl>() {
         class NoNode : NodeModel {
             override val type get() = LangModelFactory.errorType
             override val qualifier: Nothing? get() = null
@@ -131,6 +140,9 @@ internal class NodeModelImpl private constructor(
             override val hintIsFrameworkType: Boolean get() = false
             override fun toString() = "[invalid]"
             override fun compareTo(other: NodeModel): Int = hashCode() - other.hashCode()
+            override val node: NodeModel get() = this
+            override val kind: DependencyKind get() = DependencyKind.Direct
+            override fun replaceNode(node: NodeModel): NodeDependency = node
         }
 
         operator fun invoke(
@@ -143,7 +155,8 @@ internal class NodeModelImpl private constructor(
             qualifier: AnnotationLangModel? = null,
         ): NodeModelImpl {
             val decayed = type.decay()
-            return createCached(decayed, qualifier) {
+            val key: Any = if (qualifier != null) decayed to qualifier else decayed
+            return createCached(key) {
                 NodeModelImpl(
                     type = decayed,
                     qualifier = qualifier,

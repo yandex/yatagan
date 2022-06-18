@@ -1,6 +1,9 @@
 package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.core.DependencyKind
+import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.component1
+import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
@@ -16,6 +19,27 @@ internal class AccessStrategyManager(
     lockGenerator: Provider<LockGenerator>,
 ) : ComponentGenerator.Contributor {
 
+    /**
+     * A mapping between a local binding and its single dependent binding, if any.
+     * Required for inline optimization calculations.
+     */
+    private val singleLocalDependentBindingCache: Map<Binding, Binding?> =
+        buildMap(thisGraph.localBindings.size) {
+            val allLocalNodes: Map<NodeModel, Binding> = thisGraph.localBindings.keys.associateBy(Binding::target)
+            for (binding in thisGraph.localBindings.keys) {
+                for ((node, _) in binding.dependencies) {
+                    val dependencyBinding = allLocalNodes[node] ?: continue
+                    if (dependencyBinding in this) {
+                        // Not the first dependent binding, explicitly put `null` there,
+                        //  as it is no longer single
+                        put(dependencyBinding, null)
+                    } else {
+                        put(dependencyBinding, binding)
+                    }
+                }
+            }
+        }
+
     private val strategies: Map<Binding, AccessStrategy> = thisGraph.localBindings.entries.associateBy(
         keySelector = { (binding, _) -> binding },
         valueTransform = fun(entry: Map.Entry<Binding, BindingGraph.BindingUsage>): AccessStrategy {
@@ -24,15 +48,16 @@ internal class AccessStrategyManager(
                 return EmptyAccessStrategy
             }
             val strategy = if (binding.scope != null) {
-                when(detectDegenerateUsage(binding, usage)) {
-                    ScopedDegenerateUsage.CanUseInline -> {
+                when(detectDegenerateUsage(binding)) {
+                    DegenerateBindingUsage.SingleLocalDirect -> {
                         inlineStrategy(
                             binding = binding,
                             usage = usage,
                             methodsNs = methodsNs,
                         )
                     }
-                    ScopedDegenerateUsage.CanUseOnTheFlyProvider -> {
+                    DegenerateBindingUsage.SingleLocalProvider,
+                    DegenerateBindingUsage.SingleLocalLazy -> {
                         val slot = multiFactory.get().requestSlot(binding)
                         CompositeStrategy(
                             directStrategy = inlineStrategy(
@@ -134,9 +159,60 @@ internal class AccessStrategyManager(
         return strategies[binding]!!
     }
 
-    enum class ScopedDegenerateUsage {
-        CanUseInline,
-        CanUseOnTheFlyProvider,
+    enum class DegenerateBindingUsage {
+        SingleLocalDirect,
+        SingleLocalLazy,
+        SingleLocalProvider,
+    }
+
+    private fun detectDegenerateUsage(
+        binding: Binding,
+        usage: BindingGraph.BindingUsage = thisGraph.localBindings[binding]!!
+    ): DegenerateBindingUsage? {
+        // There's a possibility to use inline strategy (create on request) for scoped node if it can be proven,
+        // that the binding has *a single eager (direct/optional) usage as a dependency of a binding of the same
+        // scope*.
+
+        val potentialCase = with(usage) {
+            val directUsage = direct + optional
+            val providerUsage = provider + optionalProvider
+            val lazyUsage = lazy + optionalLazy
+            when {
+                directUsage == 1 && lazyUsage + providerUsage == 0 -> DegenerateBindingUsage.SingleLocalDirect
+                directUsage == 0 -> when {
+                    lazyUsage == 0 && providerUsage == 1 -> DegenerateBindingUsage.SingleLocalProvider
+                    lazyUsage == 1 && providerUsage == 0 -> DegenerateBindingUsage.SingleLocalLazy
+                    else -> return null
+                }
+                else -> return null
+            }
+        }
+
+        val singleDependentBinding = singleLocalDependentBindingCache[binding] ?: return null
+
+        // Now we know for sure that the dependent binding is *single*.
+        // We're going to rustle through localBindings of the binding's owner graph in hope to find this single
+        //  dependant binding. If we find it - cool, can use inline. Otherwise, this single dependant may be
+        //  from the child graphs or entry-point(s)/member-injector(s), etc... - not correct to use inline.
+
+        if (singleDependentBinding.scope != null) {
+            // If it is scoped (cached), can use the optimization
+            return potentialCase
+        }
+
+        // For unscoped dependent try to analyze transitively, if it's also only created once
+        return when (detectDegenerateUsage(singleDependentBinding)) {
+            DegenerateBindingUsage.SingleLocalDirect,
+            DegenerateBindingUsage.SingleLocalLazy
+            -> {
+                // The unscoped class itself will be created at most once, so it's ok to use optimization
+                potentialCase
+            }
+            DegenerateBindingUsage.SingleLocalProvider, null -> {
+                // Single provider for unscoped node can spawn multiple instances, no optimization
+                null
+            }
+        }
     }
 
     companion object {
@@ -149,7 +225,7 @@ internal class AccessStrategyManager(
                 binding = binding,
             )
 
-            if (binding.dependencies().isEmpty())
+            if (binding.dependencies.none())
                 return inline
             if (usage.provider + usage.lazy == 0) {
                 if (usage.direct == 1) {
@@ -166,42 +242,6 @@ internal class AccessStrategyManager(
                 binding = binding,
                 methodsNs = methodsNs,
             )
-        }
-
-        private fun detectDegenerateUsage(binding: Binding, usage: BindingGraph.BindingUsage): ScopedDegenerateUsage? {
-            // There's a possibility to use inline strategy (create on request) for scoped node if it can be proven,
-            // that the binding has *a single eager (direct/optional) usage as a dependency of a binding of the same
-            // scope*.
-
-            val potentialCase = with(usage) {
-                when {
-                    direct + optional == 1 && lazy + provider + optionalLazy + optionalProvider == 0 ->
-                        ScopedDegenerateUsage.CanUseInline
-                    direct + optional == 0 && lazy + provider + optionalLazy + optionalProvider == 1 ->
-                        ScopedDegenerateUsage.CanUseOnTheFlyProvider
-                    else -> return null
-                }
-            }
-
-            // Now we know for sure that the dependent binding is *single*.
-            // We're going to rustle through localBindings of the binding's owner graph in hope to find this single
-            //  dependant binding. If we find it - cool, can use inline. Otherwise, this single dependant may be
-            //  from the child graphs or entry-point(s)/member-injector(s), etc... - not correct to use inline.
-            for (localBinding in binding.owner.localBindings.keys) {
-                for ((dependencyNode, _) in localBinding.dependencies()) {
-                    if (binding.target == dependencyNode) {
-                        return if (localBinding.scope == binding.scope) {
-                            // Found this single dependent binding locally => it has the same scope, nice.
-                            potentialCase
-                        } else {
-                            // This single usage is in the same component (logical scope),
-                            //  yet it is not scoped (cached) at all - can't use optimization.
-                            null
-                        }
-                    }
-                }
-            }
-            return null
         }
     }
 }

@@ -8,25 +8,25 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeNameModel
-import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeImpl private constructor(
     val impl: KSType,
     private val jvmType: JvmTypeInfo,
 ) : CtTypeLangModel {
 
-    override val nameModel: CtTypeNameModel by lazy(NONE) {
+    override val nameModel: CtTypeNameModel by lazy {
         CtTypeNameModel(type = impl, jvmTypeKind = jvmType)
     }
 
-    override val declaration: TypeDeclarationLangModel by lazy(NONE) {
+    override val declaration: TypeDeclarationLangModel by lazy(PUBLICATION) {
         when (jvmType) {
             JvmTypeInfo.Declared -> KspTypeDeclarationImpl(this)
             else -> NoDeclaration(this)
         }
     }
 
-    override val typeArguments: List<TypeLangModel> by lazy(NONE) {
+    override val typeArguments: List<TypeLangModel> by lazy {
         when (jvmType) {
             JvmTypeInfo.Declared -> impl.arguments.map { arg ->
                 Factory(arg.type ?: Utils.resolver.builtIns.anyType.asReference())

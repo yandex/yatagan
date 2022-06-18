@@ -13,6 +13,7 @@ import com.yandex.daggerlite.ksp.lang.KspModelFactoryImpl
 import com.yandex.daggerlite.ksp.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.ksp.lang.Utils
 import com.yandex.daggerlite.process.Logger
+import com.yandex.daggerlite.process.Options
 import com.yandex.daggerlite.process.ProcessorDelegate
 import com.yandex.daggerlite.process.process
 import java.io.Writer
@@ -21,6 +22,13 @@ internal class KspDaggerLiteProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor, ProcessorDelegate<KSClassDeclaration> {
     override val logger: Logger = KspLogger(environment.logger)
+    override val options: Options = Options(environment.options)
+
+    init {
+        if (options[Options.UseParallelProcessing]) {
+            environment.logger.warn("KSP doesn't support parallel processing as of now. The option is ignored.")
+        }
+    }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         Utils.init(resolver).use {
@@ -29,6 +37,9 @@ internal class KspDaggerLiteProcessor(
                     sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
                         .filterIsInstance<KSClassDeclaration>(),
                     delegate = this,
+                    // KSP model doesn't support multi-thread access.
+                    // https://github.com/google/ksp/issues/311
+                    useParallelProcessing = false,
                 )
                 return emptyList()
             }

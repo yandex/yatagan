@@ -18,6 +18,7 @@ import com.yandex.daggerlite.lang.rt.TypeDeclarationLangModel
 import com.yandex.daggerlite.spi.ValidationPluginProvider
 import com.yandex.daggerlite.spi.impl.GraphValidationExtension
 import com.yandex.daggerlite.validation.ValidationMessage
+import com.yandex.daggerlite.validation.impl.LocatedMessage
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.validate
 import java.lang.reflect.Proxy
@@ -56,7 +57,7 @@ object Dagger {
                 root = ComponentFactoryModel(TypeDeclarationLangModel(builderClass)).createdComponent
             )
             val promise = doValidate(graph)
-            val factory =  promise.awaitOnError {
+            val factory = promise.awaitOnError {
                 RuntimeFactory(
                     graph = graph,
                     parent = null,
@@ -120,29 +121,33 @@ object Dagger {
         loadServices<ValidationPluginProvider>()
     }
 
+    private fun reportMessages(
+        messages: Collection<LocatedMessage>,
+        reporting: DynamicValidationDelegate.ReportingDelegate,
+    ) {
+        messages.forEach { locatedMessage ->
+            val text = Strings.formatMessage(
+                message = locatedMessage.message.contents,
+                color = null,
+                encounterPaths = locatedMessage.encounterPaths,
+                notes = locatedMessage.message.notes,
+            )
+            when (locatedMessage.message.kind) {
+                ValidationMessage.Kind.Error -> reporting.reportError(text)
+                ValidationMessage.Kind.Warning -> reporting.reportWarning(text)
+            }
+        }
+    }
+
     private fun doValidate(graph: BindingGraph) = validationDelegate?.let { delegate ->
-        delegate.dispatchValidation(
-            title = graph.toString(),
-        ) { reporting: DynamicValidationDelegate.ReportingDelegate ->
-            val toValidate = if (delegate.usePlugins) {
+        delegate.dispatchValidation(title = graph.toString()) { reporting ->
+            reportMessages(messages = validate(graph), reporting = reporting)
+            if (delegate.usePlugins) {
                 val extension = GraphValidationExtension(
                     validationPluginProviders = pluginProviders,
                     graph = graph,
                 )
-                listOf(graph, extension)
-            } else listOf(graph)
-
-            validate(toValidate).forEach { locatedMessage ->
-                val text = Strings.formatMessage(
-                    message = locatedMessage.message.contents,
-                    color = null,
-                    encounterPaths = locatedMessage.encounterPaths,
-                    notes = locatedMessage.message.notes,
-                )
-                when(locatedMessage.message.kind) {
-                    ValidationMessage.Kind.Error -> reporting.reportError(text)
-                    ValidationMessage.Kind.Warning -> reporting.reportWarning(text)
-                }
+                reportMessages(messages = validate(extension), reporting = reporting)
             }
         }
     }

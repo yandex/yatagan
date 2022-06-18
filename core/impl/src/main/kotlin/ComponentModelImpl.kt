@@ -20,7 +20,6 @@ import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class ComponentModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
@@ -48,7 +47,7 @@ internal class ComponentModelImpl private constructor(
 
     override val scope = declaration.annotations.find(AnnotationLangModel::isScope)
 
-    override val modules: Set<ModuleModel> by lazy(NONE) {
+    override val modules: Set<ModuleModel> by lazy {
         val allModules = mutableSetOf<ModuleModel>()
         val moduleQueue: ArrayDeque<ModuleModel> = ArrayDeque(
             impl?.modules?.map(TypeLangModel::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList())
@@ -62,11 +61,11 @@ internal class ComponentModelImpl private constructor(
         allModules
     }
 
-    override val dependencies: Set<ComponentDependencyModel> by lazy(NONE) {
+    override val dependencies: Set<ComponentDependencyModel> by lazy {
         impl?.dependencies?.map { ComponentDependencyModelImpl(it) }?.toSet() ?: emptySet()
     }
 
-    override val entryPoints: Set<EntryPoint> by lazy(NONE) {
+    override val entryPoints: Set<EntryPoint> by lazy {
         class EntryPointImpl(
             override val getter: FunctionLangModel,
             override val dependency: NodeDependency,
@@ -91,7 +90,7 @@ internal class ComponentModelImpl private constructor(
         }.toSet()
     }
 
-    override val memberInjectors: Set<MembersInjectorModel> by lazy(NONE) {
+    override val memberInjectors: Set<MembersInjectorModel> by lazy {
         declaration.functions.filter {
             MembersInjectorModelImpl.canRepresent(it)
         }.map { function ->
@@ -101,7 +100,7 @@ internal class ComponentModelImpl private constructor(
         }.toSet()
     }
 
-    override val factory: ComponentFactoryModel? by lazy(NONE) {
+    override val factory: ComponentFactoryModel? by lazy {
         declaration.nestedClasses
             .find { ComponentFactoryModelImpl.canRepresent(it) }?.let {
                 ComponentFactoryModelImpl(factoryDeclaration = it)
@@ -113,7 +112,7 @@ internal class ComponentModelImpl private constructor(
     override val requiresSynchronizedAccess: Boolean
         get() = impl?.multiThreadAccess ?: false
 
-    override val variant: Variant by lazy(NONE) {
+    override val variant: Variant by lazy {
         VariantImpl(impl?.variant ?: emptySequence())
     }
 

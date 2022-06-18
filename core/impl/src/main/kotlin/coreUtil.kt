@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.DependencyKind.Direct
 import com.yandex.daggerlite.core.DependencyKind.Lazy
 import com.yandex.daggerlite.core.DependencyKind.Optional
@@ -7,6 +8,7 @@ import com.yandex.daggerlite.core.DependencyKind.OptionalLazy
 import com.yandex.daggerlite.core.DependencyKind.OptionalProvider
 import com.yandex.daggerlite.core.DependencyKind.Provider
 import com.yandex.daggerlite.core.NodeDependency
+import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
@@ -24,17 +26,21 @@ internal fun NodeDependency(
         }
         else -> Direct
     }
-    return NodeDependency(
-        node = NodeModelImpl(
-            type = when (kind) {
-                Direct -> type
-                OptionalProvider, OptionalLazy -> type.typeArguments.first().typeArguments.first()
-                Lazy, Provider, Optional -> type.typeArguments.first()
-            },
-            forQualifier = forQualifier,
-        ),
-        kind = kind,
+    val node = NodeModelImpl(
+        type = when (kind) {
+            Direct -> type
+            OptionalProvider, OptionalLazy -> type.typeArguments.first().typeArguments.first()
+            Lazy, Provider, Optional -> type.typeArguments.first()
+        },
+        forQualifier = forQualifier,
     )
+    return when (kind) {
+        Direct -> node
+        else -> NodeDependencyImpl(
+            node = node,
+            kind = kind,
+        )
+    }
 }
 
 internal fun isFrameworkType(type: TypeLangModel) = when (type.declaration.qualifiedName) {
@@ -46,4 +52,21 @@ internal object Names {
     val Lazy: String = com.yandex.daggerlite.Lazy::class.qualifiedName!!
     val Provider: String = javax.inject.Provider::class.qualifiedName!!
     val Optional: String = com.yandex.daggerlite.Optional::class.qualifiedName!!
+}
+
+private class NodeDependencyImpl(
+    override val node: NodeModel,
+    override val kind: DependencyKind,
+) : NodeDependency {
+    override fun toString() = "$node [$kind]"
+
+    override fun replaceNode(node: NodeModel): NodeDependency {
+        return NodeDependencyImpl(node = node, kind = kind)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is NodeDependencyImpl && node == other.node && kind == other.kind)
+    }
+
+    override fun hashCode(): Int = 31 * node.hashCode() + kind.hashCode()
 }

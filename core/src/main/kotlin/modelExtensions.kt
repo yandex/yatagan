@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputModel
@@ -23,7 +25,7 @@ val DependencyKind.isEager
         Lazy, Provider, OptionalLazy, OptionalProvider -> false
     }
 
-fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
+inline fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
     return if (this == null) {
         visitor.visitDefault()
     } else {
@@ -31,8 +33,6 @@ fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
     }
 }
 
-fun AssistedInjectFactoryModel.allAssistedParameters() = assistedConstructorParameters
-    .filterIsInstance<AssistedInjectFactoryModel.Parameter.Assisted>()
+inline operator fun NodeDependency.component1(): NodeModel = node
 
-fun AssistedInjectFactoryModel.allInjectedParameters() = assistedConstructorParameters
-    .filterIsInstance<AssistedInjectFactoryModel.Parameter.Injected>()
+inline operator fun NodeDependency.component2(): DependencyKind = kind

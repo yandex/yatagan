@@ -25,13 +25,13 @@ import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
 import com.yandex.daggerlite.validation.impl.reportWarning
-import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class ComponentFactoryModelImpl private constructor(
     private val factoryDeclaration: TypeDeclarationLangModel,
 ) : ComponentFactoryModel {
 
-    override val createdComponent: ComponentModel by lazy(NONE) {
+    override val createdComponent: ComponentModel by lazy {
         ComponentModelImpl(factoryDeclaration.enclosingType ?: LangModelFactory.errorType.declaration)
     }
 
@@ -55,7 +55,7 @@ internal class ComponentFactoryModelImpl private constructor(
         it.isAbstract && it != factoryMethod && it.parameters.count() == 1
     }.map { method ->
         object : BuilderInputModel {
-            override val payload: InputPayload by lazy(NONE) {
+            override val payload: InputPayload by lazy(PUBLICATION) {
                 InputPayload(
                     param = method.parameters.first(),
                     forBindsInstance = method,
@@ -80,10 +80,10 @@ internal class ComponentFactoryModelImpl private constructor(
         }
     }.toList()
 
-    override val factoryInputs: Collection<FactoryInputModel> by lazy(NONE) {
+    override val factoryInputs: Collection<FactoryInputModel> by lazy {
         factoryMethod?.parameters?.map { param ->
             object : FactoryInputModel {
-                override val payload: InputPayload by lazy(NONE) {
+                override val payload: InputPayload by lazy(PUBLICATION) {
                     InputPayload(param = param)
                 }
                 override val name get() = param.name

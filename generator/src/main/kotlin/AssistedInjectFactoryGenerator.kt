@@ -2,6 +2,8 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
+import com.yandex.daggerlite.core.component1
+import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass

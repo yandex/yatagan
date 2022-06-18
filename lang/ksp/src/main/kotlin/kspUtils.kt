@@ -24,15 +24,13 @@ import com.google.devtools.ksp.symbol.NonExistLocation
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
-import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ParameterLangModel
-import kotlin.reflect.KClass
 
 
-internal fun <A : Annotation> KSAnnotation.hasType(clazz: KClass<A>): Boolean {
+internal fun <A : Annotation> KSAnnotation.hasType(clazz: Class<A>): Boolean {
     return shortName.getShortName() == clazz.simpleName &&
             annotationType.resolve().declaration.qualifiedName?.asString() ==
-            clazz.qualifiedName
+            clazz.canonicalName
 }
 
 internal operator fun KSAnnotation.get(name: String): Any? {
@@ -40,7 +38,10 @@ internal operator fun KSAnnotation.get(name: String): Any? {
 }
 
 internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): Boolean =
-    annotations.any { it.hasType(T::class) }
+    isAnnotationPresent(T::class.java)
+
+internal fun <T : Annotation> KSAnnotated.isAnnotationPresent(clazz: Class<T>): Boolean =
+    annotations.any { it.hasType(clazz) }
 
 internal fun KSPropertyDeclaration.isLateInit(): Boolean {
     return Modifier.LATEINIT in modifiers
@@ -107,8 +108,6 @@ internal fun KSClassDeclaration.allNonPrivateProperties(): Sequence<KSPropertyDe
         else /* kotlin */ -> getAllProperties().filter { !it.isPrivate() && !it.isKotlinField() }
     }
 }
-
-internal fun annotationsFrom(impl: KSAnnotated) = impl.annotations.map { KspAnnotationImpl(it) }.memoize()
 
 internal fun parametersSequenceFor(
     declaration: KSFunctionDeclaration,

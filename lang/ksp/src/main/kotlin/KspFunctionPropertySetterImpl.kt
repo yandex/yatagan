@@ -5,7 +5,6 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspFunctionPropertySetterImpl private constructor(
     private val setter: KSPropertySetter,
@@ -21,7 +20,7 @@ internal class KspFunctionPropertySetterImpl private constructor(
     override val returnType: TypeLangModel = KspTypeImpl(Utils.resolver.builtIns.unitType)
 
     @Suppress("DEPRECATION")  // capitalize
-    override val name: String by lazy(NONE) {
+    override val name: String by lazy {
         Utils.resolver.getJvmName(setter) ?: "set${property.simpleName.asString().capitalize()}"
     }
 

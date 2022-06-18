@@ -10,7 +10,6 @@ import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportError
 import javax.inject.Inject
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class MembersInjectorModelImpl private constructor(
     override val injector: FunctionLangModel,
@@ -21,7 +20,7 @@ internal class MembersInjectorModelImpl private constructor(
 
     private val injectee = injector.parameters.single().type
 
-    override val membersToInject: Map<MemberLangModel, NodeDependency> by lazy(NONE) {
+    override val membersToInject: Map<MemberLangModel, NodeDependency> by lazy {
         buildMap {
             injectee.declaration.fields.filter {
                 it.isAnnotatedWith<Inject>()

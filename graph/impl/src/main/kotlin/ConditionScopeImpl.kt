@@ -16,7 +16,6 @@ import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.reportError
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal val ConditionScope.Companion.Unscoped get() = ConditionScopeImpl.Unscoped
 internal val ConditionScope.Companion.NeverScoped get() = ConditionScopeImpl.NeverScoped
@@ -185,7 +184,7 @@ private class LiteralPayloadImpl private constructor(
 
     override fun toString() = "$root.$pathSource"
 
-    override val path: List<MemberLangModel> by lazy(NONE) {
+    override val path: List<MemberLangModel> by lazy {
         buildList {
             var currentType = root.asType()
             var finished = false

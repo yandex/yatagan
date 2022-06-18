@@ -16,7 +16,6 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -26,14 +25,15 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
-import kotlin.LazyThreadSafetyMode.NONE
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
 ) : CtTypeDeclarationLangModel() {
     private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
+    private val annotated = KspAnnotatedImpl(impl)
 
-    override val annotations: Sequence<CtAnnotationLangModel> = annotationsFrom(impl)
+    override val annotations: Sequence<CtAnnotationLangModel> = annotated.annotations
+    override fun <A : Annotation> isAnnotatedWith(type: Class<A>) = annotated.isAnnotatedWith(type)
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()
@@ -71,7 +71,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }.memoize()
 
-    override val constructors: Sequence<ConstructorLangModel> by lazy(NONE) {
+    override val constructors: Sequence<ConstructorLangModel> by lazy {
         impl.getConstructors()
             .filter { !it.isPrivate() }
             .map { ConstructorImpl(impl = it) }
@@ -85,7 +85,7 @@ internal class KspTypeDeclarationImpl private constructor(
         fun filterAll(it: KSAnnotated) = true
     }
 
-    override val functions: Sequence<FunctionLangModel> by lazy(NONE) {
+    override val functions: Sequence<FunctionLangModel> by lazy {
         sequence {
             when (kotlinObjectKind) {
                 KotlinObjectKind.Object -> {
@@ -196,7 +196,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    override val fields: Sequence<FieldLangModel> by lazy(NONE) {
+    override val fields: Sequence<FieldLangModel> = run {
         sequence {
             when (kotlinObjectKind) {
                 KotlinObjectKind.Object -> {
@@ -285,7 +285,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy(NONE) {
+    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy {
         impl.declarations
             .filterIsInstance<KSClassDeclaration>()
             .filter { !it.isPrivate() }
@@ -293,7 +293,7 @@ internal class KspTypeDeclarationImpl private constructor(
             .memoize()
     }
 
-    override val defaultCompanionObjectDeclaration: KspTypeDeclarationImpl? by lazy(NONE) {
+    override val defaultCompanionObjectDeclaration: KspTypeDeclarationImpl? by lazy {
         impl.getCompanionObject()?.takeIf {
             it.simpleName.asString() == "Companion"
         }?.let { companion ->
@@ -315,7 +315,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         private val impl: KSFunctionDeclaration,
-    ) : ConstructorLangModel {
+    ) : ConstructorLangModel, KspAnnotatedImpl(impl) {
         private val jvmSignature = JvmMethodSignature(impl)
 
         override val isEffectivelyPublic: Boolean
@@ -329,7 +329,6 @@ internal class KspTypeDeclarationImpl private constructor(
                 }
                 return impl.isPublicOrInternal()
             }
-        override val annotations: Sequence<AnnotationLangModel> = annotationsFrom(impl)
         override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
             declaration = impl,

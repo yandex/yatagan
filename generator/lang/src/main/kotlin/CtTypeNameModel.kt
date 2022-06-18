@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.generator.lang
 
-import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
  *  Represents a [com.yandex.daggerlite.generator.lang.CtTypeLangModel] via its name and type arguments.
@@ -15,7 +15,7 @@ data class ClassNameModel(
         require(simpleNames.isNotEmpty()) { "class with no name?" }
     }
 
-    private val asString by lazy(NONE) {
+    private val asString by lazy(PUBLICATION) {
         buildString {
             append(packageName).append('.')
             simpleNames.joinTo(this, separator = ".")
@@ -29,7 +29,7 @@ data class ParameterizedNameModel(
     val raw: ClassNameModel,
     val typeArguments: List<CtTypeNameModel>,
 ) : CtTypeNameModel {
-    private val asString by lazy(NONE) {
+    private val asString by lazy(PUBLICATION) {
         buildString {
             append(raw)
             append('<')
@@ -51,7 +51,7 @@ data class WildcardNameModel(
         }
     }
 
-    private val asString by lazy(NONE) {
+    private val asString by lazy(PUBLICATION) {
         buildString {
             append("?")
             upperBound?.let { append(" extends ").append(it) }

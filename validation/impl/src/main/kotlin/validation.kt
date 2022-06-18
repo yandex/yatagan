@@ -32,7 +32,7 @@ private class ValidatorImpl : Validator {
 }
 
 fun validate(
-    roots: Iterable<MayBeInvalid>,
+    root: MayBeInvalid,
 ): Collection<LocatedMessage> {
     val cache = hashMapOf<MayBeInvalid, ValidatorImpl>()
 
@@ -42,7 +42,7 @@ fun validate(
     val markedBlack = hashSetOf<MayBeInvalid>()
     val stack = arrayListOf<MutableList<MayBeInvalid>>()
 
-    stack.add(roots.toMutableList())
+    stack.add(arrayListOf(root))
 
     while (stack.isNotEmpty()) {
         // Substack is introduced to preserve node hierarchy
