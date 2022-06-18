@@ -16,6 +16,7 @@ import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.ifOrElseNull
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
@@ -35,6 +36,7 @@ import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class RtTypeDeclarationImpl private constructor(
     val type: RtTypeImpl,
@@ -80,7 +82,7 @@ internal class RtTypeDeclarationImpl private constructor(
         impl.declaredClasses.asSequence()
             .filter { !it.isPrivate }
             .map { Factory(RtTypeImpl(it)) }
-            .toList().asSequence()
+            .memoize()
     }
 
     override val constructors: Sequence<ConstructorLangModel> by lazy {
@@ -93,11 +95,12 @@ internal class RtTypeDeclarationImpl private constructor(
                     impl = it,
                     constructee = this,
                 )
-            }.toList().asSequence()
+            }.memoize()
     }
 
     override val functions: Sequence<FunctionLangModel> by lazy {
         impl.getMethodsOverrideAware()
+            .asSequence()
             .run {
                 when (kotlinObjectKind) {
                     KotlinObjectKind.Companion -> filterNot {
@@ -109,7 +112,7 @@ internal class RtTypeDeclarationImpl private constructor(
             }
             .map {
                 RtFunctionImpl(impl = it, owner = this)
-            }.asSequence()
+            }.memoize()
     }
 
     override val fields: Sequence<FieldLangModel> by lazy {
@@ -122,7 +125,7 @@ internal class RtTypeDeclarationImpl private constructor(
                     impl = it,
                     owner = this,
                 )
-            }.toList().asSequence()
+            }.memoize()
     }
 
     override val defaultCompanionObjectDeclaration: TypeDeclarationLangModel? by lazy {
@@ -217,7 +220,7 @@ internal class RtTypeDeclarationImpl private constructor(
         }
     }
 
-    internal val typeHierarchy: Sequence<RtTypeDeclarationImpl> by lazy {
+    internal val typeHierarchy: Sequence<RtTypeDeclarationImpl> by lazy(PUBLICATION) {
         sequence {
             val queue = ArrayList<RtTypeDeclarationImpl>(4)
             queue += this@RtTypeDeclarationImpl
@@ -231,7 +234,7 @@ internal class RtTypeDeclarationImpl private constructor(
                     queue += Factory(superInterface.resolveGenerics(declaration.genericsInfo))
                 }
             } while (queue.isNotEmpty())
-        }
+        }.memoize()
     }
 
     internal val genericsInfo: Lazy<Map<TypeVariable<*>, Type>>? = when (val type = type.impl) {
