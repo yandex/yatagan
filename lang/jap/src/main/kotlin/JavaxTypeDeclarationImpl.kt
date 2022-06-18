@@ -78,7 +78,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
                 owner = this@JavaxTypeDeclarationImpl,
                 impl = it,
             )
-        }
+        }.memoize()
     }
 
     override val fields: Sequence<FieldLangModel> by lazy {

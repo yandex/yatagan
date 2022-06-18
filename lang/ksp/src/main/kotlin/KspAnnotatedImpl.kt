@@ -5,8 +5,8 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 
-open class KspAnnotatedImpl(
-    private val impl: KSAnnotated
+internal open class KspAnnotatedImpl<T : KSAnnotated>(
+     val impl: T
 ) : CtAnnotatedLangModel {
     final override val annotations: Sequence<CtAnnotationLangModel> by lazy {
         impl.annotations.map { KspAnnotationImpl(it) }.memoize()

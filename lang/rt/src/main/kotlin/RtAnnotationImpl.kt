@@ -1,22 +1,14 @@
 package com.yandex.daggerlite.lang.rt
 
+import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import javax.inject.Qualifier
-import javax.inject.Scope
 
 internal class RtAnnotationImpl(
     private val impl: Annotation,
 ) : AnnotationLangModel {
 
-    override val isScope: Boolean
-        get() = impl.javaAnnotationClass.isAnnotationPresent(Scope::class.java)
-
-    override val isQualifier: Boolean
-        get() = impl.javaAnnotationClass.isAnnotationPresent(Qualifier::class.java)
-
-    override fun <A : Annotation> hasType(type: Class<A>): Boolean {
-        return impl.javaAnnotationClass == type
-    }
+    override val annotationClass: AnnotationDeclarationLangModel
+        get() = RtAnnotationClassImpl(impl.javaAnnotationClass)
 
     override fun toString() = formatString(impl)
 

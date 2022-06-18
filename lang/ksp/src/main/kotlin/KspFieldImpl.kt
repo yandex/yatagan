@@ -7,10 +7,10 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
 internal class KspFieldImpl private constructor(
-    private val impl: KSPropertyDeclaration,
+    impl: KSPropertyDeclaration,
     override val owner: TypeDeclarationLangModel,
     override val isStatic: Boolean,
-) : FieldLangModel, KspAnnotatedImpl(impl) {
+) : FieldLangModel, KspAnnotatedImpl<KSPropertyDeclaration>(impl) {
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()

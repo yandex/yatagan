@@ -1,24 +1,16 @@
 package com.yandex.daggerlite.core.lang
 
 /**
- * Models Annotation with all its arguments
+ * Models annotation instance of any class.
+ * Suits for modeling annotation of user-defined types or framework annotations, that have no attributes.
+ *
+ * This interface doesn't expose annotation attributes; to be able to get that, use class-specific annotation model,
+ * e. g. [ComponentAnnotationLangModel], ... .
  */
 interface AnnotationLangModel {
     /**
-     * Whether annotation type is annotated with `javax.inject.Scope`.
+     * Annotation class declaration.
      */
-    val isScope: Boolean
-
-    /**
-     * Whether annotation type is annotated with `javax.inject.Qualifier`.
-     */
-    val isQualifier: Boolean
-
-    /**
-     * Checks whether the annotation has the given JVM type.
-     *
-     * @param type Java class to check
-     */
-    fun <A : Annotation> hasType(type: Class<A>): Boolean
+    val annotationClass: AnnotationDeclarationLangModel
 }
 

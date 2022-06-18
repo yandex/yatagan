@@ -5,7 +5,7 @@ import kotlin.contracts.contract
 
 inline fun <reified A : Annotation> AnnotatedLangModel.isAnnotatedWith() = isAnnotatedWith(A::class.java)
 
-inline fun <reified A : Annotation> AnnotationLangModel.hasType() = hasType(A::class.java)
+inline fun <reified A : Annotation> AnnotationLangModel.hasType() = annotationClass.isClass(A::class.java)
 
 val TypeDeclarationLangModel.isKotlinObject get() = kotlinObjectKind != null
 

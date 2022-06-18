@@ -2,10 +2,9 @@ package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
-import javax.inject.Qualifier
-import javax.inject.Scope
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.VariableElement
@@ -15,14 +14,8 @@ import javax.lang.model.util.AbstractAnnotationValueVisitor8
 internal class JavaxAnnotationImpl private constructor(
     private val impl: AnnotationMirror,
 ) : CtAnnotationLangModel {
-    override val isScope: Boolean
-        get() = impl.annotationType.asElement().isAnnotatedWith<Scope>()
-
-    override val isQualifier: Boolean
-        get() = impl.annotationType.asElement().isAnnotatedWith<Qualifier>()
-
-    override fun <A : Annotation> hasType(type: Class<A>): Boolean {
-        return impl.annotationType.asTypeElement().qualifiedName.contentEquals(type.canonicalName)
+    override val annotationClass: AnnotationDeclarationLangModel by lazy {
+        JavaxAnnotationClassImpl(impl.annotationType.asTypeElement())
     }
 
     override fun getBoolean(attribute: String): Boolean {

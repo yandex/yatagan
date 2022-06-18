@@ -314,8 +314,8 @@ internal class KspTypeDeclarationImpl private constructor(
     }
 
     private inner class ConstructorImpl(
-        private val impl: KSFunctionDeclaration,
-    ) : ConstructorLangModel, KspAnnotatedImpl(impl) {
+        impl: KSFunctionDeclaration,
+    ) : ConstructorLangModel, KspAnnotatedImpl<KSFunctionDeclaration>(impl) {
         private val jvmSignature = JvmMethodSignature(impl)
 
         override val isEffectivelyPublic: Boolean

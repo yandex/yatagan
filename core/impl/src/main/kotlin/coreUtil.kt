@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.IntoMap
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.DependencyKind.Direct
 import com.yandex.daggerlite.core.DependencyKind.Lazy
@@ -10,7 +11,11 @@ import com.yandex.daggerlite.core.DependencyKind.Provider
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import javax.inject.Qualifier
+import javax.inject.Scope
 
 internal fun NodeDependency(
     type: TypeLangModel,
@@ -70,3 +75,9 @@ private class NodeDependencyImpl(
 
     override fun hashCode(): Int = 31 * node.hashCode() + kind.hashCode()
 }
+
+internal fun AnnotationLangModel.isScope() = annotationClass.isAnnotatedWith<Scope>()
+
+internal fun AnnotationLangModel.isQualifier() = annotationClass.isAnnotatedWith<Qualifier>()
+
+internal fun AnnotationLangModel.isMapKey() = annotationClass.isAnnotatedWith<IntoMap.Key>()
