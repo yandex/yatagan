@@ -1,3 +1,5 @@
+@file:OptIn(ConditionsApi::class, VariantApi::class)
+
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.AnyCondition
@@ -6,9 +8,11 @@ import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.ComponentFlavor
 import com.yandex.daggerlite.Condition
 import com.yandex.daggerlite.Conditional
+import com.yandex.daggerlite.ConditionsApi
 import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.Provides
+import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel

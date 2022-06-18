@@ -134,6 +134,7 @@ annotation class Binds(
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY_GETTER,
 )
+@OptIn(ConditionsApi::class)
 annotation class Provides(
     /**
      * One or more [Conditional] specifiers for this provision.
@@ -293,7 +294,7 @@ annotation class Component(
      *
      * @see Conditional
      */
-    val variant: Array<KClass<*>> = [],
+    val variant: Array<KClass<out Annotation>> = [],
 
     /**
      * If `true`, then the component's implementation is guaranteed to be thread-safe.
@@ -379,6 +380,7 @@ annotation class BindsInstance(
  * So in general case the resulting expression is a conjunction ('AND') of disjunctions ('OR') or,
  * in other words, Conjunctive Normal Form.
  */
+@ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
@@ -443,6 +445,7 @@ annotation class Condition(
 /**
  * Container annotation for [Condition].
  */
+@ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
@@ -453,6 +456,7 @@ annotation class AllConditions(
 /**
  * Logical `||` operator for [Conditions][Condition].
  */
+@ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
@@ -466,6 +470,7 @@ annotation class AnyCondition(
  *
  * @see Condition
  */
+@ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
@@ -476,6 +481,7 @@ annotation class AnyConditions(
 /**
  * Container annotation for [Conditional].
  */
+@ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
@@ -539,6 +545,7 @@ annotation class Conditionals(
  * @see Binds
  * @see Provides.value
  */
+@ConditionsApi
 @MustBeDocumented
 @JvmRepeatable(Conditionals::class)
 @Retention(AnnotationRetention.RUNTIME)
@@ -616,6 +623,7 @@ annotation class Conditional(
  *
  * @see Component.variant
  */
+@VariantApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
@@ -628,6 +636,7 @@ annotation class ComponentVariantDimension
  * It's a good practice to declare all basic flavors for a dimension inside the dimension declaration for better
  * visual association.
  */
+@VariantApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
@@ -677,7 +686,7 @@ annotation class AssistedFactory
 /**
  *
  * Helps to just declare a multi-bound list to a type in case *there's no actual multi-bindings to that type*, so
- * that DL won't complain with about a missing binding. If no bindings are present for a list, then an emply list
+ * that DL won't complain with about a missing binding. If no bindings are present for a list, then an empty list
  * is provided.
  *
  * Example:
