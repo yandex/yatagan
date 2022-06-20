@@ -9,7 +9,7 @@ import javax.lang.model.element.ExecutableElement
 internal class JavaxFunctionImpl (
     override val owner: JavaxTypeDeclarationImpl,
     private val impl: ExecutableElement,
-) : CtAnnotatedLangModel by JavaxAnnotatedImpl(impl), CtFunctionLangModel() {
+) : CtFunctionLangModel(), CtAnnotatedLangModel by JavaxAnnotatedImpl(impl) {
 
     override val isAbstract: Boolean get() = impl.isAbstract
 

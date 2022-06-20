@@ -87,7 +87,10 @@ enum class KeywordTypeNameModel : CtTypeNameModel {
     override fun toString() = name.lowercase()
 }
 
-class ErrorNameModel(val comment: String) : CtTypeNameModel {
+class ErrorNameModel : CtTypeNameModel {
     // No equals/hashCode overloading - no need.
-    override fun toString() = "<$comment>"
+    override fun toString() = "error.UnresolvedCla$$"
+
+    override fun equals(other: Any?): Boolean = this === other
+    override fun hashCode(): Int = System.identityHashCode(this)
 }

@@ -14,6 +14,7 @@ internal class KspParameterImpl(
 
     override val name: String
         get() = impl.name?.asString() ?: "unnamed"
+
     override val type: TypeLangModel by lazy {
         KspTypeImpl(
             reference = refinedTypeRef,
@@ -27,6 +28,4 @@ internal class KspParameterImpl(
     }
 
     override fun hashCode() = impl.hashCode()
-
-    override fun toString() = "$name: $type"
 }

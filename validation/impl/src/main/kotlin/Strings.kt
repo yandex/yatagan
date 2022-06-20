@@ -314,7 +314,33 @@ object Strings {
 
         @Covered
         fun invalidAccessForAssistedInject() =
-            "An @AssistedInject constructor and the declaring class must be $AccessMessage"
+            "An @AssistedInject constructor and the declaring class must be $AccessMessage."
+
+        @Covered
+        fun missingMapKey() =
+            "Binding is annotated with @IntoMap yet no @IntoMap.Key-annotated annotation is present"
+
+        @Covered
+        fun multipleMapKeys() =
+            "Multiple IntoMap.Key-annotations are present on the binding"
+
+        @Covered
+        fun missingMapKeyValue(annotationClass: Any) =
+            "Map key `$annotationClass` is missing a `value` attribute to be used as a key value"
+
+        @Covered
+        fun unsupportedAnnotationValueAsMapKey(annotationClass: Any) =
+            "Map key `$annotationClass`'s `value` attribute has annotation type, " +
+                    "which is not supported as a map key"
+
+        @Covered
+        fun unsupportedArrayValueAsMapKey(annotationClass: Any) =
+            "Map key `$annotationClass`'s `value` attribute has array type, " +
+                    "which is not supported as a map key"
+
+        @Covered
+        fun duplicateKeysInMapping(mapType: Any, keyValue: Any) =
+            "Mapping for `$mapType` contains duplicates for key `$keyValue`"
     }
 
     object Warnings {
@@ -355,6 +381,9 @@ object Strings {
         fun duplicateBinding(binding: Any) =
             "Conflicting binding: `$binding`"
 
+        fun duplicateKeyInMapBinding(binding: Any) =
+            "Binding with conflicting key: `$binding`"
+
         @Covered
         fun duplicateScopeComponent(component: Any) =
             "In component `$component`"
@@ -383,10 +412,16 @@ object Strings {
             "[intrinsic] pre-provided instance via `$origin`"
 
         fun multibinding(elementType: Any, contributions: Iterable<Any>) = buildString {
-            append("[intrinsic] multi-bound `$elementType` list")
-            appendLine(":")
+            appendLine("[intrinsic] multi-bound `$elementType` list:")
             contributions.forEach {
                 append(Indent).appendLine(it)
+            }
+        }
+
+        fun mapping(mapType: Any, contents: Iterable<Pair<Any, Any>>) = buildString {
+            appendLine("[intrinsic] multi-bound `$mapType`:")
+            contents.forEach {
+                append(Indent).append(it.first).append(" = ").appendLine(it.second)
             }
         }
 

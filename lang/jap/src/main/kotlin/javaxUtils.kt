@@ -3,6 +3,7 @@
 package com.yandex.daggerlite.jap.lang
 
 import com.google.auto.common.AnnotationMirrors
+import com.google.auto.common.AnnotationValues
 import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
 import com.google.common.base.Equivalence
@@ -17,7 +18,6 @@ import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
 import com.yandex.daggerlite.generator.lang.WildcardNameModel
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
-import javax.lang.model.element.AnnotationValueVisitor
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -27,18 +27,18 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.ErrorType
 import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.PrimitiveType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
-import javax.lang.model.type.TypeVisitor
 import javax.lang.model.type.WildcardType
-import javax.lang.model.util.SimpleAnnotationValueVisitor8
+import javax.lang.model.util.SimpleElementVisitor8
 
-inline fun <reified T : Annotation> Element.isAnnotatedWith() =
-    MoreElements.isAnnotationPresent(this, T::class.java)
+inline fun <reified T : Annotation> Element.isAnnotatedWith() = annotationMirrors.any {
+    it.annotationType.asTypeElement().qualifiedName.contentEquals(T::class.java.canonicalName)
+}
 
+@PublishedApi
 internal fun TypeMirror.asTypeElement(): TypeElement = MoreTypes.asTypeElement(this)
 
 internal fun TypeMirror.asPrimitiveType(): PrimitiveType = MoreTypes.asPrimitiveType(this)
@@ -51,71 +51,9 @@ internal fun TypeMirror.asWildCardType(): WildcardType = MoreTypes.asWildcard(th
 
 internal fun TypeMirror.asArrayType(): ArrayType = MoreTypes.asArray(this)
 
-internal fun AnnotationMirror.typesValue(param: String): Sequence<TypeMirror> =
-    AnnotationMirrors.getAnnotationValue(this, param).accept(AsTypes)
-
-internal fun AnnotationMirror.typeValue(param: String): TypeMirror =
-    AnnotationMirrors.getAnnotationValue(this, param).accept(AsType)
-
-internal fun AnnotationMirror.booleanValue(param: String): Boolean =
-    AnnotationMirrors.getAnnotationValue(this, param).accept(AsBoolean)
-
-internal fun AnnotationMirror.stringValue(param: String): String {
-    return AnnotationMirrors.getAnnotationValue(this, param).accept(AsString)
-}
-
-internal fun AnnotationMirror.annotationsValue(param: String): Sequence<AnnotationMirror> {
-    return AnnotationMirrors.getAnnotationValue(this, param).accept(AsAnnotations)
-}
-
-internal fun AnnotationMirror.annotationValue(param: String): AnnotationMirror {
-    return AnnotationMirrors.getAnnotationValue(this, param).accept(AsAnnotation)
-}
-
-internal fun <R> AnnotationValue.accept(visitor: AnnotationValueVisitor<R, Unit>): R = accept(visitor, Unit)
-
-/**
- * This is "javac magic". Sometimes it reports "Attribute$UnresolvedClass" as string "<error>".
- * Nothing we can do about it.
- */
-private const val ERROR_TYPE_STRING = "<error>"
-
-private abstract class ExtractingVisitor<T : Any> : SimpleAnnotationValueVisitor8<T, Unit>() {
-    final override fun defaultAction(unexpected: Any?, void: Unit) =
-        throw AssertionError("Not reached: unexpected annotation value: $unexpected")
-}
-
-private object AsBoolean : ExtractingVisitor<Boolean>() {
-    override fun visitBoolean(bool: Boolean, void: Unit) = bool
-}
-
-private object AsType : ExtractingVisitor<TypeMirror>() {
-    override fun visitType(typeMirror: TypeMirror, void: Unit) = typeMirror
-    override fun visitString(maybeError: String?, void: Unit) = when (maybeError) {
-        ERROR_TYPE_STRING -> ErrorTypeImpl
-        else -> throw AssertionError("Not reached: expected type, got: $maybeError")
-    }
-}
-
-private object AsTypes : ExtractingVisitor<Sequence<TypeMirror>>() {
-    override fun visitArray(values: List<AnnotationValue>, void: Unit) =
-        values.asSequence().map { value -> value.accept(AsType, void) }
-}
-
-private object AsString : ExtractingVisitor<String>() {
-    override fun visitString(str: String, void: Unit) = str
-}
-
-private object AsAnnotation : ExtractingVisitor<AnnotationMirror>() {
-    override fun visitAnnotation(annotation: AnnotationMirror, void: Unit) = annotation
-}
-
-private object AsAnnotations : ExtractingVisitor<Sequence<AnnotationMirror>>() {
-    override fun visitArray(values: List<AnnotationValue>, void: Unit) =
-        values.asSequence().map { value -> value.accept(AsAnnotation, void) }
-}
-
 fun Element.asTypeElement(): TypeElement = MoreElements.asType(this)
+
+fun Element.asTypeElementOrNull(): TypeElement? = this.accept(AsTypeElementOptional, Unit)
 
 fun Element.asVariableElement(): VariableElement = MoreElements.asVariable(this)
 
@@ -139,6 +77,11 @@ internal val Element.isType
     get() = MoreElements.isType(this)
 
 private val StaticFinal = setOf(Modifier.STATIC, Modifier.FINAL)
+
+private object AsTypeElementOptional : SimpleElementVisitor8<TypeElement?, Unit>() {
+    override fun defaultAction(e: Element?, p: Unit?) = null
+    override fun visitType(e: TypeElement?, p: Unit?) = e
+}
 
 internal fun TypeElement.isDefaultCompanionObject(): Boolean {
     if (!isFromKotlin())
@@ -175,6 +118,11 @@ internal fun TypeElement.isKotlinSingleton(): Boolean {
 
 internal fun TypeElement.isFromKotlin(): Boolean {
     return isAnnotatedWith<Metadata>()
+}
+
+internal tailrec fun Element.isFromKotlin(): Boolean {
+    // For a random element need to find a type element it belongs to first.
+    return asTypeElementOrNull()?.isFromKotlin() ?: (enclosingElement ?: return false).isFromKotlin()
 }
 
 internal fun TypeElement.allNonPrivateMethods(): Sequence<ExecutableElement> =
@@ -216,11 +164,18 @@ internal fun CtTypeNameModel(type: TypeMirror): CtTypeNameModel {
     return when (type.kind) {
         TypeKind.DECLARED -> {
             val declared = type.asDeclaredType()
-            val raw = ClassNameModel(declared.asTypeElement())
-            val typeArgs = declared.typeArguments.map(::CtTypeNameModel)
-            if (typeArgs.isNotEmpty()) {
-                ParameterizedNameModel(raw, typeArgs)
-            } else raw
+            val declaration = declared.asTypeElement()
+            if (declaration.qualifiedName.contentEquals("error.NonExistentClass")) {
+                // This is KAPT's stub error type - it's not actual error type,
+                //  it's a real class that's generated by KAPT.
+                ErrorNameModel()
+            } else {
+                val raw = ClassNameModel(declaration)
+                val typeArgs = declared.typeArguments.map(::CtTypeNameModel)
+                if (typeArgs.isNotEmpty()) {
+                    ParameterizedNameModel(raw, typeArgs)
+                } else raw
+            }
         }
         TypeKind.WILDCARD -> {
             val wildcard = type.asWildCardType()
@@ -241,8 +196,7 @@ internal fun CtTypeNameModel(type: TypeMirror): CtTypeNameModel {
 
         TypeKind.ARRAY -> ArrayNameModel(CtTypeNameModel(type.asArrayType().componentType))
 
-        TypeKind.ERROR -> ErrorNameModel("unresolved")
-        TypeKind.TYPEVAR -> ErrorNameModel("unsubstituted-type-var")
+        TypeKind.ERROR, TypeKind.NULL, TypeKind.TYPEVAR -> ErrorNameModel()
 
         else -> throw AssertionError("Not reached: unexpected type: $type")
     }
@@ -271,26 +225,17 @@ internal fun parametersSequenceFor(
     }
 }.memoize()
 
-internal object ErrorTypeImpl : ErrorType {
-    override fun getAnnotationMirrors(): List<AnnotationMirror> = emptyList()
-    override fun getKind(): TypeKind = TypeKind.ERROR
-    override fun <A : Annotation?> getAnnotation(clazz: Class<A>) = throw UnsupportedOperationException()
-    override fun <A : Annotation?> getAnnotationsByType(clazz: Class<A>) = throw UnsupportedOperationException()
-    override fun asElement() = throw UnsupportedOperationException()
-    override fun getEnclosingType(): TypeMirror = Utils.types.getNoType(TypeKind.NONE)
-    override fun getTypeArguments(): List<TypeMirror> = emptyList()
-
-    override fun <R : Any?, P : Any?> accept(visitor: TypeVisitor<R, P>, param: P): R {
-        return visitor.visitError(this, param)
-    }
-}
-
 internal typealias TypeMirrorEquivalence = Equivalence.Wrapper<TypeMirror>
 
 internal typealias AnnotationMirrorEquivalence = Equivalence.Wrapper<AnnotationMirror>
+
+internal typealias AnnotationValueEquivalence = Equivalence.Wrapper<AnnotationValue>
 
 internal fun TypeMirrorEquivalence(type: TypeMirror): TypeMirrorEquivalence =
     MoreTypes.equivalence().wrap(type)
 
 internal fun AnnotationMirrorEquivalence(annotation: AnnotationMirror): AnnotationMirrorEquivalence =
     AnnotationMirrors.equivalence().wrap(annotation)
+
+internal fun AnnotationValueEquivalence(value: AnnotationValue): AnnotationValueEquivalence =
+    AnnotationValues.equivalence().wrap(value)

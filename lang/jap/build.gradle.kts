@@ -8,7 +8,6 @@ dependencies {
     implementation(project(":api"))
     implementation(project(":base"))
 
-    api(project(":lang"))
     api(project(":generator-lang"))
 
     implementation("com.google.auto:auto-common:$autoCommonVersion")

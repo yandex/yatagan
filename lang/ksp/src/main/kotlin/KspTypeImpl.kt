@@ -13,7 +13,7 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 internal class KspTypeImpl private constructor(
     val impl: KSType,
     private val jvmType: JvmTypeInfo,
-) : CtTypeLangModel {
+) : CtTypeLangModel() {
 
     override val nameModel: CtTypeNameModel by lazy {
         CtTypeNameModel(type = impl, jvmTypeKind = jvmType)
@@ -53,7 +53,7 @@ internal class KspTypeImpl private constructor(
             else -> false
         }
     }
-    override fun toString() = nameModel.toString()
+
     override fun decay(): TypeLangModel {
         return when (jvmType) {
             JvmTypeInfo.Boolean, JvmTypeInfo.Byte, JvmTypeInfo.Char, JvmTypeInfo.Double,

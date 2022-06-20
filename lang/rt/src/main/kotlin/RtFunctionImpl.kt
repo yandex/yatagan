@@ -3,19 +3,21 @@ package com.yandex.daggerlite.lang.rt
 import com.yandex.daggerlite.Assisted
 import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.Provides
+import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.IntoListAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.common.FunctionLangModelBase
+import com.yandex.daggerlite.lang.common.ParameterLangModelBase
 import java.lang.reflect.Method
 
 internal class RtFunctionImpl(
-    impl: Method,
+    private val impl: Method,
     override val owner: RtTypeDeclarationImpl,
-) : FunctionLangModel, RtAnnotatedImpl<Method>(impl) {
+) : FunctionLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
     private val parametersAnnotations by lazy { impl.parameterAnnotations }
     private val parametersTypes by lazy { impl.genericParameterTypes }
     private val parameterNames by lazy { impl.parameterNamesCompat() }
@@ -56,18 +58,9 @@ internal class RtFunctionImpl(
 
     //endregion
 
-    override fun toString() = buildString {
-        append(owner.qualifiedName)
-        append("::")
-        append(name).append('(')
-        parameters.joinTo(this)
-        append("): ")
-        append(returnType)
-    }
-
     private inner class ParameterImpl(
         val index: Int,
-    ) : ParameterLangModel {
+    ) : ParameterLangModelBase() {
         override val annotations: Sequence<AnnotationLangModel> by lazy {
             parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
         }
@@ -90,7 +83,5 @@ internal class RtFunctionImpl(
                 ?.let { RtAssistedAnnotationImpl(it as Assisted) }
 
         // endregion
-
-        override fun toString() = "$name: $type"
     }
 }

@@ -77,7 +77,7 @@ internal fun CtTypeNameModel.asTypeName(): TypeName {
         KeywordTypeNameModel.Char -> TypeName.CHAR
         KeywordTypeNameModel.Void -> TypeName.VOID
         is ArrayNameModel -> ArrayTypeName.of(elementType.asTypeName())
-        is ErrorNameModel -> ClassName.get("", comment)
+        is ErrorNameModel -> ClassName.get("", toString())
     }
 }
 

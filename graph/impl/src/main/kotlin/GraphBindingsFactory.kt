@@ -16,13 +16,14 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.accept
 import com.yandex.daggerlite.core.allInputs
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportError
@@ -32,7 +33,6 @@ internal class GraphBindingsFactory(
     private val parent: GraphBindingsFactory?,
 ) : MayBeInvalid {
     private val implicitBindingCreator = ImplicitBindingCreator()
-    private val validationMessages = arrayListOf<ValidationMessage>()
 
     private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
         val bindingModelVisitor = object : ModuleHostedBindingModel.Visitor<BaseBinding> {
@@ -72,6 +72,8 @@ internal class GraphBindingsFactory(
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
         val multiBindings = linkedMapOf<NodeModel, MutableMap<NodeModel, ContributionType>>()
+        val mapBindings = linkedMapOf<Pair<TypeLangModel, NodeModel>,
+                MutableList<Pair<AnnotationLangModel.Value, NodeModel>>>()
         // TODO: In vanilla dagger, multibindings are inherited and accumulated from parents.
         for (module: ModuleModel in graph.modules) {
             // All bindings from installed modules
@@ -87,6 +89,10 @@ internal class GraphBindingsFactory(
                     is BindingTargetModel.FlattenMultiContribution -> {
                         multiBindings.getOrPut(target.flattened, ::mutableMapOf)[binding.target] =
                             ContributionType.Collection
+                    }
+                    is BindingTargetModel.MappingContribution -> {
+                        mapBindings.getOrPut(target.keyType to target.node, ::arrayListOf) +=
+                            target.keyValue to binding.target
                     }
                     is BindingTargetModel.Plain -> Unit // Nothing to do
                 }
@@ -156,6 +162,33 @@ internal class GraphBindingsFactory(
             }
         }
 
+        // Mappings
+        for ((mapSignature, contributions: List<Pair<AnnotationLangModel.Value, NodeModel>>) in mapBindings) {
+            for (useProviders in booleanArrayOf(true, false)) {
+                val (keyType: TypeLangModel, valueType: NodeModel) = mapSignature
+                val iterator = valueType.multiBoundMapNodes(key = keyType, asProviders = useProviders).iterator()
+                if (!iterator.hasNext()) continue
+                var current = iterator.next()
+                add(MapBindingImpl(
+                    owner = graph,
+                    target = current,
+                    contents = contributions,
+                    mapKey = keyType,
+                    mapValue = valueType.type,
+                    useProviders = useProviders,
+                ))
+                while (iterator.hasNext()) {
+                    val old = current
+                    current = iterator.next()
+                    add(SyntheticAliasBindingImpl(
+                        owner = graph,
+                        target = current,
+                        source = old,
+                    ))
+                }
+            }
+        }
+
         // This component binding
         add(ComponentInstanceBindingImpl(graph = graph))
     }.groupBy(BaseBinding::target)
@@ -202,8 +235,6 @@ internal class GraphBindingsFactory(
     }
 
     override fun validate(validator: Validator) {
-        validationMessages.forEach(validator::report)
-
         val locallyRequestedNodes = graph.localBindings.map { (binding, _) -> binding.target }.toHashSet()
         for ((node, bindings) in localAndParentExplicitBindings) {
             if (node !in locallyRequestedNodes) {

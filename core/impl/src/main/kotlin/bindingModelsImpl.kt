@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
+import com.yandex.daggerlite.IntoMap
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
@@ -9,6 +10,7 @@ import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.AnnotationValueVisitorAdapter
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
@@ -44,22 +46,67 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
                     BindingTargetModel.DirectMultiContribution(node = target)
                 }
             } else {
-                BindingTargetModel.Plain(node = target)
+                if (impl.isAnnotatedWith<IntoMap>()) {
+                    val key = impl.annotations.find { it.isMapKey() }
+                    val valueAttribute = key?.annotationClass?.attributes?.find { it.name == "value" }
+                    val keyValue = valueAttribute?.let { key.getValue(valueAttribute) } ?: InvalidValue()
+                    BindingTargetModel.MappingContribution(
+                        node = target,
+                        keyType = valueAttribute?.type ?: LangModelFactory.errorType,
+                        keyValue = keyValue,
+                    )
+                } else {
+                    BindingTargetModel.Plain(node = target)
+                }
             }
         }
     }
 
     override fun validate(validator: Validator) {
         validator.child(target.node)
-        if (target is BindingTargetModel.FlattenMultiContribution) {
-            val firstArg = impl.returnType.typeArguments.firstOrNull()
-            if (firstArg == null || !LangModelFactory.getCollectionType(firstArg).isAssignableFrom(impl.returnType)) {
-                validator.reportError(Errors.invalidFlatteningMultibinding(insteadOf = impl.returnType))
+        when (target) {
+            is BindingTargetModel.FlattenMultiContribution -> {
+                val firstArg = impl.returnType.typeArguments.firstOrNull()
+                if (firstArg == null || !LangModelFactory.getCollectionType(firstArg).isAssignableFrom(impl.returnType)) {
+                    validator.reportError(Errors.invalidFlatteningMultibinding(insteadOf = impl.returnType))
+                }
             }
+            is BindingTargetModel.MappingContribution -> run {
+                val keys = impl.annotations.filter { it.isMapKey() }.toList()
+                if (keys.size != 1) {
+                    validator.reportError(if (keys.isEmpty()) Errors.missingMapKey() else Errors.multipleMapKeys())
+                    return@run
+                }
+                val key = keys.first()
+                val clazz = key.annotationClass
+                val valueAttribute = clazz.attributes.find { it.name == "value" }
+                if (valueAttribute == null) {
+                    validator.reportError(Errors.missingMapKeyValue(annotationClass = clazz))
+                    return@run
+                }
+                key.getValue(valueAttribute).accept(object : AnnotationValueVisitorAdapter<Unit>() {
+                    // Unresolved is not reported here, as it's [:lang]'s problem and will be reported by the
+                    //  compiler anyway.
+                    override fun visitDefault() = Unit
+                    override fun visitAnnotation(value: AnnotationLangModel) {
+                        validator.reportError(Errors.unsupportedAnnotationValueAsMapKey(annotationClass = clazz))
+                    }
+                    override fun visitArray(value: List<AnnotationLangModel.Value>) {
+                        validator.reportError(Errors.unsupportedArrayValueAsMapKey(annotationClass = clazz))
+                    }
+                })
+            }
+            is BindingTargetModel.DirectMultiContribution, is BindingTargetModel.Plain -> { /*Nothing to validate*/ }
         }
         if (impl.returnType.isVoid) {
             validator.reportError(Errors.voidBinding())
         }
+    }
+
+    private class InvalidValue : AnnotationLangModel.Value {
+        override fun <R> accept(visitor: AnnotationLangModel.Value.Visitor<R>): R = visitor.visitUnresolved()
+        override val platformModel: Nothing? get() = null
+        override fun toString() = "<undefined>"
     }
 }
 

@@ -13,6 +13,9 @@ include("validation-impl")
 
 include("lang")
 
+include("lang-common")
+project(":lang-common").projectDir = file("lang/common")
+
 include("lang-ksp")
 project(":lang-ksp").projectDir = file("lang/ksp")
 

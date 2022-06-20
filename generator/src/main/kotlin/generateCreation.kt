@@ -18,6 +18,7 @@ import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.graph.ComponentInstanceBinding
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.InstanceBinding
+import com.yandex.daggerlite.graph.MapBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
@@ -147,6 +148,14 @@ private class CreationGeneratorVisitor(
 
     override fun visitMulti(binding: MultiBinding) {
         Generators[binding.owner].multiBindingGenerator.generateCreation(
+            builder = builder,
+            binding = binding,
+            inside = inside,
+        )
+    }
+
+    override fun visitMap(binding: MapBinding) {
+        Generators[binding.owner].mapBindingGenerator.generateCreation(
             builder = builder,
             binding = binding,
             inside = inside,

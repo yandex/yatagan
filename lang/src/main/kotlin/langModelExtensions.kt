@@ -26,3 +26,21 @@ inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -
         delegate = null
     }
 }
+
+abstract class AnnotationValueVisitorAdapter<R> : AnnotationLangModel.Value.Visitor<R> {
+    abstract fun visitDefault(): R
+    override fun visitBoolean(value: Boolean) = visitDefault()
+    override fun visitByte(value: Byte) = visitDefault()
+    override fun visitShort(value: Short) = visitDefault()
+    override fun visitInt(value: Int) = visitDefault()
+    override fun visitLong(value: Long) = visitDefault()
+    override fun visitChar(value: Char) = visitDefault()
+    override fun visitFloat(value: Float) = visitDefault()
+    override fun visitDouble(value: Double) = visitDefault()
+    override fun visitString(value: String) = visitDefault()
+    override fun visitType(value: TypeLangModel) = visitDefault()
+    override fun visitAnnotation(value: AnnotationLangModel) = visitDefault()
+    override fun visitEnumConstant(enum: TypeLangModel, constant: String) = visitDefault()
+    override fun visitArray(value: List<AnnotationLangModel.Value>) = visitDefault()
+    override fun visitUnresolved() = visitDefault()
+}

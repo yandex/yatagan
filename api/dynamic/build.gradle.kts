@@ -9,6 +9,7 @@ dependencies {
     flatImplementation(project(":base"))
     flatImplementation(project(":graph-impl"))
     flatImplementation(project(":core-impl"))
+    flatImplementation(project(":lang-common"))
     flatImplementation(project(":lang-rt"))
     flatImplementation(project(":validation-impl"))
     flatImplementation(project(":spi-impl"))

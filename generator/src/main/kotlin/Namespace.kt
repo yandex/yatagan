@@ -72,7 +72,7 @@ internal class Namespace(
                 }
             }
             is KeywordTypeNameModel -> singleValueIterator(nameModel.name)
-            is ErrorNameModel -> singleValueIterator(nameModel.comment)
+            is ErrorNameModel -> singleValueIterator(nameModel.toString())
         }
     }
 

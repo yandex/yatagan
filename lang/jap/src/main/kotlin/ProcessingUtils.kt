@@ -21,6 +21,9 @@ class ProcessingUtils(
     val objectType : TypeElement by lazy {
         elements.getTypeElement("java.lang.Object")
     }
+    val stringType : TypeElement by lazy {
+        elements.getTypeElement("java.lang.String")
+    }
 
     init {
         utils = this

@@ -14,6 +14,13 @@ interface LangModelFactory {
     fun getListType(type: TypeLangModel, isCovariant: Boolean = false): TypeLangModel
 
     /**
+     * Creates a map type.
+     *
+     * @return a `java.util.Map` type, parameterized by the given [keyType] and [valueType].
+     */
+    fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean = false): TypeLangModel
+
+    /**
      * Creates a collection type.
      *
      * @return a `java.util.Collection` type, parameterized by the given [type].
@@ -21,10 +28,17 @@ interface LangModelFactory {
     fun getCollectionType(type: TypeLangModel): TypeLangModel
 
     /**
+     * Creates a parameterized `javax.inject.Provider` type.
+     *
+     * @return a `javax.inject.Provider` type, parameterized by the given [type].
+     */
+    fun getProviderType(type: TypeLangModel): TypeLangModel
+
+    /**
      * Gets a type declaration by the fully qualified name ('.'-separated).
      *
      * @return a type declaration model by the given name. If kotlin-platform type is requested, e. g. `kotlin.String`,
-     * Java counterpart is returned, e. g. `java.lang.String`. `null` is returned when no such type can be found.
+     * Java counterpart is returned, e.g. `java.lang.String`. `null` is returned when no such type can be found.
      *
      * @param qualifiedName fully qualified name of the class.
      */
@@ -45,8 +59,16 @@ interface LangModelFactory {
             return checkNotNull(delegate).getListType(type, isCovariant)
         }
 
+        override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
+            return checkNotNull(delegate).getMapType(keyType, valueType, isCovariant)
+        }
+
         override fun getCollectionType(type: TypeLangModel) =
                 checkNotNull(delegate).getCollectionType(type)
+
+        override fun getProviderType(type: TypeLangModel): TypeLangModel {
+            return checkNotNull(delegate).getProviderType(type)
+        }
 
         override fun getTypeDeclaration(qualifiedName: String) =
                 checkNotNull(delegate).getTypeDeclaration(qualifiedName)

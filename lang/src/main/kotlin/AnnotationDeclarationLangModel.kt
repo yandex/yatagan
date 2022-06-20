@@ -4,8 +4,18 @@ package com.yandex.daggerlite.core.lang
  * An annotation class declaration.
  */
 interface AnnotationDeclarationLangModel : AnnotatedLangModel {
+    /**
+     * Represents an annotation class' property/@interface's method.
+     */
     interface Attribute {
+        /**
+         * Name of the attribute.
+         */
         val name: String
+
+        /**
+         * Type of the attribute.
+         */
         val type: TypeLangModel
     }
 
@@ -16,5 +26,8 @@ interface AnnotationDeclarationLangModel : AnnotatedLangModel {
      */
     fun isClass(clazz: Class<out Annotation>): Boolean
 
+    /**
+     * Attributes (annotation class' properties for Kotlin and @interface's methods for Java).
+     */
     val attributes: Sequence<Attribute>
 }

@@ -72,7 +72,12 @@ internal class ComponentGenerator(
             ).also(this@ComponentGenerator::registerContributor)
 
             override val multiBindingGenerator = MultiBindingGenerator(
-                methodNs = methodsNs,
+                methodsNs = methodsNs,
+                thisGraph = graph,
+            ).also(this@ComponentGenerator::registerContributor)
+
+            override val mapBindingGenerator = MapBindingGenerator(
+                methodsNs = methodsNs,
                 thisGraph = graph,
             ).also(this@ComponentGenerator::registerContributor)
 

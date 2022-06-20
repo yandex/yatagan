@@ -2,6 +2,7 @@ package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -18,11 +19,23 @@ interface ModuleHostedBindingModel : MayBeInvalid {
 
         override fun toString() = node.toString()
 
-        class Plain(override val node: NodeModel) : BindingTargetModel()
-        class DirectMultiContribution(override val node: NodeModel) : BindingTargetModel()
+        class Plain(
+            override val node: NodeModel,
+        ) : BindingTargetModel()
+
+        class DirectMultiContribution(
+            override val node: NodeModel,
+        ) : BindingTargetModel()
+
         class FlattenMultiContribution(
             override val node: NodeModel,
             val flattened: NodeModel,
+        ) : BindingTargetModel()
+
+        class MappingContribution(
+            override val node: NodeModel,
+            val keyType: TypeLangModel,
+            val keyValue: AnnotationLangModel.Value,
         ) : BindingTargetModel()
     }
 

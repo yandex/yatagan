@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
@@ -26,6 +27,7 @@ import com.yandex.daggerlite.graph.ConditionScope.Literal
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.GraphMemberInjector
 import com.yandex.daggerlite.graph.InstanceBinding
+import com.yandex.daggerlite.graph.MapBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
@@ -33,6 +35,7 @@ import com.yandex.daggerlite.graph.component1
 import com.yandex.daggerlite.graph.component2
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.lang.rt.kotlinObjectInstanceOrNull
+import com.yandex.daggerlite.lang.rt.rawValue
 import com.yandex.daggerlite.lang.rt.rt
 import java.lang.reflect.Proxy
 
@@ -73,10 +76,11 @@ internal class RuntimeComponent(
         return componentForGraph(binding.owner).access(binding, kind)
     }
 
-    private fun resolveAndAccessIfCondition(node: NodeModel): Any? {
+    private fun resolveAndAccessIfCondition(dependency: NodeDependency): Any? {
+        val (node, kind) = dependency
         val binding = graph.resolveBinding(node)
         return if (evaluateConditionScope(binding.conditionScope)) {
-            componentForGraph(binding.owner).access(binding, DependencyKind.Direct)
+            componentForGraph(binding.owner).access(binding, kind)
         } else null
     }
 
@@ -127,15 +131,13 @@ internal class RuntimeComponent(
         return true
     }
 
-    private fun evaluate(binding: Binding): Any {
-        return validationPromise.awaitOnError {
-            binding.accept(this)
-        }
-    }
-
     init {
         for ((binding: Binding, _) in graph.localBindings) {
-            val creation: () -> Any = { evaluate(binding) }
+            val creation: () -> Any = {
+                validationPromise.awaitOnError {
+                    binding.accept(this)
+                }
+            }
             accessStrategies[binding] = run {
                 val provision: AccessStrategy = if (binding.scope != null) {
                     CachingAccessStrategy(creation)
@@ -234,6 +236,16 @@ internal class RuntimeComponent(
                         MultiBinding.ContributionType.Element -> add(contribution)
                         MultiBinding.ContributionType.Collection -> addAll(contribution as Collection<*>)
                     }
+                }
+            }
+        }
+    }
+
+    override fun visitMap(binding: MapBinding): Any {
+        return buildMap(capacity = binding.contents.size) {
+            for ((key: AnnotationLangModel.Value, dependency: NodeDependency) in binding.contents) {
+                resolveAndAccessIfCondition(dependency)?.let { contribution ->
+                    put(key.rawValue, contribution)
                 }
             }
         }

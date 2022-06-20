@@ -76,7 +76,10 @@ internal fun Type.formatString(): String = when (this) {
     is ParameterizedType -> "${rawType.formatString()}<${actualTypeArguments.joinToString { it.formatString() }}>"
     is WildcardType -> when {
         lowerBounds.isNotEmpty() -> "? super ${lowerBounds.first().formatString()}"
-        upperBounds.isNotEmpty() -> "? extends ${upperBounds.first().formatString()}"
+        upperBounds.isNotEmpty() -> when(val upperBound = upperBounds.first()) {
+            Any::class.java -> "?"  // No need to write `<? extends java.langObject>`
+            else -> "? extends ${upperBound.formatString()}"
+        }
         else -> "?"
     }
     is GenericArrayType -> "${genericComponentType.formatString()}[]"
