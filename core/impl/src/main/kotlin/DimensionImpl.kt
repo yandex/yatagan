@@ -1,6 +1,9 @@
+@file:OptIn(VariantApi::class)
+
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.ComponentVariantDimension
+import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.LangModelFactory

@@ -1,19 +1,17 @@
 package com.yandex.daggerlite.generator.lang
 
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.common.TypeLangModelBase
 
 /**
  * [TypeLangModel] base class, that can be named by [CtTypeNameModel].
  */
-interface CtTypeLangModel : TypeLangModel {
+abstract class CtTypeLangModel : TypeLangModelBase() {
     /**
      * Class name.
      * @see CtTypeNameModel
      */
-    val nameModel: CtTypeNameModel
+    abstract val nameModel: CtTypeNameModel
 
-    override fun compareTo(other: TypeLangModel): Int {
-        if (other !is CtTypeLangModel) return -1
-        return nameModel.toString().compareTo(other.nameModel.toString())
-    }
+    final override fun toString() = nameModel.toString()
 }

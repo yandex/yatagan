@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.lang.rt
 
+import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -26,5 +27,8 @@ val TypeDeclarationLangModel.rt
 
 val ConstructorLangModel.rt
     get() = platformModel as Constructor<*>
+
+val AnnotationLangModel.Value.rawValue: Any
+    get() = checkNotNull(platformModel)
 
 // endregion

@@ -12,7 +12,6 @@ import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Variance
-import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.base.ObjectCache
 
 /**
@@ -20,7 +19,7 @@ import com.yandex.daggerlite.base.ObjectCache
  *
  * @see [TypeMapCache.normalizeType].
  */
-internal object TypeMapCache : BiObjectCache<Boolean, KSTypeReference, KSType>() {
+internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSType>() {
     private fun mapDeclarationToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
         if (!declaration.packageName.asString().startsWith("kotlin")) {
             // Heuristic: only types from `kotlin` package can have different java counterparts.
@@ -138,7 +137,7 @@ internal object TypeMapCache : BiObjectCache<Boolean, KSTypeReference, KSType>()
     private fun normalizeTypeImpl(
         typeReference: KSTypeReference,
         bakeVarianceAsWildcard: Boolean,
-    ): KSType = createCached(bakeVarianceAsWildcard, typeReference) {
+    ): KSType = createCached(bakeVarianceAsWildcard to typeReference) {
         doNormalizeType(
             typeReference = typeReference,
             bakeVarianceAsWildcard = bakeVarianceAsWildcard,

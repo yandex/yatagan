@@ -1,3 +1,5 @@
+@file:OptIn(ConditionsApi::class, VariantApi::class)
+
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.AllConditions
@@ -9,9 +11,13 @@ import com.yandex.daggerlite.ComponentFlavor
 import com.yandex.daggerlite.Condition
 import com.yandex.daggerlite.Conditional
 import com.yandex.daggerlite.Conditionals
+import com.yandex.daggerlite.ConditionsApi
 import com.yandex.daggerlite.Module
+import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.ifOrElseNull
+import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
@@ -26,15 +32,20 @@ import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
+import com.yandex.daggerlite.lang.common.ParameterLangModelBase
+import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class RtTypeDeclarationImpl private constructor(
     val type: RtTypeImpl,
-) : RtAnnotatedImpl<Class<*>>(type.impl.asClass()), TypeDeclarationLangModel {
+) : TypeDeclarationLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(type.impl.asClass()) {
+    private val impl = type.impl.asClass()
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
@@ -76,7 +87,7 @@ internal class RtTypeDeclarationImpl private constructor(
         impl.declaredClasses.asSequence()
             .filter { !it.isPrivate }
             .map { Factory(RtTypeImpl(it)) }
-            .toList().asSequence()
+            .memoize()
     }
 
     override val constructors: Sequence<ConstructorLangModel> by lazy {
@@ -86,14 +97,15 @@ internal class RtTypeDeclarationImpl private constructor(
             .sortedWith(ConstructorSignatureComparator)
             .map {
                 ConstructorImpl(
-                    impl = it,
+                    platformModel = it,
                     constructee = this,
                 )
-            }.toList().asSequence()
+            }.memoize()
     }
 
     override val functions: Sequence<FunctionLangModel> by lazy {
         impl.getMethodsOverrideAware()
+            .asSequence()
             .run {
                 when (kotlinObjectKind) {
                     KotlinObjectKind.Companion -> filterNot {
@@ -105,7 +117,7 @@ internal class RtTypeDeclarationImpl private constructor(
             }
             .map {
                 RtFunctionImpl(impl = it, owner = this)
-            }.asSequence()
+            }.memoize()
     }
 
     override val fields: Sequence<FieldLangModel> by lazy {
@@ -118,7 +130,7 @@ internal class RtTypeDeclarationImpl private constructor(
                     impl = it,
                     owner = this,
                 )
-            }.toList().asSequence()
+            }.memoize()
     }
 
     override val defaultCompanionObjectDeclaration: TypeDeclarationLangModel? by lazy {
@@ -142,8 +154,8 @@ internal class RtTypeDeclarationImpl private constructor(
         get() = impl.getAnnotation(Component::class.java)?.let { RtComponentAnnotationImpl(it) }
     override val moduleAnnotationIfPresent: ModuleAnnotationLangModel?
         get() = impl.getAnnotation(Module::class.java)?.let { RtModuleAnnotationImpl(it) }
-    override val conditions: Sequence<ConditionLangModel> by lazy {
-        buildList {
+    override val conditions: Sequence<ConditionLangModel>
+        get() = buildList {
             for (annotation in impl.declaredAnnotations) when (annotation) {
                 is Condition -> add(RtConditionAnnotationImpl(annotation))
                 is AnyCondition -> add(RtAnyConditionAnnotationImpl(annotation))
@@ -151,41 +163,34 @@ internal class RtTypeDeclarationImpl private constructor(
                 is AnyConditions -> for (contained in annotation.value) add(RtAnyConditionAnnotationImpl(contained))
             }
         }.asSequence()
-    }
-    override val conditionals: Sequence<ConditionalAnnotationLangModel> by lazy {
-        buildList {
+    override val conditionals: Sequence<ConditionalAnnotationLangModel>
+        get() = buildList {
             for (annotation in impl.declaredAnnotations) when (annotation) {
                 is Conditional -> add(RtConditionalAnnotationImpl(annotation))
                 is Conditionals -> for (contained in annotation.value) add(RtConditionalAnnotationImpl(contained))
             }
         }.asSequence()
-    }
-    override val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel? by lazy {
-        impl.getAnnotation(ComponentFlavor::class.java)?.let { RtComponentFlavorAnnotationImpl(it) }
-    }
-
+    override val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel?
+        get() = impl.getAnnotation(ComponentFlavor::class.java)?.let { RtComponentFlavorAnnotationImpl(it) }
     //endregion
 
-    override fun toString(): String = type.toString()
-
     private inner class ConstructorImpl(
-        impl: Constructor<*>,
+        override val platformModel: Constructor<*>,
         override val constructee: TypeDeclarationLangModel,
-    ) : ConstructorLangModel, RtAnnotatedImpl<Constructor<*>>(impl) {
-        private val parametersAnnotations by lazy { impl.parameterAnnotations }
-        private val parametersTypes by lazy { impl.genericParameterTypes }
-        private val parametersNames by lazy { impl.parameterNamesCompat() }
+    ) : ConstructorLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(platformModel) {
+        private val parametersAnnotations by lazy { platformModel.parameterAnnotations }
+        private val parametersTypes by lazy { platformModel.genericParameterTypes }
+        private val parametersNames by lazy { platformModel.parameterNamesCompat() }
 
         override val isEffectivelyPublic: Boolean
-            get() = impl.isPublic
+            get() = platformModel.isPublic
         override val parameters: Sequence<ParameterLangModel> by lazy {
-            Array(impl.getParameterCountCompat(), ::ParameterImpl).asSequence()
+            Array(platformModel.getParameterCountCompat(), ::ParameterImpl).asSequence()
         }
-        override val platformModel: Constructor<*> get() = impl
 
         private inner class ParameterImpl(
             private val index: Int,
-        ) : ParameterLangModel {
+        ) : ParameterLangModelBase() {
             override val annotations: Sequence<AnnotationLangModel> by lazy {
                 parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
             }
@@ -208,12 +213,10 @@ internal class RtTypeDeclarationImpl private constructor(
                     RtTypeImpl(parametersTypes[index].resolveGenerics(params))
                 } ?: RtTypeImpl(parametersTypes[index])
             }
-
-            override fun toString() = "$name: $type"
         }
     }
 
-    internal val typeHierarchy: Sequence<RtTypeDeclarationImpl> by lazy {
+    internal val typeHierarchy: Sequence<RtTypeDeclarationImpl> by lazy(PUBLICATION) {
         sequence {
             val queue = ArrayList<RtTypeDeclarationImpl>(4)
             queue += this@RtTypeDeclarationImpl
@@ -227,7 +230,7 @@ internal class RtTypeDeclarationImpl private constructor(
                     queue += Factory(superInterface.resolveGenerics(declaration.genericsInfo))
                 }
             } while (queue.isNotEmpty())
-        }
+        }.memoize()
     }
 
     internal val genericsInfo: Lazy<Map<TypeVariable<*>, Type>>? = when (val type = type.impl) {

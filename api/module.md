@@ -21,30 +21,32 @@ the DL component is rather an implementation detail and concrete API artifact sh
 Note: If any of the following inconsistencies or missing APIs are important to you or block you from using DL in your
 project, please, file a feature request, which has a high probability of being implemented.
 
-| Dagger2 API                              | Status in DL    | Notes                                                                         |
-|------------------------------------------|-----------------|-------------------------------------------------------------------------------|
-| `@dagger.Component`                      | (+) as is       |                                                                               |
-| `@dagger.Component.Builder`              | (+) as is       | supports factory method as well                                               |
-| `@dagger.Component.Factory`              | (+*) converged  | functionality merged into `@Builder`                                          |
-| `@dagger.Subcomponent`                   | (+*) converged  | replaced by [Component(isRoot = false)][com.yandex.daggerlite.Component]      |
-| `@dagger.Subcomponent.{Builder/Factory}` | (+*) converged  | replaced by [Component.Builder][com.yandex.daggerlite.Component.Builder]      |
-| `dagger.Lazy`                            | (+) as is       | now also extends `javax.inject.Provider`                                      |
-| `@dagger.Module`                         | (+) as is       |                                                                               |
-| `@dagger.Binds`                          | (+*) tweaked    | can bind zero/multiple alternatives, see [Binds][com.yandex.daggerlite.Binds] |
-| `@dagger.BindsInstance`                  | (+) as is       |                                                                               |
-| `@dagger.Provides`                       | (+) as is       | supports conditional provision                                                |
-| `@dagger.BindsOptionalOf`                | (+*) replaced   | replaced with [Variant][com.yandex.daggerlite.ComponentVariantDimension] API. |
-| `@dagger.Reusable`                       | (-) unsupported |                                                                               |
-| `dagger.MembersInjector`                 | (-) unsupported |                                                                               |
-| `@dagger.MapKey`                         | (-) unsupported | multi-bindings for `Map` are not supported                                    |
-| `@dagger.multibindings.IntoSet`          | (+*) renamed    | [IntoList][com.yandex.daggerlite.IntoList], now binds `List<T>`               |
-| `@dagger.multibindings.ElementsIntoSet`  | (+*) converged  | [IntoList(flatten = true)][com.yandex.daggerlite.IntoList]                    |
-| `@dagger.multibindings.Multibinds`       | (+*) renamed    | [DeclareList][com.yandex.daggerlite.DeclareList]                              |
-| `dagger.multibindings.{IntoMap-ish}`     | (-) unsupported | multi-bindings for `Map` are not supported                                    |
-| `dagger.assisted.*`                      | (+) as is       |                                                                               |
-| `dagger.producers.*`                     | (-) unsupported |                                                                               |
-| `dagger.hilt.*`                          | (-) unsupported |                                                                               |
-| `dagger.spi.*`                           | (+*) replaced   | DL has its own model for SPI, see [:spi]                                      |
+| Dagger2 API                                   | Status in DL     | Notes                                                                              |
+|-----------------------------------------------|------------------|------------------------------------------------------------------------------------|
+| `@dagger.Component`                           | (+) as is        |                                                                                    |
+| `@dagger.Component.Builder`                   | (+) as is        | supports factory method as well                                                    |
+| `@dagger.Component.Factory`                   | (+*) converged   | functionality merged into `@Builder`                                               |
+| `@dagger.Subcomponent`                        | (+*) converged   | replaced by [Component(isRoot = false)][com.yandex.daggerlite.Component]           |
+| `@dagger.Subcomponent.{Builder/Factory}`      | (+*) converged   | replaced by [Component.Builder][com.yandex.daggerlite.Component.Builder]           |
+| `dagger.Lazy`                                 | (+) as is        | now also extends `javax.inject.Provider`                                           |
+| `@dagger.Module`                              | (+) as is        |                                                                                    |
+| `@dagger.Binds`                               | (+*) tweaked     | can bind zero/multiple alternatives, see [Binds][com.yandex.daggerlite.Binds]      |
+| `@dagger.BindsInstance`                       | (+) as is        |                                                                                    |
+| `@dagger.Provides`                            | (+) as is        | supports conditional provision                                                     |
+| `@dagger.BindsOptionalOf`                     | (+*) replaced    | replaced with [Variant][com.yandex.daggerlite.ComponentVariantDimension] API.      |
+| `@dagger.Reusable`                            | (-) unsupported  |                                                                                    |
+| `dagger.MembersInjector`                      | (-) unsupported  |                                                                                    |
+| `@dagger.MapKey`                              | (+*) renamed     | [IntoMap.Key][com.yandex.daggerlite.IntoMap.Key], `unwrap=false` is unsupported    |
+| `@dagger.multibindings.IntoSet`               | (+*) renamed     | [IntoList][com.yandex.daggerlite.IntoList], now binds `List<T>`                    |
+| `@dagger.multibindings.ElementsIntoSet`       | (+/-*) converged | [IntoList(flatten = true)][com.yandex.daggerlite.IntoList]                         |
+| `@dagger.multibindings.Multibinds`            | (+*) renamed     | [DeclareList][com.yandex.daggerlite.DeclareList], doesn't work for `IntoMap` (yet) |
+| `@dagger.multibindings.IntoMap`               | (+) as is        |                                                                                    |
+| `@dagger.multibindings.{Int,Class,String}Key` | (+) as is        |                                                                                    |
+| `@dagger.multibindings.LongKey`               | (-) removed      | rarely used, can be written by hand at zero cost.                                  |
+| `dagger.assisted.*`                           | (+) as is        |                                                                                    |
+| `dagger.producers.*`                          | (-) unsupported  |                                                                                    |
+| `dagger.hilt.*`                               | (-) unsupported  |                                                                                    |
+| `dagger.spi.*`                                | (+*) replaced    | DL has its own model for SPI, see [:spi]                                           |
 
 Other behavioral changes:
 

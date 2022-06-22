@@ -16,6 +16,7 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -25,6 +26,8 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
+import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
+import com.yandex.daggerlite.lang.common.FieldLangModelBase
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
@@ -74,7 +77,7 @@ internal class KspTypeDeclarationImpl private constructor(
     override val constructors: Sequence<ConstructorLangModel> by lazy {
         impl.getConstructors()
             .filter { !it.isPrivate() }
-            .map { ConstructorImpl(impl = it) }
+            .map { ConstructorImpl(platformModel = it) }
             .memoize()
     }
 
@@ -314,35 +317,34 @@ internal class KspTypeDeclarationImpl private constructor(
     }
 
     private inner class ConstructorImpl(
-        private val impl: KSFunctionDeclaration,
-    ) : ConstructorLangModel, KspAnnotatedImpl(impl) {
-        private val jvmSignature = JvmMethodSignature(impl)
+        override val platformModel: KSFunctionDeclaration,
+    ) : ConstructorLangModelBase(), AnnotatedLangModel by KspAnnotatedImpl<KSFunctionDeclaration>(platformModel) {
+        private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean
             get() {
-                if (impl.origin == Origin.SYNTHETIC) {
-                    val constructeeOrigin = this@KspTypeDeclarationImpl.impl.origin
+                if (platformModel.origin == Origin.SYNTHETIC) {
+                    val constructeeOrigin = this@KspTypeDeclarationImpl.platformModel.origin
                     if (constructeeOrigin == Origin.JAVA || constructeeOrigin == Origin.JAVA_LIB) {
                         // Java synthetic constructor has the same visibility as the class.
                         return this@KspTypeDeclarationImpl.isEffectivelyPublic
                     }
                 }
-                return impl.isPublicOrInternal()
+                return platformModel.isPublicOrInternal()
             }
         override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
         override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
-            declaration = impl,
+            declaration = platformModel,
             containing = type.impl,
             jvmMethodSignature = jvmSignature,
         )
-        override val platformModel: KSFunctionDeclaration get() = impl
     }
 
     private class PSFSyntheticField(
         override val owner: TypeDeclarationLangModel,
         override val type: TypeLangModel = owner.asType(),
         override val name: String,
-    ) : FieldLangModel {
+    ) : FieldLangModelBase() {
         override val isEffectivelyPublic: Boolean get() = true
         override val annotations: Sequence<Nothing> get() = emptySequence()
         override val platformModel: Any? get() = null

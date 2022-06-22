@@ -1,13 +1,14 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.core.lang.FieldLangModel
+import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.common.FieldLangModelBase
 import java.lang.reflect.Field
 
 internal class RtFieldImpl(
-    impl: Field,
+    private val impl: Field,
     override val owner: RtTypeDeclarationImpl,
-) : FieldLangModel, RtAnnotatedImpl<Field>(impl) {
+) : FieldLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
     override val type: TypeLangModel by lazy {
         RtTypeImpl(impl.genericType.resolveGenericsHierarchyAware(
             declaringClass = impl.declaringClass,
@@ -26,6 +27,4 @@ internal class RtFieldImpl(
 
     override val platformModel: Field
         get() = impl
-
-    override fun toString() = "$owner::$name: $type"
 }

@@ -36,7 +36,7 @@ private fun nameModelImpl(
         JvmTypeInfo.Declared -> {
             checkNotNull(type) { "Not reached: type info is absent for declared type" }
             if (type.isError) {
-                return ErrorNameModel(type.toString())
+                return ErrorNameModel()
             }
             val declaration = type.declaration as KSClassDeclaration
             val raw = ClassNameModel(declaration)

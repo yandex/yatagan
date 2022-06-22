@@ -262,4 +262,178 @@ class MultibindingsTest(
 
         expectSuccessfulValidation()
     }
+
+    @Test
+    fun `IntoMap basic test`() {
+        givenJavaSource("test.MyApi", """
+            public interface MyApi {}
+        """.trimIndent())
+        givenJavaSource("test.CustomClassKey", """
+            import com.yandex.daggerlite.IntoMap;
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            
+            @IntoMap.Key
+            @Retention(RetentionPolicy.RUNTIME)
+            public @interface CustomClassKey {
+                Class<? extends MyApi> value();
+            }
+        """.trimIndent())
+        givenJavaSource("test.MyEnum", """
+            public enum MyEnum {
+                ONE, TWO, THREE,
+            }
+        """.trimIndent())
+        givenKotlinSource("test.KotlinConsumer", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            class KotlinConsumer @Inject constructor(
+                map1: Map<Integer, String>,
+                @Named("name") map2: Map<Class<*>, Integer>,
+                map3: Map<Class<*>, Integer>,
+                map4: Map<Class<out MyApi>, MyApi>,
+                map5: Map<MyEnum, MyApi>,
+                pm1: Provider<Map<Integer, String>>,
+                @Named("name") pm2: Provider<Map<Class<*>, Integer>>,
+                pm3: Provider<Map<Class<*>, Integer>>,
+                lm4: Lazy<Map<Class<out MyApi>, MyApi>>,
+                lm5: Lazy<Map<MyEnum, MyApi>>,
+                mapOfProviders: Map<Class<out MyApi>, Provider<MyApi>>,
+                @Named("name") kaboom: Provider<Map<Class<*>, Provider<Integer>>>,
+            )
+        """.trimIndent())
+        givenJavaSource("test.JavaConsumer", """
+            import java.util.Map;
+            import javax.inject.Inject;
+            import javax.inject.Provider;
+            import javax.inject.Named;
+            import com.yandex.daggerlite.Lazy;
+            
+            public class JavaConsumer {
+                @Inject public JavaConsumer(
+                    Map<Integer, String> map1,
+                    @Named("name") Map<Class<?>, Integer> map2,
+                    Map<Class<?>, Integer> map3,
+                    Map<Class<? extends MyApi>, MyApi> map4,
+                    Map<MyEnum, MyApi> map5,
+                    Provider<Map<Integer, String>> pm1,
+                    @Named("name") Provider<Map<Class<?>, Integer>> pm2,
+                    Provider<Map<Class<?>, Integer>> pm3,
+                    Lazy<Map<Class<? extends MyApi>, MyApi>> lm4,
+                    Lazy<Map<MyEnum, MyApi>> lm5,
+                    Map<Class<? extends MyApi>, Provider<MyApi>> mapOfProviders
+                ) {}
+            }
+        """.trimIndent())
+        givenKotlinSource("test.CustomEnumKey", """
+            import com.yandex.daggerlite.*
+            @IntoMap.Key
+            @Retention(AnnotationRetention.RUNTIME)
+            annotation class CustomEnumKey(val value: MyEnum = MyEnum.ONE)
+        """.trimIndent())
+        givenJavaSource("test.CustomEnumKeyJava", """
+            import com.yandex.daggerlite.IntoMap;
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            @IntoMap.Key
+            @Retention(RetentionPolicy.RUNTIME)
+            public @interface CustomEnumKeyJava {
+                MyEnum value();
+            }
+        """.trimIndent())
+        givenJavaSource("test.ComponentBase", """
+            import java.util.Map;
+            import javax.inject.Named;
+            public interface ComponentBase {
+                Map<Integer, String> getMap1Java();
+                @Named("name") Map<Class<?>, Integer> getMap2Java();
+                Map<Class<?>, Integer> getMap3Java();
+                Map<Class<? extends MyApi>, MyApi> getMap4Java();
+                Map<MyEnum, MyApi> getMap5Java();
+                JavaConsumer getConsumer();
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            class Impl1 : MyApi
+            class Impl2 @Inject constructor() : MyApi
+            class Impl3 @Inject constructor() : MyApi
+            
+            @Module
+            object TestModule {
+                @[Provides IntoMap IntKey(1)]
+                fun string1(): String = "hello"
+                @[Provides IntoMap IntKey(2)]
+                fun string2(): String = "world"
+            
+                @[Provides Named("name") IntoMap ClassKey(Any::class)]
+                fun int1(): Int = 1
+                @[Provides Named("name") IntoMap ClassKey(String::class)]
+                fun int2(): Int = 2
+            
+                @[Provides IntoMap ClassKey(TestModule::class)]
+                fun int3(): Int = 3
+            
+                @[Provides IntoMap CustomClassKey(Impl1::class)]
+                fun apiImpl1(): MyApi = Impl1()
+
+                @[Provides IntoMap CustomEnumKey]
+                fun one(): MyApi = Impl1()
+                @[Provides IntoMap CustomEnumKeyJava(MyEnum.TWO)]
+                fun two(): MyApi = Impl2()
+                @[Provides IntoMap CustomEnumKey(MyEnum.THREE)]
+                fun three(): MyApi = Impl3()
+            }
+            
+            @Module
+            interface TestBindings {
+                @[Binds IntoMap CustomClassKey(Impl2::class)]
+                fun apiImpl2(i: Impl2): MyApi
+                
+                @[Binds IntoMap CustomClassKey(Impl3::class)]
+                fun apiImpl3(i: Impl3): MyApi
+            }
+            
+            @Component(modules = [TestModule::class, TestBindings::class])
+            interface TestComponent : ComponentBase {
+                val map: Map<Int, String>
+                @get:Named("name") val map2: Map<Class<*>, Int>
+                val map3: Map<Class<*>, Int>
+                val map4: Map<Class<out MyApi>, MyApi>
+                val map5: Map<MyEnum, MyApi>
+                
+                val mapOfProviders: Map<Class<out MyApi>, Provider<MyApi>>
+                
+                val kotlinConsumer: KotlinConsumer
+            }
+            
+            fun test() {
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                assert(c.map == mapOf(
+                    1 to "hello",
+                    2 to "world",
+                ))
+                assert(c.map2 == mapOf(
+                    Any::class.java to 1,
+                    String::class.java to 2,
+                ))
+                assert(c.map3 == mapOf(
+                    TestModule::class.java to 3,
+                ))
+                assert(c.map4.size == 3)
+                for ((clazz, instance) in c.map4) {
+                    assert(clazz.isInstance(instance))
+                }
+                assert(c.map5.keys == MyEnum.values().toSet()) 
+                assert(c.mapOfProviders.size == 3)
+                for ((clazz, instanceProvider) in c.mapOfProviders) {
+                    assert(clazz.isInstance(instanceProvider.get()))
+                }
+            }
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
 }

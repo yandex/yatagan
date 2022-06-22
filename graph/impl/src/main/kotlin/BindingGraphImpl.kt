@@ -116,7 +116,7 @@ internal class BindingGraphImpl(
             class AliasMaterializeVisitor : BaseBinding.Visitor<Binding> {
                 var aliases = mutableSetOf<AliasBinding>()
                 override fun visitAlias(alias: AliasBinding): Binding {
-                    val carryDependency = dependency.replaceNode(node = alias.source)
+                    val carryDependency = dependency.copyDependency(node = alias.source)
                     if (!aliases.add(alias)) {
                         // Alias loop detected, bail out.
                         return bindings.materializeAliasLoop(node = dependency.node, chain = aliases)
@@ -140,7 +140,7 @@ internal class BindingGraphImpl(
 
         // Add all local assisted binding factories.
         for (binding in localBindings.keys) {
-            binding.accept(object : BindingVisitorAdapter<Unit> {
+            binding.accept(object : BindingVisitorAdapter<Unit>() {
                 override fun visitDefault() = Unit
                 override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
                     localAssistedInjectFactories += binding.model

@@ -4,13 +4,14 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.NoDeclaration
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.common.TypeLangModelBase
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
 
 internal class RtTypeImpl private constructor(
     val impl: Type,
-) : TypeLangModel {
+) : TypeLangModelBase() {
 
     override val declaration: TypeDeclarationLangModel by lazy {
         if (impl.tryAsClass() != null) RtTypeDeclarationImpl(this) else NoDeclaration(this)
@@ -48,13 +49,6 @@ internal class RtTypeImpl private constructor(
     }
 
     override fun toString(): String = impl.formatString()
-
-    override fun compareTo(other: TypeLangModel): Int {
-        return when (other) {
-            is RtTypeImpl -> impl.toString().compareTo(other.impl.toString())
-            else -> -1
-        }
-    }
 
     companion object Factory : ObjectCache<TypeEquivalenceWrapper, RtTypeImpl>() {
         operator fun invoke(type: Type): RtTypeImpl {

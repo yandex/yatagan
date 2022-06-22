@@ -2,6 +2,7 @@ package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -11,6 +12,7 @@ import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
+import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.NestingKind
@@ -58,7 +60,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .asSequence()
         .filter { it.kind == ElementKind.CONSTRUCTOR && !it.isPrivate }
         .map {
-            ConstructorImpl(impl = it.asExecutableElement())
+            ConstructorImpl(platformModel = it.asExecutableElement())
         }.memoize()
     }
 
@@ -78,7 +80,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
                 owner = this@JavaxTypeDeclarationImpl,
                 impl = it,
             )
-        }
+        }.memoize()
     }
 
     override val fields: Sequence<FieldLangModel> by lazy {
@@ -129,11 +131,10 @@ internal class JavaxTypeDeclarationImpl private constructor(
     }
 
     private inner class ConstructorImpl(
-        impl: ExecutableElement,
-    ) : ConstructorLangModel, JavaxAnnotatedImpl<ExecutableElement>(impl) {
-        override val isEffectivelyPublic: Boolean get() = impl.isPublic
+        override val platformModel: ExecutableElement,
+    ) : ConstructorLangModelBase(), AnnotatedLangModel by JavaxAnnotatedImpl(platformModel) {
+        override val isEffectivelyPublic: Boolean get() = platformModel.isPublic
         override val constructee: TypeDeclarationLangModel get() = this@JavaxTypeDeclarationImpl
-        override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(impl, type)
-        override val platformModel: ExecutableElement get() = impl
+        override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(platformModel, type)
     }
 }

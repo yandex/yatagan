@@ -6,6 +6,7 @@ import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
@@ -20,6 +21,7 @@ import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.AlternativesBinding
 import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
@@ -32,6 +34,7 @@ import com.yandex.daggerlite.graph.ComponentInstanceBinding
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.InstanceBinding
+import com.yandex.daggerlite.graph.MapBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.ProvisionBinding
@@ -60,6 +63,12 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
     override val scope: AnnotationLangModel?
         get() = null
 
+    /**
+     * `true` if the binding requires the dependencies of compatible condition scope, and it's an error to
+     *  provide a dependency under incompatible condition.
+     *
+     *  `false` if the binding allows dependencies of incompatible scope, e.g. because it can just skip them.
+     */
     val checkDependenciesConditionScope: Boolean get() = false
 
     override fun validate(validator: Validator) {
@@ -119,6 +128,7 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
         when (val target = impl.target) {
             is BindingTargetModel.DirectMultiContribution,
             is BindingTargetModel.FlattenMultiContribution,
+            is BindingTargetModel.MappingContribution,
             -> MultiBindingContributionNode(target.node)
             is BindingTargetModel.Plain -> target.node
         }
@@ -375,7 +385,6 @@ internal class MultiBindingImpl(
     }
 
     override val dependencies get() = _contributions.keys.asSequence()
-    override val originModule: Nothing? get() = null
 
     override fun toString() = Strings.Bindings.multibinding(
         elementType = target,
@@ -385,6 +394,48 @@ internal class MultiBindingImpl(
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitMulti(this)
     }
+}
+
+internal class MapBindingImpl(
+    override val owner: BindingGraphImpl,
+    override val target: NodeModel,
+    contents: List<Pair<AnnotationLangModel.Value, NodeModel>>,
+    override val mapKey: TypeLangModel,
+    override val mapValue: TypeLangModel,
+    useProviders: Boolean
+) : MapBinding, BindingMixin {
+    override val contents: List<Pair<AnnotationLangModel.Value, NodeDependency>> by lazy {
+        if (useProviders) contents.map { (key, node) ->
+            key to node.copyDependency(kind = DependencyKind.Provider)
+        } else contents
+    }
+
+    override val dependencies: Sequence<NodeDependency>
+        get() = contents.asSequence().map { (_, dependency) -> dependency }
+
+    override fun <R> accept(visitor: Binding.Visitor<R>): R {
+        return visitor.visitMap(this)
+    }
+
+    override fun validate(validator: Validator) {
+        super.validate(validator)
+        val grouped: Map<AnnotationLangModel.Value, List<NodeDependency>> = contents.groupBy(
+            keySelector = { it.first },
+            valueTransform = { it.second },
+        )
+        for ((key, dependencies) in grouped) {
+            if (dependencies.size > 1) {
+                // Found duplicates
+                validator.reportError(Errors.duplicateKeysInMapping(mapType = target, keyValue = key)) {
+                    for (dependency in dependencies) {
+                        addNote(Strings.Notes.duplicateKeyInMapBinding(binding = owner.resolveRaw(dependency.node)))
+                    }
+                }
+            }
+        }
+    }
+
+    override fun toString(): String = Strings.Bindings.mapping(mapType = target, contents = contents)
 }
 
 internal class ExplicitEmptyBindingImpl(

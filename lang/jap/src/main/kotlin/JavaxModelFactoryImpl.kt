@@ -12,6 +12,23 @@ class JavaxModelFactoryImpl : LangModelFactory {
     private val collectionElement: TypeElement by lazy {
         Utils.elements.getTypeElement(java.util.Collection::class.java.canonicalName)
     }
+    private val mapElement: TypeElement by lazy {
+        Utils.elements.getTypeElement(java.util.Map::class.java.canonicalName)
+    }
+    private val providerElement: TypeElement by lazy {
+        Utils.elements.getTypeElement(javax.inject.Provider::class.java.canonicalName)
+    }
+
+    override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
+        keyType as JavaxTypeImpl
+        valueType as JavaxTypeImpl
+        with(Utils.types) {
+            val valueArgType =
+                if (isCovariant) getWildcardType(/*extends*/ valueType.impl, /*super*/ null)
+                else valueType.impl
+            return JavaxTypeImpl(getDeclaredType(mapElement, keyType.impl, valueArgType))
+        }
+    }
 
     override fun getListType(type: TypeLangModel, isCovariant: Boolean): TypeLangModel {
         with(Utils.types) {
@@ -25,11 +42,15 @@ class JavaxModelFactoryImpl : LangModelFactory {
         return JavaxTypeImpl(Utils.types.getDeclaredType(collectionElement, (type as JavaxTypeImpl).impl))
     }
 
+    override fun getProviderType(type: TypeLangModel): TypeLangModel {
+        return JavaxTypeImpl(Utils.types.getDeclaredType(providerElement, (type as JavaxTypeImpl).impl))
+    }
+
     override fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel? {
         val element = Utils.elements.getTypeElement(qualifiedName) ?: return null
         return JavaxTypeDeclarationImpl(element.asType().asDeclaredType())
     }
 
     override val errorType: TypeLangModel
-        get() = JavaxTypeImpl(ErrorTypeImpl)
+        get() = JavaxTypeImpl(Utils.types.nullType)
 }

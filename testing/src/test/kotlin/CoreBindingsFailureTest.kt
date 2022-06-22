@@ -894,7 +894,7 @@ class CoreBindingsFailureTest(
                     listOf("test.RootComponent", "test.MyModule", "@Provides test.MyModule::illegalProvider(): javax.inject.Provider<java.lang.String>", "javax.inject.Provider<java.lang.String>"),
                 ),
             )),
-            // @formatter:off
+            // @formatter:on
         )
     }
 
@@ -966,7 +966,7 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
 
-        val missing = "@test.ComplexQualifier(arrayChar={A, B, C}, arrayInt={1, 2, 3}, " +
+        val missing = "@test.ComplexQualifier(arrayChar={'A', 'B', 'C'}, arrayInt={1, 2, 3}, " +
                 "arrayNested={@javax.inject.Named(value=\"array-nested\")}, " +
                 "arrayString={\"hello\", \"world\"}, enumValue=test.MyEnum.Red, " +
                 "name=\"hello world\", nested=@javax.inject.Named(value=\"nested-named\"), " +
@@ -1073,6 +1073,95 @@ class CoreBindingsFailureTest(
                     listOf("test.TestComponent", "[entry-point] c", "[assisted factory] test.FactoryC"),
                 ),
             )),
+        )
+    }
+
+    @Test
+    fun `invalid map binding`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            import kotlin.reflect.KClass
+
+            @IntoMap.Key annotation class InvalidMapKey1(val foo: Int)
+            @IntoMap.Key annotation class InvalidMapKey2(val value: InvalidMapKey1)
+            @IntoMap.Key annotation class InvalidMapKey3(val value: IntArray)
+            @IntoMap.Key annotation class ClassKey2(val value: KClass<*>)
+
+            @Module
+            interface TestModule {
+                @[Binds IntoMap]
+                fun binding1(): Int
+                
+                @[Binds IntoMap InvalidMapKey1(foo = 1)]
+                fun binding2(): Int
+                
+                @[Binds IntoMap InvalidMapKey2(InvalidMapKey1(foo = 1))]
+                fun binding3(): Int
+                
+                @[Binds IntoMap InvalidMapKey3([1, 2, 3])]
+                fun binding4(): Int
+                
+                @Binds @IntoMap
+                @ClassKey2(Any::class)
+                @ClassKey(String::class)
+                fun binding5(): String
+                
+                @[Binds IntoMap ClassKey(Any::class)]
+                fun binding6(): String
+            }
+
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                val map: Map<Class<*>, String>
+            }
+        """.trimIndent())
+
+        expectValidationResults(
+            // @formatter:off
+            errorMessage(formatMessage(
+               message = Errors.missingMapKey(),
+               encounterPaths = listOf(
+                   listOf("test.TestComponent", "test.TestModule", "@Binds test.TestModule::binding1(): java.lang.Integer")
+               ) 
+            )),
+            errorMessage(formatMessage(
+                message = Errors.missingMapKeyValue(annotationClass = "test.InvalidMapKey1"),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "test.TestModule", "@Binds test.TestModule::binding2(): java.lang.Integer")
+                )
+            )),
+            errorMessage(formatMessage(
+                message = Errors.unsupportedAnnotationValueAsMapKey(annotationClass = "test.InvalidMapKey2"),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "test.TestModule", "@Binds test.TestModule::binding3(): java.lang.Integer")
+                )
+            )),
+            errorMessage(formatMessage(
+                message = Errors.unsupportedArrayValueAsMapKey(annotationClass = "test.InvalidMapKey3"),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "test.TestModule", "@Binds test.TestModule::binding4(): java.lang.Integer")
+                )
+            )),
+            errorMessage(formatMessage(
+                message = Errors.duplicateKeysInMapping(mapType = "java.util.Map<java.lang.Class<?>, java.lang.String>", keyValue = "java.lang.Object.class"),
+                notes = listOf(
+                    Strings.Notes.duplicateKeyInMapBinding(binding = "[absent] @Binds test.TestModule::binding5(): java.lang.String"),
+                    Strings.Notes.duplicateKeyInMapBinding(binding = "[absent] @Binds test.TestModule::binding6(): java.lang.String"),
+                ),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "[entry-point] getMap", "[intrinsic] multi-bound `java.util.Map<java.lang.Class<?>, java.lang.String>`:\n"+
+                            "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n"+
+                            "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n")
+                )
+            )),
+            errorMessage(formatMessage(
+                message = Errors.multipleMapKeys(),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "test.TestModule", "@Binds test.TestModule::binding5(): java.lang.String")
+                )
+            )),
+            // @formatter:on
         )
     }
 }

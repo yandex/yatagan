@@ -2,15 +2,21 @@ package com.yandex.daggerlite.jap.lang
 
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
-import javax.lang.model.AnnotatedConstruct
 import javax.lang.model.element.AnnotationMirror
+import javax.lang.model.element.Element
 
-internal open class JavaxAnnotatedImpl<T : AnnotatedConstruct>(
-    protected val impl: T
+internal class JavaxAnnotatedImpl(
+    private val impl: Element,
 ) : CtAnnotatedLangModel {
 
     override val annotations: Sequence<CtAnnotationLangModel> by lazy {
-        impl.annotationMirrors.asSequence().map { JavaxAnnotationImpl(it) }
+        val annotations = impl.annotationMirrors.map { JavaxAnnotationImpl(it) }
+        if (impl.isFromKotlin()) {
+            // Means this is from KAPT, and it's known to be reversing annotations order.
+            annotations.asReversed()
+        } else {
+            annotations
+        }.asSequence()
     }
 
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {

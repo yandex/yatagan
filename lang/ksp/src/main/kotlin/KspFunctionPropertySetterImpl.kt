@@ -2,11 +2,10 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSPropertySetter
 import com.google.devtools.ksp.symbol.Modifier
-import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 
-internal class KspFunctionPropertySetterImpl private constructor(
+internal class KspFunctionPropertySetterImpl(
     private val setter: KSPropertySetter,
     override val owner: KspTypeDeclarationImpl,
     isStatic: Boolean,
@@ -34,18 +33,4 @@ internal class KspFunctionPropertySetterImpl private constructor(
 
     override val platformModel: Any?
         get() = null
-
-    companion object Factory : ObjectCache<KSPropertySetter, KspFunctionPropertySetterImpl>() {
-        operator fun invoke(
-            setter: KSPropertySetter,
-            owner: KspTypeDeclarationImpl,
-            isStatic: Boolean,
-        ) = createCached(setter) {
-            KspFunctionPropertySetterImpl(
-                setter = setter,
-                owner = owner,
-                isStatic = isStatic,
-            )
-        }
-    }
 }

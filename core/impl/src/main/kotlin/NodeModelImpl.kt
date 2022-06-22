@@ -89,6 +89,15 @@ internal class NodeModelImpl private constructor(
         )
     }
 
+    override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> {
+        val keyType = key.decay()  // Need to use decay as key may be a primitive type (do the boxing)
+        val valueType = if (asProviders) LangModelFactory.getProviderType(type) else type
+        return arrayOf(
+            Factory(type = LangModelFactory.getMapType(keyType, valueType, isCovariant = false), qualifier = qualifier),
+            Factory(type = LangModelFactory.getMapType(keyType, valueType, isCovariant = true), qualifier = qualifier),
+        )
+    }
+
     override val hintIsFrameworkType: Boolean
         get() = isFrameworkType(type)
 
@@ -127,7 +136,10 @@ internal class NodeModelImpl private constructor(
     override val kind: DependencyKind
         get() = DependencyKind.Direct
 
-    override fun replaceNode(node: NodeModel): NodeDependency = node
+    override fun copyDependency(node: NodeModel, kind: DependencyKind) = when(kind) {
+        DependencyKind.Direct -> node
+        else -> NodeDependencyImpl(node = node, kind = kind)
+    }
 
     companion object Factory : ObjectCache<Any, NodeModelImpl>() {
         class NoNode : NodeModel {
@@ -136,13 +148,17 @@ internal class NodeModelImpl private constructor(
             override fun getSpecificModel(): Nothing? = null
             override fun dropQualifier(): NodeModel = this
             override fun multiBoundListNodes(): Array<NodeModel> = emptyArray()
+            override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> = emptyArray()
             override fun validate(validator: Validator) = Unit // No need to report an error here
             override val hintIsFrameworkType: Boolean get() = false
             override fun toString() = "[invalid]"
             override fun compareTo(other: NodeModel): Int = hashCode() - other.hashCode()
             override val node: NodeModel get() = this
             override val kind: DependencyKind get() = DependencyKind.Direct
-            override fun replaceNode(node: NodeModel): NodeDependency = node
+            override fun copyDependency(node: NodeModel, kind: DependencyKind) = when(kind) {
+                DependencyKind.Direct -> node
+                else -> NodeDependencyImpl(node = node, kind = kind)
+            }
         }
 
         operator fun invoke(

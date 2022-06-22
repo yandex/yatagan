@@ -1,24 +1,31 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import javax.inject.Qualifier
-import javax.inject.Scope
+import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.core.lang.AnnotatedLangModel
+import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.core.lang.AnnotationLangModel.Value
+import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.common.AnnotationLangModelBase
+import java.lang.reflect.Method
 
 internal class RtAnnotationImpl(
     private val impl: Annotation,
-) : AnnotationLangModel {
+) : AnnotationLangModelBase() {
 
-    override val isScope: Boolean
-        get() = impl.javaAnnotationClass.isAnnotationPresent(Scope::class.java)
+    override val annotationClass: AnnotationDeclarationLangModel
+        get() = AnnotationClassImpl(impl.javaAnnotationClass)
 
-    override val isQualifier: Boolean
-        get() = impl.javaAnnotationClass.isAnnotationPresent(Qualifier::class.java)
+    override val platformModel: Annotation
+        get() = impl
 
-    override fun <A : Annotation> hasType(type: Class<A>): Boolean {
-        return impl.javaAnnotationClass == type
+    override fun getValue(attribute: AnnotationDeclarationLangModel.Attribute): Value {
+        require(attribute is AttributeImpl) { "Invalid attribute type" }
+        return try {
+            ValueImpl(attribute.impl.invoke(impl))
+        } catch (e: ReflectiveOperationException) {
+            ValueImpl(null)
+        }
     }
-
-    override fun toString() = formatString(impl)
 
     override fun equals(other: Any?): Boolean {
         return this === other || (other is RtAnnotationImpl && impl == other.impl)
@@ -26,37 +33,76 @@ internal class RtAnnotationImpl(
 
     override fun hashCode(): Int = impl.hashCode()
 
-    companion object  {
-        private fun formatString(value: Any?): String = when (value) {
-            is String -> "\"$value\""
-            is ByteArray -> value.joinToString(prefix = "{", postfix = "}")
-            is CharArray -> value.joinToString(prefix = "{", postfix = "}")
-            is DoubleArray -> value.joinToString(prefix = "{", postfix = "}")
-            is FloatArray -> value.joinToString(prefix = "{", postfix = "}")
-            is IntArray -> value.joinToString(prefix = "{", postfix = "}")
-            is LongArray -> value.joinToString(prefix = "{", postfix = "}")
-            is ShortArray -> value.joinToString(prefix = "{", postfix = "}")
-            is BooleanArray -> value.joinToString(prefix = "{", postfix = "}")
-            is Array<*> -> value.joinToString(prefix = "{", postfix = "}", transform = ::formatString)
-            is Class<*> -> value.canonicalName
-            is Enum<*> -> "${value.declaringClass.canonicalName}.${value.name}"
-            is Annotation -> buildString {
-                append('@')
-                append(value.javaAnnotationClass.canonicalName)
-                val attributes = value.javaAnnotationClass.methods
-                    .asSequence()
-                    .filter { it.declaringClass.isAnnotation }
-                if (attributes.any()) {
-                    attributes
-                        .sortedBy { it.name }
-                        .joinTo(this, prefix = "(", postfix = ")") {
-                            val attributeValue = formatString(it.invoke(value))
-                            "${it.name}=$attributeValue"
-                        }
-                }
-            }
+    private class ValueImpl(
+        private val value: Any?,
+    ) : ValueBase() {
+        override val platformModel: Any?
+            get() = value
 
-            else -> value.toString()
+        override fun <R> accept(visitor: Value.Visitor<R>): R {
+            return when(value) {
+                is Boolean -> visitor.visitBoolean(value)
+                is Byte -> visitor.visitByte(value)
+                is Short -> visitor.visitShort(value)
+                is Int -> visitor.visitInt(value)
+                is Long -> visitor.visitLong(value)
+                is Char -> visitor.visitChar(value)
+                is Float -> visitor.visitFloat(value)
+                is Double -> visitor.visitDouble(value)
+                is ByteArray -> visitor.visitArray(value.map { ValueImpl(it) })
+                is ShortArray -> visitor.visitArray(value.map { ValueImpl(it) })
+                is IntArray -> visitor.visitArray(value.map { ValueImpl(it) })
+                is LongArray -> visitor.visitArray(value.map { ValueImpl(it) })
+                is CharArray -> visitor.visitArray(value.map { ValueImpl(it) })
+                is FloatArray -> visitor.visitArray(value.map { ValueImpl(it) })
+                is DoubleArray -> visitor.visitArray(value.map { ValueImpl(it) })
+                is Array<*> -> visitor.visitArray(value.map { ValueImpl(it) })
+                is String -> visitor.visitString(value)
+                is Class<*> -> visitor.visitType(RtTypeImpl(value))
+                is Annotation -> visitor.visitAnnotation(RtAnnotationImpl(value))
+                is Enum<*> -> visitor.visitEnumConstant(
+                    enum = RtTypeImpl(value.declaringClass),
+                    constant = value.name,
+                )
+                null -> visitor.visitUnresolved()  // Should not be normally reachable
+                else -> throw AssertionError("Unexpected value type: $value")
+            }
         }
+
+        override fun hashCode() = value.hashCode()
+        override fun equals(other: Any?) = this === other || (other is ValueImpl && value == other.value)
+    }
+
+    private class AnnotationClassImpl private constructor(
+        private val impl: Class<*>,
+    ) : AnnotationDeclarationLangModel, AnnotatedLangModel by RtAnnotatedImpl(impl) {
+
+        override val attributes: Sequence<AnnotationDeclarationLangModel.Attribute> by lazy {
+            impl.declaredMethods.asSequence()
+                .filter { it.isAbstract }
+                .map {
+                    AttributeImpl(impl = it)
+                }
+        }
+
+        override fun isClass(clazz: Class<out Annotation>): Boolean {
+            return impl == clazz
+        }
+
+        override fun toString(): String = impl.canonicalName
+
+        companion object Factory : ObjectCache<Class<*>, AnnotationClassImpl>() {
+            operator fun invoke(clazz: Class<*>) = createCached(clazz) { AnnotationClassImpl(clazz) }
+        }
+    }
+
+    private class AttributeImpl(
+        val impl: Method,
+    ) : AnnotationDeclarationLangModel.Attribute {
+        override val name: String
+            get() = impl.name
+
+        override val type: TypeLangModel
+            get() = RtTypeImpl(impl.genericReturnType)
     }
 }

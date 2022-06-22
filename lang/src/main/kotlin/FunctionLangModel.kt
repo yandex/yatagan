@@ -26,12 +26,4 @@ interface FunctionLangModel : MemberLangModel, CallableLangModel {
      * [com.yandex.daggerlite.IntoList] annotation model if present. `null` if absent.
      */
     val intoListAnnotationIfPresent: IntoListAnnotationLangModel?
-
-    override fun <R> accept(visitor: MemberLangModel.Visitor<R>): R {
-        return visitor.visitFunction(this)
-    }
-
-    override fun <T> accept(visitor: CallableLangModel.Visitor<T>): T {
-        return visitor.visitFunction(this)
-    }
 }

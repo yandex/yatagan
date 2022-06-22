@@ -11,7 +11,7 @@ import javax.lang.model.type.TypeMirror
 
 internal class JavaxTypeImpl private constructor(
     val impl: TypeMirror,
-) : CtTypeLangModel {
+) : CtTypeLangModel() {
     override val nameModel: CtTypeNameModel by lazy { CtTypeNameModel(impl) }
 
     override val declaration: TypeDeclarationLangModel by lazy {
@@ -47,8 +47,6 @@ internal class JavaxTypeImpl private constructor(
             else -> false
         }
     }
-
-    override fun toString() = nameModel.toString()
 
     companion object Factory : ObjectCache<TypeMirrorEquivalence, JavaxTypeImpl>() {
         operator fun invoke(impl: TypeMirror): JavaxTypeImpl {

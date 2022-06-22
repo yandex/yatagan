@@ -8,8 +8,9 @@ import java.lang.reflect.Method
 class MethodSignatureEquivalenceWrapper(
     private val method: Method,
 ) {
+    private val parameterTypes = method.parameterTypes
     private val cachedHash by lazy {
-        method.parameterTypes.fold(method.name.hashCode()) { hash, type -> 31 * hash + type.hashCode() }
+        parameterTypes.fold(method.name.hashCode()) { hash, type -> 31 * hash + type.hashCode() }
     }
 
     override fun hashCode(): Int = cachedHash
@@ -17,6 +18,6 @@ class MethodSignatureEquivalenceWrapper(
     override fun equals(other: Any?): Boolean {
         return this === other || (other is MethodSignatureEquivalenceWrapper
                 && method.name == other.method.name &&
-                method.parameterTypes.contentEquals(other.method.parameterTypes))
+                parameterTypes.contentEquals(other.parameterTypes))
     }
 }

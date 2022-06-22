@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.TypeLangModel
 
 interface ComponentDependencyBinding : Binding {
     val dependency: ComponentDependencyModel
@@ -41,6 +42,7 @@ interface Binding : BaseBinding {
         fun visitComponentInstance(binding: ComponentInstanceBinding): R
         fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R
         fun visitMulti(binding: MultiBinding): R
+        fun visitMap(binding: MapBinding): R
         fun visitEmpty(binding: EmptyBinding): R
     }
 }
@@ -98,4 +100,10 @@ interface MultiBinding : Binding {
          */
         Collection,
     }
+}
+
+interface MapBinding : Binding {
+    val mapKey: TypeLangModel
+    val mapValue: TypeLangModel
+    val contents: List<Pair<AnnotationLangModel.Value, NodeDependency>>
 }

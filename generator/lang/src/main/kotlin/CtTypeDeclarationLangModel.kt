@@ -1,3 +1,5 @@
+@file:OptIn(ConditionsApi::class, VariantApi::class)
+
 package com.yandex.daggerlite.generator.lang
 
 import com.yandex.daggerlite.AllConditions
@@ -8,7 +10,9 @@ import com.yandex.daggerlite.ComponentFlavor
 import com.yandex.daggerlite.Condition
 import com.yandex.daggerlite.Conditional
 import com.yandex.daggerlite.Conditionals
+import com.yandex.daggerlite.ConditionsApi
 import com.yandex.daggerlite.Module
+import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
@@ -17,12 +21,13 @@ import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.hasType
+import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
  * [TypeDeclarationLangModel] specialized for compile time implementations.
  */
-abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModel {
+abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModelBase() {
     abstract override val annotations: Sequence<CtAnnotationLangModel>
 
     override val componentAnnotationIfPresent: ComponentAnnotationLangModel? by lazy(PUBLICATION) {
@@ -57,6 +62,4 @@ abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModel {
     override val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel? by lazy(PUBLICATION) {
         annotations.find { it.hasType<ComponentFlavor>() }?.let { CtComponentFlavorAnnotationImpl(it) }
     }
-
-    override fun toString() = asType().toString()
 }

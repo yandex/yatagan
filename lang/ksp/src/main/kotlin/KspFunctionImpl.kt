@@ -1,14 +1,13 @@
 package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
 import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
 
-internal class KspFunctionImpl private constructor(
+internal class KspFunctionImpl(
     private val impl: KSFunctionDeclaration,
     override val owner: KspTypeDeclarationImpl,
     override val isStatic: Boolean,
@@ -45,18 +44,4 @@ internal class KspFunctionImpl private constructor(
     )
 
     override val platformModel: KSFunctionDeclaration get() = impl
-
-    companion object Factory : BiObjectCache<KSFunctionDeclaration, KspTypeDeclarationImpl, KspFunctionImpl>() {
-        operator fun invoke(
-            impl: KSFunctionDeclaration,
-            owner: KspTypeDeclarationImpl,
-            isStatic: Boolean = false,
-        ) = createCached(impl, owner) {
-            KspFunctionImpl(
-                impl = impl,
-                owner = owner,
-                isStatic = isStatic
-            )
-        }
-    }
 }

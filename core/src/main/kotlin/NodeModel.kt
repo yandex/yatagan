@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -23,9 +24,17 @@ interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, Nod
     val qualifier: AnnotationLangModel?
 
     /**
-     * Provides all nodes that must be bound to a multi-binding of such node.
+     * Provides all nodes that must be bound to a multi-binding of this node.
      */
     fun multiBoundListNodes(): Array<NodeModel>
+
+    /**
+     * Provides all nodes that must be bound to a mapping of [key] to this node.
+     *
+     * @param key a type to use as Map's key type.
+     * @param asProviders whether wrap this type into `javax.inject.Provider` as Map's value.
+     */
+    fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel>
 
     /**
      * What specific core-level model the node represents. `null` if none.
@@ -66,5 +75,5 @@ interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, Nod
      *
      * @return Always provided [node].
      */
-    override fun replaceNode(node: NodeModel): NodeDependency
+    override fun copyDependency(node: NodeModel, kind: DependencyKind): NodeDependency
 }

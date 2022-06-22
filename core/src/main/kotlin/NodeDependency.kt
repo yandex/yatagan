@@ -19,5 +19,8 @@ interface NodeDependency {
      *
      * @return a copy with the replaced [node] property.
      */
-    fun replaceNode(node: NodeModel): NodeDependency
+    fun copyDependency(
+        node: NodeModel = this.node,
+        kind: DependencyKind = this.kind,
+    ): NodeDependency
 }

@@ -4,8 +4,8 @@ import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import java.lang.reflect.AnnotatedElement
 
-internal open class RtAnnotatedImpl<T : AnnotatedElement>(
-    protected val impl: T,
+internal class RtAnnotatedImpl(
+    private val impl: AnnotatedElement,
 ) : AnnotatedLangModel {
     override val annotations: Sequence<AnnotationLangModel> by lazy {
         impl.declaredAnnotations.map { RtAnnotationImpl(it) }.asSequence()

@@ -110,6 +110,10 @@ abstract class CompileTestDriverBase protected constructor(
             verbose = false
             inheritClassPath = false
             javacArguments += "-Xdiags:verbose"
+            kotlincArguments = listOf(
+                "-opt-in=com.yandex.daggerlite.ConditionsApi",
+                "-opt-in=com.yandex.daggerlite.VariantApi",
+            )
             classpaths = buildList {
                 when (apiType) {
                     ApiType.Compiled -> CompiledApiClasspath

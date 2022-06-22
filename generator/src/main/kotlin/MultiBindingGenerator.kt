@@ -1,65 +1,39 @@
 package com.yandex.daggerlite.generator
 
 import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
-import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.generator.poetry.CodeBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 
 internal class MultiBindingGenerator(
-    methodNs: Namespace,
+    methodsNs: Namespace,
     private val thisGraph: BindingGraph,
-) : ComponentGenerator.Contributor {
-    private val multiBindings = thisGraph.localBindings.keys.filterIsInstance<MultiBinding>()
-    private val accessors = multiBindings.associateWith { methodNs.name(it.target.name) }
-
-    fun generateCreation(builder: ExpressionBuilder, binding: MultiBinding, inside: BindingGraph) {
-        with(builder) {
-            +componentForBinding(inside = inside, binding = binding)
-            +"."
-            +accessors[binding]!!
-            +"()"
-        }
-    }
-
-    override fun generate(builder: TypeSpecBuilder) = with(builder) {
-        for (binding in multiBindings) {
-            method(accessors[binding]!!) {
-                modifiers(/*package-private*/)
-                returnType(binding.target.typeName())
-                +"final %T list = new %T<>(${binding.contributions.size})"
-                    .formatCode(binding.target.typeName(), Names.ArrayList)
-                binding.contributions.forEach { (node: NodeModel, kind: ContributionType) ->
-                    val nodeBinding = thisGraph.resolveBinding(node)
-                    fun generateAccess() = buildExpression {
-                        when(kind) {
-                            ContributionType.Element -> +"list.add("
-                            ContributionType.Collection -> +"list.addAll("
-                        }
-                        nodeBinding.generateAccess(builder = this, inside = thisGraph)
-                        +")"
+) : MultiBindingGeneratorBase<MultiBinding>(
+    methodsNs = methodsNs,
+    bindings = thisGraph.localBindings.keys.filterIsInstance<MultiBinding>(),
+    accessorPrefix = "listOf",
+) {
+    override fun buildAccessorCode(builder: CodeBuilder, binding: MultiBinding) = with(builder) {
+        +"final %T list = new %T<>(${binding.contributions.size})"
+            .formatCode(binding.target.typeName(), Names.ArrayList)
+        binding.contributions.forEach { (node: NodeModel, kind: ContributionType) ->
+            val nodeBinding = thisGraph.resolveBinding(node)
+            generateUnderCondition(
+                binding = nodeBinding,
+                inside = thisGraph,
+            ) {
+                +buildExpression {
+                    when (kind) {
+                        ContributionType.Element -> +"list.add("
+                        ContributionType.Collection -> +"list.addAll("
                     }
-
-                    if (!nodeBinding.conditionScope.isAlways) {
-                        if (nodeBinding.conditionScope.isNever) {
-                            // Just skip this.
-                        } else {
-                            val expression = buildExpression {
-                                val gen = Generators[nodeBinding.owner].conditionGenerator
-                                gen.expression(this, nodeBinding.conditionScope, inside = thisGraph)
-                            }
-                            controlFlow("if (%L) ".formatCode(expression)) {
-                                +generateAccess()
-                            }
-                        }
-                    } else {
-                        +generateAccess()
-                    }
+                    nodeBinding.generateAccess(builder = this, inside = thisGraph)
+                    +")"
                 }
-                +"return list"
             }
         }
+        +"return list"
     }
 }
