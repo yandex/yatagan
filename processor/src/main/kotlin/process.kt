@@ -13,6 +13,7 @@ import com.yandex.daggerlite.validation.ValidationMessage.Kind.Warning
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.validate
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,10 +43,19 @@ fun <Source> process(
                 loadServices()
             }
 
+            val internalErrorHandler = CoroutineExceptionHandler { _, throwable ->
+                logger.error(buildString {
+                    appendLine("Internal Processor Error")
+                    appendLine("Please, report this to the maintainers, along with the code reproducing the issue.")
+                    appendLine(throwable.message)
+                    appendLine(throwable.stackTraceToString())
+                })
+            }
+
             val supervisorJob = SupervisorJob()
             for (rootModel in rootModels) {
                 val graphSupervisor = SupervisorJob(supervisorJob)
-                launch(graphSupervisor) {
+                launch(graphSupervisor + internalErrorHandler) {
                     val graphRootDeferred = async {
                         BindingGraph(root = rootModel)
                     }
@@ -88,11 +98,10 @@ fun <Source> process(
                         }
                     }
 
-                    if (!useParallelProcessing) {
-                        // Ensure validation is complete before codegen starts
-                        isValid.await()
-                    }
+                    // Ensure validation is complete before codegen starts
+                    isValid.await()
 
+                    // TODO(DAGGERLITE-50): Try to support parallel codegen without parallel building and validation
                     val graphRoot = graphRootDeferred.await()
                     try {
                         val codegenFacade = ComponentGeneratorFacade(
@@ -123,14 +132,7 @@ fun <Source> process(
                         throw e
                     } catch (e: Throwable) {
                         isValid.await()  // May throw cancellation in case of any validation errors
-
-                        // If the execution got here, something is fishy here, likely a bug/internal error.
-                        logger.error(buildString {
-                            appendLine("Internal Processor Error while processing $graphRoot")
-                            appendLine("Please, report this to the maintainers, along with the code (diff) that triggered this.")
-                            appendLine(e.message)
-                            appendLine(e.stackTraceToString())
-                        })
+                        throw e  // If the execution got here, something is fishy here, likely a bug/internal error.
                     }
                 }
                 graphSupervisor.complete()
