@@ -132,6 +132,8 @@ internal fun TypeElement.allNonPrivateMethods(): Sequence<ExecutableElement> =
             .filter {
                 // Skip methods from Object.
                 it.enclosingElement != Utils.objectType
+            }.distinctBy {
+                TypeMirrorEquivalence(it.asType()) to it.simpleName
             },
         enclosedElements
             .asSequence()

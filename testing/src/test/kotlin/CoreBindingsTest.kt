@@ -833,5 +833,27 @@ class CoreBindingsTest(
 
         expectSuccessfulValidation()
     }
+
+    @Test
+    fun `component inherits the same method from multiple interfaces`() {
+        givenJavaSource("test.ClassA", """
+            import javax.inject.Inject;
+            public class ClassA { @Inject public ClassA() {} }
+        """.trimIndent())
+        givenJavaSource("test.MyDependencies0", """
+            public interface MyDependencies0 {
+                ClassA classA();
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+
+            interface MyDependencies1 { fun classA(): ClassA }
+            interface MyDependencies2 { fun classA(): ClassA }
+            @Component interface MyComponent : MyDependencies0, MyDependencies1, MyDependencies2
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
 }
 
