@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.base.filterIntoSmallSet
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
@@ -45,7 +46,9 @@ internal class ComponentModelImpl private constructor(
         return visitor.visitComponent(this)
     }
 
-    override val scope = declaration.annotations.find(AnnotationLangModel::isScope)
+    override val scopes: Set<AnnotationLangModel> by lazy {
+        declaration.annotations.filterIntoSmallSet { it.isScope() }
+    }
 
     override val modules: Set<ModuleModel> by lazy {
         val allModules = mutableSetOf<ModuleModel>()

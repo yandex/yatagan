@@ -56,8 +56,10 @@ object Strings {
             "Missing binding for $`for`"
 
         @Covered
-        fun noMatchingScopeForBinding(binding: Any, scope: Any?) =
-            "No components in the hierarchy match binding -> \n$Indent`$binding`\n -> with scope $scope"
+        fun noMatchingScopeForBinding(binding: Any, scopes: Set<Any>) = buildString {
+            append("No components in the hierarchy match binding -> \n$Indent`$binding`\n -> with ")
+            append(scopes.singleOrNull()?.let { "scope $it" } ?: "scopes $scopes")
+        }
 
         @Covered
         fun invalidFlatteningMultibinding(insteadOf: Any) =

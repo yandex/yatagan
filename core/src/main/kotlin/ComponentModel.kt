@@ -14,9 +14,9 @@ interface ComponentModel : ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
     val modules: Set<ModuleModel>
 
     /**
-     * A scope for bindings, that component can cache.
+     * All supported scopes for bindings, that component can cache.
      */
-    val scope: AnnotationLangModel?
+    val scopes: Set<AnnotationLangModel>
 
     /**
      * A set of component *dependencies*.

@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.base.notIntersects
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
@@ -60,8 +61,8 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
     override val conditionScope: ConditionScope
         get() = ConditionScope.Unscoped
 
-    override val scope: AnnotationLangModel?
-        get() = null
+    override val scopes: Set<AnnotationLangModel>
+        get() = emptySet()
 
     /**
      * `true` if the binding requires the dependencies of compatible condition scope, and it's an error to
@@ -91,8 +92,8 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
             }
         }
 
-        if (scope != null && scope != owner.scope) {
-            validator.reportError(Errors.noMatchingScopeForBinding(binding = this@BindingMixin, scope = scope))
+        if (scopes.isNotEmpty() && scopes notIntersects owner.scopes) {
+            validator.reportError(Errors.noMatchingScopeForBinding(binding = this@BindingMixin, scopes = scopes))
         }
     }
 
@@ -148,7 +149,7 @@ internal class ProvisionBindingImpl(
     override val owner: BindingGraphImpl,
 ) : ProvisionBinding, ConditionalBindingMixin, ModuleHostedMixin() {
 
-    override val scope get() = impl.scope
+    override val scopes get() = impl.scopes
     override val provision get() = impl.provision
     override val inputs get() = impl.inputs
     override val requiresModuleInstance get() = impl.requiresModuleInstance
@@ -173,7 +174,7 @@ internal class InjectConstructorProvisionBindingImpl(
 ) : ProvisionBinding, ConditionalBindingMixin {
     override val target get() = impl.asNode()
     override val originModule: Nothing? get() = null
-    override val scope: AnnotationLangModel? get() = impl.scope
+    override val scopes: Set<AnnotationLangModel> get() = impl.scopes
     override val provision get() = impl.constructor
     override val inputs: List<NodeDependency> get() = impl.inputs
     override val requiresModuleInstance: Boolean = false
@@ -276,9 +277,11 @@ internal class AliasBindingImpl(
 
     override fun validate(validator: Validator) {
         validator.child(owner.resolveRaw(source))
-        if (impl.scope != null) {
+        if (impl.scopes.isNotEmpty()) {
             validator.reportWarning("Scope has no effect on 'alias' binding") {
-                addNote("Scope is inherited from source graph node and can not be overridden")
+                addNote("Scope is inherited from the source graph node and can not be overridden. " +
+                        "Use multiple scopes on the source node to declare it compatible with another scope, " +
+                        "if required.")
             }
         }
     }
@@ -292,7 +295,7 @@ internal class AlternativesBindingImpl(
     override val impl: BindsBindingModel,
     override val owner: BindingGraphImpl,
 ) : AlternativesBinding, BindingMixin, ModuleHostedMixin() {
-    override val scope get() = impl.scope
+    override val scopes get() = impl.scopes
     override val alternatives get() = impl.sources
 
     override val conditionScope: ConditionScope by lazy(PUBLICATION) {
@@ -548,7 +551,7 @@ internal data class MissingBindingImpl(
         override fun visitInjectConstructor(model: InjectConstructorModel) {
             // This @inject was not used, the problem is in scope then.
             validator.reportError(Errors.noMatchingScopeForBinding(
-                binding = model, scope = model.scope))
+                binding = model, scopes = model.scopes))
         }
 
         override fun visitComponent(model: ComponentModel) = reportMissingBinding {

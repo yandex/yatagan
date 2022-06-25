@@ -139,7 +139,7 @@ internal class RuntimeComponent(
                 }
             }
             accessStrategies[binding] = run {
-                val provision: AccessStrategy = if (binding.scope != null) {
+                val provision: AccessStrategy = if (binding.scopes.isNotEmpty()) {
                     CachingAccessStrategy(creation)
                 } else {
                     CreatingAccessStrategy(creation)

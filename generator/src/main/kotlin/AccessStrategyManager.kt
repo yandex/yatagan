@@ -47,7 +47,7 @@ internal class AccessStrategyManager(
             if (binding.conditionScope.isNever) {
                 return EmptyAccessStrategy
             }
-            val strategy = if (binding.scope != null) {
+            val strategy = if (binding.scopes.isNotEmpty()) {
                 when(detectDegenerateUsage(binding)) {
                     DegenerateBindingUsage.SingleLocalDirect -> {
                         inlineStrategy(
@@ -195,7 +195,7 @@ internal class AccessStrategyManager(
         //  dependant binding. If we find it - cool, can use inline. Otherwise, this single dependant may be
         //  from the child graphs or entry-point(s)/member-injector(s), etc... - not correct to use inline.
 
-        if (singleDependentBinding.scope != null) {
+        if (singleDependentBinding.scopes.isNotEmpty()) {
             // If it is scoped (cached), can use the optimization
             return potentialCase
         }

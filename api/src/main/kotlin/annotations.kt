@@ -58,6 +58,7 @@ annotation class Module(
  * /*@*/ }
  *
  * // Other variants are more advanced cases, that are part of the *Conditions API*.
+ * //
  *
  * // `@Binds` methods with *more than one* parameter constitute an **alternatives** binding:
  * /*@*/ @Module interface TestModule2 {
@@ -183,8 +184,12 @@ annotation class Provides(
  *
  * ## Scopes
  * Scopes manage, *where* and *how many times* an instance of a type can be created by the framework.
- * If a binding is bound to a scope by using [Scope][javax.inject.Scope]-annotated annotation,
+ * If a binding is bound to a scope (or multiple scopes) by using [Scope][javax.inject.Scope]-annotated annotation(s),
  * then **it is cached inside the scope**. For such bindings, `Lazy` and `Provider` injections have no difference.
+ *
+ * Scoped bindings can only be used inside a component of the same scope.
+ * If a binding is marked by more than one scope it is compatible with any component that has at least one scope from
+ * the list (binding's and component's scopes intersection is non-empty).
  *
  * For *unscoped* bindings, an instance will be created on every request;
  * `Lazy` can locally cache such bindings.
