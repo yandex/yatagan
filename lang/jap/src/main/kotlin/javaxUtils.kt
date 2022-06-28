@@ -32,6 +32,7 @@ import javax.lang.model.type.PrimitiveType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.type.WildcardType
+import javax.lang.model.util.ElementFilter
 import javax.lang.model.util.SimpleElementVisitor8
 
 inline fun <reified T : Annotation> Element.isAnnotatedWith() = annotationMirrors.any {
@@ -123,6 +124,24 @@ internal fun TypeElement.isFromKotlin(): Boolean {
 internal tailrec fun Element.isFromKotlin(): Boolean {
     // For a random element need to find a type element it belongs to first.
     return asTypeElementOrNull()?.isFromKotlin() ?: (enclosingElement ?: return false).isFromKotlin()
+}
+
+internal fun TypeElement.allNonPrivateFields(): Sequence<VariableElement> = sequence {
+    suspend fun SequenceScope<VariableElement>.addFieldsFrom(declaration: TypeElement) {
+        if (declaration == Utils.objectType) {
+            return
+        }
+        for (field in ElementFilter.fieldsIn(declaration.enclosedElements)) {
+            if (!field.isPrivate) {
+                yield(field)
+            }
+        }
+        val superclass = declaration.superclass
+        if (superclass.kind != TypeKind.NONE) {
+            addFieldsFrom(superclass.asTypeElement())
+        }
+    }
+    addFieldsFrom(this@allNonPrivateFields)
 }
 
 internal fun TypeElement.allNonPrivateMethods(): Sequence<ExecutableElement> =

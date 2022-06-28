@@ -515,8 +515,12 @@ class CoreBindingsKotlinTest(
             class Foo {
                 @set:Inject @set:Named("hello")
                 lateinit var helloA: Provider<Api>
-                @set:Inject @set:Named("bye")
+                
+                @Inject @field:Named("bye")  // Inject into field
                 lateinit var bye: Provider<Api>
+                
+                @set:Inject @set:Named("bye")  // Inject via setter
+                lateinit var bye2: Provider<Api>
                 
                 lateinit var b: ClassB
                     private set
@@ -542,6 +546,107 @@ class CoreBindingsKotlinTest(
                 Dagger.create(TestComponent::class.java).injectFoo(foo)
                 foo.helloA; foo.bye; foo.b; foo.a
             }""".trimIndent())
+
+        expectSuccessfulValidation()
+    }
+
+    @Test
+    fun `advanced member inject`() {
+        givenJavaSource("test.JavaQualifier", """
+            import java.lang.annotation.ElementType;
+
+            @javax.inject.Qualifier
+            @java.lang.annotation.Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
+            @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+            public @interface JavaQualifier {}
+        """.trimIndent())
+        givenJavaSource("test.JavaBase", """
+            import javax.inject.Provider;
+            import javax.inject.Inject;
+            public class JavaBase<T, K> {
+                @Inject public Provider<T> javaBaseField;
+                @Inject public K javaBaseField2;
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            import javax.inject.*
+            import com.yandex.daggerlite.*
+    
+            @Qualifier
+            @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.FUNCTION)
+            annotation class KotlinQualifierForField
+
+            @Qualifier
+            @Target(AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.FUNCTION)
+            annotation class KotlinQualifierForSetter
+
+            interface ApiKotlin {
+                @set:Inject @set:JavaQualifier  // This should be ignored
+                var apiProp: Any
+            }
+
+            open class Base : JavaBase<Int, Int>(), ApiKotlin {
+                @Inject @JavaQualifier  // Expected to apply to field
+                lateinit var baseLateInitProp: Any
+                
+                @Inject @KotlinQualifierForField
+                lateinit var baseLateInitPropK: Any
+    
+                @Inject @JavaQualifier
+                override lateinit var apiProp: Any
+            }
+
+            class Derived : Base() {
+                @set:Inject @set:JavaQualifier
+                lateinit var lateInitProp: Any
+                
+                @set:Inject @set:KotlinQualifierForSetter
+                lateinit var lateInitPropK: Any
+            }
+
+            @Module
+            class MyModule {
+                var javaQualifiedCount = 0
+                var kotlinForSetterQualifiedCount = 0
+                var kotlinForFieldQualifiedCount = 0
+
+                @Provides @JavaQualifier fun a() = Any().also { ++javaQualifiedCount }
+                @Provides @KotlinQualifierForField fun b() = Any().also { ++kotlinForFieldQualifiedCount }
+                @Provides @KotlinQualifierForSetter fun c() = Any().also { ++kotlinForSetterQualifiedCount }
+            }
+
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                fun inject(d: Derived)
+                
+                @Component.Builder
+                interface Creator {
+                    fun create(
+                        module: MyModule,
+                        @BindsInstance arg: Int,
+                    ): TestComponent
+                }
+            }
+
+            fun test() {
+                val c: TestComponent.Creator = Dagger.builder(TestComponent.Creator::class.java)
+                val module = MyModule()
+                val component = c.create(module = module, arg = 1)
+                    
+                val d = Derived()
+                component.inject(d)
+                checkNotNull(d.lateInitProp)
+                checkNotNull(d.baseLateInitProp)
+                checkNotNull(d.baseLateInitPropK)
+                checkNotNull(d.lateInitPropK)
+                checkNotNull(d.javaBaseField)
+                checkNotNull(d.javaBaseField2)
+                checkNotNull(d.apiProp)
+                assert(module.javaQualifiedCount == 3)
+                assert(module.kotlinForSetterQualifiedCount == 1)
+                assert(module.kotlinForFieldQualifiedCount == 1)
+            }
+        """.trimIndent())
 
         expectSuccessfulValidation()
     }

@@ -12,7 +12,7 @@ package com.yandex.daggerlite.base
  *
  * @see ObjectCacheRegistry
  */
-abstract class ObjectCache<K, V : Any> : ObjectCacheBase() {
+abstract class ObjectCache<K, V> : ObjectCacheBase() {
     @PublishedApi
     internal val cache = hashMapOf<K, V>()
 

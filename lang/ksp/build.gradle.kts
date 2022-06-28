@@ -23,4 +23,9 @@ dependencies {
 
     implementation(kotlin("stdlib"))
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+
+    // KSP internals, sometimes required for workarounds
+    // FIXME: Remove this once there are no workarounds with access to internals employed.
+    compileOnly("com.google.devtools.ksp:symbol-processing:$kspVersion")
+    compileOnly(kotlin("compiler-embeddable"))
 }

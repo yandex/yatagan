@@ -33,6 +33,7 @@ class NoDeclaration (
 
     override fun asType(): TypeLangModel = type
 
+    override fun toString() = "Empty declaration of $type"
     override fun hashCode(): Int = type.hashCode()
     override fun equals(other: Any?): Boolean {
         return this === other || (other is NoDeclaration && type == other.type)
