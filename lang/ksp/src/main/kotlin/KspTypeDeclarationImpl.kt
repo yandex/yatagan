@@ -149,13 +149,11 @@ internal class KspTypeDeclarationImpl private constructor(
     ) {
         for (function in declaration.allNonPrivateFunctions()) {
             if (!filter.filterFunction(function)) continue
-            yield(
-                KspFunctionImpl(
-                    owner = this@KspTypeDeclarationImpl,
-                    impl = function,
-                    isStatic = isStatic(function),
-                )
-            )
+            yield(KspFunctionImpl(
+                owner = this@KspTypeDeclarationImpl,
+                impl = function,
+                isStatic = isStatic(function),
+            ))
         }
 
         for (property in declaration.allNonPrivateProperties()) {
@@ -178,23 +176,40 @@ internal class KspTypeDeclarationImpl private constructor(
         val isPropertyStatic = isStatic(property)
         property.getter?.let { getter ->
             if (filter.filterAccessor(getter)) {
-                yield(
-                    KspFunctionPropertyGetterImpl(
-                        owner = owner, getter = getter,
-                        isStatic = isPropertyStatic || isStatic(getter)
-                    )
-                )
+                yield(KspFunctionPropertyGetterImpl(
+                    owner = owner, getter = getter,
+                    isStatic = isPropertyStatic || isStatic(getter)
+                ))
             }
         }
         property.setter?.let { setter ->
             val modifiers = setter.modifiers
             if (Modifier.PRIVATE !in modifiers && Modifier.PROTECTED !in modifiers && filter.filterAccessor(setter)) {
-                yield(
-                    KspFunctionPropertySetterImpl(
-                        owner = owner, setter = setter,
-                        isStatic = isPropertyStatic || isStatic(setter)
-                    )
-                )
+                yield(KspFunctionPropertySetterImpl(
+                    owner = owner, setter = setter,
+                    isStatic = isPropertyStatic || isStatic(setter)
+                ))
+            }
+        }
+    }
+
+    private suspend fun SequenceScope<FieldLangModel>.yieldInheritedFields() {
+        val declared = impl.getDeclaredProperties().toSet()
+        for (property in impl.getAllProperties()) {
+            if (property in declared /* not handled here */ ||
+                property.isPrivate() /* skip private properties */) {
+                continue
+            }
+            if (
+                (property.getter == null && property.setter == null &&
+                        Modifier.JAVA_STATIC !in property.modifiers) /* Java field */ ||
+                property.isLateInit() /* lateinit property always exposes a field */
+            ) {
+                yield(KspFieldImpl(
+                    impl = property,
+                    owner = this@KspTypeDeclarationImpl,
+                    isStatic = false,
+                ))
             }
         }
     }
@@ -205,24 +220,20 @@ internal class KspTypeDeclarationImpl private constructor(
                 KotlinObjectKind.Object -> {
                     for (property in impl.getDeclaredProperties()) {
                         // `lateinit` generates exposed field
-                        if (property.isPrivate() || (!property.isKotlinField() && !property.isLateInit())) {
+                        if (property.isPrivate() || (!property.isKotlinFieldInObject() && !property.isLateInit())) {
                             continue  // Not a field
                         }
-                        yield(
-                            KspFieldImpl(
+                        yield(KspFieldImpl(
                                 impl = property,
                                 owner = this@KspTypeDeclarationImpl,
                                 isStatic = true,  // Every field is static in kotlin object.
-                            )
-                        )
+                        ))
                     }
                     // Simulate INSTANCE field for static kotlin singleton.
-                    yield(
-                        PSFSyntheticField(
+                    yield(PSFSyntheticField(
                             owner = this@KspTypeDeclarationImpl,
                             name = "INSTANCE",
-                        )
-                    )
+                    ))
                 }
                 KotlinObjectKind.Companion -> {
                     // Nothing here, no fields are actually generated in companion,
@@ -234,57 +245,52 @@ internal class KspTypeDeclarationImpl private constructor(
                             // Then any "property" represents a field in Java
                             for (field in impl.getDeclaredProperties()) {
                                 if (field.isPrivate()) continue
-                                yield(
-                                    KspFieldImpl(
-                                        impl = field,
-                                        owner = this@KspTypeDeclarationImpl,
-                                        isStatic = Modifier.JAVA_STATIC in field.modifiers,
-                                    )
-                                )
+                                yield(KspFieldImpl(
+                                    impl = field,
+                                    owner = this@KspTypeDeclarationImpl,
+                                    isStatic = Modifier.JAVA_STATIC in field.modifiers,
+                                ))
                             }
                         }
                         Origin.KOTLIN, Origin.KOTLIN_LIB, Origin.SYNTHETIC -> {
                             // Assume kotlin origin.
                             for (property in impl.getDeclaredProperties()) {
-                                if (property.isPrivate() || !property.isKotlinField()) {
+                                // Only `lateinit` properties expose a field in regular kotlin class
+                                if (property.isPrivate() || !property.isLateInit()) {
                                     continue
                                 }
-                                yield(
-                                    KspFieldImpl(
-                                        impl = property,
-                                        owner = this@KspTypeDeclarationImpl,
-                                        isStatic = false,
-                                    )
-                                )
+                                yield(KspFieldImpl(
+                                    impl = property,
+                                    owner = this@KspTypeDeclarationImpl,
+                                    isStatic = false,
+                                ))
                             }
                             impl.getCompanionObject()?.let { companion ->
                                 // Include fields from companion (if any) as they are generated as static fields
                                 //  in the enclosing class.
                                 for (property in companion.getDeclaredProperties()) {
-                                    if (property.isPrivate() || (!property.isKotlinField() && !property.isLateInit())) {
+                                    if (property.isPrivate() ||
+                                        (!property.isKotlinFieldInObject() && !property.isLateInit())) {
                                         continue
                                     }
-                                    yield(
-                                        KspFieldImpl(
-                                            impl = property,
-                                            owner = this@KspTypeDeclarationImpl,
-                                            isStatic = true,  // Every field is static in companion
-                                        )
-                                    )
+                                    yield(KspFieldImpl(
+                                        impl = property,
+                                        owner = this@KspTypeDeclarationImpl,
+                                        isStatic = true,  // Every field is static in companion
+                                    ))
                                 }
                                 // Simulate companion object instance field.
-                                yield(
-                                    PSFSyntheticField(
-                                        owner = this@KspTypeDeclarationImpl,
-                                        type = KspTypeImpl(companion.asType(emptyList())),
-                                        name = companion.simpleName.asString(),
-                                    )
-                                )
+                                yield(PSFSyntheticField(
+                                    owner = this@KspTypeDeclarationImpl,
+                                    type = KspTypeImpl(companion.asType(emptyList())),
+                                    name = companion.simpleName.asString(),
+                                ))
                             }
                         }
                     }
                 }
             }
+            yieldInheritedFields()
         }.memoize()
     }
 
@@ -318,7 +324,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: KSFunctionDeclaration,
-    ) : ConstructorLangModelBase(), AnnotatedLangModel by KspAnnotatedImpl<KSFunctionDeclaration>(platformModel) {
+    ) : ConstructorLangModelBase(), AnnotatedLangModel by KspAnnotatedImpl(platformModel) {
         private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean

@@ -16,7 +16,7 @@ internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
     protected val property = accessor.receiver
 
     init {
-        require(!property.isKotlinField()) { "Not reached: field can't be modeled as a property" }
+        require(!property.isKotlinFieldInObject()) { "Not reached: field can't be modeled as a property" }
     }
 
     protected val jvmSignature by lazy {

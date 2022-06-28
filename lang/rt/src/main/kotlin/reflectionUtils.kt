@@ -4,6 +4,7 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import java.lang.reflect.Constructor
+import java.lang.reflect.Field
 import java.lang.reflect.GenericArrayType
 import java.lang.reflect.Member
 import java.lang.reflect.Method
@@ -207,6 +208,30 @@ fun Class<*>.boxed(): Class<*> {
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
 internal inline val <reified A : Annotation> A.javaAnnotationClass: Class<A>
     get() = (this as java.lang.annotation.Annotation).annotationType() as Class<A>
+
+internal fun Class<*>.getAllFields(): List<Field> = buildList {
+    tailrec fun handleClass(clazz: Class<*>, includeStatic: Boolean) {
+        if (clazz === Any::class.java) {
+            // Do not add fields from java.lang.Object.
+            return
+        }
+        for (declaredField in clazz.declaredFields) {
+            if (declaredField.isPrivate || declaredField.isSynthetic) {
+                // Skip private/synthetic fields
+                continue
+            }
+            if (!includeStatic && declaredField.isStatic) {
+                // Skip static fields
+                continue
+            }
+            add(declaredField)
+        }
+        val superclass = clazz.superclass ?: return
+        handleClass(clazz = superclass, includeStatic = false)
+    }
+    handleClass(clazz = this@getAllFields, includeStatic = true)
+    sortBy { it.name }
+}
 
 internal fun Class<*>.getMethodsOverrideAware(): List<Method> = buildList {
     val overrideControl = hashSetOf<MethodSignatureEquivalenceWrapper>()

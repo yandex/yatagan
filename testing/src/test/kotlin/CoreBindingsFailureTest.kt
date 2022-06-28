@@ -114,7 +114,7 @@ class CoreBindingsFailureTest(
             errorMessage(formatMessage(
                 message = Errors.noMatchingScopeForBinding(
                     binding = "@Inject test.Foo",
-                    scope = "@javax.inject.Singleton",
+                    scopes = setOf("@javax.inject.Singleton"),
                 ),
                 encounterPaths = listOf(
                     // @formatter:off
@@ -169,7 +169,7 @@ class CoreBindingsFailureTest(
             errorMessage(formatMessage(
                 message = Errors.noMatchingScopeForBinding(
                     binding = binding,
-                    scope = "@javax.inject.Singleton"),
+                    scopes = setOf("@javax.inject.Singleton")),
                 encounterPaths = listOf(
                     listOf("test.RootComponent", "test.SubComponent", "[entry-point] getFooForSub", binding),
                 )

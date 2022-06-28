@@ -12,7 +12,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
 interface ModuleHostedBindingModel : MayBeInvalid {
     val originModule: ModuleModel
     val target: BindingTargetModel
-    val scope: AnnotationLangModel?
+    val scopes: Set<AnnotationLangModel>
 
     sealed class BindingTargetModel {
         abstract val node: NodeModel

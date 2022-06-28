@@ -36,8 +36,8 @@ internal class BindingGraphImpl(
 
     override val variant: Variant = component.variant + parent?.variant
 
-    override val scope: AnnotationLangModel?
-        get() = component.scope
+    override val scopes: Set<AnnotationLangModel>
+        get() = component.scopes
 
     override val creator: ComponentFactoryModel?
         get() = component.factory
@@ -246,8 +246,8 @@ internal class BindingGraphImpl(
         }
 
         // Check for duplicate scopes
-        scope?.let { scope ->
-            parents.find { parent -> parent.scope == scope }?.let { withDuplicateScope ->
+        scopes.forEach { scope ->
+            parents.find { parent -> scope in parent.scopes }?.let { withDuplicateScope ->
                 validator.reportError(Strings.Errors.duplicateComponentScope(scope)) {
                     addNote(Strings.Notes.duplicateScopeComponent(component = withDuplicateScope))
                     addNote(Strings.Notes.duplicateScopeComponent(component = this@BindingGraphImpl))

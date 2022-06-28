@@ -27,7 +27,7 @@ interface AliasBinding : BaseBinding {
  */
 interface Binding : BaseBinding {
     val conditionScope: ConditionScope
-    val scope: AnnotationLangModel?
+    val scopes: Set<AnnotationLangModel>
     val dependencies: Sequence<NodeDependency>
 
     fun <R> accept(visitor: Visitor<R>): R

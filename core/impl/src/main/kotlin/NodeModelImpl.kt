@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.base.filterIntoSmallSet
 import com.yandex.daggerlite.core.ConditionalHoldingModel
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.HasNodeModel
@@ -57,8 +58,8 @@ internal class NodeModelImpl private constructor(
             return visitor.visitInjectConstructor(this)
         }
 
-        override val scope: AnnotationLangModel? by lazy {
-            constructor.constructee.annotations.find(AnnotationLangModel::isScope)
+        override val scopes: Set<AnnotationLangModel> by lazy {
+            constructor.constructee.annotations.filterIntoSmallSet { it.isScope() }
         }
 
         override fun validate(validator: Validator) {

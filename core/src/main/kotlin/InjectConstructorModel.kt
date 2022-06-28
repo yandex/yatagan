@@ -8,6 +8,6 @@ import com.yandex.daggerlite.core.lang.ConstructorLangModel
  */
 interface InjectConstructorModel : ConditionalHoldingModel, HasNodeModel {
     val constructor: ConstructorLangModel
-    val scope: AnnotationLangModel?
+    val scopes: Set<AnnotationLangModel>
     val inputs: List<NodeDependency>
 }

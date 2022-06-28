@@ -188,10 +188,7 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
             // Optimize for java code - no need to go through full normalize routine - no kotlin type could be
             // referenced from java
 
-            // Try raw type detection
-            if ((type.declaration as? KSClassDeclaration)?.typeParameters?.isNotEmpty() == true &&
-                "raw " in reference.resolve().toString()
-            ) {
+            if (reference.resolve().isRaw()) {
                 // Raw type detected - remove synthetic arguments, that were "conveniently" added by KSP.
                 return RawType.of(type)
             }

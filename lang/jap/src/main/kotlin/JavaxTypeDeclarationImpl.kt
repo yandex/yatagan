@@ -84,10 +84,8 @@ internal class JavaxTypeDeclarationImpl private constructor(
     }
 
     override val fields: Sequence<FieldLangModel> by lazy {
-        impl.enclosedElements
-        .asSequence()
-        .filter { it.kind == ElementKind.FIELD && !it.isPrivate }
-        .map { JavaxFieldImpl(owner = this, impl = it.asVariableElement()) }
+        impl.allNonPrivateFields()
+        .map { JavaxFieldImpl(owner = this, impl = it) }
         .memoize()
     }
 

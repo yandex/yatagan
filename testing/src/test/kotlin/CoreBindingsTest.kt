@@ -855,5 +855,31 @@ class CoreBindingsTest(
 
         expectSuccessfulValidation()
     }
+
+    @Test
+    fun `multiple scopes`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            @Scope
+            @Retention(AnnotationRetention.RUNTIME)
+            annotation class Singleton2
+
+            @[Singleton Singleton2]
+            class ClassA @Inject constructor()
+            
+            @Component @[Singleton Singleton2]
+            interface MyComponentA { val a: ClassA }
+            
+            @Component @[Singleton]
+            interface MyComponentB { val a: ClassA }
+
+            @Component @[Singleton2]
+            interface MyComponentC { val a: ClassA }
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
 }
 

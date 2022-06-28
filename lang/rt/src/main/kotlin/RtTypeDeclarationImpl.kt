@@ -121,7 +121,7 @@ internal class RtTypeDeclarationImpl private constructor(
     }
 
     override val fields: Sequence<FieldLangModel> by lazy {
-        impl.declaredFields
+        impl.getAllFields()
             .asSequence()
             .filter { !it.isPrivate }
             .sortedBy { it.name }

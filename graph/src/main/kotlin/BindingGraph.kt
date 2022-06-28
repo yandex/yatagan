@@ -95,11 +95,11 @@ interface BindingGraph : MayBeInvalid {
     val dependencies: Collection<ComponentDependencyModel>
 
     /**
-     * Graph scope (optional)
+     * Graph scopes.
      *
-     * @see ComponentModel.scope
+     * @see ComponentModel.scopes
      */
-    val scope: AnnotationLangModel?
+    val scopes: Set<AnnotationLangModel>
 
     /**
      * Component creator model declared in the underlying model.

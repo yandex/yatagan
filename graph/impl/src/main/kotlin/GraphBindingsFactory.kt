@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.graph.impl
 
+import com.yandex.daggerlite.base.notIntersects
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
@@ -260,7 +261,7 @@ internal class GraphBindingsFactory(
         override fun visitDefault(): Binding? = null
 
         override fun visitInjectConstructor(model: InjectConstructorModel): Binding? {
-            if (model.scope != null && model.scope != graph.scope) {
+            if (model.scopes.isNotEmpty() && model.scopes notIntersects graph.scopes) {
                 return null
             }
 

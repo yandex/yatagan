@@ -52,7 +52,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     val functions: Sequence<FunctionLangModel>
 
     /**
-     * Non-private declared fields (including static). Does NOT include inherited ones.
+     * All non-private declared fields (including static and inherited).
      */
     val fields: Sequence<FieldLangModel>
 

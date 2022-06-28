@@ -72,8 +72,6 @@ Other behavioral changes:
 - `@IntoList`/`@IntoMap` bindings contributions are not inherited from parent component.
   Clients will get "duplicate bindings" error instead. An obscure case, yet worth mentioning.
 
-- `@Inject`-ing class members is only done for declared members, not inherited! 
-
 ## Basic sample
 
 ```kotlin
