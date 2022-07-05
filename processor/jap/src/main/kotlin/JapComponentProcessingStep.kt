@@ -4,6 +4,7 @@ import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.ImmutableSetMultimap
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.core.lang.LangModelFactory
+import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.use
 import com.yandex.daggerlite.jap.lang.JavaxModelFactoryImpl
 import com.yandex.daggerlite.jap.lang.ProcessingUtils
@@ -41,6 +42,10 @@ internal class JapComponentProcessingStep(
     override fun annotations(): Set<String> = setOf(Component::class.qualifiedName!!)
 
     override fun createDeclaration(source: TypeElement) = TypeDeclarationLangModel(source)
+
+    override fun getSourceFor(declaration: TypeDeclarationLangModel): TypeElement {
+        return declaration.platformModel as TypeElement
+    }
 
     override fun openFileForGenerating(
         sources: Sequence<TypeElement>,

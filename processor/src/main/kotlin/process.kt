@@ -108,21 +108,8 @@ fun <Source> process(
                             graph = graphRoot,
                         )
                         // Launch codegen
-                        // Cast relies on the fact that `HasPlatformModel.platformModel` is the Source type.
-                        @Suppress("UNCHECKED_CAST")
                         delegate.openFileForGenerating(
-                            sources = sequence {
-                                suspend fun SequenceScope<Any?>.forGraph(graph: BindingGraph) {
-                                    yield(graph.model.type.declaration.platformModel)
-                                    for (module in graph.modules) {
-                                        yield(module.type.declaration.platformModel)
-                                    }
-                                    for (child in graph.children) {
-                                        forGraph(child)
-                                    }
-                                }
-                                forGraph(graphRoot)
-                            } as Sequence<Source>,
+                            sources = allSourcesSequence(delegate, graphRoot),
                             packageName = generator.targetPackageName,
                             className = generator.targetClassName,
                         ).use(generator::generateTo)
@@ -139,4 +126,20 @@ fun <Source> process(
             supervisorJob.join()
         }
     }
+}
+
+private fun <Source> allSourcesSequence(
+    delegate: ProcessorDelegate<Source>,
+    graphRoot: BindingGraph
+) = sequence {
+    suspend fun SequenceScope<Source>.forGraph(graph: BindingGraph) {
+        yield(delegate.getSourceFor(graph.model.type.declaration))
+        for (module in graph.modules) {
+            yield(delegate.getSourceFor(module.type.declaration))
+        }
+        for (child in graph.children) {
+            forGraph(child)
+        }
+    }
+    forGraph(graphRoot)
 }

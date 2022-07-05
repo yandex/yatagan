@@ -8,6 +8,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.core.lang.LangModelFactory
+import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.use
 import com.yandex.daggerlite.ksp.lang.KspModelFactoryImpl
 import com.yandex.daggerlite.ksp.lang.TypeDeclarationLangModel
@@ -47,6 +48,10 @@ internal class KspDaggerLiteProcessor(
     }
 
     override fun createDeclaration(source: KSClassDeclaration) = TypeDeclarationLangModel(source)
+
+    override fun getSourceFor(declaration: TypeDeclarationLangModel): KSClassDeclaration {
+        return declaration.platformModel as KSClassDeclaration
+    }
 
     override fun openFileForGenerating(
         sources: Sequence<KSClassDeclaration>,
