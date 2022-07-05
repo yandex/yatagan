@@ -15,7 +15,7 @@ internal open class InvocationHandlerBase(
 ) : InvocationHandler {
     private val handlers = hashMapOf<MethodSignatureEquivalenceWrapper, MethodHandler>()
 
-    protected interface MethodHandler {
+    interface MethodHandler {
         operator fun invoke(proxy: Any, args: Array<Any?>?): Any?
     }
 

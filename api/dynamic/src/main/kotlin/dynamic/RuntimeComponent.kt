@@ -46,10 +46,38 @@ internal class RuntimeComponent(
     private val givenDependencies: Map<ComponentDependencyModel, Any>,
     validationPromise: DynamicValidationDelegate.Promise?,
     givenModuleInstances: Map<ModuleModel, Any>,
-) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any> {
+) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any>, ConditionalAccessStrategy.ScopeEvaluator {
     lateinit var thisProxy: Any
-    private val accessStrategies = hashMapOf<Binding, AccessStrategy>()
-    private val conditionLiterals = HashMap<Literal, Boolean>().apply {
+
+    private val accessStrategies: Map<Binding, AccessStrategy> = buildMap(capacity = graph.localBindings.size) {
+        for ((binding: Binding, usage) in graph.localBindings) {
+            val strategy = run {
+                val provision: AccessStrategy = if (binding.scopes.isNotEmpty()) {
+                    CachingAccessStrategy(
+                        binding = binding,
+                        creationVisitor = this@RuntimeComponent,
+                        isSynchronizedAccess = graph.requiresSynchronizedAccess,
+                    )
+                } else {
+                    CreatingAccessStrategy(
+                        binding = binding,
+                        creationVisitor = this@RuntimeComponent,
+                        isSynchronizedAccess = graph.requiresSynchronizedAccess,
+                    )
+                }
+                if (usage.hasOptionalUsage()) {
+                    ConditionalAccessStrategy(
+                        underlying = provision,
+                        evaluator = this@RuntimeComponent,
+                        conditionScopeHolder = binding,
+                    )
+                } else provision
+            }
+            put(binding, strategy)
+        }
+    }
+
+    private val conditionLiterals = HashMap<Literal, Boolean>(graph.localConditionLiterals.size, 1.0f).apply {
         for ((literal, usage) in graph.localConditionLiterals) {
             when (usage) {
                 BindingGraph.LiteralUsage.Eager -> {
@@ -61,12 +89,22 @@ internal class RuntimeComponent(
             }
         }
     }
+
     private val moduleInstances = buildMap<ModuleModel, Any> {
         putAll(givenModuleInstances)
         for (module in graph.modules) {
             if (module.requiresInstance && module.isTriviallyConstructable && module !in givenModuleInstances) {
                 put(module, module.type.declaration.rt.getConstructor().newInstance())
             }
+        }
+    }
+
+    init {
+        for ((getter, dependency) in graph.entryPoints) {
+            implementMethod(getter.rt, EntryPointHandler(dependency))
+        }
+        for (memberInject in graph.memberInjectors) {
+            implementMethod(memberInject.injector.rt, MemberInjectorHandler(memberInject))
         }
     }
 
@@ -85,13 +123,16 @@ internal class RuntimeComponent(
     }
 
     private fun componentForGraph(graph: BindingGraph): RuntimeComponent {
-        return if (this.graph == graph) this else parent!!.componentForGraph(graph)
+        var component = this
+        while (component.graph != graph)
+            component = component.parent!!
+        return component
     }
 
     private fun access(binding: Binding, kind: DependencyKind): Any {
         with(accessStrategies[binding]!!) {
             return when (kind) {
-                DependencyKind.Direct -> getDirect()
+                DependencyKind.Direct -> get()
                 DependencyKind.Lazy -> getLazy()
                 DependencyKind.Provider -> getProvider()
                 DependencyKind.Optional -> getOptional()
@@ -122,43 +163,13 @@ internal class RuntimeComponent(
         }
     }
 
-    private fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {
+    override fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {
         for (clause in conditionScope.expression) {
             var clauseValue = false
             for (literal in clause) clauseValue = clauseValue || evaluateLiteral(literal)
             if (!clauseValue) return false
         }
         return true
-    }
-
-    init {
-        for ((binding: Binding, _) in graph.localBindings) {
-            val creation: () -> Any = {
-                validationPromise.awaitOnError {
-                    binding.accept(this)
-                }
-            }
-            accessStrategies[binding] = run {
-                val provision: AccessStrategy = if (binding.scopes.isNotEmpty()) {
-                    CachingAccessStrategy(creation)
-                } else {
-                    CreatingAccessStrategy(creation)
-                }
-                if (!binding.conditionScope.isAlways) {
-                    ConditionalAccessStrategy(
-                        underlying = provision,
-                        isPresent = { evaluateConditionScope(binding.conditionScope) },
-                    )
-                } else provision
-            }
-        }
-
-        for ((getter, dependency) in graph.entryPoints) {
-            implementMethod(getter.rt, EntryPointHandler(dependency))
-        }
-        for (memberInject in graph.memberInjectors) {
-            implementMethod(memberInject.injector.rt, MemberInjectorHandler(memberInject))
-        }
     }
 
     override fun toString(): String = graph.toString()
@@ -304,4 +315,8 @@ internal class RuntimeComponent(
             return null
         }
     }
+}
+
+private fun BindingGraph.BindingUsage.hasOptionalUsage(): Boolean {
+    return (optional + optionalLazy + optionalProvider) > 0
 }
