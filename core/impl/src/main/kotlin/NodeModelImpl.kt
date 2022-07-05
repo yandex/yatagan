@@ -25,7 +25,7 @@ internal class NodeModelImpl private constructor(
 ) : NodeModel, NodeDependency {
 
     init {
-        require(!type.isVoid) {
+        assert(!type.isVoid) {
             "Not reached: void can't be represented as NodeModel"
         }
     }
@@ -34,7 +34,7 @@ internal class NodeModelImpl private constructor(
         override val constructor: ConstructorLangModel,
     ) : InjectConstructorModel, ConditionalHoldingModel {
         init {
-            require(constructor.isAnnotatedWith<Inject>())
+            assert(constructor.isAnnotatedWith<Inject>())
         }
 
         private val conditionalModel by lazy {

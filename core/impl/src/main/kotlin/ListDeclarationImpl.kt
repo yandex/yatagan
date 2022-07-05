@@ -13,7 +13,7 @@ internal class ListDeclarationImpl private constructor(
 
     companion object Factory : ObjectCache<NodeModel, ListDeclarationImpl>() {
         operator fun invoke(function: FunctionLangModel): ListDeclarationImpl {
-            require(function.isAnnotatedWith<DeclareList>()) { "Not reached" }
+            assert(function.isAnnotatedWith<DeclareList>()) { "Not reached" }
             return Factory(NodeModelImpl(
                 type = function.returnType,
                 forQualifier = function,

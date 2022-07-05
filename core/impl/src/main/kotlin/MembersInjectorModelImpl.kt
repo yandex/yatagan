@@ -15,7 +15,7 @@ internal class MembersInjectorModelImpl private constructor(
     override val injector: FunctionLangModel,
 ) : MembersInjectorModel {
     init {
-        require(canRepresent(injector))
+        assert(canRepresent(injector))
     }
 
     private val injectee = injector.parameters.single().type
