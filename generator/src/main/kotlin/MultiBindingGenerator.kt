@@ -4,6 +4,7 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.generator.poetry.CodeBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.Extensible
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 
@@ -35,5 +36,9 @@ internal class MultiBindingGenerator(
             }
         }
         +"return list"
+    }
+
+    companion object Key : Extensible.Key<MultiBindingGenerator> {
+        override val keyType get() = MultiBindingGenerator::class.java
     }
 }

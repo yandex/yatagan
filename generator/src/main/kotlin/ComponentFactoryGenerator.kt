@@ -12,6 +12,7 @@ import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.Extensible
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.PUBLIC
@@ -70,7 +71,7 @@ internal class ComponentFactoryGenerator(
                 field(input.payload.typeName(), name) { modifiers(/*package-private*/ FINAL) }
             }
             superComponentFieldNames.forEach { (input, name) ->
-                field(Generators[input].implName, name) { modifiers(/*package-private*/ FINAL) }
+                field(input[ComponentImplClassName], name) { modifiers(/*package-private*/ FINAL) }
             }
             constructor {
                 modifiers(/*package-private*/)
@@ -78,7 +79,7 @@ internal class ComponentFactoryGenerator(
                 // Firstly - used parents
                 thisGraph.usedParents.forEach { graph ->
                     val name = paramsNs.name(graph.model.name)
-                    parameter(Generators[graph].implName, name)
+                    parameter(graph[ComponentImplClassName], name)
                     +"this.${fieldNameFor(graph)} = $name"
                 }
                 // Secondly and thirdly - factory inputs and builder inputs respectively.
@@ -101,7 +102,7 @@ internal class ComponentFactoryGenerator(
                             thisGraph.usedParents.forEach { graph ->
                                 val name = paramsNs.name(graph.model.name)
                                 builderAccess += "this.$name"
-                                val typeName = Generators[graph].implName
+                                val typeName = graph[ComponentImplClassName]
                                 this@buildClass.field(typeName, name)
                                 parameter(typeName, name)
                                 +"this.$name = $name"
@@ -175,5 +176,9 @@ internal class ComponentFactoryGenerator(
                 +"this.%N = new %T()".formatCode(fieldName, module.typeName())
             }
         }
+    }
+
+    companion object Key : Extensible.Key<ComponentFactoryGenerator> {
+        override val keyType get() = ComponentFactoryGenerator::class.java
     }
 }

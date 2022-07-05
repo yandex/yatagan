@@ -32,7 +32,7 @@ private class CreationGeneratorVisitor(
             val instance = if (binding.requiresModuleInstance) {
                 "%N.%N".formatCode(
                     componentForBinding(binding),
-                    Generators[binding.owner].factoryGenerator.fieldNameFor(binding.originModule!!),
+                    binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.originModule!!),
                 )
             } else null
             binding.provision.accept(object : CallableLangModel.Visitor<Unit> {
@@ -67,7 +67,7 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
-        Generators[binding.owner].assistedInjectFactoryGenerator.generateCreation(
+        binding.owner[AssistedInjectFactoryGenerator].generateCreation(
             builder = builder,
             binding = binding,
             inside = inside,
@@ -77,8 +77,7 @@ private class CreationGeneratorVisitor(
     override fun visitInstance(binding: InstanceBinding) {
         with(builder) {
             val component = componentForBinding(binding)
-            val factory = Generators[binding.owner].factoryGenerator
-            +"$component.${factory.fieldNameFor(binding.target)}"
+            +"$component.${binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.target)}"
         }
     }
 
@@ -93,7 +92,7 @@ private class CreationGeneratorVisitor(
                         continue
                     }
                     val expression = buildExpression {
-                        val gen = Generators[inside].conditionGenerator
+                        val gen = inside[ConditionGenerator]
                         gen.expression(builder = this, conditionScope = altBinding.conditionScope, inside = inside)
                     }
                     +"%L ? ".formatCode(expression)
@@ -113,7 +112,7 @@ private class CreationGeneratorVisitor(
 
     override fun visitSubComponentFactory(binding: SubComponentFactoryBinding) {
         with(builder) {
-            +"new %T(".formatCode(Generators[binding.targetGraph].factoryGenerator.implName)
+            +"new %T(".formatCode(binding.targetGraph[ComponentFactoryGenerator].implName)
             join(binding.targetGraph.usedParents) { parentGraph ->
                 +buildExpression {
                     +componentInstance(inside = inside, graph = parentGraph)
@@ -125,8 +124,7 @@ private class CreationGeneratorVisitor(
 
     override fun visitComponentDependency(binding: ComponentDependencyBinding) {
         with(builder) {
-            val factory = Generators[binding.owner].factoryGenerator
-            +factory.fieldNameFor(binding.dependency)
+            +binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.dependency)
         }
     }
 
@@ -140,14 +138,14 @@ private class CreationGeneratorVisitor(
         with(builder) {
             +"%N.%N.%N()".formatCode(
                 componentForBinding(binding),
-                Generators[binding.owner].factoryGenerator.fieldNameFor(binding.dependency),
+                binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.dependency),
                 binding.getter.name,
             )
         }
     }
 
     override fun visitMulti(binding: MultiBinding) {
-        Generators[binding.owner].multiBindingGenerator.generateCreation(
+        binding.owner[MultiBindingGenerator].generateCreation(
             builder = builder,
             binding = binding,
             inside = inside,
@@ -155,7 +153,7 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitMap(binding: MapBinding) {
-        Generators[binding.owner].mapBindingGenerator.generateCreation(
+        binding.owner[MapBindingGenerator].generateCreation(
             builder = builder,
             binding = binding,
             inside = inside,

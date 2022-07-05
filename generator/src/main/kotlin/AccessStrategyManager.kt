@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.Extensible
 import javax.inject.Provider
 
 internal class AccessStrategyManager(
@@ -215,33 +216,35 @@ internal class AccessStrategyManager(
         }
     }
 
-    companion object {
-        private fun inlineStrategy(
-            binding: Binding,
-            usage: BindingGraph.BindingUsage,
-            methodsNs: Namespace,
-        ): AccessStrategy {
-            val inline = InlineCreationStrategy(
-                binding = binding,
-            )
+    private fun inlineStrategy(
+        binding: Binding,
+        usage: BindingGraph.BindingUsage,
+        methodsNs: Namespace,
+    ): AccessStrategy {
+        val inline = InlineCreationStrategy(
+            binding = binding,
+        )
 
-            if (binding.dependencies.none())
+        if (binding.dependencies.none())
+            return inline
+        if (usage.provider + usage.lazy == 0) {
+            if (usage.direct == 1) {
                 return inline
-            if (usage.provider + usage.lazy == 0) {
-                if (usage.direct == 1) {
-                    return inline
-                }
-            } else {
-                if (usage.direct == 0) {
-                    return inline
-                }
             }
-
-            return WrappingAccessorStrategy(
-                underlying = inline,
-                binding = binding,
-                methodsNs = methodsNs,
-            )
+        } else {
+            if (usage.direct == 0) {
+                return inline
+            }
         }
+
+        return WrappingAccessorStrategy(
+            underlying = inline,
+            binding = binding,
+            methodsNs = methodsNs,
+        )
+    }
+
+    companion object Key : Extensible.Key<AccessStrategyManager> {
+        override val keyType get() = AccessStrategyManager::class.java
     }
 }

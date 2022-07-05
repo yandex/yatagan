@@ -8,6 +8,7 @@ import com.yandex.daggerlite.generator.poetry.CodeBuilder
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.Extensible
 import com.yandex.daggerlite.graph.MapBinding
 
 internal class MapBindingGenerator(
@@ -59,5 +60,9 @@ internal class MapBindingGenerator(
         override fun visitEnumConstant(enum: TypeLangModel, constant: String) = with(builder) {
             +"%T.%N".formatCode(enum.typeName(), constant)
         }
+    }
+
+    companion object Key : Extensible.Key<MapBindingGenerator> {
+        override val keyType get() = MapBindingGenerator::class.java
     }
 }

@@ -104,30 +104,28 @@ fun <Source> process(
                     // TODO(DAGGERLITE-50): Try to support parallel codegen without parallel building and validation
                     val graphRoot = graphRootDeferred.await()
                     try {
-                        val codegenFacade = ComponentGeneratorFacade(
+                        val generator = ComponentGeneratorFacade(
                             graph = graphRoot,
                         )
                         // Launch codegen
-                        codegenFacade.use { generator ->
-                            // Cast relies on the fact that `HasPlatformModel.platformModel` is the Source type.
-                            @Suppress("UNCHECKED_CAST")
-                            delegate.openFileForGenerating(
-                                sources = sequence {
-                                    suspend fun SequenceScope<Any?>.forGraph(graph: BindingGraph) {
-                                        yield(graph.model.type.declaration.platformModel)
-                                        for (module in graph.modules) {
-                                            yield(module.type.declaration.platformModel)
-                                        }
-                                        for (child in graph.children) {
-                                            forGraph(child)
-                                        }
+                        // Cast relies on the fact that `HasPlatformModel.platformModel` is the Source type.
+                        @Suppress("UNCHECKED_CAST")
+                        delegate.openFileForGenerating(
+                            sources = sequence {
+                                suspend fun SequenceScope<Any?>.forGraph(graph: BindingGraph) {
+                                    yield(graph.model.type.declaration.platformModel)
+                                    for (module in graph.modules) {
+                                        yield(module.type.declaration.platformModel)
                                     }
-                                    forGraph(graphRoot)
-                                } as Sequence<Source>,
-                                packageName = generator.targetPackageName,
-                                className = generator.targetClassName,
-                            ).use(generator::generateTo)
-                        }
+                                    for (child in graph.children) {
+                                        forGraph(child)
+                                    }
+                                }
+                                forGraph(graphRoot)
+                            } as Sequence<Source>,
+                            packageName = generator.targetPackageName,
+                            className = generator.targetClassName,
+                        ).use(generator::generateTo)
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Throwable) {

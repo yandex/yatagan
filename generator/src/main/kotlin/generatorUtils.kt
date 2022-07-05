@@ -9,7 +9,7 @@ import com.yandex.daggerlite.graph.BindingGraph
 
 internal fun explicitComponentInstance(inside: BindingGraph, graph: BindingGraph): String? {
     return if (inside != graph) {
-        Generators[inside].factoryGenerator.fieldNameFor(graph)
+        inside[ComponentFactoryGenerator].fieldNameFor(graph)
     } else null
 }
 
@@ -26,7 +26,7 @@ internal fun Binding.generateAccess(
     inside: BindingGraph,
     kind: DependencyKind = DependencyKind.Direct,
 ) {
-    Generators[owner].accessStrategyManager.strategyFor(this).generateAccess(
+    owner[AccessStrategyManager].strategyFor(this).generateAccess(
         builder = builder,
         inside = inside,
         kind = kind,
@@ -41,7 +41,7 @@ internal inline fun CodeBuilder.generateUnderCondition(
     if (!binding.conditionScope.isAlways) {
         if (!binding.conditionScope.isNever) {
             val expression = buildExpression {
-                val gen = Generators[binding.owner].conditionGenerator
+                val gen = binding.owner[ConditionGenerator]
                 gen.expression(this, binding.conditionScope, inside = inside)
             }
             controlFlow("if (%L) ".formatCode(expression)) {
