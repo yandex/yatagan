@@ -859,6 +859,56 @@ class CoreBindingsTest(
         expectSuccessfulValidation()
     }
 
+
+    @Test
+    fun `assisted inject in subcomponents`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*import com.yandex.daggerlite.AssistedFactory
+            import javax.inject.*
+
+            class Foo @AssistedInject constructor(
+                val input: String,
+                @Assisted val number: Int,
+            )
+
+            @AssistedFactory
+            interface FooFactory {
+                fun create(number: Int): Foo
+            }
+
+            @Module(subcomponents = [SubComponent::class])
+            interface RootModule
+
+            interface Dep {
+                val input: String            
+            }
+
+            @Component(modules = [RootModule::class], dependencies = [Dep::class])
+            interface RootComponent {
+                val sub: SubComponent.Creator
+                @Component.Builder interface Creator { fun create(dep: Dep): RootComponent }
+            }
+
+            @Singleton            
+            @Component(isRoot = false)
+            interface SubComponent {
+                val factory: FooFactory            
+                @Component.Builder
+                interface Creator {
+                    fun create(): SubComponent
+                }
+            }
+    
+            fun test() {
+                val c: RootComponent.Creator = Dagger.builder(RootComponent.Creator::class.java)
+                val component = c.create(object : Dep { override val input get() = "" })    
+                component.sub.create().factory.create(1)            
+            }        
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
+
     @Test
     fun `component inherits the same method from multiple interfaces`() {
         givenJavaSource("test.ClassA", """
