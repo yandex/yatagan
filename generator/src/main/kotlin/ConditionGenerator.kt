@@ -96,9 +96,7 @@ internal class ConditionGenerator(
 
         override fun access(builder: ExpressionBuilder, inside: BindingGraph) {
             with(builder) {
-                +componentInstance(inside = inside, graph = thisGraph)
-                +"."
-                +name
+                +"%L.%N".formatCode(componentInstance(inside = inside, graph = thisGraph), name)
             }
         }
     }
@@ -148,10 +146,7 @@ internal class ConditionGenerator(
 
         override fun access(builder: ExpressionBuilder, inside: BindingGraph) {
             with(builder) {
-                +componentInstance(inside = inside, graph = thisGraph)
-                +"."
-                +accessorName
-                +"()"
+                +"%L.%N()".formatCode(componentInstance(inside = inside, graph = thisGraph), accessorName)
             }
         }
     }

@@ -751,6 +751,20 @@ class CoreBindingsTest(
 
     @Test
     fun `basic assisted inject`() {
+        givenJavaSource("test.ScopedDep", """
+            import javax.inject.Inject;
+            import javax.inject.Singleton;
+            @Singleton
+            public class ScopedDep {
+                @Inject public ScopedDep() {}
+            }
+        """.trimIndent())
+        givenJavaSource("test.UnscopedDep", """
+            import javax.inject.Inject;
+            public class UnscopedDep {
+                @Inject public UnscopedDep() {}
+            }
+        """.trimIndent())
         givenJavaSource("test.BarFactory", """
             import com.yandex.daggerlite.AssistedFactory;
             import com.yandex.daggerlite.Assisted;
@@ -770,10 +784,14 @@ class CoreBindingsTest(
         givenJavaSource("test.Foo", """
             import com.yandex.daggerlite.AssistedInject;
             import com.yandex.daggerlite.Assisted;
+            import javax.inject.Named;
             
             public class Foo { 
                 public final Bar bar;
                 @AssistedInject public Foo(
+                    ScopedDep scopedDep,
+                    UnscopedDep unscopedDep,
+                    @Named("input") String string,
                     @Assisted("c2") int c2,
                     BarFactory factory,
                     @Assisted("c1") int c1,
@@ -805,17 +823,24 @@ class CoreBindingsTest(
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
+            import javax.inject.*
             
             @Module(subcomponents = [SubComponent::class])
             interface TestModule
 
+            @Singleton
             @Component(modules = [TestModule::class])
             interface TestComponent {
-                fun fooFactory(): FooFactory 
+                fun fooFactory(): FooFactory
+                @Component.Builder interface Factory {
+                    fun create(
+                        @BindsInstance @Named("input") string: String
+                    ): TestComponent
+                }
             }
             
             fun test() {
-                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                val c: TestComponent = Dagger.builder(TestComponent.Factory::class.java).create("foo")
                 val f = c.fooFactory().createFoo(1, 2, "hello")
                 assert(f.bar.c1 == 1)
                 assert(f.bar.c2 == 2)

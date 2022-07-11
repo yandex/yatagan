@@ -32,8 +32,11 @@ internal class AssistedInjectFactoryGenerator(
         val localImplName = modelToImpl[binding.model]
         if (localImplName != null) {
             with(builder) {
-                val component = componentInstance(inside = inside, graph = thisGraph)
-                +"%T.%L.new %T()".formatCode(inside[ComponentImplClassName], component, localImplName)
+                +"%T.%L.new %T()".formatCode(
+                    inside[ComponentImplClassName],
+                    componentInstance(inside = inside, graph = thisGraph),
+                    localImplName,
+                )
             }
         } else {
             thisGraph.parent!![AssistedInjectFactoryGenerator]
@@ -65,6 +68,7 @@ internal class AssistedInjectFactoryGenerator(
                                         is AssistedInjectFactoryModel.Parameter.Injected -> {
                                             val (node, kind) = parameter.dependency
                                             thisGraph.resolveBinding(node).generateAccess(
+                                                isInsideInnerClass = true,
                                                 builder = this,
                                                 inside = thisGraph,
                                                 kind = kind,

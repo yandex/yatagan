@@ -18,12 +18,18 @@ internal abstract class MultiBindingGeneratorBase<B : Binding>(
         )
     }
 
-    fun generateCreation(builder: ExpressionBuilder, binding: B, inside: BindingGraph) {
+    fun generateCreation(
+        builder: ExpressionBuilder,
+        binding: B,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean,
+    ) {
         with(builder) {
-            +componentForBinding(inside = inside, binding = binding)
-            +"."
-            +accessorNames[binding]!!
-            +"()"
+            +"%L.%N()".formatCode(componentForBinding(
+                inside = inside,
+                binding = binding,
+                isInsideInnerClass = isInsideInnerClass,
+            ), accessorNames[binding]!!)
         }
     }
 

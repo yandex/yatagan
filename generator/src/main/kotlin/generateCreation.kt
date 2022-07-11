@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.generator
 
+import com.squareup.javapoet.CodeBlock
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
@@ -26,11 +27,12 @@ import com.yandex.daggerlite.graph.SubComponentFactoryBinding
 private class CreationGeneratorVisitor(
     private val builder: ExpressionBuilder,
     private val inside: BindingGraph,
+    private val isInsideInnerClass: Boolean,
 ) : Binding.Visitor<Unit> {
     override fun visitProvision(binding: ProvisionBinding) {
         with(builder) {
             val instance = if (binding.requiresModuleInstance) {
-                "%N.%N".formatCode(
+                "%L.%N".formatCode(
                     componentForBinding(binding),
                     binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.originModule!!),
                 )
@@ -76,8 +78,10 @@ private class CreationGeneratorVisitor(
 
     override fun visitInstance(binding: InstanceBinding) {
         with(builder) {
-            val component = componentForBinding(binding)
-            +"$component.${binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.target)}"
+            +"%L.%N".formatCode(
+                componentForBinding(binding),
+                binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.target),
+            )
         }
     }
 
@@ -115,7 +119,7 @@ private class CreationGeneratorVisitor(
             +"new %T(".formatCode(binding.targetGraph[ComponentFactoryGenerator].implName)
             join(binding.targetGraph.usedParents) { parentGraph ->
                 +buildExpression {
-                    +componentInstance(inside = inside, graph = parentGraph)
+                    +"%L".formatCode(componentInstance(inside = inside, graph = parentGraph))
                 }
             }
             +")"
@@ -136,7 +140,7 @@ private class CreationGeneratorVisitor(
 
     override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding) {
         with(builder) {
-            +"%N.%N.%N()".formatCode(
+            +"%L.%N.%N()".formatCode(
                 componentForBinding(binding),
                 binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.dependency),
                 binding.getter.name,
@@ -149,6 +153,7 @@ private class CreationGeneratorVisitor(
             builder = builder,
             binding = binding,
             inside = inside,
+            isInsideInnerClass = isInsideInnerClass,
         )
     }
 
@@ -157,6 +162,7 @@ private class CreationGeneratorVisitor(
             builder = builder,
             binding = binding,
             inside = inside,
+            isInsideInnerClass = isInsideInnerClass,
         )
     }
 
@@ -164,14 +170,23 @@ private class CreationGeneratorVisitor(
         throw AssertionError("Not reached: unreported empty/missing binding: `$binding`")
     }
 
-    private fun componentForBinding(binding: Binding): String {
-        return componentForBinding(inside = inside, binding = binding)
+    private fun componentForBinding(binding: Binding): CodeBlock {
+        return componentForBinding(
+            inside = inside,
+            binding = binding,
+            isInsideInnerClass = isInsideInnerClass,
+        )
     }
 }
 
 internal fun Binding.generateCreation(
     builder: ExpressionBuilder,
     inside: BindingGraph,
+    isInsideInnerClass: Boolean,
 ) {
-    accept(CreationGeneratorVisitor(builder = builder, inside = inside))
+    accept(CreationGeneratorVisitor(
+        builder = builder,
+        inside = inside,
+        isInsideInnerClass = isInsideInnerClass,
+    ))
 }

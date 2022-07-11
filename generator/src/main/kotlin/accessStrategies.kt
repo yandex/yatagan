@@ -25,12 +25,21 @@ internal abstract class CachingStrategyBase(
         instanceAccessorName = methodsNs.name(target.name, prefix = "cache", qualifier = target.qualifier)
     }
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
         builder.apply {
             when (kind) {
                 DependencyKind.Direct -> {
-                    val component = componentForBinding(inside = inside, binding = binding)
-                    +"$component.%N()".formatCode(instanceAccessorName)
+                    val component = componentForBinding(
+                        inside = inside,
+                        binding = binding,
+                        isInsideInnerClass = isInsideInnerClass,
+                    )
+                    +"%L.%N()".formatCode(component, instanceAccessorName)
                 }
                 else -> throw AssertionError()
             }.let { /*exhaustive*/ }
@@ -56,7 +65,7 @@ internal class CachingStrategySingleThread(
                 +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
                 +buildExpression {
                     +"local = "
-                    binding.generateCreation(builder = this, inside = binding.owner)
+                    binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)
                 }
                 +"this.%N = local".formatCode(instanceFieldName)
             }
@@ -91,7 +100,7 @@ internal class CachingStrategyMultiThread(
                     controlFlow("if (local instanceof %T)".formatCode(lockName)) {
                         +buildExpression {
                             +"local = "
-                            binding.generateCreation(builder = this, inside = binding.owner)
+                            binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)
                         }
                         +"this.%N = local".formatCode(instanceFieldName)
                     }
@@ -111,12 +120,21 @@ internal class SlotProviderStrategy(
     private val providerName = cachingProvider.name
     private val slot = multiFactory.requestSlot(binding)
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
         when (kind) {
             DependencyKind.Lazy, DependencyKind.Provider -> builder.apply {
-                val component = componentForBinding(inside = inside, binding = binding)
+                val component = componentForBinding(
+                    inside = inside,
+                    binding = binding,
+                    isInsideInnerClass = isInsideInnerClass,
+                )
                 // Provider class is chosen based on component (delegate) type - it will be the right one.
-                +"new %T($component, $slot)".formatCode(providerName)
+                +"new %T(%L, $slot)".formatCode(providerName, component)
             }
             else -> throw AssertionError()
         }.let { /*exhaustive*/ }
@@ -126,9 +144,14 @@ internal class SlotProviderStrategy(
 internal class InlineCreationStrategy(
     private val binding: Binding,
 ) : AccessStrategy {
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
         assert(kind == DependencyKind.Direct)
-        binding.generateCreation(builder = builder, inside = inside)
+        binding.generateCreation(builder = builder, inside = inside, isInsideInnerClass = isInsideInnerClass)
     }
 }
 
@@ -150,16 +173,26 @@ internal class WrappingAccessorStrategy(
             returnType(binding.target.typeName())
             +buildExpression {
                 +"return "
-                underlying.generateAccess(builder = this, kind = DependencyKind.Direct, inside = binding.owner)
+                underlying.generateAccess(
+                    builder = this,
+                    kind = DependencyKind.Direct,
+                    inside = binding.owner,
+                    isInsideInnerClass = false,
+                )
             }
         }
     }
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
         assert(kind == DependencyKind.Direct)
-        val component = componentForBinding(inside = inside, binding = binding)
+        val component = componentForBinding(inside = inside, binding = binding, isInsideInnerClass = isInsideInnerClass)
         builder.apply {
-            +"$component.$accessorName()"
+            +"%L.%N()".formatCode(component, accessorName)
         }
     }
 }
@@ -183,14 +216,25 @@ internal class CompositeStrategy(
         ).forEach { it.generateInComponent(builder) }
     }
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
+        fun delegateTo(strategy: AccessStrategy?) = checkNotNull(strategy).generateAccess(
+            builder = builder,
+            kind = kind,
+            inside = inside,
+            isInsideInnerClass = isInsideInnerClass,
+        )
         when (kind) {
-            DependencyKind.Direct -> directStrategy.generateAccess(builder, kind, inside)
-            DependencyKind.Lazy -> checkNotNull(lazyStrategy).generateAccess(builder, kind, inside)
-            DependencyKind.Provider -> checkNotNull(providerStrategy).generateAccess(builder, kind, inside)
-            DependencyKind.Optional -> checkNotNull(conditionalStrategy).generateAccess(builder, kind, inside)
-            DependencyKind.OptionalLazy -> checkNotNull(conditionalLazyStrategy).generateAccess(builder, kind, inside)
-            DependencyKind.OptionalProvider -> checkNotNull(conditionalProviderStrategy).generateAccess(builder, kind, inside)
+            DependencyKind.Direct -> delegateTo(directStrategy)
+            DependencyKind.Lazy -> delegateTo(lazyStrategy)
+            DependencyKind.Provider -> delegateTo(providerStrategy)
+            DependencyKind.Optional -> delegateTo(conditionalStrategy)
+            DependencyKind.OptionalLazy -> delegateTo(conditionalLazyStrategy)
+            DependencyKind.OptionalProvider -> delegateTo(conditionalProviderStrategy)
         }.let { /*exhaustive*/ }
     }
 }
@@ -202,11 +246,16 @@ internal class OnTheFlyScopedProviderCreationStrategy(
 ) : AccessStrategy {
     private val providerName = cachingProvider.name
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
         require(kind == DependencyKind.Lazy || kind == DependencyKind.Provider)
         builder.apply {
-            val component = componentForBinding(inside = inside, binding = binding)
-            +"new %T($component, $slot)".formatCode(providerName)
+            val component = componentForBinding(inside = inside, binding = binding, isInsideInnerClass = isInsideInnerClass)
+            +"new %T(%L, $slot)".formatCode(providerName, component)
         }
     }
 }
@@ -218,11 +267,16 @@ internal class OnTheFlyUnscopedProviderCreationStrategy(
 ) : AccessStrategy {
     private val providerName = unscopedProviderGenerator.name
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
         require(kind == DependencyKind.Provider)
         builder.apply {
-            val component = componentForBinding(inside = inside, binding = binding)
-            +"new %T($component, $slot)".formatCode(providerName)
+            val component = componentForBinding(inside = inside, binding = binding, isInsideInnerClass = isInsideInnerClass)
+            +"new %T(%L, $slot)".formatCode(providerName, component)
         }
     }
 }
@@ -252,24 +306,29 @@ internal class ConditionalAccessStrategy(
                     }
                     +buildExpression {
                         +"return %L ? %T.of(".formatCode(expression, Names.Optional)
-                        underlying.generateAccess(this, dependencyKind, binding.owner)
+                        underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
                         +") : %T.empty()".formatCode(Names.Optional)
                     }
                 }
                 else -> +buildExpression {
                     +"return %T.of(".formatCode(Names.Optional)
-                    underlying.generateAccess(this, dependencyKind, binding.owner)
+                    underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
                     +")"
                 }
             }
         }
     }
 
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
         check(dependencyKind.asOptional() == kind)
-        val component = componentForBinding(inside = inside, binding = binding)
+        val component = componentForBinding(inside = inside, binding = binding, isInsideInnerClass = isInsideInnerClass)
         builder.apply {
-            +"$component.$accessorName()"
+            +"%L.%N()".formatCode(component, accessorName)
         }
     }
 }
@@ -282,7 +341,12 @@ private fun DependencyKind.asOptional(): DependencyKind = when (this) {
 }
 
 object EmptyAccessStrategy : AccessStrategy {
-    override fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph) {
+    override fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean
+    ) {
         assert(kind.isOptional)
         with(builder) {
             +"%T.empty()".formatCode(Names.Optional)
