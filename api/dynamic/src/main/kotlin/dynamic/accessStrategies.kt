@@ -2,39 +2,73 @@ package com.yandex.daggerlite.dynamic
 
 import com.yandex.daggerlite.Lazy
 import com.yandex.daggerlite.Optional
+import com.yandex.daggerlite.graph.Binding
+import com.yandex.daggerlite.graph.ConditionScope
 import javax.inject.Provider
 
 
-internal interface AccessStrategy {
-    fun getDirect(): Any = getProvider().get()
-    fun getProvider(): Provider<*> = getLazy()
-    fun getLazy(): Lazy<*>
-    fun getOptional(): Optional<*> = getOptionalProvider().map { it.get() }
-    fun getOptionalLazy(): Optional<Lazy<*>> = Optional.of(getLazy())
-    fun getOptionalProvider(): Optional<Provider<*>> = getOptionalLazy()
+internal abstract class AccessStrategy : Provider<Any> {
+    fun getProvider(): Provider<*> = this
+    abstract fun getLazy(): Lazy<*>
+    open fun getOptional(): Optional<*> = Optional.of(get())
+    open fun getOptionalLazy(): Optional<Lazy<*>> = Optional.of(getLazy())
+    open fun getOptionalProvider(): Optional<Provider<*>> = Optional.of(this)
 }
 
-internal class CachingAccessStrategy(initializer: () -> Any) : AccessStrategy, Lazy<Any> {
-    private val value by lazy(initializer)
-    override fun get(): Any = value
+internal class CachingAccessStrategy(
+    isSynchronizedAccess: Boolean,
+    private val binding: Binding,
+    private val creationVisitor: Binding.Visitor<Any>,
+) : AccessStrategy(), Lazy<Any>, () -> Any {
+    private val lazy = lazy(
+        mode = if (isSynchronizedAccess) LazyThreadSafetyMode.SYNCHRONIZED else LazyThreadSafetyMode.NONE,
+        initializer = this,
+    )
+
+    override fun invoke(): Any = binding.accept(creationVisitor)
+    override fun get(): Any = lazy.value
     override fun getLazy(): Lazy<*> = this
 }
 
-internal class CreatingAccessStrategy(private val create: () -> Any) : AccessStrategy, Provider<Any> {
-    override fun get(): Any = create()
-    override fun getProvider(): Provider<*> = this
-    override fun getLazy(): Lazy<*> = CachingAccessStrategy(initializer = this::get)
+internal class CreatingAccessStrategy(
+    private val isSynchronizedAccess: Boolean,
+    private val binding: Binding,
+    private val creationVisitor: Binding.Visitor<Any>,
+) : AccessStrategy() {
+    override fun get(): Any = binding.accept(creationVisitor)
+    override fun getLazy(): Lazy<*> = CachingAccessStrategy(
+        isSynchronizedAccess = isSynchronizedAccess,
+        binding = binding,
+        creationVisitor = creationVisitor,
+    )
 }
 
 internal class ConditionalAccessStrategy(
     private val underlying: AccessStrategy,
-    private val isPresent: () -> Boolean,
-) : AccessStrategy {
-    override fun getOptionalLazy(): Optional<Lazy<*>> {
-        return if (isPresent()) underlying.getOptionalLazy() else Optional.empty()
+    private val conditionScopeHolder: Binding,
+    private val evaluator: ScopeEvaluator,
+) : AccessStrategy() {
+    interface ScopeEvaluator {
+        fun evaluateConditionScope(conditionScope: ConditionScope): Boolean
     }
 
+    override fun get(): Any = underlying.get()
     override fun getLazy(): Lazy<*> = underlying.getLazy()
+    
+    override fun getOptionalLazy(): Optional<Lazy<*>> =
+        if (evaluator.evaluateConditionScope(conditionScopeHolder.conditionScope)) {
+            underlying.getOptionalLazy()
+        } else Optional.empty()
+
+    override fun getOptional(): Optional<Any> =
+        if (evaluator.evaluateConditionScope(conditionScopeHolder.conditionScope)) {
+            underlying.getOptional()
+        } else Optional.empty()
+
+    override fun getOptionalProvider(): Optional<Provider<*>> =
+        if (evaluator.evaluateConditionScope(conditionScopeHolder.conditionScope)) {
+            underlying.getOptionalProvider()
+        } else Optional.empty()
 }
 
 

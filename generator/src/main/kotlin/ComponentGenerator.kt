@@ -32,66 +32,64 @@ internal class ComponentGenerator(
     private val slotSwitchingGenerator = lazyProvider {
         SlotSwitchingGenerator(
             thisGraph = graph,
-        ).also(this::registerContributor)
+        ).also(::registerContributor)
     }
     private val unscopedProviderGenerator = lazyProvider {
         UnscopedProviderGenerator(
             componentImplName = generatedClassName,
-        ).also(this::registerContributor)
+        ).also(::registerContributor)
     }
     private val scopedProviderGenerator = lazyProvider {
         ScopedProviderGenerator(
             componentImplName = generatedClassName,
             useDoubleChecking = graph.requiresSynchronizedAccess,
-        ).also(this::registerContributor)
+        ).also(::registerContributor)
     }
     private val lockGeneratorProvider = lazyProvider {
         LockGenerator(
             componentImplName = generatedClassName,
-        ).also(this::registerContributor)
+        ).also(::registerContributor)
     }
 
     init {
-        Generators[graph] = object : GeneratorContainer {
-            override val implName: ClassName get() = this@ComponentGenerator.generatedClassName
+        graph[ComponentImplClassName] = generatedClassName
 
-            override val accessStrategyManager = AccessStrategyManager(
-                thisGraph = graph,
-                fieldsNs = fieldsNs,
-                methodsNs = methodsNs,
-                multiFactory = slotSwitchingGenerator,
-                unscopedProviderGenerator = unscopedProviderGenerator,
-                scopedProviderGenerator = scopedProviderGenerator,
-                lockGenerator = lockGeneratorProvider,
-            ).also(this@ComponentGenerator::registerContributor)
+        graph[ConditionGenerator] = ConditionGenerator(
+            fieldsNs = fieldsNs,
+            methodsNs = methodsNs,
+            thisGraph = graph,
+        ).also(::registerContributor)
 
-            override val conditionGenerator = ConditionGenerator(
-                fieldsNs = fieldsNs,
-                methodsNs = methodsNs,
-                thisGraph = graph,
-            ).also(this@ComponentGenerator::registerContributor)
+        graph[MultiBindingGenerator] = MultiBindingGenerator(
+            methodsNs = methodsNs,
+            thisGraph = graph,
+        ).also(::registerContributor)
 
-            override val multiBindingGenerator = MultiBindingGenerator(
-                methodsNs = methodsNs,
-                thisGraph = graph,
-            ).also(this@ComponentGenerator::registerContributor)
+        graph[MapBindingGenerator] = MapBindingGenerator(
+            methodsNs = methodsNs,
+            thisGraph = graph,
+        ).also(::registerContributor)
 
-            override val mapBindingGenerator = MapBindingGenerator(
-                methodsNs = methodsNs,
-                thisGraph = graph,
-            ).also(this@ComponentGenerator::registerContributor)
+        graph[AssistedInjectFactoryGenerator] = AssistedInjectFactoryGenerator(
+            thisGraph = graph,
+            componentImplName = generatedClassName,
+        ).also(::registerContributor)
 
-            override val factoryGenerator = ComponentFactoryGenerator(
-                thisGraph = graph,
-                fieldsNs = fieldsNs,
-                componentImplName = implName,
-            ).also(this@ComponentGenerator::registerContributor)
+        graph[AccessStrategyManager] = AccessStrategyManager(
+            thisGraph = graph,
+            fieldsNs = fieldsNs,
+            methodsNs = methodsNs,
+            multiFactory = slotSwitchingGenerator,
+            unscopedProviderGenerator = unscopedProviderGenerator,
+            scopedProviderGenerator = scopedProviderGenerator,
+            lockGenerator = lockGeneratorProvider,
+        ).also(::registerContributor)
 
-            override val assistedInjectFactoryGenerator = AssistedInjectFactoryGenerator(
-                thisGraph = graph,
-                componentImplName = generatedClassName,
-            ).also(this@ComponentGenerator::registerContributor)
-        }
+        graph[ComponentFactoryGenerator] = ComponentFactoryGenerator(
+            thisGraph = graph,
+            fieldsNs = fieldsNs,
+            componentImplName = generatedClassName,
+        ).also(::registerContributor)
     }
 
     private val childGenerators: Collection<ComponentGenerator> = graph.children.map { childGraph ->
@@ -168,8 +166,8 @@ internal class ComponentGenerator(
     }
 
     private class LazyProvider<T : Any>(initializer: () -> T) : Provider<T> {
-        private val instance by lazy(initializer)
-        override fun get(): T = instance
+        private val instance = lazy(initializer)
+        override fun get(): T = instance.value
     }
 
     private fun <T : Any> lazyProvider(initializer: () -> T): Provider<T> = LazyProvider(initializer)

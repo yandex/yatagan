@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.generator
 
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
@@ -8,6 +9,7 @@ import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage
 import com.yandex.daggerlite.graph.ConditionScope
+import com.yandex.daggerlite.graph.Extensible
 import com.yandex.daggerlite.graph.normalized
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
@@ -37,7 +39,7 @@ internal class ConditionGenerator(
         if (localLiteralAccess != null) {
             localLiteralAccess.access(builder = builder, inside = inside)
         } else {
-            thisGraph.parent!!.let(Generators::get).conditionGenerator.access(literal, builder, inside)
+            thisGraph.parent!![ConditionGenerator].access(literal, builder, inside)
         }
     }
 
@@ -94,9 +96,7 @@ internal class ConditionGenerator(
 
         override fun access(builder: ExpressionBuilder, inside: BindingGraph) {
             with(builder) {
-                +componentInstance(inside = inside, graph = thisGraph)
-                +"."
-                +name
+                +"%L.%N".formatCode(componentInstance(inside = inside, graph = thisGraph), name)
             }
         }
     }
@@ -146,27 +146,30 @@ internal class ConditionGenerator(
 
         override fun access(builder: ExpressionBuilder, inside: BindingGraph) {
             with(builder) {
-                +componentInstance(inside = inside, graph = thisGraph)
-                +"."
-                +accessorName
-                +"()"
+                +"%L.%N()".formatCode(componentInstance(inside = inside, graph = thisGraph), accessorName)
             }
         }
     }
 
-    companion object {
-        private fun genEvaluateLiteral(literal: ConditionScope.Literal, builder: ExpressionBuilder) {
-            require(!literal.negated) { "Not reached: must be normalized" }
-            with(builder) {
-                val rootType = literal.root.asType()
-                literal.path.asSequence().forEachIndexed { index, member ->
-                    if (index == 0) {
-                        +"%T".formatCode(rootType.typeName())
-                    }
-                    +".%N".formatCode(member.name)
-                    if (member is FunctionLangModel) +"()"
+    private fun genEvaluateLiteral(literal: ConditionScope.Literal, builder: ExpressionBuilder) {
+        require(!literal.negated) { "Not reached: must be normalized" }
+        with(builder) {
+            val rootType = literal.root.asType()
+            literal.path.asSequence().forEachIndexed { index, member ->
+                if (index == 0) {
+                    +"%T".formatCode(rootType.typeName())
                 }
+                +".%N".formatCode(member.name)
+                if (member is FunctionLangModel) +"()"
             }
         }
     }
+
+    companion object Key : Extensible.Key<ConditionGenerator> {
+        override val keyType get() = ConditionGenerator::class.java
+    }
+}
+
+internal object ComponentImplClassName : Extensible.Key<ClassName> {
+    override val keyType get() = ClassName::class.java
 }

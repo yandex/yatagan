@@ -104,30 +104,15 @@ fun <Source> process(
                     // TODO(DAGGERLITE-50): Try to support parallel codegen without parallel building and validation
                     val graphRoot = graphRootDeferred.await()
                     try {
-                        val codegenFacade = ComponentGeneratorFacade(
+                        val generator = ComponentGeneratorFacade(
                             graph = graphRoot,
                         )
                         // Launch codegen
-                        codegenFacade.use { generator ->
-                            // Cast relies on the fact that `HasPlatformModel.platformModel` is the Source type.
-                            @Suppress("UNCHECKED_CAST")
-                            delegate.openFileForGenerating(
-                                sources = sequence {
-                                    suspend fun SequenceScope<Any?>.forGraph(graph: BindingGraph) {
-                                        yield(graph.model.type.declaration.platformModel)
-                                        for (module in graph.modules) {
-                                            yield(module.type.declaration.platformModel)
-                                        }
-                                        for (child in graph.children) {
-                                            forGraph(child)
-                                        }
-                                    }
-                                    forGraph(graphRoot)
-                                } as Sequence<Source>,
-                                packageName = generator.targetPackageName,
-                                className = generator.targetClassName,
-                            ).use(generator::generateTo)
-                        }
+                        delegate.openFileForGenerating(
+                            sources = allSourcesSequence(delegate, graphRoot),
+                            packageName = generator.targetPackageName,
+                            className = generator.targetClassName,
+                        ).use(generator::generateTo)
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Throwable) {
@@ -141,4 +126,20 @@ fun <Source> process(
             supervisorJob.join()
         }
     }
+}
+
+private fun <Source> allSourcesSequence(
+    delegate: ProcessorDelegate<Source>,
+    graphRoot: BindingGraph
+) = sequence {
+    suspend fun SequenceScope<Source>.forGraph(graph: BindingGraph) {
+        yield(delegate.getSourceFor(graph.model.type.declaration))
+        for (module in graph.modules) {
+            yield(delegate.getSourceFor(module.type.declaration))
+        }
+        for (child in graph.children) {
+            forGraph(child)
+        }
+    }
+    forGraph(graphRoot)
 }

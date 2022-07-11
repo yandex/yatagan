@@ -10,6 +10,7 @@ import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.Extensible
 import javax.lang.model.element.Modifier
 
 internal class AssistedInjectFactoryGenerator(
@@ -31,12 +32,14 @@ internal class AssistedInjectFactoryGenerator(
         val localImplName = modelToImpl[binding.model]
         if (localImplName != null) {
             with(builder) {
-                val component = componentInstance(inside = inside, graph = thisGraph)
-                +"%T.%L.new %T()".formatCode(Generators[inside].implName, component, localImplName)
+                +"%T.%L.new %T()".formatCode(
+                    inside[ComponentImplClassName],
+                    componentInstance(inside = inside, graph = thisGraph),
+                    localImplName,
+                )
             }
         } else {
-            thisGraph.parent!!.let(Generators::get)
-                .assistedInjectFactoryGenerator
+            thisGraph.parent!![AssistedInjectFactoryGenerator]
                 .generateCreation(builder, binding, inside)
         }
     }
@@ -65,6 +68,7 @@ internal class AssistedInjectFactoryGenerator(
                                         is AssistedInjectFactoryModel.Parameter.Injected -> {
                                             val (node, kind) = parameter.dependency
                                             thisGraph.resolveBinding(node).generateAccess(
+                                                isInsideInnerClass = true,
                                                 builder = this,
                                                 inside = thisGraph,
                                                 kind = kind,
@@ -81,16 +85,7 @@ internal class AssistedInjectFactoryGenerator(
         }
     }
 
-    private inner class AssistedFactoryImplClassModel(
-        namespace: Namespace,
-        model: AssistedInjectFactoryModel,
-    ) {
-        val name: ClassName = componentImplName.nestedClass(namespace.name(
-            nameModel = model.name,
-            suffix = "Impl",
-            firstCapital = true,
-        ))
-
-        val owner: BindingGraph get() = thisGraph
+    companion object Key : Extensible.Key<AssistedInjectFactoryGenerator> {
+        override val keyType get() = AssistedInjectFactoryGenerator::class.java
     }
 }

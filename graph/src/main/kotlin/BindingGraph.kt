@@ -19,7 +19,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  * Each [BindingGraph] is built around [ComponentModel]. For each given [ComponentModel] multiple different
  * [BindingGraph]s may exist if [ComponentModel.isRoot] is `false`, because the model may have different parents.
  */
-interface BindingGraph : MayBeInvalid {
+interface BindingGraph : MayBeInvalid, Extensible {
     /**
      * A model behind this graph.
      */

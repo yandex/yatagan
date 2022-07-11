@@ -6,6 +6,8 @@ import java.io.Writer
 /**
  * Platform-specific processor implementation.
  *
+ * @param Source platform-specific opaque object, that represent a source of a class declaration.
+ *
  * @see openFileForGenerating
  */
 interface ProcessorDelegate<Source> {
@@ -15,6 +17,11 @@ interface ProcessorDelegate<Source> {
      * Get a [type declaration][TypeDeclarationLangModel] from a source
      */
     fun createDeclaration(source: Source): TypeDeclarationLangModel
+
+    /**
+     * Get a Source for the given declaration.
+     */
+    fun getSourceFor(declaration: TypeDeclarationLangModel): Source
 
     /**
      * Opens file for writing generated Java code. Only a single class is permitted per file.

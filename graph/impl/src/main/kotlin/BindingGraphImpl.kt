@@ -27,7 +27,7 @@ internal class BindingGraphImpl(
     private val component: ComponentModel,
     override val parent: BindingGraphImpl? = null,
     override val conditionScope: ConditionScope = ConditionScope.Unscoped,
-) : BindingGraph {
+) : BindingGraph, ExtensibleImpl() {
     override val model: ComponentModel
         get() = component
 

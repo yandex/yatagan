@@ -9,6 +9,9 @@ internal inline fun <R> DynamicValidationDelegate.Promise?.awaitOnError(block: (
     this ?: return block()
     try {
         return block()
+    } catch (e: PossiblyInvalidGraphException) {
+        // No need to await or wrap anything - already done, as blocks can be nested
+        throw e
     } catch (e: Exception) {
         // Await validation, to correctly display the error
         await()

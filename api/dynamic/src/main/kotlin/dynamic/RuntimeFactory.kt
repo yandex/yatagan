@@ -15,7 +15,7 @@ internal class RuntimeFactory(
     private val graph: BindingGraph,
     private val parent: RuntimeComponent?,
     validationPromise: DynamicValidationDelegate.Promise?,
-) : InvocationHandlerBase(validationPromise) {
+) : InvocationHandlerBase(validationPromise), InvocationHandlerBase.MethodHandler {
     private val creator = checkNotNull(graph.creator) {
         "Component $graph has no explicit creator (builder/factory)"
     }
@@ -26,7 +26,7 @@ internal class RuntimeFactory(
 
     init {
         creator.factoryMethod?.let { factoryMethod ->
-            implementMethod(factoryMethod.rt, FactoryMethodHandler())
+            implementMethod(factoryMethod.rt, this)
         }
         for (input in creator.builderInputs) {
             implementMethod(input.builderSetter.rt, BuilderSetterHandler(input))
@@ -46,48 +46,46 @@ internal class RuntimeFactory(
 
     override fun toString() = creator.toString()
 
-    private inner class FactoryMethodHandler : MethodHandler {
-        override fun invoke(proxy: Any, args: Array<Any?>?): Any {
-            val componentProxy: Any
-            val time = measureTimeMillis {
-                if (creator.factoryInputs.isNotEmpty()) {
-                    for ((input, arg) in creator.factoryInputs.zip(args!!)) {
-                        consumePayload(payload = input.payload, arg = arg!!)
-                    }
-                }
-                for (input in creator.allInputs) {
-                    when (val payload = input.payload) {
-                        is ComponentFactoryModel.InputPayload.Dependency -> check(payload.dependency in givenDependencies) {
-                            "No value for $payload was provided"
-                        }
-                        is ComponentFactoryModel.InputPayload.Instance -> check(payload.node in givenInstances) {
-                            "No value for $payload was provided"
-                        }
-                        is ComponentFactoryModel.InputPayload.Module -> check(payload.module in givenModuleInstances) {
-                            "No value for $payload was provided"
-                        }
-                    }
-                }
-                val componentClass = creator.createdComponent.type.declaration.rt
-                val runtimeComponent: RuntimeComponent = RuntimeComponent(
-                    graph = graph,
-                    parent = parent,
-                    givenInstances = givenInstances,
-                    givenDependencies = givenDependencies,
-                    givenModuleInstances = givenModuleInstances,
-                    validationPromise = validationPromise,
-                )
-                componentProxy = Proxy.newProxyInstance(
-                    componentClass.classLoader,
-                    arrayOf(componentClass),
-                    runtimeComponent
-                ).also {
-                    runtimeComponent.thisProxy = it
+    override fun invoke(proxy: Any, args: Array<Any?>?): Any {
+        val componentProxy: Any
+        val time = measureTimeMillis {
+            if (creator.factoryInputs.isNotEmpty()) {
+                for ((input, arg) in creator.factoryInputs.zip(args!!)) {
+                    consumePayload(payload = input.payload, arg = arg!!)
                 }
             }
-            dlLog("Dynamic component creation via $creator took $time ms")
-            return componentProxy
+            for (input in creator.allInputs) {
+                when (val payload = input.payload) {
+                    is ComponentFactoryModel.InputPayload.Dependency -> check(payload.dependency in givenDependencies) {
+                        "No value for $payload was provided"
+                    }
+                    is ComponentFactoryModel.InputPayload.Instance -> check(payload.node in givenInstances) {
+                        "No value for $payload was provided"
+                    }
+                    is ComponentFactoryModel.InputPayload.Module -> check(payload.module in givenModuleInstances) {
+                        "No value for $payload was provided"
+                    }
+                }
+            }
+            val componentClass = creator.createdComponent.type.declaration.rt
+            val runtimeComponent: RuntimeComponent = RuntimeComponent(
+                graph = graph,
+                parent = parent,
+                givenInstances = givenInstances,
+                givenDependencies = givenDependencies,
+                givenModuleInstances = givenModuleInstances,
+                validationPromise = validationPromise,
+            )
+            componentProxy = Proxy.newProxyInstance(
+                componentClass.classLoader,
+                arrayOf(componentClass),
+                runtimeComponent
+            ).also {
+                runtimeComponent.thisProxy = it
+            }
         }
+        dlLog("Dynamic component creation via $creator took $time ms")
+        return componentProxy
     }
 
     private inner class BuilderSetterHandler(private val input: ComponentFactoryModel.InputModel) : MethodHandler {

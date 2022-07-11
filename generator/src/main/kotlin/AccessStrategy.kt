@@ -13,5 +13,10 @@ internal interface AccessStrategy {
     /**
      * Generates access expression [inside] the given component.
      */
-    fun generateAccess(builder: ExpressionBuilder, kind: DependencyKind, inside: BindingGraph)
+    fun generateAccess(
+        builder: ExpressionBuilder,
+        kind: DependencyKind,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean,
+    )
 }

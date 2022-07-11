@@ -117,7 +117,7 @@ internal class BindsImpl(
 ) : BindsBindingModel, ModuleHostedBindingBase() {
 
     init {
-        require(canRepresent(impl))
+        assert(canRepresent(impl))
     }
 
     override val sources = impl.parameters.map { parameter ->

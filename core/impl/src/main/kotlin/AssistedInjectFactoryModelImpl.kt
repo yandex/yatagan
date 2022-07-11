@@ -20,7 +20,7 @@ internal class AssistedInjectFactoryModelImpl private constructor(
     private val impl: TypeDeclarationLangModel,
 ) : AssistedInjectFactoryModel {
     init {
-        require(canRepresent(impl))
+        assert(canRepresent(impl))
     }
 
     override val factoryMethod: FunctionLangModel? by lazy {
