@@ -15,7 +15,7 @@ internal fun componentInstance(
 ): CodeBlock {
     return buildExpression {
         if (isInsideInnerClass) {
-            +"%T.this".formatCode(graph[ComponentImplClassName])
+            +"%T.this".formatCode(inside[ComponentImplClassName])
         } else {
             +"this"
         }
