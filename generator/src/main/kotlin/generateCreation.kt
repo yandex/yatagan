@@ -40,7 +40,12 @@ private class CreationGeneratorVisitor(
             binding.provision.accept(object : CallableLangModel.Visitor<Unit> {
                 fun genArgs() {
                     join(seq = binding.inputs.asIterable()) { (node, kind) ->
-                        inside.resolveBinding(node).generateAccess(builder = this, inside = inside, kind = kind)
+                        inside.resolveBinding(node).generateAccess(
+                            builder = this,
+                            inside = inside,
+                            kind = kind,
+                            isInsideInnerClass = isInsideInnerClass,
+                        )
                     }
                 }
 
@@ -73,6 +78,7 @@ private class CreationGeneratorVisitor(
             builder = builder,
             binding = binding,
             inside = inside,
+            isInsideInnerClass = isInsideInnerClass,
         )
     }
 
@@ -97,13 +103,26 @@ private class CreationGeneratorVisitor(
                     }
                     val expression = buildExpression {
                         val gen = inside[ConditionGenerator]
-                        gen.expression(builder = this, conditionScope = altBinding.conditionScope, inside = inside)
+                        gen.expression(
+                            builder = this,
+                            conditionScope = altBinding.conditionScope,
+                            inside = inside,
+                            isInsideInnerClass = isInsideInnerClass,
+                        )
                     }
                     +"%L ? ".formatCode(expression)
-                    altBinding.generateAccess(builder = builder, inside = inside)
+                    altBinding.generateAccess(
+                        builder = builder,
+                        inside = inside,
+                        isInsideInnerClass = isInsideInnerClass,
+                    )
                     +" : "
                 } else {
-                    altBinding.generateAccess(builder = builder, inside = inside)
+                    altBinding.generateAccess(
+                        builder = builder,
+                        inside = inside,
+                        isInsideInnerClass = isInsideInnerClass,
+                    )
                     exhaustive = true
                     break  // no further generation, the rest are (if any) unreachable.
                 }
@@ -119,7 +138,11 @@ private class CreationGeneratorVisitor(
             +"new %T(".formatCode(binding.targetGraph[ComponentFactoryGenerator].implName)
             join(binding.targetGraph.usedParents) { parentGraph ->
                 +buildExpression {
-                    +"%L".formatCode(componentInstance(inside = inside, graph = parentGraph))
+                    +"%L".formatCode(componentInstance(
+                        inside = inside,
+                        graph = parentGraph,
+                        isInsideInnerClass = isInsideInnerClass,
+                    ))
                 }
             }
             +")"
@@ -128,7 +151,10 @@ private class CreationGeneratorVisitor(
 
     override fun visitComponentDependency(binding: ComponentDependencyBinding) {
         with(builder) {
-            +binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.dependency)
+            +"%L.%N".formatCode(
+                componentForBinding(binding),
+                binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.dependency),
+            )
         }
     }
 

@@ -24,13 +24,18 @@ internal class MultiBindingGenerator(
             generateUnderCondition(
                 binding = nodeBinding,
                 inside = thisGraph,
+                isInsideInnerClass = false,
             ) {
                 +buildExpression {
                     when (kind) {
                         ContributionType.Element -> +"list.add("
                         ContributionType.Collection -> +"list.addAll("
                     }
-                    nodeBinding.generateAccess(builder = this, inside = thisGraph)
+                    nodeBinding.generateAccess(
+                        builder = this,
+                        inside = thisGraph,
+                        isInsideInnerClass = false,
+                    )
                     +")"
                 }
             }

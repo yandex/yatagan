@@ -301,8 +301,12 @@ internal class ConditionalAccessStrategy(
             when {
                 !binding.conditionScope.isAlways -> {
                     val expression = buildExpression {
-                        binding.owner[ConditionGenerator]
-                            .expression(builder = this, conditionScope = binding.conditionScope, inside = binding.owner)
+                        binding.owner[ConditionGenerator].expression(
+                            builder = this,
+                            conditionScope = binding.conditionScope,
+                            inside = binding.owner,
+                            isInsideInnerClass = false,
+                        )
                     }
                     +buildExpression {
                         +"return %L ? %T.of(".formatCode(expression, Names.Optional)
