@@ -32,14 +32,24 @@ internal class ConditionGenerator(
         literal: ConditionScope.Literal,
         builder: ExpressionBuilder,
         inside: BindingGraph,
+        isInsideInnerClass: Boolean,
     ) {
         require(!literal.negated) { "Not reached: must be normalized" }
 
         val localLiteralAccess = literalAccess[literal]
         if (localLiteralAccess != null) {
-            localLiteralAccess.access(builder = builder, inside = inside)
+            localLiteralAccess.access(
+                builder = builder,
+                inside = inside,
+                isInsideInnerClass = isInsideInnerClass,
+            )
         } else {
-            thisGraph.parent!![ConditionGenerator].access(literal, builder, inside)
+            thisGraph.parent!![ConditionGenerator].access(
+                literal = literal,
+                builder = builder,
+                inside = inside,
+                isInsideInnerClass = isInsideInnerClass,
+            )
         }
     }
 
@@ -53,6 +63,7 @@ internal class ConditionGenerator(
         builder: ExpressionBuilder,
         conditionScope: ConditionScope,
         inside: BindingGraph,
+        isInsideInnerClass: Boolean,
     ) = with(builder) {
         join(conditionScope.expression, separator = " && ") { clause ->
             +"("
@@ -60,7 +71,12 @@ internal class ConditionGenerator(
                 if (literal.negated) {
                     +"!"
                 }
-                access(literal = literal.normalized(), builder = this, inside = inside)
+                access(
+                    literal = literal.normalized(),
+                    builder = this,
+                    inside = inside,
+                    isInsideInnerClass = isInsideInnerClass,
+                )
             }
             +")"
         }
@@ -68,7 +84,7 @@ internal class ConditionGenerator(
 
     private interface ConditionAccessStrategy {
         fun generateInComponent(builder: TypeSpecBuilder)
-        fun access(builder: ExpressionBuilder, inside: BindingGraph)
+        fun access(builder: ExpressionBuilder, inside: BindingGraph, isInsideInnerClass: Boolean)
     }
 
     /**
@@ -94,9 +110,12 @@ internal class ConditionGenerator(
             }
         }
 
-        override fun access(builder: ExpressionBuilder, inside: BindingGraph) {
+        override fun access(builder: ExpressionBuilder, inside: BindingGraph, isInsideInnerClass: Boolean) {
             with(builder) {
-                +"%L.%N".formatCode(componentInstance(inside = inside, graph = thisGraph), name)
+                +"%L.%N".formatCode(
+                    componentInstance(inside = inside, graph = thisGraph, isInsideInnerClass = isInsideInnerClass),
+                    name,
+                )
             }
         }
     }
@@ -144,9 +163,13 @@ internal class ConditionGenerator(
             }
         }
 
-        override fun access(builder: ExpressionBuilder, inside: BindingGraph) {
+        override fun access(builder: ExpressionBuilder, inside: BindingGraph, isInsideInnerClass: Boolean) {
             with(builder) {
-                +"%L.%N()".formatCode(componentInstance(inside = inside, graph = thisGraph), accessorName)
+                +"%L.%N()".formatCode(componentInstance(
+                    inside = inside,
+                    graph = thisGraph,
+                    isInsideInnerClass = isInsideInnerClass,
+                ), accessorName)
             }
         }
     }

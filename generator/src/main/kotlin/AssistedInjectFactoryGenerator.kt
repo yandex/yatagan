@@ -28,19 +28,32 @@ internal class AssistedInjectFactoryGenerator(
         }
     }
 
-    fun generateCreation(builder: ExpressionBuilder, binding: AssistedInjectFactoryBinding, inside: BindingGraph) {
+    fun generateCreation(
+        builder: ExpressionBuilder,
+        binding: AssistedInjectFactoryBinding,
+        inside: BindingGraph,
+        isInsideInnerClass: Boolean,
+    ) {
         val localImplName = modelToImpl[binding.model]
         if (localImplName != null) {
             with(builder) {
-                +"%T.%L.new %T()".formatCode(
-                    inside[ComponentImplClassName],
-                    componentInstance(inside = inside, graph = thisGraph),
+                +"%L.new %T()".formatCode(
+                    componentInstance(
+                        inside = inside,
+                        graph = thisGraph,
+                        isInsideInnerClass = isInsideInnerClass,
+                    ),
                     localImplName,
                 )
             }
         } else {
             thisGraph.parent!![AssistedInjectFactoryGenerator]
-                .generateCreation(builder, binding, inside)
+                .generateCreation(
+                    builder = builder,
+                    binding = binding,
+                    inside = inside,
+                    isInsideInnerClass = isInsideInnerClass,
+                )
         }
     }
 

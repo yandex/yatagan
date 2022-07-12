@@ -28,12 +28,18 @@ internal class MapBindingGenerator(
             generateUnderCondition(
                 binding = nodeBinding,
                 inside = thisGraph,
+                isInsideInnerClass = false,
             ) {
                 +buildExpression {
                     +"map.put("
                     value.accept(AnnotationValueFormatter(this))
                     +", "
-                    nodeBinding.generateAccess(builder = this, inside = thisGraph, kind = kind)
+                    nodeBinding.generateAccess(
+                        builder = this,
+                        inside = thisGraph,
+                        kind = kind,
+                        isInsideInnerClass = false,
+                    )
                     +")"
                 }
             }

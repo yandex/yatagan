@@ -863,11 +863,23 @@ class CoreBindingsTest(
     @Test
     fun `assisted inject in subcomponents`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*import com.yandex.daggerlite.AssistedFactory
+            import com.yandex.daggerlite.*
             import javax.inject.*
 
+            @[Scope Retention(AnnotationRetention.RUNTIME)] annotation class RootScope
+
+            @RootScope class ClassB @Inject constructor()
+            @Singleton class ClassC @Inject constructor()
+            @Singleton class ClassA @Inject constructor(
+                val dep: Lazy<ClassB>, 
+                val dep2: Lazy<ClassC>,
+            )
+
             class Foo @AssistedInject constructor(
+                val classA: Provider<ClassA>,
+                val dep: Dep,
                 val input: String,
+                @Named("provision") val provision: String,        
                 @Assisted val number: Int,
             )
 
@@ -877,12 +889,15 @@ class CoreBindingsTest(
             }
 
             @Module(subcomponents = [SubComponent::class])
-            interface RootModule
+            class RootModule {
+                @Named("provision") @Provides fun provide(dep: Dep): String = "hello"                        
+            }
 
             interface Dep {
                 val input: String            
             }
 
+            @RootScope            
             @Component(modules = [RootModule::class], dependencies = [Dep::class])
             interface RootComponent {
                 val sub: SubComponent.Creator

@@ -11,7 +11,7 @@ import com.yandex.daggerlite.graph.BindingGraph
 internal fun componentInstance(
     inside: BindingGraph,
     graph: BindingGraph,
-    isInsideInnerClass: Boolean = false,
+    isInsideInnerClass: Boolean,
 ): CodeBlock {
     return buildExpression {
         if (isInsideInnerClass) {
@@ -42,7 +42,7 @@ internal fun componentForBinding(
 internal fun Binding.generateAccess(
     builder: ExpressionBuilder,
     inside: BindingGraph,
-    isInsideInnerClass: Boolean = false,
+    isInsideInnerClass: Boolean,
     kind: DependencyKind = DependencyKind.Direct,
 ) {
     owner[AccessStrategyManager].strategyFor(this).generateAccess(
@@ -56,13 +56,19 @@ internal fun Binding.generateAccess(
 internal inline fun CodeBuilder.generateUnderCondition(
     binding: Binding,
     inside: BindingGraph,
+    isInsideInnerClass: Boolean,
     underConditionBlock: CodeBuilder.() -> Unit,
 ) {
     if (!binding.conditionScope.isAlways) {
         if (!binding.conditionScope.isNever) {
             val expression = buildExpression {
                 val gen = binding.owner[ConditionGenerator]
-                gen.expression(this, binding.conditionScope, inside = inside)
+                gen.expression(
+                    builder = this,
+                    conditionScope = binding.conditionScope,
+                    inside = inside,
+                    isInsideInnerClass = isInsideInnerClass,
+                )
             }
             controlFlow("if (%L) ".formatCode(expression)) {
                 underConditionBlock()

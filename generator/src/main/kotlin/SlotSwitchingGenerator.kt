@@ -26,7 +26,11 @@ internal class SlotSwitchingGenerator(
                 boundSlots.forEach { (binding, slot) ->
                     +buildExpression {
                         +"case $slot: return "
-                        binding.generateAccess(builder = this, inside = thisGraph)
+                        binding.generateAccess(
+                            builder = this,
+                            inside = thisGraph,
+                            isInsideInnerClass = false,
+                        )
                     }
                 }
                 +"default: throw new %T()".formatCode(Names.AssertionError)

@@ -119,8 +119,12 @@ internal class ComponentGenerator(
                 modifiers(PUBLIC)
                 +buildExpression {
                     +"return "
-                    graph.resolveBinding(dependency.node)
-                        .generateAccess(builder = this, inside = graph, kind = dependency.kind)
+                    graph.resolveBinding(dependency.node).generateAccess(
+                        builder = this,
+                        inside = graph,
+                        kind = dependency.kind,
+                        isInsideInnerClass = false,
+                    )
                 }
             }
         }
@@ -135,14 +139,22 @@ internal class ComponentGenerator(
                             override fun visitFunction(model: FunctionLangModel) {
                                 +"%N.%N(".formatCode(instanceName, member.name)
                                 binding.generateAccess(
-                                    builder = this@buildExpression, inside = graph, kind = dependency.kind)
+                                    builder = this@buildExpression,
+                                    inside = graph,
+                                    kind = dependency.kind,
+                                    isInsideInnerClass = false,
+                                )
                                 +")"
                             }
 
                             override fun visitField(model: FieldLangModel) {
                                 +"%N.%N = ".formatCode(instanceName, member.name)
                                 binding.generateAccess(
-                                    builder = this@buildExpression, inside = graph, kind = dependency.kind)
+                                    builder = this@buildExpression,
+                                    inside = graph,
+                                    kind = dependency.kind,
+                                    isInsideInnerClass = false,
+                                )
                             }
                         })
                     }
