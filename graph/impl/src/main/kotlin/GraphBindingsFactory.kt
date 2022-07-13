@@ -23,10 +23,11 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
-import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.Extensible
 import com.yandex.daggerlite.graph.ExtensibleBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
+import com.yandex.daggerlite.graph.WithParents
+import com.yandex.daggerlite.graph.parentsSequence
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
@@ -34,7 +35,7 @@ import com.yandex.daggerlite.validation.impl.reportError
 
 internal class GraphBindingsFactory(
     private val graph: BindingGraphImpl,
-) : MayBeInvalid {
+) : MayBeInvalid, WithParents<GraphBindingsFactory> by hierarchyExtension(graph, GraphBindingsFactory) {
     init {
         graph[GraphBindingsFactory] = this
     }
@@ -151,7 +152,7 @@ internal class GraphBindingsFactory(
         for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {
             val nodes = target.multiBoundListNodes()
             val representativeNode = nodes.first()
-            val upstream = parents().mapNotNull { parentBindings ->
+            val upstream = parentsSequence().mapNotNull { parentBindings ->
                 parentBindings.providedBindings[representativeNode]?.singleOrNull() as? MultiBindingImpl
             }.firstOrNull()
             val downstreamNode = MultibindingDownstreamHandle(underlying = representativeNode)
@@ -174,7 +175,7 @@ internal class GraphBindingsFactory(
                 val (keyType: TypeLangModel, valueType: NodeModel) = mapSignature
                 val nodes = valueType.multiBoundMapNodes(key = keyType, asProviders = useProviders)
                 val representativeNode = nodes.first()
-                val upstream = parents().mapNotNull { parentBindings ->
+                val upstream = parentsSequence().mapNotNull { parentBindings ->
                     parentBindings.providedBindings[representativeNode]?.singleOrNull() as? MapBindingImpl
                 }.firstOrNull()
                 val downstreamNode = MultibindingDownstreamHandle(underlying = representativeNode)
@@ -253,16 +254,6 @@ internal class GraphBindingsFactory(
             fromParent = graph.parent?.get(GraphBindingsFactory)?.localAndParentExplicitBindings,
             current = providedBindings,
         )
-    }
-
-    private fun parents() = object : Sequence<GraphBindingsFactory> {
-        override fun iterator() = object : Iterator<GraphBindingsFactory> {
-            var graph: BindingGraph? = this@GraphBindingsFactory.graph.parent
-            override fun hasNext() = graph != null
-
-            override fun next() = (graph ?: throw NoSuchElementException())
-                .also { graph = it.parent }[GraphBindingsFactory]
-        }
     }
 
     override fun validate(validator: Validator) {

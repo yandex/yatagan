@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.dynamic
 
 import com.yandex.daggerlite.DynamicValidationDelegate
+import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.ModuleModel
@@ -31,23 +32,27 @@ import com.yandex.daggerlite.graph.MapBinding
 import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
+import com.yandex.daggerlite.graph.WithParents
 import com.yandex.daggerlite.graph.component1
 import com.yandex.daggerlite.graph.component2
 import com.yandex.daggerlite.graph.normalized
+import com.yandex.daggerlite.graph.parentsSequence
 import com.yandex.daggerlite.lang.rt.kotlinObjectInstanceOrNull
 import com.yandex.daggerlite.lang.rt.rawValue
 import com.yandex.daggerlite.lang.rt.rt
 import java.lang.reflect.Proxy
 
 internal class RuntimeComponent(
+    override val parent: RuntimeComponent?,
     private val graph: BindingGraph,
-    private val parent: RuntimeComponent?,
     private val givenInstances: Map<NodeModel, Any>,
     private val givenDependencies: Map<ComponentDependencyModel, Any>,
     validationPromise: DynamicValidationDelegate.Promise?,
     givenModuleInstances: Map<ModuleModel, Any>,
-) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any>, ConditionalAccessStrategy.ScopeEvaluator {
+) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any>,
+    ConditionalAccessStrategy.ScopeEvaluator, WithParents<RuntimeComponent> {
     lateinit var thisProxy: Any
+    private val parentsSequence = parentsSequence(includeThis = true).memoize()
 
     private val accessStrategies: Map<Binding, AccessStrategy> = buildMap(capacity = graph.localBindings.size) {
         for ((binding: Binding, usage) in graph.localBindings) {
@@ -123,10 +128,7 @@ internal class RuntimeComponent(
     }
 
     private fun componentForGraph(graph: BindingGraph): RuntimeComponent {
-        var component = this
-        while (component.graph != graph)
-            component = component.parent!!
-        return component
+        return parentsSequence.first { it.graph == graph }
     }
 
     private fun access(binding: Binding, kind: DependencyKind): Any {
@@ -152,15 +154,11 @@ internal class RuntimeComponent(
 
     private fun evaluateLiteral(literal: Literal): Boolean {
         val normalized = literal.normalized()
-        return if (normalized in graph.localConditionLiterals) {
-            conditionLiterals.getOrPut(normalized) {
+        return parentsSequence
+            .first { normalized in it.graph.localConditionLiterals }
+            .conditionLiterals.getOrPut(normalized) {
                 doEvaluateLiteral(normalized)
             } xor literal.negated
-        } else {
-            checkNotNull(parent) {
-                "Not reached: unexpected literal $literal"
-            }.evaluateLiteral(literal)
-        }
     }
 
     override fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {

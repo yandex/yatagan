@@ -68,7 +68,7 @@ internal class RuntimeFactory(
                 }
             }
             val componentClass = creator.createdComponent.type.declaration.rt
-            val runtimeComponent: RuntimeComponent = RuntimeComponent(
+            val runtimeComponent = RuntimeComponent(
                 graph = graph,
                 parent = parent,
                 givenInstances = givenInstances,
