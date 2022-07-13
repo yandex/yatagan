@@ -22,6 +22,17 @@ internal class MapBindingGenerator(
     override fun buildAccessorCode(builder: CodeBuilder, binding: MapBinding) = with(builder) {
         +"final %T map = new %T<>(${binding.contents.size})"
             .formatCode(binding.target.typeName(), Names.HashMap)
+        binding.upstream?.let { upstream ->
+            +buildExpression {
+                +"map.putAll("
+                upstream.generateAccess(
+                    builder = this,
+                    inside = thisGraph,
+                    isInsideInnerClass = false,
+                )
+                +")"
+            }
+        }
         binding.contents.forEach { (value, dependency) ->
             val (node, kind) = dependency
             val nodeBinding = thisGraph.resolveBinding(node)

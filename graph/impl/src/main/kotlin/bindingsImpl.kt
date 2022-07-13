@@ -34,6 +34,7 @@ import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.graph.ComponentInstanceBinding
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.EmptyBinding
+import com.yandex.daggerlite.graph.ExtensibleBinding
 import com.yandex.daggerlite.graph.InstanceBinding
 import com.yandex.daggerlite.graph.MapBinding
 import com.yandex.daggerlite.graph.MultiBinding
@@ -375,6 +376,8 @@ internal class SubComponentFactoryBindingImpl(
 internal class MultiBindingImpl(
     override val owner: BindingGraphImpl,
     override val target: NodeModel,
+    override val upstream: MultiBindingImpl?,
+    override val targetForDownstream: NodeModel,
     contributions: Map<NodeModel, ContributionType>,
 ) : MultiBinding, BindingMixin {
     private val _contributions = contributions
@@ -387,7 +390,7 @@ internal class MultiBindingImpl(
         ).associateWith(resolved::getValue)
     }
 
-    override val dependencies get() = _contributions.keys.asSequence()
+    override val dependencies get() = extensibleAwareDependencies(_contributions.keys.asSequence())
 
     override fun toString() = Strings.Bindings.multibinding(
         elementType = target,
@@ -405,7 +408,9 @@ internal class MapBindingImpl(
     contents: List<Pair<AnnotationLangModel.Value, NodeModel>>,
     override val mapKey: TypeLangModel,
     override val mapValue: TypeLangModel,
-    useProviders: Boolean
+    override val upstream: MapBindingImpl?,
+    override val targetForDownstream: NodeModel,
+    useProviders: Boolean,
 ) : MapBinding, BindingMixin {
     override val contents: List<Pair<AnnotationLangModel.Value, NodeDependency>> by lazy {
         if (useProviders) contents.map { (key, node) ->
@@ -413,8 +418,19 @@ internal class MapBindingImpl(
         } else contents
     }
 
+    private val allResolvedAndGroupedContents: Map<AnnotationLangModel.Value, List<BaseBinding>> by lazy {
+        mergeMultiMapsForDuplicateCheck(
+            fromParent = upstream?.allResolvedAndGroupedContents,
+            current = contents.groupBy(
+                keySelector = { (key, _) -> key },
+                // Resolution on `owner` is important here, so do it eagerly
+                valueTransform = { (_, dependency) -> owner.resolveRaw(dependency) },
+            ),
+        )
+    }
+
     override val dependencies: Sequence<NodeDependency>
-        get() = contents.asSequence().map { (_, dependency) -> dependency }
+        get() = extensibleAwareDependencies(contents.asSequence().map { (_, dependency) -> dependency })
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitMap(this)
@@ -422,16 +438,13 @@ internal class MapBindingImpl(
 
     override fun validate(validator: Validator) {
         super.validate(validator)
-        val grouped: Map<AnnotationLangModel.Value, List<NodeDependency>> = contents.groupBy(
-            keySelector = { it.first },
-            valueTransform = { it.second },
-        )
-        for ((key, dependencies) in grouped) {
-            if (dependencies.size > 1) {
+
+        for ((key, bindings) in allResolvedAndGroupedContents) {
+            if (bindings.size > 1) {
                 // Found duplicates
                 validator.reportError(Errors.duplicateKeysInMapping(mapType = target, keyValue = key)) {
-                    for (dependency in dependencies) {
-                        addNote(Strings.Notes.duplicateKeyInMapBinding(binding = owner.resolveRaw(dependency.node)))
+                    for (binding in bindings) {
+                        addNote(Strings.Notes.duplicateKeyInMapBinding(binding = binding))
                     }
                 }
             }
@@ -574,4 +587,10 @@ internal data class MissingBindingImpl(
             })
         }
     }
+}
+
+private fun ExtensibleBinding<*>.extensibleAwareDependencies(
+    baseDependencies: Sequence<NodeDependency>,
+): Sequence<NodeDependency> {
+    return upstream?.let { baseDependencies + it.targetForDownstream } ?: baseDependencies
 }

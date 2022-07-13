@@ -241,6 +241,9 @@ internal class RuntimeComponent(
 
     override fun visitMulti(binding: MultiBinding): Any {
         return buildList(capacity = binding.contributions.size) {
+            binding.upstream?.let { upstream ->
+                addAll(componentForGraph(upstream.owner).access(upstream, DependencyKind.Direct) as List<*>)
+            }
             for ((node: NodeModel, kind: MultiBinding.ContributionType) in binding.contributions) {
                 resolveAndAccessIfCondition(node)?.let { contribution ->
                     when (kind) {
@@ -254,6 +257,9 @@ internal class RuntimeComponent(
 
     override fun visitMap(binding: MapBinding): Any {
         return buildMap(capacity = binding.contents.size) {
+            binding.upstream?.let { upstream ->
+                putAll(componentForGraph(upstream.owner).access(upstream, DependencyKind.Direct) as Map<*, *>)
+            }
             for ((key: AnnotationLangModel.Value, dependency: NodeDependency) in binding.contents) {
                 resolveAndAccessIfCondition(dependency)?.let { contribution ->
                     put(key.rawValue, contribution)

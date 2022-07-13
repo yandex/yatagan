@@ -57,7 +57,6 @@ internal class BindingGraphImpl(
 
     private val bindings: GraphBindingsFactory = GraphBindingsFactory(
         graph = this,
-        parent = parent?.bindings,
     )
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()

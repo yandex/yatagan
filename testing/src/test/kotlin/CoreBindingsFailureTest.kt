@@ -734,6 +734,10 @@ class CoreBindingsFailureTest(
                 @Provides fun numbers(): List<Number> = emptyList()
                 @Provides fun builder(): SubComponent.Builder = throw AssertionError()
             }
+            @Module
+            object MySubModule {
+                @Provides fun numbers2(): List<Number> = emptyList()
+            }
             
             interface Base {
                 @get:MyQualifier(Named("hello")) val any: Any
@@ -759,8 +763,9 @@ class CoreBindingsFailureTest(
                     fun create(): MyComponent2
                 }
             }
-            @Component(isRoot = false)
+            @Component(isRoot = false, modules = [MySubModule::class])
             interface SubComponent {
+                val numbers: List<Number>
                 @Component.Builder interface Builder { fun create(): SubComponent }
             }
         """.trimIndent())
@@ -816,6 +821,14 @@ class CoreBindingsFailureTest(
                             "@Provides test.MyModule2::two(): java.lang.Number",
                         ),
                     )),
+                ),
+            )),
+            errorMessage(formatMessage(
+                message = Errors.conflictingBindings(`for` = "java.util.List<java.lang.Number>"),
+                encounterPaths = listOf(listOf("test.MyComponent2", "test.SubComponent")),
+                notes = listOf(
+                    Strings.Notes.duplicateBinding(binding = "@Provides test.MyModule2::numbers(): java.util.List<java.lang.Number>"),
+                    Strings.Notes.duplicateBinding(binding = "@Provides test.MySubModule::numbers2(): java.util.List<java.lang.Number>"),
                 ),
             )),
             errorMessage(formatMessage(
@@ -1088,7 +1101,7 @@ class CoreBindingsFailureTest(
             @IntoMap.Key annotation class InvalidMapKey3(val value: IntArray)
             @IntoMap.Key annotation class ClassKey2(val value: KClass<*>)
 
-            @Module
+            @Module(subcomponents = [SubComponent::class])
             interface TestModule {
                 @[Binds IntoMap]
                 fun binding1(): Int
@@ -1111,9 +1124,23 @@ class CoreBindingsFailureTest(
                 fun binding6(): String
             }
 
+            @Module class SubModule {
+                @[Provides IntoMap ClassKey(Any::class)]
+                fun subBinding(): String = "hi"
+            } 
+
             @Component(modules = [TestModule::class])
             interface TestComponent {
+                val sub: SubComponent.Builder
                 val map: Map<Class<*>, String>
+            }
+
+            @Component(isRoot = false, modules = [SubModule::class])
+            interface SubComponent {
+                val map: Map<Class<*>, String>
+                
+                @Component.Builder
+                interface Builder { fun create(): SubComponent }
             }
         """.trimIndent())
 
@@ -1152,7 +1179,23 @@ class CoreBindingsFailureTest(
                 encounterPaths = listOf(
                     listOf("test.TestComponent", "[entry-point] getMap", "[intrinsic] multi-bound `java.util.Map<java.lang.Class<?>, java.lang.String>`:\n"+
                             "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n"+
-                            "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n")
+                            "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n"),
+                    listOf("test.TestComponent", "test.SubComponent", "[entry-point] getMap", "[intrinsic] multi-bound `java.util.Map<java.lang.Class<?>, java.lang.String>`:\n"+
+                            "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n",
+                            "[intrinsic] multi-bound `java.util.Map<java.lang.Class<?>, java.lang.String>`:\n"+
+                                "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n"+
+                                "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n")
+                )
+            )),
+            errorMessage(formatMessage(
+                message = Errors.duplicateKeysInMapping(mapType = "java.util.Map<java.lang.Class<?>, java.lang.String>", keyValue = "java.lang.Object.class"),
+                notes = listOf(
+                    Strings.Notes.duplicateKeyInMapBinding(binding = "@Provides test.SubModule::subBinding(): java.lang.String"),
+                    Strings.Notes.duplicateKeyInMapBinding(binding = "[absent] @Binds test.TestModule::binding5(): java.lang.String"),
+                ),
+                encounterPaths = listOf(
+                    listOf("test.TestComponent", "test.SubComponent", "[entry-point] getMap", "[intrinsic] multi-bound `java.util.Map<java.lang.Class<?>, java.lang.String>`:\n"+
+                            "    java.lang.Object.class = java.lang.String [multi-binding contributor]\n"),
                 )
             )),
             errorMessage(formatMessage(

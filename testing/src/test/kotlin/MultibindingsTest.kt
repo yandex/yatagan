@@ -436,4 +436,152 @@ class MultibindingsTest(
 
         expectSuccessfulValidation()
     }
+
+    @Test
+    fun `list bindings are inherited from super-components`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            @Module(subcomponents = [SubComponent::class, SubComponent2::class]) object RootModule {
+                @[Provides IntoList(flatten = true)] fun zeroAndOne(): List<Number> = listOf(0, 1)
+                @[Provides IntoList] fun two(): Number = 2.0
+                @[Provides IntoList] fun three(): Number = 3.0f
+
+                @[Provides IntoList] fun int1(): Int = -1
+                @[Provides IntoList] fun int2(): Int = -2
+                @[Provides IntoList] fun int3(): Int = -3
+
+                @[Named("qualified") Provides IntoList] fun qInt1(): Int = 1
+                @[Named("qualified") Provides IntoList] fun qInt2(): Int = 2
+                @[Named("qualified") Provides IntoList] fun qInt3(): Int = 3
+            }
+
+            @Module object SubModule {
+                @[Provides IntoList] fun four(): Number = 4L
+                @[Provides IntoList] fun five(): Number = 5
+                @[Provides IntoList(flatten = true)] fun sixAndSeven(): List<Number> = listOf(6, 7)
+            }
+
+            @Module object SubModule2 {
+                @[Provides IntoList] fun p0(): Number = 10.0
+                @[Provides IntoList] fun p1(): Number = 20.0
+                
+                @[Named("qualified") Provides IntoList] fun qInt1(): Int = 4
+            }
+
+            @Component(modules = [RootModule::class])
+            interface RootComponent {
+                val sub: SubComponent.Builder
+                val sub2: SubComponent2.Builder
+                
+                @get:Named("qualified") val qInts: List<Int>
+            }
+
+            @Component(isRoot = false, modules = [SubModule::class])
+            interface SubComponent {
+                val numbers: List<Number>
+                @get:Named("qualified") val qInts: List<Int>
+                
+                @Component.Builder interface Builder {
+                    fun create(): SubComponent
+                }
+            }
+
+            @Component(isRoot = false, modules = [SubModule2::class])
+            interface SubComponent2 {
+                val numbers: List<Number>
+                @get:Named("qualified") val qInts: List<Int>
+                
+                @Component.Builder interface Builder {
+                    fun create(): SubComponent2
+                }
+            }
+
+            fun test() {
+                val c: RootComponent = Dagger.create(RootComponent::class.java)
+                assert(c.qInts.toSet() == setOf(1, 2, 3))
+
+                assert(c.sub.create().numbers.toSet() == setOf<Number>(0, 1, 2.0, 3.0f, 4L, 5, 6, 7))
+                assert(c.sub.create().qInts.toSet() == setOf(1, 2, 3))
+
+                assert(c.sub2.create().numbers.toSet() == setOf<Number>(0, 1, 2.0, 3.0f, 10.0, 20.0))
+                assert(c.sub2.create().qInts.toSet() == setOf(1, 2, 3, 4))
+             }
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
+
+    @Test
+    fun `map bindings are inherited from super-components`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            @Module(subcomponents = [SubComponent::class, SubComponent2::class]) object RootModule {
+                @[Provides IntoMap IntKey(1)] fun one(): String = "one"
+                @[Provides IntoMap IntKey(2)] fun two(): String = "two"
+
+                @[Provides IntoMap IntKey(1)] fun int1(): Int = -1
+                @[Provides IntoMap IntKey(2)] fun int2(): Int = -2
+
+                @[Named("qualified") Provides IntoMap IntKey(1)] fun qInt1(): Int = 1
+                @[Named("qualified") Provides IntoMap IntKey(2)] fun qInt2(): Int = 2
+            }
+
+            @Module object SubModule {
+                @[Provides IntoMap IntKey(3)] fun three(): String = "three"
+                @[Provides IntoMap IntKey(4)] fun four(): String = "four"
+            }
+
+            @Module object SubModule2 {
+                @[Provides IntoMap IntKey(3)] fun p0(): String = "3/10" 
+                @[Provides IntoMap IntKey(20)] fun p1(): String = "20"
+                
+                @[Named("qualified") Provides IntoMap IntKey(3)] fun qInt1(): Int = 3
+            }
+
+            @Component(modules = [RootModule::class])
+            interface RootComponent {
+                val sub: SubComponent.Builder
+                val sub2: SubComponent2.Builder
+                
+                @get:Named("qualified") val qInts: Map<Int, Int>
+            }
+
+            @Component(isRoot = false, modules = [SubModule::class])
+            interface SubComponent {
+                val map: Map<Int, String>
+                @get:Named("qualified") val qInts: Map<Int, Int>
+                
+                @Component.Builder interface Builder {
+                    fun create(): SubComponent
+                }
+            }
+
+            @Component(isRoot = false, modules = [SubModule2::class])
+            interface SubComponent2 {
+                val map: Map<Int, String>
+                @get:Named("qualified") val qInts: Map<Int, Int>
+                
+                @Component.Builder interface Builder {
+                    fun create(): SubComponent2
+                }
+            }
+
+            fun test() {
+                val c: RootComponent = Dagger.create(RootComponent::class.java)
+                assert(c.qInts == mapOf(1 to 1, 2 to 2))
+
+                assert(c.sub.create().map == mapOf(1 to "one", 2 to "two", 3 to "three", 4 to "four"))
+                assert(c.sub.create().qInts == mapOf(1 to 1, 2 to 2))
+
+                assert(c.sub2.create().map == mapOf(1 to "one", 2 to "two", 3 to "3/10", 20 to "20"))
+                assert(c.sub2.create().qInts == mapOf(1 to 1, 2 to 2, 3 to 3))
+             }
+        """.trimIndent())
+
+        expectSuccessfulValidation()
+    }
 }

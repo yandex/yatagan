@@ -23,6 +23,9 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
+import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.Extensible
+import com.yandex.daggerlite.graph.ExtensibleBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -31,8 +34,10 @@ import com.yandex.daggerlite.validation.impl.reportError
 
 internal class GraphBindingsFactory(
     private val graph: BindingGraphImpl,
-    private val parent: GraphBindingsFactory?,
 ) : MayBeInvalid {
+    init {
+        graph[GraphBindingsFactory] = this
+    }
     private val implicitBindingCreator = ImplicitBindingCreator()
 
     private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
@@ -144,22 +149,22 @@ internal class GraphBindingsFactory(
 
         // Multi-bindings
         for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {
-            val iterator = target.multiBoundListNodes().iterator()
-            if (!iterator.hasNext()) continue
-            var current = iterator.next()
-            add(MultiBindingImpl(
-                owner = graph,
-                target = current,
-                contributions = contributions,
-            ))
-            while (iterator.hasNext()) {
-                val old = current
-                current = iterator.next()
-                add(SyntheticAliasBindingImpl(
+            val nodes = target.multiBoundListNodes()
+            val representativeNode = nodes.first()
+            val upstream = parents().mapNotNull { parentBindings ->
+                parentBindings.providedBindings[representativeNode]?.singleOrNull() as? MultiBindingImpl
+            }.firstOrNull()
+            val downstreamNode = MultibindingDownstreamHandle(underlying = representativeNode)
+            addBindingForAllNodes(
+                nodes = nodes + downstreamNode,
+            ) {
+                MultiBindingImpl(
                     owner = graph,
-                    target = current,
-                    source = old,
-                ))
+                    target = it,
+                    contributions = contributions,
+                    upstream = upstream,
+                    targetForDownstream = downstreamNode,
+                )
             }
         }
 
@@ -167,25 +172,25 @@ internal class GraphBindingsFactory(
         for ((mapSignature, contributions: List<Pair<AnnotationLangModel.Value, NodeModel>>) in mapBindings) {
             for (useProviders in booleanArrayOf(true, false)) {
                 val (keyType: TypeLangModel, valueType: NodeModel) = mapSignature
-                val iterator = valueType.multiBoundMapNodes(key = keyType, asProviders = useProviders).iterator()
-                if (!iterator.hasNext()) continue
-                var current = iterator.next()
-                add(MapBindingImpl(
-                    owner = graph,
-                    target = current,
-                    contents = contributions,
-                    mapKey = keyType,
-                    mapValue = valueType.type,
-                    useProviders = useProviders,
-                ))
-                while (iterator.hasNext()) {
-                    val old = current
-                    current = iterator.next()
-                    add(SyntheticAliasBindingImpl(
+                val nodes = valueType.multiBoundMapNodes(key = keyType, asProviders = useProviders)
+                val representativeNode = nodes.first()
+                val upstream = parents().mapNotNull { parentBindings ->
+                    parentBindings.providedBindings[representativeNode]?.singleOrNull() as? MapBindingImpl
+                }.firstOrNull()
+                val downstreamNode = MultibindingDownstreamHandle(underlying = representativeNode)
+                addBindingForAllNodes(
+                    nodes = nodes + downstreamNode,
+                ) {
+                    MapBindingImpl(
                         owner = graph,
-                        target = current,
-                        source = old,
-                    ))
+                        target = it,
+                        contents = contributions,
+                        mapKey = keyType,
+                        mapValue = valueType.type,
+                        useProviders = useProviders,
+                        upstream = upstream,
+                        targetForDownstream = downstreamNode,
+                    )
                 }
             }
         }
@@ -224,14 +229,39 @@ internal class GraphBindingsFactory(
         }
     }
 
+    private inline fun MutableList<BaseBinding>.addBindingForAllNodes(
+        nodes: Array<NodeModel>,
+        block: (NodeModel) -> Binding,
+    ) {
+        val iterator = nodes.iterator()
+        require(iterator.hasNext())
+        var current = iterator.next()
+        add(block(current))
+        while (iterator.hasNext()) {
+            val old = current
+            current = iterator.next()
+            add(SyntheticAliasBindingImpl(
+                owner = graph,
+                target = current,
+                source = old,
+            ))
+        }
+    }
+
     private val localAndParentExplicitBindings: Map<NodeModel, List<BaseBinding>> by lazy {
-        buildMap<NodeModel, MutableList<BaseBinding>> {
-            parent?.localAndParentExplicitBindings?.forEach { (node, bindings) ->
-                getOrPut(node, ::arrayListOf) += bindings
-            }
-            providedBindings.forEach { (node, bindings) ->
-                getOrPut(node, ::arrayListOf) += bindings
-            }
+        mergeMultiMapsForDuplicateCheck(
+            fromParent = graph.parent?.get(GraphBindingsFactory)?.localAndParentExplicitBindings,
+            current = providedBindings,
+        )
+    }
+
+    private fun parents() = object : Sequence<GraphBindingsFactory> {
+        override fun iterator() = object : Iterator<GraphBindingsFactory> {
+            var graph: BindingGraph? = this@GraphBindingsFactory.graph.parent
+            override fun hasNext() = graph != null
+
+            override fun next() = (graph ?: throw NoSuchElementException())
+                .also { graph = it.parent }[GraphBindingsFactory]
         }
     }
 
@@ -247,6 +277,12 @@ internal class GraphBindingsFactory(
             if (bindings.size > 1) {
                 val distinct = bindings.toSet()
                 if (distinct.size > 1) {
+
+                    // We tolerate multibinding duplicates, because of the "extends" behavior.
+                    // There can be no two+ different multi-bindings for the same node in the same graph,
+                    //  so here we definitely have bindings from different graphs - no need to check that.
+                    if (distinct.all { it is ExtensibleBinding<*> }) continue
+
                     validator.reportError(Strings.Errors.conflictingBindings(`for` = node)) {
                         distinct.forEach { binding ->
                             addNote(Strings.Notes.duplicateBinding(binding))
@@ -277,5 +313,17 @@ internal class GraphBindingsFactory(
                 owner = graph,
             )
         }
+    }
+
+    private class MultibindingDownstreamHandle(
+        val underlying: NodeModel,
+    ) : NodeModel by underlying {
+        override fun getSpecificModel(): Nothing? = null
+        override fun toString() = "$underlying [inherited multi-binding]"
+        override val node: NodeModel get() = this
+    }
+
+    companion object Key : Extensible.Key<GraphBindingsFactory> {
+        override val keyType get() = GraphBindingsFactory::class.java
     }
 }

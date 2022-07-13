@@ -19,6 +19,9 @@ interface ComponentDependencyBinding : Binding {
  * Sort of fictional binding, that must be resolved into some real [Binding].
  */
 interface AliasBinding : BaseBinding {
+    /**
+     * Actual implementation node to be used (aliased for) for compatible [target].
+     */
     val source: NodeModel
 }
 
@@ -26,8 +29,27 @@ interface AliasBinding : BaseBinding {
  * A base class for all concrete binding implementations, apart from [AliasBinding].
  */
 interface Binding : BaseBinding {
+    /**
+     * A condition scope of this binding. Part of the *Conditions API*.
+     *
+     * If this is [never-scoped][ConditionScope.isNever], then [dependencies] **must** yield an empty sequence.
+     */
     val conditionScope: ConditionScope
+
+    /**
+     * All scopes, that this binding is compatible with (can be cached within).
+     * If empty, then the binding is *unscoped* (not cached) and is compatible with *any* scope.
+     */
     val scopes: Set<AnnotationLangModel>
+
+    /**
+     * The binding's dependencies on other bindings.
+     *
+     * If [conditionScope] is ["never"][ConditionScope.isNever], then the sequence **must** be empty.
+     *
+     * Backends can only use bindings that are reported here for codegen/runtime, as the use of any undeclared
+     *  dependencies will result in incorrect [BindingGraph.BindingUsage] computation, internal errors, etc.
+     */
     val dependencies: Sequence<NodeDependency>
 
     fun <R> accept(visitor: Visitor<R>): R
@@ -47,6 +69,11 @@ interface Binding : BaseBinding {
     }
 }
 
+/**
+ * Binding that can not be satisfied - it's codegen or runtime evaluation is *unreached*.
+ *
+ * Empty [com.yandex.daggerlite.Binds] binding is an example of such binding.
+ */
 interface EmptyBinding : Binding
 
 /**
@@ -63,7 +90,7 @@ interface AssistedInjectFactoryBinding : Binding {
 }
 
 /**
- * TODO: doc.
+ * A specific case of [com.yandex.daggerlite.Binds] binding with multiple alternatives.
  */
 interface AlternativesBinding : Binding {
     val alternatives: Sequence<NodeModel>
@@ -86,7 +113,33 @@ interface ComponentDependencyEntryPointBinding : Binding {
     val getter: FunctionLangModel
 }
 
-interface MultiBinding : Binding {
+/**
+ * A binding that can override/extend a binding with the same [target] from the parent graph.
+ */
+interface ExtensibleBinding<B> : Binding where B : ExtensibleBinding<B> {
+    /**
+     * An optional reference to a binding from one of the parent graphs, to include contributions from.
+     */
+    val upstream: B?
+
+    /**
+     * A special intrinsic node, which is used for downstream binding to depend on this binding
+     *  (as its [upstream]).
+     *
+     * Any downstream bindings' dependencies must include this node.
+     */
+    val targetForDownstream: NodeModel
+}
+
+/**
+ * A binding for a `List<T>` aggregating all contributions for `T`, marked with [com.yandex.daggerlite.IntoList].
+ * Such bindings exhibit "extends" behavior: bindings for the same list in child graphs inherit all the contributions
+ *  from parent ones (in a cascading way) and are not considered conflicting.
+ */
+interface MultiBinding : ExtensibleBinding<MultiBinding> {
+    /**
+     * All list contributions.
+     */
     val contributions: Map<NodeModel, ContributionType>
 
     enum class ContributionType {
@@ -102,8 +155,12 @@ interface MultiBinding : Binding {
     }
 }
 
-interface MapBinding : Binding {
+interface MapBinding : ExtensibleBinding<MapBinding> {
     val mapKey: TypeLangModel
     val mapValue: TypeLangModel
+
+    /**
+     * NOTE: Dependency resolve should be done exactly on the binding's [owner].
+     */
     val contents: List<Pair<AnnotationLangModel.Value, NodeDependency>>
 }
