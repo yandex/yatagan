@@ -4,13 +4,12 @@ import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
-import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.GraphMemberInjector
 import com.yandex.daggerlite.validation.Validator
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class GraphMemberInjectorImpl(
-    private val owner: BindingGraph,
+    private val owner: BindingGraphImpl,
     private val impl: MembersInjectorModel,
 ) : GraphMemberInjector {
     override val injector: FunctionLangModel
@@ -28,7 +27,7 @@ internal class GraphMemberInjectorImpl(
         val member: MemberLangModel,
         override val dependency: NodeDependency,
     ) : MemberLangModel by member, GraphEntryPointBase() {
-        override val graph: BindingGraph
+        override val graph: BindingGraphImpl
             get() = this@GraphMemberInjectorImpl.owner
 
         override fun toString() = "[member-to-inject] ${member.name}"
