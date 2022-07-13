@@ -135,6 +135,7 @@ object Dagger {
             when (locatedMessage.message.kind) {
                 ValidationMessage.Kind.Error -> reporting.reportError(text)
                 ValidationMessage.Kind.Warning -> reporting.reportWarning(text)
+                ValidationMessage.Kind.MandatoryWarning -> reporting.reportMandatoryWarning(text)
             }
         }
     }

@@ -29,5 +29,7 @@ class Options(
     companion object {
         // TODO: Hook with docs
         val UseParallelProcessing = BooleanOption("daggerlite.experimental.useParallelProcessing", default = false)
+
+        val StrictMode = BooleanOption("daggerlite.enableStrictMode", default = true)
     }
 }

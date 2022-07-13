@@ -187,6 +187,11 @@ It is yet planned to research how to provide support for multiple Kotlin version
 
 Current **Kotlin version** for KSP: **%%kotlin_version%%**
 
+## Processor options
+
+- `daggerlite.enableStrictMode` (enabled by default) can be turned off for the time of the migration from D2 to
+ turn some non-blocker errors into warnings.
+
 ## Useful links
 
 - Code: [repository](%%repo_link%%)

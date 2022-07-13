@@ -50,6 +50,9 @@ project, please, file a feature request, which has a high probability of being i
 
 Other behavioral changes:
 
+- [@Binds][com.yandex.daggerlite.Binds] can't be scoped (scope rebind is not allowed). Use scope on the implementation.
+  Also, DL supports declaring multiple scopes on bindings.
+
 - DL requires components, builders, assisted inject factories to be declared as interfaces. 
   Abstract classes are forbidden. This is due to the limitations of RT mode.
 
@@ -68,6 +71,15 @@ Other behavioral changes:
   are not supported.
 
 - Automatic component factory/builder generation is not supported - an explicit one must be written if required.
+
+- Member inject in Kotlin code should be used with care:
+  `@Inject lateinit var prop: SomeClass` will work as expected,
+  though `@Inject @Named("id") lateinit var prop: SomeClass` will not - qualifier annotation will go to the *property*
+  instead of *field*, and DL will not be able to see it.
+  In fact vanilla Dagger will also fail to see it in some scenarios, though it tries to do so on the best-effort basis.
+  DL can't read annotations from Kotlin properties, so the following explicit forms should be used instead:
+  `@Inject @field:Named("id") lateinit var prop: SomeClass` to inject directly to the field, or
+  `@set:Inject @set:Named("id") lateinit var prop: SomeClass` to inject via setter.
 
 ## Basic sample
 

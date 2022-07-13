@@ -41,11 +41,38 @@ class CoreBindingsFailureTest(
     }
 
     @Test
+    fun `rebind scope is forbidden`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            @Module interface TestModule {
+                @Binds @Singleton fun number(i: Int): Number
+                companion object {
+                    @Provides fun integer(): Int = 0
+                }
+            }
+            @Component(modules = [TestModule::class]) @Singleton interface TestComponent {
+                val number: Number
+            }
+        """.trimIndent())
+
+        expectValidationResults(
+            errorMessage(formatMessage(
+                message = Strings.Warnings.scopeRebindIsForbidden(),
+                encounterPaths = listOf(listOf(
+                    "test.TestComponent", "[entry-point] getNumber",
+                    "[alias] @Binds test.TestModule::number(java.lang.Integer): java.lang.Number"
+                )),
+                notes = listOf(Strings.Notes.infoOnScopeRebind()),
+            ))
+        )
+    }
+
+    @Test
     fun `missing dependency`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Lazy
-            import javax.inject.Inject
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             class Foo @Inject constructor(obj: Any, foo: Lazy<Foo2>)
             class Foo2 @Inject constructor(obj: Any)

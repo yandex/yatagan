@@ -9,6 +9,7 @@ import com.yandex.daggerlite.graph.impl.BindingGraph
 import com.yandex.daggerlite.spi.ValidationPluginProvider
 import com.yandex.daggerlite.spi.impl.GraphValidationExtension
 import com.yandex.daggerlite.validation.ValidationMessage.Kind.Error
+import com.yandex.daggerlite.validation.ValidationMessage.Kind.MandatoryWarning
 import com.yandex.daggerlite.validation.ValidationMessage.Kind.Warning
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.validate
@@ -32,6 +33,7 @@ fun <Source> process(
 ) {
     ObjectCacheRegistry.use {
         val dispatcher = if (useParallelProcessing) Dispatchers.Default else Dispatchers.Unconfined
+        val strictMode = delegate.options[Options.StrictMode]
         runBlocking(dispatcher) {
             val rootModels = sources.mapNotNull { source ->
                 ComponentModel(delegate.createDeclaration(source))
@@ -82,6 +84,7 @@ fun <Source> process(
                                 message = locatedMessage.message.contents,
                                 color = when (locatedMessage.message.kind) {
                                     Error -> Strings.StringColor.Red
+                                    MandatoryWarning -> Strings.StringColor.Yellow
                                     Warning -> Strings.StringColor.Yellow
                                 },
                                 encounterPaths = locatedMessage.encounterPaths,
@@ -89,6 +92,11 @@ fun <Source> process(
                             )
                             when (locatedMessage.message.kind) {
                                 Error -> logger.error(message)
+                                MandatoryWarning -> if (strictMode) {
+                                    logger.error(message)
+                                } else {
+                                    logger.warning(message)
+                                }
                                 Warning -> logger.warning(message)
                             }
                         }
