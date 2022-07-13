@@ -18,7 +18,6 @@ inline fun buildMessage(kind: Kind, block: ValidationMessageBuilder.() -> Unit):
         .build()
 }
 
-@Suppress("DEPRECATION")
 inline fun Validator.reportError(message: String, block: ValidationMessageBuilder.() -> Unit = {}) {
     report(buildMessage(Kind.Error) {
         contents = message
@@ -26,9 +25,15 @@ inline fun Validator.reportError(message: String, block: ValidationMessageBuilde
     })
 }
 
-@Suppress("DEPRECATION")
 inline fun Validator.reportWarning(message: String, block: ValidationMessageBuilder.() -> Unit = {}) {
     report(buildMessage(Kind.Warning) {
+        contents = message
+        block()
+    })
+}
+
+inline fun Validator.reportMandatoryWarning(message: String, block: ValidationMessageBuilder.() -> Unit = {}) {
+    report(buildMessage(Kind.MandatoryWarning) {
         contents = message
         block()
     })

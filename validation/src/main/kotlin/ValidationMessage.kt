@@ -15,6 +15,11 @@ interface ValidationMessage {
         Error,
 
         /**
+         * Serious warning, that can be turned into error in "strict mode".
+         */
+        MandatoryWarning,
+
+        /**
          * Warning message, non-fatal.
          */
         Warning,

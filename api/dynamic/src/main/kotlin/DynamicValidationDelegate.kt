@@ -44,6 +44,13 @@ interface DynamicValidationDelegate {
          * Invoked by the framework to report a warning.
          */
         fun reportWarning(message: String)
+
+        /**
+         * Invoked by the framework to report a mandatory warning.
+         */
+        fun reportMandatoryWarning(message: String) {
+            reportWarning(message)
+        }
     }
 
     /**

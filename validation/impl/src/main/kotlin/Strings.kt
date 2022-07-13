@@ -346,6 +346,8 @@ object Strings {
     }
 
     object Warnings {
+        @Covered
+        fun scopeRebindIsForbidden() = "Scope has no effect on 'alias' binding"
 
         @Covered
         fun ignoredDependencyOfFrameworkType(function: Any) =
@@ -367,6 +369,10 @@ object Strings {
     }
 
     object Notes {
+        @Covered
+        fun infoOnScopeRebind() = "Scope is inherited from the source graph node and can not be overridden. " +
+                "Use multiple scopes on the source node to declare it compatible with another scope, if required."
+
         @Covered
         fun unknownBinding() =
             "No known way to infer the binding"

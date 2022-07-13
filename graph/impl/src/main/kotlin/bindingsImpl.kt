@@ -46,7 +46,7 @@ import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.Strings.Errors
 import com.yandex.daggerlite.validation.impl.ValidationMessageBuilder
 import com.yandex.daggerlite.validation.impl.reportError
-import com.yandex.daggerlite.validation.impl.reportWarning
+import com.yandex.daggerlite.validation.impl.reportMandatoryWarning
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal interface BaseBindingMixin : BaseBinding {
@@ -279,10 +279,8 @@ internal class AliasBindingImpl(
     override fun validate(validator: Validator) {
         validator.child(owner.resolveRaw(source))
         if (impl.scopes.isNotEmpty()) {
-            validator.reportWarning("Scope has no effect on 'alias' binding") {
-                addNote("Scope is inherited from the source graph node and can not be overridden. " +
-                        "Use multiple scopes on the source node to declare it compatible with another scope, " +
-                        "if required.")
+            validator.reportMandatoryWarning(Strings.Warnings.scopeRebindIsForbidden()) {
+                addNote(Strings.Notes.infoOnScopeRebind())
             }
         }
     }

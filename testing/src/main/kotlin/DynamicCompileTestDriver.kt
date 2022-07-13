@@ -152,6 +152,10 @@ class DynamicCompileTestDriver(
                                         public void reportWarning(String message) {
                                             log.add(new String[]{"warning", message});
                                         }
+                                        public void reportMandatoryWarning(String message) {
+                                            // Strict mode
+                                            reportError(message);
+                                        }
                                     });
                                     if (hasErrors) {
                                         throw new InvalidGraph();
