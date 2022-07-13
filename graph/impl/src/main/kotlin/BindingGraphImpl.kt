@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.graph.impl
 
-import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
@@ -19,6 +18,7 @@ import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage
 import com.yandex.daggerlite.graph.BindingVisitorAdapter
 import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.normalized
+import com.yandex.daggerlite.graph.parentsSequence
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.impl.Strings
 import com.yandex.daggerlite.validation.impl.reportError
@@ -57,7 +57,6 @@ internal class BindingGraphImpl(
 
     private val bindings: GraphBindingsFactory = GraphBindingsFactory(
         graph = this,
-        parent = parent?.bindings,
     )
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
@@ -85,7 +84,7 @@ internal class BindingGraphImpl(
 
     init {
         // Build children
-        children = if (parents().any { it.component == component }) /*loop guard*/ emptyList() else modules
+        children = if (parentsSequence().any { it.model == model }) /*loop guard*/ emptyList() else modules
             .asSequence()
             .flatMap(ModuleModel::subcomponents)
             .distinct()
@@ -234,12 +233,12 @@ internal class BindingGraphImpl(
             validator.reportError(Strings.Errors.rootAsChild())
         }
 
-        val parents = parents().memoize()
+        val parents = parentsSequence()
 
         // Check MT status is set explicitly
         if (component.requiresSynchronizedAccess) {
             parents.filter {
-                !it.component.requiresSynchronizedAccess
+                !(it as BindingGraphImpl).component.requiresSynchronizedAccess
             }.forEach { parent ->
                 validator.reportError(Strings.Errors.multiThreadStatusMismatch(parent = parent))
             }
@@ -256,18 +255,10 @@ internal class BindingGraphImpl(
         }
 
         // Report hierarchy loops
-        if (parents.find { parent -> parent.component == component } != null) {
+        if (parents.find { parent -> parent.model == model } != null) {
             validator.reportError(Strings.Errors.componentLoop())
         }
 
         validateNoLoops(this, validator)
-    }
-
-    private fun parents() = sequence<BindingGraphImpl> {
-        var current = parent
-        while (current != null) {
-            yield(current)
-            current = current.parent
-        }
     }
 }

@@ -19,6 +19,17 @@ internal class MultiBindingGenerator(
     override fun buildAccessorCode(builder: CodeBuilder, binding: MultiBinding) = with(builder) {
         +"final %T list = new %T<>(${binding.contributions.size})"
             .formatCode(binding.target.typeName(), Names.ArrayList)
+        binding.upstream?.let { upstream ->
+            +buildExpression {
+                +"list.addAll("
+                upstream.generateAccess(
+                    builder = this,
+                    inside = thisGraph,
+                    isInsideInnerClass = false,
+                )
+                +")"
+            }
+        }
         binding.contributions.forEach { (node: NodeModel, kind: ContributionType) ->
             val nodeBinding = thisGraph.resolveBinding(node)
             generateUnderCondition(

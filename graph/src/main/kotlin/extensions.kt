@@ -27,3 +27,16 @@ abstract class BindingVisitorAdapter<R> : Binding.Visitor<R> {
     override fun visitMap(binding: MapBinding) = visitDefault()
     override fun visitEmpty(binding: EmptyBinding) = visitDefault()
 }
+
+fun <P : WithParents<P>> P.parentsSequence(
+    includeThis: Boolean = false,
+): Sequence<P> {
+    return object : Sequence<P> {
+        val initial = if (includeThis) this@parentsSequence else parent
+        override fun iterator() = object : Iterator<P> {
+            var next: P? = initial
+            override fun hasNext() = next != null
+            override fun next() = (next ?: throw NoSuchElementException()).also { next = it.parent }
+        }
+    }
+}
