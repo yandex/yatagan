@@ -42,7 +42,7 @@ internal class RtTypeImpl private constructor(
             is RtTypeImpl -> {
                 val thisClass = this.impl.tryAsClass() ?: return false
                 val thatClass = another.impl.tryAsClass() ?: return false
-                thisClass.isAssignableFrom(thatClass)
+                thisClass.boxed().isAssignableFrom(thatClass.boxed())
             }
             else -> false
         }
