@@ -58,7 +58,7 @@ class HeavyTest(
 
             includeAllFromDirectory(sourceDir)
 
-            expectSuccessfulValidation()
+            compileRunAndValidate()
         } finally {
             sourceDir.deleteRecursively()
         }

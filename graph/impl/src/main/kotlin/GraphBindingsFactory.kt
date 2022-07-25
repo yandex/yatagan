@@ -29,9 +29,11 @@ import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.WithParents
 import com.yandex.daggerlite.graph.parentsSequence
 import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.daggerlite.validation.RichString
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 
 internal class GraphBindingsFactory(
     private val graph: BindingGraphImpl,
@@ -40,6 +42,8 @@ internal class GraphBindingsFactory(
         graph[GraphBindingsFactory] = this
     }
     private val implicitBindingCreator = ImplicitBindingCreator()
+
+    override fun toString(childContext: MayBeInvalid?): RichString = throw AssertionError("Not reached")
 
     private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
         val bindingModelVisitor = object : ModuleHostedBindingModel.Visitor<BaseBinding> {
@@ -310,7 +314,11 @@ internal class GraphBindingsFactory(
         val underlying: NodeModel,
     ) : NodeModel by underlying {
         override fun getSpecificModel(): Nothing? = null
-        override fun toString() = "$underlying [inherited multi-binding]"
+        override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+            modelClassName = "inherited-multi-binding",
+            representation = underlying.toString(childContext = null),
+        )
+
         override val node: NodeModel get() = this
     }
 

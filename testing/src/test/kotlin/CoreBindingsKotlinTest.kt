@@ -56,7 +56,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent()
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -102,7 +102,7 @@ class CoreBindingsKotlinTest(
         """.trimIndent()
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -145,7 +145,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -192,7 +192,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -222,7 +222,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -251,7 +251,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -279,7 +279,7 @@ class CoreBindingsKotlinTest(
         """
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -306,7 +306,7 @@ class CoreBindingsKotlinTest(
             }
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -338,7 +338,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -364,7 +364,7 @@ class CoreBindingsKotlinTest(
             }
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -416,7 +416,7 @@ class CoreBindingsKotlinTest(
             }
             """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -493,7 +493,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -547,7 +547,7 @@ class CoreBindingsKotlinTest(
                 foo.helloA; foo.bye; foo.b; foo.a
             }""".trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -648,7 +648,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -683,7 +683,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -718,7 +718,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -787,7 +787,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -870,7 +870,7 @@ class CoreBindingsKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 }
 

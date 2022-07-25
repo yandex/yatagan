@@ -1,0 +1,54 @@
+error: @AssistedInject constructor @Assisted parameters and factory function @Assisted parameters do not match.
+NOTE: From @AssistedInject constructor: [@Assisted("A") int]
+NOTE: From assisted factory's method: [@Assisted("A") int, @Assisted("B") int]
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point c: test.FactoryC
+                    ^-[*1]-------
+  here: [1*] assisted-factory test.FactoryC::createA(): test.ClassA(.. 1 dependency)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: @AssistedInject constructor's @Assisted parameters contain duplicate types/ids.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point c: test.FactoryC
+                    ^-[*1]-------
+  here: [1*] assisted-factory test.FactoryC::createA(): test.ClassA(.. 1 dependency)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Assisted inject factory must be an interface.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point a: test.FactoryA
+                    ^-[*1]-------
+  here: [1*] assisted-factory test.FactoryA::someMethod(): <invalid-target>()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Assisted inject factory must contain exactly one abstract factory method.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point b: test.FactoryB
+                    ^-[*1]-------
+  here: [1*] assisted-factory test.FactoryB::<missing-factory-method>()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Type `void` doesn't have an @AssistedInject constructor.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point a: test.FactoryA
+                    ^-[*1]-------
+  here: [1*] assisted-factory test.FactoryA::someMethod(): <invalid-target>()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: factory method's @Assisted parameters contain duplicate types/ids.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point a: test.FactoryA
+                    ^-[*1]-------
+  here: [1*] assisted-factory test.FactoryA::someMethod(): <invalid-target>()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

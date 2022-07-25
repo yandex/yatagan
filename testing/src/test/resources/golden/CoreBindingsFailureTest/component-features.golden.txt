@@ -1,0 +1,74 @@
+error: `inject-constructor test.ElectricHeater()` with a condition:
+    (1) [test.Foo.INSTANCE.isEnabledA]
+cannot be directly exposed from an entry-point of `graph for component test.SubComponentB` under condition:
+    (2) [test.Foo.INSTANCE.isEnabledB]
+without Optional<..> wrapper, because component condition (2) does not imply condition (1)
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.SubComponentB
+  here: entry-point getElectric: test.ElectricHeater
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.SubComponentB
+  in member-injector injectConsumer(test.Consumer { .., setElectricHeater, .. })
+                                                        ^-[*1]-----------
+  here: [1*] member-to-inject setElectricHeater: test.ElectricHeater
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: `inject-constructor test.ElectricHeater()` with a condition:
+    (1) [test.Foo.INSTANCE.isEnabledA]
+cannot be directly exposed from an entry-point of `graph for root-component test.RootComponent` under condition:
+    (2) [always-present]
+without Optional<..> wrapper, because component condition (2) does not imply condition (1)
+Encountered:
+  in graph for root-component test.RootComponent
+  here: entry-point getElectric: test.ElectricHeater
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  in member-injector injectConsumer(test.Consumer { .., setElectricHeater, .. })
+                                                        ^-[*1]-----------
+  here: [1*] member-to-inject setElectricHeater: test.ElectricHeater
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: `inject-constructor test.GasHeater()` with a condition:
+    (1) [test.Foo.INSTANCE.isEnabledB]
+cannot be directly exposed from an entry-point of `graph for component test.SubComponentA` under condition:
+    (2) [test.Foo.INSTANCE.isEnabledA]
+without Optional<..> wrapper, because component condition (2) does not imply condition (1)
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.SubComponentA
+  here: entry-point getGas: test.GasHeater
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.SubComponentA
+  in member-injector injectConsumer(test.Consumer { .., setGasHeater, .. })
+                                                        ^-[*1]------
+  here: [1*] member-to-inject setGasHeater: test.GasHeater
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: `inject-constructor test.GasHeater()` with a condition:
+    (1) [test.Foo.INSTANCE.isEnabledB]
+cannot be directly exposed from an entry-point of `graph for root-component test.RootComponent` under condition:
+    (2) [always-present]
+without Optional<..> wrapper, because component condition (2) does not imply condition (1)
+Encountered:
+  in graph for root-component test.RootComponent
+  here: entry-point getGas: test.GasHeater
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  in member-injector injectConsumer(test.Consumer { .., setGasHeater, .. })
+                                                        ^-[*1]------
+  here: [1*] member-to-inject setGasHeater: test.GasHeater
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

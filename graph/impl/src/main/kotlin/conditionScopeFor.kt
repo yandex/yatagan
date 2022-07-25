@@ -1,21 +1,20 @@
 package com.yandex.daggerlite.graph.impl
 
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.ConditionalHoldingModel
 import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.Variant.DimensionModel
 import com.yandex.daggerlite.core.Variant.FlavorModel
-import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.validation.ValidationMessage
-import com.yandex.daggerlite.validation.ValidationMessage.Kind
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.buildMessage
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.buildError
 
 internal sealed interface VariantMatch {
     val conditionScope: ConditionScope
 
     class Matched(override val conditionScope: ConditionScope) : VariantMatch
-    class Error(val message: ValidationMessage) : VariantMatch {
+    class Error(val message: ValidationMessage?) : VariantMatch {
         override val conditionScope: ConditionScope
             get() = ConditionScope.NeverScoped
     }
@@ -39,11 +38,16 @@ internal fun VariantMatch(
             .groupBy(FlavorModel::dimension)
         var currentMatch = 0
         for ((dimension: DimensionModel, allowedFlavors: List<FlavorModel>) in constraints) {
-            val flavor = forVariant[dimension] ?: return VariantMatch.Error(buildMessage(Kind.Error) {
-                contents = Strings.Errors.undeclaredDimension(
-                    dimension = dimension,
-                )
-            })
+            val flavor = forVariant[dimension]
+                ?: return if (dimension.isInvalid) {
+                    // No need to report a missing dimension error here, as <error> dimension is, of course, missing
+                    VariantMatch.Error(null)
+                } else {
+                    VariantMatch.Error(buildError(Strings.Errors.undeclaredDimension(
+                        dimension = dimension,
+                    )))
+                }
+
             if (flavor !in allowedFlavors) {
                 // Not matched
                 continue@outer
@@ -51,16 +55,15 @@ internal fun VariantMatch(
             ++currentMatch
         }
         if (maxMatched == currentMatch) {
-            return VariantMatch.Error(buildMessage(Kind.Error) {
-                contents = Strings.Errors.variantMatchingAmbiguity(one = bestMatch!!, two = conditional)
-            })
+            return VariantMatch.Error(
+                buildError(Strings.Errors.variantMatchingAmbiguity(one = bestMatch!!, two = conditional)))
         }
         if (maxMatched < currentMatch) {
             maxMatched = currentMatch
             bestMatch = conditional
         }
     }
-    return bestMatch?.featureTypes?.fold(ConditionScope.Unscoped) { acc, featureType ->
-        acc and ConditionScope(featureType.conditions)
+    return bestMatch?.featureTypes?.fold(ConditionScope.Unscoped as ConditionScope) { acc, featureType ->
+        acc and featureType.conditionScope
     }?.let(VariantMatch::Matched) ?: MatchedNeverScoped
 }

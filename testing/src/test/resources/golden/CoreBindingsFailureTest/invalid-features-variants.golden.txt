@@ -1,0 +1,57 @@
+error: Duplicate flavors for a single `component-variant-dimension test.NotADimension`
+NOTE: Conflicting: `component-flavor test.InvalidFlavor`
+NOTE: Conflicting: `component-flavor test.InvalidFlavor`
+NOTE: Conflicting: `component-flavor test.InvalidFlavor2`
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.AnotherComponent
+  here: component-variant {...}
+        ^~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Feature declaration has no `@Condition`-family annotations on it.
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.NotAFeature, ..] }
+                                                           ^-[*2]----------
+  here: [2*] feature test.NotAFeature <no-conditions-declared>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.NotAFeature2, ..] }
+                                                           ^-[*2]-----------
+  here: [2*] feature test.NotAFeature2 <no-conditions-declared>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Type declaration is used as a component flavor, yet not annotated with @ComponentFlavor
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { component-flavor-constraints (onlyIn): [.., test.NotAFlavor, ..] }
+                                                                              ^-[*2]---------
+  here: [2*] component-flavor test.NotAFlavor
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Type declaration is used as a component variant dimension, yet not annotated with @ComponentVariantDimension
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { component-flavor-constraints (onlyIn): [.., test.InvalidFlavor, ..] }
+                                                                              ^-[*2]------------
+  in [2*] component-flavor test.InvalidFlavor belonging to <dimension>
+                                                           ^-[*3]-----
+  here: [3*] component-variant-dimension test.NotADimension
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

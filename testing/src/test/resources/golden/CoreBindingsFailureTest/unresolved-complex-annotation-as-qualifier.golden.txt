@@ -1,0 +1,8 @@
+error: Missing binding for @test.ComplexQualifier(arrayChar={'A', 'B', 'C'}, arrayInt={1, 2, 3}, arrayNested={@javax.inject.Named(value="array-nested")}, arrayString={"hello", "world"}, enumValue=test.MyEnum.Red, name="hello world", nested=@javax.inject.Named(value="nested-named"), number=-22, value=228) java.lang.Object
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getAny: @test.ComplexQualifier(arrayChar={'A', 'B', 'C'}, arrayInt={1, 2, 3}, arrayNested={@javax.inject.Named(value="array-nested")}, arrayString={"hello", "world"}, enumValue=test.MyEnum.Red, name="hello world", nested=@javax.inject.Named(value="nested-named"), number=-22, value=228) java.lang.Object
+                         ^-[*1]-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  here: [1*] <missing>
+             ^~~~~~~~~

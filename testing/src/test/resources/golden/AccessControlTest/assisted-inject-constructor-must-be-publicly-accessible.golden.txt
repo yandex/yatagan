@@ -1,0 +1,14 @@
+error: An @AssistedInject constructor and the declaring class must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point barFactory: test.BarFactory
+                             ^-[*1]---------
+  here: [1*] assisted-factory test.BarFactory::create(): test.Bar()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point fooFactory: test.FooFactory
+                             ^-[*1]---------
+  here: [1*] assisted-factory test.FooFactory::create(): test.Foo()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

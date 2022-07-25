@@ -14,9 +14,11 @@ import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.functionsWithCompanion
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class ModuleModelImpl private constructor(
@@ -65,7 +67,10 @@ internal class ModuleModelImpl private constructor(
         }
     }.memoize()
 
-    override fun toString() = declaration.toString()
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "module",
+        representation = declaration,
+    )
 
     internal val mayRequireInstance by lazy(PUBLICATION) {
         !declaration.isAbstract && !declaration.isKotlinObject

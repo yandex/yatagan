@@ -1,0 +1,10 @@
+error: Missing binding for java.lang.Object
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.TestComponent
+  in member-injector inject(test.ToInject { .., setObj, .. })
+                                                ^-[*1]-
+  in [1*] member-to-inject setObj: java.lang.Object
+                                   ^-[*2]----------
+  here: [2*] <missing>
+             ^~~~~~~~~

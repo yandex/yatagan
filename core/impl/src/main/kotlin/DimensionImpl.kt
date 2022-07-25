@@ -9,21 +9,30 @@ import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.TextColor
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 
 internal class DimensionImpl private constructor(
     override val type: TypeLangModel,
 ) : Variant.DimensionModel {
 
-    override fun toString() = "[dimension] $type"
-
     override fun validate(validator: Validator) {
         if (!type.declaration.isAnnotatedWith<ComponentVariantDimension>()) {
-            validator.reportError(Errors.nonComponentVariantDimension())
+            validator.reportError(Strings.Errors.nonComponentVariantDimension())
         }
     }
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "component-variant-dimension",
+        representation = type,
+    )
+
+    override val isInvalid: Boolean
+        get() = false
 
     companion object Factory : ObjectCache<TypeLangModel, DimensionImpl>() {
         operator fun invoke(type: TypeLangModel) = DimensionImpl.createCached(type, ::DimensionImpl)
@@ -35,11 +44,19 @@ internal class MissingDimension(private val flavor: Variant.FlavorModel) : Varia
         get() = LangModelFactory.errorType
 
     override fun validate(validator: Validator) {
-        // Always invalid
-        validator.reportError(Errors.missingDimension())
+        // Do not report anything here, as not-a-flavor error will be reported for flavor.
     }
 
-    override fun toString() = "[missing dimension]"
+    override val isInvalid: Boolean
+        get() = true
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "component-variant-dimension",
+        representation = {
+            color = TextColor.Red
+            append("<missing>")
+        }
+    )
 
     override fun hashCode() = flavor.hashCode()
 

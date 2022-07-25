@@ -4,6 +4,8 @@ import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.ConditionModel
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeModel
@@ -43,7 +45,7 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph> {
      *
      * The associated info is [LiteralUsage].
      */
-    val localConditionLiterals: Map<ConditionScope.Literal, LiteralUsage>
+    val localConditionLiterals: Map<ConditionModel, LiteralUsage>
 
     /**
      * [AssistedInjectFactoryModel]s that are hosted in this graph.
@@ -118,7 +120,7 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph> {
     /**
      * A condition for this graph.
      *
-     * Equals [Always][ConditionScope.isAlways] for [root][BindingGraph.isRoot] components.
+     * Equals [Always][com.yandex.daggerlite.core.ConditionExpression.Unscoped] for [root][BindingGraph.isRoot] components.
      * Arbitrary for non-root components.
      */
     val conditionScope: ConditionScope
@@ -133,8 +135,10 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph> {
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *
-     * @return resolved binding (it may be [EmptyBinding] due to [ConditionScope.isNever] or because it was requested
-     * and could not be satisfied)
+     * @return resolved binding (it may be [EmptyBinding] due to
+     * [NeverScoped][com.yandex.daggerlite.core.ConditionExpression.NeverScoped] or because it was requested and
+     * could not be satisfied)
+     *
      * @throws IllegalStateException if no such binding is found at all (requested but missing bindings are still safe
      * to request).
      */

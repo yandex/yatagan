@@ -6,8 +6,8 @@ import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.reportError
 
 internal abstract class GraphEntryPointBase : MayBeInvalid {
     abstract val graph: BindingGraphImpl
@@ -18,7 +18,7 @@ internal abstract class GraphEntryPointBase : MayBeInvalid {
         val resolved = graph.resolveBinding(node)
         if (!kind.isOptional) {
             if (resolved.conditionScope /* no component scope */ !in graph.conditionScope) {
-                validator.reportError(Strings.Errors.incompatibleConditionEntyPoint(
+                validator.reportError(Strings.Errors.incompatibleConditionEntryPoint(
                     aCondition = resolved.conditionScope, bCondition = graph.conditionScope,
                     binding = resolved, component = graph,
                 ))

@@ -1,0 +1,8 @@
+error: Binding dependency loop detected:
+(*) `test.ApiA` provided by `alias test.MyModule::a(test.ClassA)` depends on <-
+    `test.ClassA` provided by `inject-constructor test.ClassA(.. 1 dependency)` depends on <-
+    `test.ApiB` provided by `alias test.MyModule::b(test.ClassB)` depends on <-
+    `test.ClassB` provided by `inject-constructor test.ClassB(.. 1 dependency)` depends on <- (*)
+Encountered:
+  here: graph for root-component test.RootComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

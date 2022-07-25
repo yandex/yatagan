@@ -86,7 +86,7 @@ class CoreBindingsTest(
         """.trimIndent()
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -130,7 +130,7 @@ class CoreBindingsTest(
         """.trimIndent()
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -175,7 +175,7 @@ class CoreBindingsTest(
         """
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -222,7 +222,7 @@ class CoreBindingsTest(
         """
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test(timeout = 10_000)
@@ -248,7 +248,7 @@ class CoreBindingsTest(
             }
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -282,7 +282,7 @@ class CoreBindingsTest(
             }
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -316,7 +316,7 @@ class CoreBindingsTest(
             }
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -347,7 +347,7 @@ class CoreBindingsTest(
             }
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -374,7 +374,7 @@ class CoreBindingsTest(
             }
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -436,7 +436,7 @@ class CoreBindingsTest(
             }
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -463,7 +463,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -488,7 +488,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -545,7 +545,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -571,7 +571,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -653,7 +653,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -713,7 +713,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -746,7 +746,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -856,7 +856,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
 
@@ -921,7 +921,7 @@ class CoreBindingsTest(
             }        
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -943,7 +943,7 @@ class CoreBindingsTest(
             @Component interface MyComponent : MyDependencies0, MyDependencies1, MyDependencies2
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -969,7 +969,7 @@ class CoreBindingsTest(
             interface MyComponentC { val a: ClassA }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 }
 

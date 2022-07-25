@@ -1,14 +1,11 @@
 package com.yandex.daggerlite.validation.impl
 
+import com.yandex.daggerlite.base.zipWithNextOrNull
+import com.yandex.daggerlite.validation.LocatedMessage
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.Validator
 import kotlin.LazyThreadSafetyMode.NONE
-
-interface LocatedMessage {
-    val message: ValidationMessage
-    val encounterPaths: Collection<List<Any>>
-}
 
 private class ValidatorImpl : Validator {
     private val _children = arrayListOf<MayBeInvalid>()
@@ -76,9 +73,18 @@ fun validate(
     }
 
     return result.map { (message, paths) ->
-        object : LocatedMessage {
-            override val message = message
-            override val encounterPaths = paths.reversed()  // reverse leads to more natural iteration order.
+        val pathStrings: MutableList<List<CharSequence>> = paths.mapTo(arrayListOf()) { path: List<MayBeInvalid> ->
+            path.zipWithNextOrNull { node: MayBeInvalid, itsChild: MayBeInvalid? ->
+                node.toString(childContext = itsChild)
+            }
         }
+        pathStrings.sortWith(PathComparator)
+
+        LocatedMessage(
+            message = object : ValidationMessage by message {
+                override val notes: Collection<CharSequence> = message.notes.sortedWith(CharSequenceComparator)
+            },
+            encounterPaths = pathStrings,
+        )
     }
 }

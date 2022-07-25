@@ -4,10 +4,13 @@ import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.ConditionModel
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
+import com.yandex.daggerlite.core.isNever
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
@@ -16,12 +19,13 @@ import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage
 import com.yandex.daggerlite.graph.BindingVisitorAdapter
-import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.graph.parentsSequence
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 
 internal class BindingGraphImpl(
     private val component: ComponentModel,
@@ -60,7 +64,7 @@ internal class BindingGraphImpl(
     )
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
-    override val localConditionLiterals = mutableMapOf<ConditionScope.Literal, LiteralUsage>()
+    override val localConditionLiterals = mutableMapOf<ConditionModel, LiteralUsage>()
     override val localAssistedInjectFactories = mutableSetOf<AssistedInjectFactoryModel>()
     override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
@@ -214,6 +218,11 @@ internal class BindingGraphImpl(
     }
 
     override fun toString() = component.toString()
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "graph for",
+        representation = component,
+    )
 
     override fun validate(validator: Validator) {
         validator.inline(component)

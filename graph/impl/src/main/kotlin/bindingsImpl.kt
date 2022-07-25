@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.InjectConstructorModel
@@ -19,6 +20,7 @@ import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.accept
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
+import com.yandex.daggerlite.core.isNever
 import com.yandex.daggerlite.core.isOptional
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -32,7 +34,6 @@ import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ComponentDependencyBinding
 import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.graph.ComponentInstanceBinding
-import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.ExtensibleBinding
 import com.yandex.daggerlite.graph.InstanceBinding
@@ -41,12 +42,19 @@ import com.yandex.daggerlite.graph.MultiBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.graph.ProvisionBinding
 import com.yandex.daggerlite.graph.SubComponentFactoryBinding
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.ValidationMessageBuilder
-import com.yandex.daggerlite.validation.impl.reportError
-import com.yandex.daggerlite.validation.impl.reportMandatoryWarning
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.Strings.Errors
+import com.yandex.daggerlite.validation.format.TextColor
+import com.yandex.daggerlite.validation.format.ValidationMessageBuilder
+import com.yandex.daggerlite.validation.format.append
+import com.yandex.daggerlite.validation.format.appendRichString
+import com.yandex.daggerlite.validation.format.bindingModelRepresentation
+import com.yandex.daggerlite.validation.format.buildRichString
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.daggerlite.validation.format.reportMandatoryWarning
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal interface BaseBindingMixin : BaseBinding {
@@ -74,27 +82,40 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
     val checkDependenciesConditionScope: Boolean get() = false
 
     override fun validate(validator: Validator) {
-        validator.child(conditionScope)
         dependencies.forEach {
             validator.child(owner.resolveRaw(it.node))
         }
 
         if (checkDependenciesConditionScope) {
             val conditionScope = graphConditionScope()
-            for ((node, kind) in dependencies) {
+            for (dependency in dependencies) {
+                val (node, kind) = dependency
                 if (kind.isOptional) continue
                 val resolved = owner.resolveBinding(node)
                 val resolvedScope = resolved.graphConditionScope()
                 if (resolvedScope !in conditionScope) {
-                    validator.reportError(Errors.incompatibleCondition(
-                        aCondition = resolvedScope, bCondition = conditionScope, a = node, b = this,
+                    val aliases = buildList {
+                        var maybeAlias = owner.resolveRaw(node)
+                        while (maybeAlias is AliasBinding) {
+                            add(maybeAlias)
+                            maybeAlias = owner.resolveRaw(maybeAlias.source)
+                        }
+                    }
+                    // A special "edge"-like node, that represents invalid condition dependency
+                    validator.child(InvalidConditionDependency(
+                        dependency = dependency,
+                        source = this,
+                        sourceScope = conditionScope,
+                        target = resolved,
+                        targetScope = resolvedScope,
+                        aliases = aliases,
                     ))
                 }
             }
         }
 
         if (scopes.isNotEmpty() && scopes notIntersects owner.scopes) {
-            validator.reportError(Errors.noMatchingScopeForBinding(binding = this@BindingMixin, scopes = scopes))
+            validator.reportError(Errors.noMatchingScopeForBinding(binding = this, scopes = scopes))
         }
     }
 
@@ -103,6 +124,35 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
 
     override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
         return visitor.visitBinding(this)
+    }
+
+    private class InvalidConditionDependency(
+        private val sourceScope: ConditionScope,
+        private val targetScope: ConditionScope,
+        private val dependency: NodeDependency,
+        private val source: Binding,
+        private val target: Binding,
+        private val aliases: List<AliasBinding>,
+    ) : NodeDependency by dependency {
+        override fun validate(validator: Validator) {
+            validator.reportError(Errors.incompatibleCondition(
+                aCondition = targetScope,
+                bCondition = sourceScope,
+                a = target,
+                b = source,
+            )) {
+                if (aliases.isNotEmpty()) {
+                    addNote(Strings.Notes.conditionPassedThroughAliasChain(aliases = aliases))
+                }
+            }
+        }
+
+        override fun toString(childContext: MayBeInvalid?) = buildRichString {
+            color = TextColor.Red
+            append("<invalid> dependency on `")
+            append(target)
+            append("` with incompatible condition")
+        }
     }
 }
 
@@ -115,7 +165,7 @@ internal interface ConditionalBindingMixin : BindingMixin {
     override fun validate(validator: Validator) {
         super.validate(validator)
         when (val match = variantMatch) {
-            is VariantMatch.Error -> validator.report(match.message)
+            is VariantMatch.Error -> match.message?.let { error -> validator.report(error) }
             is VariantMatch.Matched -> {}
         }
     }
@@ -132,6 +182,7 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
             is BindingTargetModel.FlattenMultiContribution,
             is BindingTargetModel.MappingContribution,
             -> MultiBindingContributionNode(target.node)
+
             is BindingTargetModel.Plain -> target.node
         }
     }
@@ -140,7 +191,11 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
         private val underlying: NodeModel,
     ) : NodeModel by underlying {
         override fun getSpecificModel(): Nothing? = null
-        override fun toString() = "$underlying [multi-binding contributor]"
+        override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+            modelClassName = "multi-binding-contributor",
+            representation = underlying.toString(childContext = null),
+        )
+
         override val node: NodeModel get() = this
     }
 }
@@ -160,7 +215,15 @@ internal class ProvisionBindingImpl(
         if (conditionScope.isNever) emptySequence() else inputs.asSequence()
     }
 
-    override fun toString() = impl.toString()
+    override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
+        modelClassName = "provision",
+        childContext = childContext,
+        representation = {
+            append(impl.originModule.type)
+            append("::")
+            append(impl.provision.name)
+        },
+    )
 
     override val checkDependenciesConditionScope get() = true
 
@@ -197,7 +260,11 @@ internal class InjectConstructorProvisionBindingImpl(
         return visitor.visitProvision(this)
     }
 
-    override fun toString() = impl.toString()
+    override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
+        modelClassName = "inject-constructor",
+        representation = { append(impl.constructor.constructee) },
+        childContext = childContext,
+    )
 }
 
 internal class AssistedInjectFactoryBindingImpl(
@@ -226,7 +293,31 @@ internal class AssistedInjectFactoryBindingImpl(
 
     override val checkDependenciesConditionScope get() = true
 
-    override fun toString() = model.toString()
+    override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
+        modelClassName = "assisted-factory",
+        childContext = childContext,
+        representation = {
+            append(model.type)
+            append("::")
+            if (model.factoryMethod != null) {
+                append(model.factoryMethod!!.name)
+                append("(): ")
+                if (model.assistedInjectConstructor != null) {
+                    append(model.assistedInjectConstructor!!.constructee)
+                } else {
+                    appendRichString {
+                        color = TextColor.Red
+                        append("<invalid-target>")
+                    }
+                }
+            } else {
+                appendRichString {
+                    color = TextColor.Red
+                    append("<missing-factory-method>")
+                }
+            }
+        },
+    )
 }
 
 internal class SyntheticAliasBindingImpl(
@@ -243,9 +334,9 @@ internal class SyntheticAliasBindingImpl(
         validator.inline(owner.resolveRaw(source))
     }
 
-    override fun toString(): String {
-        // Fully transparent alias
-        return owner.resolveRaw(source).toString()
+    override fun toString(childContext: MayBeInvalid?): CharSequence {
+        // Pass-through
+        return owner.resolveRaw(source).toString(childContext)
     }
 }
 
@@ -274,7 +365,14 @@ internal class AliasBindingImpl(
         return result
     }
 
-    override fun toString() = "[alias] $impl"
+    override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
+        modelClassName = "alias",
+        childContext = childContext,
+        representation = { append(impl.originModule.type).append("::").append(impl.functionName) },
+        ellipsisStatistics = { _, dependencies ->
+            if (dependencies.isNotEmpty()) append(dependencies.first())  // Always include alias source
+        },
+    )
 
     override fun validate(validator: Validator) {
         validator.child(owner.resolveRaw(source))
@@ -298,7 +396,7 @@ internal class AlternativesBindingImpl(
     override val alternatives get() = impl.sources
 
     override val conditionScope: ConditionScope by lazy(PUBLICATION) {
-        alternatives.fold(ConditionScope.NeverScoped) { acc, alternative ->
+        alternatives.fold(ConditionScope.NeverScoped as ConditionScope) { acc, alternative ->
             val binding = owner.resolveBinding(alternative)
             acc or binding.conditionScope
         }
@@ -306,7 +404,11 @@ internal class AlternativesBindingImpl(
 
     override val dependencies get() = alternatives
 
-    override fun toString() = "[alternatives] $impl"
+    override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
+        modelClassName = "alias-with-alternatives",
+        childContext = childContext,
+        representation = { append(impl.originModule.type).append("::").append(impl.functionName) },
+    )
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitAlternatives(this)
@@ -321,11 +423,15 @@ internal class ComponentDependencyEntryPointBindingImpl(
     override val getter: FunctionLangModel,
     override val target: NodeModel,
 ) : ComponentDependencyEntryPointBinding, BindingMixin {
-    override fun toString() = Strings.Bindings.componentDependencyEntryPoint(getter)
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentDependencyEntryPoint(this)
     }
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "component-dependency-getter",
+        representation = getter,
+    )
 }
 
 internal class ComponentInstanceBindingImpl(
@@ -334,11 +440,14 @@ internal class ComponentInstanceBindingImpl(
     override val owner: BindingGraphImpl = graph
     override val target get() = owner.model.asNode()
 
-    override fun toString() = Strings.Bindings.componentInstance(component = target)
-
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentInstance(this)
     }
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "component-instance",
+        representation = owner,
+    )
 }
 
 internal class SubComponentFactoryBindingImpl(
@@ -364,7 +473,10 @@ internal class SubComponentFactoryBindingImpl(
         VariantMatch(factory.createdComponent, owner.variant)
     }
 
-    override fun toString() = Strings.Bindings.subcomponentFactory(factory)
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "child-component-factory",
+        representation = factory,
+    )
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitSubComponentFactory(this)
@@ -390,9 +502,48 @@ internal class MultiBindingImpl(
 
     override val dependencies get() = extensibleAwareDependencies(_contributions.keys.asSequence())
 
-    override fun toString() = Strings.Bindings.multibinding(
-        elementType = target,
-        contributions = contributions.map { (node, _) -> owner.resolveRaw(node) }
+    override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
+        modelClassName = "list-binding",
+        childContext = childContext,
+        representation = { append("List ") },
+        childContextTransform = { dependency ->
+            when (dependency.node) {
+                upstream?.targetForDownstream -> "<inherited from parent component>"
+                else -> dependency
+            }
+        },
+        ellipsisStatistics = {_, dependencies ->
+            var elements = 0
+            var collections = 0
+            var mentionUpstream = false
+            for (dependency in dependencies) when(contributions[dependency.node]) {
+                ContributionType.Element -> elements++
+                ContributionType.Collection -> collections++
+                null -> mentionUpstream = (dependency.node == upstream?.targetForDownstream)
+            }
+            sequenceOf(
+                when(elements) {
+                    0 -> null
+                    1 -> "1 element"
+                    else -> "$elements elements"
+                },
+                when(collections) {
+                    0 -> null
+                    1 -> "1 collection"
+                    else -> "$collections collections"
+                },
+                if (mentionUpstream) "upstream" else null,
+            ).filterNotNull().joinTo(this, separator = " + ")
+        },
+        openBracket = " { ",
+        closingBracket = buildRichString {
+            append(" } ")
+            appendRichString {
+                color = TextColor.Gray
+                append("assembled in ")
+            }
+            append(owner)
+        },
     )
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -449,7 +600,51 @@ internal class MapBindingImpl(
         }
     }
 
-    override fun toString(): String = Strings.Bindings.mapping(mapType = target, contents = contents)
+    override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
+        modelClassName = "map-binding of",
+        childContext = childContext,
+        representation = {
+            append(mapKey)
+            appendRichString {
+                color = TextColor.Gray
+                append(" to ")
+            }
+            append(mapValue)
+        },
+        childContextTransform = { context ->
+            val key = contents.find { (_, dependency) -> dependency == context }?.first
+            if (key != null) {
+                "$key -> $mapValue"
+            } else if (upstream?.targetForDownstream == context) {
+                "<inherited from parent component>"
+            } else throw AssertionError()
+        },
+        ellipsisStatistics = {_,  dependencies ->
+            var elements = 0
+            var mentionUpstream = false
+            for (dependency in dependencies) when(dependency) {
+                upstream?.targetForDownstream -> mentionUpstream = true
+                else -> elements++
+            }
+            sequenceOf(
+                when(elements) {
+                    0 -> null
+                    1 -> "1 element"
+                    else -> "$elements elements"
+                },
+                if (mentionUpstream) "upstream" else null,
+            ).filterNotNull().joinTo(this, separator = " + ")
+        },
+        openBracket = " { ",
+        closingBracket = buildRichString {
+            append(" } ")
+            appendRichString {
+                color = TextColor.Gray
+                append("assembled in ")
+            }
+            append(owner)
+        },
+    )
 }
 
 internal class ExplicitEmptyBindingImpl(
@@ -457,11 +652,15 @@ internal class ExplicitEmptyBindingImpl(
     override val owner: BindingGraphImpl,
 ) : EmptyBinding, BindingMixin, ModuleHostedMixin() {
     override val conditionScope get() = ConditionScope.NeverScoped
-    override fun toString() = "[absent] $impl"
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)
     }
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "explicit-absent by",
+        representation = impl,
+    )
 }
 
 internal class ComponentDependencyBindingImpl(
@@ -470,11 +669,14 @@ internal class ComponentDependencyBindingImpl(
 ) : ComponentDependencyBinding, BindingMixin {
     override val target get() = dependency.asNode()
 
-    override fun toString() = Strings.Bindings.componentDependencyInstance(dependency = dependency)
-
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentDependency(this)
     }
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "component-dependency-instance",
+        representation = dependency,
+    )
 }
 
 internal class InstanceBindingImpl(
@@ -483,11 +685,14 @@ internal class InstanceBindingImpl(
     private val origin: ComponentFactoryModel.InputModel,
 ) : InstanceBinding, BindingMixin {
 
-    override fun toString() = Strings.Bindings.instance(origin = origin)
-
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitInstance(this)
     }
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "bound-instance from",
+        representation = origin,
+    )
 }
 
 internal class SelfDependentInvalidBinding(
@@ -504,7 +709,11 @@ internal class SelfDependentInvalidBinding(
         validator.reportError(Errors.selfDependentBinding())
     }
 
-    override fun toString() = "[invalid] $impl"
+    override fun toString(childContext: MayBeInvalid?) = buildRichString {
+        color = TextColor.Red
+        append("<invalid> ")
+        append(impl)
+    }
 }
 
 internal class AliasLoopStubBinding(
@@ -518,10 +727,14 @@ internal class AliasLoopStubBinding(
 
     override fun validate(validator: Validator) {
         super.validate(validator)
-        validator.reportError(Errors.dependencyLoop(aliasLoop.map { it.target to it }))
+        validator.reportError(Errors.dependencyLoop(aliasLoop.toList()))
     }
 
-    override fun toString() = "[invalid] ${aliasLoop.first()}"
+    override fun toString(childContext: MayBeInvalid?) = buildRichString {
+        color = TextColor.Red
+        append("<alias-loop> ")
+        append(aliasLoop.first())
+    }
 }
 
 internal data class MissingBindingImpl(
@@ -540,7 +753,10 @@ internal data class MissingBindingImpl(
         return visitor.visitEmpty(this)
     }
 
-    override fun toString() = "[missing: $target]"
+    override fun toString(childContext: MayBeInvalid?) = buildRichString {
+        color = TextColor.Red
+        append("<missing>")
+    }
 
     private inner class ModelBasedHint(
         private val validator: Validator,
@@ -561,12 +777,18 @@ internal data class MissingBindingImpl(
 
         override fun visitInjectConstructor(model: InjectConstructorModel) {
             // This @inject was not used, the problem is in scope then.
+            val failedInject = InjectConstructorProvisionBindingImpl(
+                impl = model,
+                owner = owner,
+            )
             validator.reportError(Errors.noMatchingScopeForBinding(
-                binding = model, scopes = model.scopes))
+                binding = failedInject,
+                scopes = model.scopes,
+            ))
         }
 
         override fun visitComponent(model: ComponentModel) = reportMissingBinding {
-            addNote("A dependency seems to be a component, though it does not belong to the current hierarchy.")
+            addNote(Strings.Notes.suspiciousComponentInstanceInject())
         }
 
         override fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): Nothing {
@@ -574,15 +796,17 @@ internal data class MissingBindingImpl(
         }
 
         override fun visitComponentFactory(model: ComponentFactoryModel) = reportMissingBinding {
-            addNote(if (!model.createdComponent.isRoot) {
-                Strings.Notes.subcomponentFactoryInjectionHint(
-                    factory = model,
-                    component = model.createdComponent,
-                    owner = owner,
-                )
-            } else {
-                "$target is a factory for a root component, injecting such factory is not supported"
-            })
+            addNote(
+                if (!model.createdComponent.isRoot) {
+                    Strings.Notes.subcomponentFactoryInjectionHint(
+                        factory = model,
+                        component = model.createdComponent,
+                        owner = owner,
+                    )
+                } else {
+                    Strings.Notes.suspiciousRootComponentFactoryInject(factoryLike = target)
+                }
+            )
         }
     }
 }

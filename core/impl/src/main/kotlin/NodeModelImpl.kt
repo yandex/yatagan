@@ -14,9 +14,16 @@ import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.TextColor
+import com.yandex.daggerlite.validation.format.append
+import com.yandex.daggerlite.validation.format.appendChildContextReference
+import com.yandex.daggerlite.validation.format.appendRichString
+import com.yandex.daggerlite.validation.format.buildRichString
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 import javax.inject.Inject
 
 internal class NodeModelImpl private constructor(
@@ -63,22 +70,42 @@ internal class NodeModelImpl private constructor(
         }
 
         override fun validate(validator: Validator) {
-            validator.inline(conditionalModel)
+            validator.child(conditionalModel)
             if (!constructor.isEffectivelyPublic || !constructor.constructee.isEffectivelyPublic) {
-                validator.reportError(Errors.invalidAccessInjectConstructor())
+                validator.reportError(Strings.Errors.invalidAccessInjectConstructor())
             }
             for (input in inputs) {
                 validator.child(input.node)
             }
         }
 
-        override fun toString() = "@Inject ${this@NodeModelImpl}"
+        override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+            modelClassName = "@inject",
+            representation = {
+                append("$type(")
+                when(childContext) {
+                    is NodeModel -> {
+                        val index = inputs.indexOfFirst { it.node == childContext }
+                        append(".., ")
+                        appendChildContextReference(reference = constructor.parameters.drop(index).first())
+                        append(", ..)")
+                    }
+                    else -> {
+                        append("...)")
+                    }
+                }
+            },
+        )
     }
 
-    override fun toString() = buildString {
+    override fun toString(childContext: MayBeInvalid?) = buildRichString {
+        color = TextColor.Inherit
         qualifier?.let {
-            append(qualifier)
-            append(' ')
+            appendRichString {
+                color = TextColor.Green
+                append(qualifier)
+            }
+            append(" ")
         }
         append(type)
     }
@@ -104,7 +131,7 @@ internal class NodeModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (isFrameworkType(type)) {
-            validator.reportError(Errors.manualFrameworkType())
+            validator.reportError(Strings.Errors.manualFrameworkType())
         }
     }
 
@@ -143,22 +170,27 @@ internal class NodeModelImpl private constructor(
     }
 
     companion object Factory : ObjectCache<Any, NodeModelImpl>() {
-        class NoNode : NodeModel {
+        class VoidNode : NodeModel {
             override val type get() = LangModelFactory.errorType
             override val qualifier: Nothing? get() = null
             override fun getSpecificModel(): Nothing? = null
             override fun dropQualifier(): NodeModel = this
             override fun multiBoundListNodes(): Array<NodeModel> = emptyArray()
             override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> = emptyArray()
-            override fun validate(validator: Validator) = Unit // No need to report an error here
+            override fun validate(validator: Validator) {
+                validator.reportError(Strings.Errors.voidBinding())
+            }
             override val hintIsFrameworkType: Boolean get() = false
-            override fun toString() = "[invalid]"
             override fun compareTo(other: NodeModel): Int = hashCode() - other.hashCode()
             override val node: NodeModel get() = this
             override val kind: DependencyKind get() = DependencyKind.Direct
             override fun copyDependency(node: NodeModel, kind: DependencyKind) = when(kind) {
                 DependencyKind.Direct -> node
                 else -> NodeDependencyImpl(node = node, kind = kind)
+            }
+            override fun toString(childContext: MayBeInvalid?) = buildRichString {
+                color = TextColor.Red
+                append("<invalid node: void>")
             }
         }
 

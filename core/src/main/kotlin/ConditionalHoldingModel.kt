@@ -2,7 +2,6 @@ package com.yandex.daggerlite.core
 
 import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.daggerlite.core.ConditionalHoldingModel.FeatureModel
-import com.yandex.daggerlite.core.lang.ConditionLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -14,10 +13,10 @@ interface ConditionalHoldingModel : MayBeInvalid {
     val conditionals: Sequence<ConditionalWithFlavorConstraintsModel>
 
     /**
-     * Represents a "feature". TODO: reference API doc.
+     * Represents a "feature" - a named [ConditionScope].
      */
-    interface FeatureModel : MayBeInvalid {
-        val conditions: Sequence<ConditionLangModel>
+    interface FeatureModel : MayBeInvalid, ClassBackedModel {
+        val conditionScope: ConditionScope
     }
 
     /**

@@ -9,6 +9,7 @@ import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
+import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationValueVisitorAdapter
@@ -16,9 +17,12 @@ import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings.Errors
+import com.yandex.daggerlite.validation.format.appendChildContextReference
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
@@ -28,9 +32,12 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         impl.annotations.filterIntoSmallSet { it.isScope() }
     }
 
+    override val functionName: String
+        get() = impl.name
+
     override val target: BindingTargetModel by lazy {
         if (impl.returnType.isVoid) {
-            BindingTargetModel.Plain(NodeModelImpl.Factory.NoNode())
+            BindingTargetModel.Plain(NodeModelImpl.Factory.VoidNode())
         } else {
             val target = NodeModelImpl(type = impl.returnType, forQualifier = impl)
             val intoList = impl.intoListAnnotationIfPresent
@@ -99,9 +106,9 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
             }
             is BindingTargetModel.DirectMultiContribution, is BindingTargetModel.Plain -> { /*Nothing to validate*/ }
         }
-        if (impl.returnType.isVoid) {
-            validator.reportError(Errors.voidBinding())
-        }
+//        if (impl.returnType.isVoid) {
+//            validator.reportError(Errors.voidBinding())
+//        }
     }
 
     private class InvalidValue : AnnotationLangModel.Value {
@@ -149,9 +156,31 @@ internal class BindsImpl(
         return visitor.visitBinds(this)
     }
 
-    override fun toString(): String {
-        return "@Binds $originModule::${impl.name}(${sources.joinToString()}): $target"
-    }
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "@binds",
+        representation = {
+            append("${originModule.type}::${impl.name}(")
+            when(childContext ?: Unit) {
+                target.node -> {  // return type
+                    append("): ")
+                    appendChildContextReference(reference = impl.returnType)
+                }
+                sources.singleOrNull() -> {  // alias
+                    appendChildContextReference(reference = impl.parameters.single())
+                    append(")")
+                }
+                in sources -> {
+                    val index = sources.indexOf(childContext)
+                    append(".., ")
+                    appendChildContextReference(reference = impl.parameters.drop(index).first())
+                    append(", ..)")
+                }
+                else -> {
+                    append("...)")
+                }
+            }
+        },
+    )
 
     companion object {
         fun canRepresent(method: FunctionLangModel): Boolean {
@@ -181,7 +210,7 @@ internal class ProvidesImpl(
     override fun validate(validator: Validator) {
         super.validate(validator)
 
-        validator.inline(conditionalsModel)
+        validator.child(conditionalsModel)
 
         for (dependency in inputs) {
             validator.child(dependency.node)
@@ -209,6 +238,28 @@ internal class ProvidesImpl(
     override fun toString(): String {
         return "@Provides $originModule::${impl.name}(${inputs.joinToString()}): $target"
     }
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "@provides",
+        representation = {
+            append("${originModule.type}::${impl.name}(")
+            when(childContext) {
+                target.node -> {  // return type
+                    append("): ")
+                    appendChildContextReference(reference = impl.returnType)
+                }
+                is NodeModel -> {
+                    val index = inputs.indexOfFirst { it.node == childContext }
+                    append(".., ")
+                    appendChildContextReference(reference = impl.parameters.drop(index).first())
+                    append(", ..)")
+                }
+                else -> {
+                    append("...)")
+                }
+            }
+        },
+    )
 
     companion object {
         fun canRepresent(method: FunctionLangModel): Boolean {

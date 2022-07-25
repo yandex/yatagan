@@ -17,9 +17,10 @@ import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
 import com.yandex.daggerlite.lang.rt.TypeDeclarationLangModel
 import com.yandex.daggerlite.spi.ValidationPluginProvider
 import com.yandex.daggerlite.spi.impl.GraphValidationExtension
+import com.yandex.daggerlite.validation.LocatedMessage
+import com.yandex.daggerlite.validation.RichString
 import com.yandex.daggerlite.validation.ValidationMessage
-import com.yandex.daggerlite.validation.impl.LocatedMessage
-import com.yandex.daggerlite.validation.impl.Strings
+import com.yandex.daggerlite.validation.format.format
 import com.yandex.daggerlite.validation.impl.validate
 import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis
@@ -126,11 +127,8 @@ object Dagger {
         reporting: DynamicValidationDelegate.ReportingDelegate,
     ) {
         messages.forEach { locatedMessage ->
-            val text = Strings.formatMessage(
-                message = locatedMessage.message.contents,
-                color = null,
-                encounterPaths = locatedMessage.encounterPaths,
-                notes = locatedMessage.message.notes,
+            val text: RichString = locatedMessage.format(
+                maxEncounterPaths = 5,
             )
             when (locatedMessage.message.kind) {
                 ValidationMessage.Kind.Error -> reporting.reportError(text)

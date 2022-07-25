@@ -2,13 +2,14 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
+import com.yandex.daggerlite.core.ConditionModel
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage
-import com.yandex.daggerlite.graph.ConditionScope
 import com.yandex.daggerlite.graph.Extensible
 import com.yandex.daggerlite.graph.normalized
 import javax.lang.model.element.Modifier.FINAL
@@ -19,7 +20,7 @@ internal class ConditionGenerator(
     private val methodsNs: Namespace,
     private val thisGraph: BindingGraph,
 ) : ComponentGenerator.Contributor {
-    private val literalAccess: Map<ConditionScope.Literal, ConditionAccessStrategy> = run {
+    private val literalAccess: Map<ConditionModel, ConditionAccessStrategy> = run {
         thisGraph.localConditionLiterals.mapValues { (literal, usage) ->
             when (usage) {
                 LiteralUsage.Eager -> EagerAccessStrategy(literal)
@@ -29,7 +30,7 @@ internal class ConditionGenerator(
     }
 
     private fun access(
-        literal: ConditionScope.Literal,
+        literal: ConditionModel,
         builder: ExpressionBuilder,
         inside: BindingGraph,
         isInsideInnerClass: Boolean,
@@ -91,7 +92,7 @@ internal class ConditionGenerator(
      * Single final boolean field, eagerly initialized.
      */
     private inner class EagerAccessStrategy(
-        private val literal: ConditionScope.Literal,
+        private val literal: ConditionModel,
     ) : ConditionAccessStrategy {
 
         private val name = fieldsNs.name(
@@ -124,7 +125,7 @@ internal class ConditionGenerator(
      * Single byte field, lazily initialized (three states).
      */
     private inner class LazyAccessStrategy(
-        private val literal: ConditionScope.Literal,
+        private val literal: ConditionModel,
     ) : ConditionAccessStrategy {
         private val name = fieldsNs.name(
             nameModel = literal.root.asType().name,
@@ -174,7 +175,7 @@ internal class ConditionGenerator(
         }
     }
 
-    private fun genEvaluateLiteral(literal: ConditionScope.Literal, builder: ExpressionBuilder) {
+    private fun genEvaluateLiteral(literal: ConditionModel, builder: ExpressionBuilder) {
         require(!literal.negated) { "Not reached: must be normalized" }
         with(builder) {
             val rootType = literal.root.asType()

@@ -1,11 +1,13 @@
 package com.yandex.daggerlite.graph
 
+import com.yandex.daggerlite.core.ConditionModel
+
 /**
  * Discards negation from the literal.
  *
  * @return `!this` if negated, `this` otherwise.
  */
-fun ConditionScope.Literal.normalized(): ConditionScope.Literal {
+fun ConditionModel.normalized(): ConditionModel {
     return if (negated) !this else this
 }
 

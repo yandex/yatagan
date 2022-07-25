@@ -54,7 +54,7 @@ fun main(args: Array<String>) {
             includeAllFromDirectory(testCaseDir.toFile())
             println("$TAG Running test from $testCaseDir")
             try {
-                expectSuccessfulValidation()
+                compileRunAndValidate()
                 println("$TAG OK")
             } catch (e: Exception) {
                 System.err.println("$TAG Validation failure for ${testCaseDir.fileName}: ${e.message}")

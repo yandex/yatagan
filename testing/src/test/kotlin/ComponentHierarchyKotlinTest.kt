@@ -64,7 +64,7 @@ class ComponentHierarchyKotlinTest(
         """
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -180,7 +180,7 @@ class ComponentHierarchyKotlinTest(
         """,
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -220,7 +220,7 @@ class ComponentHierarchyKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -388,6 +388,6 @@ class ComponentHierarchyKotlinTest(
         """,
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 }

@@ -3,9 +3,11 @@ package com.yandex.daggerlite.testing
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
+import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
 import com.yandex.daggerlite.ksp.KspDaggerLiteProcessorProvider
+import com.yandex.daggerlite.process.Options
 import java.io.File
 
 class KspCompileTestDriver : CompileTestDriverBase() {
@@ -33,6 +35,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
         // Can't enable `withCompilation` here, as KSP stops failing the build on errors.
         // See the issue https://github.com/google/ksp/issues/974
         symbolProcessorProviders = listOf(KspDaggerLiteProcessorProvider())
+        kspArgs[Options.MaxIssueEncounterPaths.key] = "100"
     }
 
     override fun getGeneratedFiles(from: KotlinCompilation): Collection<File> {

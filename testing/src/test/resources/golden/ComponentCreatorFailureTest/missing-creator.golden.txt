@@ -1,0 +1,46 @@
+error: Component declaration must be an `interface`
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Component declares dependencies, yet no creator declaration is present
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Component includes non-trivially constructable modules that require object instance, yet no creator declaration is present
+NOTE: Instance of `module test.MyModule` must be provided
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Non-root component declaration must include creator declaration
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.NotAComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Root component can not be a subcomponent
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for root-component test.AnotherRootComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Type declaration is used as a component yet not annotated with `@Component`
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.NotAComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

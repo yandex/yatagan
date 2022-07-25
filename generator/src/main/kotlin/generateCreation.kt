@@ -4,6 +4,8 @@ import com.squareup.javapoet.CodeBlock
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
+import com.yandex.daggerlite.core.isAlways
+import com.yandex.daggerlite.core.isNever
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel

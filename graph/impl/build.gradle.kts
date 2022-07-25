@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":base"))
-    implementation(project(":validation-impl"))
+    implementation(project(":validation-format"))
     api(project(":graph"))
     implementation(kotlin("stdlib"))
 }

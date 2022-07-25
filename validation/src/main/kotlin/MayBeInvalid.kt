@@ -37,4 +37,11 @@ interface MayBeInvalid {
      * @param validator tracing validator object.
      */
     fun validate(validator: Validator)
+
+    /**
+     * @return string representation of the node within an optional context.
+     * @param childContext an optional validation graph node, that this node reported as a [child][Validator.child].
+     *  an instance *may be* used to provide more laconic string representation.
+     */
+    fun toString(childContext: MayBeInvalid?): CharSequence
 }

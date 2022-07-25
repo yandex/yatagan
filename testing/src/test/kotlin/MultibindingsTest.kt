@@ -67,7 +67,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -133,7 +133,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -159,7 +159,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -211,7 +211,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -260,7 +260,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -434,7 +434,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -510,7 +510,7 @@ class MultibindingsTest(
              }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -582,6 +582,6 @@ class MultibindingsTest(
              }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 }

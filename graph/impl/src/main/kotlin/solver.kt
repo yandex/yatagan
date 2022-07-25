@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.graph.impl
 
 import com.yandex.daggerlite.base.setOf
-import com.yandex.daggerlite.graph.ConditionScope.LiteralBase
+import com.yandex.daggerlite.core.ConditionExpression.Literal
 
 internal fun solveContains(a: ConjunctiveNormalForm, b: ConjunctiveNormalForm): Boolean {
     val cnf = buildNegativeImplicationCNF(source = a, target = b)
@@ -11,10 +11,10 @@ internal fun solveContains(a: ConjunctiveNormalForm, b: ConjunctiveNormalForm): 
 /**
  * A set (Conjunction) of sets (disjunctions) of literals.
  */
-private typealias ConjunctiveNormalForm = Set<Set<LiteralBase>>
-private typealias MutableConjunctiveNormalForm = MutableSet<Set<LiteralBase>>
+private typealias ConjunctiveNormalForm = Set<Set<Literal>>
+private typealias MutableConjunctiveNormalForm = MutableSet<Set<Literal>>
 
-private fun ConjunctiveNormalForm.splitBy(literal: LiteralBase): ConjunctiveNormalForm {
+private fun ConjunctiveNormalForm.splitBy(literal: Literal): ConjunctiveNormalForm {
     val negLiteral = !literal
     return buildSet {
         for (clause in this@splitBy) {
@@ -29,7 +29,7 @@ private fun unitPropagate(input: ConjunctiveNormalForm): ConjunctiveNormalForm {
     return input.find { clause -> clause.size == 1 }?.let { unitClause ->
         val unitLiteral = unitClause.first()
         val negatedUnitLiteral = !unitLiteral
-        unitPropagate(HashSet<Set<LiteralBase>>(input.size - 1, 1.0f).apply {
+        unitPropagate(HashSet<Set<Literal>>(input.size - 1, 1.0f).apply {
             for (clause in input) {
                 add(when {
                     unitLiteral in clause -> continue
@@ -66,8 +66,8 @@ private fun buildNegativeImplicationCNF(
     return negatedDCNF
 }
 
-private class FakeLiteral private constructor() : LiteralBase {
-    private val negative = object : LiteralBase {
+private class FakeLiteral private constructor() : Literal {
+    private val negative = object : Literal {
         override val negated get() = true
         override fun not() = this@FakeLiteral
     }
@@ -82,8 +82,8 @@ private class FakeLiteral private constructor() : LiteralBase {
 }
 
 private fun negateAndBuildDefinitionalCNF(cnf: ConjunctiveNormalForm): MutableConjunctiveNormalForm {
-    val negatedDCNF = hashSetOf<Set<LiteralBase>>()
-    val fakeDisjuncts = hashSetOf<LiteralBase>()
+    val negatedDCNF = hashSetOf<Set<Literal>>()
+    val fakeDisjuncts = hashSetOf<Literal>()
     cnf.forEachIndexed { index, disjuncts ->
         val fakeCondition = FakeLiteral.Pool[index]
         disjuncts.forEach { conjunct ->

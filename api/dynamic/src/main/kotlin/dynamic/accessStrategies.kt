@@ -2,8 +2,8 @@ package com.yandex.daggerlite.dynamic
 
 import com.yandex.daggerlite.Lazy
 import com.yandex.daggerlite.Optional
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.graph.Binding
-import com.yandex.daggerlite.graph.ConditionScope
 import javax.inject.Provider
 
 

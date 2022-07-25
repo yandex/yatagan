@@ -10,8 +10,8 @@ import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.component1
 import com.yandex.daggerlite.graph.component2
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.reportError
 
 internal fun validateNoLoops(graph: BindingGraphImpl, validator: Validator) {
     val markedGray = hashSetOf<BaseBinding>()
@@ -32,7 +32,7 @@ internal fun validateNoLoops(graph: BindingGraphImpl, validator: Validator) {
             return
         val binding = context.resolveRaw(node)
         if (binding in markedGray) {
-            val bindingLoop = stack.dropWhile { it != binding }.map { it.target to it }
+            val bindingLoop = stack.dropWhile { it != binding }
             validator.reportError(Strings.Errors.dependencyLoop(chain = bindingLoop))
         } else {
             stack += context.resolveRaw(node)

@@ -1,0 +1,14 @@
+error: Framework types (Lazy, Provider, Optional) can't be manually managed (provided/bound)
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getO3(): com.yandex.daggerlite.Optional<com.yandex.daggerlite.Lazy<com.yandex.daggerlite.Optional<test.WithInject
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for com.yandex.daggerlite.Optional<test.WithInject>
+NOTE: `com.yandex.daggerlite.Optional<test.WithInject>` can't be requested in any way (lazy/provider/optional) but directly
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getO3: [OptionalLazy] com.yandex.daggerlite.Optional<test.WithInject>
+                        ^-[*1]--------------------------------------------------------
+  here: [1*] <missing>
+             ^~~~~~~~~

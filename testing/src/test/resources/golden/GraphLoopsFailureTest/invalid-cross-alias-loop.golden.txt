@@ -1,0 +1,17 @@
+error: @Binds parameter `test.ApiB` is not compatible with its return type `test.ApiA`
+Encountered:
+  in graph for root-component test.RootComponent
+  in module test.MyModule
+  here: @binds test.MyModule::a(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Binding dependency loop detected:
+(*) `test.ApiA` provided by `alias test.MyModule::a(test.ApiB)` depends on <-
+    `test.ApiB` provided by `alias test.MyModule::b(test.ApiA)` depends on <- (*)
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getA: test.ApiA
+                       ^-[*1]---
+  here: [1*] <alias-loop> alias test.MyModule::a(test.ApiB)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

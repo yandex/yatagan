@@ -37,7 +37,7 @@ class ScopesTest(
         """.trimIndent()
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -61,7 +61,7 @@ class ScopesTest(
         """.trimIndent()
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -116,6 +116,6 @@ class ScopesTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 }

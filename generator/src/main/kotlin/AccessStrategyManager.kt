@@ -4,6 +4,7 @@ import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
+import com.yandex.daggerlite.core.isNever
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph

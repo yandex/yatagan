@@ -2,6 +2,8 @@ package com.yandex.daggerlite.generator
 
 import com.squareup.javapoet.CodeBlock
 import com.yandex.daggerlite.core.DependencyKind
+import com.yandex.daggerlite.core.isAlways
+import com.yandex.daggerlite.core.isNever
 import com.yandex.daggerlite.generator.poetry.CodeBuilder
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression

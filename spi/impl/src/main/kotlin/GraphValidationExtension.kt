@@ -5,6 +5,7 @@ import com.yandex.daggerlite.spi.ValidationPlugin
 import com.yandex.daggerlite.spi.ValidationPluginProvider
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.format.modelRepresentation
 
 class GraphValidationExtension(
     validationPluginProviders: List<ValidationPluginProvider>,
@@ -31,5 +32,8 @@ class GraphValidationExtension(
         }
     }
 
-    override fun toString() = graph.toString()
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "extension for",
+        representation = graph,
+    )
 }

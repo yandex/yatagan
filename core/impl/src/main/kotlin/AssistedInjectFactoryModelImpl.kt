@@ -12,9 +12,11 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 
 internal class AssistedInjectFactoryModelImpl private constructor(
     private val impl: TypeDeclarationLangModel,
@@ -106,15 +108,16 @@ internal class AssistedInjectFactoryModelImpl private constructor(
         val allFactoryAssistedParameters: Set<Parameter.Assisted> = assistedFactoryParameters.toSet()
         if (allConstructorAssistedParameters != allFactoryAssistedParameters) {
             validator.reportError(Strings.Errors.assistedInjectMismatch()) {
-                addNote("From constructor: $allConstructorAssistedParameters")
-                addNote("From factory: $allFactoryAssistedParameters")
+                addNote(Strings.Notes.assistedInjectMismatchFromConstructor(params = allConstructorAssistedParameters))
+                addNote(Strings.Notes.assistedInjectMismatchFromFactory(params = allFactoryAssistedParameters))
             }
         }
     }
 
-    override fun toString(): String {
-        return "[assisted factory] $impl"
-    }
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "assisted-factory",
+        representation = impl,
+    )
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, AssistedInjectFactoryModelImpl>() {
         operator fun invoke(declaration: TypeDeclarationLangModel): AssistedInjectFactoryModelImpl {

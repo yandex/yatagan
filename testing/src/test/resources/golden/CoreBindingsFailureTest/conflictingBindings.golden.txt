@@ -1,0 +1,73 @@
+error: Conflicting bindings for `@javax.inject.Named(value="flag") java.lang.Boolean`
+NOTE: Conflicting binding: `provision test.MyModule::bool()`
+NOTE: Conflicting binding: `bound-instance from creator-setter setFlag(i: boolean): void`
+Encountered:
+  here: graph for root-component test.MyComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting bindings for `@test.MyQualifier(named=@javax.inject.Named(value="hello")) java.lang.Object`
+NOTE: Conflicting binding: `provision test.MyModule::provideObject()`
+NOTE: Conflicting binding: `provision test.MyModule::provideObject2()`
+Encountered:
+  here: graph for root-component test.MyComponent1
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting bindings for `@test.MyQualifier(named=@javax.inject.Named(value="hello")) java.lang.Object`
+NOTE: Conflicting binding: `provision test.MyModule::provideObject()`
+NOTE: Conflicting binding: `provision test.MyModule::provideObject2()`
+Encountered:
+  here: graph for root-component test.MyComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting bindings for `java.lang.String`
+NOTE: Conflicting binding: `bound-instance from creator-setter withString(i: java.lang.String): void`
+NOTE: Conflicting binding: `component-dependency-getter test.Dependency::getMyString(): java.lang.String`
+NOTE: Conflicting binding: `bound-instance from creator-setter withAnotherString(i: java.lang.String): void`
+Encountered:
+  here: graph for root-component test.MyComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting bindings for `java.util.List<java.lang.Number>`
+NOTE: Conflicting binding: `provision test.MyModule2::numbers()`
+NOTE: Conflicting binding: `bound-instance from creator-setter setNumbers(i: java.util.List<java.lang.Number>): void`
+NOTE: Conflicting binding: `list-binding List  { 3 elements } assembled in graph for root-component test.MyComponent2`
+Encountered:
+  here: graph for root-component test.MyComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting bindings for `java.util.List<java.lang.Number>`
+NOTE: Conflicting binding: `provision test.MyModule2::numbers()`
+NOTE: Conflicting binding: `provision test.MySubModule::numbers2()`
+Encountered:
+  in graph for root-component test.MyComponent2
+  here: graph for component test.SubComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting bindings for `test.Dependency`
+NOTE: Conflicting binding: `provision test.MyModule::dep()`
+NOTE: Conflicting binding: `component-dependency-instance component-dependency test.Dependency`
+Encountered:
+  here: graph for root-component test.MyComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting bindings for `test.MyComponent1`
+NOTE: Conflicting binding: `provision test.MyModule::c1()`
+NOTE: Conflicting binding: `component-instance graph for root-component test.MyComponent1`
+Encountered:
+  here: graph for root-component test.MyComponent1
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting bindings for `test.SubComponent.Builder`
+NOTE: Conflicting binding: `provision test.MyModule2::builder()`
+NOTE: Conflicting binding: `child-component-factory component-creator test.SubComponent.Builder`
+Encountered:
+  here: graph for root-component test.MyComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

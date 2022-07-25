@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":validation"))
+    api(project(":validation"))
+    implementation(project(":base"))
 
     implementation(kotlin("stdlib"))
 }

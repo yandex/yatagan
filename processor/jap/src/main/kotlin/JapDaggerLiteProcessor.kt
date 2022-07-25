@@ -10,6 +10,9 @@ class JapDaggerLiteProcessor : BasicAnnotationProcessor() {
     override fun getSupportedOptions(): Set<String> {
         return setOf(
             Options.UseParallelProcessing.key,
+            Options.StrictMode.key,
+            Options.MaxIssueEncounterPaths.key,
+            Options.UsePlainOutput.key,
         )
     }
 

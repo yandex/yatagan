@@ -13,6 +13,7 @@ interface ModuleHostedBindingModel : MayBeInvalid {
     val originModule: ModuleModel
     val target: BindingTargetModel
     val scopes: Set<AnnotationLangModel>
+    val functionName: String
 
     sealed class BindingTargetModel {
         abstract val node: NodeModel

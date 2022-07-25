@@ -1,0 +1,17 @@
+error: No components in the hierarchy match binding -> 
+    inject-constructor test.Foo()
+ -> with scope @javax.inject.Singleton
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getFooForRoot: test.Foo
+                                ^-[*1]--
+  here: [1*] <missing>
+             ^~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.SubComponent
+  in entry-point getFooForSub: test.Foo
+                               ^-[*1]--
+  here: [1*] <missing>
+             ^~~~~~~~~

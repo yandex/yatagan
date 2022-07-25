@@ -3,12 +3,16 @@ package com.yandex.daggerlite.core.impl
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.NodeDependency
+import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.appendChildContextReference
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 import javax.inject.Inject
 
 internal class MembersInjectorModelImpl private constructor(
@@ -56,7 +60,22 @@ internal class MembersInjectorModelImpl private constructor(
         }
     }
 
-    override fun toString() = "[injector-fun] ${injector.name}"
+    override fun toString() = "[injector-fun] ${injector.name}: $injectee"
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "injector-function",
+        representation = {
+            append("${injector.name}(${injector.parameters.single()})")
+            if (childContext is NodeModel) {
+                val (member, _) = membersToInject.entries.find { (_, dependency) ->
+                    dependency.node == childContext
+                }!!
+                append(" { .., ")
+                appendChildContextReference(reference = member)
+                append(", .. }")
+            }
+        },
+    )
 
     companion object Factory : ObjectCache<FunctionLangModel, MembersInjectorModelImpl>() {
         operator fun invoke(injector: FunctionLangModel) = createCached(injector, ::MembersInjectorModelImpl)
