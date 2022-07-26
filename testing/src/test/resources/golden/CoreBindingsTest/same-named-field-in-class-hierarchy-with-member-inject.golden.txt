@@ -1,0 +1,24 @@
+error: A class hierarchy contains more than one @Inject field with the name "mField2", which is not supported
+Encountered:
+  in graph for root-component test.MyComponent
+  here: injector-function injectInto(b: test.ClassB)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: A class hierarchy contains more than one @Inject field with the name "mInt", which is not supported
+Encountered:
+  in graph for root-component test.MyComponent
+  here: injector-function injectInto(b: test.ClassB)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for java.lang.Long
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.MyComponent
+  in member-injector injectInto(test.ClassB { .., mField2, .. })
+                                                  ^-[*1]-
+  in [1*] member-to-inject mField2: java.lang.Long
+                                    ^-[*2]--------
+  here: [2*] <missing>
+             ^~~~~~~~~

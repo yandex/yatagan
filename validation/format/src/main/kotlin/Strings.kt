@@ -405,6 +405,11 @@ object Strings {
         fun ignoredBindsInstance() =
             ("A parameter of a builder's method is annotated with @BindsInstance, which has no effect. " +
                     "Maybe you meant to annotate the method itself for it to work as a binding?").toWarning()
+
+        @Covered
+        fun fieldInjectShadow(name: String) =
+            ("A class hierarchy contains more than one @Inject field with the name \"$name\", " +
+                    "which is not supported").toWarning()
     }
 
     object Notes {

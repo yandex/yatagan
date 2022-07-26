@@ -4,6 +4,7 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.MembersInjectorModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
@@ -13,6 +14,7 @@ import com.yandex.daggerlite.validation.format.Strings
 import com.yandex.daggerlite.validation.format.appendChildContextReference
 import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.daggerlite.validation.format.reportMandatoryWarning
 import javax.inject.Inject
 
 internal class MembersInjectorModelImpl private constructor(
@@ -52,6 +54,13 @@ internal class MembersInjectorModelImpl private constructor(
                 validator.reportError(Strings.Errors.invalidAccessForMemberToInject(member = member))
             }
         }
+
+        for ((name, members) in membersToInject.keys.filter { it.accept(IsField) }.groupBy { it.name }) {
+            if (members.size > 1) {
+                validator.reportMandatoryWarning(Strings.Warnings.fieldInjectShadow(name = name))
+            }
+        }
+
         if (!injector.returnType.isVoid) {
             validator.reportError(Strings.Errors.invalidInjectorReturn())
         }
@@ -82,6 +91,11 @@ internal class MembersInjectorModelImpl private constructor(
 
         fun canRepresent(impl: FunctionLangModel): Boolean {
             return impl.isAbstract && impl.parameters.count() == 1
+        }
+
+        private object IsField : MemberLangModel.Visitor<Boolean> {
+            override fun visitFunction(model: FunctionLangModel) = false
+            override fun visitField(model: FieldLangModel) = true
         }
     }
 }

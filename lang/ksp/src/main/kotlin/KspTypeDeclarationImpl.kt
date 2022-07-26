@@ -11,6 +11,7 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSModifierListOwner
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
@@ -195,23 +196,29 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private suspend fun SequenceScope<FieldLangModel>.yieldInheritedFields() {
         val declared = impl.getDeclaredProperties().toSet()
-        for (property in impl.getAllProperties()) {
-            if (property in declared /* not handled here */ ||
-                property.isPrivate() /* skip private properties */) {
-                continue
-            }
-            if (
-                (property.getter == null && property.setter == null &&
-                        Modifier.JAVA_STATIC !in property.modifiers) /* Java field */ ||
-                property.isLateInit() /* lateinit property always exposes a field */
-            ) {
-                yield(KspFieldImpl(
-                    impl = property,
-                    owner = this@KspTypeDeclarationImpl,
-                    isStatic = false,
-                ))
-            }
+
+        // We can't use `getAllProperties()` here, as it doesn't handle Java's "shadowed" fields properly.
+        suspend fun SequenceScope<FieldLangModel>.includeFieldsFrom(type: KSType) {
+            val clazz = type.declaration as? KSClassDeclaration ?: return
+            clazz.getDeclaredProperties()
+                .filter {
+                    !it.isPrivate() && ((it.getter == null && it.setter == null &&
+                            Modifier.JAVA_STATIC !in it.modifiers) /* Java field */ ||
+                            it.isLateInit() /* lateinit property always exposes a field */) && it !in declared
+                }
+                .forEach { property ->
+                    yield(
+                        KspFieldImpl(
+                            impl = property,
+                            owner = this@KspTypeDeclarationImpl,
+                            refinedOwner = type,
+                            isStatic = false,
+                        )
+                    )
+                }
+            clazz.getSuperclass()?.let { includeFieldsFrom(it) }
         }
+        includeFieldsFrom(type.impl)
     }
 
     override val fields: Sequence<FieldLangModel> = run {
