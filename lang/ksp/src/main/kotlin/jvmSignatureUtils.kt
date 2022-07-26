@@ -87,10 +87,9 @@ internal fun JvmTypeInfo(jvmSignature: CharSequence?, type: KSType?): JvmTypeInf
             jvmSignature = jvmSignature.subSequence(startIndex = 1, endIndex = jvmSignature.length),
             type = type?.arguments?.firstOrNull()?.type?.resolveOrError(),
         ))
-        'L' -> JvmTypeInfo.Declared
         'V' -> JvmTypeInfo.Void
         null -> JvmTypeInfo(checkNotNull(type) { "Not reached: both signature and type can not be null" })
-        else -> throw AssertionError("Not reached: unexpected jvm signature: $jvmSignature")
+        else -> JvmTypeInfo.Declared
     }
 
 /**

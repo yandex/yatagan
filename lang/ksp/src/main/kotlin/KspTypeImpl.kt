@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.ksp.lang
 
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.yandex.daggerlite.base.BiObjectCache
@@ -20,10 +21,9 @@ internal class KspTypeImpl private constructor(
     }
 
     override val declaration: TypeDeclarationLangModel by lazy(PUBLICATION) {
-        when (jvmType) {
-            JvmTypeInfo.Declared -> KspTypeDeclarationImpl(this)
-            else -> NoDeclaration(this)
-        }
+        if (impl.declaration is KSClassDeclaration)
+            KspTypeDeclarationImpl(this)
+        else NoDeclaration(this)
     }
 
     override val typeArguments: List<TypeLangModel> by lazy {

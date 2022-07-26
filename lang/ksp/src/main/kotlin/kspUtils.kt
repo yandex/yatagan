@@ -120,6 +120,12 @@ internal fun KSClassDeclaration.allNonPrivateProperties(): Sequence<KSPropertyDe
     return getAllProperties().filter { !it.isPrivate() && !it.isKotlinFieldInObject() }
 }
 
+internal fun KSClassDeclaration.getSuperclass(): KSType? {
+    return superTypes
+        .map { it.resolve().resolveAliasIfNeeded() }
+        .find { (it.declaration as? KSClassDeclaration)?.classKind == ClassKind.CLASS }
+}
+
 internal fun parametersSequenceFor(
     declaration: KSFunctionDeclaration,
     jvmMethodSignature: JvmMethodSignature,
@@ -141,7 +147,6 @@ internal fun parametersSequenceFor(
     }
 }
 
-
 internal object ErrorTypeImpl : KSType {
     override val annotations get() = emptySequence<Nothing>()
     override val arguments get() = emptyList<Nothing>()
@@ -158,7 +163,6 @@ internal object ErrorTypeImpl : KSType {
     override fun makeNullable(): KSType = this
     override fun replace(arguments: List<KSTypeArgument>): KSType = this
     override fun starProjection(): KSType = this
-    val Reference get() = this.asReference()
 }
 
 private object ErrorDeclarationImpl : KSClassDeclaration {

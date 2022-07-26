@@ -971,5 +971,34 @@ class CoreBindingsTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `same-named field in class hierarchy with member-inject`() {
+        givenJavaSource("test.ClassA", """
+            public class ClassA<T> {
+                @javax.inject.Inject public int mInt;
+                @javax.inject.Inject public T mField2;
+            }
+        """.trimIndent())
+        givenJavaSource("test.ClassB", """
+            public class ClassB extends ClassA<Long> {
+                @javax.inject.Inject public int mInt;
+                @javax.inject.Inject public String mField2;
+            }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            @Module class MyModule {
+                @Provides fun provideInt() = 228
+                @Provides fun provideString() = "hello"
+            }
+            @Component(modules = [MyModule::class]) interface MyComponent {
+                fun injectInto(b: ClassB)
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }
 
