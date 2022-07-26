@@ -1,0 +1,87 @@
+error: @Inject constructor and the class it is defined in must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getO1: test.WithPackagePrivateInject
+                        ^-[*1]-----------------------
+  here: [1*] inject-constructor test.WithPackagePrivateInject()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in member-injector inject(test.Members { .., m2, .. })
+                                               ^-[*1]-
+  in [1*] member-to-inject m2: test.WithProtectedInject
+                               ^-[*2]------------------
+  here: [2*] inject-constructor test.WithProtectedInject()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: @Inject member `test.Members::m2: test.WithProtectedInject` must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent
+  here: injector-function inject(m: test.Members)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: @Inject member `test.Members::m3: java.lang.Object` must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent
+  here: injector-function inject(m: test.Members)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: @Inject member `test.Members::setObject(a: java.lang.Object): void` must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent
+  here: injector-function inject(m: test.Members)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: @Provides-annotated methods must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.PackagePrivateModule
+  here: @provides test.PackagePrivateModule::provideObject(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: A class for members injection must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent2
+  here: injector-function inject2(m: test.Members2)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Class `test.Flags2` is not accessible for condition computation, make it public/internal
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getO4: [Optional] test.UnderFeatureClass
+                        ^-[*1]---------------------------
+  in [1*] inject-constructor test.UnderFeatureClass()
+  in its conditions declaration { runtime-conditions: [.., test.Feature, ..] }
+                                                           ^-[*2]------
+  in [2*] feature test.Feature [test.Flags.isEnabledA && test.Flags2.isEnabledB]
+                                                         ^-[*3]----------------
+  here: [3*] test.Flags2.isEnabledB
+             ^~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Member `test.Flags::isEnabledA: boolean` is not accessible for condition computation, make it public/internal
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getO4: [Optional] test.UnderFeatureClass
+                        ^-[*1]---------------------------
+  in [1*] inject-constructor test.UnderFeatureClass()
+  in its conditions declaration { runtime-conditions: [.., test.Feature, ..] }
+                                                           ^-[*2]------
+  in [2*] feature test.Feature [test.Flags.isEnabledA && test.Flags2.isEnabledB]
+                                ^-[*3]---------------
+  here: [3*] test.Flags.isEnabledA
+             ^~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Module contains provisions and thus must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent
+  here: module test.PackagePrivateProvidesModule
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

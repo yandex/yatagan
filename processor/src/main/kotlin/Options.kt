@@ -17,6 +17,11 @@ class Options(
         }
     }
 
+    operator fun get(option: IntOption): Int {
+        val value = values[option.key] ?: return option.default
+        return value.toIntOrNull() ?: throw RuntimeException("Invalid integer option value: $value")
+    }
+
     class BooleanOption internal constructor(
         val key: String,
         val default: Boolean,
@@ -26,10 +31,23 @@ class Options(
         }
     }
 
+    class IntOption internal constructor(
+        val key: String,
+        val default: Int,
+    ) {
+        operator fun getValue(delegate: ProcessorDelegate<*>, property: KProperty<*>): Int {
+            return delegate.options[this]
+        }
+    }
+
     companion object {
         // TODO: Hook with docs
         val UseParallelProcessing = BooleanOption("daggerlite.experimental.useParallelProcessing", default = false)
 
         val StrictMode = BooleanOption("daggerlite.enableStrictMode", default = true)
+
+        val MaxIssueEncounterPaths = IntOption("daggerlite.maxIssueEncounterPaths", default = 5)
+
+        val UsePlainOutput = BooleanOption("daggerlite.usePlainOutput", default = false)
     }
 }

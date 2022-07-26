@@ -1,0 +1,6 @@
+error: Binding dependency loop detected:
+(*) `test.ClassB` provided by `inject-constructor test.ClassB(.. 1 dependency)` depends on <-
+    `test.ClassA` provided by `inject-constructor test.ClassA(.. 1 dependency)` depends on <- (*)
+Encountered:
+  here: graph for root-component test.RootComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -5,7 +5,11 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.graph.GraphMemberInjector
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.format.append
+import com.yandex.daggerlite.validation.format.appendChildContextReference
+import com.yandex.daggerlite.validation.format.modelRepresentation
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class GraphMemberInjectorImpl(
@@ -30,12 +34,33 @@ internal class GraphMemberInjectorImpl(
         override val graph: BindingGraphImpl
             get() = this@GraphMemberInjectorImpl.owner
 
-        override fun toString() = "[member-to-inject] ${member.name}"
+        override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+            modelClassName = "member-to-inject",
+            representation = {
+                append("${member.name}: ")
+                if (childContext != null) {
+                    appendChildContextReference(reference = dependency)
+                } else {
+                    append(dependency)
+                }
+            }
+        )
     }
 
     override fun validate(validator: Validator) {
         _membersToInject.forEach(validator::child)
     }
 
-    override fun toString() = impl.toString()
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "member-injector",
+        representation = {
+            append("${injector.name}(${injector.parameters.single().type}")
+            if (childContext is MemberToInjectEntryPoint) {
+                append(" { .., ")
+                appendChildContextReference(reference = childContext.member.name)
+                append(", .. }")
+            }
+            append(")")
+        },
+    )
 }

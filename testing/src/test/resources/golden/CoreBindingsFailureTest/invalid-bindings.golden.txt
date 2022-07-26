@@ -1,0 +1,48 @@
+error: @Binds annotated method must be abstract
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::hello2(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: @Binds parameter `java.util.List<java.lang.Integer>` is not compatible with its return type `java.lang.String`
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule2
+  here: @binds test.TestModule2::bindListToString(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: @Provides annotated method must not be abstract (must have a body)
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule2
+  here: @provides test.TestModule2::provides(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Binding method must not return `void`
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  in @binds test.TestModule::hello2(): void
+                                       ^-[*1]-
+  here: [1*] <invalid node: void>
+             ^~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  in @provides test.TestModule::hello(): void
+                                         ^-[*1]-
+  here: [1*] <invalid node: void>
+             ^~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Flattening multi-binding must return `Collection` or any of its subtypes instead of `int`
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @provides test.TestModule::bindThreeForFive(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

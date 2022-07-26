@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.testing
 
-import com.yandex.daggerlite.validation.impl.Strings
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -79,7 +78,7 @@ class AccessControlTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -181,65 +180,7 @@ class AccessControlTest(
             }
         """.trimIndent())
 
-        expectValidationResults(
-            // @formatter:off
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessInjectConstructor(),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "[entry-point] getO1", "@Inject test.WithPackagePrivateInject"),
-                    listOf("test.TestComponent", "[injector-fun] inject", "[member-to-inject] m2", "@Inject test.WithProtectedInject"),
-                ),
-            )),
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForConditionClass(`class` = "test.Flags2"),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "[entry-point] getO4", "@Inject test.UnderFeatureClass", "[test.Flags.isEnabledA && test.Flags2.isEnabledB]", "test.Flags2.isEnabledB"),
-                ),
-            )),
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForConditionMember(member = "test.Flags::isEnabledA: boolean"),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "[entry-point] getO4", "@Inject test.UnderFeatureClass", "[test.Flags.isEnabledA && test.Flags2.isEnabledB]", "test.Flags.isEnabledA"),
-                ),
-            )),
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForMemberToInject(member = "test.Members::m2: test.WithProtectedInject"),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "[injector-fun] inject"),
-                ),
-            )),
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForMemberToInject(member = "test.Members::m3: java.lang.Object"),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "[injector-fun] inject"),
-                ),
-            )),
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForMemberToInject(member = "test.Members::setObject(a: java.lang.Object): void"),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "[injector-fun] inject"),
-                ),
-            )),
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForProvides(),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "test.PackagePrivateModule", "@Provides test.PackagePrivateModule::provideObject(): java.lang.Object"),
-                ),
-            )),
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForModuleClass(),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent", "test.PackagePrivateProvidesModule")
-                ),
-            )),
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForMemberInject(),
-                encounterPaths = listOf(
-                    listOf("test.TestComponent2", "[injector-fun] inject2")
-                ),
-            )),
-            // @formatter:on
-        )
+        compileRunAndValidate()
     }
 
     @Test
@@ -285,14 +226,6 @@ class AccessControlTest(
             }
         """.trimIndent())
 
-        expectValidationResults(
-            errorMessage(Strings.formatMessage(
-                message = Strings.Errors.invalidAccessForAssistedInject(),
-                encounterPaths = listOf(
-                  listOf("test.TestComponent", "[entry-point] barFactory", "[assisted factory] test.BarFactory"),  
-                  listOf("test.TestComponent", "[entry-point] fooFactory", "[assisted factory] test.FooFactory"),
-                ),
-            ))
-        )
+        compileRunAndValidate()
     }
 }

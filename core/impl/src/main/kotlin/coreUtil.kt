@@ -14,6 +14,12 @@ import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.daggerlite.validation.Validator
+import com.yandex.daggerlite.validation.format.TextColor
+import com.yandex.daggerlite.validation.format.append
+import com.yandex.daggerlite.validation.format.appendRichString
+import com.yandex.daggerlite.validation.format.buildRichString
 import javax.inject.Qualifier
 import javax.inject.Scope
 
@@ -63,7 +69,15 @@ internal data class NodeDependencyImpl(
     override val node: NodeModel,
     override val kind: DependencyKind,
 ) : NodeDependency {
-    override fun toString() = "$node [$kind]"
+    override fun validate(validator: Validator) = Unit
+    override fun toString(childContext: MayBeInvalid?) = buildRichString {
+        color = TextColor.Inherit
+        appendRichString {
+            color = TextColor.Cyan
+            append("[$kind] ")
+        }
+        append(node)
+    }
     override fun copyDependency(node: NodeModel, kind: DependencyKind) = copy(node = node, kind = kind)
 }
 

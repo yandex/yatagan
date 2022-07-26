@@ -1,5 +1,7 @@
 package com.yandex.daggerlite
 
+import com.yandex.daggerlite.validation.RichString
+
 /**
  * A delegate interface, that provides API for clients, that wish to enable full DL validation
  * routine for reflection backend.
@@ -38,17 +40,17 @@ interface DynamicValidationDelegate {
          * Invoked by the framework to report an error.
          * If this gets invoked at least once for graph, then the graph is invalid.
          */
-        fun reportError(message: String)
+        fun reportError(message: RichString)
 
         /**
          * Invoked by the framework to report a warning.
          */
-        fun reportWarning(message: String)
+        fun reportWarning(message: RichString)
 
         /**
          * Invoked by the framework to report a mandatory warning.
          */
-        fun reportMandatoryWarning(message: String) {
+        fun reportMandatoryWarning(message: RichString) {
             reportWarning(message)
         }
     }

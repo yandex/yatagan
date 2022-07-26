@@ -31,12 +31,12 @@ interface ValidationMessage {
     val kind: Kind
 
     /**
-     * Message text.
+     * Message text. Maybe [RichString] or any other [CharSequence].
      */
-    val contents: String
+    val contents: CharSequence
 
     /**
      * Notes, related to the message, helping/clarifying/adding more info.
      */
-    val notes: Collection<String>
+    val notes: Collection<CharSequence>
 }

@@ -1,0 +1,71 @@
+error: Binding is annotated with @IntoMap yet no @IntoMap.Key-annotated annotation is present
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::binding1(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Map key `test.InvalidMapKey1` is missing a `value` attribute to be used as a key value
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::binding2(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Map key `test.InvalidMapKey2`'s `value` attribute has annotation type, which is not supported as a map key
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::binding3(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Map key `test.InvalidMapKey3`'s `value` attribute has array type, which is not supported as a map key
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::binding4(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Mapping for `java.util.Map<java.lang.Class<?>, java.lang.String>` contains duplicates for key `java.lang.Object.class`
+NOTE: Binding with conflicting key: `explicit-absent by @binds test.TestModule::binding5(...)`
+NOTE: Binding with conflicting key: `explicit-absent by @binds test.TestModule::binding6(...)`
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getMap: java.util.Map<java.lang.Class<?>, java.lang.String>
+                         ^-[*1]---------------------------------------------
+  here: [1*] map-binding of java.lang.Class<?> to java.lang.String { 2 elements } assembled in graph for root-component test.TestComponent
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in graph for component test.SubComponent
+  in entry-point getMap: java.util.Map<java.lang.Class<?>, java.lang.String>
+                         ^-[*1]---------------------------------------------
+  in [1*] map-binding of java.lang.Class<?> to java.lang.String { <inherited from parent component>, 1 element } assembled in graph for component test.SubComponent
+                                                                  ^-[*2]---------------------------
+  here: [2*] map-binding of java.lang.Class<?> to java.lang.String { 2 elements } assembled in graph for root-component test.TestComponent
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Mapping for `java.util.Map<java.lang.Class<?>, java.lang.String>` contains duplicates for key `java.lang.Object.class`
+NOTE: Binding with conflicting key: `provision test.SubModule::subBinding()`
+NOTE: Binding with conflicting key: `explicit-absent by @binds test.TestModule::binding5(...)`
+Encountered:
+  in graph for root-component test.TestComponent
+  in graph for component test.SubComponent
+  in entry-point getMap: java.util.Map<java.lang.Class<?>, java.lang.String>
+                         ^-[*1]---------------------------------------------
+  here: [1*] map-binding of java.lang.Class<?> to java.lang.String { 1 element + upstream } assembled in graph for component test.SubComponent
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Multiple IntoMap.Key-annotations are present on the binding
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::binding5(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

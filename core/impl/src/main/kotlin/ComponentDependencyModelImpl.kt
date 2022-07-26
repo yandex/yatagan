@@ -7,9 +7,11 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportWarning
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportWarning
 
 internal class ComponentDependencyModelImpl private constructor(
     override val type: TypeLangModel,
@@ -53,7 +55,10 @@ internal class ComponentDependencyModelImpl private constructor(
         }
     }
 
-    override fun toString() = type.toString()
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "component-dependency",
+        representation = type,
+    )
 
     companion object Factory : ObjectCache<TypeLangModel, ComponentDependencyModelImpl>() {
         operator fun invoke(type: TypeLangModel) = createCached(type) {

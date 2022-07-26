@@ -1,0 +1,8 @@
+error: Scope has no effect on 'alias' binding
+NOTE: Scope is inherited from the source graph node and can not be overridden. Use multiple scopes on the source node to declare it compatible with another scope, if required.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getNumber: java.lang.Number
+                            ^-[*1]----------
+  here: [1*] alias test.TestModule::number(java.lang.Integer)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

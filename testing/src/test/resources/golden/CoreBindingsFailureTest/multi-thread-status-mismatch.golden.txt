@@ -1,0 +1,5 @@
+error: Component declares a multi-threaded requirement, but its parent `graph for root-component test.RootComponent` does not. Please, specify the same requirement for the parent.
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent1
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

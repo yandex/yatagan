@@ -1,0 +1,26 @@
+error: A single scope `@javax.inject.Singleton` can not be present on more than one component in a hierarchy
+NOTE: In component `graph for component test.MySubComponentB`
+NOTE: In component `graph for root-component test.MyRootComponent`
+Encountered:
+  in graph for root-component test.MyRootComponent
+  in graph for component test.MySubComponentA
+  here: graph for component test.MySubComponentB
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Component hierarchy loop detected
+Encountered:
+  in graph for root-component test.MyRootComponent
+  in graph for component test.MySubComponentA
+  in graph for component test.MySubComponentB
+  here: graph for component test.MySubComponentA
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Type declaration is used as a module, yet not annotated with @Module
+Encountered:
+  in graph for root-component test.MyRootComponent
+  in graph for component test.MySubComponentA
+  in graph for component test.MySubComponentB
+  here: module test.NotAModule
+        ^~~~~~~~~~~~~~~~~~~~~~

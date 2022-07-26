@@ -17,10 +17,13 @@ import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.Strings.Errors
+import com.yandex.daggerlite.validation.format.appendChildContextReference
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 
 internal class ComponentModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
@@ -77,6 +80,17 @@ internal class ComponentModelImpl private constructor(
                 validator.child(dependency.node)
             }
 
+            override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+                modelClassName = "entry-point",
+                representation = {
+                    append("${getter.name}()")
+                    if (childContext == dependency.node) {
+                        append(": ")
+                        appendChildContextReference(reference = getter.returnType)
+                    }
+                },
+            )
+
             override fun toString() = "[entry-point] ${getter.name}"
         }
 
@@ -120,7 +134,7 @@ internal class ComponentModelImpl private constructor(
     }
 
     override fun validate(validator: Validator) {
-        validator.inline(conditionalsModel)
+        validator.child(conditionalsModel)
 
         for (module in modules) {
             validator.child(module)
@@ -180,7 +194,10 @@ internal class ComponentModelImpl private constructor(
         }
     }
 
-    override fun toString() = declaration.toString()
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = if (isRoot) "root-component" else "component",
+        representation = declaration,
+    )
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)

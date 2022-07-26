@@ -6,7 +6,9 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  * TODO: doc.
  */
 interface Variant : MayBeInvalid {
-    interface DimensionModel : ClassBackedModel, MayBeInvalid
+    interface DimensionModel : ClassBackedModel, MayBeInvalid {
+        val isInvalid: Boolean
+    }
 
     interface FlavorModel : ClassBackedModel, MayBeInvalid {
         val dimension: DimensionModel

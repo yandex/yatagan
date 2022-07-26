@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(project(":core"))
-    implementation(project(":validation-impl"))
+    implementation(project(":validation-format"))
     implementation(project(":api"))
     implementation(project(":base"))
 

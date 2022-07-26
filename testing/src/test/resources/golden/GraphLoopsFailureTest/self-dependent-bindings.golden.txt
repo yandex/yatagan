@@ -1,0 +1,14 @@
+error: Binding depends on itself
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getA: test.ApiA
+                       ^-[*1]---
+  here: [1*] <invalid> @binds test.MyModule::a(...)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getB: test.ApiB
+                       ^-[*1]---
+  here: [1*] <invalid> @provides test.MyModule::b(...)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

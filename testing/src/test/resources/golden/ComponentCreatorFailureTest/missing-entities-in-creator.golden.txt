@@ -1,0 +1,46 @@
+error: Component creator declaration must be an `interface`
+Encountered:
+  in graph for root-component test.MyComponent
+  here: component-creator test.MyComponent.Builder
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Declared `component-dependency test.MyDependency` is not passed to component creator
+Encountered:
+  in graph for root-component test.MyComponent
+  here: component-creator test.MyComponent.Builder
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Declared `module test.RequiresInstance` requires instance but it is not passed to component creator
+Encountered:
+  in graph for root-component test.MyComponent
+  here: component-creator test.MyComponent.Builder
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Extra/unneeded module instance is present
+NOTE: The module is undeclared, i. m. not present in @Component(.., module = [<here>], ..)
+Encountered:
+  in graph for root-component test.MyComponent
+  in component-creator test.MyComponent.Builder
+  in creator-method-parameter create(.., module: test.Unknown, ..)
+                                         ^-[*1]--------------
+  here: [1*] input module test.Unknown
+             ^~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: Component dependency declaration is not abstract. If it is already known how to provide necessary dependencies for the graph, consider using Inject-constructors or a @Module with regular provisions instead.
+Encountered:
+  in graph for root-component test.MyComponent
+  here: component-dependency test.MyDependency
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: function
+    test.MyDependency::getNotGonnaBeUsed(): com.yandex.daggerlite.Optional<java.lang.Object>
+returns a framework type (Provider/Lazy/Optional) and such type can not be directly introduced to the graph via component dependency - the function will be ignored. If you need this to form a binding - change the return type, or use a wrapper type. Otherwise remove the function from the dependency interface entirely.
+Encountered:
+  in graph for root-component test.MyComponent
+  here: component-dependency test.MyDependency
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

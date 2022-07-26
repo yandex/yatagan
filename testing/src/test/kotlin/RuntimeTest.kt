@@ -49,7 +49,7 @@ class RuntimeTest(
         """
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -129,7 +129,7 @@ class RuntimeTest(
             } 
         """)
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -161,7 +161,7 @@ class RuntimeTest(
         """
         )
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -219,6 +219,6 @@ class RuntimeTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 }

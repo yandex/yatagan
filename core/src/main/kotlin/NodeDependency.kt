@@ -1,9 +1,11 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.validation.MayBeInvalid
+
 /**
  * Represents a dependency on a particular [node] with the specified dependency [kind].
  */
-interface NodeDependency {
+interface NodeDependency : MayBeInvalid {
     /**
      * Requested node.
      */

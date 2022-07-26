@@ -1,16 +1,14 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.ConditionalHoldingModel
 import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.daggerlite.core.ConditionalHoldingModel.FeatureModel
 import com.yandex.daggerlite.core.Variant.FlavorModel
-import com.yandex.daggerlite.core.lang.ConditionLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.appendChildContextReference
+import com.yandex.daggerlite.validation.format.modelRepresentation
 
 internal open class ConditionalHoldingModelImpl(
     sources: Sequence<ConditionalAnnotationLangModel>,
@@ -19,6 +17,27 @@ internal open class ConditionalHoldingModelImpl(
         sources.map { annotation ->
             ConditionalWithFlavorConstraintsModelImpl(annotation)
         }
+
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "its conditions declaration",
+        representation = {
+            append("{ ")
+            when (childContext) {
+                is FlavorModel -> {
+                    append("component-flavor-constraints (onlyIn): [.., ")
+                    appendChildContextReference(reference = childContext.type)
+                    append(", ..]")
+                }
+                is FeatureModel -> {
+                    append("runtime-conditions: [.., ")
+                    appendChildContextReference(reference = childContext.type)
+                    append(", ..]")
+                }
+                else -> append("...")
+            }
+            append(" }")
+        },
+    )
 
     private class ConditionalWithFlavorConstraintsModelImpl(
         annotation: ConditionalAnnotationLangModel,
@@ -32,27 +51,12 @@ internal open class ConditionalHoldingModelImpl(
             onlyIn.forEach(validator::child)
             featureTypes.forEach(validator::child)
         }
+
+        override fun toString(childContext: MayBeInvalid?) = throw AssertionError("not reached")
     }
 
     override fun validate(validator: Validator) {
         conditionals.forEach(validator::inline)
     }
 
-    private class FeatureModelImpl private constructor(
-        private val impl: TypeDeclarationLangModel,
-    ) : FeatureModel {
-        override val conditions: Sequence<ConditionLangModel> = impl.conditions
-
-        override fun validate(validator: Validator) {
-            if (conditions.none()) {
-                validator.reportError(Errors.noConditionsOnFeature())
-            }
-        }
-
-        override fun toString() = "[feature] $impl"
-
-        companion object Factory : ObjectCache<TypeDeclarationLangModel, FeatureModelImpl>() {
-            operator fun invoke(impl: TypeDeclarationLangModel) = createCached(impl, ::FeatureModelImpl)
-        }
-    }
 }

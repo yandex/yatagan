@@ -2,7 +2,6 @@ package com.yandex.daggerlite.testing
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.generated.CompiledApiClasspath
 import com.yandex.daggerlite.generated.DynamicApiClasspath
 import com.yandex.daggerlite.generated.DynamicOptimizedApiClasspath
@@ -10,12 +9,18 @@ import com.yandex.daggerlite.process.LoggerDecorator
 import org.junit.Assert
 import java.io.File
 import java.net.URLClassLoader
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.writeText
 
 abstract class CompileTestDriverBase protected constructor(
     private val apiType: ApiType = ApiType.Compiled,
 ) : CompileTestDriver {
     private val mainSourceSet = SourceSetImpl()
     private var precompiledModuleOutputDir: File? = null
+
+    override val testNameRule = TestNameRule()
 
     final override val sourceFiles: List<SourceFile>
         get() = mainSourceSet.sourceFiles
@@ -74,16 +79,27 @@ abstract class CompileTestDriverBase protected constructor(
         return emptyList()
     }
 
-    override fun expectValidationResults(vararg messages: Message) {
+    override fun compileRunAndValidate() {
+        val goldenResourcePath = "golden/${testNameRule.testClassSimpleName}/${testNameRule.testMethodName}.golden.txt"
+
         val (runtimeClasspath, messageLog, success, generatedFiles) = doCompile()
+        val strippedLog = normalizeMessages(messageLog)
+
+        if (goldenSourceDirForUpdate != null) {
+            val goldenSourcePath = Path(goldenSourceDirForUpdate).resolve(goldenResourcePath)
+            if (strippedLog.isBlank()) {
+                goldenSourcePath.deleteIfExists()
+            } else {
+                goldenSourcePath.parent.createDirectories()
+                goldenSourcePath.writeText(strippedLog)
+            }
+            println("Updated $goldenSourcePath")
+            return
+        }
+
         try {
-            Assert.assertFalse("No errors expected, yet compilation failed",
-                messages.none { it.kind == MessageKind.Error } && !success)
-            val actualMessages = parseMessages(messageLog).sorted().toList()
-            val expectedMessages = messages.map {
-                it.copy(text = it.text.stripColor())
-            }.sorted()
-            Assert.assertArrayEquals(expectedMessages.toTypedArray(), actualMessages.toTypedArray())
+            val goldenOutput = javaClass.getResourceAsStream("/$goldenResourcePath")?.bufferedReader()?.readText() ?: ""
+            Assert.assertEquals(goldenOutput, strippedLog)
 
             if (success) {
                 // find runtime test
@@ -96,7 +112,6 @@ abstract class CompileTestDriverBase protected constructor(
                     println("NOTE: No runtime test detected in TestCaseKt class.")
                 }
             }
-
         } finally {
             // print generated files
             for (generatedFile in generatedFiles) {
@@ -142,18 +157,17 @@ abstract class CompileTestDriverBase protected constructor(
         DynamicOptimized,
     }
 
-    private fun parseMessages(messages: String): Sequence<Message> {
-        return LoggerDecorator.MessageRegex.findAll(messages).map { messageMatch ->
-            val (kind, message) = messageMatch.destructured
-            Message(
-                kind = when (kind) {
-                    "error" -> MessageKind.Error
-                    "warning" -> MessageKind.Warning
-                    else -> throw AssertionError()
-                },
-                text = message.trimIndent().stripColor(),
-            )
-        }.memoize()
+    /**
+     * Required to trim and sort error-messages, as they are not required to be issued in any particular order.
+     */
+    private fun normalizeMessages(log: String): String {
+        return buildList {
+            for (messageMatch in LoggerDecorator.MessageRegex.findAll(log)) {
+                val (kind, message) = messageMatch.destructured
+                add("$kind: ${message.trimIndent().stripColor().trim()}")
+            }
+            sort()
+        }.joinToString(separator = "\n$MessageSeparator\n\n").trim()
     }
 
     companion object {
@@ -162,5 +176,12 @@ abstract class CompileTestDriverBase protected constructor(
         }
 
         private val AnsiColorSequenceRegex = "\u001b\\[.*?m".toRegex()
+
+        private val MessageSeparator = "~".repeat(80)
+
+        val goldenSourceDirForUpdate: String? = System.getProperty("com.yandex.daggerlite.updateGoldenFiles")
+
+        val isInUpdateGoldenMode: Boolean
+            get() = goldenSourceDirForUpdate != null
     }
 }

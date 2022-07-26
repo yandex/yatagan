@@ -40,9 +40,9 @@ class DynamicCompileTestDriver(
         )
     }
 
-    override fun expectValidationResults(vararg messages: Message) {
+    override fun compileRunAndValidate() {
         dynamicRuntimeScope {
-            super.expectValidationResults(*messages)
+            super.compileRunAndValidate()
         }
     }
 
@@ -129,6 +129,7 @@ class DynamicCompileTestDriver(
                 @Language("Java")
                 val code = """
                     package ${componentName.packageName()};
+                    import com.yandex.daggerlite.validation.RichString;
                     import com.yandex.daggerlite.*;
                     import java.util.function.*;
                     import java.util.*;
@@ -145,14 +146,14 @@ class DynamicCompileTestDriver(
                                     DynamicValidationDelegate.Operation operation
                                 ) {
                                     operation.validate(new DynamicValidationDelegate.ReportingDelegate() {
-                                        public void reportError(String message) {
+                                        public void reportError(RichString message) {
                                             hasErrors = true;
-                                            log.add(new String[]{"error", message});
+                                            log.add(new String[]{"error", message.toString()});
                                         }
-                                        public void reportWarning(String message) {
-                                            log.add(new String[]{"warning", message});
+                                        public void reportWarning(RichString message) {
+                                            log.add(new String[]{"warning", message.toString()});
                                         }
-                                        public void reportMandatoryWarning(String message) {
+                                        public void reportMandatoryWarning(RichString message) {
                                             // Strict mode
                                             reportError(message);
                                         }

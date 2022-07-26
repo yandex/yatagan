@@ -1,8 +1,5 @@
 package com.yandex.daggerlite.testing
 
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.Strings.Errors
-import com.yandex.daggerlite.validation.impl.Strings.formatMessage
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,15 +52,7 @@ class GraphLoopsFailureTest(
             }
         """.trimIndent())
 
-        expectValidationResults(
-            errorMessage(formatMessage(
-                message = Errors.dependencyLoop(listOf(
-                    "test.ClassB" to "@Inject test.ClassB",
-                    "test.ClassA" to "@Inject test.ClassA",
-                )),
-                encounterPaths = listOf(listOf("test.RootComponent")),
-            )),
-        )
+        compileRunAndValidate()
     }
 
     @Test
@@ -89,17 +78,7 @@ class GraphLoopsFailureTest(
             }
         """.trimIndent())
 
-        expectValidationResults(
-            errorMessage(formatMessage(
-                message = Errors.dependencyLoop(listOf(
-                    "test.ApiA" to "[alias] @Binds test.MyModule::a(test.ClassA): test.ApiA",
-                    "test.ClassA" to "@Inject test.ClassA",
-                    "test.ApiB" to "[alias] @Binds test.MyModule::b(test.ClassB): test.ApiB",
-                    "test.ClassB" to "@Inject test.ClassB",
-                )),
-                encounterPaths = listOf(listOf("test.RootComponent")),
-            )),
-        )
+        compileRunAndValidate()
     }
 
     @Test
@@ -130,17 +109,7 @@ class GraphLoopsFailureTest(
             }
         """.trimIndent())
 
-        expectValidationResults(
-            // @formatter:off
-            errorMessage(formatMessage(
-                message = Errors.selfDependentBinding(),
-                encounterPaths = listOf(
-                    listOf("test.RootComponent", "[entry-point] getA", "[invalid] @Binds test.MyModule::a(test.AImpl, test.ApiA): test.ApiA"),
-                    listOf("test.RootComponent", "[entry-point] getB", "[invalid] @Provides test.MyModule::b(test.ApiA, test.ApiB): test.ApiB"),
-                ),
-            )),
-            // @formatter:on
-        )
+        compileRunAndValidate()
     }
 
     @Test(timeout = 10_000)
@@ -166,27 +135,7 @@ class GraphLoopsFailureTest(
             }
         """.trimIndent())
 
-        expectValidationResults(
-            // @formatter:off
-            errorMessage(formatMessage(
-                message = Errors.inconsistentBinds(
-                    param = "test.ApiB", returnType = "test.ApiA",
-                ),
-                encounterPaths = listOf(
-                    listOf("test.RootComponent", "test.MyModule", "@Binds test.MyModule::a(test.ApiB): test.ApiA")
-                )
-            )),
-            errorMessage(formatMessage(
-                message = Errors.dependencyLoop(chain = listOf(
-                    "test.ApiA" to "[alias] @Binds test.MyModule::a(test.ApiB): test.ApiA",
-                    "test.ApiB" to "[alias] @Binds test.MyModule::b(test.ApiA): test.ApiB",
-                )),
-                encounterPaths = listOf(
-                    listOf("test.RootComponent", "[entry-point] getA", "[invalid] [alias] @Binds test.MyModule::a(test.ApiB): test.ApiA")
-                )
-            )),
-            // @formatter:on
-        )
+        compileRunAndValidate()
     }
 
     @Test
@@ -217,23 +166,6 @@ class GraphLoopsFailureTest(
             }
         """.trimIndent())
 
-        expectValidationResults(
-            errorMessage(formatMessage(
-                message = Errors.componentLoop(),
-                encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB", "test.MySubComponentA"))
-            )),
-            errorMessage(formatMessage(
-                message = Errors.nonModule(),
-                encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB", "test.NotAModule"))
-            )),
-            errorMessage(formatMessage(
-                message = Errors.duplicateComponentScope(scope = "@javax.inject.Singleton"),
-                encounterPaths = listOf(listOf("test.MyRootComponent", "test.MySubComponentA", "test.MySubComponentB")),
-                notes = listOf(
-                    Strings.Notes.duplicateScopeComponent("test.MyRootComponent"),
-                    Strings.Notes.duplicateScopeComponent("test.MySubComponentB"),
-                ),
-            )),
-        )
+        compileRunAndValidate()
     }
 }

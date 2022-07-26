@@ -4,9 +4,14 @@ import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.Variant.DimensionModel
 import com.yandex.daggerlite.core.Variant.FlavorModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.impl.Strings
-import com.yandex.daggerlite.validation.impl.reportError
+import com.yandex.daggerlite.validation.format.Strings
+import com.yandex.daggerlite.validation.format.append
+import com.yandex.daggerlite.validation.format.appendChildContextReference
+import com.yandex.daggerlite.validation.format.buildRichString
+import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.daggerlite.validation.format.reportError
 
 internal class VariantImpl private constructor(
     private val parts: Map<DimensionModel, List<FlavorModel>>,
@@ -15,6 +20,7 @@ internal class VariantImpl private constructor(
             : this(flavors.map { FlavorImpl(it) }.groupBy(FlavorImpl::dimension))
 
     override fun plus(variant: Variant?): Variant {
+        // TODO: Implement variant extension explicitly, rather than by simple merging, when all hierarchy info is lost.
         variant ?: return this
         return VariantImpl(buildMap<DimensionModel, MutableList<FlavorModel>> {
             parts.forEach { (dimension, flavor) ->
@@ -41,12 +47,31 @@ internal class VariantImpl private constructor(
                 validator.reportError(
                     Strings.Errors.conflictingOrDuplicateFlavors(dimension = dimension)) {
                     for (conflict in flavors) {
-                        addNote("Conflicting flavor: `$conflict`")
+                        addNote(Strings.Notes.conflictingFlavorInVariant(flavor = conflict))
                     }
                 }
             }
         }
     }
 
-    override fun toString() = if (parts.isEmpty()) "Variant{empty}" else "Variant{...}"
+    override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
+        modelClassName = "component-variant",
+        representation = {
+            when {
+                childContext != null -> {
+                    val (dimension, _) = parts.entries.find { (_, flavor) ->
+                        childContext == flavor
+                    }!!
+                    append("{.., ")
+                    appendChildContextReference(reference = buildRichString {
+                        append("flavor for ")
+                        append(dimension)
+                    })
+                    append(", ..}")
+                }
+                parts.isEmpty() -> append("{empty}")
+                else -> append("{...}")
+            }
+        }
+    )
 }

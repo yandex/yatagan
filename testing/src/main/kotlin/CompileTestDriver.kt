@@ -1,17 +1,36 @@
 package com.yandex.daggerlite.testing
 
+import org.junit.Rule
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
+
 interface CompileTestDriver : SourceSet {
+    @get:Rule
+    val testNameRule: TestNameRule
+
     fun givenPrecompiledModule(
         sources: SourceSet,
     )
 
-    fun expectValidationResults(
-        vararg messages: Message,
-    )
+    /**
+     * Runs the test and validates the output against the golden output file.
+     * The golden output file resource path is computed from the junit test name.
+     */
+    fun compileRunAndValidate()
 
     val backendUnderTest: Backend
+}
 
-    fun expectSuccessfulValidation() = expectValidationResults(/*none*/)
+class TestNameRule : TestWatcher() {
+    var testClassSimpleName: String? = ""
+    var testMethodName: String = "no-test"
+
+    override fun starting(description: Description) {
+        testClassSimpleName = description.className.substringAfterLast('.')
+        testMethodName = description.methodName
+            .replace("""\[.*?]$""".toRegex(), "")  // Remove backend+api test suffix, e.g. [JAP], [KSP], ... .
+            .replace("""\W+""".toRegex(), "-")  // Replace every sequence of non-word characters by a '-'.
+    }
 }
 
 enum class Backend {
@@ -19,27 +38,3 @@ enum class Backend {
     Ksp,
     Rt,
 }
-
-enum class MessageKind {
-    Warning,
-    Error,
-}
-
-data class Message(
-    val kind: MessageKind,
-    val text: String,
-) : Comparable<Message> {
-    override fun compareTo(other: Message): Int {
-        kind.compareTo(other.kind).let {
-            if (it != 0) return it
-        }
-        text.compareTo(other.text).let {
-            if (it != 0) return it
-        }
-        return 0
-    }
-}
-
-fun errorMessage(text: String) = Message(kind = MessageKind.Error, text = text)
-
-fun warningMessage(text: String) = Message(kind = MessageKind.Warning, text = text)

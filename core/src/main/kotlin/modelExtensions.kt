@@ -36,3 +36,10 @@ inline fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
 inline operator fun NodeDependency.component1(): NodeModel = node
 
 inline operator fun NodeDependency.component2(): DependencyKind = kind
+
+
+val ConditionScope.isAlways: Boolean
+    get() = this == ConditionScope.Unscoped
+
+val ConditionScope.isNever: Boolean
+    get() = this == ConditionScope.NeverScoped

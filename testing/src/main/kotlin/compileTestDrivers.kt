@@ -17,7 +17,7 @@ internal fun compileTestDrivers(
         override fun toString() = name
     }
 
-    return buildList {
+    val providers = buildList {
         if (includeKsp) {
             add(NamedProvider(::KspCompileTestDriver, name = "KSP"))
         }
@@ -31,4 +31,8 @@ internal fun compileTestDrivers(
             add(NamedProvider({ DynamicCompileTestDriver(apiType = ApiType.DynamicOptimized) }, name = "RT-optimized"))
         }
     }
+    return if (CompileTestDriverBase.isInUpdateGoldenMode) {
+        // No need to use all backends, use only the first included to be chosen as "golden".
+        providers.take(1)
+    } else providers
 }

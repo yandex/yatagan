@@ -64,7 +64,7 @@ class ComponentDependenciesKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
     @Test
@@ -90,7 +90,7 @@ class ComponentDependenciesKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 
 
@@ -129,6 +129,6 @@ class ComponentDependenciesKotlinTest(
             }
         """.trimIndent())
 
-        expectSuccessfulValidation()
+        compileRunAndValidate()
     }
 }

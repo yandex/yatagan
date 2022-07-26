@@ -3,6 +3,8 @@ package com.yandex.daggerlite.dynamic
 import com.yandex.daggerlite.DynamicValidationDelegate
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.ComponentDependencyModel
+import com.yandex.daggerlite.core.ConditionModel
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.ModuleModel
 import com.yandex.daggerlite.core.NodeDependency
@@ -23,8 +25,6 @@ import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.ComponentDependencyBinding
 import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
 import com.yandex.daggerlite.graph.ComponentInstanceBinding
-import com.yandex.daggerlite.graph.ConditionScope
-import com.yandex.daggerlite.graph.ConditionScope.Literal
 import com.yandex.daggerlite.graph.EmptyBinding
 import com.yandex.daggerlite.graph.GraphMemberInjector
 import com.yandex.daggerlite.graph.InstanceBinding
@@ -82,7 +82,7 @@ internal class RuntimeComponent(
         }
     }
 
-    private val conditionLiterals = HashMap<Literal, Boolean>(graph.localConditionLiterals.size, 1.0f).apply {
+    private val conditionLiterals = HashMap<ConditionModel, Boolean>(graph.localConditionLiterals.size, 1.0f).apply {
         for ((literal, usage) in graph.localConditionLiterals) {
             when (usage) {
                 BindingGraph.LiteralUsage.Eager -> {
@@ -144,7 +144,7 @@ internal class RuntimeComponent(
         }
     }
 
-    private fun doEvaluateLiteral(literal: Literal): Boolean {
+    private fun doEvaluateLiteral(literal: ConditionModel): Boolean {
         var instance: Any? = null
         for (member in literal.path) {
             instance = member.accept(MemberEvaluator(instance))
@@ -152,7 +152,7 @@ internal class RuntimeComponent(
         return instance as Boolean
     }
 
-    private fun evaluateLiteral(literal: Literal): Boolean {
+    private fun evaluateLiteral(literal: ConditionModel): Boolean {
         val normalized = literal.normalized()
         return parentsSequence
             .first { normalized in it.graph.localConditionLiterals }

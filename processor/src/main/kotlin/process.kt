@@ -11,7 +11,7 @@ import com.yandex.daggerlite.spi.impl.GraphValidationExtension
 import com.yandex.daggerlite.validation.ValidationMessage.Kind.Error
 import com.yandex.daggerlite.validation.ValidationMessage.Kind.MandatoryWarning
 import com.yandex.daggerlite.validation.ValidationMessage.Kind.Warning
-import com.yandex.daggerlite.validation.impl.Strings
+import com.yandex.daggerlite.validation.format.format
 import com.yandex.daggerlite.validation.impl.validate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -31,6 +31,7 @@ fun <Source> process(
     delegate: ProcessorDelegate<Source>,
     useParallelProcessing: Boolean,
 ) {
+    val usePlainOutput = delegate.options[Options.UsePlainOutput]
     ObjectCacheRegistry.use {
         val dispatcher = if (useParallelProcessing) Dispatchers.Default else Dispatchers.Unconfined
         val strictMode = delegate.options[Options.StrictMode]
@@ -80,16 +81,11 @@ fun <Source> process(
                     val isValid = async {
                         val allMessages = baseValidationJob.await() + pluginsValidationJob.await()
                         allMessages.forEach { locatedMessage ->
-                            val message = Strings.formatMessage(
-                                message = locatedMessage.message.contents,
-                                color = when (locatedMessage.message.kind) {
-                                    Error -> Strings.StringColor.Red
-                                    MandatoryWarning -> Strings.StringColor.Yellow
-                                    Warning -> Strings.StringColor.Yellow
-                                },
-                                encounterPaths = locatedMessage.encounterPaths,
-                                notes = locatedMessage.message.notes
-                            )
+                            val message = locatedMessage.format(
+                                maxEncounterPaths = delegate.options[Options.MaxIssueEncounterPaths],
+                            ).run {
+                                if (usePlainOutput) toString() else toAnsiEscapedString()
+                            }
                             when (locatedMessage.message.kind) {
                                 Error -> logger.error(message)
                                 MandatoryWarning -> if (strictMode) {

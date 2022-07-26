@@ -56,6 +56,9 @@ project(":spi-impl").projectDir = file("spi/impl")
 
 project(":validation-impl").projectDir = file("validation/impl")
 
+include("validation-format")
+project(":validation-format").projectDir = file("validation/format")
+
 project(":core-impl").projectDir = file("core/impl")
 
 project(":graph").projectDir = file("graph")

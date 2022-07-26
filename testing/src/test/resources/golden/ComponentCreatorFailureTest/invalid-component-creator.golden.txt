@@ -1,0 +1,69 @@
+error: Component creator is missing a creating method - an abstract method which returns the component interface
+Encountered:
+  in graph for root-component test.MyComponent
+  here: component-creator test.MyComponent.Foo
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Extra/unneeded module instance is present
+NOTE: The module is undeclared, i. m. not present in @Component(.., module = [<here>], ..)
+Encountered:
+  in graph for root-component test.MyComponent
+  in component-creator test.MyComponent.Foo
+  in creator-setter setModule(m: test.Unnecessary): void
+                              ^-[*1]-------------
+  here: [1*] input module test.Unnecessary
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Multiple component factories detected declared
+NOTE: Declared `test.MyComponent.Foo`
+NOTE: Declared `test.MyComponent.Builder`
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Setter method in component creator must return either `void` or creator type itself (`test.MyComponent.Foo`)
+Encountered:
+  in graph for root-component test.MyComponent
+  in component-creator test.MyComponent.Foo
+  here: creator-setter setString(i: java.lang.String): java.lang.String
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unexpected/unrecognized method
+    `test.MyComponent.Foo::create(): void`
+ for component creator interface
+Encountered:
+  in graph for root-component test.MyComponent
+  here: component-creator test.MyComponent.Foo
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unrecognized type (component dependency?) is present
+NOTE: To bind the instance itself, use @BindInstance marker
+NOTE: To use the instance as component dependency, explicitly declare it in @Component(.., dependencies = [<here>], ..)
+Encountered:
+  in graph for root-component test.MyComponent
+  in component-creator test.MyComponent.Foo
+  in creator-setter setInt(i: int): void
+                           ^-[*1]-
+  here: [1*] input component-dependency int
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.MyComponent
+  in component-creator test.MyComponent.Foo
+  in creator-setter setString(i: java.lang.String): java.lang.String
+                              ^-[*1]-------------
+  here: [1*] input component-dependency java.lang.String
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: A parameter of a builder's method is annotated with @BindsInstance, which has no effect. Maybe you meant to annotate the method itself for it to work as a binding?
+Encountered:
+  in graph for root-component test.MyComponent
+  in component-creator test.MyComponent.Foo
+  here: creator-setter setString(i: java.lang.String): java.lang.String
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

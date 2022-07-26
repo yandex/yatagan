@@ -1,0 +1,13 @@
+error: Injector method should return `void`/`Unit`.
+Encountered:
+  in graph for root-component test.MyComponent
+  here: injector-function inject(i: test.Injectee)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unexpected method
+    test.MyComponent::misc(i: test.Injectee, extra: int): void
+ in component declaration
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

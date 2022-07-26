@@ -3,6 +3,7 @@ package com.yandex.daggerlite.graph
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
+import com.yandex.daggerlite.core.ConditionScope
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
@@ -32,7 +33,8 @@ interface Binding : BaseBinding {
     /**
      * A condition scope of this binding. Part of the *Conditions API*.
      *
-     * If this is [never-scoped][ConditionScope.isNever], then [dependencies] **must** yield an empty sequence.
+     * If this is [never-scoped][com.yandex.daggerlite.core.ConditionExpression.NeverScoped],
+     * then [dependencies] **must** yield an empty sequence.
      */
     val conditionScope: ConditionScope
 
@@ -45,7 +47,8 @@ interface Binding : BaseBinding {
     /**
      * The binding's dependencies on other bindings.
      *
-     * If [conditionScope] is ["never"][ConditionScope.isNever], then the sequence **must** be empty.
+     * If [conditionScope] is ["never"][com.yandex.daggerlite.core.ConditionExpression.NeverScoped],
+     * then the sequence **must** be empty.
      *
      * Backends can only use bindings that are reported here for codegen/runtime, as the use of any undeclared
      *  dependencies will result in incorrect [BindingGraph.BindingUsage] computation, internal errors, etc.

@@ -1,0 +1,23 @@
+error: Missing binding for java.lang.Integer
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.SubComponent
+  in entry-point getFooForSub: @javax.inject.Named(value="foo") test.Foo
+                               ^-[*1]-----------------------------------
+  in [1*] provision test.RootModule::provideFoo(java.lang.Integer, )
+                                                ^-[*2]-----------
+  here: [2*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: No components in the hierarchy match binding -> 
+    provision test.RootModule::provideFoo(.. 1 dependency)
+ -> with scope @javax.inject.Singleton
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.SubComponent
+  in entry-point getFooForSub: @javax.inject.Named(value="foo") test.Foo
+                               ^-[*1]-----------------------------------
+  here: [1*] provision test.RootModule::provideFoo(.. 1 dependency)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

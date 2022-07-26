@@ -37,7 +37,6 @@ dependencies {
 
     // Base test dependencies
     implementation(project(":processor"))
-    implementation(project(":validation-impl"))
     implementation(project(":core-impl"))
     implementation(project(":graph-impl"))
     implementation(project(":api"))
@@ -60,6 +59,9 @@ dependencies {
 
     // Heavy test dependencies
     testImplementation(project(":testing-generator"))
+
+    // For strings
+    testImplementation(project(":validation-format"))
 
     baseTestRuntime("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")  // required for heavy tests
     dynamicTestRuntime(project(":api-dynamic", configuration = "runtimeElements"))
@@ -89,9 +91,20 @@ tasks.named("compileKotlin") {
     dependsOn(generateDynamicApiClasspath, generateDynamicOptimizedApiClasspath, generateCompiledApiClasspath)
 }
 
+val updateGoldenFiles by tasks.registering(Test::class) {
+    group = "tools"
+    description = "Launch tests in a special 'regenerate-golden' mode, where they are do not fail, " +
+            "but write their *actual* results as *expected*. Use with care after you've changed some error-reporting " +
+            "format and need to regenerate the actual results in batch"
+    // Pass the resource directory absolute path
+    systemProperty("com.yandex.daggerlite.updateGoldenFiles",
+        sourceSets.test.get().resources.sourceDirectories.singleFile.absolutePath)
+}
+
 tasks.test {
     // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
     jvmArgs = listOf("-Xmx4G", "-Xms256m")
+    shouldRunAfter(updateGoldenFiles)
 }
 
 kotlin {
