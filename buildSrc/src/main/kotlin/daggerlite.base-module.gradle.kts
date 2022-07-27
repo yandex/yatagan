@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.net.URI
 
 plugins {
     kotlin("jvm")
@@ -8,7 +7,7 @@ plugins {
 repositories {
     maven {
         name = "mavenCentral"
-        url = URI.create("https://artifactory.yandex.net/central")
+        url = uri("https://artifactory.yandex.net/central")
     }
 }
 
