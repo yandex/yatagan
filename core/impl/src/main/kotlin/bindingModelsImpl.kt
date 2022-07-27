@@ -106,9 +106,6 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
             }
             is BindingTargetModel.DirectMultiContribution, is BindingTargetModel.Plain -> { /*Nothing to validate*/ }
         }
-//        if (impl.returnType.isVoid) {
-//            validator.reportError(Errors.voidBinding())
-//        }
     }
 
     private class InvalidValue : AnnotationLangModel.Value {
@@ -233,10 +230,6 @@ internal class ProvidesImpl(
 
     override fun <R> accept(visitor: ModuleHostedBindingModel.Visitor<R>): R {
         return visitor.visitProvides(this)
-    }
-
-    override fun toString(): String {
-        return "@Provides $originModule::${impl.name}(${inputs.joinToString()}): $target"
     }
 
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(

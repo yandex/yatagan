@@ -1,6 +1,13 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="764965d3-b193-329e-88da-cde70c7a766e" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="GradlePackageUpdate" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SSBasedInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <replaceConfiguration name="toString() on MayBeInvalid" description="toString() is not normally implemented for MayBeInvalid models.&#10;toString(childContext) should be used instead to obtain rich string representation." suppressId="richToString" problemDescriptor="toString() usage on MayBeInvalid instance" text="$Receiver$.toString()" recursive="false" caseInsensitive="true" type="Kotlin" pattern_context="default" search_injected="false" reformatAccordingToStyle="true" shortenFQN="false" replacement="$Receiver$.toString(childContext = null).toString()">
+        <constraint name="__context__" within="" contains="" />
+        <constraint name="Receiver" nameOfExprType="com\.yandex\.daggerlite\.validation\.MayBeInvalid" exprTypeWithinHierarchy="true" within="" contains="" />
+      </replaceConfiguration>
+    </inspection_tool>
   </profile>
 </component>

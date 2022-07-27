@@ -18,7 +18,7 @@ interface ModuleHostedBindingModel : MayBeInvalid {
     sealed class BindingTargetModel {
         abstract val node: NodeModel
 
-        override fun toString() = node.toString()
+        override fun toString() = node.toString(childContext = null).toString()
 
         class Plain(
             override val node: NodeModel,

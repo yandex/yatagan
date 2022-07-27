@@ -139,7 +139,7 @@ object Dagger {
     }
 
     private fun doValidate(graph: BindingGraph) = validationDelegate?.let { delegate ->
-        delegate.dispatchValidation(title = graph.toString()) { reporting ->
+        delegate.dispatchValidation(title = graph.model.type.toString()) { reporting ->
             reportMessages(messages = validate(graph), reporting = reporting)
             if (delegate.usePlugins) {
                 val extension = GraphValidationExtension(

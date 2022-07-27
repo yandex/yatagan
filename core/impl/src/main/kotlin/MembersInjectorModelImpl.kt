@@ -69,8 +69,6 @@ internal class MembersInjectorModelImpl private constructor(
         }
     }
 
-    override fun toString() = "[injector-fun] ${injector.name}: $injectee"
-
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
         modelClassName = "injector-function",
         representation = {

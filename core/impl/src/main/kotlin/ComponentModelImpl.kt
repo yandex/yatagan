@@ -90,8 +90,6 @@ internal class ComponentModelImpl private constructor(
                     }
                 },
             )
-
-            override fun toString() = "[entry-point] ${getter.name}"
         }
 
         declaration.functions.filter {
