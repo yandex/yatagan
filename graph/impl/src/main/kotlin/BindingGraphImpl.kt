@@ -217,8 +217,6 @@ internal class BindingGraphImpl(
         }
     }
 
-    override fun toString() = component.toString()
-
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
         modelClassName = "graph for",
         representation = component,

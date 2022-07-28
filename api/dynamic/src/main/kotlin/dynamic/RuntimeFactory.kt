@@ -44,7 +44,7 @@ internal class RuntimeFactory(
         }
     }
 
-    override fun toString() = creator.toString()
+    override fun toString() = creator.toString(childContext = null).toString()
 
     override fun invoke(proxy: Any, args: Array<Any?>?): Any {
         val componentProxy: Any

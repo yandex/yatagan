@@ -1,5 +1,3 @@
-import java.net.URI
-
 plugins {
     `kotlin-dsl`
 }
@@ -7,11 +5,11 @@ plugins {
 repositories {
     maven {
         name = "mavenCentral"
-        url = URI.create("https://artifactory.yandex.net/central")
+        url = uri("https://artifactory.yandex.net/central")
     }
     maven {
         name = "gradlePluginPortal"
-        url = URI.create("https://artifactory.yandex.net/gradle")
+        url = uri("https://artifactory.yandex.net/gradle")
     }
 }
 

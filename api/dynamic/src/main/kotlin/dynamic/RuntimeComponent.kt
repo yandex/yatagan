@@ -170,7 +170,7 @@ internal class RuntimeComponent(
         return true
     }
 
-    override fun toString(): String = graph.toString()
+    override fun toString(): String = graph.toString(childContext = null).toString()
 
     override fun visitProvision(binding: ProvisionBinding): Any {
         val instance: Any? = binding.provision.accept(ProvisionEvaluator(binding))
@@ -193,7 +193,7 @@ internal class RuntimeComponent(
 
     override fun visitInstance(binding: InstanceBinding): Any {
         return checkNotNull(givenInstances[binding.target]) {
-            "Provided instance for ${binding.target} is null"
+            "Provided instance for ${binding.target.toString(null)} is null"
         }
     }
 
@@ -208,7 +208,7 @@ internal class RuntimeComponent(
 
     override fun visitSubComponentFactory(binding: SubComponentFactoryBinding): Any {
         val creatorClass = checkNotNull(binding.targetGraph.creator) {
-            "No creator is declared in ${binding.targetGraph}"
+            "No creator is declared in ${binding.targetGraph.toString(null)}"
         }.type.declaration.rt
         return Proxy.newProxyInstance(
             creatorClass.classLoader,
@@ -223,7 +223,7 @@ internal class RuntimeComponent(
 
     override fun visitComponentDependency(binding: ComponentDependencyBinding): Any {
         return checkNotNull(givenDependencies[binding.dependency]) {
-            "Provided instance for dependency ${binding.dependency} is null"
+            "Provided instance for dependency ${binding.dependency.toString(null)} is null"
         }
     }
 
@@ -233,7 +233,7 @@ internal class RuntimeComponent(
 
     override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): Any {
         return binding.getter.rt.invoke(checkNotNull(givenDependencies[binding.dependency]) {
-            "Provided instance for dependency ${binding.dependency} is null"
+            "Provided instance for dependency ${binding.dependency.toString(null)} is null"
         })
     }
 
