@@ -7,12 +7,14 @@ Encountered:
                                ^-[*2]------------------------------------
   in [2*] provision test.TestModule::toAny2(test.ApiBase, )
                                             ^-[*3]------
-  in [3*] alias test.TestModule::impl2(test.Api)
-  in alias test.TestModule::impl1(test.Impl)
-  in inject-constructor test.Impl()
+  in [3*] alias test.TestModule::impl2(test.Api, )
+                                       ^-[*4]--
+  in [4*] alias test.TestModule::impl1(test.Impl, )
+                                       ^-[*5]---
+  in [5*] inject-constructor test.Impl()
   in its conditions declaration { runtime-conditions: [.., test.NotAFeature, ..] }
-                                                           ^-[*4]----------
-  here: [4*] feature test.NotAFeature <no-conditions-declared>
+                                                           ^-[*6]----------
+  here: [6*] feature test.NotAFeature <no-conditions-declared>
              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
