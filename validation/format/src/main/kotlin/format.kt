@@ -89,7 +89,7 @@ inline fun BaseBinding.bindingModelRepresentation(
 fun BaseBinding.findChildContextNode(childContext: MayBeInvalid?): NodeDependency? {
     return when(childContext) {
         is BaseBinding -> accept(object : BaseBinding.Visitor<NodeDependency?> {
-            override fun visitAlias(alias: AliasBinding) = alias.source.takeIf { it == childContext }
+            override fun visitAlias(alias: AliasBinding) = alias.source.takeIf { it == childContext.target }
             override fun visitBinding(binding: Binding) = binding.dependencies.find { it.node == childContext.target }
         })
         is NodeDependency -> childContext.copyDependency()  // Copy is used to discard any custom implementation
