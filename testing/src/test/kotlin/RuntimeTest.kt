@@ -123,6 +123,7 @@ class RuntimeTest(
 
             fun test() {
                 val c = Dagger.create(TestComponent::class.java)
+                assert(c == c) { "Equality test" }
                 assert(c.hello().value == "hello")
                 assert(c.bye().value == "bye")
                 assert(c.foo().value == "foo")

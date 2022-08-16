@@ -57,7 +57,7 @@ internal open class InvocationHandlerBase(
     private class EqualsHandler : MethodHandler {
         override fun invoke(proxy: Any, args: Array<Any?>?): Boolean {
             val (other) = args!!
-            return proxy == other
+            return proxy === other
         }
     }
 
