@@ -1,5 +1,7 @@
 package com.yandex.daggerlite.graph.impl
 
+import com.yandex.daggerlite.base.ifOrElseNull
+import com.yandex.daggerlite.base.traverseDepthFirstWithPath
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
@@ -14,56 +16,29 @@ import com.yandex.daggerlite.validation.format.Strings
 import com.yandex.daggerlite.validation.format.reportError
 
 internal fun validateNoLoops(graph: BindingGraphImpl, validator: Validator) {
-    val markedGray = hashSetOf<BaseBinding>()
-    val markedBlack = hashSetOf<BaseBinding>()
-    val stack = arrayListOf<BaseBinding>()
-
-    fun BaseBinding.dependencies(): Sequence<NodeDependency> {
-        class DependenciesVisitor : BaseBinding.Visitor<Sequence<NodeDependency>> {
-            override fun visitAlias(alias: AliasBinding) = sequenceOf(alias.source)
-            override fun visitBinding(binding: Binding) = binding.dependencies
-        }
-        return accept(DependenciesVisitor())
-    }
-
-    fun tryAddToStack(dependency: NodeDependency, context: BindingGraphImpl) {
-        val (node, kind) = dependency
-        if (!kind.isEager)
-            return
-        val binding = context.resolveRaw(node)
-        if (binding in markedGray) {
-            val bindingLoop = stack.dropWhile { it != binding }
-            validator.reportError(Strings.Errors.dependencyLoop(chain = bindingLoop))
-        } else {
-            stack += context.resolveRaw(node)
-        }
-    }
-
-    graph.entryPoints.forEach { (_, dependency) ->
-        tryAddToStack(dependency, context = graph)
-    }
-    graph.memberInjectors.forEach { it.membersToInject.forEach { (_, dependency) ->
-        tryAddToStack(dependency, context = graph) }
-    }
-
-    while (stack.isNotEmpty()) {
-        when (val binding = stack.last()) {
-            in markedBlack -> {
-                stack.removeLast()
+    traverseDepthFirstWithPath(
+        roots = buildList<BaseBinding> {
+            graph.entryPoints.forEach { (_, dependency) ->
+                add(graph.resolveRaw(dependency.node))
             }
-
-            in markedGray -> {
-                stack.removeLast()
-                markedBlack += binding
-                markedGray -= binding
-            }
-
-            else -> {
-                markedGray += binding
-                binding.dependencies().forEach {
-                    tryAddToStack(it, context = binding.owner as BindingGraphImpl)
+            graph.memberInjectors.forEach {
+                it.membersToInject.forEach { (_, dependency) ->
+                    add(graph.resolveRaw(dependency.node))
                 }
             }
+        },
+        childrenOf = { binding ->
+            class DependenciesVisitor : BaseBinding.Visitor<Sequence<NodeDependency>> {
+                override fun visitAlias(alias: AliasBinding) = sequenceOf(alias.source)
+                override fun visitBinding(binding: Binding) = binding.dependencies
+            }
+            val context = binding.owner as BindingGraphImpl
+            binding.accept(DependenciesVisitor()).mapNotNull { (node, kind) ->
+                ifOrElseNull(kind.isEager) { context.resolveRaw(node) }
+            }.asIterable()
+        },
+        onLoop = { bindingLoop ->
+            validator.reportError(Strings.Errors.dependencyLoop(chain = bindingLoop.toList()))
         }
-    }
+    )
 }
