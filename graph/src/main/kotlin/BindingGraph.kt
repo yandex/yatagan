@@ -145,6 +145,11 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph> {
     fun resolveBinding(node: NodeModel): Binding
 
     /**
+     * Behaves as [resolveBinding] only doesn't follow aliases.
+     */
+    fun resolveBindingRaw(node: NodeModel): BaseBinding
+
+    /**
      * Provides counts of each dependency [kind][com.yandex.daggerlite.core.DependencyKind] requests for the
      * [target][Binding.target].
      */

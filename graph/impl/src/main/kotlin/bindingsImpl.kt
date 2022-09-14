@@ -58,8 +58,6 @@ import com.yandex.daggerlite.validation.format.reportMandatoryWarning
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal interface BaseBindingMixin : BaseBinding {
-    override val owner: BindingGraphImpl
-
     override val originModule: ModuleModel?
         get() = null
 }
@@ -83,7 +81,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
 
     override fun validate(validator: Validator) {
         dependencies.forEach {
-            validator.child(owner.resolveRaw(it.node))
+            validator.child(owner.resolveBindingRaw(it.node))
         }
 
         if (checkDependenciesConditionScope) {
@@ -95,10 +93,10 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
                 val resolvedScope = resolved.graphConditionScope()
                 if (resolvedScope !in conditionScope) {
                     val aliases = buildList {
-                        var maybeAlias = owner.resolveRaw(node)
+                        var maybeAlias = owner.resolveBindingRaw(node)
                         while (maybeAlias is AliasBinding) {
                             add(maybeAlias)
-                            maybeAlias = owner.resolveRaw(maybeAlias.source)
+                            maybeAlias = owner.resolveBindingRaw(maybeAlias.source)
                         }
                     }
                     // A special "edge"-like node, that represents invalid condition dependency
@@ -202,7 +200,7 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
 
 internal class ProvisionBindingImpl(
     override val impl: ProvidesBindingModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : ProvisionBinding, ConditionalBindingMixin, ModuleHostedMixin() {
 
     override val scopes get() = impl.scopes
@@ -234,7 +232,7 @@ internal class ProvisionBindingImpl(
 
 internal class InjectConstructorProvisionBindingImpl(
     private val impl: InjectConstructorModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : ProvisionBinding, ConditionalBindingMixin {
     override val target get() = impl.asNode()
     override val originModule: Nothing? get() = null
@@ -268,7 +266,7 @@ internal class InjectConstructorProvisionBindingImpl(
 }
 
 internal class AssistedInjectFactoryBindingImpl(
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
     override val model: AssistedInjectFactoryModel,
 ) : AssistedInjectFactoryBinding, BindingMixin {
     override val target: NodeModel
@@ -323,7 +321,7 @@ internal class AssistedInjectFactoryBindingImpl(
 internal class SyntheticAliasBindingImpl(
     override val source: NodeModel,
     override val target: NodeModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : AliasBinding {
     override val originModule: ModuleModel? get() = null
     override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
@@ -331,18 +329,18 @@ internal class SyntheticAliasBindingImpl(
     }
 
     override fun validate(validator: Validator) {
-        validator.inline(owner.resolveRaw(source))
+        validator.inline(owner.resolveBindingRaw(source))
     }
 
     override fun toString(childContext: MayBeInvalid?): CharSequence {
         // Pass-through
-        return owner.resolveRaw(source).toString(childContext)
+        return owner.resolveBindingRaw(source).toString(childContext)
     }
 }
 
 internal class AliasBindingImpl(
     override val impl: BindsBindingModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : AliasBinding, ModuleHostedMixin() {
     init {
         assert(impl.sources.count() == 1) {
@@ -375,7 +373,7 @@ internal class AliasBindingImpl(
     )
 
     override fun validate(validator: Validator) {
-        validator.child(owner.resolveRaw(source))
+        validator.child(owner.resolveBindingRaw(source))
         if (impl.scopes.isNotEmpty()) {
             validator.reportMandatoryWarning(Strings.Warnings.scopeRebindIsForbidden()) {
                 addNote(Strings.Notes.infoOnScopeRebind())
@@ -390,7 +388,7 @@ internal class AliasBindingImpl(
 
 internal class AlternativesBindingImpl(
     override val impl: BindsBindingModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : AlternativesBinding, BindingMixin, ModuleHostedMixin() {
     override val scopes get() = impl.scopes
     override val alternatives get() = impl.sources
@@ -418,7 +416,7 @@ internal class AlternativesBindingImpl(
 }
 
 internal class ComponentDependencyEntryPointBindingImpl(
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
     override val dependency: ComponentDependencyModel,
     override val getter: FunctionLangModel,
     override val target: NodeModel,
@@ -435,9 +433,9 @@ internal class ComponentDependencyEntryPointBindingImpl(
 }
 
 internal class ComponentInstanceBindingImpl(
-    graph: BindingGraphImpl,
+    graph: BindingGraph,
 ) : ComponentInstanceBinding, BindingMixin {
-    override val owner: BindingGraphImpl = graph
+    override val owner: BindingGraph = graph
     override val target get() = owner.model.asNode()
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -451,7 +449,7 @@ internal class ComponentInstanceBindingImpl(
 }
 
 internal class SubComponentFactoryBindingImpl(
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
     private val factory: ComponentFactoryModel,
 ) : SubComponentFactoryBinding, ConditionalBindingMixin {
     override val target: NodeModel
@@ -484,7 +482,7 @@ internal class SubComponentFactoryBindingImpl(
 }
 
 internal class MultiBindingImpl(
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
     override val target: NodeModel,
     override val upstream: MultiBindingImpl?,
     override val targetForDownstream: NodeModel,
@@ -552,7 +550,7 @@ internal class MultiBindingImpl(
 }
 
 internal class MapBindingImpl(
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
     override val target: NodeModel,
     contents: List<Pair<AnnotationLangModel.Value, NodeModel>>,
     override val mapKey: TypeLangModel,
@@ -573,7 +571,7 @@ internal class MapBindingImpl(
             current = contents.groupBy(
                 keySelector = { (key, _) -> key },
                 // Resolution on `owner` is important here, so do it eagerly
-                valueTransform = { (_, dependency) -> owner.resolveRaw(dependency) },
+                valueTransform = { (_, dependency) -> owner.resolveBindingRaw(dependency) },
             ),
         )
     }
@@ -649,7 +647,7 @@ internal class MapBindingImpl(
 
 internal class ExplicitEmptyBindingImpl(
     override val impl: ModuleHostedBindingModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : EmptyBinding, BindingMixin, ModuleHostedMixin() {
     override val conditionScope get() = ConditionScope.NeverScoped
 
@@ -665,7 +663,7 @@ internal class ExplicitEmptyBindingImpl(
 
 internal class ComponentDependencyBindingImpl(
     override val dependency: ComponentDependencyModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : ComponentDependencyBinding, BindingMixin {
     override val target get() = dependency.asNode()
 
@@ -681,7 +679,7 @@ internal class ComponentDependencyBindingImpl(
 
 internal class InstanceBindingImpl(
     override val target: NodeModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
     private val origin: ComponentFactoryModel.InputModel,
 ) : InstanceBinding, BindingMixin {
 
@@ -697,7 +695,7 @@ internal class InstanceBindingImpl(
 
 internal class SelfDependentInvalidBinding(
     override val impl: ModuleHostedBindingModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : EmptyBinding, BindingMixin, ModuleHostedMixin() {
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)
@@ -717,7 +715,7 @@ internal class SelfDependentInvalidBinding(
 }
 
 internal class AliasLoopStubBinding(
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
     override val target: NodeModel,
     private val aliasLoop: Collection<AliasBinding>,
 ) : EmptyBinding, BindingMixin {
@@ -739,7 +737,7 @@ internal class AliasLoopStubBinding(
 
 internal data class MissingBindingImpl(
     override val target: NodeModel,
-    override val owner: BindingGraphImpl,
+    override val owner: BindingGraph,
 ) : EmptyBinding, BindingMixin {
 
     override fun validate(validator: Validator) {

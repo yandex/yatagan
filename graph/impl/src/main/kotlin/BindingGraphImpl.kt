@@ -71,15 +71,15 @@ internal class BindingGraphImpl(
 
     override fun resolveBinding(node: NodeModel): Binding {
         class AliasResolveVisitor : BaseBinding.Visitor<Binding> {
-            override fun visitAlias(alias: AliasBinding) = resolveRaw(alias.source).accept(this)
+            override fun visitAlias(alias: AliasBinding) = resolveBindingRaw(alias.source).accept(this)
             override fun visitBinding(binding: Binding) = binding
         }
-        return resolveRaw(node).accept(AliasResolveVisitor())
+        return resolveBindingRaw(node).accept(AliasResolveVisitor())
     }
 
-    internal fun resolveRaw(node: NodeModel): BaseBinding {
+    override fun resolveBindingRaw(node: NodeModel): BaseBinding {
         return bindings.getBindingFor(node)
-            ?: parent?.resolveRaw(node)
+            ?: parent?.resolveBindingRaw(node)
             ?: throw IllegalStateException("Not reached: missing binding for $node")
     }
 
