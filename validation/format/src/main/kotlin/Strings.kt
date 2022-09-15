@@ -82,6 +82,7 @@ object Strings {
             a: Binding, b: Binding,
         ) = buildRichString {
             color = TextColor.Inherit
+            append("Invalid dependency of `").append(b.target).append("` on `").append(a.target).appendLine("`:")
             append("`").append(a).appendLine("` with a condition:")
             append(Indent).append("(1) ").append(aCondition).appendLine()
             append("cannot be injected into `").append(b).appendLine("` with a condition:")
@@ -101,6 +102,22 @@ object Strings {
                 .appendLine("` under condition:")
             append(Indent).append("(2) ").append(bCondition).appendLine()
             append("without Optional<..> wrapper, because component condition (2) does not imply condition (1)")
+        }.toError()
+
+        @Covered
+        fun incompatibleConditionForConditionProvider(
+            aCondition: ConditionScope,
+            bCondition: ConditionScope,
+            a: Binding, b: Binding,
+        ) = buildRichString {
+            color = TextColor.Inherit
+            append("`").append(b.target).append("` is under condition provided by `").append(a.target)
+                .appendLine("` which by itself has incompatible condition:")
+            append("`").append(a).appendLine("` with a condition:")
+            append(Indent).append("(1) ").append(aCondition).appendLine()
+            append("cannot provide condition for `").append(b).appendLine("` with a condition:")
+            append(Indent).append("(2) ").append(bCondition).appendLine()
+            append("because condition (2) does not imply condition (1)")
         }.toError()
 
         @Covered
@@ -245,10 +262,6 @@ object Strings {
         @Covered
         fun invalidConditionMissingMember(name: String, type: TypeLangModel) =
             "Can not find accessible `$name` member in $type".toError()
-
-        @Covered
-        fun invalidNonStaticMember(name: String, type: TypeLangModel) =
-            "Member `$name` in $type is not static".toError()
 
 
         @Covered
@@ -410,6 +423,12 @@ object Strings {
         fun fieldInjectShadow(name: String) =
             ("A class hierarchy contains more than one @Inject field with the name \"$name\", " +
                     "which is not supported").toWarning()
+
+        @Covered
+        fun nonStaticConditionOnKotlinObject() =
+            ("Non-static member of a Kotlin singleton object is used as a condition. " +
+                    "Framework will try to find the object instance in the graph, which may not be what you wanted. " +
+                    "Did you forget to add `INSTANCE.` to access the object from static context?").toWarning()
     }
 
     object Notes {

@@ -19,6 +19,7 @@ import com.yandex.daggerlite.graph.Binding
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage
 import com.yandex.daggerlite.graph.BindingVisitorAdapter
+import com.yandex.daggerlite.graph.childrenSequence
 import com.yandex.daggerlite.graph.normalized
 import com.yandex.daggerlite.graph.parentsSequence
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -138,6 +139,9 @@ internal class BindingGraphImpl(
                     continue
                 }
                 materializationQueue += nonAlias.dependencies
+
+                // Add all non-static condition receivers
+                materializationQueue += nonAlias.nonStaticConditionProviders
             }
         }
 
@@ -157,7 +161,10 @@ internal class BindingGraphImpl(
             for (clause in binding.conditionScope.expression) for (literal in clause) {
                 val normalized = literal.normalized()
                 if (isEager) {
-                    localConditionLiterals[normalized] = LiteralUsage.Eager
+                    localConditionLiterals[normalized] = when {
+                        normalized.requiresInstance -> LiteralUsage.Lazy  // Always lazy
+                        else -> LiteralUsage.Eager
+                    }
                     isEager = false
                 } else {
                     if (normalized !in localConditionLiterals) {
@@ -167,16 +174,14 @@ internal class BindingGraphImpl(
             }
         }
         // Remove all local condition literals/assisted inject factories from every child (in-depth).
-        val graphQueue = ArrayDeque(children)
-        while (graphQueue.isNotEmpty()) {
-            val child = graphQueue.removeFirst()
+        for (child in childrenSequence(includeThis = false)) {
+            child as BindingGraphImpl
             val usesConditions = child.localConditionLiterals.keys.removeAll(localConditionLiterals.keys)
             val usesAssistedInjectFactories = child.localAssistedInjectFactories.removeAll(localAssistedInjectFactories)
             if (usesConditions || usesAssistedInjectFactories) {
                 // This will never be seen by materialization and that's okay, because no bindings are required here.
                 child.usedParents += this
             }
-            graphQueue += child.children
         }
     }
 

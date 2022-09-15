@@ -145,7 +145,10 @@ internal class RuntimeComponent(
     }
 
     private fun doEvaluateLiteral(literal: ConditionModel): Boolean {
-        var instance: Any? = null
+        var instance: Any? = when {
+            literal.requiresInstance -> resolveAndAccess(literal.root)
+            else -> null
+        }
         for (member in literal.path) {
             instance = member.accept(MemberEvaluator(instance))
         }

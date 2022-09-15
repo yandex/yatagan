@@ -55,6 +55,15 @@ interface Binding : BaseBinding {
      */
     val dependencies: Sequence<NodeDependency>
 
+    /**
+     * A set of selected [condition model's roots][com.yandex.daggerlite.core.ConditionModel.root] from
+     * [conditionScope].
+     *
+     * NOTE: the set may be empty if the binding doesn't _own_ the condition models, e.g. an alternatives binding whose
+     * condition scope is inferred from its dependencies and require resolution to be computed.
+     */
+    val nonStaticConditionProviders: Set<NodeModel>
+
     fun <R> accept(visitor: Visitor<R>): R
 
     interface Visitor<R> {

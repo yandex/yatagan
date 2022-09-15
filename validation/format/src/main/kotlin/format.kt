@@ -77,7 +77,9 @@ inline fun BaseBinding.bindingModelRepresentation(
     append(openBracket)
     if (context != null) {
         appendChildContextReference(childContextTransform(context))
-        append(", ")
+        if (dependencies.size > 1) {
+            append(", ")
+        }
         val withoutContext = dependencies - context
         ellipsisStatistics(context, withoutContext)
     } else {
@@ -92,7 +94,6 @@ fun BaseBinding.findChildContextNode(childContext: MayBeInvalid?): NodeDependenc
             override fun visitAlias(alias: AliasBinding) = alias.source.takeIf { it == childContext.target }
             override fun visitBinding(binding: Binding) = binding.dependencies.find { it.node == childContext.target }
         })
-        is NodeDependency -> childContext.copyDependency()  // Copy is used to discard any custom implementation
         else -> null
     }
 }

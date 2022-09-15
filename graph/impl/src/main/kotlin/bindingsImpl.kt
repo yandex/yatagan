@@ -64,12 +64,26 @@ internal interface BaseBindingMixin : BaseBinding {
 
 internal fun Binding.graphConditionScope(): ConditionScope = conditionScope and owner.conditionScope
 
+internal fun BindingGraph.resolveAliasChain(node: NodeModel): List<AliasBinding> = buildList {
+    var maybeAlias = resolveBindingRaw(node)
+    while (maybeAlias is AliasBinding) {
+        add(maybeAlias)
+        maybeAlias = resolveBindingRaw(maybeAlias.source)
+    }
+}
+
 internal interface BindingMixin : Binding, BaseBindingMixin {
     override val conditionScope: ConditionScope
         get() = ConditionScope.Unscoped
 
+    override val nonStaticConditionProviders: Set<NodeModel>
+        get() = emptySet()
+
     override val scopes: Set<AnnotationLangModel>
         get() = emptySet()
+
+    val nonStaticConditionDependencies: NonStaticConditionDependencies?
+        get() = null
 
     /**
      * `true` if the binding requires the dependencies of compatible condition scope, and it's an error to
@@ -83,6 +97,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
         dependencies.forEach {
             validator.child(owner.resolveBindingRaw(it.node))
         }
+        nonStaticConditionDependencies?.let(validator::child)
 
         if (checkDependenciesConditionScope) {
             val conditionScope = graphConditionScope()
@@ -92,22 +107,18 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
                 val resolved = owner.resolveBinding(node)
                 val resolvedScope = resolved.graphConditionScope()
                 if (resolvedScope !in conditionScope) {
-                    val aliases = buildList {
-                        var maybeAlias = owner.resolveBindingRaw(node)
-                        while (maybeAlias is AliasBinding) {
-                            add(maybeAlias)
-                            maybeAlias = owner.resolveBindingRaw(maybeAlias.source)
+                    // Incompatible condition!
+                    validator.reportError(Errors.incompatibleCondition(
+                        aCondition = resolvedScope,
+                        bCondition = conditionScope,
+                        a = resolved,
+                        b = this,
+                    )) {
+                        val aliases = owner.resolveAliasChain(node)
+                        if (aliases.isNotEmpty()) {
+                            addNote(Strings.Notes.conditionPassedThroughAliasChain(aliases = aliases))
                         }
                     }
-                    // A special "edge"-like node, that represents invalid condition dependency
-                    validator.child(InvalidConditionDependency(
-                        dependency = dependency,
-                        source = this,
-                        sourceScope = conditionScope,
-                        target = resolved,
-                        targetScope = resolvedScope,
-                        aliases = aliases,
-                    ))
                 }
             }
         }
@@ -123,39 +134,15 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
     override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
         return visitor.visitBinding(this)
     }
-
-    private class InvalidConditionDependency(
-        private val sourceScope: ConditionScope,
-        private val targetScope: ConditionScope,
-        private val dependency: NodeDependency,
-        private val source: Binding,
-        private val target: Binding,
-        private val aliases: List<AliasBinding>,
-    ) : NodeDependency by dependency {
-        override fun validate(validator: Validator) {
-            validator.reportError(Errors.incompatibleCondition(
-                aCondition = targetScope,
-                bCondition = sourceScope,
-                a = target,
-                b = source,
-            )) {
-                if (aliases.isNotEmpty()) {
-                    addNote(Strings.Notes.conditionPassedThroughAliasChain(aliases = aliases))
-                }
-            }
-        }
-
-        override fun toString(childContext: MayBeInvalid?) = buildRichString {
-            color = TextColor.Red
-            append("<invalid> dependency on `")
-            append(target)
-            append("` with incompatible condition")
-        }
-    }
 }
 
 internal interface ConditionalBindingMixin : BindingMixin {
     val variantMatch: VariantMatch
+
+    override val nonStaticConditionDependencies: NonStaticConditionDependencies
+
+    override val nonStaticConditionProviders: Set<NodeModel>
+        get() = nonStaticConditionDependencies.conditionProviders
 
     override val conditionScope: ConditionScope
         get() = variantMatch.conditionScope
@@ -213,6 +200,10 @@ internal class ProvisionBindingImpl(
         if (conditionScope.isNever) emptySequence() else inputs.asSequence()
     }
 
+    override val nonStaticConditionDependencies by lazy {
+        NonStaticConditionDependencies(this@ProvisionBindingImpl)
+    }
+
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = "provision",
         childContext = childContext,
@@ -247,6 +238,10 @@ internal class InjectConstructorProvisionBindingImpl(
 
     override val dependencies by lazy(PUBLICATION) {
         if (conditionScope.isNever) emptySequence() else impl.inputs.asSequence()
+    }
+
+    override val nonStaticConditionDependencies by lazy {
+        NonStaticConditionDependencies(this@InjectConstructorProvisionBindingImpl)
     }
 
     override fun validate(validator: Validator) {
@@ -469,6 +464,10 @@ internal class SubComponentFactoryBindingImpl(
 
     override val variantMatch: VariantMatch by lazy {
         VariantMatch(factory.createdComponent, owner.variant)
+    }
+
+    override val nonStaticConditionDependencies by lazy {
+        NonStaticConditionDependencies(this@SubComponentFactoryBindingImpl)
     }
 
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(

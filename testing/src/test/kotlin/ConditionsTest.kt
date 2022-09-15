@@ -761,4 +761,106 @@ class ConditionsTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `non-static conditions`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            class FeatureProvider(
+                var isEnabledA: Boolean,
+                var isEnabledB: Boolean,
+                var isEnabledC: Boolean,
+            ) {
+                @Condition(FeatureProvider::class, "isEnabledA") annotation class A
+                @Condition(FeatureProvider::class, "isEnabledB") annotation class B
+                @Condition(FeatureProvider::class, "isEnabledC") annotation class C
+            }
+
+            class FeatureProvider2 @Inject constructor() {
+                val isEnabledD: Boolean get() = true
+
+                @Condition(FeatureProvider2::class, "isEnabledD") annotation class D
+            }
+
+            interface F3 {
+                val isEnabledE: Boolean
+                
+                @Condition(F3::class, "isEnabledE") annotation class E
+            }
+
+            @Singleton
+            @Conditional(FeatureProvider.C::class)
+            class FeatureProvider3 @Inject constructor() : F3 {
+                override var isEnabledE = false
+            }
+            
+            @Conditional(FeatureProvider.A::class)
+            class ClassA @Inject constructor()
+
+            @Conditional(FeatureProvider.A::class, FeatureProvider.B::class)
+            class ClassB @Inject constructor(c: Optional<ClassC>, a: ClassA)
+
+            @Conditional(FeatureProvider.C::class, FeatureProvider2.D::class, F3.E::class)
+            class ClassC @Inject constructor()
+
+            @Module
+            interface TestModule {
+                @Binds
+                fun alias(i: FeatureProvider3): F3
+            }
+
+            @Singleton
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                val a: Optional<ClassA>
+                val b: Optional<ClassB>
+                val c: Optional<ClassC>
+                
+                val f3: Optional<FeatureProvider3>
+
+                @Component.Builder
+                interface Builder {
+                    fun create(
+                        @BindsInstance features: FeatureProvider,
+                    ): TestComponent
+                }
+            }
+
+            fun test() {
+                val factory: TestComponent.Builder = Dagger.builder(TestComponent.Builder::class.java)
+                val features = FeatureProvider(
+                    isEnabledA = false,
+                    isEnabledB = true,
+                    isEnabledC = false,
+                )
+                // Create component - features are not touched
+                val component = factory.create(features)
+
+                // Can change features
+                features.isEnabledA = true
+                // Query A - feature A should be queried and saved
+                assert(component.a.isPresent)
+                features.isEnabledA = false  // Shouldn't affect anything
+                assert(component.a.isPresent)  // Still present
+
+                features.isEnabledB = false  // Change feature B
+                assert(!component.b.isPresent)  // B is absent
+                features.isEnabledB = false  // Shouldn't affect anything
+                assert(!component.b.isPresent)  // B is still absent
+
+                features.isEnabledC = true  // Change feature C
+                assert(component.f3.isPresent)
+                component.f3.get().isEnabledE = true  // Change feature E
+
+                assert(component.c.isPresent)  // C is present
+                features.isEnabledC = false  // Shouldn't affect anything
+                component.f3.get().isEnabledE = false   // Shouldn't affect anything
+                assert(component.c.isPresent)  // C is still present
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

@@ -1,25 +1,5 @@
-error: `inject-constructor test.UnderA(.. 2 dependencies)` with a condition:
-    (1) [test.Foo.INSTANCE.isEnabledA]
-cannot be injected into `inject-constructor test.UnderB(.. 2 dependencies)` with a condition:
-    (2) [(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledB]
-without Optional<..> wrapper, because condition (2) does not imply condition (1)
-Encountered:
-  in graph for root-component test.MyComponent
-  in entry-point getObject3: [Optional] @javax.inject.Named(value="ok2") java.lang.Object
-                             ^-[*1]------------------------------------------------------
-  in [1*] provision test.MyModule::provideObject3(test.UnderA, )
-                                                  ^-[*2]-----
-  in [2*] inject-constructor test.UnderA(test.UnderAorB, + 1 dependency)
-                                         ^-[*3]--------
-  in [3*] inject-constructor test.UnderAorB([Provider] test.UnderB, + 1 dependency)
-                                            ^-[*4]----------------
-  in [4*] inject-constructor test.UnderB(test.UnderA, + 1 dependency)
-                                         ^-[*5]-----
-  here: [5*] <invalid> dependency on `inject-constructor test.UnderA(.. 2 dependencies)` with incompatible condition
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-error: `inject-constructor test.UnderA(.. 2 dependencies)` with a condition:
+error: Invalid dependency of `@javax.inject.Named(value="error") java.lang.Object` on `test.UnderA`:
+`inject-constructor test.UnderA(.. 2 dependencies)` with a condition:
     (1) [test.Foo.INSTANCE.isEnabledA]
 cannot be injected into `provision test.MyModule::provideObject(.. 1 dependency)` with a condition:
     (2) [always-present]
@@ -28,13 +8,12 @@ Encountered:
   in graph for root-component test.MyComponent
   in entry-point getObject1: @javax.inject.Named(value="error") java.lang.Object
                              ^-[*1]---------------------------------------------
-  in [1*] provision test.MyModule::provideObject(test.UnderA, )
-                                                 ^-[*2]-----
-  here: [2*] <invalid> dependency on `inject-constructor test.UnderA(.. 2 dependencies)` with incompatible condition
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: [1*] provision test.MyModule::provideObject(.. 1 dependency)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: `inject-constructor test.UnderAandB(.. 2 dependencies)` with a condition:
+error: Invalid dependency of `test.UnderA` on `test.UnderAandB`:
+`inject-constructor test.UnderAandB(.. 2 dependencies)` with a condition:
     (1) [test.Foo.INSTANCE.isEnabledA && test.Foo.INSTANCE.isEnabledB]
 cannot be injected into `inject-constructor test.UnderA(.. 2 dependencies)` with a condition:
     (2) [test.Foo.INSTANCE.isEnabledA]
@@ -43,15 +22,14 @@ Encountered:
   in graph for root-component test.MyComponent
   in entry-point getObject3: [Optional] @javax.inject.Named(value="ok2") java.lang.Object
                              ^-[*1]------------------------------------------------------
-  in [1*] provision test.MyModule::provideObject3(test.UnderA, )
+  in [1*] provision test.MyModule::provideObject3(test.UnderA)
                                                   ^-[*2]-----
-  in [2*] inject-constructor test.UnderA(test.UnderAandB, + 1 dependency)
-                                         ^-[*3]---------
-  here: [3*] <invalid> dependency on `inject-constructor test.UnderAandB(.. 2 dependencies)` with incompatible condition
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: [2*] inject-constructor test.UnderA(.. 2 dependencies)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: `inject-constructor test.UnderB(.. 2 dependencies)` with a condition:
+error: Invalid dependency of `test.UnderAorB` on `test.UnderB`:
+`inject-constructor test.UnderB(.. 2 dependencies)` with a condition:
     (1) [(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledB]
 cannot be injected into `inject-constructor test.UnderAorB(.. 2 dependencies)` with a condition:
     (2) [(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledA]
@@ -60,17 +38,36 @@ Encountered:
   in graph for root-component test.MyComponent
   in entry-point getObject3: [Optional] @javax.inject.Named(value="ok2") java.lang.Object
                              ^-[*1]------------------------------------------------------
-  in [1*] provision test.MyModule::provideObject3(test.UnderA, )
+  in [1*] provision test.MyModule::provideObject3(test.UnderA)
+                                                  ^-[*2]-----
+  in [2*] inject-constructor test.UnderA(test.UnderAorB, + 1 dependency)
+                                         ^-[*3]--------
+  here: [3*] inject-constructor test.UnderAorB(.. 2 dependencies)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid dependency of `test.UnderB` on `test.UnderA`:
+`inject-constructor test.UnderA(.. 2 dependencies)` with a condition:
+    (1) [test.Foo.INSTANCE.isEnabledA]
+cannot be injected into `inject-constructor test.UnderB(.. 2 dependencies)` with a condition:
+    (2) [(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledB]
+without Optional<..> wrapper, because condition (2) does not imply condition (1)
+Encountered:
+  in graph for root-component test.MyComponent
+  in entry-point getObject3: [Optional] @javax.inject.Named(value="ok2") java.lang.Object
+                             ^-[*1]------------------------------------------------------
+  in [1*] provision test.MyModule::provideObject3(test.UnderA)
                                                   ^-[*2]-----
   in [2*] inject-constructor test.UnderA(test.UnderAorB, + 1 dependency)
                                          ^-[*3]--------
   in [3*] inject-constructor test.UnderAorB([Provider] test.UnderB, + 1 dependency)
                                             ^-[*4]----------------
-  here: [4*] <invalid> dependency on `inject-constructor test.UnderB(.. 2 dependencies)` with incompatible condition
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: [4*] inject-constructor test.UnderB(.. 2 dependencies)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: `inject-constructor test.UnderComplex(.. 2 dependencies)` with a condition:
+error: Invalid dependency of `test.UnderB` on `test.UnderComplex`:
+`inject-constructor test.UnderComplex(.. 2 dependencies)` with a condition:
     (1) [test.Foo.INSTANCE.isEnabledA && test.Foo.INSTANCE.isEnabledB && (test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB)]
 cannot be injected into `inject-constructor test.UnderB(.. 2 dependencies)` with a condition:
     (2) [(test.Foo.INSTANCE.isEnabledA || test.Foo.INSTANCE.isEnabledB) && test.Foo.INSTANCE.isEnabledB]
@@ -79,13 +76,11 @@ Encountered:
   in graph for root-component test.MyComponent
   in entry-point getObject3: [Optional] @javax.inject.Named(value="ok2") java.lang.Object
                              ^-[*1]------------------------------------------------------
-  in [1*] provision test.MyModule::provideObject3(test.UnderA, )
+  in [1*] provision test.MyModule::provideObject3(test.UnderA)
                                                   ^-[*2]-----
   in [2*] inject-constructor test.UnderA(test.UnderAorB, + 1 dependency)
                                          ^-[*3]--------
   in [3*] inject-constructor test.UnderAorB([Provider] test.UnderB, + 1 dependency)
                                             ^-[*4]----------------
-  in [4*] inject-constructor test.UnderB([Lazy] test.UnderComplex, + 1 dependency)
-                                         ^-[*5]------------------
-  here: [5*] <invalid> dependency on `inject-constructor test.UnderComplex(.. 2 dependencies)` with incompatible condition
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: [4*] inject-constructor test.UnderB(.. 2 dependencies)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

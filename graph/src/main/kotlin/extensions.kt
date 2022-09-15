@@ -42,3 +42,23 @@ fun <P : WithParents<P>> P.parentsSequence(
         }
     }
 }
+
+fun <C : WithChildren<C>> C.childrenSequence(
+    includeThis: Boolean = true,
+): Sequence<C> {
+    return object : Sequence<C> {
+        val initial: Collection<C> = if (includeThis) listOf(this@childrenSequence) else children
+
+        override fun iterator() = object : Iterator<C> {
+            val queue = ArrayDeque(initial)
+
+            override fun hasNext(): Boolean = queue.isNotEmpty()
+
+            override fun next(): C {
+                val next = queue.removeFirst()
+                queue.addAll(next.children)
+                return next
+            }
+        }
+    }
+}

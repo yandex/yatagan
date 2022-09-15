@@ -5,7 +5,7 @@ Encountered:
   in graph for component test.SubComponent
   in entry-point getFooForSub: @javax.inject.Named(value="foo") test.Foo
                                ^-[*1]-----------------------------------
-  in [1*] provision test.RootModule::provideFoo(java.lang.Integer, )
+  in [1*] provision test.RootModule::provideFoo(java.lang.Integer)
                                                 ^-[*2]-----------
   here: [2*] <missing>
              ^~~~~~~~~

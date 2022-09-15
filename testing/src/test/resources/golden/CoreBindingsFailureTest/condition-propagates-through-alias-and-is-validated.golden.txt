@@ -5,11 +5,11 @@ Encountered:
                          ^-[*1]--------------------------
   in [1*] list-binding List  { multi-binding-contributor java.lang.Object, 1 element } assembled in graph for root-component test.TestComponent
                                ^-[*2]------------------------------------
-  in [2*] provision test.TestModule::toAny2(test.ApiBase, )
+  in [2*] provision test.TestModule::toAny2(test.ApiBase)
                                             ^-[*3]------
-  in [3*] alias test.TestModule::impl2(test.Api, )
+  in [3*] alias test.TestModule::impl2(test.Api)
                                        ^-[*4]--
-  in [4*] alias test.TestModule::impl1(test.Impl, )
+  in [4*] alias test.TestModule::impl1(test.Impl)
                                        ^-[*5]---
   in [5*] inject-constructor test.Impl()
   in its conditions declaration { runtime-conditions: [.., test.NotAFeature, ..] }
@@ -18,7 +18,8 @@ Encountered:
              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: `inject-constructor test.Impl()` with a condition:
+error: Invalid dependency of `multi-binding-contributor java.lang.Object` on `test.Impl`:
+`inject-constructor test.Impl()` with a condition:
     (1) [test.Foo.INSTANCE.isEnabledA]
 cannot be injected into `provision test.TestModule::toAny1(.. 1 dependency)` with a condition:
     (2) [always-present]
@@ -30,13 +31,12 @@ Encountered:
                          ^-[*1]--------------------------
   in [1*] list-binding List  { multi-binding-contributor java.lang.Object, 1 element } assembled in graph for root-component test.TestComponent
                                ^-[*2]------------------------------------
-  in [2*] provision test.TestModule::toAny1(test.Api, )
-                                            ^-[*3]--
-  here: [3*] <invalid> dependency on `inject-constructor test.Impl()` with incompatible condition
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: [2*] provision test.TestModule::toAny1(.. 1 dependency)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: `inject-constructor test.Impl()` with a condition:
+error: Invalid dependency of `multi-binding-contributor java.lang.Object` on `test.Impl`:
+`inject-constructor test.Impl()` with a condition:
     (1) [test.Foo.INSTANCE.isEnabledA]
 cannot be injected into `provision test.TestModule::toAny2(.. 1 dependency)` with a condition:
     (2) [always-present]
@@ -51,7 +51,5 @@ Encountered:
                          ^-[*1]--------------------------
   in [1*] list-binding List  { multi-binding-contributor java.lang.Object, 1 element } assembled in graph for root-component test.TestComponent
                                ^-[*2]------------------------------------
-  in [2*] provision test.TestModule::toAny2(test.ApiBase, )
-                                            ^-[*3]------
-  here: [3*] <invalid> dependency on `inject-constructor test.Impl()` with incompatible condition
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: [2*] provision test.TestModule::toAny2(.. 1 dependency)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
