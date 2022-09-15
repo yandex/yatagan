@@ -1,7 +1,6 @@
 package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.base.filterIntoSmallSet
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
@@ -50,7 +49,7 @@ internal class ComponentModelImpl private constructor(
     }
 
     override val scopes: Set<AnnotationLangModel> by lazy {
-        declaration.annotations.filterIntoSmallSet { it.isScope() }
+        declaration.annotations.filter { it.isScope() }.toSet()
     }
 
     override val modules: Set<ModuleModel> by lazy {

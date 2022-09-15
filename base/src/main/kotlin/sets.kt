@@ -38,26 +38,3 @@ infix fun <T> Set<T>.intersects(another: Set<T>): Boolean {
 }
 
 inline infix fun <T> Set<T>.notIntersects(another: Set<T>) = !(this intersects another)
-
-inline fun <T> Sequence<T>.filterIntoSmallSet(filter: (T) -> Boolean): Set<T> {
-    var one: T? = null
-    var second: T? = null
-    var multiple: MutableSet<T>? = null
-    for (element in this) {
-        if (!filter(element)) continue
-        when {
-            one === null -> one = element
-            second === null -> second = element
-            multiple === null -> multiple = linkedSetOf(one, second, element)
-            else -> multiple += element
-        }
-    }
-    return when {
-        multiple != null -> multiple
-        one != null -> when {
-            second != null -> setOf(one, second)
-            else -> setOf(one)
-        }
-        else -> emptySet()
-    }
-}
