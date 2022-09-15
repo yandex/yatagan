@@ -167,7 +167,12 @@ internal class RuntimeComponent(
     override fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {
         for (clause in conditionScope.expression) {
             var clauseValue = false
-            for (literal in clause) clauseValue = clauseValue || evaluateLiteral(literal)
+            for (literal in clause) {
+                if (evaluateLiteral(literal)) {
+                    clauseValue = true
+                    break
+                }
+            }
             if (!clauseValue) return false
         }
         return true

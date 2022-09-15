@@ -84,7 +84,7 @@ internal class RuntimeFactory(
                 runtimeComponent.thisProxy = it
             }
         }
-        dlLog("Dynamic component creation via $creator took $time ms")
+        dlLog("Dynamic component creation via ${creator.toString(childContext = null)} took $time ms")
         return componentProxy
     }
 
