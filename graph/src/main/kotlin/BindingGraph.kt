@@ -21,7 +21,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  * Each [BindingGraph] is built around [ComponentModel]. For each given [ComponentModel] multiple different
  * [BindingGraph]s may exist if [ComponentModel.isRoot] is `false`, because the model may have different parents.
  */
-interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph> {
+interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, WithChildren<BindingGraph> {
     /**
      * A model behind this graph.
      */
@@ -51,11 +51,6 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph> {
      * [AssistedInjectFactoryModel]s that are hosted in this graph.
      */
     val localAssistedInjectFactories: Collection<AssistedInjectFactoryModel>
-
-    /**
-     * Child graphs (or Subcomponents). Empty if no children present.
-     */
-    val children: Collection<BindingGraph>
 
     /**
      * A collection of parent (not necessarily direct) [BindingGraph]s, from which bindings and/or conditions are used
@@ -143,6 +138,11 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph> {
      * to request).
      */
     fun resolveBinding(node: NodeModel): Binding
+
+    /**
+     * Behaves as [resolveBinding] only doesn't follow aliases.
+     */
+    fun resolveBindingRaw(node: NodeModel): BaseBinding
 
     /**
      * Provides counts of each dependency [kind][com.yandex.daggerlite.core.DependencyKind] requests for the

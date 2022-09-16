@@ -35,3 +35,51 @@ inline fun <T, R> Iterable<T>.zipWithNextOrNull(block: (T, T?) -> R): List<R> {
     }
     return list
 }
+
+inline fun <T : Any> traverseDepthFirstWithPath(
+    roots: Iterable<T>,
+    childrenOf: (T) -> Iterable<T>,
+    onLoop: ((loop: Sequence<T>) -> Unit) = { /* nothing by default */ },
+    visit: (path: Sequence<T>, node: T) -> Unit = { _, _ -> /* nothing by default */ },
+) {
+    val markedGray = hashSetOf<T>()
+    val markedBlack = hashSetOf<T>()
+    val stack = arrayListOf<MutableList<T>>()
+
+    val currentPath = stack.asSequence().map { it.last() }
+
+    stack += roots.toMutableList()
+
+    while (stack.isNotEmpty()) {
+        // Substack is introduced to preserve node hierarchy
+        val subStack = stack.last()
+        if (subStack.isEmpty()) {
+            stack.removeLast()
+            continue
+        }
+
+        when (val node = subStack.last()) {
+            in markedBlack -> {
+                subStack.removeLast()
+            }
+
+            in markedGray -> {
+                subStack.removeLast()
+                markedBlack += node
+                markedGray -= node
+            }
+
+            else -> {
+                markedGray += node
+                visit(currentPath, node)
+                stack += childrenOf(node).mapNotNullTo(arrayListOf()) { child ->
+                    if (child in markedGray) {
+                        // Loop: report and skip
+                        onLoop(currentPath.dropWhile { it != child })
+                        null
+                    } else child
+                }
+            }
+        }
+    }
+}

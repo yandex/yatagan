@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.testing
 
+import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -485,6 +486,30 @@ class CoreBindingsTest(
             @Component
             public interface TestComponent extends KotlinInterface {
                 
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `java component declaration with builder and nested dependency`() {
+        // KSP is broken: https://github.com/google/ksp/issues/1034
+        assumeFalse(backendUnderTest == Backend.Ksp)  // TODO: revisit in KSP 1.0.7
+
+        givenJavaSource("test.TestComponent", """
+            import com.yandex.daggerlite.Component;
+            
+            @Component(dependencies = {TestComponent.Dependency.class})
+            public interface TestComponent {
+                interface Dependency {
+                    int provideInt();
+                }
+            
+                @Component.Builder
+                interface Builder {
+                    TestComponent create(Dependency dep);
+                }
             }
         """.trimIndent())
 

@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.validation.impl
 
+import com.yandex.daggerlite.base.traverseDepthFirstWithPath
 import com.yandex.daggerlite.base.zipWithNextOrNull
 import com.yandex.daggerlite.validation.LocatedMessage
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -32,45 +33,21 @@ fun validate(
     root: MayBeInvalid,
 ): Collection<LocatedMessage> {
     val cache = hashMapOf<MayBeInvalid, ValidatorImpl>()
-
     val result: MutableMap<ValidationMessage, MutableSet<List<MayBeInvalid>>> = mutableMapOf()
 
-    val markedGray = hashSetOf<MayBeInvalid>()
-    val markedBlack = hashSetOf<MayBeInvalid>()
-    val stack = arrayListOf<MutableList<MayBeInvalid>>()
-
-    stack.add(arrayListOf(root))
-
-    while (stack.isNotEmpty()) {
-        // Substack is introduced to preserve node hierarchy
-        val subStack = stack.last()
-        if (subStack.isEmpty()) {
-            stack.removeLast()
-            continue
-        }
-        when (val node = subStack.last()) {
-            in markedBlack -> {
-                // TODO: Report already encountered errors if any.
-                subStack.removeLast()
+    traverseDepthFirstWithPath(
+        roots = listOf(root),
+        childrenOf = { cache[it]?.children ?: emptyList() },
+        visit = { path, node ->
+            val validator = cache.getOrPut(node) {
+                ValidatorImpl().apply(node::validate)
             }
-            in markedGray -> {
-                subStack.removeLast()
-                markedBlack += node
-                markedGray -= node
-            }
-            else -> {
-                markedGray += node
-                val validator = cache.getOrPut(node) {
-                    ValidatorImpl().apply(node::validate)
-                }
-                for (message in validator.messages) {
-                    // Extract current path from stack::substack
-                    result.getOrPut(message, ::mutableSetOf) += stack.map { it.last() }
-                }
-                stack += validator.children.filterTo(mutableListOf()) { it !in markedGray }
+            for (message in validator.messages) {
+                // Extract current path from stack::substack
+                result.getOrPut(message, ::mutableSetOf) += path.toList()
             }
         }
-    }
+    )
 
     return result.map { (message, paths) ->
         val pathStrings: MutableList<List<CharSequence>> = paths.mapTo(arrayListOf()) { path: List<MayBeInvalid> ->

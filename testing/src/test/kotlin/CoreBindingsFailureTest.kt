@@ -424,7 +424,53 @@ class CoreBindingsFailureTest(
     }
 
     @Test
-    fun conflictingBindings() {
+    fun `inconsistent non-static bindings`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            class FeatureProvider(
+                val isEnabledA: Boolean,
+                val isEnabledC: Boolean,
+            ) {
+                @Condition(FeatureProvider::class, "isEnabledA") annotation class A
+                @Condition(FeatureProvider::class, "isEnabledC") annotation class C
+            }
+
+            @Conditional(FeatureProvider.A::class /* error incompatible condition-under-condition */)
+            class FeatureProvider2 @Inject constructor(c: Optional<ClassC> /* error: loop */) : Conditions {
+                override val isEnabledD: Boolean get() = true
+            }
+            
+            @Conditional(FeatureProvider.A::class)
+            class ClassA @Inject constructor()
+
+            @Conditional(FeatureProvider.C::class, Conditions.D::class)
+            class ClassC @Inject constructor()
+
+            interface Conditions {
+                val isEnabledD: Boolean
+                
+                @Condition(Conditions::class, "isEnabledD") annotation class D
+            }
+
+            @Module
+            interface TestModule {
+                @Binds fun conditions(i: FeatureProvider2): Conditions
+            }
+
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                val a: Optional<ClassA>
+                val c: Optional<ClassC>
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `conflicting bindings`() {
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             import javax.inject.*

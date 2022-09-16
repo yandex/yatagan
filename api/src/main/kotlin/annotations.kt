@@ -384,6 +384,11 @@ annotation class BindsInstance(
  * it's instances are `AND`ed together in [AnyConditions] container.
  * So in general case the resulting expression is a conjunction ('AND') of disjunctions ('OR') or,
  * in other words, Conjunctive Normal Form.
+ *
+ * The unique condition value is computed **only once** to avoid any inconsistencies at runtime and cached inside the
+ * component object.
+ * The computation may occur either at component creation or on demand when immediately required - this depends
+ * on a condition usage. *Non-static* conditions are always computed on-demand.
  */
 @ConditionsApi
 @MustBeDocumented
@@ -404,6 +409,12 @@ annotation class Condition(
      * resulting type of previous identifier or the root class if this is the first identifier.
      * The last identifier must resolve into a primitive boolean result.
      *
+     * If the first member is static, then the resulting condition is a *plain (static) condition* - it can be evaluated
+     * anywhere from static context.
+     * If the first member is non-static, then, naturally, an instance of the [root][value] class is required to compute
+     * the condition. The instance is resolved *as a regular binding dependency*. Thus, it can be provided in any way
+     * as a normal graph node could be - inject constructor, provision, binds, etc.
+     *
      * Names are considered from Java point of view, not Kotlin! So property names are not a thing, getters should be
      * used instead.
      *
@@ -421,6 +432,7 @@ annotation class Condition(
      * /*@*/ }
      * /*@*/ class AnotherClass { val memberCondition = false }
      * /*@*/ class WithCompanion { companion object { val prop = false } }
+     * /*@*/ class ConditionProviderWithInject @Inject constructor() { val memberCondition = true }
      *
      * // Kotlin's singletons require explicit INSTANCE identifier:
      * @Condition(SomeObject::class, "INSTANCE.isEnabled")
@@ -438,7 +450,11 @@ annotation class Condition(
      * @Condition(WithCompanion::class, "Companion.getProp")
      * /*@*/ annotation class D
      *
-     * /*@*/ @Conditional(A::class, B::class, C::class, D::class)
+     * // Non-static condition - an injectable class with non-static member:
+     * @Condition(ConditionProviderWithInject::class, "!getMemberCondition")
+     * /*@*/ annotation class E
+     *
+     * /*@*/ @Conditional(A::class, B::class, C::class, D::class, E::class)
      * /*@*/ class Sample @Inject constructor() {}
      * /*@*/ @Component interface SampleComponent { val s: Optional<Sample> }
      * /*@*/ fun test() { Dagger.create(SampleComponent::class.java).s }

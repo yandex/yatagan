@@ -145,7 +145,10 @@ internal class RuntimeComponent(
     }
 
     private fun doEvaluateLiteral(literal: ConditionModel): Boolean {
-        var instance: Any? = null
+        var instance: Any? = when {
+            literal.requiresInstance -> resolveAndAccess(literal.root)
+            else -> null
+        }
         for (member in literal.path) {
             instance = member.accept(MemberEvaluator(instance))
         }
@@ -164,7 +167,12 @@ internal class RuntimeComponent(
     override fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {
         for (clause in conditionScope.expression) {
             var clauseValue = false
-            for (literal in clause) clauseValue = clauseValue || evaluateLiteral(literal)
+            for (literal in clause) {
+                if (evaluateLiteral(literal)) {
+                    clauseValue = true
+                    break
+                }
+            }
             if (!clauseValue) return false
         }
         return true

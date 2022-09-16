@@ -95,8 +95,14 @@ internal class ConditionGenerator(
         private val literal: ConditionModel,
     ) : ConditionAccessStrategy {
 
+        init {
+            assert(!literal.requiresInstance) {
+                "Eager strategy should not be used for non-static conditions"
+            }
+        }
+
         private val name = fieldsNs.name(
-            nameModel = literal.root.asType().name,
+            nameModel = literal.root.type.name,
             suffix = literal.path.joinToString(separator = "_") { it.name },
         )
 
@@ -128,11 +134,11 @@ internal class ConditionGenerator(
         private val literal: ConditionModel,
     ) : ConditionAccessStrategy {
         private val name = fieldsNs.name(
-            nameModel = literal.root.asType().name,
+            nameModel = literal.root.type.name,
             suffix = literal.path.joinToString(separator = "_") { it.name },
         )
         private val accessorName = methodsNs.name(
-            nameModel = literal.root.asType().name,
+            nameModel = literal.root.type.name,
             suffix = literal.path.joinToString(separator = "_") { it.name },
         )
 
@@ -178,10 +184,18 @@ internal class ConditionGenerator(
     private fun genEvaluateLiteral(literal: ConditionModel, builder: ExpressionBuilder) {
         require(!literal.negated) { "Not reached: must be normalized" }
         with(builder) {
-            val rootType = literal.root.asType()
+            val rootType = literal.root.type
             literal.path.asSequence().forEachIndexed { index, member ->
                 if (index == 0) {
-                    +"%T".formatCode(rootType.typeName())
+                    if (literal.requiresInstance) {
+                        thisGraph.resolveBinding(literal.root).generateAccess(
+                            builder = this,
+                            inside = thisGraph,
+                            isInsideInnerClass = false,
+                        )
+                    } else {
+                        +"%T".formatCode(rootType.typeName())
+                    }
                 }
                 +".%N".formatCode(member.name)
                 if (member is FunctionLangModel) +"()"

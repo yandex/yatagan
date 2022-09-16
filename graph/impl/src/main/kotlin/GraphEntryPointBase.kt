@@ -4,13 +4,14 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
 import com.yandex.daggerlite.core.isOptional
+import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
 import com.yandex.daggerlite.validation.format.reportError
 
 internal abstract class GraphEntryPointBase : MayBeInvalid {
-    abstract val graph: BindingGraphImpl
+    abstract val graph: BindingGraph
     abstract val dependency: NodeDependency
 
     override fun validate(validator: Validator) {
@@ -24,6 +25,6 @@ internal abstract class GraphEntryPointBase : MayBeInvalid {
                 ))
             }
         }
-        validator.child(graph.resolveRaw(node))
+        validator.child(graph.resolveBindingRaw(node))
     }
 }

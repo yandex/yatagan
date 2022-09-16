@@ -29,7 +29,12 @@ internal class AccessStrategyManager(
         buildMap(thisGraph.localBindings.size) {
             val allLocalNodes: Map<NodeModel, Binding> = thisGraph.localBindings.keys.associateBy(Binding::target)
             for (binding in thisGraph.localBindings.keys) {
-                for ((node, _) in binding.dependencies) {
+
+                val dependencies = if (binding.nonStaticConditionProviders.isNotEmpty()) {
+                    binding.dependencies + binding.nonStaticConditionProviders
+                } else binding.dependencies
+
+                for ((node, _) in dependencies) {
                     val dependencyBinding = allLocalNodes[node] ?: continue
                     if (dependencyBinding in this) {
                         // Not the first dependent binding, explicitly put `null` there,

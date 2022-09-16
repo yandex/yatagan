@@ -13,17 +13,20 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.MemberLangModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.ErrorMessage
 import com.yandex.daggerlite.validation.format.Negation
 import com.yandex.daggerlite.validation.format.Strings
 import com.yandex.daggerlite.validation.format.TextColor
+import com.yandex.daggerlite.validation.format.WarningMessage
 import com.yandex.daggerlite.validation.format.append
 import com.yandex.daggerlite.validation.format.appendRichString
 import com.yandex.daggerlite.validation.format.buildRichString
 import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.daggerlite.validation.format.reportWarning
 import com.yandex.daggerlite.validation.format.toString
 
 internal class FeatureModelImpl private constructor(
@@ -92,7 +95,13 @@ private class ConditionLiteralImpl private constructor(
         get() = payload.path
 
     override val root
-        get() = payload.path.firstOrNull()?.owner ?: LangModelFactory.errorType.declaration
+        get() = NodeModelImpl(
+            type = payload.path.firstOrNull()?.owner?.asType() ?: LangModelFactory.errorType,
+            qualifier = null,
+        )
+
+    override val requiresInstance: Boolean
+        get() = payload.nonStatic
 
     override fun validate(validator: Validator) {
         validator.inline(payload)
@@ -120,6 +129,7 @@ private class ConditionLiteralImpl private constructor(
                         // Always invalid
                         validator.reportError(Strings.Errors.invalidCondition(expression = condition))
                     }
+                    override val nonStatic: Boolean get() = false
 
                     override fun toString(childContext: MayBeInvalid?) = buildRichString {
                         color = TextColor.Red
@@ -142,6 +152,7 @@ private class ConditionLiteralImpl private constructor(
 
 private interface LiteralPayload : MayBeInvalid {
     val path: List<MemberLangModel>
+    val nonStatic: Boolean
 }
 
 private object MemberTypeVisitor : MemberLangModel.Visitor<TypeLangModel> {
@@ -149,15 +160,24 @@ private object MemberTypeVisitor : MemberLangModel.Visitor<TypeLangModel> {
     override fun visitField(model: FieldLangModel) = model.type
 }
 
+private typealias ValidationReport = (Validator) -> Unit
+
 private class LiteralPayloadImpl private constructor(
     private val root: TypeDeclarationLangModel,
     private val pathSource: String,
 ) : LiteralPayload {
-    private var pathParsingError: ErrorMessage? = null
+    private var validationReport: ValidationReport? = null
+    private var _nonStatic = false
+
+    override val nonStatic: Boolean
+        get() {
+            path  // Ensure path is parsed
+            return _nonStatic
+        }
 
     override fun validate(validator: Validator) {
         path  // Ensure path is parsed
-        pathParsingError?.let(validator::reportError)
+        validationReport?.invoke(validator)
     }
 
     override fun toString(childContext: MayBeInvalid?) = buildRichString {
@@ -176,30 +196,36 @@ private class LiteralPayloadImpl private constructor(
             var isFirst = true
             pathSource.split('.').forEach { name ->
                 if (finished) {
-                    pathParsingError = Strings.Errors.invalidConditionNoBoolean()
+                    validationReport = SimpleErrorReport(Strings.Errors.invalidConditionNoBoolean())
                     return@forEach
                 }
 
                 val currentDeclaration = currentType.declaration
                 if (!currentDeclaration.isEffectivelyPublic) {
-                    pathParsingError = Strings.Errors.invalidAccessForConditionClass(`class` = currentDeclaration)
+                    validationReport = SimpleErrorReport(
+                        Strings.Errors.invalidAccessForConditionClass(`class` = currentDeclaration))
                     return@buildList
                 }
 
                 val member = findAccessor(currentDeclaration, name)
                 if (member == null) {
-                    pathParsingError = Strings.Errors.invalidConditionMissingMember(name = name, type = currentType)
+                    validationReport = SimpleErrorReport(
+                        Strings.Errors.invalidConditionMissingMember(name = name, type = currentType))
                     return@buildList
                 }
                 if (isFirst) {
                     if (!member.isStatic) {
-                        pathParsingError = Strings.Errors.invalidNonStaticMember(name = name, type = currentType)
-                        return@buildList
+                        if (currentType.declaration.isKotlinObject) {
+                            // Issue warning
+                            validationReport = SimpleWarningReport(Strings.Warnings.nonStaticConditionOnKotlinObject())
+                        }
+                        _nonStatic = true
                     }
                     isFirst = false
                 }
                 if (!member.isEffectivelyPublic) {
-                    pathParsingError = Strings.Errors.invalidAccessForConditionMember(member = member)
+                    validationReport = SimpleErrorReport(
+                        Strings.Errors.invalidAccessForConditionMember(member = member))
                     return@buildList
                 }
                 add(member)
@@ -211,8 +237,11 @@ private class LiteralPayloadImpl private constructor(
                     currentType = type
                 }
             }
-            if (!finished && pathParsingError == null) {
-                pathParsingError = Strings.Errors.invalidConditionNoBoolean()
+            if (!finished) {
+                validationReport = CompositeErrorReport(
+                    base = validationReport,
+                    added = SimpleErrorReport(Strings.Errors.invalidConditionNoBoolean()),
+                )
             }
         }
     }
@@ -237,6 +266,24 @@ private class LiteralPayloadImpl private constructor(
                 return method
             }
             return null
+        }
+
+        class SimpleErrorReport(val error: ErrorMessage): ValidationReport {
+            override fun invoke(validator: Validator) = validator.reportError(error)
+        }
+
+        class SimpleWarningReport(val warning: WarningMessage): ValidationReport {
+            override fun invoke(validator: Validator) = validator.reportWarning(warning)
+        }
+
+        class CompositeErrorReport(
+            val base: ValidationReport?,
+            val added: ValidationReport,
+        ) : ValidationReport {
+            override fun invoke(validator: Validator) {
+                base?.invoke(validator)
+                added.invoke(validator)
+            }
         }
     }
 }

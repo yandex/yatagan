@@ -2,7 +2,6 @@ package com.yandex.daggerlite.core.impl
 
 import com.yandex.daggerlite.Binds
 import com.yandex.daggerlite.IntoMap
-import com.yandex.daggerlite.base.filterIntoSmallSet
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
@@ -29,7 +28,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
     protected abstract val impl: FunctionLangModel
 
     override val scopes: Set<AnnotationLangModel> by lazy {
-        impl.annotations.filterIntoSmallSet { it.isScope() }
+        impl.annotations.filter { it.isScope() }.toSet()
     }
 
     override val functionName: String

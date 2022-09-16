@@ -1,0 +1,41 @@
+error: Binding dependency loop detected:
+(*) `test.ClassC` provided by `inject-constructor test.ClassC()` depends on <-
+    `test.Conditions` provided by `alias test.TestModule::conditions(test.FeatureProvider2)` depends on <-
+    `test.FeatureProvider2` provided by `inject-constructor test.FeatureProvider2(.. 1 dependency)` depends on <- (*)
+Encountered:
+  here: graph for root-component test.TestComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for test.FeatureProvider
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  in its non-static conditions { test.Conditions.isEnabledD, .. }
+                                 ^-[*2]--------------------
+  in [2*] alias test.TestModule::conditions(test.FeatureProvider2)
+                                            ^-[*3]---------------
+  in [3*] inject-constructor test.FeatureProvider2(.. 1 dependency)
+  in its non-static conditions { test.FeatureProvider.isEnabledA }
+                                 ^-[*4]-------------------------
+  here: [4*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: `test.ClassC` is under condition provided by `test.FeatureProvider2` which by itself has incompatible condition:
+`inject-constructor test.FeatureProvider2(.. 1 dependency)` with a condition:
+    (1) [test.FeatureProvider.isEnabledA]
+cannot provide condition for `inject-constructor test.ClassC()` with a condition:
+    (2) [test.FeatureProvider.isEnabledC && test.Conditions.isEnabledD]
+because condition (2) does not imply condition (1)
+NOTE: Condition passed through the `alias test.TestModule::conditions(test.FeatureProvider2): test.Conditions`
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  here: its non-static conditions  { .. }
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

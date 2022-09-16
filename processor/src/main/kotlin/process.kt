@@ -5,6 +5,7 @@ import com.yandex.daggerlite.base.loadServices
 import com.yandex.daggerlite.core.impl.ComponentModel
 import com.yandex.daggerlite.generator.ComponentGeneratorFacade
 import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.graph.childrenSequence
 import com.yandex.daggerlite.graph.impl.BindingGraph
 import com.yandex.daggerlite.spi.ValidationPluginProvider
 import com.yandex.daggerlite.spi.impl.GraphValidationExtension
@@ -134,16 +135,11 @@ fun <Source> process(
 
 private fun <Source> allSourcesSequence(
     delegate: ProcessorDelegate<Source>,
-    graphRoot: BindingGraph
-) = sequence {
-    suspend fun SequenceScope<Source>.forGraph(graph: BindingGraph) {
-        yield(delegate.getSourceFor(graph.model.type.declaration))
-        for (module in graph.modules) {
-            yield(delegate.getSourceFor(module.type.declaration))
-        }
-        for (child in graph.children) {
-            forGraph(child)
-        }
+    graphRoot: BindingGraph,
+) = graphRoot.childrenSequence(includeThis = true).flatMap { graph ->
+    sequenceOf(
+        delegate.getSourceFor(graph.model.type.declaration),
+    ) + graph.modules.asSequence().map { module ->
+        delegate.getSourceFor(module.type.declaration)
     }
-    forGraph(graphRoot)
 }
