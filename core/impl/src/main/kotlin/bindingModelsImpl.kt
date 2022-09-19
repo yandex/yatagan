@@ -55,12 +55,14 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
             } else {
                 if (impl.isAnnotatedWith<IntoMap>()) {
                     val key = impl.annotations.find { it.isMapKey() }
-                    val valueAttribute = key?.annotationClass?.attributes?.find { it.name == "value" }
+                    val annotationClass = key?.annotationClass
+                    val valueAttribute = annotationClass?.attributes?.find { it.name == "value" }
                     val keyValue = valueAttribute?.let { key.getValue(valueAttribute) } ?: InvalidValue()
                     BindingTargetModel.MappingContribution(
                         node = target,
                         keyType = valueAttribute?.type ?: LangModelFactory.errorType,
                         keyValue = keyValue,
+                        mapKeyClass = annotationClass,
                     )
                 } else {
                     BindingTargetModel.Plain(node = target)

@@ -11,8 +11,8 @@ import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.use
 import com.yandex.daggerlite.ksp.lang.KspModelFactoryImpl
+import com.yandex.daggerlite.ksp.lang.ProcessingUtils
 import com.yandex.daggerlite.ksp.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.ksp.lang.Utils
 import com.yandex.daggerlite.process.Logger
 import com.yandex.daggerlite.process.Options
 import com.yandex.daggerlite.process.ProcessorDelegate
@@ -32,7 +32,7 @@ internal class KspDaggerLiteProcessor(
     }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        Utils.init(resolver).use {
+        ProcessingUtils(resolver).use {
             LangModelFactory.use(KspModelFactoryImpl()) {
                 process(
                     sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)

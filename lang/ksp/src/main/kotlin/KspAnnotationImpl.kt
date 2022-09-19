@@ -5,14 +5,15 @@ import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSTypeReference
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel.Value
+import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
+import java.lang.annotation.RetentionPolicy
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspAnnotationImpl(
@@ -24,7 +25,7 @@ internal class KspAnnotationImpl(
 
     override val annotationClass: AnnotationDeclarationLangModel by lazy {
         AnnotationClassImpl(
-            annotation = impl,
+            declaration = impl.annotationType.resolve().resolveAliasIfNeeded().declaration as KSClassDeclaration,
         )
     }
 
@@ -96,8 +97,18 @@ internal class KspAnnotationImpl(
                 }
                 is KSAnnotation -> visitor.visitAnnotation(KspAnnotationImpl(value))
                 is List<*> -> visitor.visitArray(value.map { ValueImpl(it ?: "<error>") })
+                is Enum<*> -> {
+                    // Sometimes KSP yields enums (of platform types?) literally.
+                    visitor.visitEnumConstant(
+                        // Suppress before https://youtrack.jetbrains.com/issue/KT-54005 gets rolled out.
+                        enum = @Suppress("ENUM_DECLARING_CLASS_DEPRECATED_WARNING") LangModelFactory.getTypeDeclaration(
+                            qualifiedName = value.declaringClass.canonicalName,
+                        )?.asType() ?: LangModelFactory.errorType,
+                        constant = value.name,
+                    )
+                }
                 null -> visitor.visitUnresolved()
-                else -> throw AssertionError("Unexpected value type: $value")
+                else -> throw AssertionError("Unexpected value type: $value with class ${value.javaClass}")
             }
         }
 
@@ -131,13 +142,10 @@ internal class KspAnnotationImpl(
         }
     }
 
-    private class AnnotationClassImpl private constructor(
-        private val reference: KSTypeReference,
-        private val shortName: String,
+    internal class AnnotationClassImpl private constructor(
+        declaration: KSClassDeclaration,
     ) : AnnotationDeclarationLangModel {
-        private val annotated by lazy {
-            KspAnnotatedImpl(reference.resolve().resolveAliasIfNeeded().declaration as KSClassDeclaration)
-        }
+        private val annotated = KspAnnotatedImpl(declaration)
 
         override val annotations: Sequence<AnnotationLangModel>
             get() = annotated.annotations
@@ -153,24 +161,57 @@ internal class KspAnnotationImpl(
         }
 
         override fun isClass(clazz: Class<out Annotation>): Boolean {
-            return shortName == clazz.simpleName &&
-                    annotated.impl.qualifiedName?.asString() == clazz.canonicalName
+            return annotated.impl.qualifiedName?.asString() == clazz.canonicalName
         }
 
         override fun toString() = annotated.impl.qualifiedName?.asString() ?: ""
 
-        companion object Factory : ObjectCache<Pair<KSTypeReference, String>, AnnotationClassImpl>() {
-            operator fun invoke(
-                annotation: KSAnnotation,
-            ): AnnotationClassImpl {
-                val shortName = annotation.shortName.getShortName()
-                val reference = annotation.annotationType
-                return createCached(reference to shortName) {
-                    AnnotationClassImpl(
-                        reference = reference,
-                        shortName = shortName,
-                    )
+        override fun getRetention(): AnnotationRetention {
+            for (annotation in annotated.impl.annotations) {
+                return when (annotation.annotationType.resolve().resolveAliasIfNeeded().declaration) {
+                    Utils.kotlinRetentionClass -> when (val value = annotation["value"]) {
+                        is AnnotationRetention -> value
+                        is KSType -> when (value.declaration.simpleName.getShortName()) {
+                            "SOURCE" -> AnnotationRetention.SOURCE
+                            "BINARY" -> AnnotationRetention.BINARY
+                            "RUNTIME" -> AnnotationRetention.RUNTIME
+                            else -> throw AssertionError("Unexpected retention")
+                        }
+                        else -> throw AssertionError("Unexpected retention")
+                    }
+                    Utils.javaRetentionClass -> when (val value = annotation["value"]) {
+                        is RetentionPolicy -> when (value) {
+                            RetentionPolicy.SOURCE -> AnnotationRetention.SOURCE
+                            RetentionPolicy.CLASS -> AnnotationRetention.BINARY
+                            RetentionPolicy.RUNTIME -> AnnotationRetention.RUNTIME
+                        }
+                        is KSType -> when (value.declaration.simpleName.getShortName()) {
+                            "SOURCE" -> AnnotationRetention.SOURCE
+                            "CLASS" -> AnnotationRetention.BINARY
+                            "RUNTIME" -> AnnotationRetention.RUNTIME
+                            else -> throw AssertionError("Unexpected retention")
+                        }
+                        else -> throw AssertionError("Unexpected retention")
+                    }
+                    else -> continue
                 }
+            }
+
+            // Defaults:
+            return if (annotated.impl.isFromKotlin) {
+                // Kotlin default
+                AnnotationRetention.RUNTIME
+            } else {
+                // Java default
+                AnnotationRetention.BINARY
+            }
+        }
+
+        companion object Factory : ObjectCache<KSClassDeclaration, AnnotationClassImpl>() {
+            operator fun invoke(
+                declaration: KSClassDeclaration,
+            ): AnnotationClassImpl {
+                return createCached(declaration, ::AnnotationClassImpl)
             }
         }
     }

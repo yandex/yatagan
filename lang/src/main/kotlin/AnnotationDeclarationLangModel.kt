@@ -30,4 +30,14 @@ interface AnnotationDeclarationLangModel : AnnotatedLangModel {
      * Attributes (annotation class' properties for Kotlin and @interface's methods for Java).
      */
     val attributes: Sequence<Attribute>
+
+    /**
+     * Computes annotation retention.
+     *
+     * @return annotation retention in Kotlin terms.
+     *
+     * @see java.lang.annotation.Retention
+     * @see kotlin.annotation.Retention
+     */
+    fun getRetention(): AnnotationRetention
 }

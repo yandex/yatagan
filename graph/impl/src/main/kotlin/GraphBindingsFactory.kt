@@ -85,7 +85,6 @@ internal class GraphBindingsFactory(
         val multiBindings = linkedMapOf<NodeModel, MutableMap<NodeModel, ContributionType>>()
         val mapBindings = linkedMapOf<Pair<TypeLangModel, NodeModel>,
                 MutableList<Pair<AnnotationLangModel.Value, NodeModel>>>()
-        // TODO: In vanilla dagger, multibindings are inherited and accumulated from parents.
         for (module: ModuleModel in graph.modules) {
             // All bindings from installed modules
             for (bindingModel in module.bindings) {

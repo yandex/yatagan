@@ -7,13 +7,13 @@ import javax.lang.model.util.Types
 
 private var utils: ProcessingUtils? = null
 
-val Utils: ProcessingUtils get() = checkNotNull(utils) {
+internal val Utils: ProcessingUtils get() = checkNotNull(utils) {
     "Not reached: utils are used before set/after cleared"
 }
 
 class ProcessingUtils(
     val types: Types,
-    val elements: Elements
+    val elements: Elements,
 ) : Closeable {
     val booleanType: TypeElement by lazy {
         elements.getTypeElement("java.lang.Boolean")

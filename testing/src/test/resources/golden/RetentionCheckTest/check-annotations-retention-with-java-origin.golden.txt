@@ -1,0 +1,40 @@
+error: Annotation class `test.MyBinaryQualifier` must have RUNTIME retention instead of BINARY
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Annotation class `test.MyBinaryScope` must have RUNTIME retention instead of BINARY
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Annotation class `test.MyDefaultQualifier` must have RUNTIME retention instead of BINARY
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Annotation class `test.MyDefaultScope` must have RUNTIME retention instead of BINARY
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Annotation class `test.MySourceQualifier` must have RUNTIME retention instead of SOURCE
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Annotation class `test.MySourceScope` must have RUNTIME retention instead of SOURCE
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Annotation class `test.TestMapKey` must have RUNTIME retention instead of BINARY
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

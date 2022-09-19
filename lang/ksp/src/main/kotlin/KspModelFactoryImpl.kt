@@ -75,4 +75,7 @@ class KspModelFactoryImpl : LangModelFactory {
 
     override val errorType: TypeLangModel
         get() = KspTypeImpl(ErrorTypeImpl)
+
+    override val isInRuntimeEnvironment: Boolean
+        get() = false
 }
