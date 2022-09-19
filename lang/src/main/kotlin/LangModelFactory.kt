@@ -50,6 +50,11 @@ interface LangModelFactory {
      */
     val errorType: TypeLangModel
 
+    /**
+     * `true` if the code runs in RT mode (using reflection). `false` if codegen mode.
+     */
+    val isInRuntimeEnvironment: Boolean
+
     @OptIn(InternalLangApi::class)
     companion object : LangModelFactory {
         @InternalLangApi
@@ -74,5 +79,7 @@ interface LangModelFactory {
                 checkNotNull(delegate).getTypeDeclaration(qualifiedName)
 
         override val errorType: TypeLangModel get() = checkNotNull(delegate).errorType
+
+        override val isInRuntimeEnvironment: Boolean get() = checkNotNull(delegate).isInRuntimeEnvironment
     }
 }

@@ -121,6 +121,26 @@ internal class JavaxAnnotationImpl private constructor(
 
         override fun toString(): String = impl.qualifiedName.toString()
 
+        override fun getRetention(): AnnotationRetention {
+            // Kapt generates java retention counterparts, so no need to be kotlin-aware here
+            val retention = impl.annotationMirrors.find {
+                it.annotationType.asTypeElement().qualifiedName.contentEquals("java.lang.annotation.Retention")
+            }
+            return retention?.elementValues?.values?.firstOrNull()?.accept(
+                object : AbstractAnnotationValueVisitor8Adapter<AnnotationRetention?>() {
+                    override fun visitDefault(): AnnotationRetention? = null
+                    override fun visitEnumConstant(c: VariableElement, p: Nothing?): AnnotationRetention? {
+                        return when (c.simpleName.toString()) {
+                            "SOURCE" -> AnnotationRetention.SOURCE
+                            "CLASS" -> AnnotationRetention.BINARY
+                            "RUNTIME" -> AnnotationRetention.RUNTIME
+                            else -> null
+                        }
+                    }
+                }, null
+            ) ?: AnnotationRetention.BINARY  // Default java retention
+        }
+
         companion object Factory : ObjectCache<TypeElement, AnnotationClassImpl>() {
             operator fun invoke(type: TypeElement) = createCached(type) { AnnotationClassImpl(type) }
         }

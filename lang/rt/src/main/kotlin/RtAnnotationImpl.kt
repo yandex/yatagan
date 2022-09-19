@@ -92,6 +92,8 @@ internal class RtAnnotationImpl(
 
         override fun toString(): String = impl.canonicalName
 
+        override fun getRetention(): AnnotationRetention = AnnotationRetention.RUNTIME
+
         companion object Factory : ObjectCache<Class<*>, AnnotationClassImpl>() {
             operator fun invoke(clazz: Class<*>) = createCached(clazz) { AnnotationClassImpl(clazz) }
         }

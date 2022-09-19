@@ -53,4 +53,7 @@ class JavaxModelFactoryImpl : LangModelFactory {
 
     override val errorType: TypeLangModel
         get() = JavaxTypeImpl(Utils.types.nullType)
+
+    override val isInRuntimeEnvironment: Boolean
+        get() = false
 }

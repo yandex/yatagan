@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.core
 
+import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -37,6 +38,7 @@ interface ModuleHostedBindingModel : MayBeInvalid {
             override val node: NodeModel,
             val keyType: TypeLangModel,
             val keyValue: AnnotationLangModel.Value,
+            val mapKeyClass: AnnotationDeclarationLangModel?,
         ) : BindingTargetModel()
     }
 

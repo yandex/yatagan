@@ -391,6 +391,12 @@ object Strings {
             append("Mapping for `").append(mapType).append("` contains duplicates for key `")
                 .append(keyValue).append("`")
         }.toError()
+
+        @Covered
+        fun invalidAnnotationRetention(
+            annotationDeclaration: AnnotationDeclarationLangModel,
+            insteadOf: AnnotationRetention,
+        ) = ("Annotation class `$annotationDeclaration` must have RUNTIME retention instead of $insteadOf").toError()
     }
 
     object Warnings {

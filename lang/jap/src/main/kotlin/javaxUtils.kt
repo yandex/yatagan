@@ -32,6 +32,7 @@ import javax.lang.model.type.PrimitiveType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.type.WildcardType
+import javax.lang.model.util.AbstractAnnotationValueVisitor8
 import javax.lang.model.util.ElementFilter
 import javax.lang.model.util.SimpleElementVisitor8
 
@@ -260,3 +261,20 @@ internal fun AnnotationMirrorEquivalence(annotation: AnnotationMirror): Annotati
 
 internal fun AnnotationValueEquivalence(value: AnnotationValue): AnnotationValueEquivalence =
     AnnotationValues.equivalence().wrap(value)
+
+internal abstract class AbstractAnnotationValueVisitor8Adapter<T> : AbstractAnnotationValueVisitor8<T, Nothing?>() {
+    override fun visitBoolean(b: Boolean, p: Nothing?): T = visitDefault()
+    override fun visitByte(b: Byte, p: Nothing?): T = visitDefault()
+    override fun visitChar(c: Char, p: Nothing?): T = visitDefault()
+    override fun visitDouble(d: Double, p: Nothing?): T = visitDefault()
+    override fun visitFloat(f: Float, p: Nothing?): T = visitDefault()
+    override fun visitInt(i: Int, p: Nothing?): T = visitDefault()
+    override fun visitLong(i: Long, p: Nothing?): T = visitDefault()
+    override fun visitShort(s: Short, p: Nothing?): T = visitDefault()
+    override fun visitString(s: String?, p: Nothing?): T = visitDefault()
+    override fun visitType(t: TypeMirror, p: Nothing?): T = visitDefault()
+    override fun visitEnumConstant(c: VariableElement, p: Nothing?): T = visitDefault()
+    override fun visitAnnotation(a: AnnotationMirror, p: Nothing?): T = visitDefault()
+    override fun visitArray(vals: MutableList<out AnnotationValue>, p: Nothing?): T = visitDefault()
+    abstract fun visitDefault(): T
+}

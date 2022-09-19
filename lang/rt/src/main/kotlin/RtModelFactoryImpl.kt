@@ -40,6 +40,9 @@ class RtModelFactoryImpl : LangModelFactory {
     override val errorType: TypeLangModel
         get() = RtTypeImpl(ErrorType())
 
+    override val isInRuntimeEnvironment: Boolean
+        get() = true
+
     private class ErrorType : Type {
         override fun toString() = "<error>"
     }

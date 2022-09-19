@@ -272,5 +272,6 @@ internal class BindingGraphImpl(
         }
 
         validateNoLoops(this, validator)
+        validateAnnotationsRetention(this, validator)
     }
 }
