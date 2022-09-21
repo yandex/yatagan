@@ -17,9 +17,9 @@ interface ModuleModel : ClassBackedModel, MayBeInvalid {
     val subcomponents: Collection<ComponentModel>
 
     /**
-     * TODO: doc.
+     * A sequence of all multibinding declarations from the module.
      */
-    val listDeclarations: Sequence<ListDeclarationModel>
+    val multiBindingDeclarations: Sequence<MultiBindingDeclarationModel>
 
     /**
      * Whether module instance is required to use some (or all) of its bindings.

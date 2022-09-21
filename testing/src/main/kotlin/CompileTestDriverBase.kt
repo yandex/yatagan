@@ -111,6 +111,8 @@ abstract class CompileTestDriverBase protected constructor(
                 } catch (e: NoSuchMethodException) {
                     println("NOTE: No runtime test detected in TestCaseKt class.")
                 }
+            } else {
+                Assert.assertTrue("Compilation failed, yet expected output is blank", goldenOutput.isNotBlank())
             }
         } finally {
             // print generated files

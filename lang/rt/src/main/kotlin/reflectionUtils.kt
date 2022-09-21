@@ -84,6 +84,7 @@ internal fun Type.formatString(): String = when (this) {
         else -> "?"
     }
     is GenericArrayType -> "${genericComponentType.formatString()}[]"
+    is TypeVariable<*> -> "error.UnresolvedCla$$"
     else -> toString()
 }
 

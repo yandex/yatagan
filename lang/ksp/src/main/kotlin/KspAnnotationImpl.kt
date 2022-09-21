@@ -99,11 +99,12 @@ internal class KspAnnotationImpl(
                 is List<*> -> visitor.visitArray(value.map { ValueImpl(it ?: "<error>") })
                 is Enum<*> -> {
                     // Sometimes KSP yields enums (of platform types?) literally.
+                    // Suppress before https://youtrack.jetbrains.com/issue/KT-54005 gets rolled out.
+                    @Suppress("ENUM_DECLARING_CLASS_DEPRECATED_WARNING")
                     visitor.visitEnumConstant(
-                        // Suppress before https://youtrack.jetbrains.com/issue/KT-54005 gets rolled out.
-                        enum = @Suppress("ENUM_DECLARING_CLASS_DEPRECATED_WARNING") LangModelFactory.getTypeDeclaration(
+                        enum = checkNotNull(LangModelFactory.getTypeDeclaration(
                             qualifiedName = value.declaringClass.canonicalName,
-                        )?.asType() ?: LangModelFactory.errorType,
+                        )) { "enum constant $value has unresolved class (?)" }.asType(),
                         constant = value.name,
                     )
                 }

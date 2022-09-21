@@ -12,6 +12,7 @@ import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.MultiBindingDeclarationModel
 import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
@@ -101,8 +102,12 @@ internal class GraphBindingsFactory(
                             ContributionType.Collection
                     }
                     is BindingTargetModel.MappingContribution -> {
-                        mapBindings.getOrPut(target.keyType to target.node, ::arrayListOf) +=
-                            target.keyValue to binding.target
+                        target.keyType?.let { keyType ->
+                            target.keyValue?.let { keyValue ->
+                                mapBindings.getOrPut(keyType to target.node, ::arrayListOf) +=
+                                    keyValue to binding.target
+                            }
+                        }
                     }
                     is BindingTargetModel.Plain -> Unit // Nothing to do
                 }
@@ -144,12 +149,25 @@ internal class GraphBindingsFactory(
             }
         }
 
-        graph.modules.asSequence()
-            .flatMap { it.listDeclarations }
-            .forEach {
-                // Provide empty map for an empty list
-                multiBindings.getOrPut(it.listType, ::mutableMapOf)
-            }
+        for (module in graph.modules) for (declaration in module.multiBindingDeclarations) {
+            declaration.accept(object : MultiBindingDeclarationModel.Visitor<Unit> {
+                override fun visitInvalid(model: MultiBindingDeclarationModel.InvalidDeclarationModel) = Unit
+
+                override fun visitListDeclaration(model: MultiBindingDeclarationModel.ListDeclarationModel) {
+                    model.listType?.let { listType ->
+                        multiBindings.getOrPut(listType, ::mutableMapOf)
+                    }
+                }
+
+                override fun visitMapDeclaration(model: MultiBindingDeclarationModel.MapDeclarationModel) {
+                    model.keyType?.let { keyType ->
+                        model.valueType?.let { valueType ->
+                            mapBindings.getOrPut(keyType to valueType, ::mutableListOf)
+                        }
+                    }
+                }
+            })
+        }
 
         // Multi-bindings
         for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {

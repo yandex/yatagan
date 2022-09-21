@@ -755,4 +755,51 @@ class CoreBindingsFailureTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `invalid multibinding declaration`() {
+        givenJavaSource("test.JavaModule", """
+            import com.yandex.daggerlite.Module;
+            import com.yandex.daggerlite.Multibinds;
+            import java.util.List;
+            import java.util.Map;
+
+            @Module
+            interface JavaModule {
+                @Multibinds
+                List list();
+                
+                @Multibinds
+                Map map();
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            @Module class MyModule {
+                @Multibinds fun mapDeclaration(): Map<Int, String> = emptyMap()
+                @Multibinds fun listDeclaration(): List<Int> = emptyList()
+            }
+            @Module interface MyModule2 {
+                @Multibinds fun mapDeclaration1(arg: Int): Map<Int, String>
+                @Multibinds fun listDeclaration1(arg: Int): List<Int>
+                
+                @Multibinds fun mapDeclaration2(arg: Int): Map<*, *>
+                @Multibinds fun listDeclaration2(arg: Int): List<*>
+                
+                @Multibinds fun <T> mapDeclaration3(arg: Int): Map<T, *>
+                @Multibinds fun <T> listDeclaration3(arg: Int): List<T>
+            }
+
+            @Component(modules = [
+                MyModule::class,
+                MyModule2::class,
+                JavaModule::class,
+            ])
+            interface MyComponent
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

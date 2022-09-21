@@ -34,7 +34,7 @@ internal class JavaxTypeImpl private constructor(
         return Factory(decay(impl))
     }
 
-    override val typeArguments: Collection<TypeLangModel> by lazy {
+    override val typeArguments: List<TypeLangModel> by lazy {
         when (impl.kind) {
             TypeKind.DECLARED -> impl.asDeclaredType().typeArguments.map { Factory(decay(it)) }
             else -> emptyList()
@@ -55,7 +55,9 @@ internal class JavaxTypeImpl private constructor(
 
         private fun decay(type: TypeMirror): TypeMirror {
             return when (type.kind) {
-                TypeKind.WILDCARD -> type.asWildCardType().let { it.extendsBound ?: it.superBound }
+                TypeKind.WILDCARD -> type.asWildCardType().let {
+                    it.extendsBound ?: it.superBound ?: Utils.objectType.asType()
+                }
                 TypeKind.BOOLEAN, TypeKind.BYTE, TypeKind.SHORT, TypeKind.CHAR,
                 TypeKind.INT, TypeKind.LONG, TypeKind.FLOAT, TypeKind.DOUBLE,
                 -> Utils.types.boxedClass(type.asPrimitiveType()).asType()

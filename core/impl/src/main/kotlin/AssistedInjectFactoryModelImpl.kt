@@ -8,7 +8,6 @@ import com.yandex.daggerlite.core.AssistedInjectFactoryModel.Parameter
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
@@ -29,12 +28,12 @@ internal class AssistedInjectFactoryModelImpl private constructor(
         impl.functions.singleOrNull { it.isAbstract }
     }
 
-    private val assistedInjectType: TypeLangModel by lazy {
-        factoryMethod?.returnType ?: LangModelFactory.errorType
+    private val assistedInjectType: TypeLangModel? by lazy {
+        factoryMethod?.returnType
     }
 
     override val assistedInjectConstructor by lazy {
-        assistedInjectType.declaration.constructors.find {
+        assistedInjectType?.declaration?.constructors?.find {
             it.isAnnotatedWith<AssistedInject>()
         }
     }
@@ -88,8 +87,9 @@ internal class AssistedInjectFactoryModelImpl private constructor(
             validator.reportError(Strings.Errors.assistedInjectFactoryDuplicateParameters())
         }
 
+        val assistedInjectType = assistedInjectType
         val assistedInjectConstructor = assistedInjectConstructor
-        if (assistedInjectConstructor == null) {
+        if (assistedInjectType == null || assistedInjectConstructor == null) {
             validator.reportError(Strings.Errors.assistedInjectTypeNoConstructor(assistedInjectType))
             return  // All the following errors here will be induced, skip them.
         }

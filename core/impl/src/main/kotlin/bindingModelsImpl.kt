@@ -57,10 +57,10 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
                     val key = impl.annotations.find { it.isMapKey() }
                     val annotationClass = key?.annotationClass
                     val valueAttribute = annotationClass?.attributes?.find { it.name == "value" }
-                    val keyValue = valueAttribute?.let { key.getValue(valueAttribute) } ?: InvalidValue()
+                    val keyValue = valueAttribute?.let { key.getValue(valueAttribute) }
                     BindingTargetModel.MappingContribution(
                         node = target,
-                        keyType = valueAttribute?.type ?: LangModelFactory.errorType,
+                        keyType = valueAttribute?.type,
                         keyValue = keyValue,
                         mapKeyClass = annotationClass,
                     )
@@ -107,12 +107,6 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
             }
             is BindingTargetModel.DirectMultiContribution, is BindingTargetModel.Plain -> { /*Nothing to validate*/ }
         }
-    }
-
-    private class InvalidValue : AnnotationLangModel.Value {
-        override fun <R> accept(visitor: AnnotationLangModel.Value.Visitor<R>): R = visitor.visitUnresolved()
-        override val platformModel: Nothing? get() = null
-        override fun toString() = "<undefined>"
     }
 }
 

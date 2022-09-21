@@ -16,7 +16,7 @@ interface TypeLangModel : Comparable<TypeLangModel> {
      *
      * NOTE: Every returned type is implicitly [decayed][decay].
      */
-    val typeArguments: Collection<TypeLangModel>
+    val typeArguments: List<TypeLangModel>
 
     /**
      * Checks if the type is `boolean` or `java.lang.Boolean` (`kotlin.Boolean`) type.

@@ -1,13 +1,13 @@
 package com.yandex.daggerlite.core.impl
 
-import com.yandex.daggerlite.DeclareList
+import com.yandex.daggerlite.Multibinds
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.BindsBindingModel
 import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.ListDeclarationModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleModel
+import com.yandex.daggerlite.core.MultiBindingDeclarationModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -37,13 +37,15 @@ internal class ModuleModelImpl private constructor(
         impl?.subcomponents?.map(TypeLangModel::declaration)?.map { ComponentModelImpl(it) }?.toSet() ?: emptySet()
     }
 
-    override val listDeclarations: Sequence<ListDeclarationModel> =
+    override val multiBindingDeclarations: Sequence<MultiBindingDeclarationModel> =
         declaration.functions
-            .filter { it.isAnnotatedWith<DeclareList>() }
+            .filter { it.isAnnotatedWith<Multibinds>() }
             .map { method ->
-                ListDeclarationImpl(
-                    function = method,
-                )
+                when {
+                    ListDeclarationImpl.canRepresent(method) -> ListDeclarationImpl(method)
+                    MapDeclarationImpl.canRepresent(method) -> MapDeclarationImpl(method)
+                    else -> InvalidDeclarationImpl(invalidMethod = method)
+                }
             }.memoize()
 
     override val requiresInstance: Boolean by lazy {
@@ -88,6 +90,9 @@ internal class ModuleModelImpl private constructor(
         }
         if (!declaration.isEffectivelyPublic && bindings.any { it.accept(AsProvides) != null }) {
             validator.reportError(Strings.Errors.invalidAccessForModuleClass())
+        }
+        for (declaration in multiBindingDeclarations) {
+            validator.child(declaration)
         }
     }
 
