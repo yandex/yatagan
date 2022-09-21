@@ -36,8 +36,8 @@ interface ModuleHostedBindingModel : MayBeInvalid {
 
         class MappingContribution(
             override val node: NodeModel,
-            val keyType: TypeLangModel,
-            val keyValue: AnnotationLangModel.Value,
+            val keyType: TypeLangModel?,
+            val keyValue: AnnotationLangModel.Value?,
             val mapKeyClass: AnnotationDeclarationLangModel?,
         ) : BindingTargetModel()
     }

@@ -1,0 +1,49 @@
+error: Method doesn't resemble a valid multibinding
+NOTE: Multibinding declaration must be abstract with no parameters and return either a `List<..>` or a `Map<.., ..>`
+Encountered:
+  in graph for root-component test.MyComponent
+  in module test.JavaModule
+  here: multibinding declaration (map) test.JavaModule::map(): java.util.Map
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.MyComponent
+  in module test.JavaModule
+  here: multibinding declaration (list) test.JavaModule::list(): java.util.List
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.MyComponent
+  in module test.MyModule2
+  here: multibinding declaration (list) test.MyModule2::listDeclaration2(arg: int): java.util.List<?>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.MyComponent
+  in module test.MyModule2
+  here: multibinding declaration (map) test.MyModule2::mapDeclaration2(arg: int): java.util.Map<?, ?>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.MyComponent
+  in module test.MyModule2
+  here: multibinding declaration (list) test.MyModule2::listDeclaration1(arg: int): java.util.List<java.lang.Integer>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.MyComponent
+  in module test.MyModule2
+  here: multibinding declaration (list) test.MyModule2::listDeclaration3(arg: int): java.util.List<error.UnresolvedCla$$>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.MyComponent
+  in module test.MyModule2
+  here: multibinding declaration (map) test.MyModule2::mapDeclaration3(arg: int): java.util.Map<error.UnresolvedCla$$, ?>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.MyComponent
+  in module test.MyModule2
+  here: multibinding declaration (map) test.MyModule2::mapDeclaration1(arg: int): java.util.Map<java.lang.Integer, java.lang.String>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

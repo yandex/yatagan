@@ -96,7 +96,7 @@ private class ConditionLiteralImpl private constructor(
 
     override val root
         get() = NodeModelImpl(
-            type = payload.path.firstOrNull()?.owner?.asType() ?: LangModelFactory.errorType,
+            type = payload.root.asType(),
             qualifier = null,
         )
 
@@ -124,6 +124,8 @@ private class ConditionLiteralImpl private constructor(
             } ?: this(
                 negated = false,
                 payload = object : LiteralPayload {
+                    override val root: TypeDeclarationLangModel
+                        get() = LangModelFactory.errorType.declaration
                     override val path: List<MemberLangModel> get() = emptyList()
                     override fun validate(validator: Validator) {
                         // Always invalid
@@ -151,6 +153,7 @@ private class ConditionLiteralImpl private constructor(
 }
 
 private interface LiteralPayload : MayBeInvalid {
+    val root: TypeDeclarationLangModel
     val path: List<MemberLangModel>
     val nonStatic: Boolean
 }
@@ -163,7 +166,7 @@ private object MemberTypeVisitor : MemberLangModel.Visitor<TypeLangModel> {
 private typealias ValidationReport = (Validator) -> Unit
 
 private class LiteralPayloadImpl private constructor(
-    private val root: TypeDeclarationLangModel,
+    override val root: TypeDeclarationLangModel,
     private val pathSource: String,
 ) : LiteralPayload {
     private var validationReport: ValidationReport? = null

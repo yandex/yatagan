@@ -138,6 +138,7 @@ class DynamicCompileTestDriver(
                             class InvalidGraph extends RuntimeException {}
 
                             final List<String[]> log = new ArrayList<>();
+                            Dagger.setMaxIssueEncounterPaths(100);
                             Dagger.setDynamicValidationDelegate(new DynamicValidationDelegate() {
                                 private boolean hasErrors;
                                 public boolean getUsePlugins() { return true; }

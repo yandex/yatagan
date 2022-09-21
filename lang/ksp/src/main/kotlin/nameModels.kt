@@ -38,7 +38,8 @@ private fun nameModelImpl(
             if (type.isError) {
                 return ErrorNameModel()
             }
-            val declaration = type.declaration as KSClassDeclaration
+            val declaration = type.resolveAliasIfNeeded().declaration as? KSClassDeclaration
+                ?: return ErrorNameModel()
             val raw = ClassNameModel(declaration)
             val typeArguments = type.arguments.map { argument ->
                 fun argType() = argument.type.resolveOrError()

@@ -56,6 +56,10 @@ object Strings {
             "Flattening multi-binding must return `Collection` or any of its subtypes instead of `$insteadOf`".toError()
 
         @Covered
+        fun invalidMultiBindingDeclaration() =
+            ("Method doesn't resemble a valid multibinding").toError()
+
+        @Covered
         fun voidBinding() =
             "Binding method must not return `void`".toError()
 
@@ -309,8 +313,11 @@ object Strings {
             "Assisted inject factory must be an interface.".toError()
 
         @Covered
-        fun assistedInjectTypeNoConstructor(type: TypeLangModel) =
-            "Type `$type` doesn't have an @AssistedInject constructor.".toError()
+        fun assistedInjectTypeNoConstructor(type: TypeLangModel?) = if (type == null) {
+            "No @AssistedInject constructor can be found"
+        } else {
+            "Type `$type` doesn't have an @AssistedInject constructor."
+        }.toError()
 
         @Covered
         fun assistedInjectFactoryNoMethod() =
@@ -560,5 +567,9 @@ object Strings {
             color = TextColor.Inherit
             append("Conflicting: `").append(flavor).append('`')
         }.toNote()
+
+        @Covered
+        fun invalidMultiBindingAdvice() = ("Multibinding declaration must be abstract with no parameters" +
+                " and return either a `List<..>` or a `Map<.., ..>`").toNote()
     }
 }

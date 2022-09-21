@@ -718,8 +718,11 @@ annotation class AssistedFactory
  * /*@*/ import com.yandex.daggerlite.*
  * @Module
  * interface SomeModule {
- *   @DeclareList
- *   fun listOfNumbers(): Number
+ *   @Multibinds
+ *   fun listOfNumbers(): List<Number>
+ *
+ *   @Multibinds
+ *   fun mapOfIntToString(): Map<Int, String>
  * }
  *
  * // Possible component declaration:
@@ -727,14 +730,19 @@ annotation class AssistedFactory
  * @Component(modules = [SomeModule::class])
  * interface ExampleComponent {
  *   val numbers: List<Number>
+ *   val map: Map<Int, String>
  * }
  *
  * // Then the following holds true:
  *
  * /*@*/ fun test() {
+ * Dagger.create(ExampleComponent::class.java).run {
  * /*@*/assert(
- * Dagger.create(ExampleComponent::class.java).numbers.isEmpty()
+ *     numbers.isEmpty()
+ * /*@*/ &&
+ *     map.isEmpty()
  * /*@*/)
+ * }
  * /*@*/}
  * ```
  *
@@ -743,7 +751,7 @@ annotation class AssistedFactory
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class DeclareList(
+annotation class Multibinds(
 )
 
 /**

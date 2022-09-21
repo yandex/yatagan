@@ -17,7 +17,7 @@ internal class RtTypeImpl private constructor(
         if (impl.tryAsClass() != null) RtTypeDeclarationImpl(this) else NoDeclaration(this)
     }
 
-    override val typeArguments: Collection<TypeLangModel> by lazy {
+    override val typeArguments: List<TypeLangModel> by lazy {
         when (impl) {
             is ParameterizedType -> impl.actualTypeArguments.map { Factory(decay(it)) }
             else -> emptyList()

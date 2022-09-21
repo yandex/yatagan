@@ -41,7 +41,7 @@ class MultibindingsTest(
             
             @Module
             interface MyModule {
-                @DeclareList fun createList(): Create
+                @Multibinds fun createList(): List<Create>
             
                 @IntoList @Binds fun createClassA(a: ClassA): Create
                 @IntoList @Binds fun createClassB(b: ClassB): Create
@@ -92,7 +92,7 @@ class MultibindingsTest(
             
             @Module
             interface MyModule {                
-                @DeclareList fun create(): Create
+                @Multibinds fun create(): List<Create>
                 @Binds @IntoList fun create(i: CreateA): Create
                 @Binds @IntoList fun create(i: CreateB): Create
                 @Binds @IntoList fun create(i: CreateDestroyA): Create
@@ -100,7 +100,7 @@ class MultibindingsTest(
                 @Binds @IntoList fun create(i: CreateDestroyC): Create
                 @Binds @IntoList fun create(i: CreateDestroyD): Create
                 
-                @DeclareList fun destroy(): Destroy
+                @Multibinds fun destroy(): List<Destroy>
                 @Binds @IntoList fun destroy(i: CreateDestroyA): Destroy
                 @Binds @IntoList fun destroy(i: CreateDestroyB): Destroy
                 @Binds @IntoList fun destroy(i: CreateDestroyC): Destroy
@@ -146,7 +146,7 @@ class MultibindingsTest(
             
             @Module
             interface MyModule {
-                @DeclareList fun create(): Create
+                @Multibinds fun create(): List<Create>
             }
             
             @Singleton @Component(modules = [MyModule::class])
@@ -165,16 +165,8 @@ class MultibindingsTest(
     @Test
     fun `multi-bound list with conditional entries`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Condition
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Optional
-            import javax.inject.Inject
-            import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.IntoList
-            import com.yandex.daggerlite.DeclareList
+            import com.yandex.daggerlite.*
+            import javax.inject.*
             
             class Features {
                 companion object {
@@ -199,7 +191,7 @@ class MultibindingsTest(
             
             @Module
             interface MyModule {
-                @DeclareList fun create(): Create
+                @Multibinds fun create(): List<Create>
                 @Binds @IntoList fun create(i: ClassA): Create
                 @Binds @IntoList fun create(i: ClassB): Create
                 @Binds @IntoList fun create(i: ClassC): Create
@@ -394,6 +386,13 @@ class MultibindingsTest(
                 
                 @[Binds IntoMap CustomClassKey(Impl3::class)]
                 fun apiImpl3(i: Impl3): MyApi
+                
+                @Multibinds
+                fun emptyMap(): Map<String, Any>
+                
+                @Named("hello")
+                @Multibinds
+                fun emptyMap2(): Map<String, Any>
             }
             
             @Component(modules = [TestModule::class, TestBindings::class])
@@ -403,6 +402,9 @@ class MultibindingsTest(
                 val map3: Map<Class<*>, Int>
                 val map4: Map<Class<out MyApi>, MyApi>
                 val map5: Map<MyEnum, MyApi>
+                
+                val emptyMap: Map<String, Any>
+                @get:Named("hello") val emptyMap2: Map<String, Any>
                 
                 val mapOfProviders: Map<Class<out MyApi>, Provider<MyApi>>
                 
@@ -428,6 +430,7 @@ class MultibindingsTest(
                 }
                 assert(c.map5.keys == MyEnum.values().toSet()) 
                 assert(c.mapOfProviders.size == 3)
+                assert(c.emptyMap.isEmpty())
                 for ((clazz, instanceProvider) in c.mapOfProviders) {
                     assert(clazz.isInstance(instanceProvider.get()))
                 }

@@ -33,6 +33,8 @@ import kotlin.system.measureTimeMillis
 object Dagger {
     @Volatile
     private var validationDelegate: DynamicValidationDelegate? = null
+    @Volatile
+    private var maxIssueEncounterPaths: Int = 5
 
     init {
         @OptIn(InternalLangApi::class)
@@ -118,6 +120,14 @@ object Dagger {
         validationDelegate = delegate
     }
 
+    /**
+     * Sets max issue encounter path count. No more than [value] paths will be reported for the single message.
+     */
+    @JvmStatic
+    fun setMaxIssueEncounterPaths(value: Int) {
+        maxIssueEncounterPaths = value
+    }
+
     private val pluginProviders by lazy {
         loadServices<ValidationPluginProvider>()
     }
@@ -128,7 +138,7 @@ object Dagger {
     ) {
         messages.forEach { locatedMessage ->
             val text: RichString = locatedMessage.format(
-                maxEncounterPaths = 5,
+                maxEncounterPaths = maxIssueEncounterPaths,
             )
             when (locatedMessage.message.kind) {
                 ValidationMessage.Kind.Error -> reporting.reportError(text)
