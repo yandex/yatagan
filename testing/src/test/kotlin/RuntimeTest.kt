@@ -214,7 +214,7 @@ class RuntimeTest(
                     if (!success) {
                         throw AssertionError("Test failed")
                     }
-                } catch (e: Throwable) {
+                } finally {
                     ThreadAssertions.asserter = null
                 }
             }
