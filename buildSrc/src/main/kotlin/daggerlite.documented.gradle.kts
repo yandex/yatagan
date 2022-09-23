@@ -49,7 +49,7 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
             noStdlibLink.set(true)
             noJdkLink.set(true)
 
-            includes.from("module.md")
+            includes.from(patchModuleDoc.map { it.outputFile })
 
             // Include all samples from `samples` project directory, if present
             if (samplesDir.isDirectory) {
