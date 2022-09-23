@@ -55,20 +55,33 @@ internal class RuntimeComponent(
     private val parentsSequence = parentsSequence(includeThis = true).memoize()
 
     private val accessStrategies: Map<Binding, AccessStrategy> = buildMap(capacity = graph.localBindings.size) {
+        val requiresSynchronizedAccess = graph.requiresSynchronizedAccess
         for ((binding: Binding, usage) in graph.localBindings) {
             val strategy = run {
                 val provision: AccessStrategy = if (binding.scopes.isNotEmpty()) {
-                    CachingAccessStrategy(
-                        binding = binding,
-                        creationVisitor = this@RuntimeComponent,
-                        isSynchronizedAccess = graph.requiresSynchronizedAccess,
-                    )
+                    if (requiresSynchronizedAccess) {
+                        SynchronizedCachingAccessStrategy(
+                            binding = binding,
+                            creationVisitor = this@RuntimeComponent,
+                        )
+                    } else {
+                        CachingAccessStrategy(
+                            binding = binding,
+                            creationVisitor = this@RuntimeComponent,
+                        )
+                    }
                 } else {
-                    CreatingAccessStrategy(
-                        binding = binding,
-                        creationVisitor = this@RuntimeComponent,
-                        isSynchronizedAccess = graph.requiresSynchronizedAccess,
-                    )
+                    if (requiresSynchronizedAccess) {
+                        SynchronizedCreatingAccessStrategy(
+                            binding = binding,
+                            creationVisitor = this@RuntimeComponent,
+                        )
+                    } else {
+                        CreatingAccessStrategy(
+                            binding = binding,
+                            creationVisitor = this@RuntimeComponent,
+                        )
+                    }
                 }
                 if (usage.hasOptionalUsage()) {
                     ConditionalAccessStrategy(
