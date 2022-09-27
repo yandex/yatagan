@@ -13,6 +13,8 @@ import com.yandex.daggerlite.dynamic.awaitOnError
 import com.yandex.daggerlite.dynamic.dlLog
 import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.impl.BindingGraph
+import com.yandex.daggerlite.internal.loadImplementationByBuilderClass
+import com.yandex.daggerlite.internal.loadImplementationByComponentClass
 import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
 import com.yandex.daggerlite.lang.rt.TypeDeclarationLangModel
 import com.yandex.daggerlite.spi.ValidationPluginProvider
@@ -56,6 +58,15 @@ object Dagger {
             require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
                 "$builderClass is not a component builder"
             }
+
+            try {
+                return loadImplementationByBuilderClass(builderClass).also {
+                    dlLog("Found generated implementation for `$builderClass`, using it")
+                }
+            } catch (_: ClassNotFoundException) {
+                // Fallback to full reflection
+            }
+
             val graph = BindingGraph(
                 root = ComponentFactoryModel(TypeDeclarationLangModel(builderClass)).createdComponent
             )
@@ -88,6 +99,15 @@ object Dagger {
             require(componentClass.isAnnotationPresent(Component::class.java)) {
                 "$componentClass is not a component"
             }
+
+            try {
+                return loadImplementationByComponentClass(componentClass).also {
+                    dlLog("Found generated implementation for `$componentClass`, using it")
+                }
+            } catch (_: ClassNotFoundException) {
+                // Fallback to full reflection
+            }
+
             val graph = BindingGraph(ComponentModel(TypeDeclarationLangModel(componentClass)))
             val promise = doValidate(graph)
             val component = promise.awaitOnError {

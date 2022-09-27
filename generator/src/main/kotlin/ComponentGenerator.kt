@@ -5,6 +5,7 @@ import com.squareup.javapoet.TypeSpec
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.MemberLangModel
+import com.yandex.daggerlite.generator.lang.ClassNameModel
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.generator.poetry.buildClass
 import com.yandex.daggerlite.generator.poetry.buildExpression
@@ -18,7 +19,11 @@ import javax.lang.model.element.Modifier.STATIC
 
 internal class ComponentGenerator(
     private val graph: BindingGraph,
-    val generatedClassName: ClassName = graph.model.name.asClassName { "Dagger$$it" },
+    val generatedClassName: ClassName = graph.model.name.let { name ->
+        check(name is ClassNameModel)
+        // Keep name mangling in sync with loader!
+        ClassName.get(name.packageName, "Dagger$" + name.simpleNames.joinToString(separator = "$"))
+    },
 ) {
     interface Contributor {
         fun generate(builder: TypeSpecBuilder)

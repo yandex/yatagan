@@ -18,25 +18,6 @@ import com.yandex.daggerlite.generator.lang.WildcardNameModel
 import com.yandex.daggerlite.generator.poetry.MethodSpecBuilder
 import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
 
-internal inline fun CtTypeNameModel.asClassName(
-    transformName: (String) -> String,
-): ClassName {
-    return when (this) {
-        is ClassNameModel -> when (simpleNames.size) {
-            1 -> ClassName.get(packageName, transformName(simpleNames.first()))
-            else -> ClassName.get(
-                packageName, simpleNames.first(), *simpleNames
-                    .mapIndexed { index, name ->
-                        if (index == simpleNames.lastIndex) {
-                            transformName(name)
-                        } else name
-                    }.drop(1).toTypedArray()
-            )
-        }
-        else -> throw IllegalArgumentException("Unexpected type: $this")
-    }
-}
-
 internal fun ClassBackedModel.typeName(): TypeName {
     return name.asTypeName()
 }
