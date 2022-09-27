@@ -116,14 +116,19 @@ class DynamicCompileTestDriver(
                 val componentName = ClassName.get(type)
                 val builderName = type.enclosedElements.find {
                     it.isAnnotatedWith<Component.Builder>()
-                }?.let { "${componentName.simpleName()}.${it.simpleName}" }
+                }?.let {
+                    componentName.simpleNames().joinToString(".") + '.' + it.simpleName
+                }
 
-                val bootstrapperName = componentName.peerClass("${componentName.simpleName()}Bootstrap")
+                val bootstrapperName = ClassName.get(
+                    componentName.packageName(),
+                    componentName.simpleNames().joinToString("_") + "Bootstrap",
+                )
                 _bootstrapperNames += bootstrapperName
                 val bootstrapInvocation = if (builderName != null) {
                     "builder($builderName.class)"
                 } else {
-                    "create(${componentName.simpleName()}.class)"
+                    "create(${componentName.simpleNames().joinToString(".")}.class)"
                 }
 
                 @Language("Java")
@@ -133,7 +138,7 @@ class DynamicCompileTestDriver(
                     import com.yandex.daggerlite.*;
                     import java.util.function.*;
                     import java.util.*;
-                    public final class ${componentName.simpleName()}Bootstrap implements Supplier<List<String[]>> {
+                    public final class ${bootstrapperName.simpleName()} implements Supplier<List<String[]>> {
                         public List<String[]> get() {
                             class InvalidGraph extends RuntimeException {}
 

@@ -169,8 +169,8 @@ class RuntimeTest(
     fun `thread assertions`() {
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
+            import java.util.concurrent.*
             import javax.inject.*
-            import kotlin.concurrent.thread
             
             @Singleton class MyClassA @Inject constructor()
             @Singleton class MyClassB @Inject constructor()
@@ -189,31 +189,26 @@ class RuntimeTest(
                     }
                 }
                 try {
-                    var success = true
-                    val t1 = thread {
+                    val executor = Executors.newFixedThreadPool(2)
+                    val t1 = executor.submit { 
                         try {
                             c.getA().get()
-                            success = false
-                        } catch (_: AssertionError) { }
+                            throw IllegalStateException("Test failed")
+                        } catch (_: AssertionError) {}
                     }
-                    val t2 = thread {
+                    val t2 = executor.submit {
                         try {
                             c.getB()
-                            success = false
-                        } catch (_: AssertionError) { }
+                            throw IllegalStateException("Test failed")
+                        } catch (_: AssertionError) {}
                     }
-                    try {
-                        c.getA().get()
-                        c.getB()
-                    } catch (_: AssertionError) {
-                        success = false
-                    }
-                    t1.join()
-                    t2.join()
-                    
-                    if (!success) {
-                        throw AssertionError("Test failed")
-                    }
+
+                    // On main:
+                    c.getA().get()
+                    c.getB()
+
+                    t1.get()
+                    t2.get()
                 } finally {
                     ThreadAssertions.asserter = null
                 }

@@ -15,11 +15,17 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + listOf(
             "-Xjvm-default=all",
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=kotlin.ExperimentalStdlibApi",
-            "-opt-in=kotlin.contracts.ExperimentalContracts",
             "-Werror"
         )
+    }
+}
+
+kotlin {
+    sourceSets.configureEach {
+        languageSettings {
+            optIn("kotlin.ExperimentalStdlibApi")
+            optIn("kotlin.contracts.ExperimentalContracts")
+        }
     }
 }
 

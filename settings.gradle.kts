@@ -5,6 +5,8 @@ include("api-compiled")
 project(":api-compiled").projectDir = file("api/compiled")
 include("api-dynamic")
 project(":api-dynamic").projectDir = file("api/dynamic")
+include("api-common")
+project(":api-common").projectDir = file("api/common")
 
 include("base")
 

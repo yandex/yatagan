@@ -60,6 +60,29 @@ class CoreBindingsKotlinTest(
     }
 
     @Test
+    fun `basic component - nested component class`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+
+            class TopLevelClass {
+                class NestedClass {
+                    @Component interface Component1
+                }
+                @Component interface Component2 {
+                    @Component.Builder interface Builder { fun c(): Component2 }
+                }
+            }
+
+            fun test() {
+                Dagger.create(TopLevelClass.NestedClass.Component1::class.java)
+                Dagger.builder(TopLevelClass.Component2.Builder::class.java)
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
     fun `basic component - @Module with companion object`() {
         givenKotlinSource("test.Api", """interface Api""")
         givenKotlinSource("test.Impl", """class Impl : Api""")

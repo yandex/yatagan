@@ -14,6 +14,7 @@ dependencies {
     flatImplementation(project(":validation-impl"))
     flatImplementation(project(":validation-format"))
     flatImplementation(project(":spi-impl"))
+    flatImplementation(project(":api-common"))
 
     // Project API, will not be merged and will be declared as a normal dependency.
     flatApi(project(":api"))
