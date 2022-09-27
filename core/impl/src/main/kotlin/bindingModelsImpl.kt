@@ -25,27 +25,22 @@ import com.yandex.daggerlite.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
-    protected abstract val impl: FunctionLangModel
-
     override val scopes: Set<AnnotationLangModel> by lazy {
-        impl.annotations.filter { it.isScope() }.toSet()
+        function.annotations.filter { it.isScope() }.toSet()
     }
 
-    override val functionName: String
-        get() = impl.name
-
     override val target: BindingTargetModel by lazy {
-        if (impl.returnType.isVoid) {
+        if (function.returnType.isVoid) {
             BindingTargetModel.Plain(NodeModelImpl.Factory.VoidNode())
         } else {
-            val target = NodeModelImpl(type = impl.returnType, forQualifier = impl)
-            val intoList = impl.intoListAnnotationIfPresent
+            val target = NodeModelImpl(type = function.returnType, forQualifier = function)
+            val intoList = function.intoListAnnotationIfPresent
             if (intoList != null) {
                 if (intoList.flatten) {
                     BindingTargetModel.FlattenMultiContribution(
                         node = target,
                         flattened = NodeModelImpl(
-                            type = impl.returnType.typeArguments.firstOrNull() ?: impl.returnType,
+                            type = function.returnType.typeArguments.firstOrNull() ?: function.returnType,
                             qualifier = target.qualifier,
                         )
                     )
@@ -53,8 +48,8 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
                     BindingTargetModel.DirectMultiContribution(node = target)
                 }
             } else {
-                if (impl.isAnnotatedWith<IntoMap>()) {
-                    val key = impl.annotations.find { it.isMapKey() }
+                if (function.isAnnotatedWith<IntoMap>()) {
+                    val key = function.annotations.find { it.isMapKey() }
                     val annotationClass = key?.annotationClass
                     val valueAttribute = annotationClass?.attributes?.find { it.name == "value" }
                     val keyValue = valueAttribute?.let { key.getValue(valueAttribute) }
@@ -75,13 +70,14 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         validator.child(target.node)
         when (target) {
             is BindingTargetModel.FlattenMultiContribution -> {
-                val firstArg = impl.returnType.typeArguments.firstOrNull()
-                if (firstArg == null || !LangModelFactory.getCollectionType(firstArg).isAssignableFrom(impl.returnType)) {
-                    validator.reportError(Errors.invalidFlatteningMultibinding(insteadOf = impl.returnType))
+                val firstArg = function.returnType.typeArguments.firstOrNull()
+                if (firstArg == null || !LangModelFactory.getCollectionType(firstArg)
+                        .isAssignableFrom(function.returnType)) {
+                    validator.reportError(Errors.invalidFlatteningMultibinding(insteadOf = function.returnType))
                 }
             }
             is BindingTargetModel.MappingContribution -> run {
-                val keys = impl.annotations.filter { it.isMapKey() }.toList()
+                val keys = function.annotations.filter { it.isMapKey() }.toList()
                 if (keys.size != 1) {
                     validator.reportError(if (keys.isEmpty()) Errors.missingMapKey() else Errors.multipleMapKeys())
                     return@run
@@ -111,15 +107,15 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
 }
 
 internal class BindsImpl(
-    override val impl: FunctionLangModel,
+    override val function: FunctionLangModel,
     override val originModule: ModuleModel,
 ) : BindsBindingModel, ModuleHostedBindingBase() {
 
     init {
-        assert(canRepresent(impl))
+        assert(canRepresent(function))
     }
 
-    override val sources = impl.parameters.map { parameter ->
+    override val sources = function.parameters.map { parameter ->
         NodeModelImpl(type = parameter.type, forQualifier = parameter)
     }.memoize()
 
@@ -130,16 +126,16 @@ internal class BindsImpl(
             validator.child(source)
         }
 
-        for (param in impl.parameters) {
-            if (!impl.returnType.isAssignableFrom(param.type)) {
+        for (param in function.parameters) {
+            if (!function.returnType.isAssignableFrom(param.type)) {
                 validator.reportError(Errors.inconsistentBinds(
                     param = param.type,
-                    returnType = impl.returnType,
+                    returnType = function.returnType,
                 ))
             }
         }
 
-        if (!impl.isAbstract) {
+        if (!function.isAbstract) {
             validator.reportError(Errors.nonAbstractBinds())
         }
     }
@@ -151,20 +147,20 @@ internal class BindsImpl(
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
         modelClassName = "@binds",
         representation = {
-            append("${originModule.type}::${impl.name}(")
+            append("${originModule.type}::${function.name}(")
             when(childContext ?: Unit) {
                 target.node -> {  // return type
                     append("): ")
-                    appendChildContextReference(reference = impl.returnType)
+                    appendChildContextReference(reference = function.returnType)
                 }
                 sources.singleOrNull() -> {  // alias
-                    appendChildContextReference(reference = impl.parameters.single())
+                    appendChildContextReference(reference = function.parameters.single())
                     append(")")
                 }
                 in sources -> {
                     val index = sources.indexOf(childContext)
                     append(".., ")
-                    appendChildContextReference(reference = impl.parameters.drop(index).first())
+                    appendChildContextReference(reference = function.parameters.drop(index).first())
                     append(", ..)")
                 }
                 else -> {
@@ -182,19 +178,19 @@ internal class BindsImpl(
 }
 
 internal class ProvidesImpl(
-    override val impl: FunctionLangModel,
+    override val function: FunctionLangModel,
     override val originModule: ModuleModelImpl,
 ) : ProvidesBindingModel,
     ModuleHostedBindingBase() {
 
     private val conditionalsModel by lazy {
-        ConditionalHoldingModelImpl(checkNotNull(impl.providesAnnotationIfPresent) { "Not reached" }.conditionals)
+        ConditionalHoldingModelImpl(checkNotNull(function.providesAnnotationIfPresent) { "Not reached" }.conditionals)
     }
 
     override val conditionals get() = conditionalsModel.conditionals
 
     override val inputs: List<NodeDependency> by lazy(PUBLICATION) {
-        impl.parameters.map { param ->
+        function.parameters.map { param ->
             NodeDependency(type = param.type, forQualifier = param)
         }.toList()
     }
@@ -208,20 +204,17 @@ internal class ProvidesImpl(
             validator.child(dependency.node)
         }
 
-        if (impl.isAbstract) {
+        if (function.isAbstract) {
             validator.reportError(Errors.abstractProvides())
         }
 
-        if (!impl.isEffectivelyPublic) {
+        if (!function.isEffectivelyPublic) {
             validator.reportError(Errors.invalidAccessForProvides())
         }
     }
 
-    override val provision: FunctionLangModel
-        get() = impl
-
     override val requiresModuleInstance: Boolean
-        get() = originModule.mayRequireInstance && !impl.isStatic && !impl.owner.isKotlinObject
+        get() = originModule.mayRequireInstance && !function.isStatic && !function.owner.isKotlinObject
 
     override fun <R> accept(visitor: ModuleHostedBindingModel.Visitor<R>): R {
         return visitor.visitProvides(this)
@@ -230,16 +223,16 @@ internal class ProvidesImpl(
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
         modelClassName = "@provides",
         representation = {
-            append("${originModule.type}::${impl.name}(")
+            append("${originModule.type}::${function.name}(")
             when(childContext) {
                 target.node -> {  // return type
                     append("): ")
-                    appendChildContextReference(reference = impl.returnType)
+                    appendChildContextReference(reference = function.returnType)
                 }
                 is NodeModel -> {
                     val index = inputs.indexOfFirst { it.node == childContext }
                     append(".., ")
-                    appendChildContextReference(reference = impl.parameters.drop(index).first())
+                    appendChildContextReference(reference = function.parameters.drop(index).first())
                     append(", ..)")
                 }
                 else -> {

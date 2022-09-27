@@ -58,11 +58,11 @@ internal class ModuleModelImpl private constructor(
     override val bindings: Sequence<ModuleHostedBindingModel> = declaration.functionsWithCompanion.mapNotNull { method ->
         when {
             BindsImpl.canRepresent(method) -> BindsImpl(
-                impl = method,
+                function = method,
                 originModule = this@ModuleModelImpl,
             )
             ProvidesImpl.canRepresent(method) -> ProvidesImpl(
-                impl = method,
+                function = method,
                 originModule = this@ModuleModelImpl,
             )
             else -> null

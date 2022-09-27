@@ -191,7 +191,7 @@ internal class ProvisionBindingImpl(
 ) : ProvisionBinding, ConditionalBindingMixin, ModuleHostedMixin() {
 
     override val scopes get() = impl.scopes
-    override val provision get() = impl.provision
+    override val provision get() = impl.function
     override val inputs get() = impl.inputs
     override val requiresModuleInstance get() = impl.requiresModuleInstance
     override val variantMatch: VariantMatch by lazy { VariantMatch(impl, owner.variant) }
@@ -210,7 +210,7 @@ internal class ProvisionBindingImpl(
         representation = {
             append(impl.originModule.type)
             append("::")
-            append(impl.provision.name)
+            append(impl.function.name)
         },
     )
 
@@ -361,7 +361,7 @@ internal class AliasBindingImpl(
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = "alias",
         childContext = childContext,
-        representation = { append(impl.originModule.type).append("::").append(impl.functionName) },
+        representation = { append(impl.originModule.type).append("::").append(impl.function.name) },
         ellipsisStatistics = { _, dependencies ->
             if (dependencies.isNotEmpty()) append(dependencies.first())  // Always include alias source
         },
@@ -400,7 +400,7 @@ internal class AlternativesBindingImpl(
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = "alias-with-alternatives",
         childContext = childContext,
-        representation = { append(impl.originModule.type).append("::").append(impl.functionName) },
+        representation = { append(impl.originModule.type).append("::").append(impl.function.name) },
     )
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {

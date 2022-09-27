@@ -9,7 +9,7 @@ import com.yandex.daggerlite.graph.BindingGraph
  */
 interface ValidationPluginProvider {
     /**
-     * Creates [ValidationPlugin] for a given [root].
+     * Creates [ValidationPlugin] for a given [graph].
      * Will be called for every [BindingGraph] in all hierarchies under processing.
      *
      * @param graph a [BindingGraph] for inspection.

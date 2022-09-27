@@ -24,7 +24,14 @@ interface AnnotationDeclarationLangModel : AnnotatedLangModel {
      *
      * @param clazz Java class to check
      */
-    fun isClass(clazz: Class<out Annotation>): Boolean
+    fun isClass(clazz: Class<out Annotation>): Boolean {
+        return clazz.canonicalName == qualifiedName
+    }
+
+    /**
+     * Qualified name of the annotation class.
+     */
+    val qualifiedName: String
 
     /**
      * Attributes (annotation class' properties for Kotlin and @interface's methods for Java).

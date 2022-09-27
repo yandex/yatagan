@@ -13,6 +13,7 @@ import com.yandex.daggerlite.core.lang.AnnotationLangModel.Value
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
+import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
 import java.lang.annotation.RetentionPolicy
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
@@ -145,7 +146,7 @@ internal class KspAnnotationImpl(
 
     internal class AnnotationClassImpl private constructor(
         declaration: KSClassDeclaration,
-    ) : AnnotationDeclarationLangModel {
+    ) : AnnotationDeclarationLangModelBase() {
         private val annotated = KspAnnotatedImpl(declaration)
 
         override val annotations: Sequence<AnnotationLangModel>
@@ -161,11 +162,8 @@ internal class KspAnnotationImpl(
             }.memoize()
         }
 
-        override fun isClass(clazz: Class<out Annotation>): Boolean {
-            return annotated.impl.qualifiedName?.asString() == clazz.canonicalName
-        }
-
-        override fun toString() = annotated.impl.qualifiedName?.asString() ?: ""
+        override val qualifiedName: String
+            get() = annotated.impl.qualifiedName?.asString() ?: ""
 
         override fun getRetention(): AnnotationRetention {
             for (annotation in annotated.impl.annotations) {

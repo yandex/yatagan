@@ -11,33 +11,85 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  * Backed by a `lang`-level construct.
  */
 interface ModuleHostedBindingModel : MayBeInvalid {
+    /**
+     * Module the binding originates from.
+     */
     val originModule: ModuleModel
-    val target: BindingTargetModel
-    val scopes: Set<AnnotationLangModel>
-    val functionName: String
 
+    /**
+     * Parsed return value of the binding. See [BindingTargetModel] for the details.
+     */
+    val target: BindingTargetModel
+
+    /**
+     * Declared scope annotations.
+     */
+    val scopes: Set<AnnotationLangModel>
+
+    /**
+     * Underlying function model.
+     *
+     * Use only for extracting the info not available via the API of the model.
+     */
+    val function: FunctionLangModel
+
+    /**
+     * Binding target variants.
+     */
     sealed class BindingTargetModel {
+        /**
+         * A node corresponding to the return type of the binding model.
+         * Doesn't always directly correspond to the effective binding target - multi-bindings can be in effect.
+         */
         abstract val node: NodeModel
 
         override fun toString() = node.toString(childContext = null).toString()
 
+        /**
+         * Binding for the plain [node].
+         */
         class Plain(
             override val node: NodeModel,
         ) : BindingTargetModel()
 
+        /**
+         * Single element list contribution to the List of [node]s.
+         */
         class DirectMultiContribution(
             override val node: NodeModel,
         ) : BindingTargetModel()
 
+        /**
+         * Collection contribution to the List of [flattened], which is an unwrapped [node].
+         */
         class FlattenMultiContribution(
             override val node: NodeModel,
+
+            /**
+             * An unwrapped [node] (its type argument, given [node] is a collection).
+             */
             val flattened: NodeModel,
         ) : BindingTargetModel()
 
+        /**
+         * Contribution of a single [node] as a value to a map with the [keyType] under [keyValue].
+         */
         class MappingContribution(
             override val node: NodeModel,
+
+            /**
+             * Mapping key type. `null` when not-found/unresolved.
+             */
             val keyType: TypeLangModel?,
+
+            /**
+             * Mapping key value. `null` when not-found/unresolved.
+             */
             val keyValue: AnnotationLangModel.Value?,
+
+            /**
+             * Annotation class of the Map-key annotation. `null` when not-found/unresolved.
+             */
             val mapKeyClass: AnnotationDeclarationLangModel?,
         ) : BindingTargetModel()
     }
@@ -62,7 +114,6 @@ interface BindsBindingModel : ModuleHostedBindingModel {
  */
 interface ProvidesBindingModel : ModuleHostedBindingModel, ConditionalHoldingModel {
     val inputs: List<NodeDependency>
-    val provision: FunctionLangModel
     val requiresModuleInstance: Boolean
 }
 
