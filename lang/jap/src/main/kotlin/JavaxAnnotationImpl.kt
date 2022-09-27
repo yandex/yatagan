@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel.Value
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
+import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ExecutableElement
@@ -103,7 +104,7 @@ internal class JavaxAnnotationImpl private constructor(
 
     private class AnnotationClassImpl private constructor(
         private val impl: TypeElement,
-    ) : AnnotationDeclarationLangModel, AnnotatedLangModel by JavaxAnnotatedImpl(impl) {
+    ) : AnnotationDeclarationLangModelBase(), AnnotatedLangModel by JavaxAnnotatedImpl(impl) {
 
         override val attributes: Sequence<AnnotationDeclarationLangModel.Attribute> by lazy {
             ElementFilter.methodsIn(impl.enclosedElements)
@@ -115,11 +116,8 @@ internal class JavaxAnnotationImpl private constructor(
                 .memoize()
         }
 
-        override fun isClass(clazz: Class<out Annotation>): Boolean {
-            return impl.qualifiedName.contentEquals(clazz.canonicalName)
-        }
-
-        override fun toString(): String = impl.qualifiedName.toString()
+        override val qualifiedName: String
+            get() = impl.qualifiedName.toString()
 
         override fun getRetention(): AnnotationRetention {
             // Kapt generates java retention counterparts, so no need to be kotlin-aware here

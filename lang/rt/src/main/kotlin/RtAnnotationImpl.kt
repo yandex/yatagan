@@ -5,6 +5,7 @@ import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel.Value
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
 import com.yandex.daggerlite.lang.common.AnnotationLangModelBase
 import java.lang.reflect.Method
 
@@ -76,7 +77,7 @@ internal class RtAnnotationImpl(
 
     private class AnnotationClassImpl private constructor(
         private val impl: Class<*>,
-    ) : AnnotationDeclarationLangModel, AnnotatedLangModel by RtAnnotatedImpl(impl) {
+    ) : AnnotationDeclarationLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
 
         override val attributes: Sequence<AnnotationDeclarationLangModel.Attribute> by lazy {
             impl.declaredMethods.asSequence()
@@ -90,7 +91,8 @@ internal class RtAnnotationImpl(
             return impl == clazz
         }
 
-        override fun toString(): String = impl.canonicalName
+        override val qualifiedName: String
+            get() = impl.canonicalName
 
         override fun getRetention(): AnnotationRetention = AnnotationRetention.RUNTIME
 
