@@ -1,24 +1,32 @@
 package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.getClassDeclarationByName
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
-import javax.inject.Provider
 
 class KspModelFactoryImpl : LangModelFactory {
-    private val listDeclaration = checkNotNull(Utils.resolver.getClassDeclarationByName(List::class.java.canonicalName)) {
-        "Not reached: unable to define list declaration"
+    private val listDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        checkNotNull(Utils.resolver.getClassDeclarationByName("java.util.List")) {
+            "FATAL: Unable to define `java.util.List`, check classpath"
+        }
     }
-    private val mapDeclaration = checkNotNull(Utils.resolver.getClassDeclarationByName(Map::class.java.canonicalName)) {
-        "Not reached: unable to define map declaration"
+    private val mapDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        checkNotNull(Utils.resolver.getClassDeclarationByName("java.util.Map")) {
+            "FATAL: Unable to define `java.util.Map`, check classpath"
+        }
     }
-    private val collectionDeclaration = checkNotNull(Utils.resolver.getClassDeclarationByName(Collection::class.java.canonicalName)) {
-        "Not reached: unable to define collection declaration"
+    private val collectionDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        checkNotNull(Utils.resolver.getClassDeclarationByName("java.util.Collection")) {
+            "FATAL: Unable to define `java.util.Collection`, check classpath"
+        }
     }
-    private val providerDeclaration = checkNotNull(Utils.resolver.getClassDeclarationByName(Provider::class.java.canonicalName)) {
-        "Not reached: unable to define collection declaration"
+    private val providerDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        checkNotNull(Utils.resolver.getClassDeclarationByName("javax.inject.Provider")) {
+            "FATAL: unable to define `javax.inject.Provider` declaration, ensure DL API is present on the classpath"
+        }
     }
 
     override fun getListType(type: TypeLangModel, isCovariant: Boolean): TypeLangModel {
@@ -68,8 +76,23 @@ class KspModelFactoryImpl : LangModelFactory {
         }
     }
 
-    override fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel? {
+    override fun getTypeDeclaration(
+        packageName: String,
+        simpleName: String,
+        vararg simpleNames: String
+    ): TypeDeclarationLangModel? {
+        val qualifiedName = buildString {
+            if (packageName.isNotEmpty()) {
+                append(packageName).append('.')
+            }
+            append(simpleName)
+            for (name in simpleNames) append('.').append(name)
+        }
         val declaration = Utils.resolver.getClassDeclarationByName(qualifiedName) ?: return null
+        if (declaration.classKind == ClassKind.ENUM_ENTRY) {
+            // Explicitly prohibit directly getting enum entries to get consistent behavior.
+            return null
+        }
         return KspTypeDeclarationImpl(KspTypeImpl(declaration.asType(emptyList())))
     }
 

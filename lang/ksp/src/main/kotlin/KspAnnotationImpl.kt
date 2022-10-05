@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.ksp.lang
 
+import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -10,7 +11,6 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel.Value
-import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
@@ -26,7 +26,7 @@ internal class KspAnnotationImpl(
 
     override val annotationClass: AnnotationDeclarationLangModel by lazy {
         AnnotationClassImpl(
-            declaration = impl.annotationType.resolve().resolveAliasIfNeeded().declaration as KSClassDeclaration,
+            declaration = checkNotNull(impl.annotationType.resolve().classDeclaration()),
         )
     }
 
@@ -102,10 +102,14 @@ internal class KspAnnotationImpl(
                     // Sometimes KSP yields enums (of platform types?) literally.
                     // Suppress before https://youtrack.jetbrains.com/issue/KT-54005 gets rolled out.
                     @Suppress("ENUM_DECLARING_CLASS_DEPRECATED_WARNING")
+                    val enumClass = KspTypeImpl(
+                        checkNotNull(Utils.resolver.getClassDeclarationByName(value.declaringClass.canonicalName)) {
+                            "enum constant $value has unresolved class (?)"
+                        }.asStarProjectedType()
+                    )
+
                     visitor.visitEnumConstant(
-                        enum = checkNotNull(LangModelFactory.getTypeDeclaration(
-                            qualifiedName = value.declaringClass.canonicalName,
-                        )) { "enum constant $value has unresolved class (?)" }.asType(),
+                        enum = enumClass,
                         constant = value.name,
                     )
                 }

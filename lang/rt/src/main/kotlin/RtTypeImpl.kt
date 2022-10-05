@@ -19,22 +19,26 @@ internal class RtTypeImpl private constructor(
 
     override val typeArguments: List<TypeLangModel> by lazy {
         when (impl) {
-            is ParameterizedType -> impl.actualTypeArguments.map { Factory(decay(it)) }
+            is ParameterizedType -> impl.actualTypeArguments.map { type ->
+                Factory(when(type) {
+                    is WildcardType -> {
+                        type.lowerBounds.singleOrNull() ?: type.upperBounds.singleOrNull() ?: Any::class.java
+                    }
+                    else -> type
+                })
+            }
             else -> emptyList()
         }
     }
 
-    override val isBoolean: Boolean
-        get() = when (impl.tryAsClass()) {
-            java.lang.Boolean.TYPE, java.lang.Boolean::class.java -> true
-            else -> false
-        }
-
     override val isVoid: Boolean
         get() = impl.tryAsClass() == Void.TYPE
 
-    override fun decay(): TypeLangModel {
-        return Factory(decay(impl))
+    override fun asBoxed(): TypeLangModel {
+        return Factory(when(impl) {
+            is Class<*> -> impl.boxed()
+            else -> impl
+        })
     }
 
     override fun isAssignableFrom(another: TypeLangModel): Boolean {
@@ -53,14 +57,6 @@ internal class RtTypeImpl private constructor(
     companion object Factory : ObjectCache<TypeEquivalenceWrapper, RtTypeImpl>() {
         operator fun invoke(type: Type): RtTypeImpl {
             return createCached(type.equivalence()) { RtTypeImpl(type) }
-        }
-
-        private fun decay(type: Type): Type {
-            return when (type) {
-                is WildcardType -> type.lowerBounds.singleOrNull() ?: type.upperBounds.singleOrNull()
-                is Class<*> -> type.boxed()
-                else -> null
-            } ?: type
         }
     }
 }

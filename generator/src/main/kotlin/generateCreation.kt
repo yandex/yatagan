@@ -9,7 +9,7 @@ import com.yandex.daggerlite.core.isNever
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.KotlinObjectKind
+import com.yandex.daggerlite.core.lang.TypeDeclarationKind
 import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
 import com.yandex.daggerlite.generator.poetry.buildExpression
 import com.yandex.daggerlite.graph.AlternativesBinding
@@ -56,8 +56,8 @@ private class CreationGeneratorVisitor(
                     if (instance != null) {
                         +"%L.%N(".formatCode(instance, function.name)
                     } else {
-                        val ownerObject = when (function.owner.kotlinObjectKind) {
-                            KotlinObjectKind.Object -> ".INSTANCE"
+                        val ownerObject = when (function.owner.kind) {
+                            TypeDeclarationKind.KotlinObject -> ".INSTANCE"
                             else -> ""
                         }
                         +"%T%L.%L(".formatCode(function.ownerName.asTypeName(), ownerObject, function.name)

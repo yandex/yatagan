@@ -17,7 +17,9 @@ data class ClassNameModel(
 
     private val asString by lazy(PUBLICATION) {
         buildString {
-            append(packageName).append('.')
+            if (packageName.isNotEmpty()) {
+                append(packageName).append('.')
+            }
             simpleNames.joinTo(this, separator = ".")
         }
     }

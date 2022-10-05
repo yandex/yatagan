@@ -2,12 +2,17 @@ package com.yandex.daggerlite.core.lang
 
 /**
  * Models a type declaration. Can represent class/primitive/array/... types.
+ *
+ * As of now type declaration has 1 : 1 relation to the [type][asType].
+ * This allows the declaration members be presented with already resolved class-level generics and eliminated the need
+ * for a public API for `asMemberOf()` and the likes. This should be taken into account while comparing two type
+ * declarations for equality - they may compare unequal for they have different underlying types.
  */
 interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Accessible {
     /**
-     * Whether the declaration is an interface.
+     * Declaration kind.
      */
-    val isInterface: Boolean
+    val kind: TypeDeclarationKind
 
     /**
      * Whether the declaration is abstract (abstract class or interface).
@@ -15,14 +20,9 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     val isAbstract: Boolean
 
     /**
-     * Whether the declaration is a kotlin `object`.
-     */
-    val kotlinObjectKind: KotlinObjectKind?
-
-    /**
      * Qualified/Canonical name of the represented class from the Java point of view.
      *
-     * Example: `"com.example.TopLevel.Nested"`.
+     * Example: `"com.example.TopLevel.Nested"`, `"int"`, `"void"`, ...
      */
     val qualifiedName: String
 
@@ -76,8 +76,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     val defaultCompanionObjectDeclaration: TypeDeclarationLangModel?
 
     /**
-     * Creates [TypeLangModel] based on the declaration **assuming, that no type arguments are required**.
-     * If the declaration does require type arguments, the behavior is undefined.
+     * Returns an underlying [TypeLangModel].
      */
     fun asType(): TypeLangModel
 

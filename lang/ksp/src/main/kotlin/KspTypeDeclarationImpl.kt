@@ -22,8 +22,8 @@ import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
+import com.yandex.daggerlite.core.lang.TypeDeclarationKind
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
@@ -44,17 +44,20 @@ internal class KspTypeDeclarationImpl private constructor(
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()
 
-    override val isInterface: Boolean
-        get() = impl.classKind == ClassKind.INTERFACE
-
     override val isAbstract: Boolean
         get() = impl.isAbstract()
 
-    override val kotlinObjectKind: KotlinObjectKind?
-        get() = when {
-            impl.isCompanionObject && impl.simpleName.asString() == "Companion" -> KotlinObjectKind.Companion
-            impl.classKind == ClassKind.OBJECT -> KotlinObjectKind.Object
-            else -> null
+    override val kind: TypeDeclarationKind
+        get() = when(impl.classKind) {
+            ClassKind.INTERFACE -> TypeDeclarationKind.Interface
+            ClassKind.CLASS -> TypeDeclarationKind.Class
+            ClassKind.ENUM_CLASS -> TypeDeclarationKind.Enum
+            ClassKind.ENUM_ENTRY -> TypeDeclarationKind.Enum  // TODO(*) WTF is with KSP?
+            ClassKind.OBJECT -> when {
+                impl.isCompanionObject && impl.simpleName.asString() == "Companion" -> TypeDeclarationKind.KotlinCompanion
+                else -> TypeDeclarationKind.KotlinObject
+            }
+            ClassKind.ANNOTATION_CLASS -> TypeDeclarationKind.Annotation
         }
 
     override val qualifiedName: String
@@ -82,10 +85,16 @@ internal class KspTypeDeclarationImpl private constructor(
     }
 
     override val constructors: Sequence<ConstructorLangModel> by lazy {
-        impl.getConstructors()
-            .filter { !it.isPrivate() }
-            .map { ConstructorImpl(platformModel = it) }
-            .memoize()
+        when(kind) {
+            TypeDeclarationKind.Annotation -> {
+                // Kotlin treats annotations as classes, we don't.
+                emptySequence()
+            }
+            else -> impl.getConstructors()
+                .filter { !it.isPrivate() }
+                .map { ConstructorImpl(platformModel = it) }
+                .memoize()
+        }
     }
 
     private interface FunctionFilter {
@@ -97,15 +106,15 @@ internal class KspTypeDeclarationImpl private constructor(
 
     override val functions: Sequence<FunctionLangModel> by lazy {
         sequence {
-            when (kotlinObjectKind) {
-                KotlinObjectKind.Object -> {
+            when (kind) {
+                TypeDeclarationKind.KotlinObject -> {
                     functionsImpl(
                         declaration = impl,
                         filter = object : FunctionFilter {},
                         isStatic = { it.isAnnotationPresent<JvmStatic>() }
                     )
                 }
-                KotlinObjectKind.Companion -> {
+                TypeDeclarationKind.KotlinCompanion -> {
                     functionsImpl(
                         declaration = impl,
                         filter = object : FunctionFilter {
@@ -117,7 +126,7 @@ internal class KspTypeDeclarationImpl private constructor(
                         isStatic = { false }
                     )
                 }
-                null -> {
+                else -> {
                     functionsImpl(
                         declaration = impl,
                         filter = object : FunctionFilter {},
@@ -229,8 +238,8 @@ internal class KspTypeDeclarationImpl private constructor(
 
     override val fields: Sequence<FieldLangModel> = run {
         sequence {
-            when (kotlinObjectKind) {
-                KotlinObjectKind.Object -> {
+            when (kind) {
+                TypeDeclarationKind.KotlinObject -> {
                     for (property in impl.getDeclaredProperties()) {
                         // `lateinit` generates exposed field
                         if (property.isPrivate() || (!property.isKotlinFieldInObject() && !property.isLateInit())) {
@@ -248,11 +257,11 @@ internal class KspTypeDeclarationImpl private constructor(
                             name = "INSTANCE",
                     ))
                 }
-                KotlinObjectKind.Companion -> {
+                TypeDeclarationKind.KotlinCompanion -> {
                     // Nothing here, no fields are actually generated in companion,
                     //  they are all generated in the enclosing class.
                 }
-                null -> {
+                else -> {
                     when (impl.origin) {
                         Origin.JAVA, Origin.JAVA_LIB -> {
                             // Then any "property" represents a field in Java

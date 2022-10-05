@@ -52,6 +52,9 @@ project(":testing-generator").projectDir = file("testing/generator")
 include("testing-dokka")
 project(":testing-dokka").projectDir = file("testing/dokka")
 
+include("testing-source-set")
+project(":testing-source-set").projectDir = file("testing/source-set")
+
 include("spi")
 include("spi-impl")
 project(":spi-impl").projectDir = file("spi/impl")

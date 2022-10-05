@@ -56,7 +56,14 @@ private fun nameModelImpl(
         is JvmTypeInfo.Array -> {
             return ArrayNameModel(
                 elementType = CtTypeNameModel(
-                    type = type?.arguments?.firstOrNull()?.type.resolveOrError(),
+                    type = type?.arguments?.firstOrNull().let {
+                        if (it?.variance == Variance.STAR) {
+                            // We don't trust KSP to return the correctly mapped type with STAR projection.
+                            Utils.objectType.asStarProjectedType()
+                        } else {
+                            it?.type.resolveOrError()
+                        }
+                    },
                     jvmTypeKind = jvmTypeKind.elementInfo,
                 )
             )

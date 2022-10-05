@@ -3,7 +3,16 @@ package com.yandex.daggerlite.core.lang
 /**
  * Models a concrete [TypeDeclarationLangModel] usage.
  * Contains additional information, like type arguments.
- * **Represents only non-nullable type**. It must be an error to try and represent a nullable type.
+ *
+ * No assumptions about type nullability and other "enhancements" is made.
+ *
+ * The represented type can be any normal Java type: reference, primitive, array, etc., except the wildcard types.
+ *
+ * Regarding wildcard types.
+ * This model can't represent a wildcard type directly - the system has Kotlin point of view here. Kotlin models
+ * type parameter as a *type variable* and a *variance*, and type argument as a *type* and a *projection*.
+ * [TypeLangModel] only provides [typeArguments]; variance, projection and type variables are not exposed as of now.
+ *
  */
 interface TypeLangModel : Comparable<TypeLangModel> {
     /**
@@ -12,19 +21,13 @@ interface TypeLangModel : Comparable<TypeLangModel> {
     val declaration: TypeDeclarationLangModel
 
     /**
-     * Type arguments.
-     *
-     * NOTE: Every returned type is implicitly [decayed][decay].
+     * Type arguments. If any of the arguments has non-invariant variance (or a wildcard type) -
+     * such is info is not available via the current API.
      */
     val typeArguments: List<TypeLangModel>
 
     /**
-     * Checks if the type is `boolean` or `java.lang.Boolean` (`kotlin.Boolean`) type.
-     */
-    val isBoolean: Boolean
-
-    /**
-     * Checks if the type is the `void` (`kotlin.Unit`) type.
+     * Checks if the type is the `void` JVM type.
      */
     val isVoid: Boolean
 
@@ -34,14 +37,8 @@ interface TypeLangModel : Comparable<TypeLangModel> {
     fun isAssignableFrom(another: TypeLangModel): Boolean
 
     /**
-     * This API is inspired by C++'s `std::decay` - the type "decays" into some other type according to some
-     * well-defined rules.
+     * @return If this is a primitive type, returns its *boxed* counterpart. Returns this type otherwise.
      *
-     * @return
-     *  If this is wildcard type (type with non-invariant variance), returns upper *xor* lower bound.
-     *  If this is a java builtin type, returns its *boxed* counterpart.
-     *  In any other cases, just returns the original type.
-     *  In all the cases, nullability info is discarded.
      */
-    fun decay(): TypeLangModel
+    fun asBoxed(): TypeLangModel
 }

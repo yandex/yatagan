@@ -14,6 +14,7 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.Variant
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.TypeDeclarationKind
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -166,7 +167,7 @@ internal class ComponentModelImpl private constructor(
             validator.reportError(Errors.nonComponent())
         }
 
-        if (!declaration.isInterface) {
+        if (declaration.kind != TypeDeclarationKind.Interface) {
             validator.reportError(Errors.nonInterfaceComponent())
         }
 

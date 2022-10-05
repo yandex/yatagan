@@ -117,7 +117,7 @@ internal class NodeModelImpl private constructor(
     }
 
     override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> {
-        val keyType = key.decay()  // Need to use decay as key may be a primitive type (do the boxing)
+        val keyType = key.asBoxed()  // Need to use box as key may be a primitive type
         val valueType = if (asProviders) LangModelFactory.getProviderType(type) else type
         return arrayOf(
             Factory(type = LangModelFactory.getMapType(keyType, valueType, isCovariant = false), qualifier = qualifier),
@@ -202,11 +202,11 @@ internal class NodeModelImpl private constructor(
             type: TypeLangModel,
             qualifier: AnnotationLangModel? = null,
         ): NodeModelImpl {
-            val decayed = type.decay()
-            val key: Any = if (qualifier != null) decayed to qualifier else decayed
+            val boxed = type.asBoxed()
+            val key: Any = if (qualifier != null) boxed to qualifier else boxed
             return createCached(key) {
                 NodeModelImpl(
-                    type = decayed,
+                    type = boxed,
                     qualifier = qualifier,
                 )
             }

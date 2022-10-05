@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.lang.KotlinObjectKind
+import com.yandex.daggerlite.core.lang.TypeDeclarationKind
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
@@ -91,13 +91,13 @@ internal fun Type.formatString(): String = when (this) {
 fun TypeDeclarationLangModel.kotlinObjectInstanceOrNull(): Any? {
     val model = this as RtTypeDeclarationImpl
     val impl = model.type.impl.asClass()
-    return when(model.kotlinObjectKind) {
-        KotlinObjectKind.Object -> impl.declaredFields.first { it.name == "INSTANCE" }
-        KotlinObjectKind.Companion -> {
+    return when(model.kind) {
+        TypeDeclarationKind.KotlinObject -> impl.declaredFields.first { it.name == "INSTANCE" }
+        TypeDeclarationKind.KotlinCompanion -> {
             val companionName = impl.simpleName
             impl.enclosingClass.declaredFields.first { it.name == companionName }
         }
-        null -> null
+        else -> null
     }?.get(null)
 }
 

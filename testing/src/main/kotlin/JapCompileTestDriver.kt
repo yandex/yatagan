@@ -20,4 +20,5 @@ class JapCompileTestDriver : CompileTestDriverBase() {
 
     override val backendUnderTest: Backend
         get() = Backend.Kapt
+
 }

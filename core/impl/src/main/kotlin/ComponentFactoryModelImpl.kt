@@ -17,6 +17,7 @@ import com.yandex.daggerlite.core.allInputs
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.ParameterLangModel
+import com.yandex.daggerlite.core.lang.TypeDeclarationKind
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
@@ -151,7 +152,7 @@ internal class ComponentFactoryModelImpl private constructor(
             validator.child(input)
         }
 
-        if (!factoryDeclaration.isInterface) {
+        if (factoryDeclaration.kind != TypeDeclarationKind.Interface) {
             validator.reportError(Strings.Errors.nonInterfaceCreator())
         }
         val factory = factoryMethod

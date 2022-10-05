@@ -7,8 +7,8 @@ import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.ParameterLangModel
+import com.yandex.daggerlite.core.lang.TypeDeclarationKind
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
@@ -36,18 +36,22 @@ internal class JavaxTypeDeclarationImpl private constructor(
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
 
-    override val isInterface: Boolean
-        get() = impl.kind == ElementKind.INTERFACE
-
     override val isAbstract: Boolean
-        get() = impl.isAbstract
+        get() = impl.isAbstract &&
+                impl.kind != ElementKind.ANNOTATION_TYPE  // Do not treat @interface as abstract for consistency
 
-    override val kotlinObjectKind: KotlinObjectKind?
-    get() = when {
-        impl.isDefaultCompanionObject() -> KotlinObjectKind.Companion
-        impl.isKotlinSingleton() -> KotlinObjectKind.Object
-        else -> null
-    }
+    override val kind: TypeDeclarationKind
+        get() = when(impl.kind) {
+            ElementKind.ENUM -> TypeDeclarationKind.Enum
+            ElementKind.CLASS -> when {
+                impl.isDefaultCompanionObject() -> TypeDeclarationKind.KotlinCompanion
+                impl.isKotlinSingleton() -> TypeDeclarationKind.KotlinObject
+                else -> TypeDeclarationKind.Class
+            }
+            ElementKind.ANNOTATION_TYPE -> TypeDeclarationKind.Annotation
+            ElementKind.INTERFACE -> TypeDeclarationKind.Interface
+            else -> TypeDeclarationKind.None
+        }
 
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
@@ -84,8 +88,8 @@ internal class JavaxTypeDeclarationImpl private constructor(
     override val functions: Sequence<FunctionLangModel> by lazy {
         impl.allNonPrivateMethods()
         .run {
-            when (kotlinObjectKind) {
-                KotlinObjectKind.Companion -> filterNot {
+            when (kind) {
+                TypeDeclarationKind.KotlinCompanion -> filterNot {
                     // Such methods already have a truly static counterpart so skip them.
                     it.isAnnotatedWith<JvmStatic>()
                 }

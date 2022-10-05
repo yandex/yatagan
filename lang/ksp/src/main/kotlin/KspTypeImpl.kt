@@ -21,24 +21,19 @@ internal class KspTypeImpl private constructor(
     }
 
     override val declaration: TypeDeclarationLangModel by lazy(PUBLICATION) {
-        if (impl.declaration is KSClassDeclaration)
+        if (jvmType is JvmTypeInfo.Declared && impl.declaration is KSClassDeclaration) {
             KspTypeDeclarationImpl(this)
-        else NoDeclaration(this)
+        } else NoDeclaration(this)
     }
 
     override val typeArguments: List<TypeLangModel> by lazy {
         when (jvmType) {
             JvmTypeInfo.Declared -> impl.arguments.map { arg ->
-                Factory(arg.type ?: Utils.resolver.builtIns.anyType.asReference())
+                Factory(arg.type ?: Utils.objectType.asStarProjectedType().asReference())
             }
             else -> emptyList()
         }
     }
-
-    override val isBoolean: Boolean
-        get() {
-            return jvmType == JvmTypeInfo.Boolean || impl.declaration.qualifiedName?.asString() == "java.lang.Boolean"
-        }
 
     override val isVoid: Boolean
         get() = jvmType == JvmTypeInfo.Void || impl == Utils.resolver.builtIns.unitType
@@ -54,7 +49,7 @@ internal class KspTypeImpl private constructor(
         }
     }
 
-    override fun decay(): TypeLangModel {
+    override fun asBoxed(): TypeLangModel {
         return when (jvmType) {
             JvmTypeInfo.Boolean, JvmTypeInfo.Byte, JvmTypeInfo.Char, JvmTypeInfo.Double,
             JvmTypeInfo.Float, JvmTypeInfo.Int, JvmTypeInfo.Long, JvmTypeInfo.Short,
