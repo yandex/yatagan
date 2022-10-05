@@ -22,7 +22,7 @@ val compiledTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy {
         // Force KSP version as testing framework may depend on an older version.
         force("com.google.devtools.ksp:symbol-processing:$kspVersion")
@@ -32,7 +32,7 @@ configurations.all {
 
 dependencies {
     // Third-party test dependencies
-    implementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$kotlinCompileTestingVersion")
+    api(project(":testing-source-set"))
     implementation("junit:junit:$junitVersion")
 
     // Base test dependencies

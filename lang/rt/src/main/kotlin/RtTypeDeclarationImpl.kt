@@ -27,9 +27,9 @@ import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.KotlinObjectKind
 import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
+import com.yandex.daggerlite.core.lang.TypeDeclarationKind
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
@@ -50,34 +50,41 @@ internal class RtTypeDeclarationImpl private constructor(
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
 
-    override val isInterface: Boolean
-        get() = impl.isInterface
-
     override val isAbstract: Boolean
-        get() = Modifier.isAbstract(impl.modifiers)
+        get() = Modifier.isAbstract(impl.modifiers) && !impl.isAnnotation
 
     override val qualifiedName: String
         get() = impl.canonicalName
 
-    override val kotlinObjectKind: KotlinObjectKind? by lazy {
-        ifOrElseNull(impl.isFromKotlin()) {
-            when {
-                impl.simpleName == "Companion" && impl.enclosingClass?.declaredFields?.any {
-                    it.isPublicStaticFinal && it.name == "Companion" && it.type == impl
-                } == true -> KotlinObjectKind.Companion
-                impl.declaredFields.any {
-                    it.isPublicStaticFinal && it.name == "INSTANCE" && it.type == impl
-                } -> KotlinObjectKind.Object
-                else -> null
-            }
+    override val kind: TypeDeclarationKind by lazy(PUBLICATION) {
+        when {
+            impl.isAnnotation -> TypeDeclarationKind.Annotation
+            impl.isInterface -> TypeDeclarationKind.Interface
+            impl.isEnum -> TypeDeclarationKind.Enum
+            impl.isPrimitive || impl.isArray -> TypeDeclarationKind.None
+            impl.simpleName == "Companion" && impl.enclosingClass?.declaredFields?.any {
+                it.isPublicStaticFinal && it.name == "Companion" && it.type == impl
+            } == true -> TypeDeclarationKind.KotlinCompanion
+
+            impl.declaredFields.any {
+                it.isPublicStaticFinal && it.name == "INSTANCE" && it.type == impl
+            } -> TypeDeclarationKind.KotlinObject
+
+            else -> TypeDeclarationKind.Class
         }
     }
 
     override val enclosingType: TypeDeclarationLangModel?
         get() = impl.enclosingClass?.let { Factory(RtTypeImpl(it)) }
 
-    override val implementedInterfaces: Sequence<TypeLangModel>
-        get() = TODO("Not yet implemented")
+    override val interfaces: Sequence<TypeLangModel>
+        get() = superTypes
+            .filter { it.impl.isInterface }
+            .map { it.type }
+
+    override val superType: TypeLangModel?
+        get() = superTypes.firstOrNull { !it.impl.isInterface }
+            ?.takeUnless { it.qualifiedName == "java.lang.Object" }?.type
 
     override fun asType(): TypeLangModel {
         return type
@@ -107,8 +114,8 @@ internal class RtTypeDeclarationImpl private constructor(
         impl.getMethodsOverrideAware()
             .asSequence()
             .run {
-                when (kotlinObjectKind) {
-                    KotlinObjectKind.Companion -> filterNot {
+                when (kind) {
+                    TypeDeclarationKind.KotlinCompanion -> filterNot {
                         // Such methods already have a truly static counterpart so skip them.
                         it.isAnnotationPresent(JvmStatic::class.java)
                     }
@@ -216,28 +223,22 @@ internal class RtTypeDeclarationImpl private constructor(
         }
     }
 
-    internal val typeHierarchy: Sequence<RtTypeDeclarationImpl> by lazy(PUBLICATION) {
+    internal val superTypes: Sequence<RtTypeDeclarationImpl> by lazy(PUBLICATION) {
         sequence {
-            val queue = ArrayList<RtTypeDeclarationImpl>(4)
-            queue += this@RtTypeDeclarationImpl
-            do {
-                val declaration = queue.removeLast()
-                yield(declaration)
-                declaration.impl.genericSuperclass?.let { superClass ->
-                    queue += Factory(superClass.resolveGenerics(declaration.genericsInfo))
-                }
-                for (superInterface in declaration.impl.genericInterfaces) {
-                    queue += Factory(superInterface.resolveGenerics(declaration.genericsInfo))
-                }
-            } while (queue.isNotEmpty())
+            impl.genericSuperclass?.let { superClass ->
+                yield(Factory(superClass.resolveGenerics(genericsInfo)))
+            }
+            for (superInterface in impl.genericInterfaces) {
+                yield(Factory(superInterface.resolveGenerics(genericsInfo)))
+            }
         }.memoize()
     }
 
     internal val genericsInfo: Lazy<Map<TypeVariable<*>, Type>>? = when (val type = type.impl) {
         is ParameterizedType -> lazy {
-            buildMap(type.actualTypeArguments.size) {
+            val typeArgs = type.actualTypeArguments
+            buildMap(typeArgs.size) {
                 val typeParams = impl.typeParameters
-                val typeArgs = type.actualTypeArguments
                 for (i in typeParams.indices) {
                     put(typeParams[i], typeArgs[i])
                 }

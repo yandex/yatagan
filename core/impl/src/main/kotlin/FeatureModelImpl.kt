@@ -234,7 +234,7 @@ private class LiteralPayloadImpl private constructor(
                 add(member)
 
                 val type = member.accept(MemberTypeVisitor)
-                if (type.isBoolean) {
+                if (type.asBoxed().declaration.qualifiedName == "java.lang.Boolean") {
                     finished = true
                 } else {
                     currentType = type

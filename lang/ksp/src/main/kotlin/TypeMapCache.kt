@@ -215,7 +215,7 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
     fun mapToKotlinType(
         type: KSType,
     ): KSType {
-        val declaration = type.resolveAliasIfNeeded().declaration as? KSClassDeclaration
+        val declaration = type.classDeclaration()
         val qualifiedName = declaration?.qualifiedName ?: return type
         if (qualifiedName.asString().run { !startsWith("java.") && !startsWith("kotlin.jvm.") }) {
             // Only these types may have kotlin-specific counterparts.

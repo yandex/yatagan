@@ -12,6 +12,7 @@ import com.yandex.daggerlite.process.Logger
 import com.yandex.daggerlite.process.LoggerDecorator
 import org.intellij.lang.annotations.Language
 import java.io.File
+import java.lang.reflect.Method
 import java.util.TreeSet
 import java.util.function.Supplier
 import javax.annotation.processing.AbstractProcessor
@@ -19,6 +20,8 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 class DynamicCompileTestDriver(
     apiType: ApiType = ApiType.Dynamic,
@@ -40,9 +43,9 @@ class DynamicCompileTestDriver(
         )
     }
 
-    override fun compileRunAndValidate() {
-        dynamicRuntimeScope {
-            super.compileRunAndValidate()
+    override fun runRuntimeTest(test: Method) {
+        dynamicRuntimeScope(test.declaringClass.classLoader) {
+            super.runRuntimeTest(test)
         }
     }
 
@@ -62,38 +65,41 @@ class DynamicCompileTestDriver(
         log: StringBuilder,
     ): Boolean {
         val classLoader = makeClassLoader(runtimeClasspath)
-        var success = true
-        val logger = LoggerDecorator(object : Logger {
-            override fun error(message: String) {
-                success = false
-                log.appendLine(message)
-                println(message)
-            }
+        dynamicRuntimeScope(classLoader) {
+            var success = true
+            val logger = LoggerDecorator(object : Logger {
+                override fun error(message: String) {
+                    success = false
+                    log.appendLine(message)
+                    println(message)
+                }
 
-            override fun warning(message: String) {
-                log.appendLine(message)
-                println(message)
-            }
-        })
-        for (bootstrapperName in componentBootstrapperNames) {
-            @Suppress("UNCHECKED_CAST")
-            val bootstrapper = classLoader.loadClass(bootstrapperName.reflectionName())
-                .getDeclaredConstructor()
-                .newInstance() as Supplier<List<Array<String>>>
-            for ((kind, message) in bootstrapper.get()) {
-                when (kind) {
-                    "error" -> logger.error(message)
-                    "warning" -> logger.warning(message)
-                    else -> throw AssertionError("not reached")
+                override fun warning(message: String) {
+                    log.appendLine(message)
+                    println(message)
+                }
+            })
+            for (bootstrapperName in componentBootstrapperNames) {
+                @Suppress("UNCHECKED_CAST")
+                val bootstrapper = classLoader.loadClass(bootstrapperName.reflectionName())
+                    .getDeclaredConstructor()
+                    .newInstance() as Supplier<List<Array<String>>>
+                for ((kind, message) in bootstrapper.get()) {
+                    when (kind) {
+                        "error" -> logger.error(message)
+                        "warning" -> logger.warning(message)
+                        else -> throw AssertionError("not reached")
+                    }
                 }
             }
+            return success
         }
-        return success
     }
 
-    private inline fun dynamicRuntimeScope(block: () -> Unit) {
+    private inline fun dynamicRuntimeScope(classLoader: ClassLoader, block: () -> Unit) {
+        contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
         ObjectCacheRegistry.use {
-            LangModelFactory.use(RtModelFactoryImpl()) {
+            LangModelFactory.use(RtModelFactoryImpl(classLoader)) {
                 block()
             }
         }

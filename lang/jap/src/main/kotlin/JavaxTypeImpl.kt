@@ -20,23 +20,25 @@ internal class JavaxTypeImpl private constructor(
         } else NoDeclaration(this)
     }
 
-    override val isBoolean: Boolean
-        get() = when (impl.kind) {
-            TypeKind.BOOLEAN -> true
-            TypeKind.DECLARED -> impl.asTypeElement() == Utils.booleanType
-            else -> false
-        }
-
     override val isVoid: Boolean
         get() = impl.kind == TypeKind.VOID
 
-    override fun decay(): TypeLangModel {
-        return Factory(decay(impl))
+    override fun asBoxed(): TypeLangModel {
+        return Factory(if (impl.kind.isPrimitive) {
+            Utils.types.boxedClass(impl.asPrimitiveType()).asType()
+        } else impl)
     }
 
     override val typeArguments: List<TypeLangModel> by lazy {
         when (impl.kind) {
-            TypeKind.DECLARED -> impl.asDeclaredType().typeArguments.map { Factory(decay(it)) }
+            TypeKind.DECLARED -> impl.asDeclaredType().typeArguments.map { type ->
+                Factory(when(type.kind) {
+                    TypeKind.WILDCARD -> type.asWildCardType().let {
+                        it.extendsBound ?: it.superBound ?: Utils.objectType.asType()
+                    }
+                    else -> type
+                })
+            }
             else -> emptyList()
         }
     }
@@ -51,18 +53,6 @@ internal class JavaxTypeImpl private constructor(
     companion object Factory : ObjectCache<TypeMirrorEquivalence, JavaxTypeImpl>() {
         operator fun invoke(impl: TypeMirror): JavaxTypeImpl {
             return createCached(TypeMirrorEquivalence(impl)) { JavaxTypeImpl(impl = impl) }
-        }
-
-        private fun decay(type: TypeMirror): TypeMirror {
-            return when (type.kind) {
-                TypeKind.WILDCARD -> type.asWildCardType().let {
-                    it.extendsBound ?: it.superBound ?: Utils.objectType.asType()
-                }
-                TypeKind.BOOLEAN, TypeKind.BYTE, TypeKind.SHORT, TypeKind.CHAR,
-                TypeKind.INT, TypeKind.LONG, TypeKind.FLOAT, TypeKind.DOUBLE,
-                -> Utils.types.boxedClass(type.asPrimitiveType()).asType()
-                else -> null
-            } ?: type
         }
     }
 }

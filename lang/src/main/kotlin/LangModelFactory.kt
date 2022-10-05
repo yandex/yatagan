@@ -40,9 +40,15 @@ interface LangModelFactory {
      * @return a type declaration model by the given name. If kotlin-platform type is requested, e. g. `kotlin.String`,
      * Java counterpart is returned, e.g. `java.lang.String`. `null` is returned when no such type can be found.
      *
-     * @param qualifiedName fully qualified name of the class.
+     * @param packageName package name where the class is located.
+     * @param simpleName a single simple class name.
+     * @param simpleNames multiple names if the class is nested, empty if the class is top-level.
      */
-    fun getTypeDeclaration(qualifiedName: String): TypeDeclarationLangModel?
+    fun getTypeDeclaration(
+        packageName: String,
+        simpleName: String,
+        vararg simpleNames: String,
+    ): TypeDeclarationLangModel?
 
     /**
      * An "error" type, which is usually applicable in places, where type information is unresolved due to a semantic
@@ -75,8 +81,12 @@ interface LangModelFactory {
             return checkNotNull(delegate).getProviderType(type)
         }
 
-        override fun getTypeDeclaration(qualifiedName: String) =
-                checkNotNull(delegate).getTypeDeclaration(qualifiedName)
+        override fun getTypeDeclaration(
+            packageName: String,
+            simpleName: String,
+            vararg simpleNames: String
+        ): TypeDeclarationLangModel? =
+                checkNotNull(delegate).getTypeDeclaration(packageName, simpleName, *simpleNames)
 
         override val errorType: TypeLangModel get() = checkNotNull(delegate).errorType
 

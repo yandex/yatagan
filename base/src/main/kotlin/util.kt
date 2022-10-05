@@ -14,6 +14,16 @@ inline fun <reified S : Any> loadServices(): List<S> {
     return ServiceLoader.load(serviceClass, serviceClass.classLoader).toList()
 }
 
+inline fun <T, reified R> Array<T>.mapToArray(map: (T) -> R): Array<R> {
+    contract { callsInPlace(map) }
+    return Array(size) { map(get(it)) }
+}
+
+inline fun <T, reified R> List<T>.mapToArray(map: (T) -> R): Array<R> {
+    contract { callsInPlace(map) }
+    return Array(size) { map(get(it)) }
+}
+
 inline fun <T, R> Iterable<T>.zipWithNextOrNull(block: (T, T?) -> R): List<R> {
     contract { callsInPlace(block) }
 

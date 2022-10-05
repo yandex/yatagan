@@ -40,7 +40,7 @@ object Dagger {
 
     init {
         @OptIn(InternalLangApi::class)
-        LangModelFactory.delegate = RtModelFactoryImpl()
+        LangModelFactory.delegate = RtModelFactoryImpl(javaClass.classLoader)
     }
 
     /**

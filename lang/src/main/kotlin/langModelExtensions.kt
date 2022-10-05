@@ -7,7 +7,10 @@ inline fun <reified A : Annotation> AnnotatedLangModel.isAnnotatedWith() = isAnn
 
 inline fun <reified A : Annotation> AnnotationLangModel.hasType() = annotationClass.isClass(A::class.java)
 
-val TypeDeclarationLangModel.isKotlinObject get() = kotlinObjectKind != null
+val TypeDeclarationLangModel.isKotlinObject get() = when(kind) {
+    TypeDeclarationKind.KotlinObject, TypeDeclarationKind.KotlinCompanion -> true
+    else -> false
+}
 
 val TypeDeclarationLangModel.functionsWithCompanion: Sequence<FunctionLangModel>
     get() = when (val companion = defaultCompanionObjectDeclaration) {
@@ -23,6 +26,7 @@ inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -
     try {
         block()
     } finally {
+        check(delegate == factory)
         delegate = null
     }
 }

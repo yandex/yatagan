@@ -8,6 +8,7 @@ import com.yandex.daggerlite.generated.DynamicOptimizedApiClasspath
 import com.yandex.daggerlite.process.LoggerDecorator
 import org.junit.Assert
 import java.io.File
+import java.lang.reflect.Method
 import java.net.URLClassLoader
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -17,7 +18,7 @@ import kotlin.io.path.writeText
 abstract class CompileTestDriverBase protected constructor(
     private val apiType: ApiType = ApiType.Compiled,
 ) : CompileTestDriver {
-    private val mainSourceSet = SourceSetImpl()
+    private val mainSourceSet = SourceSet()
     private var precompiledModuleOutputDir: File? = null
 
     override val testNameRule = TestNameRule()
@@ -79,6 +80,10 @@ abstract class CompileTestDriverBase protected constructor(
         return emptyList()
     }
 
+    protected open fun runRuntimeTest(test: Method) {
+        test.invoke(null)
+    }
+
     override fun compileRunAndValidate() {
         val goldenResourcePath = "golden/${testNameRule.testClassSimpleName}/${testNameRule.testMethodName}.golden.txt"
 
@@ -105,7 +110,7 @@ abstract class CompileTestDriverBase protected constructor(
                 // find runtime test
                 val classLoader = makeClassLoader(runtimeClasspath)
                 try {
-                    classLoader.loadClass("test.TestCaseKt").getDeclaredMethod("test").invoke(null)
+                    runRuntimeTest(classLoader.loadClass("test.TestCaseKt").getDeclaredMethod("test"))
                 } catch (e: ClassNotFoundException) {
                     println("NOTE: No runtime test detected.")
                 } catch (e: NoSuchMethodException) {

@@ -8,6 +8,7 @@ import com.yandex.daggerlite.core.AssistedInjectFactoryModel.Parameter
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.TypeDeclarationKind
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
@@ -74,7 +75,7 @@ internal class AssistedInjectFactoryModelImpl private constructor(
     override fun validate(validator: Validator) {
         validator.child(asNode())
 
-        if (!impl.isInterface) {
+        if (impl.kind != TypeDeclarationKind.Interface) {
             validator.reportError(Strings.Errors.assistedInjectFactoryNotInterface())
         }
 

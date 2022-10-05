@@ -88,6 +88,11 @@ internal fun KSType.resolveAliasIfNeeded(): KSType = when (val declaration = dec
     else -> this
 }
 
+internal fun KSType.classDeclaration(): KSClassDeclaration? = when (val declaration = declaration) {
+    is KSTypeAlias -> declaration.type.resolve().classDeclaration()
+    else -> declaration as? KSClassDeclaration
+}
+
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
     declarations.filterIsInstance<KSClassDeclaration>().find(KSClassDeclaration::isCompanionObject)
 

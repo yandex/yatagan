@@ -19,6 +19,14 @@ class ProcessingUtils(
         resolver.getClassDeclarationByName("java.lang.Class")!!
     }
 
+    val anyType by lazy {
+        resolver.getClassDeclarationByName("kotlin.Any")!!
+    }
+
+    val objectType by lazy {
+        resolver.getClassDeclarationByName("java.lang.Object")!!
+    }
+
     val kotlinRetentionClass by lazy {
         Utils.resolver.getClassDeclarationByName("kotlin.annotation.Retention")!!
     }
