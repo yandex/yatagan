@@ -12,7 +12,8 @@ import com.google.devtools.ksp.symbol.KSModifierListOwner
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.KSTypeArgument
+import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
@@ -29,6 +30,7 @@ import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
 import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
 import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
 import com.yandex.daggerlite.lang.common.FieldLangModelBase
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
@@ -61,19 +63,23 @@ internal class KspTypeDeclarationImpl private constructor(
     override val enclosingType: TypeDeclarationLangModel?
         get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { Factory(KspTypeImpl(it.asType(emptyList()))) }
 
-    override val implementedInterfaces: Sequence<TypeLangModel> = sequence {
-        val queue = ArrayDeque<Sequence<KSTypeReference>>()
-        queue += impl.superTypes
-        while (queue.isNotEmpty()) {
-            for (typeRef in queue.removeFirst()) {
-                val declaration = typeRef.resolve().resolveAliasIfNeeded() as? KSClassDeclaration ?: continue
-                queue += declaration.superTypes
-                if (declaration.classKind == ClassKind.INTERFACE) {
-                    yield(KspTypeImpl(typeRef))
-                }
-            }
-        }
-    }.memoize()
+    override val interfaces: Sequence<TypeLangModel> by lazy {
+        impl.superTypes.map {
+            it.resolve()
+        }.filter {
+            it.classDeclaration()?.classKind != ClassKind.CLASS
+        }.map { KspTypeImpl(it.asMemberOfThis()) }
+            .memoize()
+    }
+
+    override val superType: TypeLangModel? by lazy {
+        impl.superTypes.map {
+            it.resolve()
+        }.find {
+            val declaration = it.classDeclaration()
+            declaration?.classKind == ClassKind.CLASS && declaration != Utils.anyType
+        }?.let { KspTypeImpl(it.asMemberOfThis()) }
+    }
 
     override val constructors: Sequence<ConstructorLangModel> by lazy {
         impl.getConstructors()
@@ -323,6 +329,37 @@ internal class KspTypeDeclarationImpl private constructor(
 
     override val platformModel: KSClassDeclaration
         get() = impl
+
+    private val genericsInfo: Map<String, KSTypeArgument> by lazy(PUBLICATION) {
+        impl.typeParameters.map { it.name.asString() }
+            .zip(type.impl.arguments)
+            .toMap()
+    }
+
+    private fun KSType.asMemberOfThis(): KSType {
+        return when(val declaration = declaration) {
+            is KSTypeParameter -> {
+                genericsInfo[declaration.name.asString()]?.type?.resolve() ?: this
+            }
+            is KSClassDeclaration -> {
+                if (arguments.isEmpty()) {
+                    this
+                } else declaration.asType(arguments.map { arg ->
+                    when (val reference = arg.type) {
+                        null -> arg
+                        else -> {
+                            val oldType = reference.resolve()
+                            when (val newType = oldType.asMemberOfThis()) {
+                                oldType -> arg
+                                else -> Utils.resolver.getTypeArgument(reference.replaceType(newType), arg.variance)
+                            }
+                        }
+                    }
+                })
+            }
+            else -> this
+        }
+    }
 
     companion object Factory : ObjectCache<KspTypeImpl, KspTypeDeclarationImpl>() {
         operator fun invoke(impl: KspTypeImpl) =

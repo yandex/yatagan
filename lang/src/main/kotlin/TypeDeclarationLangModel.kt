@@ -32,9 +32,17 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     val enclosingType: TypeDeclarationLangModel?
 
     /**
-     * All implemented interfaces, recursively.
+     * Interfaces directly implemented/extended by the declaration.
      */
-    val implementedInterfaces: Sequence<TypeLangModel>
+    val interfaces: Sequence<TypeLangModel>
+
+    /**
+     * Super-type, if present.
+     *
+     * NOTE: Never returns `java.lang.Object`/`kotlin.Any`, `null` is returned instead.
+     * This is done to counter uniformity issues.
+     */
+    val superType: TypeLangModel?
 
     /**
      * All declared non-private constructors.

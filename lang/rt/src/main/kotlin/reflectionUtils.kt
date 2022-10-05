@@ -115,6 +115,15 @@ internal fun Type.resolveGenericsHierarchyAware(
     }?.genericsInfo?.let(::resolveGenerics) ?: this
 }
 
+private val RtTypeDeclarationImpl.typeHierarchy: Sequence<RtTypeDeclarationImpl>
+    get() = sequence {
+        yield(this@typeHierarchy)
+        for (superType in superTypes) {
+            yield(superType)
+            yieldAll(superType.typeHierarchy)
+        }
+    }
+
 internal fun Type.resolveGenerics(genericsInfo: Lazy<Map<TypeVariable<*>, Type>>?): Type {
     if (genericsInfo == null) {
         return this

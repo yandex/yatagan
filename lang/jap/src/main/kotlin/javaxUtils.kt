@@ -24,6 +24,7 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
+import javax.lang.model.element.TypeParameterElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
@@ -58,6 +59,8 @@ fun Element.asTypeElement(): TypeElement = MoreElements.asType(this)
 fun Element.asTypeElementOrNull(): TypeElement? = this.accept(AsTypeElementOptional, Unit)
 
 fun Element.asVariableElement(): VariableElement = MoreElements.asVariable(this)
+
+fun Element.asTypeParameterElement(): TypeParameterElement = MoreElements.asTypeParameter(this)
 
 internal fun Element.asExecutableElement() = MoreElements.asExecutable(this)
 

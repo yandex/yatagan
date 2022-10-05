@@ -12,7 +12,7 @@ class NoDeclaration (
     override val isEffectivelyPublic get() = false
 
     override val annotations get() = emptySequence<Nothing>()
-    override val implementedInterfaces get() = emptySequence<Nothing>()
+    override val interfaces get() = emptySequence<Nothing>()
     override val constructors get() = emptySequence<Nothing>()
     override val functions get() = emptySequence<Nothing>()
     override val fields get() = emptySequence<Nothing>()
@@ -20,6 +20,7 @@ class NoDeclaration (
     override val conditions get() = emptySequence<Nothing>()
     override val conditionals get() = emptySequence<Nothing>()
 
+    override val superType: Nothing? get() = null
     override val defaultCompanionObjectDeclaration: Nothing? get() = null
     override val enclosingType: Nothing? get() = null
     override val kotlinObjectKind: Nothing? get() = null

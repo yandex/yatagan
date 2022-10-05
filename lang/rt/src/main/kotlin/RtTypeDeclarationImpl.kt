@@ -76,8 +76,14 @@ internal class RtTypeDeclarationImpl private constructor(
     override val enclosingType: TypeDeclarationLangModel?
         get() = impl.enclosingClass?.let { Factory(RtTypeImpl(it)) }
 
-    override val implementedInterfaces: Sequence<TypeLangModel>
-        get() = TODO("Not yet implemented")
+    override val interfaces: Sequence<TypeLangModel>
+        get() = superTypes
+            .filter { it.impl.isInterface }
+            .map { it.type }
+
+    override val superType: TypeLangModel?
+        get() = superTypes.firstOrNull { !it.impl.isInterface }
+            ?.takeUnless { it.qualifiedName == "java.lang.Object" }?.type
 
     override fun asType(): TypeLangModel {
         return type
@@ -216,28 +222,22 @@ internal class RtTypeDeclarationImpl private constructor(
         }
     }
 
-    internal val typeHierarchy: Sequence<RtTypeDeclarationImpl> by lazy(PUBLICATION) {
+    internal val superTypes: Sequence<RtTypeDeclarationImpl> by lazy(PUBLICATION) {
         sequence {
-            val queue = ArrayList<RtTypeDeclarationImpl>(4)
-            queue += this@RtTypeDeclarationImpl
-            do {
-                val declaration = queue.removeLast()
-                yield(declaration)
-                declaration.impl.genericSuperclass?.let { superClass ->
-                    queue += Factory(superClass.resolveGenerics(declaration.genericsInfo))
-                }
-                for (superInterface in declaration.impl.genericInterfaces) {
-                    queue += Factory(superInterface.resolveGenerics(declaration.genericsInfo))
-                }
-            } while (queue.isNotEmpty())
+            impl.genericSuperclass?.let { superClass ->
+                yield(Factory(superClass.resolveGenerics(genericsInfo)))
+            }
+            for (superInterface in impl.genericInterfaces) {
+                yield(Factory(superInterface.resolveGenerics(genericsInfo)))
+            }
         }.memoize()
     }
 
     internal val genericsInfo: Lazy<Map<TypeVariable<*>, Type>>? = when (val type = type.impl) {
         is ParameterizedType -> lazy {
-            buildMap(type.actualTypeArguments.size) {
+            val typeArgs = type.actualTypeArguments
+            buildMap(typeArgs.size) {
                 val typeParams = impl.typeParameters
-                val typeArgs = type.actualTypeArguments
                 for (i in typeParams.indices) {
                     put(typeParams[i], typeArgs[i])
                 }
