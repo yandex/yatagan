@@ -143,7 +143,7 @@ internal class NodeModelImpl private constructor(
             inject != null -> InjectConstructorImpl(inject)
             AssistedInjectFactoryModelImpl.canRepresent(declaration) -> AssistedInjectFactoryModelImpl(declaration)
             ComponentFactoryModelImpl.canRepresent(declaration) -> ComponentFactoryModelImpl(declaration)
-            ComponentModelImpl.canRepresent(declaration) -> ComponentFactoryModelImpl(declaration)
+            ComponentModelImpl.canRepresent(declaration) -> ComponentModelImpl(declaration)
             else -> null
         }
     }
