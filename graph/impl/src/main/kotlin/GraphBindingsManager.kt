@@ -36,50 +36,18 @@ import com.yandex.daggerlite.validation.format.Strings
 import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 
-internal class GraphBindingsFactory(
+internal class GraphBindingsManager(
     private val graph: BindingGraphImpl,
-) : MayBeInvalid, WithParents<GraphBindingsFactory> by hierarchyExtension(graph, GraphBindingsFactory) {
+) : MayBeInvalid, WithParents<GraphBindingsManager> by hierarchyExtension(graph, GraphBindingsManager) {
     init {
-        graph[GraphBindingsFactory] = this
+        graph[GraphBindingsManager] = this
     }
     private val implicitBindingCreator = ImplicitBindingCreator()
 
     override fun toString(childContext: MayBeInvalid?): RichString = throw AssertionError("Not reached")
 
     private val providedBindings: Map<NodeModel, List<BaseBinding>> = buildList {
-        val bindingModelVisitor = object : ModuleHostedBindingModel.Visitor<BaseBinding> {
-            override fun visitBinds(model: BindsBindingModel): BaseBinding {
-                return if (model.target.node in model.sources) {
-                    SelfDependentInvalidBinding(
-                        owner = graph,
-                        impl = model,
-                    )
-                } else when (model.sources.count()) {
-                    0 -> ExplicitEmptyBindingImpl(
-                        owner = graph,
-                        impl = model,
-                    )
-                    1 -> AliasBindingImpl(
-                        owner = graph,
-                        impl = model,
-                    )
-                    else -> AlternativesBindingImpl(
-                        owner = graph,
-                        impl = model,
-                    )
-                }
-            }
-
-            override fun visitProvides(model: ProvidesBindingModel): BaseBinding {
-                return if (model.target.node in model.inputs.map(NodeDependency::node)) SelfDependentInvalidBinding(
-                    owner = graph,
-                    impl = model,
-                ) else ProvisionBindingImpl(
-                    impl = model,
-                    owner = graph,
-                )
-            }
-        }
+        val bindingModelVisitor = ModuleHostedBindingsCreator()
 
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
@@ -272,7 +240,7 @@ internal class GraphBindingsFactory(
 
     private val localAndParentExplicitBindings: Map<NodeModel, List<BaseBinding>> by lazy {
         mergeMultiMapsForDuplicateCheck(
-            fromParent = graph.parent?.get(GraphBindingsFactory)?.localAndParentExplicitBindings,
+            fromParent = graph.parent?.get(GraphBindingsManager)?.localAndParentExplicitBindings,
             current = providedBindings,
         )
     }
@@ -302,6 +270,40 @@ internal class GraphBindingsFactory(
                     }
                 }
             }
+        }
+    }
+
+    private inner class ModuleHostedBindingsCreator : ModuleHostedBindingModel.Visitor<BaseBinding> {
+        override fun visitBinds(model: BindsBindingModel): BaseBinding {
+            return if (model.target.node in model.sources) {
+                SelfDependentInvalidBinding(
+                    owner = graph,
+                    impl = model,
+                )
+            } else when (model.sources.count()) {
+                0 -> ExplicitEmptyBindingImpl(
+                    owner = graph,
+                    impl = model,
+                )
+                1 -> AliasBindingImpl(
+                    owner = graph,
+                    impl = model,
+                )
+                else -> AlternativesBindingImpl(
+                    owner = graph,
+                    impl = model,
+                )
+            }
+        }
+
+        override fun visitProvides(model: ProvidesBindingModel): BaseBinding {
+            return if (model.target.node in model.inputs.map(NodeDependency::node)) SelfDependentInvalidBinding(
+                owner = graph,
+                impl = model,
+            ) else ProvisionBindingImpl(
+                impl = model,
+                owner = graph,
+            )
         }
     }
 
@@ -339,7 +341,7 @@ internal class GraphBindingsFactory(
         override val node: NodeModel get() = this
     }
 
-    companion object Key : Extensible.Key<GraphBindingsFactory> {
-        override val keyType get() = GraphBindingsFactory::class.java
+    companion object Key : Extensible.Key<GraphBindingsManager> {
+        override val keyType get() = GraphBindingsManager::class.java
     }
 }

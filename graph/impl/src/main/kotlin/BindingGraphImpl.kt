@@ -60,7 +60,7 @@ internal class BindingGraphImpl(
     override val requiresSynchronizedAccess: Boolean
         get() = component.requiresSynchronizedAccess
 
-    private val bindings: GraphBindingsFactory = GraphBindingsFactory(
+    private val bindings: GraphBindingsManager = GraphBindingsManager(
         graph = this,
     )
 
