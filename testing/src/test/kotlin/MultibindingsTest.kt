@@ -40,12 +40,20 @@ class MultibindingsTest(
             class Consumer @Inject constructor(list: List<Create>, later: Provider<List<Create>>)
             
             @Module
-            interface MyModule {
-                @Multibinds fun createList(): List<Create>
-            
+            interface MyRedundantModule {
                 @IntoList @Binds fun createClassA(a: ClassA): Create
+                @IntoList @Binds fun createClassA2(a: ClassA): Create
+            }
+
+            @Module(includes = [MyRedundantModule::class])
+            interface MyModule {
+                // Duplicate binds should not introduce duplicates into the list
+                @IntoList @Binds fun createClassA(a: ClassA): Create
+                @IntoList @Binds fun createClassA2(a: ClassA): Create
+                
                 @IntoList @Binds fun createClassB(b: ClassB): Create
-                @IntoList @Binds fun createClassC(c: ClassC): Create
+                @IntoList @Binds fun createClassB2(b: ClassB): Create
+                @IntoList @Binds fun createClassC3(c: ClassC): Create
             }
             
             @Singleton @Component(modules = [MyModule::class])
@@ -57,10 +65,11 @@ class MultibindingsTest(
             }
             
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
                 
                 val bootstrapList = c.bootstrap()
                 assert(bootstrapList !== c.bootstrap())
+                assert(bootstrapList.size == 3)
                 assert(bootstrapList[0] is ClassB) {"classB"}
                 assert(bootstrapList[1] is ClassA) {"classA"}
                 assert(bootstrapList[2] is ClassC) {"classC"}
