@@ -8,7 +8,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  * Represents a way to provide a [NodeModel].
  * Each [NodeModel] must have a single [BaseBinding] for a [BindingGraph] to be valid.
  */
-interface BaseBinding : MayBeInvalid {
+interface BaseBinding : MayBeInvalid, Comparable<BaseBinding> {
     /**
      * A node that this binding provides.
      */

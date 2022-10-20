@@ -11,7 +11,6 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
@@ -279,9 +278,9 @@ internal class RuntimeComponent(
             binding.upstream?.let { upstream ->
                 putAll(componentForGraph(upstream.owner).access(upstream, DependencyKind.Direct) as Map<*, *>)
             }
-            for ((key: AnnotationLangModel.Value, dependency: NodeDependency) in binding.contents) {
-                resolveAndAccessIfCondition(dependency)?.let { contribution ->
-                    put(key.rawValue, contribution)
+            for (contributionEntry in binding.contents) {
+                resolveAndAccessIfCondition(contributionEntry.dependency)?.let { contribution ->
+                    put(contributionEntry.keyValue.rawValue, contribution)
                 }
             }
         }

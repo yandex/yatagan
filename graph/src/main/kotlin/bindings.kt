@@ -174,5 +174,20 @@ interface MapBinding : ExtensibleBinding<MapBinding> {
     /**
      * NOTE: Dependency resolve should be done exactly on the binding's [owner].
      */
-    val contents: List<Pair<AnnotationLangModel.Value, NodeDependency>>
+    val contents: Collection<Contribution>
+
+    /**
+     * A pair of [keyValue], [dependency] to be put into map.
+     */
+    interface Contribution {
+        /**
+         * A value of a key annotation (read: map key)
+         */
+        val keyValue: AnnotationLangModel.Value
+
+        /**
+         * A dependency which resolves to a contribution for the key.
+         */
+        val dependency: NodeDependency
+    }
 }

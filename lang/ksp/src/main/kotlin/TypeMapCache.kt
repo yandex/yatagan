@@ -2,7 +2,6 @@ package com.yandex.daggerlite.ksp.lang
 
 import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getJavaClassByName
-import com.google.devtools.ksp.getKotlinClassByName
 import com.google.devtools.ksp.isOpen
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -113,9 +112,10 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
                     // KSClassDeclaration.asType() invocation
                     return type
                 }
+                val shouldComputeWildcard = bakeVarianceAsWildcard || argTypeReference.shouldForceWildcards()
                 Utils.resolver.getTypeArgument(
                     typeRef = argTypeReference.replaceType(mappedArgType),
-                    variance = if (bakeVarianceAsWildcard) {
+                    variance = if (shouldComputeWildcard) {
                         // Use declaration-site variance
                         computeWildcard(
                             declarationSite = param.variance,
@@ -155,11 +155,11 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
     }
 
     private fun KSTypeReference.shouldForceWildcards(): Boolean {
-        val force = isAnnotationPresent<JvmWildcard>() ||
-                element?.typeArguments?.any { it.type?.shouldForceWildcards() == true } ?: false
+        val force = isAnnotationPresent<JvmWildcard>()
+        if (force) return true
         return when (val declaration = this.resolve().declaration) {
-            is KSTypeAlias -> force || declaration.type.shouldForceWildcards()
-            else -> force
+            is KSTypeAlias -> declaration.type.shouldForceWildcards()
+            else -> false
         }
     }
 
@@ -221,7 +221,7 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
             // Only these types may have kotlin-specific counterparts.
             return RawType.unwrap(type)
         }
-        return Utils.resolver.getKotlinClassByName(qualifiedName)?.asType(
+        return Utils.resolver.getKotlinClassByName(qualifiedName, forceMutable = true)?.asType(
             type.arguments.map { arg ->
                 when (val typeRef = arg.type) {
                     null -> arg

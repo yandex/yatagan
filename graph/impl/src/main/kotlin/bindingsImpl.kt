@@ -1,5 +1,7 @@
 package com.yandex.daggerlite.graph.impl
 
+import com.yandex.daggerlite.base.ListComparator
+import com.yandex.daggerlite.base.MapComparator
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.base.notIntersects
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
@@ -8,7 +10,6 @@ import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
 import com.yandex.daggerlite.core.ConditionScope
-import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
@@ -156,7 +157,50 @@ internal interface ConditionalBindingMixin : BindingMixin {
     }
 }
 
-internal abstract class ModuleHostedMixin : BaseBindingMixin {
+internal sealed interface ComparableBindingMixin<B : ComparableBindingMixin<B>> : BaseBinding {
+    fun compareTo(other: B): Int
+
+    override fun compareTo(other: BaseBinding): Int {
+        if (this == other) return 0
+        other as ComparableBindingMixin<*>
+
+        orderByClass(this).compareTo(orderByClass(other)).let { if (it != 0) return it }
+
+        // If the class order is the same, assume the class is matching, delegate to dedicated comparison.
+        @Suppress("UNCHECKED_CAST")
+        return compareTo(other as B)
+    }
+
+    private companion object {
+        // NOTE: These priorities denote a default order for contributions in a multi-binding - do not change these.
+        fun orderByClass(binding: ComparableBindingMixin<*>): Int = when(binding) {
+            // Usable bindings - the order number should be stable.
+            is ModuleHostedMixin -> 0
+            is InjectConstructorProvisionBindingImpl -> 10
+            is AssistedInjectFactoryBindingImpl -> 40
+            is ComponentDependencyBindingImpl -> 50
+            is ComponentDependencyEntryPointBindingImpl -> 60
+            is ComponentInstanceBindingImpl -> 70
+            is SubComponentFactoryBindingImpl -> 80
+            is InstanceBindingImpl -> 90
+            is MapBindingImpl -> 100
+            is MultiBindingImpl -> 110
+            // Invalid bindings, don't really care for their order - it's UB to use them anyway.
+            is MissingBindingImpl -> Int.MAX_VALUE - 1
+            is AliasLoopStubBinding -> Int.MAX_VALUE - 2
+        }
+    }
+}
+
+internal sealed interface ComparableByTargetBindingMixin : ComparableBindingMixin<ComparableByTargetBindingMixin> {
+    override fun compareTo(other: ComparableByTargetBindingMixin): Int {
+        target.compareTo(other.target).let { if (it != 0) return it }
+        // Fallback to compare owners in very rare case targets are equal
+        return owner.model.type.compareTo(other.owner.model.type)
+    }
+}
+
+internal abstract class ModuleHostedMixin : BaseBindingMixin, ComparableBindingMixin<ModuleHostedMixin> {
     abstract val impl: ModuleHostedBindingModel
 
     final override val originModule get() = impl.originModule
@@ -182,6 +226,10 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin {
         )
 
         override val node: NodeModel get() = this
+    }
+
+    final override fun compareTo(other: ModuleHostedMixin): Int {
+        return impl.function.compareTo(other.impl.function)
     }
 }
 
@@ -224,7 +272,7 @@ internal class ProvisionBindingImpl(
 internal class InjectConstructorProvisionBindingImpl(
     private val impl: InjectConstructorModel,
     override val owner: BindingGraph,
-) : ProvisionBinding, ConditionalBindingMixin {
+) : ProvisionBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin {
     override val target get() = impl.asNode()
     override val originModule: Nothing? get() = null
     override val scopes: Set<AnnotationLangModel> get() = impl.scopes
@@ -263,7 +311,7 @@ internal class InjectConstructorProvisionBindingImpl(
 internal class AssistedInjectFactoryBindingImpl(
     override val owner: BindingGraph,
     override val model: AssistedInjectFactoryModel,
-) : AssistedInjectFactoryBinding, BindingMixin {
+) : AssistedInjectFactoryBinding, BindingMixin, ComparableByTargetBindingMixin {
     override val target: NodeModel
         get() = model.asNode()
 
@@ -318,6 +366,8 @@ internal class SyntheticAliasBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraph,
 ) : AliasBinding {
+    private val sourceBinding by lazy(PUBLICATION) { owner.resolveBindingRaw(source) }
+
     override val originModule: ModuleModel? get() = null
     override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
         return visitor.visitAlias(this)
@@ -329,7 +379,12 @@ internal class SyntheticAliasBindingImpl(
 
     override fun toString(childContext: MayBeInvalid?): CharSequence {
         // Pass-through
-        return owner.resolveBindingRaw(source).toString(childContext)
+        return sourceBinding.toString(childContext)
+    }
+
+    override fun compareTo(other: BaseBinding): Int {
+        // Pass-through
+        return sourceBinding.compareTo(other)
     }
 }
 
@@ -415,7 +470,7 @@ internal class ComponentDependencyEntryPointBindingImpl(
     override val dependency: ComponentDependencyModel,
     override val getter: FunctionLangModel,
     override val target: NodeModel,
-) : ComponentDependencyEntryPointBinding, BindingMixin {
+) : ComponentDependencyEntryPointBinding, BindingMixin, ComparableBindingMixin<ComponentDependencyEntryPointBindingImpl> {
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentDependencyEntryPoint(this)
@@ -425,11 +480,15 @@ internal class ComponentDependencyEntryPointBindingImpl(
         modelClassName = "component-dependency-getter",
         representation = getter,
     )
+
+    override fun compareTo(other: ComponentDependencyEntryPointBindingImpl): Int {
+        return getter.compareTo(other.getter)
+    }
 }
 
 internal class ComponentInstanceBindingImpl(
     graph: BindingGraph,
-) : ComponentInstanceBinding, BindingMixin {
+) : ComponentInstanceBinding, BindingMixin, ComparableByTargetBindingMixin {
     override val owner: BindingGraph = graph
     override val target get() = owner.model.asNode()
 
@@ -446,7 +505,7 @@ internal class ComponentInstanceBindingImpl(
 internal class SubComponentFactoryBindingImpl(
     override val owner: BindingGraph,
     private val factory: ComponentFactoryModel,
-) : SubComponentFactoryBinding, ConditionalBindingMixin {
+) : SubComponentFactoryBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin {
     override val target: NodeModel
         get() = factory.asNode()
 
@@ -485,19 +544,32 @@ internal class MultiBindingImpl(
     override val target: NodeModel,
     override val upstream: MultiBindingImpl?,
     override val targetForDownstream: NodeModel,
-    contributions: Map<NodeModel, ContributionType>,
-) : MultiBinding, BindingMixin {
+    contributions: Map<Contribution, ContributionType>,
+) : MultiBinding, BindingMixin, ComparableBindingMixin<MultiBindingImpl> {
     private val _contributions = contributions
+
+    data class Contribution(
+        val contributionDependency: NodeModel,
+        val origin: ModuleHostedBindingModel,
+    ) : Comparable<Contribution> {
+        override fun compareTo(other: Contribution): Int {
+            return origin.function.compareTo(other.origin.function)
+        }
+    }
+
     override val contributions: Map<NodeModel, ContributionType> by lazy {
         // Resolve aliases as multi-bindings often work with @Binds
-        val resolved = _contributions.mapKeys { (node, _) -> owner.resolveBinding(node).target }
+        val resolved = _contributions.mapKeys { (contribution, _) ->
+            owner.resolveBinding(contribution.contributionDependency).target
+        }
         topologicalSort(
             nodes = resolved.keys,
             inside = owner,
         ).associateWith(resolved::getValue)
     }
 
-    override val dependencies get() = extensibleAwareDependencies(_contributions.keys.asSequence())
+    override val dependencies get() = extensibleAwareDependencies(
+        _contributions.keys.asSequence().map { it.contributionDependency })
 
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = "list-binding",
@@ -543,6 +615,11 @@ internal class MultiBindingImpl(
         },
     )
 
+    override fun compareTo(other: MultiBindingImpl): Int {
+        return MapComparator.ofComparable<Contribution, ContributionType>()
+            .compare(_contributions, other._contributions)
+    }
+
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitMulti(this)
     }
@@ -551,17 +628,21 @@ internal class MultiBindingImpl(
 internal class MapBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
-    contents: List<Pair<AnnotationLangModel.Value, NodeModel>>,
+    override val contents: List<Contribution>,
     override val mapKey: TypeLangModel,
     override val mapValue: TypeLangModel,
     override val upstream: MapBindingImpl?,
     override val targetForDownstream: NodeModel,
-    useProviders: Boolean,
-) : MapBinding, BindingMixin {
-    override val contents: List<Pair<AnnotationLangModel.Value, NodeDependency>> by lazy {
-        if (useProviders) contents.map { (key, node) ->
-            key to node.copyDependency(kind = DependencyKind.Provider)
-        } else contents
+) : MapBinding, BindingMixin, ComparableBindingMixin<MapBindingImpl> {
+
+    data class Contribution(
+        override val keyValue: AnnotationLangModel.Value,
+        override val dependency: NodeDependency,
+        val origin: ModuleHostedBindingModel,
+    ) : MapBinding.Contribution, Comparable<Contribution> {
+        override fun compareTo(other: Contribution): Int {
+            return origin.function.compareTo(other.origin.function)
+        }
     }
 
     private val allResolvedAndGroupedContents: Map<AnnotationLangModel.Value, List<BaseBinding>> by lazy {
@@ -570,7 +651,7 @@ internal class MapBindingImpl(
             current = contents.groupBy(
                 keySelector = { (key, _) -> key },
                 // Resolution on `owner` is important here, so do it eagerly
-                valueTransform = { (_, dependency) -> owner.resolveBindingRaw(dependency) },
+                valueTransform = { it -> owner.resolveBindingRaw(it.dependency.node) },
             ),
         )
     }
@@ -597,6 +678,11 @@ internal class MapBindingImpl(
         }
     }
 
+    override fun compareTo(other: MapBindingImpl): Int {
+        return ListComparator.ofComparable<Contribution>(asSorted = true)
+            .compare(contents, other.contents)
+    }
+
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = "map-binding of",
         childContext = childContext,
@@ -609,7 +695,7 @@ internal class MapBindingImpl(
             append(mapValue)
         },
         childContextTransform = { context ->
-            val key = contents.find { (_, dependency) -> dependency == context }?.first
+            val key = contents.find { (_, dependency) -> dependency == context }?.keyValue
             if (key != null) {
                 "$key -> $mapValue"
             } else if (upstream?.targetForDownstream == context) {
@@ -663,7 +749,7 @@ internal class ExplicitEmptyBindingImpl(
 internal class ComponentDependencyBindingImpl(
     override val dependency: ComponentDependencyModel,
     override val owner: BindingGraph,
-) : ComponentDependencyBinding, BindingMixin {
+) : ComponentDependencyBinding, BindingMixin, ComparableByTargetBindingMixin {
     override val target get() = dependency.asNode()
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -680,7 +766,7 @@ internal class InstanceBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraph,
     private val origin: ComponentFactoryModel.InputModel,
-) : InstanceBinding, BindingMixin {
+) : InstanceBinding, BindingMixin, ComparableByTargetBindingMixin {
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitInstance(this)
@@ -717,7 +803,7 @@ internal class AliasLoopStubBinding(
     override val owner: BindingGraph,
     override val target: NodeModel,
     private val aliasLoop: Collection<AliasBinding>,
-) : EmptyBinding, BindingMixin {
+) : EmptyBinding, BindingMixin, ComparableByTargetBindingMixin {
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)
     }
@@ -737,7 +823,7 @@ internal class AliasLoopStubBinding(
 internal data class MissingBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraph,
-) : EmptyBinding, BindingMixin {
+) : EmptyBinding, BindingMixin, ComparableByTargetBindingMixin {
 
     override fun validate(validator: Validator) {
         target.getSpecificModel().accept(ModelBasedHint(validator))

@@ -8,7 +8,8 @@ package com.yandex.daggerlite.core.lang
  * for a public API for `asMemberOf()` and the likes. This should be taken into account while comparing two type
  * declarations for equality - they may compare unequal for they have different underlying types.
  */
-interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Accessible {
+interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Accessible,
+    Comparable<TypeDeclarationLangModel> {
     /**
      * Declaration kind.
      */

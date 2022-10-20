@@ -7,6 +7,7 @@ import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
 import com.yandex.daggerlite.core.ComponentModel
+import com.yandex.daggerlite.core.DependencyKind
 import com.yandex.daggerlite.core.HasNodeModel
 import com.yandex.daggerlite.core.InjectConstructorModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
@@ -18,12 +19,12 @@ import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.accept
 import com.yandex.daggerlite.core.allInputs
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
 import com.yandex.daggerlite.graph.AliasBinding
 import com.yandex.daggerlite.graph.BaseBinding
 import com.yandex.daggerlite.graph.Binding
+import com.yandex.daggerlite.graph.BindingGraph
 import com.yandex.daggerlite.graph.Extensible
 import com.yandex.daggerlite.graph.ExtensibleBinding
 import com.yandex.daggerlite.graph.MultiBinding.ContributionType
@@ -37,7 +38,7 @@ import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 
 internal class GraphBindingsManager(
-    private val graph: BindingGraphImpl,
+    private val graph: BindingGraph,
 ) : MayBeInvalid, WithParents<GraphBindingsManager> by hierarchyExtension(graph, GraphBindingsManager) {
     init {
         graph[GraphBindingsManager] = this
@@ -51,9 +52,8 @@ internal class GraphBindingsManager(
 
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
-        val multiBindings = linkedMapOf<NodeModel, MutableMap<NodeModel, ContributionType>>()
-        val mapBindings = linkedMapOf<Pair<TypeLangModel, NodeModel>,
-                MutableList<Pair<AnnotationLangModel.Value, NodeModel>>>()
+        val multiBindings = linkedMapOf<NodeModel, MutableMap<MultiBindingImpl.Contribution, ContributionType>>()
+        val mapBindings = linkedMapOf<MapSignature, MutableList<MapBindingImpl.Contribution>>()
         for (module: ModuleModel in graph.modules) {
             // All bindings from installed modules
             for (bindingModel in module.bindings) {
@@ -62,18 +62,33 @@ internal class GraphBindingsManager(
                 // Handle multi-bindings
                 when (val target = bindingModel.target) {
                     is BindingTargetModel.DirectMultiContribution -> {
-                        multiBindings.getOrPut(target.node, ::mutableMapOf)[binding.target] =
+                        val contribution = MultiBindingImpl.Contribution(
+                            contributionDependency = binding.target,
+                            origin = bindingModel,
+                        )
+                        multiBindings.getOrPut(target.node, ::mutableMapOf)[contribution] =
                             ContributionType.Element
                     }
                     is BindingTargetModel.FlattenMultiContribution -> {
-                        multiBindings.getOrPut(target.flattened, ::mutableMapOf)[binding.target] =
+                        val contribution = MultiBindingImpl.Contribution(
+                            contributionDependency = binding.target,
+                            origin = bindingModel,
+                        )
+                        multiBindings.getOrPut(target.flattened, ::mutableMapOf)[contribution] =
                             ContributionType.Collection
                     }
                     is BindingTargetModel.MappingContribution -> {
                         target.keyType?.let { keyType ->
                             target.keyValue?.let { keyValue ->
-                                mapBindings.getOrPut(keyType to target.node, ::arrayListOf) +=
-                                    keyValue to binding.target
+                                val signature = MapSignature(
+                                    keyType = keyType,
+                                    valueType = target.node,
+                                )
+                                mapBindings.getOrPut(signature, ::arrayListOf) += MapBindingImpl.Contribution(
+                                    keyValue = keyValue,
+                                    dependency = binding.target,  // will be m-b contribution node
+                                    origin = bindingModel,
+                                )
                             }
                         }
                     }
@@ -130,7 +145,7 @@ internal class GraphBindingsManager(
                 override fun visitMapDeclaration(model: MultiBindingDeclarationModel.MapDeclarationModel) {
                     model.keyType?.let { keyType ->
                         model.valueType?.let { valueType ->
-                            mapBindings.getOrPut(keyType to valueType, ::mutableListOf)
+                            mapBindings.getOrPut(MapSignature(keyType, valueType), ::mutableListOf)
                         }
                     }
                 }
@@ -138,7 +153,7 @@ internal class GraphBindingsManager(
         }
 
         // Multi-bindings
-        for ((target: NodeModel, contributions: Map<NodeModel, ContributionType>) in multiBindings) {
+        for ((target: NodeModel, contributions) in multiBindings) {
             val nodes = target.multiBoundListNodes()
             val representativeNode = nodes.first()
             val upstream = parentsSequence().mapNotNull { parentBindings ->
@@ -159,7 +174,7 @@ internal class GraphBindingsManager(
         }
 
         // Mappings
-        for ((mapSignature, contributions: List<Pair<AnnotationLangModel.Value, NodeModel>>) in mapBindings) {
+        for ((mapSignature, contributions) in mapBindings) {
             for (useProviders in booleanArrayOf(true, false)) {
                 val (keyType: TypeLangModel, valueType: NodeModel) = mapSignature
                 val nodes = valueType.multiBoundMapNodes(key = keyType, asProviders = useProviders)
@@ -174,10 +189,17 @@ internal class GraphBindingsManager(
                     MapBindingImpl(
                         owner = graph,
                         target = it,
-                        contents = contributions,
+                        contents = if (useProviders) {
+                            contributions.map { contribution ->
+                                contribution.copy(
+                                    dependency = contribution.dependency.copyDependency(
+                                        kind = DependencyKind.Provider,
+                                    )
+                                )
+                            }
+                        } else contributions,
                         mapKey = keyType,
                         mapValue = valueType.type,
-                        useProviders = useProviders,
                         upstream = upstream,
                         targetForDownstream = downstreamNode,
                     )
@@ -340,6 +362,11 @@ internal class GraphBindingsManager(
 
         override val node: NodeModel get() = this
     }
+
+    private data class MapSignature(
+        val keyType: TypeLangModel,
+        val valueType: NodeModel,
+    )
 
     companion object Key : Extensible.Key<GraphBindingsManager> {
         override val keyType get() = GraphBindingsManager::class.java

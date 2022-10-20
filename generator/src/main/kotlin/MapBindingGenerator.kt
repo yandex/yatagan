@@ -33,8 +33,8 @@ internal class MapBindingGenerator(
                 +")"
             }
         }
-        binding.contents.forEach { (value, dependency) ->
-            val (node, kind) = dependency
+        binding.contents.forEach { contribution ->
+            val (node, kind) = contribution.dependency
             val nodeBinding = thisGraph.resolveBinding(node)
             generateUnderCondition(
                 binding = nodeBinding,
@@ -43,7 +43,7 @@ internal class MapBindingGenerator(
             ) {
                 +buildExpression {
                     +"map.put("
-                    value.accept(AnnotationValueFormatter(this))
+                    contribution.keyValue.accept(AnnotationValueFormatter(this))
                     +", "
                     nodeBinding.generateAccess(
                         builder = this,
