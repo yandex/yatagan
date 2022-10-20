@@ -70,6 +70,75 @@ internal fun Type.tryAsClass(): Class<*>? = when (this) {
     else -> null
 }
 
+internal fun Type.isAssignableFrom(another: Type): Boolean {
+    return when(another) {
+        is Class<*> -> isAssignableFrom(another.boxed())
+        is ParameterizedType -> isAssignableFrom(another)
+        is GenericArrayType -> isAssignableFrom(another)
+        else -> false  // NOTE: We don't care about wildcards here, they are not-reached
+    }
+}
+
+internal fun Type.isAssignableFrom(another: Class<*>): Boolean {
+    return when(this) {
+        is Class<*> -> boxed().isAssignableFrom(another)
+        is ParameterizedType -> rawType.isAssignableFrom(another)  // As raw type (unchecked)
+        is GenericArrayType -> genericComponentType.isAssignableFrom(another)  // As raw type (unchecked)
+        else -> false
+    }
+}
+
+internal fun Type.isAssignableFrom(another: GenericArrayType): Boolean {
+    return when(this) {
+        is GenericArrayType -> genericComponentType.isAssignableFrom(another.genericComponentType)
+        else -> false
+    }
+}
+
+internal fun Type.isAssignableFrom(another: ParameterizedType): Boolean {
+    return when(this) {
+        is ParameterizedType -> isAssignableFrom(another)
+        else -> false
+    }
+}
+
+internal fun ParameterizedType.isAssignableFrom(another: ParameterizedType): Boolean {
+    // Check if raw types are assignable
+    if (!this.rawType.isAssignableFrom(another.rawType))
+        return false
+
+    val thisArgs = actualTypeArguments
+    val thatArgs = another.actualTypeArguments
+    if (thisArgs.size != thatArgs.size)
+        return false
+
+    for (i in thisArgs.indices) {
+        val thisArg: Type = thisArgs[i]
+        val thatArg: Type = thatArgs[i]
+
+        if (thisArg.isAssignableFrom(thatArg)) {
+            continue
+        }
+
+        if (thisArg !is WildcardType)
+            return false
+
+        val thisUpperBound = thisArg.upperBounds.firstOrNull() ?: Any::class.java
+        if (thatArg is WildcardType) {
+            val thatUpperBound = thatArg.upperBounds.firstOrNull() ?: Any::class.java
+            if (!thisUpperBound.isAssignableFrom(thatUpperBound)) {
+                return false
+            }
+        } else {
+            if (!thisUpperBound.isAssignableFrom(thatArg)) {
+                return false
+            }
+        }
+    }
+
+    return true
+}
+
 internal fun Class<*>.isFromKotlin() = isAnnotationPresent(Metadata::class.java)
 
 internal fun Type.formatString(): String = when (this) {
