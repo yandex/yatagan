@@ -177,7 +177,7 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitMulti(binding: MultiBinding) {
-        binding.owner[MultiBindingGenerator].generateCreation(
+        binding.owner[CollectionBindingGenerator].generateCreation(
             builder = builder,
             binding = binding,
             inside = inside,

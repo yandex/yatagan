@@ -265,6 +265,11 @@ class MultibindingsTest(
             interface TestComponent {
                 fun bootstrap(): List<Create>
             }
+
+            fun test() {
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                assert(c.bootstrap().map { it::class } == listOf(ClassA::class, ClassC::class)) 
+            }
         """.trimIndent())
 
         compileRunAndValidate()
@@ -647,6 +652,79 @@ class MultibindingsTest(
                 assert(c.sub2.create().map == mapOf(1 to "one", 2 to "two", 3 to "3/10", 20 to "20"))
                 assert(c.sub2.create().qInts == mapOf(1 to 1, 2 to 2, 3 to 3))
              }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `multi-bound set basic test`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            class Features {
+                companion object { var isEnabled = false }
+                @Condition(Features::class, "Companion.isEnabled")
+                annotation class Feature
+            }
+            
+            interface Handler
+            
+            @Singleton
+            class ClassA @Inject constructor (b: Optional<ClassB>) : Handler
+            
+            @Singleton
+            @Conditional(Features.Feature::class)
+            class ClassB @Inject constructor() : Handler
+            
+            @Singleton
+            class ClassC @Inject constructor(c: ClassA) : Handler
+
+            class ClassX : Handler
+            class ClassY : Handler
+
+            class Consumer @Inject constructor(handlers: Set<Handler>)
+            
+            @Module
+            interface MyModule {
+                @Binds @IntoSet fun a(i: ClassA): Handler
+                @Binds @IntoSet fun b(i: ClassB): Handler
+                @Binds @IntoSet fun c(i: ClassC): Handler
+                
+                @Multibinds fun emptySet(): Set<Number>
+                
+                companion object {
+                    @get:Provides
+                    val x = ClassX()
+
+                    @get:Provides
+                    val y = ClassY()
+
+                    @Provides @IntoSet(flatten = true)
+                    fun collection1(): Collection<Handler> = listOf(x, y)
+                    
+                    @Provides @IntoSet(flatten = true)
+                    fun collection2(): Collection<Handler> = listOf(y)
+                }
+            }
+            
+            @Singleton @Component(modules = [MyModule::class])
+            interface TestComponent {
+                val a: ClassA
+                val c: ClassC
+                val consumer: Consumer
+                val numbers: Set<Number>
+
+                fun handlers(): Set<Handler>
+            }
+
+            fun test() {
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                assert(c.handlers() !== c.handlers())
+                assert(c.handlers() == setOf(c.a, c.c, MyModule.x, MyModule.y))
+                assert(c.numbers.isEmpty())
+            }
         """.trimIndent())
 
         compileRunAndValidate()

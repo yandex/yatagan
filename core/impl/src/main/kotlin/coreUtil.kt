@@ -63,6 +63,10 @@ internal object Names {
     val Lazy: String = com.yandex.daggerlite.Lazy::class.qualifiedName!!
     val Provider: String = javax.inject.Provider::class.qualifiedName!!
     val Optional: String = com.yandex.daggerlite.Optional::class.qualifiedName!!
+
+    const val List: String = "java.util.List"
+    const val Set: String = "java.util.Set"
+    const val Map: String = "java.util.Map"
 }
 
 internal data class NodeDependencyImpl(

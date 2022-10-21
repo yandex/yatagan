@@ -2,6 +2,7 @@ package com.yandex.daggerlite.dynamic
 
 import com.yandex.daggerlite.DynamicValidationDelegate
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.CollectionTargetKind
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ConditionModel
 import com.yandex.daggerlite.core.ConditionScope
@@ -258,19 +259,23 @@ internal class RuntimeComponent(
     }
 
     override fun visitMulti(binding: MultiBinding): Any {
-        return buildList(capacity = binding.contributions.size) {
-            binding.upstream?.let { upstream ->
-                addAll(componentForGraph(upstream.owner).access(upstream, DependencyKind.Direct) as List<*>)
-            }
-            for ((node: NodeModel, kind: MultiBinding.ContributionType) in binding.contributions) {
-                resolveAndAccessIfCondition(node)?.let { contribution ->
-                    when (kind) {
-                        MultiBinding.ContributionType.Element -> add(contribution)
-                        MultiBinding.ContributionType.Collection -> addAll(contribution as Collection<*>)
-                    }
+        val collection: MutableCollection<Any?> = when (binding.kind) {
+            CollectionTargetKind.List -> arrayListOf()
+            CollectionTargetKind.Set -> hashSetOf()
+        }
+        binding.upstream?.let { upstream ->
+            collection.addAll(componentForGraph(upstream.owner)
+                .access(upstream, DependencyKind.Direct) as Collection<*>)
+        }
+        for ((node: NodeModel, kind: MultiBinding.ContributionType) in binding.contributions) {
+            resolveAndAccessIfCondition(node)?.let { contribution ->
+                when (kind) {
+                    MultiBinding.ContributionType.Element -> collection.add(contribution)
+                    MultiBinding.ContributionType.Collection -> collection.addAll(contribution as Collection<*>)
                 }
             }
         }
+        return collection
     }
 
     override fun visitMap(binding: MapBinding): Any {

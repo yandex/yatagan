@@ -25,5 +25,10 @@ interface FunctionLangModel : MemberLangModel, CallableLangModel, Comparable<Fun
     /**
      * [com.yandex.daggerlite.IntoList] annotation model if present. `null` if absent.
      */
-    val intoListAnnotationIfPresent: IntoListAnnotationLangModel?
+    val intoListAnnotationIfPresent: IntoCollectionAnnotationLangModel?
+
+    /**
+     * [com.yandex.daggerlite.IntoSet] annotation model if present. `null` if absent.
+     */
+    val intoSetAnnotationIfPresent: IntoCollectionAnnotationLangModel?
 }

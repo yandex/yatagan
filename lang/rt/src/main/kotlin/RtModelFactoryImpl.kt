@@ -11,28 +11,31 @@ class RtModelFactoryImpl(
     private val classLoader: ClassLoader,
 ) : LangModelFactory {
     private val listClass = classLoader.loadClass("java.util.List")
+    private val setClass = classLoader.loadClass("java.util.Set")
     private val mapClass = classLoader.loadClass("java.util.Map")
     private val collectionClass = classLoader.loadClass("java.util.Collection")
     private val providerClass = classLoader.loadClass("javax.inject.Provider")
 
-    override fun getListType(type: TypeLangModel, isCovariant: Boolean): TypeLangModel {
-        type as RtTypeImpl
-        val arg = if (isCovariant) WildcardTypeImpl(upperBound = type.impl) else type.impl
-        return RtTypeImpl(ParameterizedTypeImpl(arg, raw = listClass))
+    override fun getParameterizedType(
+        type: LangModelFactory.ParameterizedType,
+        parameter: TypeLangModel,
+        isCovariant: Boolean,
+    ): TypeLangModel {
+        parameter as RtTypeImpl
+        val clazz = when (type) {
+            LangModelFactory.ParameterizedType.List -> listClass
+            LangModelFactory.ParameterizedType.Set -> setClass
+            LangModelFactory.ParameterizedType.Collection -> collectionClass
+            LangModelFactory.ParameterizedType.Provider -> providerClass
+        }
+        val arg = if (isCovariant) WildcardTypeImpl(upperBound = parameter.impl) else parameter.impl
+        return RtTypeImpl(ParameterizedTypeImpl(arg, raw = clazz))
     }
 
     override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
         valueType as RtTypeImpl
         val valueArg = if (isCovariant) WildcardTypeImpl(upperBound = valueType.impl) else valueType.impl
         return RtTypeImpl(ParameterizedTypeImpl((keyType as RtTypeImpl).impl, valueArg, raw = mapClass))
-    }
-
-    override fun getCollectionType(type: TypeLangModel): TypeLangModel {
-        return RtTypeImpl(ParameterizedTypeImpl((type as RtTypeImpl).impl, raw = collectionClass))
-    }
-
-    override fun getProviderType(type: TypeLangModel): TypeLangModel {
-        return RtTypeImpl(ParameterizedTypeImpl((type as RtTypeImpl).impl, raw = providerClass))
     }
 
     override fun getTypeDeclaration(

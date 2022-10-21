@@ -12,7 +12,7 @@ interface MultiBindingDeclarationModel : MayBeInvalid {
     fun <R> accept(visitor: Visitor<R>): R
 
     interface Visitor<R> {
-        fun visitListDeclaration(model: ListDeclarationModel): R
+        fun visitCollectionDeclaration(model: CollectionDeclarationModel): R
         fun visitMapDeclaration(model: MapDeclarationModel): R
         fun visitInvalid(model: InvalidDeclarationModel): R
     }
@@ -20,11 +20,16 @@ interface MultiBindingDeclarationModel : MayBeInvalid {
     /**
      * Declares empty list binding
      */
-    interface ListDeclarationModel : MultiBindingDeclarationModel {
+    interface CollectionDeclarationModel : MultiBindingDeclarationModel {
         /**
          * An element's type for a multi-bound list.
          */
-        val listType: NodeModel?
+        val elementType: NodeModel?
+
+        /**
+         * Target collection kind for a multi-binding.
+         */
+        val kind: CollectionTargetKind
     }
 
     /**

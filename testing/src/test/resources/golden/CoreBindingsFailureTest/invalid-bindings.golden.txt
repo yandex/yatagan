@@ -46,3 +46,11 @@ Encountered:
   in module test.TestModule
   here: @provides test.TestModule::bindThreeForFive(...)
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Methods can't declare both @IntoList and @IntoSet modifier annotations
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @provides test.TestModule::bindThree(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

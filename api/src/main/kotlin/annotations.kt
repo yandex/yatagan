@@ -757,15 +757,19 @@ annotation class Multibinds(
 /**
  * A special modifier annotation that can be applied together with [Binds] or [Provides].
  *
- * When applied, a *binding* becomes a *multi-binding* - a list of the bound type is introduced to the graph.
+ * When applied, a *binding* becomes a *multi-binding* - a `java.util.List<[? extends] T>`is introduced to the graph,
+ * where `T` is a return type of the annotated method.
+ *
  * Therese can be multiple `IntoList` bindings for a given node (type + qualifier).
  * The list will contain *all* instances, provided by the bindings.
  *
- * The order is well-defined: the instances will be topologically-sorted according to their binding's dependencies.
- *  (independent bindings are sorted alphabetically).
+ * The order of the elements in the resulting list is defined as follows:
+ * 1. the contributing bindings are sorted in a stable (though non-intuitive) way.
+ * The order should be consistent across all implementations and framework versions.
+ * 2. the instances will be topologically-sorted according to their binding's dependencies.
  *
  * The multi-binding's return type does not "spill" outside the list and does not conflict with other non-multi
- * binding for the same type.
+ * bindings for the same type.
  *
  * Let's assume we have the following bindings
  * ```kotlin
@@ -823,6 +827,21 @@ annotation class IntoList(
      * The return type actually *must* be compatible with a `Collection` interface.
      *
      * See example [here][IntoList], that includes usage of this flag.
+     */
+    val flatten: Boolean = false,
+)
+
+/**
+ * A modifier annotation, which behaves largely like [IntoList] with the following differences:
+ *
+ * - Binds `java.util.Set<[? extends] T>` instead of `List`.
+ * - The order of contributions inside the resulting set *is not defined* in any way.
+ * - No duplicates (as per `Set` contract) could be present in the set. E.g. if any two `@Provides` return the same
+ *  instance/instance that compare equals via `equals` - there'll be only one of them in the set.
+ */
+annotation class IntoSet(
+    /**
+     * Same as [IntoList.flatten].
      */
     val flatten: Boolean = false,
 )

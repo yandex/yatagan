@@ -57,6 +57,7 @@ interface ModuleHostedBindingModel : MayBeInvalid {
          */
         class DirectMultiContribution(
             override val node: NodeModel,
+            val kind: CollectionTargetKind,
         ) : BindingTargetModel()
 
         /**
@@ -69,6 +70,11 @@ interface ModuleHostedBindingModel : MayBeInvalid {
              * An unwrapped [node] (its type argument, given [node] is a collection).
              */
             val flattened: NodeModel,
+
+            /**
+             * Collection kind.
+             */
+            val kind: CollectionTargetKind,
         ) : BindingTargetModel()
 
         /**

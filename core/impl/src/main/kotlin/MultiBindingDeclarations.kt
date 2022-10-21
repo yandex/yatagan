@@ -1,5 +1,7 @@
 package com.yandex.daggerlite.core.impl
 
+import com.yandex.daggerlite.base.setOf
+import com.yandex.daggerlite.core.CollectionTargetKind
 import com.yandex.daggerlite.core.MultiBindingDeclarationModel
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.lang.FunctionLangModel
@@ -11,6 +13,7 @@ import com.yandex.daggerlite.validation.format.TextColor
 import com.yandex.daggerlite.validation.format.append
 import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
+import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class MultiBindingDeclarationBase(
     protected val method: FunctionLangModel,
@@ -24,14 +27,14 @@ internal abstract class MultiBindingDeclarationBase(
     }
 }
 
-internal class ListDeclarationImpl(
+internal class CollectionDeclarationImpl(
     method: FunctionLangModel,
-) : MultiBindingDeclarationBase(method), MultiBindingDeclarationModel.ListDeclarationModel {
+) : MultiBindingDeclarationBase(method), MultiBindingDeclarationModel.CollectionDeclarationModel {
     init {
         assert(canRepresent(method))
     }
 
-    override val listType: NodeModel?
+    override val elementType: NodeModel?
         get() = method.returnType.typeArguments.firstOrNull()?.let { type ->
             NodeModelImpl(
                 type = type,
@@ -40,7 +43,7 @@ internal class ListDeclarationImpl(
         }
 
     override fun <R> accept(visitor: MultiBindingDeclarationModel.Visitor<R>): R {
-        return visitor.visitListDeclaration(this)
+        return visitor.visitCollectionDeclaration(this)
     }
 
     override fun validate(validator: Validator) {
@@ -53,17 +56,40 @@ internal class ListDeclarationImpl(
     }
 
     override fun toString(childContext: MayBeInvalid?): CharSequence {
-        return modelRepresentation(modelClassName = "multibinding declaration (list)") {
+        val type = when (kind) {
+            CollectionTargetKind.List -> "list"
+            CollectionTargetKind.Set -> "set"
+        }
+        return modelRepresentation(modelClassName = "multibinding declaration ($type)") {
             append(method)
         }
     }
 
-    override fun hashCode(): Int = listType.hashCode()
-    override fun equals(other: Any?) = this === other || (other is ListDeclarationImpl && listType == other.listType)
+    override val kind: CollectionTargetKind by lazy(PUBLICATION) {
+        when (method.returnType.declaration.qualifiedName) {
+            Names.List -> CollectionTargetKind.List
+            Names.Set -> CollectionTargetKind.Set
+            else -> throw AssertionError("Not reached")
+        }
+    }
+
+    override fun hashCode(): Int {
+        var result = elementType?.hashCode() ?: 0
+        result = 31 * result + kind.hashCode()
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return this === other || (other is CollectionDeclarationImpl &&
+                kind == other.kind &&
+                elementType == other.elementType)
+    }
 
     companion object {
+        private val SupportedCollectionNames = setOf(Names.List, Names.Set)
+
         fun canRepresent(method: FunctionLangModel): Boolean {
-            return method.returnType.declaration.qualifiedName == "java.util.List"
+            return method.returnType.declaration.qualifiedName in SupportedCollectionNames
         }
     }
 }
@@ -111,7 +137,7 @@ internal class MapDeclarationImpl(
 
     companion object {
         fun canRepresent(method: FunctionLangModel): Boolean {
-            return method.returnType.declaration.qualifiedName == "java.util.Map"
+            return method.returnType.declaration.qualifiedName == Names.Map
         }
     }
 }

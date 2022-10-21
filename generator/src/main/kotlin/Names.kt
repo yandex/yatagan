@@ -10,5 +10,6 @@ internal object Names {
     val AssertionError: ClassName = ClassName.get(java.lang.AssertionError::class.java)
     val ArrayList: ClassName = ClassName.get(java.util.ArrayList::class.java)
     val HashMap: ClassName = ClassName.get(java.util.HashMap::class.java)
+    val HashSet: ClassName = ClassName.get(java.util.HashSet::class.java)
     val Checks: ClassName = ClassName.get("com.yandex.daggerlite.internal", "Checks")
 }

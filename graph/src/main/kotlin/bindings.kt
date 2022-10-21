@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.graph
 
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
+import com.yandex.daggerlite.core.CollectionTargetKind
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ConditionScope
@@ -153,6 +154,11 @@ interface MultiBinding : ExtensibleBinding<MultiBinding> {
      * All list contributions.
      */
     val contributions: Map<NodeModel, ContributionType>
+
+    /**
+     * Target collection kind.
+     */
+    val kind: CollectionTargetKind
 
     enum class ContributionType {
         /**

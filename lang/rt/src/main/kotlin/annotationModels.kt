@@ -10,6 +10,7 @@ import com.yandex.daggerlite.Condition
 import com.yandex.daggerlite.Conditional
 import com.yandex.daggerlite.ConditionsApi
 import com.yandex.daggerlite.IntoList
+import com.yandex.daggerlite.IntoSet
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.VariantApi
@@ -19,7 +20,7 @@ import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
-import com.yandex.daggerlite.core.lang.IntoListAnnotationLangModel
+import com.yandex.daggerlite.core.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -68,7 +69,14 @@ internal class RtProvidesAnnotationImpl(
 
 internal class RtIntoListAnnotationImpl(
     impl: IntoList,
-) : RtAnnotationImplBase<IntoList>(impl), IntoListAnnotationLangModel {
+) : RtAnnotationImplBase<IntoList>(impl), IntoCollectionAnnotationLangModel {
+    override val flatten: Boolean
+        get() = impl.flatten
+}
+
+internal class RtIntoSetAnnotationImpl(
+    impl: IntoSet,
+) : RtAnnotationImplBase<IntoSet>(impl), IntoCollectionAnnotationLangModel {
     override val flatten: Boolean
         get() = impl.flatten
 }

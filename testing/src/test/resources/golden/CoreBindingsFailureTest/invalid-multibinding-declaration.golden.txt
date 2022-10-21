@@ -1,5 +1,5 @@
 error: Method doesn't resemble a valid multibinding
-NOTE: Multibinding declaration must be abstract with no parameters and return either a `List<..>` or a `Map<.., ..>`
+NOTE: Multibinding declaration must be abstract with no parameters and return either a `List<..>`, `Set<..>` or a `Map<.., ..>`
 Encountered:
   in graph for root-component test.MyComponent
   in module test.JavaModule

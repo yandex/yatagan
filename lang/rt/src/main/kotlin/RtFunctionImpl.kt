@@ -2,11 +2,12 @@ package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.Assisted
 import com.yandex.daggerlite.IntoList
+import com.yandex.daggerlite.IntoSet
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.core.lang.AnnotatedLangModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
-import com.yandex.daggerlite.core.lang.IntoListAnnotationLangModel
+import com.yandex.daggerlite.core.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.ParameterLangModel
 import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
@@ -49,12 +50,14 @@ internal class RtFunctionImpl(
 
     //region Annotations
 
-    override val providesAnnotationIfPresent: ProvidesAnnotationLangModel? by lazy {
-        impl.getAnnotation(Provides::class.java)?.let { RtProvidesAnnotationImpl(it) }
-    }
-    override val intoListAnnotationIfPresent: IntoListAnnotationLangModel? by lazy {
-        impl.getAnnotation(IntoList::class.java)?.let { RtIntoListAnnotationImpl(it) }
-    }
+    override val providesAnnotationIfPresent: ProvidesAnnotationLangModel?
+        get() = impl.getAnnotation(Provides::class.java)?.let { RtProvidesAnnotationImpl(it) }
+
+    override val intoListAnnotationIfPresent: IntoCollectionAnnotationLangModel?
+        get() = impl.getAnnotation(IntoList::class.java)?.let { RtIntoListAnnotationImpl(it) }
+
+    override val intoSetAnnotationIfPresent: IntoCollectionAnnotationLangModel?
+        get() = impl.getAnnotation(IntoSet::class.java)?.let { RtIntoSetAnnotationImpl(it) }
 
     //endregion
 

@@ -13,6 +13,11 @@ class KspModelFactoryImpl : LangModelFactory {
             "FATAL: Unable to define `java.util.List`, check classpath"
         }
     }
+    private val setDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        checkNotNull(Utils.resolver.getClassDeclarationByName("java.util.Set")) {
+            "FATAL: Unable to define `java.util.Set`, check classpath"
+        }
+    }
     private val mapDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
         checkNotNull(Utils.resolver.getClassDeclarationByName("java.util.Map")) {
             "FATAL: Unable to define `java.util.Map`, check classpath"
@@ -29,15 +34,25 @@ class KspModelFactoryImpl : LangModelFactory {
         }
     }
 
-    override fun getListType(type: TypeLangModel, isCovariant: Boolean): TypeLangModel {
-        type as KspTypeImpl
+    override fun getParameterizedType(
+        type: LangModelFactory.ParameterizedType,
+        parameter: TypeLangModel,
+        isCovariant: Boolean,
+    ): TypeLangModel {
+        parameter as KspTypeImpl
+        val declaration = when (type) {
+            LangModelFactory.ParameterizedType.List -> listDeclaration
+            LangModelFactory.ParameterizedType.Set -> setDeclaration
+            LangModelFactory.ParameterizedType.Collection -> collectionDeclaration
+            LangModelFactory.ParameterizedType.Provider -> providerDeclaration
+        }
         with(Utils.resolver) {
             val argument = getTypeArgument(
-                typeRef = type.impl.asReference(),
+                typeRef = parameter.impl.asReference(),
                 variance = if (isCovariant) Variance.COVARIANT else Variance.INVARIANT,
             )
             return KspTypeImpl(
-                reference = listDeclaration.asType(listOf(argument)).asReference(),
+                reference = declaration.asType(listOf(argument)).asReference(),
                 typePosition = TypeMapCache.Position.Parameter,
             )
         }
@@ -59,20 +74,6 @@ class KspModelFactoryImpl : LangModelFactory {
                 reference = mapDeclaration.asType(listOf(keyTypeArgument, valueTypeArgument)).asReference(),
                 typePosition = TypeMapCache.Position.Parameter,
             )
-        }
-    }
-
-    override fun getCollectionType(type: TypeLangModel): TypeLangModel {
-        with(Utils.resolver) {
-            val argument = getTypeArgument((type as KspTypeImpl).impl.asReference(), Variance.INVARIANT)
-            return KspTypeImpl(collectionDeclaration.asType(listOf(argument)))
-        }
-    }
-
-    override fun getProviderType(type: TypeLangModel): TypeLangModel {
-        with(Utils.resolver) {
-            val argument = getTypeArgument((type as KspTypeImpl).impl.asReference(), Variance.INVARIANT)
-            return KspTypeImpl(providerDeclaration.asType(listOf(argument)))
         }
     }
 

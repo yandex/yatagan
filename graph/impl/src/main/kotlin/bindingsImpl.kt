@@ -6,6 +6,7 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.base.notIntersects
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.BindsBindingModel
+import com.yandex.daggerlite.core.CollectionTargetKind
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentModel
@@ -544,6 +545,7 @@ internal class MultiBindingImpl(
     override val target: NodeModel,
     override val upstream: MultiBindingImpl?,
     override val targetForDownstream: NodeModel,
+    override val kind: CollectionTargetKind,
     contributions: Map<Contribution, ContributionType>,
 ) : MultiBinding, BindingMixin, ComparableBindingMixin<MultiBindingImpl> {
     private val _contributions = contributions
@@ -558,21 +560,32 @@ internal class MultiBindingImpl(
     }
 
     override val contributions: Map<NodeModel, ContributionType> by lazy {
-        // Resolve aliases as multi-bindings often work with @Binds
-        val resolved = _contributions.mapKeys { (contribution, _) ->
-            owner.resolveBinding(contribution.contributionDependency).target
+        when (kind) {
+            CollectionTargetKind.List -> {
+                // Resolve aliases as multi-bindings often work with @Binds
+                val resolved = _contributions.mapKeys { (contribution, _) ->
+                    owner.resolveBinding(contribution.contributionDependency).target
+                }
+                topologicalSort(
+                    nodes = resolved.keys,
+                    inside = owner,
+                ).associateWith(resolved::getValue)
+            }
+
+            CollectionTargetKind.Set -> {
+                _contributions.mapKeys { it.key.contributionDependency }
+            }
         }
-        topologicalSort(
-            nodes = resolved.keys,
-            inside = owner,
-        ).associateWith(resolved::getValue)
     }
 
     override val dependencies get() = extensibleAwareDependencies(
         _contributions.keys.asSequence().map { it.contributionDependency })
 
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
-        modelClassName = "list-binding",
+        modelClassName = when(kind) {
+            CollectionTargetKind.List -> "list-binding"
+            CollectionTargetKind.Set -> "set-binding"
+        },
         childContext = childContext,
         representation = { append("List ") },
         childContextTransform = { dependency ->

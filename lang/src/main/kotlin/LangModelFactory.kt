@@ -4,35 +4,56 @@ package com.yandex.daggerlite.core.lang
  * An interface that provides an API to create `lang`-level model objects.
  */
 interface LangModelFactory {
-    /**
-     * Creates a list type.
-     *
-     * @return a `java.util.List` type, parameterized by the given [type].
-     *
-     * @param isCovariant whether to yield a `? extends [T][type]` wildcard as the list type parameter.
-     */
-    fun getListType(type: TypeLangModel, isCovariant: Boolean = false): TypeLangModel
+
+    enum class ParameterizedType {
+        /**
+         * `java.util.List`
+         */
+        List,
+
+        /**
+         * `java.util.Set`
+         */
+        Set,
+
+        /**
+         * `java.util.Collection`
+         */
+        Collection,
+
+        /**
+         * `javax.inject.Provider`
+         */
+        Provider,
+    }
 
     /**
-     * Creates a map type.
+     * Obtains a map type.
+     *
+     * @param keyType key type for a map
+     * @param valueType value type for a map
+     * @param isCovariant `true` if the resulting type needs to be covariant over value type
+     * `? extends V`/`out V`, where V - [valueType])
      *
      * @return a `java.util.Map` type, parameterized by the given [keyType] and [valueType].
      */
     fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean = false): TypeLangModel
 
     /**
-     * Creates a collection type.
+     * Obtains a parameterized type.
      *
-     * @return a `java.util.Collection` type, parameterized by the given [type].
-     */
-    fun getCollectionType(type: TypeLangModel): TypeLangModel
-
-    /**
-     * Creates a parameterized `javax.inject.Provider` type.
+     * @return the resulting parameterized type
      *
-     * @return a `javax.inject.Provider` type, parameterized by the given [type].
+     * @param type one of available parameterized type declarations
+     * @param parameter type parameter to use
+     * @param isCovariant `true` if the resulting type needs to be covariant
+     * (`? extends T`/`out T`, where T - [parameter])
      */
-    fun getProviderType(type: TypeLangModel): TypeLangModel
+    fun getParameterizedType(
+        type: ParameterizedType,
+        parameter: TypeLangModel,
+        isCovariant: Boolean,
+    ): TypeLangModel
 
     /**
      * Gets a type declaration by the fully qualified name ('.'-separated).
@@ -66,27 +87,23 @@ interface LangModelFactory {
         @InternalLangApi
         var delegate: LangModelFactory? = null
 
-        override fun getListType(type: TypeLangModel, isCovariant: Boolean): TypeLangModel {
-            return checkNotNull(delegate).getListType(type, isCovariant)
+        override fun getParameterizedType(
+            type: ParameterizedType,
+            parameter: TypeLangModel,
+            isCovariant: Boolean,
+        ): TypeLangModel {
+            return checkNotNull(delegate).getParameterizedType(type, parameter, isCovariant)
         }
 
         override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
             return checkNotNull(delegate).getMapType(keyType, valueType, isCovariant)
         }
 
-        override fun getCollectionType(type: TypeLangModel) =
-                checkNotNull(delegate).getCollectionType(type)
-
-        override fun getProviderType(type: TypeLangModel): TypeLangModel {
-            return checkNotNull(delegate).getProviderType(type)
-        }
-
         override fun getTypeDeclaration(
             packageName: String,
             simpleName: String,
             vararg simpleNames: String
-        ): TypeDeclarationLangModel? =
-                checkNotNull(delegate).getTypeDeclaration(packageName, simpleName, *simpleNames)
+        ): TypeDeclarationLangModel? = checkNotNull(delegate).getTypeDeclaration(packageName, simpleName, *simpleNames)
 
         override val errorType: TypeLangModel get() = checkNotNull(delegate).errorType
 

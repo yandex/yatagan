@@ -174,6 +174,9 @@ class CoreBindingsFailureTest(
                 fun bindThreeForFive(): Int = 3
                 @Provides fun hello() = Unit
                 @Binds fun hello2() = Unit
+
+                @Provides @IntoList @IntoSet
+                fun bindThree(): Int = 3
             }
             @Module
             interface TestModule2 {

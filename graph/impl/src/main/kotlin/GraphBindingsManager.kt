@@ -3,6 +3,7 @@ package com.yandex.daggerlite.graph.impl
 import com.yandex.daggerlite.base.notIntersects
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.BindsBindingModel
+import com.yandex.daggerlite.core.CollectionTargetKind
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload
@@ -52,7 +53,8 @@ internal class GraphBindingsManager(
 
         // Gather bindings from modules
         val seenSubcomponents = hashSetOf<ComponentModel>()
-        val multiBindings = linkedMapOf<NodeModel, MutableMap<MultiBindingImpl.Contribution, ContributionType>>()
+        val listBindings = linkedMapOf<NodeModel, MutableMap<MultiBindingImpl.Contribution, ContributionType>>()
+        val setBindings = linkedMapOf<NodeModel, MutableMap<MultiBindingImpl.Contribution, ContributionType>>()
         val mapBindings = linkedMapOf<MapSignature, MutableList<MapBindingImpl.Contribution>>()
         for (module: ModuleModel in graph.modules) {
             // All bindings from installed modules
@@ -66,16 +68,20 @@ internal class GraphBindingsManager(
                             contributionDependency = binding.target,
                             origin = bindingModel,
                         )
-                        multiBindings.getOrPut(target.node, ::mutableMapOf)[contribution] =
-                            ContributionType.Element
+                        when(target.kind) {
+                            CollectionTargetKind.List -> listBindings
+                            CollectionTargetKind.Set -> setBindings
+                        }.getOrPut(target.node, ::mutableMapOf)[contribution] = ContributionType.Element
                     }
                     is BindingTargetModel.FlattenMultiContribution -> {
                         val contribution = MultiBindingImpl.Contribution(
                             contributionDependency = binding.target,
                             origin = bindingModel,
                         )
-                        multiBindings.getOrPut(target.flattened, ::mutableMapOf)[contribution] =
-                            ContributionType.Collection
+                        when(target.kind) {
+                            CollectionTargetKind.List -> listBindings
+                            CollectionTargetKind.Set -> setBindings
+                        }.getOrPut(target.flattened, ::mutableMapOf)[contribution] = ContributionType.Collection
                     }
                     is BindingTargetModel.MappingContribution -> {
                         target.keyType?.let { keyType ->
@@ -136,9 +142,13 @@ internal class GraphBindingsManager(
             declaration.accept(object : MultiBindingDeclarationModel.Visitor<Unit> {
                 override fun visitInvalid(model: MultiBindingDeclarationModel.InvalidDeclarationModel) = Unit
 
-                override fun visitListDeclaration(model: MultiBindingDeclarationModel.ListDeclarationModel) {
-                    model.listType?.let { listType ->
-                        multiBindings.getOrPut(listType, ::mutableMapOf)
+                override fun visitCollectionDeclaration(model: MultiBindingDeclarationModel.CollectionDeclarationModel) {
+                    val bindings = when (model.kind) {
+                        CollectionTargetKind.List -> listBindings
+                        CollectionTargetKind.Set -> setBindings
+                    }
+                    model.elementType?.let { elementType ->
+                        bindings.getOrPut(elementType, ::mutableMapOf)
                     }
                 }
 
@@ -153,25 +163,14 @@ internal class GraphBindingsManager(
         }
 
         // Multi-bindings
-        for ((target: NodeModel, contributions) in multiBindings) {
-            val nodes = target.multiBoundListNodes()
-            val representativeNode = nodes.first()
-            val upstream = parentsSequence().mapNotNull { parentBindings ->
-                parentBindings.providedBindings[representativeNode]?.singleOrNull() as? MultiBindingImpl
-            }.firstOrNull()
-            val downstreamNode = MultibindingDownstreamHandle(underlying = representativeNode)
-            addBindingForAllNodes(
-                nodes = nodes + downstreamNode,
-            ) {
-                MultiBindingImpl(
-                    owner = graph,
-                    target = it,
-                    contributions = contributions,
-                    upstream = upstream,
-                    targetForDownstream = downstreamNode,
-                )
-            }
-        }
+        addMultiBindings(
+            listBindings,
+            multiBindingKind = CollectionTargetKind.List,
+        )
+        addMultiBindings(
+            setBindings,
+            multiBindingKind = CollectionTargetKind.Set,
+        )
 
         // Mappings
         for ((mapSignature, contributions) in mapBindings) {
@@ -257,6 +256,35 @@ internal class GraphBindingsManager(
                 target = current,
                 source = old,
             ))
+        }
+    }
+
+    private fun MutableList<BaseBinding>.addMultiBindings(
+        multiBindings: Map<NodeModel, MutableMap<MultiBindingImpl.Contribution, ContributionType>>,
+        multiBindingKind: CollectionTargetKind,
+    ) {
+        for ((target: NodeModel, contributions) in multiBindings) {
+            val nodes = when (multiBindingKind) {
+                CollectionTargetKind.List -> target.multiBoundListNodes()
+                CollectionTargetKind.Set -> target.multiBoundSetNodes()
+            }
+            val representativeNode = nodes.first()
+            val upstream = parentsSequence().mapNotNull { parentBindings ->
+                parentBindings.providedBindings[representativeNode]?.singleOrNull()
+            }.firstOrNull() as? MultiBindingImpl
+            val downstreamNode = MultibindingDownstreamHandle(underlying = representativeNode)
+            addBindingForAllNodes(
+                nodes = nodes + downstreamNode,
+            ) {
+                MultiBindingImpl(
+                    owner = graph,
+                    target = it,
+                    upstream = upstream,
+                    targetForDownstream = downstreamNode,
+                    contributions = contributions,
+                    kind = multiBindingKind,
+                )
+            }
         }
     }
 
