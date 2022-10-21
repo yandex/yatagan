@@ -202,13 +202,12 @@ class RuntimeTest(
                             throw IllegalStateException("Test failed")
                         } catch (_: AssertionError) {}
                     }
+                    t1.get()
+                    t2.get()
 
                     // On main:
                     c.getA().get()
                     c.getB()
-
-                    t1.get()
-                    t2.get()
                 } finally {
                     ThreadAssertions.asserter = null
                 }
