@@ -24,6 +24,22 @@ inline fun <T, reified R> List<T>.mapToArray(map: (T) -> R): Array<R> {
     return Array(size) { map(get(it)) }
 }
 
+fun <T1, T2> Sequence<T1>.zipOrNull(another: Sequence<T2>): Sequence<Pair<T1?, T2?>> {
+    return Sequence {
+        object : Iterator<Pair<T1?, T2?>> {
+            val iterator1 = this@zipOrNull.iterator()
+            val iterator2 = another.iterator()
+
+            override fun hasNext() = iterator1.hasNext() || iterator2.hasNext()
+            override fun next(): Pair<T1?, T2?> {
+                val v1 = ifOrElseNull(iterator1.hasNext()) { iterator1.next() }
+                val v2 = ifOrElseNull(iterator2.hasNext()) { iterator2.next() }
+                return v1 to v2
+            }
+        }
+    }
+}
+
 inline fun <T, R> Iterable<T>.zipWithNextOrNull(block: (T, T?) -> R): List<R> {
     contract { callsInPlace(block) }
 

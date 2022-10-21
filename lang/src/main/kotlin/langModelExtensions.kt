@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.yandex.daggerlite.core.lang
 
 import kotlin.contracts.InvocationKind
@@ -47,4 +49,36 @@ abstract class AnnotationValueVisitorAdapter<R> : AnnotationLangModel.Value.Visi
     override fun visitEnumConstant(enum: TypeLangModel, constant: String) = visitDefault()
     override fun visitArray(value: List<AnnotationLangModel.Value>) = visitDefault()
     override fun visitUnresolved() = visitDefault()
+}
+
+inline fun LangModelFactory.getListType(parameter: TypeLangModel, isCovariant: Boolean = false): TypeLangModel {
+    return getParameterizedType(
+        type = LangModelFactory.ParameterizedType.List,
+        parameter = parameter,
+        isCovariant = isCovariant,
+    )
+}
+
+inline fun LangModelFactory.getSetType(parameter: TypeLangModel, isCovariant: Boolean = false): TypeLangModel {
+    return getParameterizedType(
+        type = LangModelFactory.ParameterizedType.Set,
+        parameter = parameter,
+        isCovariant = isCovariant,
+    )
+}
+
+inline fun LangModelFactory.getCollectionType(parameter: TypeLangModel, isCovariant: Boolean = false): TypeLangModel {
+    return getParameterizedType(
+        type = LangModelFactory.ParameterizedType.Collection,
+        parameter = parameter,
+        isCovariant = isCovariant,
+    )
+}
+
+inline fun LangModelFactory.getProviderType(parameter: TypeLangModel, isCovariant: Boolean = false): TypeLangModel {
+    return getParameterizedType(
+        type = LangModelFactory.ParameterizedType.Provider,
+        parameter = parameter,
+        isCovariant = isCovariant,
+    )
 }

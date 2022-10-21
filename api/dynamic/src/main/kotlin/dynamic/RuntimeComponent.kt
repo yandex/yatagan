@@ -2,6 +2,7 @@ package com.yandex.daggerlite.dynamic
 
 import com.yandex.daggerlite.DynamicValidationDelegate
 import com.yandex.daggerlite.base.memoize
+import com.yandex.daggerlite.core.CollectionTargetKind
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ConditionModel
 import com.yandex.daggerlite.core.ConditionScope
@@ -11,7 +12,6 @@ import com.yandex.daggerlite.core.NodeDependency
 import com.yandex.daggerlite.core.NodeModel
 import com.yandex.daggerlite.core.component1
 import com.yandex.daggerlite.core.component2
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.CallableLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.FieldLangModel
@@ -259,19 +259,23 @@ internal class RuntimeComponent(
     }
 
     override fun visitMulti(binding: MultiBinding): Any {
-        return buildList(capacity = binding.contributions.size) {
-            binding.upstream?.let { upstream ->
-                addAll(componentForGraph(upstream.owner).access(upstream, DependencyKind.Direct) as List<*>)
-            }
-            for ((node: NodeModel, kind: MultiBinding.ContributionType) in binding.contributions) {
-                resolveAndAccessIfCondition(node)?.let { contribution ->
-                    when (kind) {
-                        MultiBinding.ContributionType.Element -> add(contribution)
-                        MultiBinding.ContributionType.Collection -> addAll(contribution as Collection<*>)
-                    }
+        val collection: MutableCollection<Any?> = when (binding.kind) {
+            CollectionTargetKind.List -> arrayListOf()
+            CollectionTargetKind.Set -> hashSetOf()
+        }
+        binding.upstream?.let { upstream ->
+            collection.addAll(componentForGraph(upstream.owner)
+                .access(upstream, DependencyKind.Direct) as Collection<*>)
+        }
+        for ((node: NodeModel, kind: MultiBinding.ContributionType) in binding.contributions) {
+            resolveAndAccessIfCondition(node)?.let { contribution ->
+                when (kind) {
+                    MultiBinding.ContributionType.Element -> collection.add(contribution)
+                    MultiBinding.ContributionType.Collection -> collection.addAll(contribution as Collection<*>)
                 }
             }
         }
+        return collection
     }
 
     override fun visitMap(binding: MapBinding): Any {
@@ -279,9 +283,9 @@ internal class RuntimeComponent(
             binding.upstream?.let { upstream ->
                 putAll(componentForGraph(upstream.owner).access(upstream, DependencyKind.Direct) as Map<*, *>)
             }
-            for ((key: AnnotationLangModel.Value, dependency: NodeDependency) in binding.contents) {
-                resolveAndAccessIfCondition(dependency)?.let { contribution ->
-                    put(key.rawValue, contribution)
+            for (contributionEntry in binding.contents) {
+                resolveAndAccessIfCondition(contributionEntry.dependency)?.let { contribution ->
+                    put(contributionEntry.keyValue.rawValue, contribution)
                 }
             }
         }

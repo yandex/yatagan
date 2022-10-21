@@ -24,10 +24,7 @@ import com.google.devtools.ksp.symbol.NonExistLocation
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
-import com.google.devtools.ksp.symbol.impl.binary.KSPropertyDeclarationDescriptorImpl
-import com.google.devtools.ksp.symbol.impl.kotlin.KSTypeImpl
 import com.yandex.daggerlite.core.lang.ParameterLangModel
-import org.jetbrains.kotlin.types.RawType
 
 
 internal fun <A : Annotation> KSAnnotation.hasType(clazz: Class<A>): Boolean {
@@ -45,22 +42,6 @@ internal inline fun <reified T : Annotation> KSAnnotated.isAnnotationPresent(): 
 
 internal fun <T : Annotation> KSAnnotated.isAnnotationPresent(clazz: Class<T>): Boolean =
     annotations.any { it.hasType(clazz) }
-
-internal fun KSType.isRaw(): Boolean {
-    return when(this) {
-        // FIXME: Remove this ksp-impl workaround when fix is available for the public api.
-        is KSTypeImpl -> kotlinType.unwrap() is RawType
-        else -> Utils.resolver.isJavaRawType(this)
-    }
-}
-
-internal fun KSPropertyDeclaration.isLateInit(): Boolean {
-    return when(this) {
-        // FIXME: Remove this ksp-impl workaround when fix is available for the public api.
-        is KSPropertyDeclarationDescriptorImpl -> descriptor.isLateInit
-        else -> Modifier.LATEINIT in modifiers
-    }
-}
 
 internal fun KSPropertyDeclaration.isKotlinFieldInObject(): Boolean {
     return Modifier.CONST in modifiers || isAnnotationPresent<JvmField>()

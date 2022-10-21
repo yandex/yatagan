@@ -9,6 +9,9 @@ class JavaxModelFactoryImpl : LangModelFactory {
     private val listElement: TypeElement by lazy {
         Utils.elements.getTypeElement(java.util.List::class.java.canonicalName)
     }
+    private val setElement: TypeElement by lazy {
+        Utils.elements.getTypeElement(java.util.Set::class.java.canonicalName)
+    }
     private val collectionElement: TypeElement by lazy {
         Utils.elements.getTypeElement(java.util.Collection::class.java.canonicalName)
     }
@@ -30,20 +33,23 @@ class JavaxModelFactoryImpl : LangModelFactory {
         }
     }
 
-    override fun getListType(type: TypeLangModel, isCovariant: Boolean): TypeLangModel {
-        with(Utils.types) {
-            val typeImpl = (type as JavaxTypeImpl).impl
-            val argType = if (isCovariant) getWildcardType(/*extends*/ typeImpl,/*super*/ null) else typeImpl
-            return JavaxTypeImpl(getDeclaredType(listElement, argType))
+    override fun getParameterizedType(
+        type: LangModelFactory.ParameterizedType,
+        parameter: TypeLangModel,
+        isCovariant: Boolean,
+    ): TypeLangModel {
+        parameter as JavaxTypeImpl
+        val element = when(type) {
+            LangModelFactory.ParameterizedType.List -> listElement
+            LangModelFactory.ParameterizedType.Set -> setElement
+            LangModelFactory.ParameterizedType.Collection -> collectionElement
+            LangModelFactory.ParameterizedType.Provider -> providerElement
         }
-    }
-
-    override fun getCollectionType(type: TypeLangModel): TypeLangModel {
-        return JavaxTypeImpl(Utils.types.getDeclaredType(collectionElement, (type as JavaxTypeImpl).impl))
-    }
-
-    override fun getProviderType(type: TypeLangModel): TypeLangModel {
-        return JavaxTypeImpl(Utils.types.getDeclaredType(providerElement, (type as JavaxTypeImpl).impl))
+        with(Utils.types) {
+            val typeImpl = parameter.impl
+            val argType = if (isCovariant) getWildcardType(/*extends*/ typeImpl,/*super*/ null) else typeImpl
+            return JavaxTypeImpl(getDeclaredType(element, argType))
+        }
     }
 
     override fun getTypeDeclaration(

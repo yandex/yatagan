@@ -4,6 +4,7 @@ import com.yandex.daggerlite.Binds
 import com.yandex.daggerlite.IntoMap
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.BindsBindingModel
+import com.yandex.daggerlite.core.CollectionTargetKind
 import com.yandex.daggerlite.core.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.ModuleModel
@@ -13,7 +14,9 @@ import com.yandex.daggerlite.core.ProvidesBindingModel
 import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.AnnotationValueVisitorAdapter
 import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
+import com.yandex.daggerlite.core.lang.getCollectionType
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.core.lang.isKotlinObject
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -35,20 +38,19 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         } else {
             val target = NodeModelImpl(type = function.returnType, forQualifier = function)
             val intoList = function.intoListAnnotationIfPresent
-            if (intoList != null) {
-                if (intoList.flatten) {
-                    BindingTargetModel.FlattenMultiContribution(
-                        node = target,
-                        flattened = NodeModelImpl(
-                            type = function.returnType.typeArguments.firstOrNull() ?: function.returnType,
-                            qualifier = target.qualifier,
-                        )
-                    )
-                } else {
-                    BindingTargetModel.DirectMultiContribution(node = target)
-                }
-            } else {
-                if (function.isAnnotatedWith<IntoMap>()) {
+            val intoSet = function.intoSetAnnotationIfPresent
+            when {
+                intoList != null -> computeMultiContributionTarget(
+                    intoCollection = intoList,
+                    kind = CollectionTargetKind.List,
+                )
+
+                intoSet != null -> computeMultiContributionTarget(
+                    intoCollection = intoSet,
+                    kind = CollectionTargetKind.Set,
+                )
+
+                function.isAnnotatedWith<IntoMap>() -> {
                     val key = function.annotations.find { it.isMapKey() }
                     val annotationClass = key?.annotationClass
                     val valueAttribute = annotationClass?.attributes?.find { it.name == "value" }
@@ -59,15 +61,20 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
                         keyValue = keyValue,
                         mapKeyClass = annotationClass,
                     )
-                } else {
-                    BindingTargetModel.Plain(node = target)
                 }
+
+                else -> BindingTargetModel.Plain(node = target)
             }
         }
     }
 
     override fun validate(validator: Validator) {
         validator.child(target.node)
+
+        if (function.intoListAnnotationIfPresent != null && function.intoSetAnnotationIfPresent != null) {
+            validator.reportError(Errors.conflictingCollectionBindingAnnotations())
+        }
+
         when (target) {
             is BindingTargetModel.FlattenMultiContribution -> {
                 val firstArg = function.returnType.typeArguments.firstOrNull()
@@ -103,6 +110,26 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
             }
             is BindingTargetModel.DirectMultiContribution, is BindingTargetModel.Plain -> { /*Nothing to validate*/ }
         }
+    }
+
+    private fun computeMultiContributionTarget(
+        intoCollection: IntoCollectionAnnotationLangModel,
+        kind: CollectionTargetKind,
+    ) : BindingTargetModel {
+        val target = NodeModelImpl(type = function.returnType, forQualifier = function)
+        return if (intoCollection.flatten) {
+            BindingTargetModel.FlattenMultiContribution(
+                node = target,
+                flattened = NodeModelImpl(
+                    type = function.returnType.typeArguments.firstOrNull() ?: function.returnType,
+                    qualifier = target.qualifier,
+                ),
+                kind = kind,
+            )
+        } else BindingTargetModel.DirectMultiContribution(
+            node = target,
+            kind = kind,
+        )
     }
 }
 

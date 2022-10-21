@@ -37,14 +37,16 @@ project, please, file a feature request, which has a high probability of being i
 | `@dagger.Reusable`                            | (-) unsupported  |                                                                                 |
 | `dagger.MembersInjector`                      | (-) unsupported  |                                                                                 |
 | `@dagger.MapKey`                              | (+*) renamed     | [IntoMap.Key][com.yandex.daggerlite.IntoMap.Key], `unwrap=false` is unsupported |
-| `@dagger.multibindings.IntoSet`               | (+*) renamed     | [IntoList][com.yandex.daggerlite.IntoList], now binds `List<T>`                 |
-| `@dagger.multibindings.ElementsIntoSet`       | (+/-*) converged | [IntoList(flatten = true)][com.yandex.daggerlite.IntoList]                      |
+| `@dagger.multibindings.IntoSet`               | (+*) renamed     | as is                                                                           |
+| `@dagger.multibindings.ElementsIntoSet`       | (+/-*) converged | [IntoSet(flatten = true)][com.yandex.daggerlite.IntoSet]                        |
 | `@dagger.multibindings.Multibinds`            | (+) as is        |                                                                                 |
 | `@dagger.multibindings.IntoMap`               | (+) as is        |                                                                                 |
 | `@dagger.multibindings.{Int,Class,String}Key` | (+) as is        |                                                                                 |
 | `@dagger.multibindings.LongKey`               | (-) removed      | rarely used, can be written by hand at zero cost.                               |
 | `dagger.assisted.*`                           | (+) as is        |                                                                                 |
 | `dagger.producers.*`                          | (-) unsupported  |                                                                                 |
+| `dagger.android.*`                            | (-) unsupported  |                                                                                 |
+| `dagger.grpc.*`                               | (-) unsupported  |                                                                                 |
 | `dagger.hilt.*`                               | (-) unsupported  |                                                                                 |
 | `dagger.spi.*`                                | (+*) replaced    | DL has its own model for SPI, see [:spi]                                        |
 

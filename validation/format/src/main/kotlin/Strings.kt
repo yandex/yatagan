@@ -60,6 +60,10 @@ object Strings {
             ("Method doesn't resemble a valid multibinding").toError()
 
         @Covered
+        fun conflictingCollectionBindingAnnotations() =
+            ("Methods can't declare both @IntoList and @IntoSet modifier annotations").toError()
+
+        @Covered
         fun voidBinding() =
             "Binding method must not return `void`".toError()
 
@@ -570,6 +574,6 @@ object Strings {
 
         @Covered
         fun invalidMultiBindingAdvice() = ("Multibinding declaration must be abstract with no parameters" +
-                " and return either a `List<..>` or a `Map<.., ..>`").toNote()
+                " and return either a `List<..>`, `Set<..>` or a `Map<.., ..>`").toNote()
     }
 }

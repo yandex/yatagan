@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.lang.NoDeclaration
 import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.common.NoDeclaration
 import com.yandex.daggerlite.lang.common.TypeLangModelBase
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -43,11 +43,7 @@ internal class RtTypeImpl private constructor(
 
     override fun isAssignableFrom(another: TypeLangModel): Boolean {
         return when (another) {
-            is RtTypeImpl -> {
-                val thisClass = this.impl.tryAsClass() ?: return false
-                val thatClass = another.impl.tryAsClass() ?: return false
-                thisClass.boxed().isAssignableFrom(thatClass.boxed())
-            }
+            is RtTypeImpl -> impl.isAssignableFrom(another.impl)
             else -> false
         }
     }

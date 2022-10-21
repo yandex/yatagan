@@ -40,12 +40,20 @@ class MultibindingsTest(
             class Consumer @Inject constructor(list: List<Create>, later: Provider<List<Create>>)
             
             @Module
-            interface MyModule {
-                @Multibinds fun createList(): List<Create>
-            
+            interface MyRedundantModule {
                 @IntoList @Binds fun createClassA(a: ClassA): Create
+                @IntoList @Binds fun createClassA2(a: ClassA): Create
+            }
+
+            @Module(includes = [MyRedundantModule::class])
+            interface MyModule {
+                // Duplicate binds should not introduce duplicates into the list
+                @IntoList @Binds fun createClassA(a: ClassA): Create
+                @IntoList @Binds fun createClassA2(a: ClassA): Create
+                
                 @IntoList @Binds fun createClassB(b: ClassB): Create
-                @IntoList @Binds fun createClassC(c: ClassC): Create
+                @IntoList @Binds fun createClassB2(b: ClassB): Create
+                @IntoList @Binds fun createClassC3(c: ClassC): Create
             }
             
             @Singleton @Component(modules = [MyModule::class])
@@ -57,10 +65,11 @@ class MultibindingsTest(
             }
             
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
                 
                 val bootstrapList = c.bootstrap()
                 assert(bootstrapList !== c.bootstrap())
+                assert(bootstrapList.size == 3)
                 assert(bootstrapList[0] is ClassB) {"classB"}
                 assert(bootstrapList[1] is ClassA) {"classA"}
                 assert(bootstrapList[2] is ClassC) {"classC"}
@@ -71,7 +80,7 @@ class MultibindingsTest(
     }
 
     @Test
-    fun `class implements multiple interfaces`() {
+    fun `default binding ordering for list bindings`() {
         givenKotlinSource("test.TestCase", """
             import com.yandex.daggerlite.*
             import javax.inject.*
@@ -89,47 +98,102 @@ class MultibindingsTest(
             @Singleton class CreateDestroyD : CreateDestroyC()
             
             @Singleton class DestroyA @Inject constructor() : ActivityDestroy
+
+            class CreateX : Create
+            class CreateZ @Inject constructor() : Create
+
+            interface MyDependency : Create {
+                @get:Named("from-depA")
+                val myNewCreate2: Create
+                @get:Named("from-depB")
+                val myNewCreate1: Create
+            }
+
+            class MyDependencyImpl : MyDependency {
+                override val myNewCreate1: Create
+                    get() = CreateA()
+                override val myNewCreate2: Create
+                    get() = CreateZ()
+            }
             
             @Module
             interface MyModule {                
                 @Multibinds fun create(): List<Create>
                 @Binds @IntoList fun create(i: CreateA): Create
                 @Binds @IntoList fun create(i: CreateB): Create
-                @Binds @IntoList fun create(i: CreateDestroyA): Create
+                @Binds @IntoList fun createDependency(i: MyDependency): Create
+                @Binds @IntoList fun createComponent(i: MyComponent): Create
                 @Binds @IntoList fun create(i: CreateDestroyB): Create
-                @Binds @IntoList fun create(i: CreateDestroyC): Create
+                @Binds @IntoList fun create(i: CreateDestroyA): Create
+                @Binds @IntoList fun create(i: CreateX): Create
                 @Binds @IntoList fun create(i: CreateDestroyD): Create
+                @Binds @IntoList fun create(i: CreateDestroyC): Create
+                @Binds @IntoList fun createA(@Named("from-depA") i: Create): Create
+                @Binds @IntoList fun createB(@Named("from-depB") i: Create): Create
                 
                 @Multibinds fun destroy(): List<Destroy>
                 @Binds @IntoList fun destroy(i: CreateDestroyA): Destroy
                 @Binds @IntoList fun destroy(i: CreateDestroyB): Destroy
-                @Binds @IntoList fun destroy(i: CreateDestroyC): Destroy
                 @Binds @IntoList fun destroy(i: CreateDestroyD): Destroy
+                @Binds @IntoList fun destroy(i: CreateDestroyC): Destroy
                 @Binds @IntoList fun activityDestroy(i: DestroyA): Destroy
+                
+                @Binds @IntoList fun allCreates(i: List<Create>): List<@JvmWildcard Any>
+                @Binds @IntoList fun numbers(i: List<Number>): List<@JvmWildcard Any>
+                @Binds @IntoList fun allDestroys(i: List<Destroy>): List<@JvmWildcard Any>
                 
                 companion object {
                     @Provides fun createDestroyD() = CreateDestroyD()
+                    @Provides fun myListOfNumbers(): List<@JvmWildcard Number> = listOf(1, 2f, 3.0)
                 }
             }
             
             @Singleton
-            @Component(modules = [MyModule::class])
-            interface MyComponent {
+            @Component(modules = [MyModule::class], dependencies = [MyDependency::class])
+            interface MyComponent : Create {
                 val bootstrapCreate: List<Create>
                 val bootstrapDestroy: List<Destroy>
+                val allLists: List<List<@JvmWildcard Any>>
+                
+                @Component.Builder
+                interface Builder {
+                    fun create(
+                        @BindsInstance x: CreateX,
+                        dep: MyDependency,
+                    ): MyComponent
+                }
             }
             
             fun test() {
-                val c = Dagger.create(MyComponent::class.java)
+                val builder: MyComponent.Builder = Dagger.builder(MyComponent.Builder::class.java)
+                val c = builder.create(CreateX(), MyDependencyImpl())
+                       
                 val create = c.bootstrapCreate
                 val destroy = c.bootstrapDestroy
+                val allLists = c.allLists
             
-                assert(create.size == 6)
-                assert(create.map { it::class } == listOf(CreateA::class, CreateB::class, CreateDestroyA::class, 
-                    CreateDestroyB::class, CreateDestroyC::class, CreateDestroyD::class))
+                var i = 0
+                assert(create[i++] is CreateDestroyD)
+                assert(create[i++] is CreateA)
+                assert(create[i++] is CreateB)
+                assert(create[i++] is CreateDestroyA)
+                assert(create[i++] is CreateDestroyB)
+                assert(create[i++] is CreateDestroyC)
+                assert(create[i++] is MyDependency)
+                assert(create[i++] is CreateA)  // from myNewCreate1
+                assert(create[i++] is CreateZ)  // from myNewCreate2
+                assert(create[i++] is MyComponent)
+                assert(create[i++] is CreateX)
+                assert(create.size == i)
+
                 assert(destroy.size == 5)
-                assert(destroy.map { it::class } == listOf(CreateDestroyA::class, CreateDestroyB::class, 
-                    CreateDestroyC::class, CreateDestroyD::class, DestroyA::class))
+                assert(destroy.map { it::class } == listOf(CreateDestroyD::class, 
+                    CreateDestroyA::class, CreateDestroyB::class, 
+                    CreateDestroyC::class, DestroyA::class))
+
+                assert(allLists[0].size == 3)  // numbers
+                assert(allLists[1].size == destroy.size)
+                assert(allLists[2].size == create.size)
             }
         """.trimIndent())
 
@@ -200,6 +264,11 @@ class MultibindingsTest(
             @Singleton @Component(modules = [MyModule::class])
             interface TestComponent {
                 fun bootstrap(): List<Create>
+            }
+
+            fun test() {
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                assert(c.bootstrap().map { it::class } == listOf(ClassA::class, ClassC::class)) 
             }
         """.trimIndent())
 
@@ -583,6 +652,79 @@ class MultibindingsTest(
                 assert(c.sub2.create().map == mapOf(1 to "one", 2 to "two", 3 to "3/10", 20 to "20"))
                 assert(c.sub2.create().qInts == mapOf(1 to 1, 2 to 2, 3 to 3))
              }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `multi-bound set basic test`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+            
+            class Features {
+                companion object { var isEnabled = false }
+                @Condition(Features::class, "Companion.isEnabled")
+                annotation class Feature
+            }
+            
+            interface Handler
+            
+            @Singleton
+            class ClassA @Inject constructor (b: Optional<ClassB>) : Handler
+            
+            @Singleton
+            @Conditional(Features.Feature::class)
+            class ClassB @Inject constructor() : Handler
+            
+            @Singleton
+            class ClassC @Inject constructor(c: ClassA) : Handler
+
+            class ClassX : Handler
+            class ClassY : Handler
+
+            class Consumer @Inject constructor(handlers: Set<Handler>)
+            
+            @Module
+            interface MyModule {
+                @Binds @IntoSet fun a(i: ClassA): Handler
+                @Binds @IntoSet fun b(i: ClassB): Handler
+                @Binds @IntoSet fun c(i: ClassC): Handler
+                
+                @Multibinds fun emptySet(): Set<Number>
+                
+                companion object {
+                    @get:Provides
+                    val x = ClassX()
+
+                    @get:Provides
+                    val y = ClassY()
+
+                    @Provides @IntoSet(flatten = true)
+                    fun collection1(): Collection<Handler> = listOf(x, y)
+                    
+                    @Provides @IntoSet(flatten = true)
+                    fun collection2(): Collection<Handler> = listOf(y)
+                }
+            }
+            
+            @Singleton @Component(modules = [MyModule::class])
+            interface TestComponent {
+                val a: ClassA
+                val c: ClassC
+                val consumer: Consumer
+                val numbers: Set<Number>
+
+                fun handlers(): Set<Handler>
+            }
+
+            fun test() {
+                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                assert(c.handlers() !== c.handlers())
+                assert(c.handlers() == setOf(c.a, c.c, MyModule.x, MyModule.y))
+                assert(c.numbers.isEmpty())
+            }
         """.trimIndent())
 
         compileRunAndValidate()

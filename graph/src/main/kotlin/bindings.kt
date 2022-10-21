@@ -1,6 +1,7 @@
 package com.yandex.daggerlite.graph
 
 import com.yandex.daggerlite.core.AssistedInjectFactoryModel
+import com.yandex.daggerlite.core.CollectionTargetKind
 import com.yandex.daggerlite.core.ComponentDependencyModel
 import com.yandex.daggerlite.core.ComponentFactoryModel
 import com.yandex.daggerlite.core.ConditionScope
@@ -154,6 +155,11 @@ interface MultiBinding : ExtensibleBinding<MultiBinding> {
      */
     val contributions: Map<NodeModel, ContributionType>
 
+    /**
+     * Target collection kind.
+     */
+    val kind: CollectionTargetKind
+
     enum class ContributionType {
         /**
          * Single element to be contributed to a collection.
@@ -174,5 +180,20 @@ interface MapBinding : ExtensibleBinding<MapBinding> {
     /**
      * NOTE: Dependency resolve should be done exactly on the binding's [owner].
      */
-    val contents: List<Pair<AnnotationLangModel.Value, NodeDependency>>
+    val contents: Collection<Contribution>
+
+    /**
+     * A pair of [keyValue], [dependency] to be put into map.
+     */
+    interface Contribution {
+        /**
+         * A value of a key annotation (read: map key)
+         */
+        val keyValue: AnnotationLangModel.Value
+
+        /**
+         * A dependency which resolves to a contribution for the key.
+         */
+        val dependency: NodeDependency
+    }
 }

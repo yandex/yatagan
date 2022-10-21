@@ -12,6 +12,9 @@ import com.yandex.daggerlite.core.lang.AnnotationLangModel
 import com.yandex.daggerlite.core.lang.ConstructorLangModel
 import com.yandex.daggerlite.core.lang.LangModelFactory
 import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.lang.getListType
+import com.yandex.daggerlite.core.lang.getProviderType
+import com.yandex.daggerlite.core.lang.getSetType
 import com.yandex.daggerlite.core.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -116,6 +119,13 @@ internal class NodeModelImpl private constructor(
         )
     }
 
+    override fun multiBoundSetNodes(): Array<NodeModel> {
+        return arrayOf(
+            Factory(type = LangModelFactory.getSetType(type, isCovariant = false), qualifier = qualifier),
+            Factory(type = LangModelFactory.getSetType(type, isCovariant = true), qualifier = qualifier),
+        )
+    }
+
     override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> {
         val keyType = key.asBoxed()  // Need to use box as key may be a primitive type
         val valueType = if (asProviders) LangModelFactory.getProviderType(type) else type
@@ -143,7 +153,7 @@ internal class NodeModelImpl private constructor(
             inject != null -> InjectConstructorImpl(inject)
             AssistedInjectFactoryModelImpl.canRepresent(declaration) -> AssistedInjectFactoryModelImpl(declaration)
             ComponentFactoryModelImpl.canRepresent(declaration) -> ComponentFactoryModelImpl(declaration)
-            ComponentModelImpl.canRepresent(declaration) -> ComponentFactoryModelImpl(declaration)
+            ComponentModelImpl.canRepresent(declaration) -> ComponentModelImpl(declaration)
             else -> null
         }
     }
@@ -175,6 +185,7 @@ internal class NodeModelImpl private constructor(
             override fun getSpecificModel(): Nothing? = null
             override fun dropQualifier(): NodeModel = this
             override fun multiBoundListNodes(): Array<NodeModel> = emptyArray()
+            override fun multiBoundSetNodes(): Array<NodeModel> = emptyArray()
             override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> = emptyArray()
             override fun validate(validator: Validator) {
                 validator.reportError(Strings.Errors.voidBinding())

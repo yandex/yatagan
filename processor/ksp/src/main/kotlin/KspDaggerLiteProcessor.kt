@@ -25,12 +25,6 @@ internal class KspDaggerLiteProcessor(
     override val logger: Logger = KspLogger(environment.logger)
     override val options: Options = Options(environment.options)
 
-    init {
-        if (options[Options.UseParallelProcessing]) {
-            environment.logger.warn("KSP doesn't support parallel processing as of now. The option is ignored.")
-        }
-    }
-
     override fun process(resolver: Resolver): List<KSAnnotated> {
         ProcessingUtils(resolver).use {
             LangModelFactory.use(KspModelFactoryImpl()) {
@@ -38,9 +32,6 @@ internal class KspDaggerLiteProcessor(
                     sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
                         .filterIsInstance<KSClassDeclaration>(),
                     delegate = this,
-                    // KSP model doesn't support multi-thread access.
-                    // https://github.com/google/ksp/issues/311
-                    useParallelProcessing = false,
                 )
                 return emptyList()
             }

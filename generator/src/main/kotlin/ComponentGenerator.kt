@@ -65,7 +65,7 @@ internal class ComponentGenerator(
             thisGraph = graph,
         ).also(::registerContributor)
 
-        graph[MultiBindingGenerator] = MultiBindingGenerator(
+        graph[CollectionBindingGenerator] = CollectionBindingGenerator(
             methodsNs = methodsNs,
             thisGraph = graph,
         ).also(::registerContributor)

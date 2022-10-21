@@ -24,9 +24,14 @@ interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, Nod
     val qualifier: AnnotationLangModel?
 
     /**
-     * Provides all nodes that must be bound to a multi-binding of this node.
+     * Provides all nodes that must be bound to a list-binding of this node.
      */
     fun multiBoundListNodes(): Array<NodeModel>
+
+    /**
+     * Provides all nodes that must be bound to a set-binding of this node.
+     */
+    fun multiBoundSetNodes(): Array<NodeModel>
 
     /**
      * Provides all nodes that must be bound to a mapping of [key] to this node.

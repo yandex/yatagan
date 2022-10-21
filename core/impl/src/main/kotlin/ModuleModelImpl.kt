@@ -42,7 +42,7 @@ internal class ModuleModelImpl private constructor(
             .filter { it.isAnnotatedWith<Multibinds>() }
             .map { method ->
                 when {
-                    ListDeclarationImpl.canRepresent(method) -> ListDeclarationImpl(method)
+                    CollectionDeclarationImpl.canRepresent(method) -> CollectionDeclarationImpl(method)
                     MapDeclarationImpl.canRepresent(method) -> MapDeclarationImpl(method)
                     else -> InvalidDeclarationImpl(invalidMethod = method)
                 }

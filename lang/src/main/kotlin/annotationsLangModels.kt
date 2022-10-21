@@ -55,9 +55,9 @@ interface ComponentAnnotationLangModel {
 }
 
 /**
- * Models [com.yandex.daggerlite.IntoList] annotation.
+ * Models [com.yandex.daggerlite.IntoList]/[com.yandex.daggerlite.IntoSet] annotations.
  */
-interface IntoListAnnotationLangModel {
+interface IntoCollectionAnnotationLangModel {
     val flatten: Boolean
 }
 
