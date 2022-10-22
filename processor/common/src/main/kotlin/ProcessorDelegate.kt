@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.process
+package com.yandex.daggerlite.processor.common
 
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import java.io.Writer
 
 /**

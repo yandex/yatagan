@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.lang
+package com.yandex.daggerlite.lang
 
 /**
  * Models a type declaration. Can represent class/primitive/array/... types.

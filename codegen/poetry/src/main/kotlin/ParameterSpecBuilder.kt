@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.generator.poetry
+package com.yandex.daggerlite.codegen.poetry
 
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.ParameterSpec

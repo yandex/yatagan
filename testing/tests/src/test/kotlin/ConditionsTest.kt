@@ -1,5 +1,6 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.tests
 
+import com.yandex.daggerlite.testing.source_set.SourceSet
 import org.junit.Assume.assumeFalse
 import org.junit.Test
 import org.junit.runner.RunWith

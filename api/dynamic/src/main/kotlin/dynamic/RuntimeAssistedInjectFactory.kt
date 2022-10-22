@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.dynamic
 
 import com.yandex.daggerlite.DynamicValidationDelegate
-import com.yandex.daggerlite.core.AssistedInjectFactoryModel
+import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
 import com.yandex.daggerlite.lang.rt.rt
 
 internal class RuntimeAssistedInjectFactory(

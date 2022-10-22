@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.model.DependencyKind
 
 internal class BindingUsageImpl : BindingGraph.BindingUsage {
     private var _direct: Int = 0

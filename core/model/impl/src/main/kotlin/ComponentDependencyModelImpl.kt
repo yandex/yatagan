@@ -1,12 +1,12 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.core.model.impl
 
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.ComponentDependencyModel
-import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.model.ComponentDependencyModel
+import com.yandex.daggerlite.core.model.DependencyKind
+import com.yandex.daggerlite.core.model.NodeDependency
+import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings

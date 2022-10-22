@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.generator.lang
+package com.yandex.daggerlite.lang.compiled
 
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.AnnotationLangModel.Value
-import com.yandex.daggerlite.core.lang.AnnotationValueVisitorAdapter
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.AnnotationLangModel.Value
+import com.yandex.daggerlite.lang.AnnotationValueVisitorAdapter
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.AnnotationLangModelBase
 
 /**

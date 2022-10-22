@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.generator.lang
+package com.yandex.daggerlite.lang.compiled
 
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
- *  Represents a [com.yandex.daggerlite.generator.lang.CtTypeLangModel] via its name and type arguments.
+ *  Represents a [com.yandex.daggerlite.lang.compiled.CtTypeLangModel] via its name and type arguments.
  */
 sealed interface CtTypeNameModel
 

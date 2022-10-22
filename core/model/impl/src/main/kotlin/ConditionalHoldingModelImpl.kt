@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.core.model.impl
 
-import com.yandex.daggerlite.core.ConditionalHoldingModel
-import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
-import com.yandex.daggerlite.core.ConditionalHoldingModel.FeatureModel
-import com.yandex.daggerlite.core.Variant.FlavorModel
-import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel.FeatureModel
+import com.yandex.daggerlite.core.model.Variant.FlavorModel
+import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.appendChildContextReference

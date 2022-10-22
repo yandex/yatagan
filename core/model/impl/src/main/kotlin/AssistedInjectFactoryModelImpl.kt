@@ -1,17 +1,17 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.core.model.impl
 
 import com.yandex.daggerlite.AssistedFactory
 import com.yandex.daggerlite.AssistedInject
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.AssistedInjectFactoryModel.Parameter
-import com.yandex.daggerlite.core.HasNodeModel
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationKind
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
+import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel.Parameter
+import com.yandex.daggerlite.core.model.HasNodeModel
+import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationKind
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings

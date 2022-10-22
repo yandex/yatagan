@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.ksp.lang
+package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.KSValueParameter
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
-import com.yandex.daggerlite.generator.lang.CtParameterLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtParameterLangModel
 
 internal class KspParameterImpl(
     private val impl: KSValueParameter,

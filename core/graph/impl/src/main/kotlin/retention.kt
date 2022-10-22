@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.ModuleHostedBindingModel.BindingTargetModel
-import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.core.lang.LangModelFactory
-import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.model.ModuleHostedBindingModel.BindingTargetModel
+import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
 import com.yandex.daggerlite.validation.format.reportError

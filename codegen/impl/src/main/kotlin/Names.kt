@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.generator
+package com.yandex.daggerlite.codegen.impl
 
 import com.squareup.javapoet.ClassName
 

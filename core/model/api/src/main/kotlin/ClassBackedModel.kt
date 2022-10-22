@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 interface ClassBackedModel {
     val type: TypeLangModel

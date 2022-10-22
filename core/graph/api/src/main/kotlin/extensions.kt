@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.graph
+package com.yandex.daggerlite.core.graph
 
-import com.yandex.daggerlite.core.ConditionModel
+import com.yandex.daggerlite.core.model.ConditionModel
 
 /**
  * Discards negation from the literal.

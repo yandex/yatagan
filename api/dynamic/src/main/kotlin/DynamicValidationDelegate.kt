@@ -12,7 +12,7 @@ import com.yandex.daggerlite.validation.RichString
  */
 interface DynamicValidationDelegate {
     /**
-     * Whether to load and use [com.yandex.daggerlite.spi.ValidationPluginProvider]s.
+     * Whether to load and use [com.yandex.daggerlite.validation.spi.ValidationPluginProvider]s.
      */
     val usePlugins: Boolean
 

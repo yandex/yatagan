@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.testing.generation
+package com.yandex.daggerlite.testing.procedural
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
-import com.yandex.daggerlite.testing.generation.GenerationParams.DependencyKind
+import com.yandex.daggerlite.testing.procedural.GenerationParams.DependencyKind
 
 /**
  * Represents a logical scope. A physical dagger scope may be associated with the logical scope.

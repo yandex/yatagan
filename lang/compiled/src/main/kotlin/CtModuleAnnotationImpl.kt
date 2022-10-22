@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.generator.lang
+package com.yandex.daggerlite.lang.compiled
 
-import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 internal class CtModuleAnnotationImpl(
     impl: CtAnnotationLangModel

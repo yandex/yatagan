@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.core.model
 
 enum class CollectionTargetKind {
     /**

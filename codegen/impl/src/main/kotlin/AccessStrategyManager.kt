@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.generator
+package com.yandex.daggerlite.codegen.impl
 
-import com.yandex.daggerlite.core.DependencyKind
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.component1
-import com.yandex.daggerlite.core.component2
-import com.yandex.daggerlite.core.isNever
-import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.graph.Binding
-import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.Extensible
+import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.core.graph.Binding
+import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.Extensible
+import com.yandex.daggerlite.core.model.DependencyKind
+import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.core.model.component1
+import com.yandex.daggerlite.core.model.component2
+import com.yandex.daggerlite.core.model.isNever
 import javax.inject.Provider
 
 internal class AccessStrategyManager(

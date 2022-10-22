@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.core.lang.AnnotatedLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.FieldLangModelBase
 import java.lang.reflect.Field
 

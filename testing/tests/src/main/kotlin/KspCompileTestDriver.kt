@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.tests
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
@@ -6,8 +6,8 @@ import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
-import com.yandex.daggerlite.ksp.KspDaggerLiteProcessorProvider
-import com.yandex.daggerlite.process.Options
+import com.yandex.daggerlite.processor.common.Options
+import com.yandex.daggerlite.processor.ksp.KspDaggerLiteProcessorProvider
 import java.io.File
 
 class KspCompileTestDriver : CompileTestDriverBase() {

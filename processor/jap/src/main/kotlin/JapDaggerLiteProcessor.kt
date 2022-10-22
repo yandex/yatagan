@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.jap
+package com.yandex.daggerlite.processor.jap
 
 import com.google.auto.common.BasicAnnotationProcessor
-import com.yandex.daggerlite.process.Options
+import com.yandex.daggerlite.processor.common.Options
 import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.core.model
 
 /**
  * Trait for models, that can provide appropriate [NodeModel].

@@ -1,15 +1,15 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.tests
 
 import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.base.ObjectCacheRegistry
-import com.yandex.daggerlite.core.lang.LangModelFactory
-import com.yandex.daggerlite.core.lang.use
-import com.yandex.daggerlite.jap.lang.asTypeElement
-import com.yandex.daggerlite.jap.lang.isAnnotatedWith
+import com.yandex.daggerlite.lang.LangModelFactory
+import com.yandex.daggerlite.lang.jap.asTypeElement
+import com.yandex.daggerlite.lang.jap.isAnnotatedWith
 import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
-import com.yandex.daggerlite.process.Logger
-import com.yandex.daggerlite.process.LoggerDecorator
+import com.yandex.daggerlite.lang.use
+import com.yandex.daggerlite.processor.common.Logger
+import com.yandex.daggerlite.processor.common.LoggerDecorator
 import org.intellij.lang.annotations.Language
 import java.io.File
 import java.lang.reflect.Method

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.ksp.lang
+package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getJavaClassByName

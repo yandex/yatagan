@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.lang.common
 
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 abstract class TypeLangModelBase : TypeLangModel {
     final override fun compareTo(other: TypeLangModel): Int {

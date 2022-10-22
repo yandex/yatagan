@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.generator.lang
+package com.yandex.daggerlite.lang.compiled
 
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
-import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
-import com.yandex.daggerlite.core.lang.IntoCollectionAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.AnyConditionAnnotationLangModel
+import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
+import com.yandex.daggerlite.lang.ComponentFlavorAnnotationLangModel
+import com.yandex.daggerlite.lang.ConditionAnnotationLangModel
+import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
+import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 internal class CtConditionAnnotationImpl private constructor(
     private val impl: CtAnnotationLangModel,

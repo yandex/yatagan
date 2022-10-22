@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.ksp.lang
+package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
-import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
-import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtFunctionLangModel
 
 internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
     private val accessor: T,

@@ -1,14 +1,14 @@
 @file:OptIn(VariantApi::class)
 
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.core.model.impl
 
 import com.yandex.daggerlite.ComponentVariantDimension
 import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.Variant
-import com.yandex.daggerlite.core.lang.LangModelFactory
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.core.lang.isAnnotatedWith
+import com.yandex.daggerlite.core.model.Variant
+import com.yandex.daggerlite.lang.LangModelFactory
+import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings

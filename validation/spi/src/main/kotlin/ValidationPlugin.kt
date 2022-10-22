@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.spi
+package com.yandex.daggerlite.validation.spi
 
 import com.yandex.daggerlite.validation.MayBeInvalid
 

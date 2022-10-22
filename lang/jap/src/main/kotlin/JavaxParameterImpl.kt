@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.jap.lang
+package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
-import com.yandex.daggerlite.generator.lang.CtParameterLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtParameterLangModel
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.TypeMirror
 import kotlin.LazyThreadSafetyMode.PUBLICATION

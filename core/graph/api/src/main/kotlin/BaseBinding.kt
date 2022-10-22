@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.graph
+package com.yandex.daggerlite.core.graph
 
-import com.yandex.daggerlite.core.ModuleModel
-import com.yandex.daggerlite.core.NodeModel
+import com.yandex.daggerlite.core.model.ModuleModel
+import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**

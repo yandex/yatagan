@@ -1,11 +1,12 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.tests
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.yandex.daggerlite.generated.CompiledApiClasspath
 import com.yandex.daggerlite.generated.DynamicApiClasspath
 import com.yandex.daggerlite.generated.DynamicOptimizedApiClasspath
-import com.yandex.daggerlite.process.LoggerDecorator
+import com.yandex.daggerlite.processor.common.LoggerDecorator
+import com.yandex.daggerlite.testing.source_set.SourceSet
 import org.junit.Assert
 import java.io.File
 import java.lang.reflect.Method

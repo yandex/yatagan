@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.ksp.lang
+package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.getConstructors
 import com.google.devtools.ksp.getDeclaredProperties
@@ -18,18 +18,18 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.lang.AnnotatedLangModel
-import com.yandex.daggerlite.core.lang.ConstructorLangModel
-import com.yandex.daggerlite.core.lang.FieldLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.ParameterLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationKind
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
-import com.yandex.daggerlite.generator.lang.CtTypeDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationKind
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
 import com.yandex.daggerlite.lang.common.FieldLangModelBase
+import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
+import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeDeclarationImpl private constructor(

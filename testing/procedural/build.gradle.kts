@@ -12,5 +12,5 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.yandex.daggerlite.testing.generation.Standalone")
+    mainClass.set("com.yandex.daggerlite.testing.procedural.Standalone")
 }

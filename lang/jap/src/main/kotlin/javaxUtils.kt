@@ -1,6 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-package com.yandex.daggerlite.jap.lang
+package com.yandex.daggerlite.lang.jap
 
 import com.google.auto.common.AnnotationMirrors
 import com.google.auto.common.AnnotationValues
@@ -8,14 +8,14 @@ import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
 import com.google.common.base.Equivalence
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.lang.ParameterLangModel
-import com.yandex.daggerlite.generator.lang.ArrayNameModel
-import com.yandex.daggerlite.generator.lang.ClassNameModel
-import com.yandex.daggerlite.generator.lang.CtTypeNameModel
-import com.yandex.daggerlite.generator.lang.ErrorNameModel
-import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
-import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
-import com.yandex.daggerlite.generator.lang.WildcardNameModel
+import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.compiled.ArrayNameModel
+import com.yandex.daggerlite.lang.compiled.ClassNameModel
+import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
+import com.yandex.daggerlite.lang.compiled.ErrorNameModel
+import com.yandex.daggerlite.lang.compiled.KeywordTypeNameModel
+import com.yandex.daggerlite.lang.compiled.ParameterizedNameModel
+import com.yandex.daggerlite.lang.compiled.WildcardNameModel
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Element

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.lang
+package com.yandex.daggerlite.lang
 
 /**
  * An interface that provides an API to create `lang`-level model objects.

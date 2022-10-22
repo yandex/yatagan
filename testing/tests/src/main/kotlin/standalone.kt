@@ -1,5 +1,5 @@
 @file:JvmName("Standalone")
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.tests
 
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType

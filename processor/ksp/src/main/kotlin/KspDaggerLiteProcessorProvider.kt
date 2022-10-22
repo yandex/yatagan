@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.ksp
+package com.yandex.daggerlite.processor.ksp
 
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment

@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.lang.TypeDeclarationKind
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationKind
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.GenericArrayType

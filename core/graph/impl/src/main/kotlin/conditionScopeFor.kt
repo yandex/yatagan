@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.ConditionScope
-import com.yandex.daggerlite.core.ConditionalHoldingModel
-import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
-import com.yandex.daggerlite.core.Variant
-import com.yandex.daggerlite.core.Variant.DimensionModel
-import com.yandex.daggerlite.core.Variant.FlavorModel
+import com.yandex.daggerlite.core.model.ConditionScope
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
+import com.yandex.daggerlite.core.model.Variant
+import com.yandex.daggerlite.core.model.Variant.DimensionModel
+import com.yandex.daggerlite.core.model.Variant.FlavorModel
 import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.format.Strings
 import com.yandex.daggerlite.validation.format.buildError

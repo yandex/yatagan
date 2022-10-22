@@ -1,30 +1,30 @@
-package com.yandex.daggerlite.generator
+package com.yandex.daggerlite.codegen.impl
 
 import com.squareup.javapoet.CodeBlock
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.component1
-import com.yandex.daggerlite.core.component2
-import com.yandex.daggerlite.core.isAlways
-import com.yandex.daggerlite.core.isNever
-import com.yandex.daggerlite.core.lang.CallableLangModel
-import com.yandex.daggerlite.core.lang.ConstructorLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationKind
-import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
-import com.yandex.daggerlite.generator.poetry.buildExpression
-import com.yandex.daggerlite.graph.AlternativesBinding
-import com.yandex.daggerlite.graph.AssistedInjectFactoryBinding
-import com.yandex.daggerlite.graph.Binding
-import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.ComponentDependencyBinding
-import com.yandex.daggerlite.graph.ComponentDependencyEntryPointBinding
-import com.yandex.daggerlite.graph.ComponentInstanceBinding
-import com.yandex.daggerlite.graph.EmptyBinding
-import com.yandex.daggerlite.graph.InstanceBinding
-import com.yandex.daggerlite.graph.MapBinding
-import com.yandex.daggerlite.graph.MultiBinding
-import com.yandex.daggerlite.graph.ProvisionBinding
-import com.yandex.daggerlite.graph.SubComponentFactoryBinding
+import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
+import com.yandex.daggerlite.codegen.poetry.buildExpression
+import com.yandex.daggerlite.core.graph.AlternativesBinding
+import com.yandex.daggerlite.core.graph.AssistedInjectFactoryBinding
+import com.yandex.daggerlite.core.graph.Binding
+import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.ComponentDependencyBinding
+import com.yandex.daggerlite.core.graph.ComponentDependencyEntryPointBinding
+import com.yandex.daggerlite.core.graph.ComponentInstanceBinding
+import com.yandex.daggerlite.core.graph.EmptyBinding
+import com.yandex.daggerlite.core.graph.InstanceBinding
+import com.yandex.daggerlite.core.graph.MapBinding
+import com.yandex.daggerlite.core.graph.MultiBinding
+import com.yandex.daggerlite.core.graph.ProvisionBinding
+import com.yandex.daggerlite.core.graph.SubComponentFactoryBinding
+import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.core.model.component1
+import com.yandex.daggerlite.core.model.component2
+import com.yandex.daggerlite.core.model.isAlways
+import com.yandex.daggerlite.core.model.isNever
+import com.yandex.daggerlite.lang.CallableLangModel
+import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationKind
 
 private class CreationGeneratorVisitor(
     private val builder: ExpressionBuilder,

@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.graph.GraphEntryPoint
+import com.yandex.daggerlite.core.graph.GraphEntryPoint
+import com.yandex.daggerlite.core.model.ComponentModel
+import com.yandex.daggerlite.core.model.NodeDependency
+import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.format.append
 import com.yandex.daggerlite.validation.format.appendChildContextReference

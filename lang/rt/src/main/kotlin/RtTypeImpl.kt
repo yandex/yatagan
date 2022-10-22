@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.NoDeclaration
 import com.yandex.daggerlite.lang.common.TypeLangModelBase
 import java.lang.reflect.ParameterizedType

@@ -1,6 +1,6 @@
 // Copyright 2020 Yandex LLC. All rights reserved.
 
-package com.yandex.daggerlite.generator.poetry
+package com.yandex.daggerlite.codegen.poetry
 
 import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName

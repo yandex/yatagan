@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.lang
+package com.yandex.daggerlite.lang
 
 /**
  * Represents a function/method associated with a class from **the Java point of view**.

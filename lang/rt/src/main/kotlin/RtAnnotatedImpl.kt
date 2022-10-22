@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.core.lang.AnnotatedLangModel
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.AnnotationLangModel
 import java.lang.reflect.AnnotatedElement
 
 internal class RtAnnotatedImpl(

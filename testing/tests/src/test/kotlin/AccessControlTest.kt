@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.tests
 
 import org.junit.Test
 import org.junit.runner.RunWith

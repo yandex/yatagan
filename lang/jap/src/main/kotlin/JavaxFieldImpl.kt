@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.jap.lang
+package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.FieldLangModelBase
+import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
 import javax.lang.model.element.VariableElement
 
 internal class JavaxFieldImpl (

@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.tests
 
-import com.yandex.daggerlite.testing.generation.Distribution
-import com.yandex.daggerlite.testing.generation.ExperimentalGenerationApi
-import com.yandex.daggerlite.testing.generation.GenerationParams
-import com.yandex.daggerlite.testing.generation.generate
+import com.yandex.daggerlite.testing.procedural.Distribution
+import com.yandex.daggerlite.testing.procedural.ExperimentalGenerationApi
+import com.yandex.daggerlite.testing.procedural.GenerationParams
+import com.yandex.daggerlite.testing.procedural.generate
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized

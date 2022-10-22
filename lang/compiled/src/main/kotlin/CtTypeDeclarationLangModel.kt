@@ -1,6 +1,6 @@
 @file:OptIn(ConditionsApi::class, VariantApi::class)
 
-package com.yandex.daggerlite.generator.lang
+package com.yandex.daggerlite.lang.compiled
 
 import com.yandex.daggerlite.AllConditions
 import com.yandex.daggerlite.AnyCondition
@@ -14,14 +14,14 @@ import com.yandex.daggerlite.ConditionsApi
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ConditionLangModel
-import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.hasType
+import com.yandex.daggerlite.lang.ComponentAnnotationLangModel
+import com.yandex.daggerlite.lang.ComponentFlavorAnnotationLangModel
+import com.yandex.daggerlite.lang.ConditionLangModel
+import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
+import com.yandex.daggerlite.lang.hasType
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**

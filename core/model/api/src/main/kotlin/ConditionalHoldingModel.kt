@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.core.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
-import com.yandex.daggerlite.core.ConditionalHoldingModel.FeatureModel
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel.FeatureModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -20,7 +20,7 @@ interface ConditionalHoldingModel : MayBeInvalid {
     }
 
     /**
-     * Core-level model of a [com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel].
+     * Core-level model of a [com.yandex.daggerlite.lang.ConditionalAnnotationLangModel].
      */
     interface ConditionalWithFlavorConstraintsModel : MayBeInvalid {
         val featureTypes: Sequence<FeatureModel>

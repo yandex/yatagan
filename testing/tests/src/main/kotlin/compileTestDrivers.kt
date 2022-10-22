@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing
+package com.yandex.daggerlite.testing.tests
 
-import com.yandex.daggerlite.testing.CompileTestDriverBase.ApiType
+import com.yandex.daggerlite.testing.tests.CompileTestDriverBase.ApiType
 import javax.inject.Provider
 
 internal fun compileTestDrivers(

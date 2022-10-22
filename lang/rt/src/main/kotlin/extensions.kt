@@ -1,10 +1,10 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.ConstructorLangModel
-import com.yandex.daggerlite.core.lang.FieldLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method

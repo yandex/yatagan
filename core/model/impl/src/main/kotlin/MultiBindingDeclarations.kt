@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.core.impl
+package com.yandex.daggerlite.core.model.impl
 
 import com.yandex.daggerlite.base.setOf
-import com.yandex.daggerlite.core.CollectionTargetKind
-import com.yandex.daggerlite.core.MultiBindingDeclarationModel
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.model.CollectionTargetKind
+import com.yandex.daggerlite.core.model.MultiBindingDeclarationModel
+import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings

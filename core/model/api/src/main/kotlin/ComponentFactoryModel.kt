@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload.Dependency
-import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload.Instance
-import com.yandex.daggerlite.core.ComponentFactoryModel.InputPayload.Module
-import com.yandex.daggerlite.core.lang.FunctionLangModel
+import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Dependency
+import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Instance
+import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Module
+import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -93,7 +93,7 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
         /**
          * Actual abstract setter.
          * Has *single parameter*; return type may be of the builder type itself or
-         * [void][com.yandex.daggerlite.core.lang.TypeLangModel.isVoid].
+         * [void][com.yandex.daggerlite.lang.TypeLangModel.isVoid].
          */
         val builderSetter: FunctionLangModel
     }

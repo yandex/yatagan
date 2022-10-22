@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**

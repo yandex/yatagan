@@ -1,12 +1,12 @@
-package com.yandex.daggerlite.generator.lang
+package com.yandex.daggerlite.lang.compiled
 
 import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.IntoSet
 import com.yandex.daggerlite.Provides
-import com.yandex.daggerlite.core.lang.IntoCollectionAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
-import com.yandex.daggerlite.core.lang.hasType
+import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
+import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.lang.common.FunctionLangModelBase
+import com.yandex.daggerlite.lang.hasType
 
 abstract class CtFunctionLangModel : FunctionLangModelBase() {
     abstract override val annotations: Sequence<CtAnnotationLangModel>

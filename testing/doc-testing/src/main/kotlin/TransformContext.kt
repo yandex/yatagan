@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.dokka
+package com.yandex.daggerlite.testing.doc_testing
 
 import org.jetbrains.dokka.model.*
 

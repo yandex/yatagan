@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.core
+package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.MemberLangModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.MemberLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**

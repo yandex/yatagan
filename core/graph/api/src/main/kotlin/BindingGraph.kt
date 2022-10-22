@@ -1,18 +1,18 @@
-package com.yandex.daggerlite.graph
+package com.yandex.daggerlite.core.graph
 
-import com.yandex.daggerlite.core.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.ComponentDependencyModel
-import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.ConditionModel
-import com.yandex.daggerlite.core.ConditionScope
-import com.yandex.daggerlite.core.HasNodeModel
-import com.yandex.daggerlite.core.ModuleModel
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.Variant
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage.Eager
-import com.yandex.daggerlite.graph.BindingGraph.LiteralUsage.Lazy
+import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage.Eager
+import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage.Lazy
+import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
+import com.yandex.daggerlite.core.model.ComponentDependencyModel
+import com.yandex.daggerlite.core.model.ComponentFactoryModel
+import com.yandex.daggerlite.core.model.ComponentModel
+import com.yandex.daggerlite.core.model.ConditionModel
+import com.yandex.daggerlite.core.model.ConditionScope
+import com.yandex.daggerlite.core.model.HasNodeModel
+import com.yandex.daggerlite.core.model.ModuleModel
+import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.core.model.Variant
+import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**

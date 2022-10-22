@@ -1,5 +1,5 @@
 @file:[JvmMultifileClass JvmName("Loader")]
-package com.yandex.daggerlite.internal
+package com.yandex.daggerlite.common
 
 import com.yandex.daggerlite.Component
 

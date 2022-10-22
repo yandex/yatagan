@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.generator
+package com.yandex.daggerlite.codegen.impl
 
 import com.squareup.javapoet.ClassName
-import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.generator.poetry.buildExpression
-import com.yandex.daggerlite.graph.Binding
-import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.codegen.poetry.buildExpression
+import com.yandex.daggerlite.core.graph.Binding
+import com.yandex.daggerlite.core.graph.BindingGraph
 
 internal class SlotSwitchingGenerator(
     private val thisGraph: BindingGraph,

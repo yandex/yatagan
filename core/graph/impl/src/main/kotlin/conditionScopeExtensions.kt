@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.ConditionModel
-import com.yandex.daggerlite.core.ConditionScope
+import com.yandex.daggerlite.core.model.ConditionModel
+import com.yandex.daggerlite.core.model.ConditionScope
 
 internal operator fun ConditionScope.contains(another: ConditionScope): Boolean {
     if (another == ConditionScope.Unscoped) return true

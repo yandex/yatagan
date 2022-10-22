@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.lang
+package com.yandex.daggerlite.lang
 
 import org.assertj.core.api.SoftAssertions
 import org.junit.Assert

@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.generator
+package com.yandex.daggerlite.codegen.impl
 
-import com.yandex.daggerlite.generator.poetry.CodeBuilder
-import com.yandex.daggerlite.generator.poetry.ExpressionBuilder
-import com.yandex.daggerlite.generator.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.graph.Binding
-import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.codegen.poetry.CodeBuilder
+import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
+import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
+import com.yandex.daggerlite.core.graph.Binding
+import com.yandex.daggerlite.core.graph.BindingGraph
 
 internal abstract class MultiBindingGeneratorBase<B : Binding>(
     private val bindings: List<B>,

@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.core.component1
-import com.yandex.daggerlite.core.component2
-import com.yandex.daggerlite.core.isOptional
-import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.model.NodeDependency
+import com.yandex.daggerlite.core.model.component1
+import com.yandex.daggerlite.core.model.component2
+import com.yandex.daggerlite.core.model.isOptional
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings

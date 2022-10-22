@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.generation
+package com.yandex.daggerlite.testing.procedural
 
 internal class Tree<T> private constructor(
     val value: T,

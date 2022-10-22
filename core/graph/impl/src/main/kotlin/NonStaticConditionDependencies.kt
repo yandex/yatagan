@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.ConditionExpression
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.graph.BaseBinding
+import com.yandex.daggerlite.core.graph.BaseBinding
+import com.yandex.daggerlite.core.model.ConditionExpression
+import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -12,7 +12,7 @@ import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 
 /**
- * See [com.yandex.daggerlite.graph.Binding.nonStaticConditionProviders].
+ * See [com.yandex.daggerlite.core.graph.Binding.nonStaticConditionProviders].
  */
 internal interface NonStaticConditionDependencies : MayBeInvalid {
     val conditionProviders: Set<NodeModel>

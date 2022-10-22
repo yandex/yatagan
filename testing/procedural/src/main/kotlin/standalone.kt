@@ -1,9 +1,9 @@
 @file:JvmName("Standalone")
 
-package com.yandex.daggerlite.testing.generation
+package com.yandex.daggerlite.testing.procedural
 
-import com.yandex.daggerlite.testing.generation.GenerationParams.BindingType
-import com.yandex.daggerlite.testing.generation.GenerationParams.DependencyKind
+import com.yandex.daggerlite.testing.procedural.GenerationParams.BindingType
+import com.yandex.daggerlite.testing.procedural.GenerationParams.DependencyKind
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default

@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.jap.lang
+package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.lang.AnnotatedLangModel
-import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.core.lang.AnnotationLangModel.Value
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
+import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationLangModel.Value
+import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
+import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ExecutableElement

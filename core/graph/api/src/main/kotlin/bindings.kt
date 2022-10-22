@@ -1,16 +1,16 @@
-package com.yandex.daggerlite.graph
+package com.yandex.daggerlite.core.graph
 
-import com.yandex.daggerlite.core.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.CollectionTargetKind
-import com.yandex.daggerlite.core.ComponentDependencyModel
-import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.ConditionScope
-import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.CallableLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
+import com.yandex.daggerlite.core.model.CollectionTargetKind
+import com.yandex.daggerlite.core.model.ComponentDependencyModel
+import com.yandex.daggerlite.core.model.ComponentFactoryModel
+import com.yandex.daggerlite.core.model.ConditionScope
+import com.yandex.daggerlite.core.model.NodeDependency
+import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.CallableLangModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 interface ComponentDependencyBinding : Binding {
     val dependency: ComponentDependencyModel

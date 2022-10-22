@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.graph
+package com.yandex.daggerlite.core.graph
 
 /**
  * A hierarchy trait, that allows accessing optional parent nodes.

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.generation
+package com.yandex.daggerlite.testing.procedural
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName

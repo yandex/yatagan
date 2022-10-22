@@ -1,20 +1,22 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.base.traverseDepthFirstWithPath
-import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.core.component1
-import com.yandex.daggerlite.core.component2
-import com.yandex.daggerlite.core.isEager
-import com.yandex.daggerlite.graph.AliasBinding
-import com.yandex.daggerlite.graph.BaseBinding
-import com.yandex.daggerlite.graph.Binding
-import com.yandex.daggerlite.graph.BindingGraph
-import com.yandex.daggerlite.graph.component1
-import com.yandex.daggerlite.graph.component2
+import com.yandex.daggerlite.core.graph.AliasBinding
+import com.yandex.daggerlite.core.graph.BaseBinding
+import com.yandex.daggerlite.core.graph.Binding
+import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.component1
+import com.yandex.daggerlite.core.graph.component2
+import com.yandex.daggerlite.core.model.NodeDependency
+import com.yandex.daggerlite.core.model.component1
+import com.yandex.daggerlite.core.model.component2
+import com.yandex.daggerlite.core.model.isEager
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
 import com.yandex.daggerlite.validation.format.reportError
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 internal fun validateNoLoops(graph: BindingGraph, validator: Validator) {
     traverseDepthFirstWithPath(

@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.ksp.lang
+package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 
 fun TypeDeclarationLangModel(declaration: KSClassDeclaration): TypeDeclarationLangModel {
     return KspTypeDeclarationImpl(KspTypeImpl(declaration.asType(emptyList())))

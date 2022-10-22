@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.generation
+package com.yandex.daggerlite.testing.procedural
 
 data class GenerationParams(
     /**

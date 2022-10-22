@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.graph.impl
+package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.MembersInjectorModel
-import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.MemberLangModel
-import com.yandex.daggerlite.graph.GraphMemberInjector
+import com.yandex.daggerlite.core.graph.GraphMemberInjector
+import com.yandex.daggerlite.core.model.MembersInjectorModel
+import com.yandex.daggerlite.core.model.NodeDependency
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.MemberLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.append

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.generator.poetry
+package com.yandex.daggerlite.codegen.poetry
 
 @DslMarker
 internal annotation class JavaPoetry

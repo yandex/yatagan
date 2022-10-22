@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.generator.lang
+package com.yandex.daggerlite.lang.compiled
 
-import com.yandex.daggerlite.core.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.AnnotatedLangModel
 
 interface CtAnnotatedLangModel : AnnotatedLangModel {
     override val annotations: Sequence<CtAnnotationLangModel>

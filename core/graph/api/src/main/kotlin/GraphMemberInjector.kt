@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.graph
+package com.yandex.daggerlite.core.graph
 
-import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.MemberLangModel
+import com.yandex.daggerlite.core.model.NodeDependency
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.MemberLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**

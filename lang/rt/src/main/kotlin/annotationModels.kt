@@ -14,16 +14,16 @@ import com.yandex.daggerlite.IntoSet
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.VariantApi
-import com.yandex.daggerlite.core.lang.AnyConditionAnnotationLangModel
-import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ComponentAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ComponentFlavorAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ConditionAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ConditionalAnnotationLangModel
-import com.yandex.daggerlite.core.lang.IntoCollectionAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ModuleAnnotationLangModel
-import com.yandex.daggerlite.core.lang.ProvidesAnnotationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.AnyConditionAnnotationLangModel
+import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
+import com.yandex.daggerlite.lang.ComponentAnnotationLangModel
+import com.yandex.daggerlite.lang.ComponentFlavorAnnotationLangModel
+import com.yandex.daggerlite.lang.ConditionAnnotationLangModel
+import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
+import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
+import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 internal open class RtAnnotationImplBase<A : Annotation>(
     protected val impl: A,

@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.generator.lang
+package com.yandex.daggerlite.lang.compiled
 
 import com.yandex.daggerlite.Assisted
-import com.yandex.daggerlite.core.lang.AssistedAnnotationLangModel
-import com.yandex.daggerlite.core.lang.hasType
+import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.lang.common.ParameterLangModelBase
+import com.yandex.daggerlite.lang.hasType
 
 abstract class CtParameterLangModel : ParameterLangModelBase() {
     abstract override val annotations: Sequence<CtAnnotationLangModel>
