@@ -41,7 +41,7 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
     dependsOn(patchModuleDoc)
 
     dependencies {
-        plugins(project(":testing-dokka"))
+        plugins(project(":testing:doc-testing"))
     }
 
     dokkaSourceSets {
@@ -88,7 +88,7 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
 val runCodeBlockTestsClasspath by configurations.creating
 
 dependencies {
-    runCodeBlockTestsClasspath(project(":testing"))
+    runCodeBlockTestsClasspath(project(":testing:tests"))
 }
 
 val testDocumentationCodeBlocks by tasks.registering(JavaExec::class) {

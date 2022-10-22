@@ -5,10 +5,10 @@ plugins {
 val autoCommonVersion: String by extra
 
 dependencies {
-    implementation(project(":api"))
+    implementation(project(":api:public"))
     implementation(project(":base"))
 
-    api(project(":generator-lang"))
+    api(project(":lang:compiled"))
 
     implementation("com.google.auto:auto-common:$autoCommonVersion")
 

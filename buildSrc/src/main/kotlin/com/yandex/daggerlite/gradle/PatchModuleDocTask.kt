@@ -1,13 +1,17 @@
 package com.yandex.daggerlite.gradle
 
+import gradle.kotlin.dsl.accessors._19a95a576b7b06f136cb52e0fec15dfb.publishing
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.MapProperty
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.mapProperty
 import javax.inject.Inject
 
@@ -34,9 +38,16 @@ abstract class PatchModuleDocTask @Inject constructor(
     @get:Input
     val macros: MapProperty<String, String> = objects.mapProperty()
 
-    private val projectName = project.name
+    private val projectName: String
     private val isRoot = project == project.rootProject
     private val projectPath = project.path
+
+    init {
+        projectName = project.extensions.findByType<PublishingExtension>()?.let {
+            val mainArtifactPublication = it.publications.getByName("main") as MavenPublication
+            mainArtifactPublication.artifactId
+        } ?: project.name
+    }
 
     internal interface DocSyntaxExtension {
         val syntaxRegex: Regex

@@ -5,7 +5,7 @@ import com.yandex.daggerlite.process.Options
 import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 class JapDaggerLiteProcessor : BasicAnnotationProcessor() {
     override fun getSupportedOptions(): Set<String> {
         return setOf(

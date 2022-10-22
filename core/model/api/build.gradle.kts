@@ -1,13 +1,12 @@
 plugins {
     id("daggerlite.artifact")
+    id("daggerlite.documented")
 }
 
 dependencies {
+    api(project(":lang:api"))
     api(project(":validation:api"))
-    api(project(":validation:spi"))
-
-    implementation(project(":base"))
-    implementation(project(":validation:format"))
+    implementation(project(":api:public"))
 
     implementation(kotlin("stdlib"))
 }

@@ -18,11 +18,11 @@ import com.yandex.daggerlite.internal.loadImplementationByComponentClass
 import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
 import com.yandex.daggerlite.lang.rt.TypeDeclarationLangModel
 import com.yandex.daggerlite.spi.ValidationPluginProvider
-import com.yandex.daggerlite.spi.impl.GraphValidationExtension
 import com.yandex.daggerlite.validation.LocatedMessage
 import com.yandex.daggerlite.validation.RichString
 import com.yandex.daggerlite.validation.ValidationMessage
 import com.yandex.daggerlite.validation.format.format
+import com.yandex.daggerlite.validation.impl.GraphValidationExtension
 import com.yandex.daggerlite.validation.impl.validate
 import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis

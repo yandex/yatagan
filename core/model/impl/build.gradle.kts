@@ -3,11 +3,10 @@ plugins {
 }
 
 dependencies {
-    api(project(":validation:api"))
-    api(project(":validation:spi"))
-
-    implementation(project(":base"))
+    api(project(":core:model:api"))
     implementation(project(":validation:format"))
+    implementation(project(":api:public"))
+    implementation(project(":base"))
 
     implementation(kotlin("stdlib"))
 }

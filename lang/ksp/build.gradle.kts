@@ -16,10 +16,10 @@ tasks.withType<KotlinCompile> {
 val kspVersion: String by extra
 
 dependencies {
-    implementation(project(":api"))
+    implementation(project(":api:public"))
     implementation(project(":base"))
-    api(project(":lang"))
-    api(project(":generator-lang"))
+    api(project(":lang:api"))
+    api(project(":lang:compiled"))
 
     implementation(kotlin("stdlib"))
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
