@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang
 /**
  * A sealed marker interface for an entity that can be called.
  */
-interface CallableLangModel : HasPlatformModel {
+interface Callable : HasPlatformModel {
 
     /**
      * Parameters required to call this callable.

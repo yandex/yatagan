@@ -8,7 +8,7 @@ import com.yandex.daggerlite.core.model.ConditionScope
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.CallableLangModel
+import com.yandex.daggerlite.lang.Callable
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 
@@ -93,7 +93,7 @@ interface EmptyBinding : Binding
  * A [com.yandex.daggerlite.Provides] binding.
  */
 interface ProvisionBinding : Binding {
-    val provision: CallableLangModel
+    val provision: Callable
     val inputs: List<NodeDependency>
     val requiresModuleInstance: Boolean
 }

@@ -21,7 +21,7 @@ import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.core.model.isAlways
 import com.yandex.daggerlite.core.model.isNever
-import com.yandex.daggerlite.lang.CallableLangModel
+import com.yandex.daggerlite.lang.Callable
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.TypeDeclarationKind
@@ -39,7 +39,7 @@ private class CreationGeneratorVisitor(
                     binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.originModule!!),
                 )
             } else null
-            binding.provision.accept(object : CallableLangModel.Visitor<Unit> {
+            binding.provision.accept(object : Callable.Visitor<Unit> {
                 fun genArgs() {
                     join(seq = binding.inputs.asIterable()) { (node, kind) ->
                         inside.resolveBinding(node).generateAccess(

@@ -31,7 +31,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
-import com.yandex.daggerlite.lang.CallableLangModel
+import com.yandex.daggerlite.lang.Callable
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Member
@@ -296,7 +296,7 @@ internal class RuntimeComponent(
         override fun visitField(model: Field): Any? = model.rt.get(instance)
     }
 
-    private inner class ProvisionEvaluator(val binding: ProvisionBinding) : CallableLangModel.Visitor<Any?> {
+    private inner class ProvisionEvaluator(val binding: ProvisionBinding) : Callable.Visitor<Any?> {
         private fun args(): Array<Any> = binding.inputs.let { inputs ->
             Array(inputs.size) { index ->
                 resolveAndAccess(inputs[index])

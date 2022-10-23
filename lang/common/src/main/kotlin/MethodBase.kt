@@ -1,12 +1,12 @@
 package com.yandex.daggerlite.lang.common
 
 import com.yandex.daggerlite.base.zipOrNull
-import com.yandex.daggerlite.lang.CallableLangModel
+import com.yandex.daggerlite.lang.Callable
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
 
 abstract class MethodBase : Method {
-    final override fun <T> accept(visitor: CallableLangModel.Visitor<T>): T {
+    final override fun <T> accept(visitor: Callable.Visitor<T>): T {
         return visitor.visitMethod(this)
     }
 

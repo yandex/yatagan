@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang
 /**
  * Models a type constructor.
  */
-interface Constructor : CallableLangModel, AnnotatedLangModel, Accessible {
+interface Constructor : Callable, AnnotatedLangModel, Accessible {
     /**
      * An owner and a constructed type of the constructor.
      */
