@@ -8,7 +8,7 @@ import com.yandex.daggerlite.core.model.InjectConstructorModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Type
@@ -30,7 +30,7 @@ import javax.inject.Inject
 
 internal class NodeModelImpl private constructor(
     override val type: Type,
-    override val qualifier: AnnotationLangModel?,
+    override val qualifier: Annotation?,
 ) : NodeModel, NodeDependency {
 
     init {
@@ -67,7 +67,7 @@ internal class NodeModelImpl private constructor(
             return visitor.visitInjectConstructor(this)
         }
 
-        override val scopes: Set<AnnotationLangModel> by lazy {
+        override val scopes: Set<Annotation> by lazy {
             constructor.constructee.annotations.filter { it.isScope() }.toSet()
         }
 
@@ -207,11 +207,11 @@ internal class NodeModelImpl private constructor(
         operator fun invoke(
             type: Type,
             forQualifier: AnnotatedLangModel?,
-        ) = this(type, forQualifier?.annotations?.find(AnnotationLangModel::isQualifier))
+        ) = this(type, forQualifier?.annotations?.find(Annotation::isQualifier))
 
         operator fun invoke(
             type: Type,
-            qualifier: AnnotationLangModel? = null,
+            qualifier: Annotation? = null,
         ): NodeModelImpl {
             val boxed = type.asBoxed()
             val key: Any = if (qualifier != null) boxed to qualifier else boxed

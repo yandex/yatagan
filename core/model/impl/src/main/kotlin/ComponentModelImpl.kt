@@ -12,7 +12,7 @@ import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
@@ -49,7 +49,7 @@ internal class ComponentModelImpl private constructor(
         return visitor.visitComponent(this)
     }
 
-    override val scopes: Set<AnnotationLangModel> by lazy {
+    override val scopes: Set<Annotation> by lazy {
         declaration.annotations.filter { it.isScope() }.toSet()
     }
 

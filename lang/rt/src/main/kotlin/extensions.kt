@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
@@ -25,7 +25,7 @@ val TypeDeclarationLangModel.rt
 val Constructor.rt
     get() = platformModel as ReflectConstructor
 
-val AnnotationLangModel.Value.rawValue: Any
+val Annotation.Value.rawValue: Any
     get() = checkNotNull(platformModel)
 
 // endregion

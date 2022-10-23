@@ -5,9 +5,9 @@ package com.yandex.daggerlite.lang
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-inline fun <reified A : Annotation> AnnotatedLangModel.isAnnotatedWith() = isAnnotatedWith(A::class.java)
+inline fun <reified A : kotlin.Annotation> AnnotatedLangModel.isAnnotatedWith() = isAnnotatedWith(A::class.java)
 
-inline fun <reified A : Annotation> AnnotationLangModel.hasType() = annotationClass.isClass(A::class.java)
+inline fun <reified A : kotlin.Annotation> Annotation.hasType() = annotationClass.isClass(A::class.java)
 
 val TypeDeclarationLangModel.isKotlinObject get() = when(kind) {
     TypeDeclarationKind.KotlinObject, TypeDeclarationKind.KotlinCompanion -> true
@@ -33,7 +33,7 @@ inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -
     }
 }
 
-abstract class AnnotationValueVisitorAdapter<R> : AnnotationLangModel.Value.Visitor<R> {
+abstract class AnnotationValueVisitorAdapter<R> : Annotation.Value.Visitor<R> {
     abstract fun visitDefault(): R
     override fun visitBoolean(value: Boolean) = visitDefault()
     override fun visitByte(value: Byte) = visitDefault()
@@ -45,9 +45,9 @@ abstract class AnnotationValueVisitorAdapter<R> : AnnotationLangModel.Value.Visi
     override fun visitDouble(value: Double) = visitDefault()
     override fun visitString(value: String) = visitDefault()
     override fun visitType(value: Type) = visitDefault()
-    override fun visitAnnotation(value: AnnotationLangModel) = visitDefault()
+    override fun visitAnnotation(value: Annotation) = visitDefault()
     override fun visitEnumConstant(enum: Type, constant: String) = visitDefault()
-    override fun visitArray(value: List<AnnotationLangModel.Value>) = visitDefault()
+    override fun visitArray(value: List<Annotation.Value>) = visitDefault()
     override fun visitUnresolved() = visitDefault()
 }
 

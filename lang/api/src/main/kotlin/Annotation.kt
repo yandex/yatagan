@@ -7,7 +7,7 @@ package com.yandex.daggerlite.lang
  * This interface doesn't expose annotation attributes; to be able to get that, use class-specific annotation model,
  * e. g. [ComponentAnnotationLangModel], ... .
  */
-interface AnnotationLangModel : HasPlatformModel {
+interface Annotation : HasPlatformModel {
     /**
      * Annotation class declaration.
      */
@@ -41,7 +41,7 @@ interface AnnotationLangModel : HasPlatformModel {
             fun visitDouble(value: Double): R
             fun visitString(value: String): R
             fun visitType(value: Type): R
-            fun visitAnnotation(value: AnnotationLangModel): R
+            fun visitAnnotation(value: Annotation): R
             fun visitEnumConstant(enum: Type, constant: String): R
             fun visitArray(value: List<Value>): R
             fun visitUnresolved(): R

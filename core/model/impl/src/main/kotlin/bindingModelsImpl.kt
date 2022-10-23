@@ -11,7 +11,7 @@ import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.ProvidesBindingModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.AnnotationValueVisitorAdapter
 import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.lang.LangModelFactory
@@ -28,7 +28,7 @@ import com.yandex.daggerlite.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
-    override val scopes: Set<AnnotationLangModel> by lazy {
+    override val scopes: Set<Annotation> by lazy {
         method.annotations.filter { it.isScope() }.toSet()
     }
 
@@ -100,10 +100,10 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
                     // Unresolved is not reported here, as it's [:lang]'s problem and will be reported by the
                     //  compiler anyway.
                     override fun visitDefault() = Unit
-                    override fun visitAnnotation(value: AnnotationLangModel) {
+                    override fun visitAnnotation(value: Annotation) {
                         validator.reportError(Errors.unsupportedAnnotationValueAsMapKey(annotationClass = clazz))
                     }
-                    override fun visitArray(value: List<AnnotationLangModel.Value>) {
+                    override fun visitArray(value: List<Annotation.Value>) {
                         validator.reportError(Errors.unsupportedArrayValueAsMapKey(annotationClass = clazz))
                     }
                 })

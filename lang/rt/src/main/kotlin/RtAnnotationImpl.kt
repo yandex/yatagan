@@ -2,15 +2,15 @@ package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotation.Value
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel.Value
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
-import com.yandex.daggerlite.lang.common.AnnotationLangModelBase
+import com.yandex.daggerlite.lang.common.AnnotationBase
 
 internal class RtAnnotationImpl(
     private val impl: Annotation,
-) : AnnotationLangModelBase() {
+) : AnnotationBase() {
 
     override val annotationClass: AnnotationDeclarationLangModel
         get() = AnnotationClassImpl(impl.javaAnnotationClass)

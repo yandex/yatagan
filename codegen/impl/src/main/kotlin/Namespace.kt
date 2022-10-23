@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.codegen.impl
 
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.compiled.ArrayNameModel
 import com.yandex.daggerlite.lang.compiled.ClassNameModel
 import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
@@ -93,7 +93,7 @@ internal class Namespace(
 
     fun name(
         nameModel: CtTypeNameModel,
-        qualifier: AnnotationLangModel? = null,
+        qualifier: Annotation? = null,
         prefix: String = "",
         suffix: String = "",
         firstCapital: Boolean = false,

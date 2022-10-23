@@ -18,7 +18,7 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.lang.ComponentFlavorAnnotationLangModel
@@ -193,7 +193,7 @@ internal class RtTypeDeclarationImpl private constructor(
         private inner class ParameterImpl(
             private val index: Int,
         ) : ParameterBase() {
-            override val annotations: Sequence<AnnotationLangModel> by lazy {
+            override val annotations: Sequence<Annotation> by lazy {
                 parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
             }
 

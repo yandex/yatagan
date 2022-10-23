@@ -21,7 +21,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.core.model.isNever
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -41,7 +41,7 @@ internal class BindingGraphImpl(
 
     override val variant: Variant = component.variant + parent?.variant
 
-    override val scopes: Set<AnnotationLangModel>
+    override val scopes: Set<Annotation>
         get() = component.scopes
 
     override val creator: ComponentFactoryModel?

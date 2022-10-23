@@ -7,7 +7,7 @@ import com.yandex.daggerlite.core.model.ComponentFactoryModel
 import com.yandex.daggerlite.core.model.ConditionScope
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Callable
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
@@ -43,7 +43,7 @@ interface Binding : BaseBinding {
      * All scopes, that this binding is compatible with (can be cached within).
      * If empty, then the binding is *unscoped* (not cached) and is compatible with *any* scope.
      */
-    val scopes: Set<AnnotationLangModel>
+    val scopes: Set<Annotation>
 
     /**
      * The binding's dependencies on other bindings.
@@ -189,7 +189,7 @@ interface MapBinding : ExtensibleBinding<MapBinding> {
         /**
          * A value of a key annotation (read: map key)
          */
-        val keyValue: AnnotationLangModel.Value
+        val keyValue: Annotation.Value
 
         /**
          * A dependency which resolves to a contribution for the key.

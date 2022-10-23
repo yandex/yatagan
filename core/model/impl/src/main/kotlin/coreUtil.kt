@@ -11,7 +11,7 @@ import com.yandex.daggerlite.core.model.DependencyKind.Provider
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -85,8 +85,8 @@ internal data class NodeDependencyImpl(
     override fun copyDependency(node: NodeModel, kind: DependencyKind) = copy(node = node, kind = kind)
 }
 
-internal fun AnnotationLangModel.isScope() = annotationClass.isAnnotatedWith<Scope>()
+internal fun Annotation.isScope() = annotationClass.isAnnotatedWith<Scope>()
 
-internal fun AnnotationLangModel.isQualifier() = annotationClass.isAnnotatedWith<Qualifier>()
+internal fun Annotation.isQualifier() = annotationClass.isAnnotatedWith<Qualifier>()
 
-internal fun AnnotationLangModel.isMapKey() = annotationClass.isAnnotatedWith<IntoMap.Key>()
+internal fun Annotation.isMapKey() = annotationClass.isAnnotatedWith<IntoMap.Key>()

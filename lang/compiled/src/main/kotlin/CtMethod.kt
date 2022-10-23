@@ -9,7 +9,7 @@ import com.yandex.daggerlite.lang.common.MethodBase
 import com.yandex.daggerlite.lang.hasType
 
 abstract class CtMethod : MethodBase() {
-    abstract override val annotations: Sequence<CtAnnotationLangModel>
+    abstract override val annotations: Sequence<CtAnnotation>
 
     final override val providesAnnotationIfPresent: ProvidesAnnotationLangModel?
         get() = annotations.find { it.hasType<Provides>() }?.let { CtProvidesAnnotationImpl(it) }

@@ -13,8 +13,8 @@ import com.yandex.daggerlite.core.model.ConditionalHoldingModel
 import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
@@ -38,7 +38,7 @@ object Strings {
         }.toError()
 
         @Covered
-        fun noMatchingScopeForBinding(binding: Binding, scopes: Set<AnnotationLangModel>) = buildRichString {
+        fun noMatchingScopeForBinding(binding: Binding, scopes: Set<Annotation>) = buildRichString {
             color = TextColor.Inherit
             appendLine("No components in the hierarchy match binding -> ")
             append(Indent).append(binding).appendLine()
@@ -283,7 +283,7 @@ object Strings {
             "Root component can not be a subcomponent".toError()
 
         @Covered
-        fun duplicateComponentScope(scope: AnnotationLangModel) =
+        fun duplicateComponentScope(scope: Annotation) =
             "A single scope `$scope` can not be present on more than one component in a hierarchy".toError()
 
         @Covered
@@ -397,7 +397,7 @@ object Strings {
                     "which is not supported as a map key").toError()
 
         @Covered
-        fun duplicateKeysInMapping(mapType: NodeModel, keyValue: AnnotationLangModel.Value) = buildRichString {
+        fun duplicateKeysInMapping(mapType: NodeModel, keyValue: Annotation.Value) = buildRichString {
             color = TextColor.Inherit
             append("Mapping for `").append(mapType).append("` contains duplicates for key `")
                 .append(keyValue).append("`")

@@ -5,7 +5,7 @@ import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.IntoSet
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.lang.Parameter
@@ -63,7 +63,7 @@ internal class RtMethodImpl(
     private inner class ParameterImpl(
         val index: Int,
     ) : ParameterBase() {
-        override val annotations: Sequence<AnnotationLangModel> by lazy {
+        override val annotations: Sequence<Annotation> by lazy {
             parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
         }
 

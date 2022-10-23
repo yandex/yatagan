@@ -28,7 +28,7 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
  * [TypeDeclarationLangModel] specialized for compile time implementations.
  */
 abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModelBase() {
-    abstract override val annotations: Sequence<CtAnnotationLangModel>
+    abstract override val annotations: Sequence<CtAnnotation>
 
     override val componentAnnotationIfPresent: ComponentAnnotationLangModel? by lazy(PUBLICATION) {
         annotations.find { it.hasType<Component>() }?.let(::CtComponentAnnotationImpl)

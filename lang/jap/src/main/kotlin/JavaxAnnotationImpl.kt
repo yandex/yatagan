@@ -3,11 +3,11 @@ package com.yandex.daggerlite.lang.jap
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotation.Value
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel.Value
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
-import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotation
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ExecutableElement
@@ -20,7 +20,7 @@ import javax.lang.model.util.ElementFilter
 
 internal class JavaxAnnotationImpl private constructor(
     private val impl: AnnotationMirror,
-) : CtAnnotationLangModel() {
+) : CtAnnotation() {
     override val annotationClass: AnnotationDeclarationLangModel by lazy {
         AnnotationClassImpl(impl.annotationType.asTypeElement())
     }

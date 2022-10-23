@@ -28,7 +28,7 @@ import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.common.ConstructorBase
 import com.yandex.daggerlite.lang.common.FieldBase
-import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotation
 import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
@@ -38,7 +38,7 @@ internal class KspTypeDeclarationImpl private constructor(
     private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
     private val annotated = KspAnnotatedImpl(impl)
 
-    override val annotations: Sequence<CtAnnotationLangModel> = annotated.annotations
+    override val annotations: Sequence<CtAnnotation> = annotated.annotations
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>) = annotated.isAnnotatedWith(type)
 
     override val isEffectivelyPublic: Boolean

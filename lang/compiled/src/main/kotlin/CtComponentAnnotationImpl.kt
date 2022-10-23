@@ -4,7 +4,7 @@ import com.yandex.daggerlite.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.lang.Type
 
 internal class CtComponentAnnotationImpl(
-    impl: CtAnnotationLangModel,
+    impl: CtAnnotation,
 ) : ComponentAnnotationLangModel {
     override val isRoot: Boolean = impl.getBoolean("isRoot")
     override val modules: Sequence<Type> = impl.getTypes("modules")

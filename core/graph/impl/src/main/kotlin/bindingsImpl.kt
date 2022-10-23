@@ -41,7 +41,7 @@ import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.core.model.isNever
 import com.yandex.daggerlite.core.model.isOptional
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -81,7 +81,7 @@ internal interface BindingMixin : Binding, BaseBindingMixin {
     override val nonStaticConditionProviders: Set<NodeModel>
         get() = emptySet()
 
-    override val scopes: Set<AnnotationLangModel>
+    override val scopes: Set<Annotation>
         get() = emptySet()
 
     val nonStaticConditionDependencies: NonStaticConditionDependencies?
@@ -276,7 +276,7 @@ internal class InjectConstructorProvisionBindingImpl(
 ) : ProvisionBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin {
     override val target get() = impl.asNode()
     override val originModule: Nothing? get() = null
-    override val scopes: Set<AnnotationLangModel> get() = impl.scopes
+    override val scopes: Set<Annotation> get() = impl.scopes
     override val provision get() = impl.constructor
     override val inputs: List<NodeDependency> get() = impl.inputs
     override val requiresModuleInstance: Boolean = false
@@ -649,7 +649,7 @@ internal class MapBindingImpl(
 ) : MapBinding, BindingMixin, ComparableBindingMixin<MapBindingImpl> {
 
     data class Contribution(
-        override val keyValue: AnnotationLangModel.Value,
+        override val keyValue: Annotation.Value,
         override val dependency: NodeDependency,
         val origin: ModuleHostedBindingModel,
     ) : MapBinding.Contribution, Comparable<Contribution> {
@@ -658,7 +658,7 @@ internal class MapBindingImpl(
         }
     }
 
-    private val allResolvedAndGroupedContents: Map<AnnotationLangModel.Value, List<BaseBinding>> by lazy {
+    private val allResolvedAndGroupedContents: Map<Annotation.Value, List<BaseBinding>> by lazy {
         mergeMultiMapsForDuplicateCheck(
             fromParent = upstream?.allResolvedAndGroupedContents,
             current = contents.groupBy(

@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.lang.common
 
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Type
 
-abstract class AnnotationLangModelBase : AnnotationLangModel {
+abstract class AnnotationBase : Annotation {
     final override fun toString() = buildString {
         append('@')
         append(annotationClass)
@@ -17,12 +17,12 @@ abstract class AnnotationLangModelBase : AnnotationLangModel {
         }
     }
 
-    abstract class ValueBase : AnnotationLangModel.Value {
+    abstract class ValueBase : Annotation.Value {
         final override fun toString(): String = this.accept(ToString)
     }
 }
 
-private object ToString : AnnotationLangModel.Value.Visitor<String> {
+private object ToString : Annotation.Value.Visitor<String> {
     override fun visitBoolean(value: Boolean) = value.toString()
     override fun visitByte(value: Byte) = value.toString()
     override fun visitShort(value: Short) = value.toString()
@@ -33,10 +33,10 @@ private object ToString : AnnotationLangModel.Value.Visitor<String> {
     override fun visitDouble(value: Double) = value.toString()
     override fun visitString(value: String) = "\"$value\""
     override fun visitType(value: Type) = "$value.class"
-    override fun visitAnnotation(value: AnnotationLangModel) = value.toString()
+    override fun visitAnnotation(value: Annotation) = value.toString()
     override fun visitEnumConstant(enum: Type, constant: String) = "$enum.$constant"
     override fun visitUnresolved(): String = "<unresolved>"
-    override fun visitArray(value: List<AnnotationLangModel.Value>): String {
+    override fun visitArray(value: List<Annotation.Value>): String {
         return value.joinToString(prefix = "{", postfix = "}", separator = ", ") { it.accept(ToString) }
     }
 }
