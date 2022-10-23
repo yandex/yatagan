@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 
 internal fun ReflectType.equivalence() = TypeEquivalenceWrapper(this)
 
@@ -147,7 +147,7 @@ internal fun ReflectType.formatString(): String = when (this) {
     else -> toString()
 }
 
-fun TypeDeclarationLangModel.kotlinObjectInstanceOrNull(): Any? {
+fun TypeDeclaration.kotlinObjectInstanceOrNull(): Any? {
     val model = this as RtTypeDeclarationImpl
     val impl = model.type.impl.asClass()
     return when(model.kind) {

@@ -2,16 +2,16 @@ package com.yandex.daggerlite.lang.common
 
 import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 
 /**
- * A [TypeDeclarationLangModel] implementation, that is convenient to return when no declaration makes sense at all,
+ * A [TypeDeclaration] implementation, that is convenient to return when no declaration makes sense at all,
  * e.g. for primitive types, `void` type, array type, etc.
  */
 class NoDeclaration(
     private val type: Type,
-) : TypeDeclarationLangModelBase() {
+) : TypeDeclarationBase() {
     override val isAbstract get() = false
     override val isEffectivelyPublic get() = false
 

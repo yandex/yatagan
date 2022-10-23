@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.common.NoDeclaration
 import com.yandex.daggerlite.lang.compiled.CtType
 import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
@@ -14,7 +14,7 @@ internal class JavaxTypeImpl private constructor(
 ) : CtType() {
     override val nameModel: CtTypeNameModel by lazy { CtTypeNameModel(impl) }
 
-    override val declaration: TypeDeclarationLangModel by lazy {
+    override val declaration: TypeDeclaration by lazy {
         if (impl.kind == TypeKind.DECLARED) {
             JavaxTypeDeclarationImpl(impl.asDeclaredType())
         } else NoDeclaration(this)

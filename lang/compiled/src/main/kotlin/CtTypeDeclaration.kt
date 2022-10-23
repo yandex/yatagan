@@ -16,13 +16,13 @@ import com.yandex.daggerlite.ConditionsApi
 import com.yandex.daggerlite.Module
 import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
+import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.daggerlite.lang.common.TypeDeclarationBase
 
 /**
- * [TypeDeclarationLangModel] specialized for compile time implementations.
+ * [TypeDeclaration] specialized for compile time implementations.
  */
-abstract class CtTypeDeclarationLangModel : TypeDeclarationLangModelBase() {
+abstract class CtTypeDeclaration : TypeDeclarationBase() {
     abstract override val annotations: Sequence<CtAnnotation>
 
     override fun <T : BuiltinAnnotation.OnClass> getAnnotation(

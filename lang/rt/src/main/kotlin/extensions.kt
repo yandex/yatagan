@@ -4,7 +4,7 @@ import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 
 /**
  * Convenience extension for creating [MethodSignatureEquivalenceWrapper] for the given [Method].
@@ -19,7 +19,7 @@ val Method.rt
 val Field.rt
     get() = platformModel as ReflectField
 
-val TypeDeclarationLangModel.rt
+val TypeDeclaration.rt
     get() = platformModel as Class<*>
 
 val Constructor.rt

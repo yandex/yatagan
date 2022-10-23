@@ -10,7 +10,7 @@ import com.yandex.daggerlite.core.model.MultiBindingDeclarationModel
 import com.yandex.daggerlite.core.model.ProvidesBindingModel
 import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.functionsWithCompanion
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -21,7 +21,7 @@ import com.yandex.daggerlite.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class ModuleModelImpl private constructor(
-    private val declaration: TypeDeclarationLangModel,
+    private val declaration: TypeDeclaration,
 ) : ModuleModel {
     private val impl = declaration.getAnnotation(BuiltinAnnotation.Module)
 
@@ -100,10 +100,10 @@ internal class ModuleModelImpl private constructor(
         override fun visitProvides(model: ProvidesBindingModel) = model
     }
 
-    companion object Factory : ObjectCache<TypeDeclarationLangModel, ModuleModelImpl>() {
-        operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ModuleModelImpl)
+    companion object Factory : ObjectCache<TypeDeclaration, ModuleModelImpl>() {
+        operator fun invoke(key: TypeDeclaration) = createCached(key, ::ModuleModelImpl)
 
-        fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
+        fun canRepresent(declaration: TypeDeclaration): Boolean {
             return declaration.getAnnotation(BuiltinAnnotation.Module) != null
         }
     }

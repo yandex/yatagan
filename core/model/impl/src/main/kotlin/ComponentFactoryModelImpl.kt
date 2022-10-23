@@ -16,8 +16,8 @@ import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -29,7 +29,7 @@ import com.yandex.daggerlite.validation.format.reportWarning
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class ComponentFactoryModelImpl private constructor(
-    private val factoryDeclaration: TypeDeclarationLangModel,
+    private val factoryDeclaration: TypeDeclaration,
 ) : ComponentFactoryModel {
 
     override val createdComponent: ComponentModel by lazy {
@@ -252,16 +252,16 @@ internal class ComponentFactoryModelImpl private constructor(
         )
     }
 
-    companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentFactoryModelImpl>() {
+    companion object Factory : ObjectCache<TypeDeclaration, ComponentFactoryModelImpl>() {
         operator fun invoke(
-            factoryDeclaration: TypeDeclarationLangModel,
+            factoryDeclaration: TypeDeclaration,
         ) = createCached(factoryDeclaration) {
             ComponentFactoryModelImpl(
                 factoryDeclaration = it,
             )
         }
 
-        fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
+        fun canRepresent(declaration: TypeDeclaration): Boolean {
             return declaration.getAnnotation(BuiltinAnnotation.Component.Builder) != null
         }
     }

@@ -4,10 +4,10 @@ import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.ImmutableSetMultimap
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.jap.JavaxModelFactoryImpl
 import com.yandex.daggerlite.lang.jap.ProcessingUtils
-import com.yandex.daggerlite.lang.jap.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.jap.TypeDeclaration
 import com.yandex.daggerlite.lang.jap.asTypeElement
 import com.yandex.daggerlite.lang.use
 import com.yandex.daggerlite.processor.common.Logger
@@ -35,9 +35,9 @@ internal class JapComponentProcessingStep(
 
     override fun annotations(): Set<String> = setOf(Component::class.qualifiedName!!)
 
-    override fun createDeclaration(source: TypeElement) = TypeDeclarationLangModel(source)
+    override fun createDeclaration(source: TypeElement) = TypeDeclaration(source)
 
-    override fun getSourceFor(declaration: TypeDeclarationLangModel): TypeElement {
+    override fun getSourceFor(declaration: TypeDeclaration): TypeElement {
         return declaration.platformModel as TypeElement
     }
 

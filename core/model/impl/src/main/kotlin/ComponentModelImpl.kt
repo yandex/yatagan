@@ -16,8 +16,8 @@ import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -27,7 +27,7 @@ import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 
 internal class ComponentModelImpl private constructor(
-    private val declaration: TypeDeclarationLangModel,
+    private val declaration: TypeDeclaration,
 ) : ComponentModel, ConditionalHoldingModel {
     private val impl = declaration.getAnnotation(BuiltinAnnotation.Component)
 
@@ -198,10 +198,10 @@ internal class ComponentModelImpl private constructor(
         representation = declaration,
     )
 
-    companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
-        operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)
+    companion object Factory : ObjectCache<TypeDeclaration, ComponentModelImpl>() {
+        operator fun invoke(key: TypeDeclaration) = createCached(key, ::ComponentModelImpl)
 
-        fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
+        fun canRepresent(declaration: TypeDeclaration): Boolean {
             return declaration.getAnnotation(BuiltinAnnotation.Component) != null
         }
     }

@@ -1,11 +1,11 @@
 package com.yandex.daggerlite.lang.common
 
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 
-abstract class TypeDeclarationLangModelBase : TypeDeclarationLangModel {
+abstract class TypeDeclarationBase : TypeDeclaration {
     final override fun toString() = asType().toString()
 
-    final override fun compareTo(other: TypeDeclarationLangModel): Int {
+    final override fun compareTo(other: TypeDeclaration): Int {
         if (this == other) return 0
 
         // Compare by qualified name - cheap

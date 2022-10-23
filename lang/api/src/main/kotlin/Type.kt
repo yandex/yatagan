@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang
 
 /**
- * Models a concrete [TypeDeclarationLangModel] usage.
+ * Models a concrete [TypeDeclaration] usage.
  * Contains additional information, like type arguments.
  *
  * No assumptions about type nullability and other "enhancements" is made.
@@ -18,7 +18,7 @@ interface Type : Comparable<Type> {
     /**
      * The corresponding type declaration.
      */
-    val declaration: TypeDeclarationLangModel
+    val declaration: TypeDeclaration
 
     /**
      * Type arguments. If any of the arguments has non-invariant variance (or a wildcard type) -

@@ -15,7 +15,7 @@ fun LangModelFactory.declaration(
     name: String,
     vararg names: String,
     packageName: String = "",
-): TypeDeclarationLangModel {
+): TypeDeclaration {
     return getTypeDeclaration(packageName, name, *names).apply {
         Assert.assertNotNull("Class `$packageName.$name.${names.contentToString()}` is not defined", this)
     }!!

@@ -19,7 +19,7 @@ import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 
 object Strings {
     private const val Indent = "    "
@@ -355,7 +355,7 @@ object Strings {
             "Module contains provisions and thus must be $AccessMessage.".toError()
 
         @Covered
-        fun invalidAccessForConditionClass(`class`: TypeDeclarationLangModel) =
+        fun invalidAccessForConditionClass(`class`: TypeDeclaration) =
             "Class `$`class`` is not accessible for condition computation, make it $AccessMessage".toError()
 
         @Covered
@@ -465,7 +465,7 @@ object Strings {
         }.toNote()
 
         @Covered
-        fun conflictingCreator(creator: TypeDeclarationLangModel) = buildRichString {
+        fun conflictingCreator(creator: TypeDeclaration) = buildRichString {
             color = TextColor.Inherit
             append("Declared `").append(creator).append('`')
         }.toNote()

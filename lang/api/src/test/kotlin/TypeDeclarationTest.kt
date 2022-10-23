@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class TypeDeclarationLangModelTest(
+class TypeDeclarationTest(
     driverProvider: () -> LangTestDriver,
 ) : LangTestDriver by driverProvider() {
     companion object {

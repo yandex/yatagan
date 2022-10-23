@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.common.NoDeclaration
 import com.yandex.daggerlite.lang.common.TypeBase
 import java.lang.reflect.ParameterizedType
@@ -12,7 +12,7 @@ internal class RtTypeImpl private constructor(
     val impl: ReflectType,
 ) : TypeBase() {
 
-    override val declaration: TypeDeclarationLangModel by lazy {
+    override val declaration: TypeDeclaration by lazy {
         if (impl.tryAsClass() != null) RtTypeDeclarationImpl(this) else NoDeclaration(this)
     }
 

@@ -9,11 +9,11 @@ import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.compiled.CtAnnotated
 import com.yandex.daggerlite.lang.compiled.CtConstructor
-import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
+import com.yandex.daggerlite.lang.compiled.CtTypeDeclaration
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.NestingKind
@@ -30,7 +30,7 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val type: DeclaredType,
-) : CtAnnotated by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationLangModel() {
+) : CtAnnotated by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclaration() {
     private val impl = type.asTypeElement()
 
     override val isEffectivelyPublic: Boolean
@@ -56,7 +56,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
     override val qualifiedName: String
         get() = impl.qualifiedName.toString()
 
-    override val enclosingType: TypeDeclarationLangModel?
+    override val enclosingType: TypeDeclaration?
         get() = when (impl.nestingKind) {
             NestingKind.MEMBER -> Factory(impl.enclosingElement.asType().asDeclaredType())
             else -> null
@@ -110,7 +110,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .memoize()
     }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy {
+    override val nestedClasses: Sequence<TypeDeclaration> by lazy {
         impl.enclosedElements
         .asSequence()
         .filter {
@@ -125,7 +125,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         .memoize()
     }
 
-    override val defaultCompanionObjectDeclaration: TypeDeclarationLangModel? by lazy {
+    override val defaultCompanionObjectDeclaration: TypeDeclaration? by lazy {
         if (impl.isFromKotlin()) {
             impl.enclosedElements.find {
                 it.kind == ElementKind.CLASS && it.asTypeElement().isDefaultCompanionObject()
@@ -189,7 +189,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         override val platformModel: ExecutableElement,
     ) : CtConstructor(), Annotated by JavaxAnnotatedImpl(platformModel) {
         override val isEffectivelyPublic: Boolean get() = platformModel.isPublic
-        override val constructee: TypeDeclarationLangModel get() = this@JavaxTypeDeclarationImpl
+        override val constructee: TypeDeclaration get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<Parameter> = parametersSequenceFor(platformModel, type)
     }
 }

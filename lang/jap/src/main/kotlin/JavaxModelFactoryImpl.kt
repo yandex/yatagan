@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import javax.lang.model.element.TypeElement
 
 class JavaxModelFactoryImpl : LangModelFactory {
@@ -56,7 +56,7 @@ class JavaxModelFactoryImpl : LangModelFactory {
         packageName: String,
         simpleName: String,
         vararg simpleNames: String
-    ): TypeDeclarationLangModel? {
+    ): TypeDeclaration? {
         val name = buildString {
             if (packageName.isNotEmpty()) {
                 append(packageName).append('.')

@@ -24,17 +24,17 @@ import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.compiled.CtAnnotation
 import com.yandex.daggerlite.lang.compiled.CtConstructor
 import com.yandex.daggerlite.lang.compiled.CtField
-import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
+import com.yandex.daggerlite.lang.compiled.CtTypeDeclaration
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
-) : CtTypeDeclarationLangModel() {
+) : CtTypeDeclaration() {
     private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
     private val annotated = KspAnnotatedImpl(impl)
 
@@ -63,7 +63,7 @@ internal class KspTypeDeclarationImpl private constructor(
     override val qualifiedName: String
         get() = impl.qualifiedName?.asString() ?: ""
 
-    override val enclosingType: TypeDeclarationLangModel?
+    override val enclosingType: TypeDeclaration?
         get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { Factory(KspTypeImpl(it.asType(emptyList()))) }
 
     override val interfaces: Sequence<Type> by lazy {
@@ -316,7 +316,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy {
+    override val nestedClasses: Sequence<TypeDeclaration> by lazy {
         impl.declarations
             .filterIsInstance<KSClassDeclaration>()
             .filter { !it.isPrivate() }
@@ -391,7 +391,7 @@ internal class KspTypeDeclarationImpl private constructor(
                 }
                 return platformModel.isPublicOrInternal()
             }
-        override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
+        override val constructee: TypeDeclaration get() = this@KspTypeDeclarationImpl
         override val parameters: Sequence<Parameter> = parametersSequenceFor(
             declaration = platformModel,
             containing = type.impl,
@@ -400,7 +400,7 @@ internal class KspTypeDeclarationImpl private constructor(
     }
 
     private class PSFSyntheticField(
-        override val owner: TypeDeclarationLangModel,
+        override val owner: TypeDeclaration,
         override val type: Type = owner.asType(),
         override val name: String,
     ) : CtField() {

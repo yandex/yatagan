@@ -7,7 +7,7 @@ interface Constructor : Callable, Annotated, Accessible {
     /**
      * An owner and a constructed type of the constructor.
      */
-    val constructee: TypeDeclarationLangModel
+    val constructee: TypeDeclaration
 
     /**
      * Obtains framework annotation of the given kind.

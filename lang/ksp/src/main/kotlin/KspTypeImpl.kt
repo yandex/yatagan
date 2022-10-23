@@ -5,7 +5,7 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.common.NoDeclaration
 import com.yandex.daggerlite.lang.compiled.CtType
 import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
@@ -20,7 +20,7 @@ internal class KspTypeImpl private constructor(
         CtTypeNameModel(type = impl, jvmTypeKind = jvmType)
     }
 
-    override val declaration: TypeDeclarationLangModel by lazy(PUBLICATION) {
+    override val declaration: TypeDeclaration by lazy(PUBLICATION) {
         if (jvmType is JvmTypeInfo.Declared && impl.declaration is KSClassDeclaration) {
             KspTypeDeclarationImpl(this)
         } else NoDeclaration(this)

@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import javax.lang.model.element.TypeElement
 
-fun TypeDeclarationLangModel(typeElement: TypeElement): TypeDeclarationLangModel {
+fun TypeDeclaration(typeElement: TypeElement): TypeDeclaration {
     return JavaxTypeDeclarationImpl(typeElement.asType().asDeclaredType())
 }

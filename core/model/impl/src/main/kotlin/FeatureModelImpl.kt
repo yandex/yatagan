@@ -11,7 +11,7 @@ import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -29,7 +29,7 @@ import com.yandex.daggerlite.validation.format.reportWarning
 import com.yandex.daggerlite.validation.format.toString
 
 internal class FeatureModelImpl private constructor(
-    private val impl: TypeDeclarationLangModel,
+    private val impl: TypeDeclaration,
 ) : ConditionalHoldingModel.FeatureModel {
     override val conditionScope: ConditionScope by lazy {
         ConditionScope(impl.getAnnotations(BuiltinAnnotation.ConditionFamily).map { conditionModel ->
@@ -75,8 +75,8 @@ internal class FeatureModelImpl private constructor(
     override val type: Type
         get() = impl.asType()
 
-    companion object Factory : ObjectCache<TypeDeclarationLangModel, FeatureModelImpl>() {
-        operator fun invoke(impl: TypeDeclarationLangModel) = createCached(impl, ::FeatureModelImpl)
+    companion object Factory : ObjectCache<TypeDeclaration, FeatureModelImpl>() {
+        operator fun invoke(impl: TypeDeclaration) = createCached(impl, ::FeatureModelImpl)
     }
 }
 
@@ -123,7 +123,7 @@ private class ConditionLiteralImpl private constructor(
             } ?: this(
                 negated = false,
                 payload = object : LiteralPayload {
-                    override val root: TypeDeclarationLangModel
+                    override val root: TypeDeclaration
                         get() = LangModelFactory.errorType.declaration
                     override val path: List<Member> get() = emptyList()
                     override fun validate(validator: Validator) {
@@ -152,7 +152,7 @@ private class ConditionLiteralImpl private constructor(
 }
 
 private interface LiteralPayload : MayBeInvalid {
-    val root: TypeDeclarationLangModel
+    val root: TypeDeclaration
     val path: List<Member>
     val nonStatic: Boolean
 }
@@ -165,7 +165,7 @@ private object MemberTypeVisitor : Member.Visitor<Type> {
 private typealias ValidationReport = (Validator) -> Unit
 
 private class LiteralPayloadImpl private constructor(
-    override val root: TypeDeclarationLangModel,
+    override val root: TypeDeclaration,
     private val pathSource: String,
 ) : LiteralPayload {
     private var validationReport: ValidationReport? = null
@@ -248,14 +248,14 @@ private class LiteralPayloadImpl private constructor(
         }
     }
 
-    companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
-        operator fun invoke(root: TypeDeclarationLangModel, pathSource: String): LiteralPayload {
+    companion object Factory : BiObjectCache<TypeDeclaration, String, LiteralPayload>() {
+        operator fun invoke(root: TypeDeclaration, pathSource: String): LiteralPayload {
             return createCached(root, pathSource) {
                 LiteralPayloadImpl(root, pathSource)
             }
         }
 
-        private fun findAccessor(type: TypeDeclarationLangModel, name: String): Member? {
+        private fun findAccessor(type: TypeDeclaration, name: String): Member? {
             val field = type.fields.find { it.name == name }
             if (field != null) {
                 return field

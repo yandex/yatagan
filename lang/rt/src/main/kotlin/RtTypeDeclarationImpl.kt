@@ -26,16 +26,16 @@ import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.common.ConstructorBase
-import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
+import com.yandex.daggerlite.lang.common.TypeDeclarationBase
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class RtTypeDeclarationImpl private constructor(
     val type: RtTypeImpl,
-) : TypeDeclarationLangModelBase(), Annotated by RtAnnotatedImpl(type.impl.asClass()) {
+) : TypeDeclarationBase(), Annotated by RtAnnotatedImpl(type.impl.asClass()) {
     private val impl = type.impl.asClass()
 
     override val isEffectivelyPublic: Boolean
@@ -65,7 +65,7 @@ internal class RtTypeDeclarationImpl private constructor(
         }
     }
 
-    override val enclosingType: TypeDeclarationLangModel?
+    override val enclosingType: TypeDeclaration?
         get() = impl.enclosingClass?.let { Factory(RtTypeImpl(it)) }
 
     override val interfaces: Sequence<Type>
@@ -81,7 +81,7 @@ internal class RtTypeDeclarationImpl private constructor(
         return type
     }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy {
+    override val nestedClasses: Sequence<TypeDeclaration> by lazy {
         impl.declaredClasses.asSequence()
             .filter { !it.isPrivate }
             .map { Factory(RtTypeImpl(it)) }
@@ -131,7 +131,7 @@ internal class RtTypeDeclarationImpl private constructor(
             }.memoize()
     }
 
-    override val defaultCompanionObjectDeclaration: TypeDeclarationLangModel? by lazy {
+    override val defaultCompanionObjectDeclaration: TypeDeclaration? by lazy {
         ifOrElseNull(impl.isFromKotlin()) {
             impl.declaredClasses.find {
                 it.simpleName == "Companion"
@@ -194,7 +194,7 @@ internal class RtTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: ReflectConstructor,
-        override val constructee: TypeDeclarationLangModel,
+        override val constructee: TypeDeclaration,
     ) : ConstructorBase(), Annotated by RtAnnotatedImpl(platformModel) {
         private val parametersAnnotations by lazy { platformModel.parameterAnnotations }
         private val parametersTypes by lazy { platformModel.genericParameterTypes }

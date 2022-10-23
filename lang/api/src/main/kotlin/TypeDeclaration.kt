@@ -8,8 +8,7 @@ package com.yandex.daggerlite.lang
  * for a public API for `asMemberOf()` and the likes. This should be taken into account while comparing two type
  * declarations for equality - they may compare unequal for they have different underlying types.
  */
-interface TypeDeclarationLangModel : Annotated, HasPlatformModel, Accessible,
-    Comparable<TypeDeclarationLangModel> {
+interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<TypeDeclaration> {
     /**
      * Declaration kind.
      */
@@ -30,7 +29,7 @@ interface TypeDeclarationLangModel : Annotated, HasPlatformModel, Accessible,
     /**
      * If this declaration is nested, returns enclosing declaration. `null` otherwise.
      */
-    val enclosingType: TypeDeclarationLangModel?
+    val enclosingType: TypeDeclaration?
 
     /**
      * Interfaces directly implemented/extended by the declaration.
@@ -68,13 +67,13 @@ interface TypeDeclarationLangModel : Annotated, HasPlatformModel, Accessible,
     /**
      * Nested non-private classes that are declared inside this declaration.
      */
-    val nestedClasses: Sequence<TypeDeclarationLangModel>
+    val nestedClasses: Sequence<TypeDeclaration>
 
     /**
      * Kotlin's default companion object declaration, if one exists for the type.
      * If a companion object has non-default name (`"Companion"`), it won't be found here.
      */
-    val defaultCompanionObjectDeclaration: TypeDeclarationLangModel?
+    val defaultCompanionObjectDeclaration: TypeDeclaration?
 
     /**
      * Returns an underlying [Type].

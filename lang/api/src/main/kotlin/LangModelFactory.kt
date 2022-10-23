@@ -69,7 +69,7 @@ interface LangModelFactory {
         packageName: String,
         simpleName: String,
         vararg simpleNames: String,
-    ): TypeDeclarationLangModel?
+    ): TypeDeclaration?
 
     /**
      * An "error" type, which is usually applicable in places, where type information is unresolved due to a semantic
@@ -103,7 +103,7 @@ interface LangModelFactory {
             packageName: String,
             simpleName: String,
             vararg simpleNames: String
-        ): TypeDeclarationLangModel? = checkNotNull(delegate).getTypeDeclaration(packageName, simpleName, *simpleNames)
+        ): TypeDeclaration? = checkNotNull(delegate).getTypeDeclaration(packageName, simpleName, *simpleNames)
 
         override val errorType: Type get() = checkNotNull(delegate).errorType
 

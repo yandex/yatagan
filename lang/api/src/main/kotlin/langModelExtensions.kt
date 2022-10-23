@@ -5,12 +5,12 @@ package com.yandex.daggerlite.lang
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-val TypeDeclarationLangModel.isKotlinObject get() = when(kind) {
+val TypeDeclaration.isKotlinObject get() = when(kind) {
     TypeDeclarationKind.KotlinObject, TypeDeclarationKind.KotlinCompanion -> true
     else -> false
 }
 
-val TypeDeclarationLangModel.functionsWithCompanion: Sequence<Method>
+val TypeDeclaration.functionsWithCompanion: Sequence<Method>
     get() = when (val companion = defaultCompanionObjectDeclaration) {
         null -> methods
         else -> methods + companion.methods

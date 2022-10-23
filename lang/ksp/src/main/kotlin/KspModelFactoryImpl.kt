@@ -5,7 +5,7 @@ import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 
 class KspModelFactoryImpl : LangModelFactory {
     private val listDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
@@ -81,7 +81,7 @@ class KspModelFactoryImpl : LangModelFactory {
         packageName: String,
         simpleName: String,
         vararg simpleNames: String
-    ): TypeDeclarationLangModel? {
+    ): TypeDeclaration? {
         val qualifiedName = buildString {
             if (packageName.isNotEmpty()) {
                 append(packageName).append('.')

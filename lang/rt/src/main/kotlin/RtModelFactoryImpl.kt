@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 
 class RtModelFactoryImpl(
     private val classLoader: ClassLoader,
@@ -39,7 +39,7 @@ class RtModelFactoryImpl(
         packageName: String,
         simpleName: String,
         vararg simpleNames: String
-    ): TypeDeclarationLangModel? {
+    ): TypeDeclaration? {
         val qualifiedName = buildString {
             if (packageName.isNotEmpty()) {
                 append(packageName).append('.')

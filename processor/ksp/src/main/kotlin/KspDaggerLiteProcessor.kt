@@ -8,10 +8,10 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.ksp.KspModelFactoryImpl
 import com.yandex.daggerlite.lang.ksp.ProcessingUtils
-import com.yandex.daggerlite.lang.ksp.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.ksp.TypeDeclaration
 import com.yandex.daggerlite.lang.use
 import com.yandex.daggerlite.processor.common.Logger
 import com.yandex.daggerlite.processor.common.Options
@@ -38,9 +38,9 @@ internal class KspDaggerLiteProcessor(
         }
     }
 
-    override fun createDeclaration(source: KSClassDeclaration) = TypeDeclarationLangModel(source)
+    override fun createDeclaration(source: KSClassDeclaration) = TypeDeclaration(source)
 
-    override fun getSourceFor(declaration: TypeDeclarationLangModel): KSClassDeclaration {
+    override fun getSourceFor(declaration: TypeDeclaration): KSClassDeclaration {
         return declaration.platformModel as KSClassDeclaration
     }
 

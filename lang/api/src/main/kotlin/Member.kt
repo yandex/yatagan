@@ -7,7 +7,7 @@ interface Member : Annotated, HasPlatformModel, Accessible {
     /**
      * Type declaration that this entity is member of.
      */
-    val owner: TypeDeclarationLangModel
+    val owner: TypeDeclaration
 
     /**
      * Whether the member is truly static (@[JvmStatic] or `static`).

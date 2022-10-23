@@ -8,8 +8,8 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -17,7 +17,7 @@ import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 
 internal class AssistedInjectFactoryModelImpl private constructor(
-    private val impl: TypeDeclarationLangModel,
+    private val impl: TypeDeclaration,
 ) : AssistedInjectFactoryModel {
     init {
         assert(canRepresent(impl))
@@ -118,12 +118,12 @@ internal class AssistedInjectFactoryModelImpl private constructor(
         representation = impl,
     )
 
-    companion object Factory : ObjectCache<TypeDeclarationLangModel, AssistedInjectFactoryModelImpl>() {
-        operator fun invoke(declaration: TypeDeclarationLangModel): AssistedInjectFactoryModelImpl {
+    companion object Factory : ObjectCache<TypeDeclaration, AssistedInjectFactoryModelImpl>() {
+        operator fun invoke(declaration: TypeDeclaration): AssistedInjectFactoryModelImpl {
             return createCached(declaration, ::AssistedInjectFactoryModelImpl)
         }
 
-        fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
+        fun canRepresent(declaration: TypeDeclaration): Boolean {
             return declaration.getAnnotation(BuiltinAnnotation.AssistedFactory) != null
         }
     }
