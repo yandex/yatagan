@@ -10,9 +10,9 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Annotation.Value
-import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
+import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotation
 import java.lang.annotation.RetentionPolicy
 import kotlin.LazyThreadSafetyMode.PUBLICATION
@@ -24,7 +24,7 @@ internal class KspAnnotationImpl(
         this@KspAnnotationImpl.toString()
     }
 
-    override val annotationClass: AnnotationDeclarationLangModel by lazy {
+    override val annotationClass: AnnotationDeclaration by lazy {
         AnnotationClassImpl(
             declaration = checkNotNull(impl.annotationType.resolve().classDeclaration()),
         )
@@ -33,7 +33,7 @@ internal class KspAnnotationImpl(
     override val platformModel: KSAnnotation
         get() = impl
 
-    override fun getValue(attribute: AnnotationDeclarationLangModel.Attribute): Value {
+    override fun getValue(attribute: AnnotationDeclaration.Attribute): Value {
         require(attribute is AttributeImpl) { "Invalid attribute type" }
         val arg = impl.arguments.find { (it.name?.asString() ?: "value") == attribute.name }
         requireNotNull(arg) {
@@ -126,7 +126,7 @@ internal class KspAnnotationImpl(
 
     private class AttributeImpl(
         val impl: KSPropertyDeclaration,
-    ) : AnnotationDeclarationLangModel.Attribute {
+    ) : AnnotationDeclaration.Attribute {
 
         override val name: String
             get() = impl.simpleName.asString()
@@ -150,7 +150,7 @@ internal class KspAnnotationImpl(
 
     internal class AnnotationClassImpl private constructor(
         declaration: KSClassDeclaration,
-    ) : AnnotationDeclarationLangModelBase() {
+    ) : AnnotationDeclarationBase() {
         private val annotated = KspAnnotatedImpl(declaration)
 
         override val annotations: Sequence<Annotation>
@@ -160,7 +160,7 @@ internal class KspAnnotationImpl(
             return annotated.isAnnotatedWith(type)
         }
 
-        override val attributes: Sequence<AnnotationDeclarationLangModel.Attribute> by lazy {
+        override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             annotated.impl.getAllProperties().map {
                 AttributeImpl(impl = it)
             }.memoize()

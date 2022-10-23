@@ -4,9 +4,9 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.Annotation.Value
-import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
+import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotation
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
@@ -21,14 +21,14 @@ import javax.lang.model.util.ElementFilter
 internal class JavaxAnnotationImpl private constructor(
     private val impl: AnnotationMirror,
 ) : CtAnnotation() {
-    override val annotationClass: AnnotationDeclarationLangModel by lazy {
+    override val annotationClass: AnnotationDeclaration by lazy {
         AnnotationClassImpl(impl.annotationType.asTypeElement())
     }
 
     override val platformModel: AnnotationMirror
         get() = impl
 
-    override fun getValue(attribute: AnnotationDeclarationLangModel.Attribute): Value {
+    override fun getValue(attribute: AnnotationDeclaration.Attribute): Value {
         require(attribute is AttributeImpl) { "Invalid attribute type" }
         val value = impl.elementValues[attribute.impl] ?: attribute.impl.defaultValue
         checkNotNull(value) { "Attribute missing/invalid" }
@@ -95,7 +95,7 @@ internal class JavaxAnnotationImpl private constructor(
 
     private class AttributeImpl(
         val impl: ExecutableElement,
-    ) : AnnotationDeclarationLangModel.Attribute {
+    ) : AnnotationDeclaration.Attribute {
         override val name: String
             get() = impl.simpleName.toString()
         override val type: Type
@@ -104,9 +104,9 @@ internal class JavaxAnnotationImpl private constructor(
 
     private class AnnotationClassImpl private constructor(
         private val impl: TypeElement,
-    ) : AnnotationDeclarationLangModelBase(), AnnotatedLangModel by JavaxAnnotatedImpl(impl) {
+    ) : AnnotationDeclarationBase(), AnnotatedLangModel by JavaxAnnotatedImpl(impl) {
 
-        override val attributes: Sequence<AnnotationDeclarationLangModel.Attribute> by lazy {
+        override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             ElementFilter.methodsIn(impl.enclosedElements)
                 .asSequence()
                 .filter { it.isAbstract }

@@ -11,7 +11,7 @@ interface Annotation : HasPlatformModel {
     /**
      * Annotation class declaration.
      */
-    val annotationClass: AnnotationDeclarationLangModel
+    val annotationClass: AnnotationDeclaration
 
     /**
      * Get the value of an [attribute], returning default value if no explicit value was specified.
@@ -21,10 +21,10 @@ interface Annotation : HasPlatformModel {
      * For framework annotations use corresponding concrete annotation models, that may optimize the way they obtain
      *  the attributes, like e.g. [ComponentAnnotationLangModel], [ModuleAnnotationLangModel], ...
      *
-     * @param attribute one of this model's [annotationClass]'s [attributes][AnnotationDeclarationLangModel.attributes].
+     * @param attribute one of this model's [annotationClass]'s [attributes][AnnotationDeclaration.attributes].
      *  Otherwise behaviour is undefined.
      */
-    fun getValue(attribute: AnnotationDeclarationLangModel.Attribute): Value
+    fun getValue(attribute: AnnotationDeclaration.Attribute): Value
 
     /**
      * Models annotation attribute value.

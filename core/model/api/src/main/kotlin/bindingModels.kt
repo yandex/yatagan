@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core.model
 
 import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -96,7 +96,7 @@ interface ModuleHostedBindingModel : MayBeInvalid {
             /**
              * Annotation class of the Map-key annotation. `null` when not-found/unresolved.
              */
-            val mapKeyClass: AnnotationDeclarationLangModel?,
+            val mapKeyClass: AnnotationDeclaration?,
         ) : BindingTargetModel()
     }
 

@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang
 /**
  * An annotation class declaration.
  */
-interface AnnotationDeclarationLangModel : AnnotatedLangModel {
+interface AnnotationDeclaration : AnnotatedLangModel {
     /**
      * Represents an annotation class' property/@interface's method.
      */

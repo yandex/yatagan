@@ -3,22 +3,22 @@ package com.yandex.daggerlite.lang.rt
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.Annotation.Value
-import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
+import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
 import com.yandex.daggerlite.lang.common.AnnotationBase
 
 internal class RtAnnotationImpl(
     private val impl: Annotation,
 ) : AnnotationBase() {
 
-    override val annotationClass: AnnotationDeclarationLangModel
+    override val annotationClass: AnnotationDeclaration
         get() = AnnotationClassImpl(impl.javaAnnotationClass)
 
     override val platformModel: Annotation
         get() = impl
 
-    override fun getValue(attribute: AnnotationDeclarationLangModel.Attribute): Value {
+    override fun getValue(attribute: AnnotationDeclaration.Attribute): Value {
         require(attribute is AttributeImpl) { "Invalid attribute type" }
         return try {
             ValueImpl(attribute.impl.invoke(impl))
@@ -76,9 +76,9 @@ internal class RtAnnotationImpl(
 
     private class AnnotationClassImpl private constructor(
         private val impl: Class<*>,
-    ) : AnnotationDeclarationLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
+    ) : AnnotationDeclarationBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
 
-        override val attributes: Sequence<AnnotationDeclarationLangModel.Attribute> by lazy {
+        override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             impl.declaredMethods.asSequence()
                 .filter { it.isAbstract }
                 .map {
@@ -102,7 +102,7 @@ internal class RtAnnotationImpl(
 
     private class AttributeImpl(
         val impl: ReflectMethod,
-    ) : AnnotationDeclarationLangModel.Attribute {
+    ) : AnnotationDeclaration.Attribute {
         override val name: String
             get() = impl.name
 

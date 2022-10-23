@@ -14,7 +14,7 @@ import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
@@ -383,16 +383,16 @@ object Strings {
             "Multiple IntoMap.Key-annotations are present on the binding".toError()
 
         @Covered
-        fun missingMapKeyValue(annotationClass: AnnotationDeclarationLangModel) =
+        fun missingMapKeyValue(annotationClass: AnnotationDeclaration) =
             "Map key `$annotationClass` is missing a `value` attribute to be used as a key value".toError()
 
         @Covered
-        fun unsupportedAnnotationValueAsMapKey(annotationClass: AnnotationDeclarationLangModel) =
+        fun unsupportedAnnotationValueAsMapKey(annotationClass: AnnotationDeclaration) =
             ("Map key `$annotationClass`'s `value` attribute has annotation type, " +
                     "which is not supported as a map key").toError()
 
         @Covered
-        fun unsupportedArrayValueAsMapKey(annotationClass: AnnotationDeclarationLangModel) =
+        fun unsupportedArrayValueAsMapKey(annotationClass: AnnotationDeclaration) =
             ("Map key `$annotationClass`'s `value` attribute has array type, " +
                     "which is not supported as a map key").toError()
 
@@ -405,7 +405,7 @@ object Strings {
 
         @Covered
         fun invalidAnnotationRetention(
-            annotationDeclaration: AnnotationDeclarationLangModel,
+            annotationDeclaration: AnnotationDeclaration,
             insteadOf: AnnotationRetention,
         ) = ("Annotation class `$annotationDeclaration` must have RUNTIME retention instead of $insteadOf").toError()
     }
