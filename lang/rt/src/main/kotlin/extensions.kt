@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
@@ -22,7 +22,7 @@ val Field.rt
 val TypeDeclarationLangModel.rt
     get() = platformModel as Class<*>
 
-val ConstructorLangModel.rt
+val Constructor.rt
     get() = platformModel as ReflectConstructor
 
 val AnnotationLangModel.Value.rawValue: Any

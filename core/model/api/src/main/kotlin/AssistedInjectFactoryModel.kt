@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
@@ -19,7 +19,7 @@ interface AssistedInjectFactoryModel : MayBeInvalid, HasNodeModel {
      * an [@AssistedInject][com.yandex.daggerlite.AssistedInject]-annotated constructor from the
      * factory's target type.
      */
-    val assistedInjectConstructor: ConstructorLangModel?
+    val assistedInjectConstructor: Constructor?
 
     /**
      * Parsed parameter models from [assistedInjectConstructor].

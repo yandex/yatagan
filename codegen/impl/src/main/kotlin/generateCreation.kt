@@ -22,7 +22,7 @@ import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.core.model.isAlways
 import com.yandex.daggerlite.core.model.isNever
 import com.yandex.daggerlite.lang.CallableLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 
@@ -66,7 +66,7 @@ private class CreationGeneratorVisitor(
                     +"))"
                 }
 
-                override fun visitConstructor(constructor: ConstructorLangModel) {
+                override fun visitConstructor(constructor: Constructor) {
                     +"new %T(".formatCode(constructor.constructee.asType().typeName().asRawType())
                     genArgs()
                     +")"

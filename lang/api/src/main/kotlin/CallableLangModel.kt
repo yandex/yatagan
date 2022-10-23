@@ -14,6 +14,6 @@ interface CallableLangModel : HasPlatformModel {
 
     interface Visitor<T> {
         fun visitMethod(method: Method): T
-        fun visitConstructor(constructor: ConstructorLangModel): T
+        fun visitConstructor(constructor: Constructor): T
     }
 }

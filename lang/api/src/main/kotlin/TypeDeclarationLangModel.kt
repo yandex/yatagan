@@ -48,7 +48,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     /**
      * All declared non-private constructors.
      */
-    val constructors: Sequence<ConstructorLangModel>
+    val constructors: Sequence<Constructor>
 
     /**
      * All non-private methods (including static and inherited ones).

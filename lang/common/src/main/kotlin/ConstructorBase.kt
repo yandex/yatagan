@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.lang.common
 
 import com.yandex.daggerlite.lang.CallableLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 
-abstract class ConstructorLangModelBase : ConstructorLangModel {
+abstract class ConstructorBase : Constructor {
     final override fun <T> accept(visitor: CallableLangModel.Visitor<T>): T {
         return visitor.visitConstructor(this)
     }

@@ -19,14 +19,14 @@ import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
+import com.yandex.daggerlite.lang.common.ConstructorBase
 import com.yandex.daggerlite.lang.common.FieldBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
 import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
@@ -84,7 +84,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }?.let { KspTypeImpl(it.asMemberOfThis()) }
     }
 
-    override val constructors: Sequence<ConstructorLangModel> by lazy {
+    override val constructors: Sequence<Constructor> by lazy {
         when(kind) {
             TypeDeclarationKind.Annotation -> {
                 // Kotlin treats annotations as classes, we don't.
@@ -377,7 +377,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: KSFunctionDeclaration,
-    ) : ConstructorLangModelBase(), AnnotatedLangModel by KspAnnotatedImpl(platformModel) {
+    ) : ConstructorBase(), AnnotatedLangModel by KspAnnotatedImpl(platformModel) {
         private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean

@@ -32,7 +32,7 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.lang.CallableLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
@@ -316,7 +316,7 @@ internal class RuntimeComponent(
             else -> null
         }, /* method arguments*/ *args())
 
-        override fun visitConstructor(constructor: ConstructorLangModel): Any? = constructor.rt.newInstance(*args())
+        override fun visitConstructor(constructor: Constructor): Any? = constructor.rt.newInstance(*args())
     }
 
     override fun visitEmpty(binding: EmptyBinding): Any {

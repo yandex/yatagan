@@ -15,7 +15,7 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
@@ -511,7 +511,7 @@ object Strings {
             append('`')
         }.toNote()
 
-        fun inaccessibleAutoConstructorForMissingModule(constructor: ConstructorLangModel) =
+        fun inaccessibleAutoConstructorForMissingModule(constructor: Constructor) =
             ("found effectively not public parameterless constructor here: `$constructor`" +
                     "maybe make it public or internal to allow automatic module creation?").toNote()
 

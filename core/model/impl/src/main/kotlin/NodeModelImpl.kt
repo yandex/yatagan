@@ -9,7 +9,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.getListType
@@ -40,7 +40,7 @@ internal class NodeModelImpl private constructor(
     }
 
     private inner class InjectConstructorImpl(
-        override val constructor: ConstructorLangModel,
+        override val constructor: Constructor,
     ) : InjectConstructorModel, ConditionalHoldingModel {
         init {
             assert(constructor.isAnnotatedWith<Inject>())

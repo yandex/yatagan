@@ -24,7 +24,7 @@ import com.yandex.daggerlite.lang.ComponentAnnotationLangModel
 import com.yandex.daggerlite.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.lang.ConditionLangModel
 import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
@@ -32,7 +32,7 @@ import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
+import com.yandex.daggerlite.lang.common.ConstructorBase
 import com.yandex.daggerlite.lang.common.ParameterBase
 import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
 import kotlin.LazyThreadSafetyMode.PUBLICATION
@@ -92,7 +92,7 @@ internal class RtTypeDeclarationImpl private constructor(
             .memoize()
     }
 
-    override val constructors: Sequence<ConstructorLangModel> by lazy {
+    override val constructors: Sequence<Constructor> by lazy {
         impl.declaredConstructors
             .asSequence()
             .filter { !it.isPrivate }
@@ -179,7 +179,7 @@ internal class RtTypeDeclarationImpl private constructor(
     private inner class ConstructorImpl(
         override val platformModel: ReflectConstructor,
         override val constructee: TypeDeclarationLangModel,
-    ) : ConstructorLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(platformModel) {
+    ) : ConstructorBase(), AnnotatedLangModel by RtAnnotatedImpl(platformModel) {
         private val parametersAnnotations by lazy { platformModel.parameterAnnotations }
         private val parametersTypes by lazy { platformModel.genericParameterTypes }
         private val parametersNames by lazy { platformModel.parameterNamesCompat() }
