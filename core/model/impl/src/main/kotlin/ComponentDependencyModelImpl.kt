@@ -6,7 +6,7 @@ import com.yandex.daggerlite.core.model.DependencyKind
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -14,7 +14,7 @@ import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportWarning
 
 internal class ComponentDependencyModelImpl private constructor(
-    override val type: TypeLangModel,
+    override val type: Type,
 ) : ComponentDependencyModel {
 
     private val exposedEntryPoints: Map<NodeDependency, FunctionLangModel> by lazy {
@@ -60,8 +60,8 @@ internal class ComponentDependencyModelImpl private constructor(
         representation = type,
     )
 
-    companion object Factory : ObjectCache<TypeLangModel, ComponentDependencyModelImpl>() {
-        operator fun invoke(type: TypeLangModel) = createCached(type) {
+    companion object Factory : ObjectCache<Type, ComponentDependencyModelImpl>() {
+        operator fun invoke(type: Type) = createCached(type) {
             ComponentDependencyModelImpl(type)
         }
     }

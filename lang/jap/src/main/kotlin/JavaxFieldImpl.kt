@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.FieldLangModelBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
 import javax.lang.model.element.VariableElement
@@ -14,7 +14,7 @@ internal class JavaxFieldImpl (
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
 
-    override val type: TypeLangModel by lazy {
+    override val type: Type by lazy {
         JavaxTypeImpl(impl.asMemberOf(owner.type))
     }
 

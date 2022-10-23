@@ -9,7 +9,7 @@ import com.yandex.daggerlite.codegen.poetry.MethodSpecBuilder
 import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.core.model.ClassBackedModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.ArrayNameModel
 import com.yandex.daggerlite.lang.compiled.ClassNameModel
 import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
@@ -22,7 +22,7 @@ internal fun ClassBackedModel.typeName(): TypeName {
     return name.asTypeName()
 }
 
-internal fun TypeLangModel.typeName(): TypeName {
+internal fun Type.typeName(): TypeName {
     return name.asTypeName()
 }
 

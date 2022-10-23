@@ -93,7 +93,7 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
         /**
          * Actual abstract setter.
          * Has *single parameter*; return type may be of the builder type itself or
-         * [void][com.yandex.daggerlite.lang.TypeLangModel.isVoid].
+         * [void][com.yandex.daggerlite.lang.Type.isVoid].
          */
         val builderSetter: FunctionLangModel
     }

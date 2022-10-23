@@ -11,10 +11,10 @@ package com.yandex.daggerlite.lang
  * Regarding wildcard types.
  * This model can't represent a wildcard type directly - the system has Kotlin point of view here. Kotlin models
  * type parameter as a *type variable* and a *variance*, and type argument as a *type* and a *projection*.
- * [TypeLangModel] only provides [typeArguments]; variance, projection and type variables are not exposed as of now.
+ * [Type] only provides [typeArguments]; variance, projection and type variables are not exposed as of now.
  *
  */
-interface TypeLangModel : Comparable<TypeLangModel> {
+interface Type : Comparable<Type> {
     /**
      * The corresponding type declaration.
      */
@@ -24,7 +24,7 @@ interface TypeLangModel : Comparable<TypeLangModel> {
      * Type arguments. If any of the arguments has non-invariant variance (or a wildcard type) -
      * such is info is not available via the current API.
      */
-    val typeArguments: List<TypeLangModel>
+    val typeArguments: List<Type>
 
     /**
      * Checks if the type is the `void` JVM type.
@@ -34,11 +34,11 @@ interface TypeLangModel : Comparable<TypeLangModel> {
     /**
      * Checks if a variable of this type can be assigned a value of [another] type.
      */
-    fun isAssignableFrom(another: TypeLangModel): Boolean
+    fun isAssignableFrom(another: Type): Boolean
 
     /**
      * @return If this is a primitive type, returns its *boxed* counterpart. Returns this type otherwise.
      *
      */
-    fun asBoxed(): TypeLangModel
+    fun asBoxed(): Type
 }

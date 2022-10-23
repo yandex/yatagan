@@ -3,7 +3,7 @@ package com.yandex.daggerlite.core.model
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -86,7 +86,7 @@ interface ModuleHostedBindingModel : MayBeInvalid {
             /**
              * Mapping key type. `null` when not-found/unresolved.
              */
-            val keyType: TypeLangModel?,
+            val keyType: Type?,
 
             /**
              * Mapping key value. `null` when not-found/unresolved.

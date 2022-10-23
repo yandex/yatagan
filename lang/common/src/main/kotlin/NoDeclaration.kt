@@ -1,15 +1,15 @@
 package com.yandex.daggerlite.lang.common
 
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 
 /**
  * A [TypeDeclarationLangModel] implementation, that is convenient to return when no declaration makes sense at all,
  * e.g. for primitive types, `void` type, array type, etc.
  */
 class NoDeclaration(
-    private val type: TypeLangModel,
+    private val type: Type,
 ) : TypeDeclarationLangModelBase() {
     override val isAbstract get() = false
     override val isEffectivelyPublic get() = false
@@ -37,7 +37,7 @@ class NoDeclaration(
     override val qualifiedName: String
         get() = type.toString()
 
-    override fun asType(): TypeLangModel = type
+    override fun asType(): Type = type
 
     override fun hashCode(): Int = type.hashCode()
     override fun equals(other: Any?): Boolean {

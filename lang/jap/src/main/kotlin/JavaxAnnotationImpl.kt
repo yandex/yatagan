@@ -5,7 +5,7 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel.Value
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
 import javax.lang.model.element.AnnotationMirror
@@ -98,7 +98,7 @@ internal class JavaxAnnotationImpl private constructor(
     ) : AnnotationDeclarationLangModel.Attribute {
         override val name: String
             get() = impl.simpleName.toString()
-        override val type: TypeLangModel
+        override val type: Type
             get() = JavaxTypeImpl(impl.returnType)
     }
 

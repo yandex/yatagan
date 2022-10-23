@@ -44,14 +44,14 @@ abstract class AnnotationValueVisitorAdapter<R> : AnnotationLangModel.Value.Visi
     override fun visitFloat(value: Float) = visitDefault()
     override fun visitDouble(value: Double) = visitDefault()
     override fun visitString(value: String) = visitDefault()
-    override fun visitType(value: TypeLangModel) = visitDefault()
+    override fun visitType(value: Type) = visitDefault()
     override fun visitAnnotation(value: AnnotationLangModel) = visitDefault()
-    override fun visitEnumConstant(enum: TypeLangModel, constant: String) = visitDefault()
+    override fun visitEnumConstant(enum: Type, constant: String) = visitDefault()
     override fun visitArray(value: List<AnnotationLangModel.Value>) = visitDefault()
     override fun visitUnresolved() = visitDefault()
 }
 
-inline fun LangModelFactory.getListType(parameter: TypeLangModel, isCovariant: Boolean = false): TypeLangModel {
+inline fun LangModelFactory.getListType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(
         type = LangModelFactory.ParameterizedType.List,
         parameter = parameter,
@@ -59,7 +59,7 @@ inline fun LangModelFactory.getListType(parameter: TypeLangModel, isCovariant: B
     )
 }
 
-inline fun LangModelFactory.getSetType(parameter: TypeLangModel, isCovariant: Boolean = false): TypeLangModel {
+inline fun LangModelFactory.getSetType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(
         type = LangModelFactory.ParameterizedType.Set,
         parameter = parameter,
@@ -67,7 +67,7 @@ inline fun LangModelFactory.getSetType(parameter: TypeLangModel, isCovariant: Bo
     )
 }
 
-inline fun LangModelFactory.getCollectionType(parameter: TypeLangModel, isCovariant: Boolean = false): TypeLangModel {
+inline fun LangModelFactory.getCollectionType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(
         type = LangModelFactory.ParameterizedType.Collection,
         parameter = parameter,
@@ -75,7 +75,7 @@ inline fun LangModelFactory.getCollectionType(parameter: TypeLangModel, isCovari
     )
 }
 
-inline fun LangModelFactory.getProviderType(parameter: TypeLangModel, isCovariant: Boolean = false): TypeLangModel {
+inline fun LangModelFactory.getProviderType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(
         type = LangModelFactory.ParameterizedType.Provider,
         parameter = parameter,

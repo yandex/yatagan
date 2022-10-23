@@ -1,12 +1,11 @@
 package com.yandex.daggerlite.lang.rt
 
-import java.lang.reflect.Method
-
 /**
- * Equivalence wrapper for [Method] using Java language method signature - method name + parameters erasure.
+ * Equivalence wrapper for [java.lang.reflect.Method] using Java language method signature -
+ * method name + parameters erasure.
  */
 class MethodSignatureEquivalenceWrapper(
-    private val method: Method,
+    private val method: ReflectMethod,
 ) {
     private val parameterTypes = method.parameterTypes
     private val cachedHash by lazy {

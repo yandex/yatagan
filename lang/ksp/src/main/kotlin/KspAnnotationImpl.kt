@@ -11,7 +11,7 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel.Value
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
 import java.lang.annotation.RetentionPolicy
@@ -62,9 +62,9 @@ internal class KspAnnotationImpl(
                 override fun visitFloat(value: Float) = value
                 override fun visitDouble(value: Double) = value
                 override fun visitString(value: String) = value
-                override fun visitType(value: TypeLangModel) = value
+                override fun visitType(value: Type) = value
                 override fun visitAnnotation(value: AnnotationLangModel) = value
-                override fun visitEnumConstant(enum: TypeLangModel, constant: String) = enum to constant
+                override fun visitEnumConstant(enum: Type, constant: String) = enum to constant
                 override fun visitArray(value: List<Value>) = value
                 override fun visitUnresolved() = null
             })
@@ -131,7 +131,7 @@ internal class KspAnnotationImpl(
         override val name: String
             get() = impl.simpleName.asString()
 
-        override val type: TypeLangModel by lazy {
+        override val type: Type by lazy {
             val kotlinType = impl.type.resolve().resolveAliasIfNeeded()
             val declaration = kotlinType.declaration as? KSClassDeclaration
             if (declaration?.qualifiedName?.asString() == "kotlin.reflect.KClass") {

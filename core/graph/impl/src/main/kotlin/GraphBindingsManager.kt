@@ -30,7 +30,7 @@ import com.yandex.daggerlite.core.model.ProvidesBindingModel
 import com.yandex.daggerlite.core.model.accept
 import com.yandex.daggerlite.core.model.allInputs
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.RichString
 import com.yandex.daggerlite.validation.Validator
@@ -175,7 +175,7 @@ internal class GraphBindingsManager(
         // Mappings
         for ((mapSignature, contributions) in mapBindings) {
             for (useProviders in booleanArrayOf(true, false)) {
-                val (keyType: TypeLangModel, valueType: NodeModel) = mapSignature
+                val (keyType: Type, valueType: NodeModel) = mapSignature
                 val nodes = valueType.multiBoundMapNodes(key = keyType, asProviders = useProviders)
                 val representativeNode = nodes.first()
                 val upstream = parentsSequence().mapNotNull { parentBindings ->
@@ -392,7 +392,7 @@ internal class GraphBindingsManager(
     }
 
     private data class MapSignature(
-        val keyType: TypeLangModel,
+        val keyType: Type,
         val valueType: NodeModel,
     )
 

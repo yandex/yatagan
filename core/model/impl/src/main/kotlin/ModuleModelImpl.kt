@@ -9,8 +9,8 @@ import com.yandex.daggerlite.core.model.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.MultiBindingDeclarationModel
 import com.yandex.daggerlite.core.model.ProvidesBindingModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.functionsWithCompanion
 import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.lang.isKotlinObject
@@ -26,15 +26,15 @@ internal class ModuleModelImpl private constructor(
 ) : ModuleModel {
     private val impl = declaration.moduleAnnotationIfPresent
 
-    override val type: TypeLangModel
+    override val type: Type
         get() = declaration.asType()
 
     override val includes: Collection<ModuleModel> by lazy {
-        impl?.includes?.map(TypeLangModel::declaration)?.map(Factory::invoke)?.toSet() ?: emptySet()
+        impl?.includes?.map(Type::declaration)?.map(Factory::invoke)?.toSet() ?: emptySet()
     }
 
     override val subcomponents: Collection<ComponentModel> by lazy {
-        impl?.subcomponents?.map(TypeLangModel::declaration)?.map { ComponentModelImpl(it) }?.toSet() ?: emptySet()
+        impl?.subcomponents?.map(Type::declaration)?.map { ComponentModelImpl(it) }?.toSet() ?: emptySet()
     }
 
     override val multiBindingDeclarations: Sequence<MultiBindingDeclarationModel> =

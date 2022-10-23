@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.KSValueParameter
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
 import com.yandex.daggerlite.lang.compiled.CtParameterLangModel
 
@@ -15,7 +15,7 @@ internal class KspParameterImpl(
     override val name: String
         get() = impl.name?.asString() ?: "unnamed"
 
-    override val type: TypeLangModel by lazy {
+    override val type: Type by lazy {
         KspTypeImpl(
             reference = refinedTypeRef,
             jvmSignatureHint = jvmSignatureSupplier(),

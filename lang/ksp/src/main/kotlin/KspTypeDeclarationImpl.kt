@@ -23,9 +23,9 @@ import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
 import com.yandex.daggerlite.lang.common.FieldLangModelBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
@@ -66,7 +66,7 @@ internal class KspTypeDeclarationImpl private constructor(
     override val enclosingType: TypeDeclarationLangModel?
         get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { Factory(KspTypeImpl(it.asType(emptyList()))) }
 
-    override val interfaces: Sequence<TypeLangModel> by lazy {
+    override val interfaces: Sequence<Type> by lazy {
         impl.superTypes.map {
             it.resolve()
         }.filter {
@@ -75,7 +75,7 @@ internal class KspTypeDeclarationImpl private constructor(
             .memoize()
     }
 
-    override val superType: TypeLangModel? by lazy {
+    override val superType: Type? by lazy {
         impl.superTypes.map {
             it.resolve()
         }.find {
@@ -332,7 +332,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    override fun asType(): TypeLangModel {
+    override fun asType(): Type {
         return type
     }
 
@@ -401,7 +401,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private class PSFSyntheticField(
         override val owner: TypeDeclarationLangModel,
-        override val type: TypeLangModel = owner.asType(),
+        override val type: Type = owner.asType(),
         override val name: String,
     ) : FieldLangModelBase() {
         override val isEffectivelyPublic: Boolean get() = true

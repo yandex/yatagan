@@ -17,9 +17,9 @@ import com.yandex.daggerlite.core.model.allInputs
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -43,7 +43,7 @@ internal class ComponentFactoryModelImpl private constructor(
         it.isAbstract && it.returnType == createdComponent.type
     }
 
-    override val type: TypeLangModel
+    override val type: Type
         get() = factoryDeclaration.asType()
 
     override fun asNode(): NodeModel = NodeModelImpl(

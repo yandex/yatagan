@@ -4,10 +4,9 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel.Value
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.AnnotationDeclarationLangModelBase
 import com.yandex.daggerlite.lang.common.AnnotationLangModelBase
-import java.lang.reflect.Method
 
 internal class RtAnnotationImpl(
     private val impl: Annotation,
@@ -102,12 +101,12 @@ internal class RtAnnotationImpl(
     }
 
     private class AttributeImpl(
-        val impl: Method,
+        val impl: ReflectMethod,
     ) : AnnotationDeclarationLangModel.Attribute {
         override val name: String
             get() = impl.name
 
-        override val type: TypeLangModel
+        override val type: Type
             get() = RtTypeImpl(impl.genericReturnType)
     }
 }

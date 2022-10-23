@@ -8,9 +8,9 @@ import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
 import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
@@ -62,13 +62,13 @@ internal class JavaxTypeDeclarationImpl private constructor(
             else -> null
         }
 
-    override val interfaces: Sequence<TypeLangModel> by lazy {
+    override val interfaces: Sequence<Type> by lazy {
         impl.interfaces.asSequence()
             .map { JavaxTypeImpl(it.asMemberOfThis()) }
             .memoize()
     }
 
-    override val superType: TypeLangModel? by lazy {
+    override val superType: Type? by lazy {
         impl.superclass.takeIf {
             it.kind == TypeKind.DECLARED && it.asTypeElement() != Utils.objectType
         }?.let { superClass ->
@@ -133,7 +133,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         } else null
     }
 
-    override fun asType(): TypeLangModel {
+    override fun asType(): Type {
         return JavaxTypeImpl(type)
     }
 

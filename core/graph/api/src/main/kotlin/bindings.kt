@@ -10,7 +10,7 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.CallableLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 
 interface ComponentDependencyBinding : Binding {
     val dependency: ComponentDependencyModel
@@ -174,8 +174,8 @@ interface MultiBinding : ExtensibleBinding<MultiBinding> {
 }
 
 interface MapBinding : ExtensibleBinding<MapBinding> {
-    val mapKey: TypeLangModel
-    val mapValue: TypeLangModel
+    val mapKey: Type
+    val mapValue: Type
 
     /**
      * NOTE: Dependency resolve should be done exactly on the binding's [owner].

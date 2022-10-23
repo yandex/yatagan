@@ -15,7 +15,7 @@ interface FunctionLangModel : MemberLangModel, CallableLangModel, Comparable<Fun
     /**
      * Return type of the function.
      */
-    val returnType: TypeLangModel
+    val returnType: Type
 
     /**
      * [com.yandex.daggerlite.Provides] annotation model if present. `null` if absent.

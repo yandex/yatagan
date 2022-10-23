@@ -37,7 +37,7 @@ interface LangModelFactory {
      *
      * @return a `java.util.Map` type, parameterized by the given [keyType] and [valueType].
      */
-    fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean = false): TypeLangModel
+    fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean = false): Type
 
     /**
      * Obtains a parameterized type.
@@ -51,9 +51,9 @@ interface LangModelFactory {
      */
     fun getParameterizedType(
         type: ParameterizedType,
-        parameter: TypeLangModel,
+        parameter: Type,
         isCovariant: Boolean,
-    ): TypeLangModel
+    ): Type
 
     /**
      * Gets a type declaration by the fully qualified name ('.'-separated).
@@ -75,7 +75,7 @@ interface LangModelFactory {
      * An "error" type, which is usually applicable in places, where type information is unresolved due to a semantic
      * error in the underlying code.
      */
-    val errorType: TypeLangModel
+    val errorType: Type
 
     /**
      * `true` if the code runs in RT mode (using reflection). `false` if codegen mode.
@@ -89,13 +89,13 @@ interface LangModelFactory {
 
         override fun getParameterizedType(
             type: ParameterizedType,
-            parameter: TypeLangModel,
+            parameter: Type,
             isCovariant: Boolean,
-        ): TypeLangModel {
+        ): Type {
             return checkNotNull(delegate).getParameterizedType(type, parameter, isCovariant)
         }
 
-        override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
+        override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
             return checkNotNull(delegate).getMapType(keyType, valueType, isCovariant)
         }
 
@@ -105,7 +105,7 @@ interface LangModelFactory {
             vararg simpleNames: String
         ): TypeDeclarationLangModel? = checkNotNull(delegate).getTypeDeclaration(packageName, simpleName, *simpleNames)
 
-        override val errorType: TypeLangModel get() = checkNotNull(delegate).errorType
+        override val errorType: Type get() = checkNotNull(delegate).errorType
 
         override val isInRuntimeEnvironment: Boolean get() = checkNotNull(delegate).isInRuntimeEnvironment
     }

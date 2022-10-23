@@ -40,9 +40,9 @@ interface AnnotationLangModel : HasPlatformModel {
             fun visitFloat(value: Float): R
             fun visitDouble(value: Double): R
             fun visitString(value: String): R
-            fun visitType(value: TypeLangModel): R
+            fun visitType(value: Type): R
             fun visitAnnotation(value: AnnotationLangModel): R
-            fun visitEnumConstant(enum: TypeLangModel, constant: String): R
+            fun visitEnumConstant(enum: Type, constant: String): R
             fun visitArray(value: List<Value>): R
             fun visitUnresolved(): R
         }

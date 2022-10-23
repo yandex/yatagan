@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang.ksp
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.FieldLangModelBase
 
 internal class KspFieldImpl(
@@ -16,7 +16,7 @@ internal class KspFieldImpl(
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()
 
-    override val type: TypeLangModel by lazy {
+    override val type: Type by lazy {
         val jvmSignatureHint = Utils.resolver.mapToJvmSignature(impl)
         if (refinedOwner != null) KspTypeImpl(
             impl = impl.asMemberOf(refinedOwner),

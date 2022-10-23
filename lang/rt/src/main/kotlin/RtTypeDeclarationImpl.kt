@@ -29,17 +29,12 @@ import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
 import com.yandex.daggerlite.lang.common.ParameterLangModelBase
 import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
-import java.lang.reflect.Constructor
-import java.lang.reflect.Modifier
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.lang.reflect.TypeVariable
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class RtTypeDeclarationImpl private constructor(
@@ -51,7 +46,7 @@ internal class RtTypeDeclarationImpl private constructor(
         get() = impl.isPublic
 
     override val isAbstract: Boolean
-        get() = Modifier.isAbstract(impl.modifiers) && !impl.isAnnotation
+        get() = impl.isAbstract && !impl.isAnnotation
 
     override val qualifiedName: String
         get() = impl.canonicalName
@@ -77,16 +72,16 @@ internal class RtTypeDeclarationImpl private constructor(
     override val enclosingType: TypeDeclarationLangModel?
         get() = impl.enclosingClass?.let { Factory(RtTypeImpl(it)) }
 
-    override val interfaces: Sequence<TypeLangModel>
+    override val interfaces: Sequence<Type>
         get() = superTypes
             .filter { it.impl.isInterface }
             .map { it.type }
 
-    override val superType: TypeLangModel?
+    override val superType: Type?
         get() = superTypes.firstOrNull { !it.impl.isInterface }
             ?.takeUnless { it.qualifiedName == "java.lang.Object" }?.type
 
-    override fun asType(): TypeLangModel {
+    override fun asType(): Type {
         return type
     }
 
@@ -182,7 +177,7 @@ internal class RtTypeDeclarationImpl private constructor(
     //endregion
 
     private inner class ConstructorImpl(
-        override val platformModel: Constructor<*>,
+        override val platformModel: ReflectConstructor,
         override val constructee: TypeDeclarationLangModel,
     ) : ConstructorLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(platformModel) {
         private val parametersAnnotations by lazy { platformModel.parameterAnnotations }
@@ -214,7 +209,7 @@ internal class RtTypeDeclarationImpl private constructor(
             override val name: String
                 get() = parametersNames[index]
 
-            override val type: TypeLangModel by lazy {
+            override val type: Type by lazy {
                 genericsInfo?.let { params ->
                     // No need to use "hierarchy aware" variant, as constructor can't be inherited.
                     RtTypeImpl(parametersTypes[index].resolveGenerics(params))
@@ -234,8 +229,8 @@ internal class RtTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    internal val genericsInfo: Lazy<Map<TypeVariable<*>, Type>>? = when (val type = type.impl) {
-        is ParameterizedType -> lazy {
+    internal val genericsInfo: Lazy<Map<ReflectTypeVariable, ReflectType>>? = when (val type = type.impl) {
+        is ReflectParameterizedType -> lazy {
             val typeArgs = type.actualTypeArguments
             buildMap(typeArgs.size) {
                 val typeParams = impl.typeParameters
@@ -249,6 +244,6 @@ internal class RtTypeDeclarationImpl private constructor(
 
     companion object Factory : ObjectCache<RtTypeImpl, RtTypeDeclarationImpl>() {
         operator fun invoke(type: RtTypeImpl) = createCached(type, ::RtTypeDeclarationImpl)
-        operator fun invoke(type: Type) = createCached(RtTypeImpl(type), ::RtTypeDeclarationImpl)
+        operator fun invoke(type: ReflectType) = createCached(RtTypeImpl(type), ::RtTypeDeclarationImpl)
     }
 }

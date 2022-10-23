@@ -10,7 +10,7 @@ sealed interface ConditionLangModel
  * Represents [com.yandex.daggerlite.Condition] annotation.
  */
 interface ConditionAnnotationLangModel : ConditionLangModel {
-    val target: TypeLangModel
+    val target: Type
     val condition: String
 }
 
@@ -25,15 +25,15 @@ interface AnyConditionAnnotationLangModel : ConditionLangModel {
  * Represents [com.yandex.daggerlite.Conditional] annotation.
  */
 interface ConditionalAnnotationLangModel {
-    val featureTypes: Sequence<TypeLangModel>
-    val onlyIn: Sequence<TypeLangModel>
+    val featureTypes: Sequence<Type>
+    val onlyIn: Sequence<Type>
 }
 
 /**
  * Represents [com.yandex.daggerlite.ComponentFlavor] annotation.
  */
 interface ComponentFlavorAnnotationLangModel {
-    val dimension: TypeLangModel
+    val dimension: Type
 }
 
 /**
@@ -48,9 +48,9 @@ interface AssistedAnnotationLangModel {
  */
 interface ComponentAnnotationLangModel {
     val isRoot: Boolean
-    val modules: Sequence<TypeLangModel>
-    val dependencies: Sequence<TypeLangModel>
-    val variant: Sequence<TypeLangModel>
+    val modules: Sequence<Type>
+    val dependencies: Sequence<Type>
+    val variant: Sequence<Type>
     val multiThreadAccess: Boolean
 }
 
@@ -65,8 +65,8 @@ interface IntoCollectionAnnotationLangModel {
  * Models [com.yandex.daggerlite.Module] annotation.
  */
 interface ModuleAnnotationLangModel {
-    val includes: Sequence<TypeLangModel>
-    val subcomponents: Sequence<TypeLangModel>
+    val includes: Sequence<Type>
+    val subcomponents: Sequence<Type>
 }
 
 /**

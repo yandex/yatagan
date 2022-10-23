@@ -23,7 +23,7 @@ import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 
 internal open class RtAnnotationImplBase<A : Annotation>(
     protected val impl: A,
@@ -37,26 +37,26 @@ internal class RtComponentAnnotationImpl(
     impl: Component,
 ) : RtAnnotationImplBase<Component>(impl), ComponentAnnotationLangModel {
     override val isRoot: Boolean get() = impl.isRoot
-    override val modules: Sequence<TypeLangModel> = impl.modules.asSequence().map { RtTypeImpl(it.java) }
-    override val dependencies: Sequence<TypeLangModel> = impl.dependencies.asSequence().map { RtTypeImpl(it.java) }
-    override val variant: Sequence<TypeLangModel> = impl.variant.asSequence().map { RtTypeImpl(it.java) }
+    override val modules: Sequence<Type> = impl.modules.asSequence().map { RtTypeImpl(it.java) }
+    override val dependencies: Sequence<Type> = impl.dependencies.asSequence().map { RtTypeImpl(it.java) }
+    override val variant: Sequence<Type> = impl.variant.asSequence().map { RtTypeImpl(it.java) }
     override val multiThreadAccess: Boolean get() = impl.multiThreadAccess
 }
 
 internal class RtModuleAnnotationImpl(
     impl: Module,
 ) : RtAnnotationImplBase<Module>(impl), ModuleAnnotationLangModel {
-    override val includes: Sequence<TypeLangModel>
+    override val includes: Sequence<Type>
         get() = impl.includes.asSequence().map { RtTypeImpl(it.java) }
-    override val subcomponents: Sequence<TypeLangModel>
+    override val subcomponents: Sequence<Type>
         get() = impl.subcomponents.asSequence().map { RtTypeImpl(it.java) }
 }
 
 internal class RtConditionalAnnotationImpl(
     impl: Conditional,
 ) : RtAnnotationImplBase<Conditional>(impl), ConditionalAnnotationLangModel {
-    override val featureTypes: Sequence<TypeLangModel> = impl.value.asSequence().map { RtTypeImpl(it.java) }
-    override val onlyIn: Sequence<TypeLangModel> = impl.onlyIn.asSequence().map { RtTypeImpl(it.java) }
+    override val featureTypes: Sequence<Type> = impl.value.asSequence().map { RtTypeImpl(it.java) }
+    override val onlyIn: Sequence<Type> = impl.onlyIn.asSequence().map { RtTypeImpl(it.java) }
 }
 
 internal class RtProvidesAnnotationImpl(
@@ -84,7 +84,7 @@ internal class RtIntoSetAnnotationImpl(
 internal class RtConditionAnnotationImpl(
     impl: Condition,
 ) : RtAnnotationImplBase<Condition>(impl), ConditionAnnotationLangModel {
-    override val target: TypeLangModel
+    override val target: Type
         get() = RtTypeImpl(impl.value.java)
     override val condition: String
         get() = impl.condition
@@ -101,7 +101,7 @@ internal class RtAnyConditionAnnotationImpl(
 internal class RtComponentFlavorAnnotationImpl(
     impl: ComponentFlavor,
 ) : RtAnnotationImplBase<ComponentFlavor>(impl), ComponentFlavorAnnotationLangModel {
-    override val dimension: TypeLangModel
+    override val dimension: Type
         get() = RtTypeImpl(impl.dimension.java)
 }
 

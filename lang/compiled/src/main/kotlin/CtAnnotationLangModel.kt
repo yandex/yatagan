@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang.compiled
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel.Value
 import com.yandex.daggerlite.lang.AnnotationValueVisitorAdapter
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.AnnotationLangModelBase
 
 /**
@@ -14,11 +14,11 @@ abstract class CtAnnotationLangModel : AnnotationLangModelBase() {
         return attributeValue(attribute).accept(AsBoolean)
     }
 
-    fun getTypes(attribute: String): Sequence<TypeLangModel> {
+    fun getTypes(attribute: String): Sequence<Type> {
         return attributeValue(attribute).accept(AsTypes).asSequence()
     }
 
-    fun getType(attribute: String): TypeLangModel {
+    fun getType(attribute: String): Type {
         return attributeValue(attribute).accept(AsType)
     }
 
@@ -40,15 +40,15 @@ abstract class CtAnnotationLangModel : AnnotationLangModelBase() {
             override fun visitBoolean(value: Boolean) = value
         }
 
-        private object AsType : AnnotationValueVisitorAdapter<TypeLangModel>() {
+        private object AsType : AnnotationValueVisitorAdapter<Type>() {
             override fun visitDefault() = throw IllegalStateException("Expected class value")
-            override fun visitType(value: TypeLangModel) = value
+            override fun visitType(value: Type) = value
         }
 
-        private object AsTypes : AnnotationValueVisitorAdapter<List<TypeLangModel>>() {
+        private object AsTypes : AnnotationValueVisitorAdapter<List<Type>>() {
             override fun visitDefault() = throw IllegalStateException("Expected class array value")
             override fun visitArray(value: List<Value>) = value.map { it.accept(AsType) }
-            override fun visitType(value: TypeLangModel) = listOf(value)
+            override fun visitType(value: Type) = listOf(value)
         }
 
         private object AsString : AnnotationValueVisitorAdapter<String>() {

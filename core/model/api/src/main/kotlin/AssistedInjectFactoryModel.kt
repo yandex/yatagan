@@ -2,7 +2,7 @@ package com.yandex.daggerlite.core.model
 
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -37,7 +37,7 @@ interface AssistedInjectFactoryModel : MayBeInvalid, HasNodeModel {
          */
         data class Assisted(
             val identifier: String,
-            val type: TypeLangModel,
+            val type: Type,
         ) : Parameter {
             override fun toString() = "@Assisted(\"$identifier\") $type"
         }

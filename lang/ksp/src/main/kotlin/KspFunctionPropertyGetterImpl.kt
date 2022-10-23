@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSPropertyGetter
 import com.yandex.daggerlite.lang.ParameterLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 
 internal class KspFunctionPropertyGetterImpl(
     getter: KSPropertyGetter,
@@ -10,7 +10,7 @@ internal class KspFunctionPropertyGetterImpl(
     isStatic: Boolean,
 ) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter, isStatic) {
 
-    override val returnType: TypeLangModel by lazy {
+    override val returnType: Type by lazy {
         var typeReference = property.type
         if (!isStatic) {
             typeReference = typeReference.replaceType(property.asMemberOf(owner.type.impl))

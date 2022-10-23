@@ -16,7 +16,7 @@ interface ParameterLangModel : AnnotatedLangModel {
     /**
      * Parameter type.
      */
-    val type: TypeLangModel
+    val type: Type
 
     /**
      * [com.yandex.daggerlite.Assisted] annotation model, or `null` if none present.

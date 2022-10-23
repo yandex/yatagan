@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.lang.common
 
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 
-abstract class TypeLangModelBase : TypeLangModel {
-    final override fun compareTo(other: TypeLangModel): Int {
+abstract class TypeBase : Type {
+    final override fun compareTo(other: Type): Int {
         if (this == other) return 0
 
         // Use string representation for stable ordering across all implementations.

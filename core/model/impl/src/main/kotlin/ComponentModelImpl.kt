@@ -14,9 +14,9 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -37,7 +37,7 @@ internal class ComponentModelImpl private constructor(
     override val conditionals
         get() = conditionalsModel.conditionals
 
-    override val type: TypeLangModel
+    override val type: Type
         get() = declaration.asType()
 
     override fun asNode(): NodeModel = NodeModelImpl(
@@ -56,7 +56,7 @@ internal class ComponentModelImpl private constructor(
     override val modules: Set<ModuleModel> by lazy {
         val allModules = mutableSetOf<ModuleModel>()
         val moduleQueue: ArrayDeque<ModuleModel> = ArrayDeque(
-            impl?.modules?.map(TypeLangModel::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList())
+            impl?.modules?.map(Type::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList())
         while (moduleQueue.isNotEmpty()) {
             val module = moduleQueue.removeFirst()
             if (!allModules.add(module)) {

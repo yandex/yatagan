@@ -5,7 +5,7 @@ import com.yandex.daggerlite.core.model.CollectionTargetKind
 import com.yandex.daggerlite.core.model.MultiBindingDeclarationModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -105,7 +105,7 @@ internal class MapDeclarationImpl(
         return visitor.visitMapDeclaration(this)
     }
 
-    override val keyType: TypeLangModel?
+    override val keyType: Type?
         get() = method.returnType.typeArguments.firstOrNull()
 
     override val valueType: NodeModel?

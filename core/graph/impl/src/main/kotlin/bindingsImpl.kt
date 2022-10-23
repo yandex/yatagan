@@ -43,7 +43,7 @@ import com.yandex.daggerlite.core.model.isNever
 import com.yandex.daggerlite.core.model.isOptional
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -642,8 +642,8 @@ internal class MapBindingImpl(
     override val owner: BindingGraph,
     override val target: NodeModel,
     override val contents: List<Contribution>,
-    override val mapKey: TypeLangModel,
-    override val mapValue: TypeLangModel,
+    override val mapKey: Type,
+    override val mapValue: Type,
     override val upstream: MapBindingImpl?,
     override val targetForDownstream: NodeModel,
 ) : MapBinding, BindingMixin, ComparableBindingMixin<MapBindingImpl> {

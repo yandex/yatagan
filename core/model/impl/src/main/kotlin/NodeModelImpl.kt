@@ -11,7 +11,7 @@ import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.getListType
 import com.yandex.daggerlite.lang.getProviderType
 import com.yandex.daggerlite.lang.getSetType
@@ -29,7 +29,7 @@ import com.yandex.daggerlite.validation.format.reportError
 import javax.inject.Inject
 
 internal class NodeModelImpl private constructor(
-    override val type: TypeLangModel,
+    override val type: Type,
     override val qualifier: AnnotationLangModel?,
 ) : NodeModel, NodeDependency {
 
@@ -59,7 +59,7 @@ internal class NodeModelImpl private constructor(
             }.toList()
         }
 
-        override val type: TypeLangModel = this@NodeModelImpl.type
+        override val type: Type = this@NodeModelImpl.type
 
         override fun asNode(): NodeModel = this@NodeModelImpl
 
@@ -126,7 +126,7 @@ internal class NodeModelImpl private constructor(
         )
     }
 
-    override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> {
+    override fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel> {
         val keyType = key.asBoxed()  // Need to use box as key may be a primitive type
         val valueType = if (asProviders) LangModelFactory.getProviderType(type) else type
         return arrayOf(
@@ -186,7 +186,7 @@ internal class NodeModelImpl private constructor(
             override fun dropQualifier(): NodeModel = this
             override fun multiBoundListNodes(): Array<NodeModel> = emptyArray()
             override fun multiBoundSetNodes(): Array<NodeModel> = emptyArray()
-            override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> = emptyArray()
+            override fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel> = emptyArray()
             override fun validate(validator: Validator) {
                 validator.reportError(Strings.Errors.voidBinding())
             }
@@ -205,12 +205,12 @@ internal class NodeModelImpl private constructor(
         }
 
         operator fun invoke(
-            type: TypeLangModel,
+            type: Type,
             forQualifier: AnnotatedLangModel?,
         ) = this(type, forQualifier?.annotations?.find(AnnotationLangModel::isQualifier))
 
         operator fun invoke(
-            type: TypeLangModel,
+            type: Type,
             qualifier: AnnotationLangModel? = null,
         ): NodeModelImpl {
             val boxed = type.asBoxed()

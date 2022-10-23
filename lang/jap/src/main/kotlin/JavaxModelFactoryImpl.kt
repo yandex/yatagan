@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.lang.LangModelFactory
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import javax.lang.model.element.TypeElement
 
 class JavaxModelFactoryImpl : LangModelFactory {
@@ -22,7 +22,7 @@ class JavaxModelFactoryImpl : LangModelFactory {
         Utils.elements.getTypeElement(javax.inject.Provider::class.java.canonicalName)
     }
 
-    override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
+    override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
         keyType as JavaxTypeImpl
         valueType as JavaxTypeImpl
         with(Utils.types) {
@@ -35,9 +35,9 @@ class JavaxModelFactoryImpl : LangModelFactory {
 
     override fun getParameterizedType(
         type: LangModelFactory.ParameterizedType,
-        parameter: TypeLangModel,
+        parameter: Type,
         isCovariant: Boolean,
-    ): TypeLangModel {
+    ): Type {
         parameter as JavaxTypeImpl
         val element = when(type) {
             LangModelFactory.ParameterizedType.List -> listElement
@@ -68,7 +68,7 @@ class JavaxModelFactoryImpl : LangModelFactory {
         return JavaxTypeDeclarationImpl(element.asType().asDeclaredType())
     }
 
-    override val errorType: TypeLangModel
+    override val errorType: Type
         get() = JavaxTypeImpl(Utils.types.nullType)
 
     override val isInRuntimeEnvironment: Boolean

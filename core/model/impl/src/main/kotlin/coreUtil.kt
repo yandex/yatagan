@@ -12,7 +12,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -24,7 +24,7 @@ import javax.inject.Qualifier
 import javax.inject.Scope
 
 internal fun NodeDependency(
-    type: TypeLangModel,
+    type: Type,
     forQualifier: AnnotatedLangModel,
 ): NodeDependency {
     val kind = when (type.declaration.qualifiedName) {
@@ -54,7 +54,7 @@ internal fun NodeDependency(
     }
 }
 
-internal fun isFrameworkType(type: TypeLangModel) = when (type.declaration.qualifiedName) {
+internal fun isFrameworkType(type: Type) = when (type.declaration.qualifiedName) {
     Names.Lazy, Names.Optional, Names.Provider -> true
     else -> false
 }

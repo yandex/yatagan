@@ -9,5 +9,5 @@ interface FieldLangModel : MemberLangModel {
     /**
      * Type of the field.
      */
-    val type: TypeLangModel
+    val type: Type
 }

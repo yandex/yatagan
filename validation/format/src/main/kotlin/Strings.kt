@@ -18,8 +18,8 @@ import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 
 object Strings {
     private const val Indent = "    "
@@ -52,7 +52,7 @@ object Strings {
         }.toError()
 
         @Covered
-        fun invalidFlatteningMultibinding(insteadOf: TypeLangModel) =
+        fun invalidFlatteningMultibinding(insteadOf: Type) =
             "Flattening multi-binding must return `Collection` or any of its subtypes instead of `$insteadOf`".toError()
 
         @Covered
@@ -80,7 +80,7 @@ object Strings {
             "Binding depends on itself".toError()
 
         @Covered
-        fun inconsistentBinds(param: TypeLangModel, returnType: TypeLangModel) =
+        fun inconsistentBinds(param: Type, returnType: Type) =
             "@Binds parameter `$param` is not compatible with its return type `$returnType`".toError()
 
         @Covered
@@ -268,7 +268,7 @@ object Strings {
             "Unable to reach boolean result in the given expression".toError()
 
         @Covered
-        fun invalidConditionMissingMember(name: String, type: TypeLangModel) =
+        fun invalidConditionMissingMember(name: String, type: Type) =
             "Can not find accessible `$name` member in $type".toError()
 
 
@@ -317,7 +317,7 @@ object Strings {
             "Assisted inject factory must be an interface.".toError()
 
         @Covered
-        fun assistedInjectTypeNoConstructor(type: TypeLangModel?) = if (type == null) {
+        fun assistedInjectTypeNoConstructor(type: Type?) = if (type == null) {
             "No @AssistedInject constructor can be found"
         } else {
             "Type `$type` doesn't have an @AssistedInject constructor."

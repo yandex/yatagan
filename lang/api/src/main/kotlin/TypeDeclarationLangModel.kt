@@ -35,7 +35,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     /**
      * Interfaces directly implemented/extended by the declaration.
      */
-    val interfaces: Sequence<TypeLangModel>
+    val interfaces: Sequence<Type>
 
     /**
      * Super-type, if present.
@@ -43,7 +43,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
      * NOTE: Never returns `java.lang.Object`/`kotlin.Any`, `null` is returned instead.
      * This is done to counter uniformity issues.
      */
-    val superType: TypeLangModel?
+    val superType: Type?
 
     /**
      * All declared non-private constructors.
@@ -77,9 +77,9 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     val defaultCompanionObjectDeclaration: TypeDeclarationLangModel?
 
     /**
-     * Returns an underlying [TypeLangModel].
+     * Returns an underlying [Type].
      */
-    fun asType(): TypeLangModel
+    fun asType(): Type
 
     /**
      * [com.yandex.daggerlite.Component] annotation if present.

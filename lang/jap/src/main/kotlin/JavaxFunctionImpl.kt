@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.lang.ParameterLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
 import com.yandex.daggerlite.lang.compiled.CtFunctionLangModel
 import javax.lang.model.element.ExecutableElement
@@ -18,7 +18,7 @@ internal class JavaxFunctionImpl (
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
 
-    override val returnType: TypeLangModel by lazy {
+    override val returnType: Type by lazy {
         JavaxTypeImpl(impl.asMemberOf(owner.type).asExecutableType().returnType)
     }
     override val name: String get() = impl.simpleName.toString()

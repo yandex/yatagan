@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core.model
 
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -39,7 +39,7 @@ interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, Nod
      * @param key a type to use as Map's key type.
      * @param asProviders whether wrap this type into `javax.inject.Provider` as Map's value.
      */
-    fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel>
+    fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel>
 
     /**
      * What specific core-level model the node represents. `null` if none.

@@ -8,9 +8,9 @@ import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel.Parameter
 import com.yandex.daggerlite.core.model.HasNodeModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -29,7 +29,7 @@ internal class AssistedInjectFactoryModelImpl private constructor(
         impl.functions.singleOrNull { it.isAbstract }
     }
 
-    private val assistedInjectType: TypeLangModel? by lazy {
+    private val assistedInjectType: Type? by lazy {
         factoryMethod?.returnType
     }
 
@@ -60,7 +60,7 @@ internal class AssistedInjectFactoryModelImpl private constructor(
         }?.toList() ?: emptyList()
     }
 
-    override val type: TypeLangModel
+    override val type: Type
         get() = impl.asType()
 
     override fun asNode(): NodeModel = NodeModelImpl(

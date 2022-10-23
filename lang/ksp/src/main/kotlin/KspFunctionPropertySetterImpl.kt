@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang.ksp
 import com.google.devtools.ksp.symbol.KSPropertySetter
 import com.google.devtools.ksp.symbol.Modifier
 import com.yandex.daggerlite.lang.ParameterLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 
 internal class KspFunctionPropertySetterImpl(
     private val setter: KSPropertySetter,
@@ -16,7 +16,7 @@ internal class KspFunctionPropertySetterImpl(
             Modifier.PRIVATE !in it && Modifier.PROTECTED !in it
         }
 
-    override val returnType: TypeLangModel = KspTypeImpl(Utils.resolver.builtIns.unitType)
+    override val returnType: Type = KspTypeImpl(Utils.resolver.builtIns.unitType)
 
     @Suppress("DEPRECATION")  // capitalize
     override val name: String by lazy {

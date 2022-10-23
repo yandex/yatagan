@@ -10,13 +10,12 @@ import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.lang.ParameterLangModel
 import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.FunctionLangModelBase
 import com.yandex.daggerlite.lang.common.ParameterLangModelBase
-import java.lang.reflect.Method
 
 internal class RtFunctionImpl(
-    private val impl: Method,
+    private val impl: ReflectMethod,
     override val owner: RtTypeDeclarationImpl,
 ) : FunctionLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
     private val parametersAnnotations by lazy { impl.parameterAnnotations }
@@ -27,7 +26,7 @@ internal class RtFunctionImpl(
         Array(impl.getParameterCountCompat(), ::ParameterImpl).asSequence()
     }
 
-    override val returnType: TypeLangModel by lazy {
+    override val returnType: Type by lazy {
         RtTypeImpl(impl.genericReturnType.resolveGenericsHierarchyAware(
             declaringClass = impl.declaringClass,
             asMemberOf = owner,
@@ -46,7 +45,7 @@ internal class RtFunctionImpl(
     override val name: String
         get() = impl.name
 
-    override val platformModel: Method get() = impl
+    override val platformModel: ReflectMethod get() = impl
 
     //region Annotations
 
@@ -71,7 +70,7 @@ internal class RtFunctionImpl(
         override val name: String
             get() = parameterNames[index]
 
-        override val type: TypeLangModel by lazy {
+        override val type: Type by lazy {
             RtTypeImpl(parametersTypes[index].resolveGenericsHierarchyAware(
                 declaringClass = impl.declaringClass,
                 asMemberOf = owner,

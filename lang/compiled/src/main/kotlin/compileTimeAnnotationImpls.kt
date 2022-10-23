@@ -8,12 +8,12 @@ import com.yandex.daggerlite.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 
 internal class CtConditionAnnotationImpl private constructor(
     private val impl: CtAnnotationLangModel,
 ) : ConditionAnnotationLangModel {
-    override val target: TypeLangModel = impl.getType("value")
+    override val target: Type = impl.getType("value")
     override val condition: String = impl.getString("condition")
     override fun toString() = impl.toString()
 
@@ -37,8 +37,8 @@ internal class CtAnyConditionAnnotationImpl private constructor(
 internal class CtConditionalAnnotationImpl private constructor(
     private val impl: CtAnnotationLangModel,
 ) : ConditionalAnnotationLangModel {
-    override val featureTypes: Sequence<TypeLangModel> = impl.getTypes("value")
-    override val onlyIn: Sequence<TypeLangModel> = impl.getTypes("onlyIn")
+    override val featureTypes: Sequence<Type> = impl.getTypes("value")
+    override val onlyIn: Sequence<Type> = impl.getTypes("onlyIn")
     override fun toString() = impl.toString()
 
     companion object Factory : ObjectCache<CtAnnotationLangModel, CtConditionalAnnotationImpl>() {
@@ -49,7 +49,7 @@ internal class CtConditionalAnnotationImpl private constructor(
 internal class CtComponentFlavorAnnotationImpl private constructor(
     private val impl: CtAnnotationLangModel,
 ) : ComponentFlavorAnnotationLangModel {
-    override val dimension: TypeLangModel = impl.getType("dimension")
+    override val dimension: Type = impl.getType("dimension")
     override fun toString() = impl.toString()
 
     companion object Factory : ObjectCache<CtAnnotationLangModel, CtComponentFlavorAnnotationImpl>() {

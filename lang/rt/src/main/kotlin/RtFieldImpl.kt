@@ -1,15 +1,14 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.FieldLangModelBase
-import java.lang.reflect.Field
 
 internal class RtFieldImpl(
-    private val impl: Field,
+    private val impl: ReflectField,
     override val owner: RtTypeDeclarationImpl,
 ) : FieldLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
-    override val type: TypeLangModel by lazy {
+    override val type: Type by lazy {
         RtTypeImpl(impl.genericType.resolveGenericsHierarchyAware(
             declaringClass = impl.declaringClass,
             asMemberOf = owner,
@@ -25,6 +24,6 @@ internal class RtFieldImpl(
     override val name: String
         get() = impl.name
 
-    override val platformModel: Field
+    override val platformModel: ReflectField
         get() = impl
 }

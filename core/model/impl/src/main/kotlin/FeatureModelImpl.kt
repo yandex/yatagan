@@ -11,8 +11,8 @@ import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -73,7 +73,7 @@ internal class FeatureModelImpl private constructor(
         },
     )
 
-    override val type: TypeLangModel
+    override val type: Type
         get() = impl.asType()
 
     companion object Factory : ObjectCache<TypeDeclarationLangModel, FeatureModelImpl>() {
@@ -158,7 +158,7 @@ private interface LiteralPayload : MayBeInvalid {
     val nonStatic: Boolean
 }
 
-private object MemberTypeVisitor : MemberLangModel.Visitor<TypeLangModel> {
+private object MemberTypeVisitor : MemberLangModel.Visitor<Type> {
     override fun visitFunction(model: FunctionLangModel) = model.returnType
     override fun visitField(model: FieldLangModel) = model.type
 }

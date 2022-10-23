@@ -16,7 +16,7 @@ interface AnnotationDeclarationLangModel : AnnotatedLangModel {
         /**
          * Type of the attribute.
          */
-        val type: TypeLangModel
+        val type: Type
     }
 
     /**

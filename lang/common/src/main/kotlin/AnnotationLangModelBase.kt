@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.common
 
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 
 abstract class AnnotationLangModelBase : AnnotationLangModel {
     final override fun toString() = buildString {
@@ -32,9 +32,9 @@ private object ToString : AnnotationLangModel.Value.Visitor<String> {
     override fun visitFloat(value: Float) = value.toString()
     override fun visitDouble(value: Double) = value.toString()
     override fun visitString(value: String) = "\"$value\""
-    override fun visitType(value: TypeLangModel) = "$value.class"
+    override fun visitType(value: Type) = "$value.class"
     override fun visitAnnotation(value: AnnotationLangModel) = value.toString()
-    override fun visitEnumConstant(enum: TypeLangModel, constant: String) = "$enum.$constant"
+    override fun visitEnumConstant(enum: Type, constant: String) = "$enum.$constant"
     override fun visitUnresolved(): String = "<unresolved>"
     override fun visitArray(value: List<AnnotationLangModel.Value>): String {
         return value.joinToString(prefix = "{", postfix = "}", separator = ", ") { it.accept(ToString) }

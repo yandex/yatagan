@@ -1,18 +1,15 @@
 package com.yandex.daggerlite.lang.rt
 
-import java.lang.reflect.Constructor
-import java.lang.reflect.Method
-
-internal object MethodSignatureComparator : Comparator<Method> {
-    override fun compare(one: Method, other: Method): Int {
+internal object MethodSignatureComparator : Comparator<ReflectMethod> {
+    override fun compare(one: ReflectMethod, other: ReflectMethod): Int {
         one.name.compareTo(other.name).let { if (it != 0) return it }
 
         return parametersCompare(one.parameterTypes, other.parameterTypes)
     }
 }
 
-internal object ConstructorSignatureComparator : Comparator<Constructor<*>> {
-    override fun compare(one: Constructor<*>, other: Constructor<*>): Int {
+internal object ConstructorSignatureComparator : Comparator<ReflectConstructor> {
+    override fun compare(one: ReflectConstructor, other: ReflectConstructor): Int {
         return parametersCompare(one.parameterTypes, other.parameterTypes)
     }
 }

@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang.ksp
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.lang.ParameterLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
 import com.yandex.daggerlite.lang.compiled.CtFunctionLangModel
 
@@ -21,7 +21,7 @@ internal class KspFunctionImpl(
         get() = impl.isAbstract
 
 
-    override val returnType: TypeLangModel by lazy {
+    override val returnType: Type by lazy {
         var typeReference = impl.returnType ?: ErrorTypeImpl.asReference()
         if (!isStatic) {
             // No need to resolve generics for static functions.

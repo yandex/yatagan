@@ -7,7 +7,7 @@ import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -17,7 +17,7 @@ import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 
 internal class DimensionImpl private constructor(
-    override val type: TypeLangModel,
+    override val type: Type,
 ) : Variant.DimensionModel {
 
     override fun validate(validator: Validator) {
@@ -34,13 +34,13 @@ internal class DimensionImpl private constructor(
     override val isInvalid: Boolean
         get() = false
 
-    companion object Factory : ObjectCache<TypeLangModel, DimensionImpl>() {
-        operator fun invoke(type: TypeLangModel) = DimensionImpl.createCached(type, ::DimensionImpl)
+    companion object Factory : ObjectCache<Type, DimensionImpl>() {
+        operator fun invoke(type: Type) = DimensionImpl.createCached(type, ::DimensionImpl)
     }
 }
 
 internal class MissingDimension(private val flavor: Variant.FlavorModel) : Variant.DimensionModel {
-    override val type: TypeLangModel
+    override val type: Type
         get() = LangModelFactory.errorType
 
     override fun validate(validator: Validator) {
