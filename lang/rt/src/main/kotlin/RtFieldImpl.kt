@@ -1,13 +1,13 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.FieldBase
 
 internal class RtFieldImpl(
     private val impl: ReflectField,
     override val owner: RtTypeDeclarationImpl,
-) : FieldBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
+) : FieldBase(), Annotated by RtAnnotatedImpl(impl) {
     override val type: Type by lazy {
         RtTypeImpl(impl.genericType.resolveGenericsHierarchyAware(
             declaringClass = impl.declaringClass,

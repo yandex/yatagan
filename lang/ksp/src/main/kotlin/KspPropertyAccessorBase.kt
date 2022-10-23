@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
-import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotated
 import com.yandex.daggerlite.lang.compiled.CtMethod
 
 internal abstract class KspPropertyAccessorBase<T : KSPropertyAccessor>(
@@ -11,7 +11,7 @@ internal abstract class KspPropertyAccessorBase<T : KSPropertyAccessor>(
 ) : CtMethod(),
     // NOTE: We can't use annotations from |property| as they aren't properly accessible from Kapt.
     //  See https://youtrack.jetbrains.com/issue/KT-34684
-    CtAnnotatedLangModel by KspAnnotatedImpl(accessor) {
+    CtAnnotated by KspAnnotatedImpl(accessor) {
 
     protected val property = accessor.receiver
 

@@ -2,14 +2,14 @@ package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotated
 import com.yandex.daggerlite.lang.compiled.CtMethod
 import javax.lang.model.element.ExecutableElement
 
 internal class JavaxMethodImpl (
     override val owner: JavaxTypeDeclarationImpl,
     private val impl: ExecutableElement,
-) : CtMethod(), CtAnnotatedLangModel by JavaxAnnotatedImpl(impl) {
+) : CtMethod(), CtAnnotated by JavaxAnnotatedImpl(impl) {
 
     override val isAbstract: Boolean get() = impl.isAbstract
 

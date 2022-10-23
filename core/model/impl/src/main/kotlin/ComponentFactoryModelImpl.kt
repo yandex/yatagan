@@ -14,7 +14,7 @@ import com.yandex.daggerlite.core.model.HasNodeModel
 import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.allInputs
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
@@ -127,7 +127,7 @@ internal class ComponentFactoryModelImpl private constructor(
 
     private fun InputPayload(
         param: Parameter,
-        forBindsInstance: AnnotatedLangModel = param,
+        forBindsInstance: Annotated = param,
     ): InputPayload {
         val declaration = param.type.declaration
         return when {

@@ -1,13 +1,13 @@
 package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotated
 import com.yandex.daggerlite.lang.compiled.CtAnnotation
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
 
 internal class JavaxAnnotatedImpl(
     private val impl: Element,
-) : CtAnnotatedLangModel {
+) : CtAnnotated {
 
     override val annotations: Sequence<CtAnnotation> by lazy {
         val annotations = impl.annotationMirrors.map { JavaxAnnotationImpl(it) }

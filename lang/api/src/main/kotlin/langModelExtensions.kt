@@ -5,7 +5,7 @@ package com.yandex.daggerlite.lang
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-inline fun <reified A : kotlin.Annotation> AnnotatedLangModel.isAnnotatedWith() = isAnnotatedWith(A::class.java)
+inline fun <reified A : kotlin.Annotation> Annotated.isAnnotatedWith() = isAnnotatedWith(A::class.java)
 
 inline fun <reified A : kotlin.Annotation> Annotation.hasType() = annotationClass.isClass(A::class.java)
 

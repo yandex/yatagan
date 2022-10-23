@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation.Value
 import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Type
@@ -76,7 +76,7 @@ internal class RtAnnotationImpl(
 
     private class AnnotationClassImpl private constructor(
         private val impl: Class<*>,
-    ) : AnnotationDeclarationBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
+    ) : AnnotationDeclarationBase(), Annotated by RtAnnotatedImpl(impl) {
 
         override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             impl.declaredMethods.asSequence()

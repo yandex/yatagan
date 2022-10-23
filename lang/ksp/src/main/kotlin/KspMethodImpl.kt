@@ -4,14 +4,14 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotated
 import com.yandex.daggerlite.lang.compiled.CtMethod
 
 internal class KspMethodImpl(
     private val impl: KSFunctionDeclaration,
     override val owner: KspTypeDeclarationImpl,
     override val isStatic: Boolean,
-) : CtMethod(), CtAnnotatedLangModel by KspAnnotatedImpl(impl) {
+) : CtMethod(), CtAnnotated by KspAnnotatedImpl(impl) {
     private val jvmSignature = JvmMethodSignature(impl)
 
     override val isEffectivelyPublic: Boolean

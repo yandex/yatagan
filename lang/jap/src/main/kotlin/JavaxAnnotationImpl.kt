@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation.Value
 import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Type
@@ -104,7 +104,7 @@ internal class JavaxAnnotationImpl private constructor(
 
     private class AnnotationClassImpl private constructor(
         private val impl: TypeElement,
-    ) : AnnotationDeclarationBase(), AnnotatedLangModel by JavaxAnnotatedImpl(impl) {
+    ) : AnnotationDeclarationBase(), Annotated by JavaxAnnotatedImpl(impl) {
 
         override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             ElementFilter.methodsIn(impl.enclosedElements)

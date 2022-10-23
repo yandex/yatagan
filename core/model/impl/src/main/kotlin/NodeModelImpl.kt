@@ -7,7 +7,7 @@ import com.yandex.daggerlite.core.model.HasNodeModel
 import com.yandex.daggerlite.core.model.InjectConstructorModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.LangModelFactory
@@ -206,7 +206,7 @@ internal class NodeModelImpl private constructor(
 
         operator fun invoke(
             type: Type,
-            forQualifier: AnnotatedLangModel?,
+            forQualifier: Annotated?,
         ) = this(type, forQualifier?.annotations?.find(Annotation::isQualifier))
 
         operator fun invoke(

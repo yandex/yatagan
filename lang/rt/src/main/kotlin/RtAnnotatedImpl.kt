@@ -1,11 +1,11 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation
 
 internal class RtAnnotatedImpl(
     private val impl: ReflectAnnotatedElement,
-) : AnnotatedLangModel {
+) : Annotated {
     override val annotations: Sequence<Annotation> by lazy {
         impl.declaredAnnotations.map { RtAnnotationImpl(it) }.asSequence()
     }

@@ -18,7 +18,7 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
@@ -377,7 +377,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: KSFunctionDeclaration,
-    ) : ConstructorBase(), AnnotatedLangModel by KspAnnotatedImpl(platformModel) {
+    ) : ConstructorBase(), Annotated by KspAnnotatedImpl(platformModel) {
         private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean

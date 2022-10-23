@@ -10,7 +10,7 @@ import com.yandex.daggerlite.core.model.DependencyKind.OptionalProvider
 import com.yandex.daggerlite.core.model.DependencyKind.Provider
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.isAnnotatedWith
@@ -25,7 +25,7 @@ import javax.inject.Scope
 
 internal fun NodeDependency(
     type: Type,
-    forQualifier: AnnotatedLangModel,
+    forQualifier: Annotated,
 ): NodeDependency {
     val kind = when (type.declaration.qualifiedName) {
         Names.Lazy -> Lazy

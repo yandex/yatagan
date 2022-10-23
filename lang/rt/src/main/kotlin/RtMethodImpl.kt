@@ -4,7 +4,7 @@ import com.yandex.daggerlite.Assisted
 import com.yandex.daggerlite.IntoList
 import com.yandex.daggerlite.IntoSet
 import com.yandex.daggerlite.Provides
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
@@ -17,7 +17,7 @@ import com.yandex.daggerlite.lang.common.ParameterBase
 internal class RtMethodImpl(
     private val impl: ReflectMethod,
     override val owner: RtTypeDeclarationImpl,
-) : MethodBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
+) : MethodBase(), Annotated by RtAnnotatedImpl(impl) {
     private val parametersAnnotations by lazy { impl.parameterAnnotations }
     private val parametersTypes by lazy { impl.genericParameterTypes }
     private val parameterNames by lazy { impl.parameterNamesCompat() }

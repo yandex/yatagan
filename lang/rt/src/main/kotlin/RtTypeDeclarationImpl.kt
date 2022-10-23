@@ -17,7 +17,7 @@ import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.lang.ComponentAnnotationLangModel
@@ -39,7 +39,7 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class RtTypeDeclarationImpl private constructor(
     val type: RtTypeImpl,
-) : TypeDeclarationLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(type.impl.asClass()) {
+) : TypeDeclarationLangModelBase(), Annotated by RtAnnotatedImpl(type.impl.asClass()) {
     private val impl = type.impl.asClass()
 
     override val isEffectivelyPublic: Boolean
@@ -179,7 +179,7 @@ internal class RtTypeDeclarationImpl private constructor(
     private inner class ConstructorImpl(
         override val platformModel: ReflectConstructor,
         override val constructee: TypeDeclarationLangModel,
-    ) : ConstructorBase(), AnnotatedLangModel by RtAnnotatedImpl(platformModel) {
+    ) : ConstructorBase(), Annotated by RtAnnotatedImpl(platformModel) {
         private val parametersAnnotations by lazy { platformModel.parameterAnnotations }
         private val parametersTypes by lazy { platformModel.genericParameterTypes }
         private val parametersNames by lazy { platformModel.parameterNamesCompat() }

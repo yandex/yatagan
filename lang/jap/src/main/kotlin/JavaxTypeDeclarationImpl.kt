@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang.jap
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.mapToArray
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
@@ -12,7 +12,7 @@ import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.common.ConstructorBase
-import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotated
 import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -30,7 +30,7 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val type: DeclaredType,
-) : CtAnnotatedLangModel by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationLangModel() {
+) : CtAnnotated by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationLangModel() {
     private val impl = type.asTypeElement()
 
     override val isEffectivelyPublic: Boolean
@@ -187,7 +187,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: ExecutableElement,
-    ) : ConstructorBase(), AnnotatedLangModel by JavaxAnnotatedImpl(platformModel) {
+    ) : ConstructorBase(), Annotated by JavaxAnnotatedImpl(platformModel) {
         override val isEffectivelyPublic: Boolean get() = platformModel.isPublic
         override val constructee: TypeDeclarationLangModel get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<Parameter> = parametersSequenceFor(platformModel, type)

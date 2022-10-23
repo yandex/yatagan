@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang
 /**
  * Model a language construct that can be annotated.
  */
-interface AnnotatedLangModel {
+interface Annotated {
     /**
      * All annotations present of the construct.
      */
