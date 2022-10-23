@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.lang.common
 
 import com.yandex.daggerlite.base.zipOrNull
-import com.yandex.daggerlite.core.lang.CallableLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.MemberLangModel
+import com.yandex.daggerlite.lang.CallableLangModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.MemberLangModel
 
 abstract class FunctionLangModelBase : FunctionLangModel {
     final override fun <T> accept(visitor: CallableLangModel.Visitor<T>): T {

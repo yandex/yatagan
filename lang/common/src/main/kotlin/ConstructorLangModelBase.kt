@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.common
 
-import com.yandex.daggerlite.core.lang.CallableLangModel
-import com.yandex.daggerlite.core.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.CallableLangModel
+import com.yandex.daggerlite.lang.ConstructorLangModel
 
 abstract class ConstructorLangModelBase : ConstructorLangModel {
     final override fun <T> accept(visitor: CallableLangModel.Visitor<T>): T {

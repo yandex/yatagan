@@ -23,21 +23,21 @@ val mavenUsername: Provider<String> = providers.environmentVariable("MAVEN_USERN
 // maven password - must be valid both for snapshot and release repos.
 val mavenPassword: Provider<String> = providers.environmentVariable("MAVEN_PASSWORD")
 
-version = daggerLiteVersion
-group = "com.yandex.daggerlite"
-
 java {
     withSourcesJar()
 }
 
 publishing {
     publications {
-        create<MavenPublication>(name) {
+        create<MavenPublication>("main") {
             from(components["java"])
+            this.version = daggerLiteVersion
+            this.groupId = "com.yandex.daggerlite"
+            this.artifactId = path.trim(':').replace(':', '-')
         }
 
         components.findByName("optimizedJava")?.let { optimizedJava ->
-            create<MavenPublication>("${name}Optimized") {
+            create<MavenPublication>("optimized") {
                 from(optimizedJava)
                 artifactId = "${project.name}-optimized"
             }

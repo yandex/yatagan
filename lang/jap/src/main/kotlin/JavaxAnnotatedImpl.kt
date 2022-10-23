@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.jap.lang
+package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotationLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
 

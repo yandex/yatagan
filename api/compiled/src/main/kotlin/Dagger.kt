@@ -2,8 +2,8 @@ package com.yandex.daggerlite
 
 import com.yandex.daggerlite.Dagger.builder
 import com.yandex.daggerlite.Dagger.create
-import com.yandex.daggerlite.internal.loadImplementationByBuilderClass
-import com.yandex.daggerlite.internal.loadImplementationByComponentClass
+import com.yandex.daggerlite.common.loadImplementationByBuilderClass
+import com.yandex.daggerlite.common.loadImplementationByComponentClass
 
 /**
  * Dagger Lite entry-point object. Create instances of DL components by loading generated implementations for

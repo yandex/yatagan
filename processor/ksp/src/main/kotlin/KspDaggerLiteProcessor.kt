@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.ksp
+package com.yandex.daggerlite.processor.ksp
 
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -7,16 +7,16 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.daggerlite.Component
-import com.yandex.daggerlite.core.lang.LangModelFactory
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.use
-import com.yandex.daggerlite.ksp.lang.KspModelFactoryImpl
-import com.yandex.daggerlite.ksp.lang.ProcessingUtils
-import com.yandex.daggerlite.ksp.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.process.Logger
-import com.yandex.daggerlite.process.Options
-import com.yandex.daggerlite.process.ProcessorDelegate
-import com.yandex.daggerlite.process.process
+import com.yandex.daggerlite.lang.LangModelFactory
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.ksp.KspModelFactoryImpl
+import com.yandex.daggerlite.lang.ksp.ProcessingUtils
+import com.yandex.daggerlite.lang.ksp.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.use
+import com.yandex.daggerlite.processor.common.Logger
+import com.yandex.daggerlite.processor.common.Options
+import com.yandex.daggerlite.processor.common.ProcessorDelegate
+import com.yandex.daggerlite.processor.common.process
 import java.io.Writer
 
 internal class KspDaggerLiteProcessor(

@@ -1,15 +1,15 @@
-package com.yandex.daggerlite.ksp.lang
+package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Variance
-import com.yandex.daggerlite.generator.lang.ArrayNameModel
-import com.yandex.daggerlite.generator.lang.ClassNameModel
-import com.yandex.daggerlite.generator.lang.CtTypeNameModel
-import com.yandex.daggerlite.generator.lang.ErrorNameModel
-import com.yandex.daggerlite.generator.lang.KeywordTypeNameModel
-import com.yandex.daggerlite.generator.lang.ParameterizedNameModel
-import com.yandex.daggerlite.generator.lang.WildcardNameModel
+import com.yandex.daggerlite.lang.compiled.ArrayNameModel
+import com.yandex.daggerlite.lang.compiled.ClassNameModel
+import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
+import com.yandex.daggerlite.lang.compiled.ErrorNameModel
+import com.yandex.daggerlite.lang.compiled.KeywordTypeNameModel
+import com.yandex.daggerlite.lang.compiled.ParameterizedNameModel
+import com.yandex.daggerlite.lang.compiled.WildcardNameModel
 
 
 internal fun CtTypeNameModel(

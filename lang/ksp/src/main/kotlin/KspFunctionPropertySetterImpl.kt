@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.ksp.lang
+package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSPropertySetter
 import com.google.devtools.ksp.symbol.Modifier
-import com.yandex.daggerlite.core.lang.ParameterLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 internal class KspFunctionPropertySetterImpl(
     private val setter: KSPropertySetter,

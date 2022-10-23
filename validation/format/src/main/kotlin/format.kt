@@ -1,12 +1,12 @@
 @file:[JvmMultifileClass JvmName("Format") ]
 package com.yandex.daggerlite.validation.format
 
-import com.yandex.daggerlite.core.ConditionExpression
-import com.yandex.daggerlite.core.ConditionScope
-import com.yandex.daggerlite.core.NodeDependency
-import com.yandex.daggerlite.graph.AliasBinding
-import com.yandex.daggerlite.graph.BaseBinding
-import com.yandex.daggerlite.graph.Binding
+import com.yandex.daggerlite.core.graph.AliasBinding
+import com.yandex.daggerlite.core.graph.BaseBinding
+import com.yandex.daggerlite.core.graph.Binding
+import com.yandex.daggerlite.core.model.ConditionExpression
+import com.yandex.daggerlite.core.model.ConditionScope
+import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.RichString
 

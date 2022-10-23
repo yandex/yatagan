@@ -21,6 +21,10 @@ tasks.withType<KotlinCompile> {
 }
 
 kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+
     sourceSets.configureEach {
         languageSettings {
             optIn("kotlin.ExperimentalStdlibApi")
@@ -47,10 +51,3 @@ val daggerLiteVersion: String by extra(
     providers.fileContents(rootProject.layout.projectDirectory.file("daggerlite.version"))
         .asText.get().trim()
 )
-
-java {
-    toolchain {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-}

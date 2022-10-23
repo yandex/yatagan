@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    api(project(":core"))
-    api(project(":graph"))
-    api(project(":validation"))
+    api(project(":core:model:api"))
+    api(project(":core:graph:api"))
+    api(project(":validation:api"))
 
     implementation(kotlin("stdlib"))
 

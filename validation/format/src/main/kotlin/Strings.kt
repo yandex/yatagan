@@ -1,25 +1,25 @@
 package com.yandex.daggerlite.validation.format
 
-import com.yandex.daggerlite.core.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.ComponentDependencyModel
-import com.yandex.daggerlite.core.ComponentFactoryModel
-import com.yandex.daggerlite.core.ComponentModel
-import com.yandex.daggerlite.core.ConditionScope
-import com.yandex.daggerlite.core.ConditionalHoldingModel
-import com.yandex.daggerlite.core.ModuleModel
-import com.yandex.daggerlite.core.NodeModel
-import com.yandex.daggerlite.core.Variant
-import com.yandex.daggerlite.core.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.ConstructorLangModel
-import com.yandex.daggerlite.core.lang.FunctionLangModel
-import com.yandex.daggerlite.core.lang.MemberLangModel
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.graph.AliasBinding
-import com.yandex.daggerlite.graph.BaseBinding
-import com.yandex.daggerlite.graph.Binding
-import com.yandex.daggerlite.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.AliasBinding
+import com.yandex.daggerlite.core.graph.BaseBinding
+import com.yandex.daggerlite.core.graph.Binding
+import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
+import com.yandex.daggerlite.core.model.ComponentDependencyModel
+import com.yandex.daggerlite.core.model.ComponentFactoryModel
+import com.yandex.daggerlite.core.model.ComponentModel
+import com.yandex.daggerlite.core.model.ConditionScope
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel
+import com.yandex.daggerlite.core.model.ModuleModel
+import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.core.model.Variant
+import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 object Strings {
     private const val Indent = "    "

@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.jap.lang
+package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.core.lang.LangModelFactory
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.LangModelFactory
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 import javax.lang.model.element.TypeElement
 
 class JavaxModelFactoryImpl : LangModelFactory {

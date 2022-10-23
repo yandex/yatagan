@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.jap.lang
+package com.yandex.daggerlite.lang.jap
 
 import java.io.Closeable
 import javax.lang.model.element.TypeElement

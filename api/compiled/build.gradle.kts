@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":api"))
+    api(project(":api:public"))
 
-    implementation(project(":api-common"))
+    implementation(project(":api:common"))
 }

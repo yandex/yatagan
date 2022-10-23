@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.lang.common
 
-import com.yandex.daggerlite.core.lang.TypeDeclarationKind
-import com.yandex.daggerlite.core.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.TypeDeclarationKind
+import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 /**
  * A [TypeDeclarationLangModel] implementation, that is convenient to return when no declaration makes sense at all,

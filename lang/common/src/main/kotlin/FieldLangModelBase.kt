@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.common
 
-import com.yandex.daggerlite.core.lang.FieldLangModel
-import com.yandex.daggerlite.core.lang.MemberLangModel
+import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.MemberLangModel
 
 abstract class FieldLangModelBase : FieldLangModel {
     final override fun <R> accept(visitor: MemberLangModel.Visitor<R>): R {

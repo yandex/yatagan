@@ -1,0 +1,393 @@
+package com.yandex.daggerlite.testing.tests
+
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import javax.inject.Provider
+
+@RunWith(Parameterized::class)
+class ComponentHierarchyKotlinTest(
+    driverProvider: Provider<CompileTestDriverBase>
+) : CompileTestDriver by driverProvider.get() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun parameters() = compileTestDrivers()
+    }
+
+    @Test
+    fun `subcomponents - basic case`() {
+        givenKotlinSource(
+            "test.TestCase", """
+            import javax.inject.Inject
+            import javax.inject.Scope
+            import javax.inject.Singleton
+            import com.yandex.daggerlite.Component
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.Module
+            import javax.inject.Provider
+            import com.yandex.daggerlite.Lazy
+
+            @Scope
+            annotation class ActivityScoped
+
+            interface MyApplicationManager
+            class MyApplicationManagerImpl @Inject constructor() : MyApplicationManager
+            
+            @Module(subcomponents = [MyActivityComponent::class])
+            interface ApplicationModule {
+                @Binds
+                fun appManager(i: MyApplicationManagerImpl): MyApplicationManager
+            }
+            
+            @Singleton
+            @Component(modules = [ApplicationModule::class])
+            interface MyApplicationComponent {
+                @Component.Builder
+                interface Factory {
+                    fun create(): MyApplicationComponent 
+                }
+            }
+
+            @ActivityScoped
+            @Component(isRoot = false)
+            interface MyActivityComponent {
+                val appManager: MyApplicationManager
+                val appManagerLazy: Lazy<MyApplicationManager>
+                val appManagerProvider: Provider<MyApplicationManager>
+
+                @Component.Builder
+                interface Factory {
+                    fun create(): MyActivityComponent 
+                }
+            }
+        """
+        )
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `subcomponents - advanced case`() {
+        givenKotlinSource(
+            "test.TestCase",
+            """
+            import com.yandex.daggerlite.*
+            import javax.inject.*
+
+            @Scope annotation class ActivityScoped
+            @Scope annotation class FragmentScoped
+
+            interface MyApplicationManager
+            class MyApplicationManagerImpl @Inject constructor(
+                controller: MyApplicationController,
+                @Named("app_id") id: String,
+            ) : MyApplicationManager
+
+            interface MyApplicationController
+            @Singleton
+            class MyApplicationControllerImpl @Inject constructor() : MyApplicationController
+            
+            @Module(subcomponents = [MyActivityComponent::class])
+            interface ApplicationModule {
+                @Binds
+                fun appManager(i: MyApplicationManagerImpl): MyApplicationManager
+                @Binds
+                fun controller(i: MyApplicationControllerImpl): MyApplicationController
+            }
+            
+            @Singleton
+            @Component(modules = [ApplicationModule::class])
+            interface MyApplicationComponent {
+                val activityFactory: MyActivityComponent.Factory
+
+                @Component.Builder
+                interface Factory {
+                    fun create(
+                        @BindsInstance @Named("app_id") appId: String,
+                    ): MyApplicationComponent
+                }
+            }
+    
+            @Module(subcomponents = [MyFragmentComponent::class])
+            interface MyActivityModule
+
+            class MyActivityController @Inject constructor(
+                appComponent: MyApplicationComponent,
+                @Named("app_id") appId: Lazy<String>,
+                @Named("activity_id") id: Provider<String>,
+            )
+
+            @ActivityScoped
+            @Component(isRoot = false, modules = [MyActivityModule::class])
+            interface MyActivityComponent {
+                val appManager: MyApplicationManager
+                val appManagerLazy: Lazy<MyApplicationManager>
+                val appManagerProvider: Provider<MyApplicationManager>
+
+                val fragmentFactory: MyFragmentComponent.Factory
+
+                @Component.Builder
+                interface Factory {
+                    fun create(@BindsInstance @Named("activity_id") id: String): MyActivityComponent 
+                }
+            }
+
+            @FragmentScoped
+            class FragmentController @Inject constructor(
+                val activityController: MyActivityController,
+            )
+
+            @FragmentScoped
+            @Component(isRoot = false)
+            interface MyFragmentComponent {
+                val appManager: MyApplicationManager
+                val appManagerLazy: Lazy<MyApplicationManager>
+                val appManagerProvider: Provider<MyApplicationManager>
+                
+                val fragment: FragmentController
+
+                @Component.Builder
+                interface Factory {
+                    fun create(): MyFragmentComponent 
+                }
+            }
+
+            fun test() {
+                val factory: MyApplicationComponent.Factory = Dagger.builder(MyApplicationComponent.Factory::class.java)
+                val appComponent = factory.create("foo")
+                 
+                with(appComponent.activityFactory.create("bar")) {
+                    val appManager = appManager
+                    val appManagerLazy = appManagerLazy
+                    val appManagerProvider = appManagerProvider
+                    assert(appManager != appManagerLazy.get())
+                    assert(appManager != appManagerProvider.get())
+                    assert(appManagerLazy.get() == appManagerLazy.get())
+                    assert(appManagerProvider.get() != appManagerProvider.get())
+                }
+
+                with(appComponent.activityFactory.create("bar").fragmentFactory.create()) {
+                    val appManager = appManager
+                    val appManagerLazy = appManagerLazy
+                    val appManagerProvider = appManagerProvider
+                    assert(appManager != appManagerLazy.get())
+                    assert(appManager != appManagerProvider.get())
+                    assert(appManagerLazy.get() == appManagerLazy.get())
+                    assert(appManagerProvider.get() != appManagerProvider.get())
+                }
+            }
+        """,
+        )
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `alias binding across component boundary`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.daggerlite.Module            
+            import com.yandex.daggerlite.Component            
+            import com.yandex.daggerlite.Binds
+            import com.yandex.daggerlite.BindsInstance
+            import javax.inject.Inject      
+
+            interface MyApi
+            class MyImpl : MyApi
+            @Module
+            interface TestSubModule {
+                @Binds fun api(i: MyImpl): MyApi
+            }
+            @Module(subcomponents = [TestSubComponent::class])
+            interface TestModule
+            class Consumer @Inject constructor(api: MyApi)
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                val sub: TestSubComponent.Creator
+
+                @Component.Builder
+                interface Creator {
+                    fun create(@BindsInstance impl: MyImpl): TestComponent
+                }
+            }
+            @Component(isRoot = false, modules = [TestSubModule::class])
+            interface TestSubComponent {
+                val consumer: Consumer
+                @Component.Builder
+                interface Creator {
+                    fun create(): TestSubComponent
+                }
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `subcomponents - one more advanced case`() {
+        givenKotlinSource(
+            "test.TestCase",
+            """
+            import javax.inject.*
+            import com.yandex.daggerlite.*
+
+            @Scope annotation class ActivityScoped
+             
+            interface Theme
+            
+            class DefaultTheme @Inject constructor() : Theme
+            
+            class DarkTheme @Inject constructor(): Theme
+            
+            class RootClass
+
+            @ActivityScoped
+            class ActivityScopedClass @Inject constructor()
+
+            class CameraSettings @Inject constructor(val theme: Theme)
+            
+            open class Activity
+            
+            class SettingsActivity : Activity()
+            
+            @Singleton class SingletonClass @Inject constructor()
+             
+            //////////////////////////////////////
+            
+            @Module(subcomponents = [MainActivityComponent::class, SettingsActivityComponent::class])
+            interface ApplicationModule {
+                companion object {
+                    @Provides
+                    fun rootClass(): RootClass = RootClass()
+                }
+            }
+            
+            @Module(subcomponents = [ProfileSettingsFragmentComponent::class, ProfileFragmentComponent::class])
+            class SettingsActivityFragmentModule (private val settingsActivity: SettingsActivity) {
+                @Provides fun activity(): Activity = settingsActivity
+            }
+            
+            @Module
+            object MainActivityModule {
+                @Provides
+                fun activity() = Activity()
+            }
+            
+            @Module(subcomponents = [CameraFragmentComponent::class])
+            interface CameraFragmentModule {
+            }
+            
+            @Module(subcomponents = [CameraFragmentComponent::class, ProfileFragmentComponent::class])
+            interface ProfileCameraModule
+            
+            @Module
+            interface DefaultThemeModule {
+                @Binds fun theme(i: DefaultTheme): Theme
+            }
+            @Module
+            interface DarkThemeModule {
+                @Binds fun theme(i: DarkTheme): Theme
+            }
+            
+            //////////////////////////////////////
+            
+            @Singleton
+            @Component(modules = [ApplicationModule::class])
+            interface ApplicationComponent {    
+                val mainActivity: MainActivityComponent.Factory
+                val settingsActivity: SettingsActivityComponent.Factory
+            }
+            
+            @ActivityScoped
+            @Component(modules = [CameraFragmentModule::class, ProfileCameraModule::class, DefaultThemeModule::class, MainActivityModule::class],
+                isRoot = false)
+            interface MainActivityComponent {
+                val cameraFragmentComponent: CameraFragmentComponent.Factory
+                val profileFragmentComponent: ProfileFragmentComponent.Factory
+                
+                fun rootClass(): RootClass
+            
+                @Component.Builder
+                interface Factory {
+                    fun create(): MainActivityComponent
+                }
+            }
+            
+            @ActivityScoped
+            @Component(modules = [DarkThemeModule::class, SettingsActivityFragmentModule::class], isRoot = false)
+            interface SettingsActivityComponent {
+                fun rootClass(): RootClass
+                
+                val profileFragmentComponent: ProfileFragmentComponent.Factory
+                val profileSettingsFragmentComponent: ProfileSettingsFragmentComponent.Factory
+                
+                @Component.Builder
+                interface Factory {
+                    fun create(settingsActivityFragmentModule: SettingsActivityFragmentModule): SettingsActivityComponent
+                }
+            }
+            
+            @Component(isRoot = false)
+            interface CameraFragmentComponent {
+                fun cameraSettings(): CameraSettings
+            
+                @Component.Builder
+                interface Factory {
+                    fun create(): CameraFragmentComponent
+                }
+            }
+            
+            @Component(isRoot = false)
+            interface ProfileFragmentComponent {
+                fun activityScoped(): ActivityScopedClass
+                fun activity(): Activity
+                fun singleton(): SingletonClass
+            
+                @Component.Builder
+                interface Factory {
+                    fun create(): ProfileFragmentComponent
+                }
+            }
+            
+            @Component(isRoot = false)
+            interface ProfileSettingsFragmentComponent {
+                fun cameraSettings(): CameraSettings
+            
+                @Component.Builder
+                interface Factory {
+                    fun create(): ProfileSettingsFragmentComponent
+                }
+            }
+            
+            fun test() {
+                val c = Dagger.create(ApplicationComponent::class.java)
+                val settingsActivityFragmentModule = SettingsActivityFragmentModule(SettingsActivity())
+                
+                val mainActivityC = c.mainActivity.create()
+                val settingsActivityC = c.settingsActivity.create(settingsActivityFragmentModule)
+                
+                val cameraFragmentC = mainActivityC.cameraFragmentComponent.create()
+                val profileFragmentC = mainActivityC.profileFragmentComponent.create()
+            
+                val profileFragmentFromSettingsC = settingsActivityC.profileFragmentComponent.create()
+                val profileSettingsFragmentC = settingsActivityC.profileSettingsFragmentComponent.create()
+            
+                assert(mainActivityC.rootClass() !== settingsActivityC.rootClass())
+
+                assert(profileFragmentC.activity()::class == Activity::class)
+                assert(profileFragmentFromSettingsC.activity()::class == SettingsActivity::class)
+
+                assert(profileFragmentC.activityScoped() === profileFragmentC.activityScoped())
+                assert(profileFragmentFromSettingsC.activityScoped() === profileFragmentFromSettingsC.activityScoped())
+                assert(profileFragmentFromSettingsC.activityScoped() !== profileFragmentC.activityScoped())
+
+                assert(profileFragmentC.singleton() === profileFragmentFromSettingsC.singleton())
+                assert(cameraFragmentC.cameraSettings().theme::class == DefaultTheme::class)
+                assert(profileSettingsFragmentC.cameraSettings().theme::class == DarkTheme::class)
+            }
+        """,
+        )
+
+        compileRunAndValidate()
+    }
+}

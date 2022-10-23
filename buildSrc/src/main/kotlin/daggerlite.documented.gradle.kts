@@ -41,7 +41,7 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
     dependsOn(patchModuleDoc)
 
     dependencies {
-        plugins(project(":testing-dokka"))
+        plugins(project(":testing:doc-testing"))
     }
 
     dokkaSourceSets {
@@ -79,7 +79,7 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
         }
     """.trimIndent()
     pluginsMapConfiguration.set(mapOf(
-        "com.yandex.daggerlite.testing.dokka.DLDokkaPlugin" to config
+        "com.yandex.daggerlite.testing.doc_testing.DLDokkaPlugin" to config
     ))
 
     outputs.dir(kdocsTestsDir)
@@ -88,7 +88,7 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
 val runCodeBlockTestsClasspath by configurations.creating
 
 dependencies {
-    runCodeBlockTestsClasspath(project(":testing"))
+    runCodeBlockTestsClasspath(project(":testing:tests"))
 }
 
 val testDocumentationCodeBlocks by tasks.registering(JavaExec::class) {
@@ -99,7 +99,7 @@ val testDocumentationCodeBlocks by tasks.registering(JavaExec::class) {
     inputs.dir(kdocsTestsDir)
 
     classpath = runCodeBlockTestsClasspath
-    mainClass.set("com.yandex.daggerlite.testing.Standalone")
+    mainClass.set("com.yandex.daggerlite.testing.tests.Standalone")
     argumentProviders += CommandLineArgumentProvider {
         listOf("--backend", "ksp", "--test-cases-dir", kdocsTestsDir.get().asFile.toString())
     }

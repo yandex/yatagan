@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.jap.lang
+package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.core.lang.ParameterLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
-import com.yandex.daggerlite.generator.lang.CtAnnotatedLangModel
-import com.yandex.daggerlite.generator.lang.CtFunctionLangModel
+import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
+import com.yandex.daggerlite.lang.compiled.CtFunctionLangModel
 import javax.lang.model.element.ExecutableElement
 
 internal class JavaxFunctionImpl (

@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.common
 
-import com.yandex.daggerlite.core.lang.AnnotationLangModel
-import com.yandex.daggerlite.core.lang.TypeLangModel
+import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.TypeLangModel
 
 abstract class AnnotationLangModelBase : AnnotationLangModel {
     final override fun toString() = buildString {
