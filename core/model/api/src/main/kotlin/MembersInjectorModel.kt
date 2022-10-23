@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core.model
 
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -16,5 +16,5 @@ interface MembersInjectorModel : MayBeInvalid {
     /**
      * The @[javax.inject.Inject]-annotated fields/setters discovered in the injectee.
      */
-    val membersToInject: Map<MemberLangModel, NodeDependency>
+    val membersToInject: Map<Member, NodeDependency>
 }

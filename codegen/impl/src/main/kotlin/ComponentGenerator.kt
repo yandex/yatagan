@@ -10,7 +10,7 @@ import com.yandex.daggerlite.core.graph.component1
 import com.yandex.daggerlite.core.graph.component2
 import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.compiled.ClassNameModel
 import javax.inject.Provider
 import javax.lang.model.element.Modifier.FINAL
@@ -140,7 +140,7 @@ internal class ComponentGenerator(
                 membersInjector.membersToInject.forEach { (member, dependency) ->
                     val binding = graph.resolveBinding(dependency.node)
                     +buildExpression {
-                        member.accept(object : MemberLangModel.Visitor<Unit> {
+                        member.accept(object : Member.Visitor<Unit> {
                             override fun visitFunction(model: FunctionLangModel) {
                                 +"%N.%N(".formatCode(instanceName, member.name)
                                 binding.generateAccess(

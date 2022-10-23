@@ -3,14 +3,14 @@ package com.yandex.daggerlite.lang.common
 import com.yandex.daggerlite.base.zipOrNull
 import com.yandex.daggerlite.lang.CallableLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Member
 
 abstract class FunctionLangModelBase : FunctionLangModel {
     final override fun <T> accept(visitor: CallableLangModel.Visitor<T>): T {
         return visitor.visitFunction(this)
     }
 
-    final override fun <R> accept(visitor: MemberLangModel.Visitor<R>): R {
+    final override fun <R> accept(visitor: Member.Visitor<R>): R {
         return visitor.visitFunction(this)
     }
 

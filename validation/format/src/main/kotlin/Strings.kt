@@ -17,7 +17,7 @@ import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 
@@ -347,7 +347,7 @@ object Strings {
             "@Provides-annotated methods must be $AccessMessage.".toError()
 
         @Covered
-        fun invalidAccessForMemberToInject(member: MemberLangModel) =
+        fun invalidAccessForMemberToInject(member: Member) =
             "@Inject member `$member` must be $AccessMessage.".toError()
 
         @Covered
@@ -359,7 +359,7 @@ object Strings {
             "Class `$`class`` is not accessible for condition computation, make it $AccessMessage".toError()
 
         @Covered
-        fun invalidAccessForConditionMember(member: MemberLangModel) =
+        fun invalidAccessForConditionMember(member: Member) =
             "Member `$member` is not accessible for condition computation, make it $AccessMessage".toError()
 
         @Covered

@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -18,7 +18,7 @@ interface ConditionModel : ConditionExpression.Literal, MayBeInvalid {
      * A chain of members, that, if evaluated sequentially on the result of each other,  lead to boolean value.
      * The first member if evaluated on [root].
      */
-    val path: List<MemberLangModel>
+    val path: List<Member>
 
     /**
      * `true` if this condition requires an injectable instance to evaluate (non-static condition).

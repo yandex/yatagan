@@ -6,7 +6,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -26,7 +26,7 @@ internal class MembersInjectorModelImpl private constructor(
 
     private val injectee = injector.parameters.single().type
 
-    override val membersToInject: Map<MemberLangModel, NodeDependency> by lazy {
+    override val membersToInject: Map<Member, NodeDependency> by lazy {
         buildMap {
             injectee.declaration.fields.filter {
                 it.isAnnotatedWith<Inject>()
@@ -91,7 +91,7 @@ internal class MembersInjectorModelImpl private constructor(
             return impl.isAbstract && impl.parameters.count() == 1
         }
 
-        private object IsField : MemberLangModel.Visitor<Boolean> {
+        private object IsField : Member.Visitor<Boolean> {
             override fun visitFunction(model: FunctionLangModel) = false
             override fun visitField(model: FieldLangModel) = true
         }

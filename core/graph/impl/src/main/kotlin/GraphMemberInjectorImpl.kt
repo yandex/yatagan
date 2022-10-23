@@ -4,7 +4,7 @@ import com.yandex.daggerlite.core.graph.GraphMemberInjector
 import com.yandex.daggerlite.core.model.MembersInjectorModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.append
@@ -23,14 +23,14 @@ internal class GraphMemberInjectorImpl(
         impl.membersToInject.map { (member, dependency) -> MemberToInjectEntryPoint(member, dependency) }
     }
 
-    override val membersToInject: Map<out MemberLangModel, NodeDependency> by lazy(PUBLICATION) {
+    override val membersToInject: Map<out Member, NodeDependency> by lazy(PUBLICATION) {
         _membersToInject.associateWith { it.dependency }
     }
 
     private inner class MemberToInjectEntryPoint(
-        val member: MemberLangModel,
+        val member: Member,
         override val dependency: NodeDependency,
-    ) : MemberLangModel by member, GraphEntryPointBase() {
+    ) : Member by member, GraphEntryPointBase() {
         override val graph: BindingGraphImpl
             get() = this@GraphMemberInjectorImpl.owner
 

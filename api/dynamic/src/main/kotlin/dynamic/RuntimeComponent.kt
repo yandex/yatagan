@@ -35,7 +35,7 @@ import com.yandex.daggerlite.lang.CallableLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.lang.rt.kotlinObjectInstanceOrNull
 import com.yandex.daggerlite.lang.rt.rawValue
@@ -291,7 +291,7 @@ internal class RuntimeComponent(
         }
     }
 
-    private class MemberEvaluator(private val instance: Any?) : MemberLangModel.Visitor<Any?> {
+    private class MemberEvaluator(private val instance: Any?) : Member.Visitor<Any?> {
         override fun visitFunction(model: FunctionLangModel): Any? = model.rt.invoke(instance)
         override fun visitField(model: FieldLangModel): Any? = model.rt.get(instance)
     }
@@ -334,7 +334,7 @@ internal class RuntimeComponent(
             val (injectee) = args!!
             for ((member, dependency) in memberInject.membersToInject) {
                 val value = resolveAndAccess(dependency)
-                member.accept(object : MemberLangModel.Visitor<Unit> {
+                member.accept(object : Member.Visitor<Unit> {
                     override fun visitField(model: FieldLangModel) = model.rt.set(injectee, value)
                     override fun visitFunction(model: FunctionLangModel) {
                         model.rt.invoke(injectee, value)

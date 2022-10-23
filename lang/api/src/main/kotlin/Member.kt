@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang
 /**
  * Models a type declaration member.
  */
-interface MemberLangModel : AnnotatedLangModel, HasPlatformModel, Accessible {
+interface Member : AnnotatedLangModel, HasPlatformModel, Accessible {
     /**
      * Type declaration that this entity is member of.
      */
