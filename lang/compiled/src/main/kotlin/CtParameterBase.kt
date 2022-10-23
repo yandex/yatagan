@@ -5,8 +5,8 @@ import com.yandex.daggerlite.BindsInstance
 import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.common.ParameterBase
 
-abstract class CtParameter : ParameterBase() {
-    abstract override val annotations: Sequence<CtAnnotation>
+abstract class CtParameterBase : ParameterBase() {
+    abstract override val annotations: Sequence<CtAnnotationBase>
 
     final override fun <T : BuiltinAnnotation.OnParameter> getAnnotation(
         which: BuiltinAnnotation.Target.OnParameter<T>

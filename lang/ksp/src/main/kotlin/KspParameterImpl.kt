@@ -4,13 +4,13 @@ import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtParameter
+import com.yandex.daggerlite.lang.compiled.CtParameterBase
 
 internal class KspParameterImpl(
     private val impl: KSValueParameter,
     private val refinedTypeRef: KSTypeReference,
     private val jvmSignatureSupplier: () -> String?,
-) : CtParameter(), CtAnnotated by KspAnnotatedImpl(impl) {
+) : CtParameterBase(), CtAnnotated by KspAnnotatedImpl(impl) {
 
     override val name: String
         get() = impl.name?.asString() ?: "unnamed"

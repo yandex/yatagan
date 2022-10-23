@@ -22,8 +22,8 @@ import com.yandex.daggerlite.lang.common.TypeDeclarationBase
 /**
  * [TypeDeclaration] specialized for compile time implementations.
  */
-abstract class CtTypeDeclaration : TypeDeclarationBase() {
-    abstract override val annotations: Sequence<CtAnnotation>
+abstract class CtTypeDeclarationBase : TypeDeclarationBase() {
+    abstract override val annotations: Sequence<CtAnnotationBase>
 
     override fun <T : BuiltinAnnotation.OnClass> getAnnotation(
         which: BuiltinAnnotation.Target.OnClass<T>

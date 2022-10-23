@@ -12,8 +12,8 @@ import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtConstructor
-import com.yandex.daggerlite.lang.compiled.CtTypeDeclaration
+import com.yandex.daggerlite.lang.compiled.CtConstructorBase
+import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationBase
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.NestingKind
@@ -30,7 +30,7 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class JavaxTypeDeclarationImpl private constructor(
     val type: DeclaredType,
-) : CtAnnotated by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclaration() {
+) : CtAnnotated by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationBase() {
     private val impl = type.asTypeElement()
 
     override val isEffectivelyPublic: Boolean
@@ -187,7 +187,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: ExecutableElement,
-    ) : CtConstructor(), Annotated by JavaxAnnotatedImpl(platformModel) {
+    ) : CtConstructorBase(), Annotated by JavaxAnnotatedImpl(platformModel) {
         override val isEffectivelyPublic: Boolean get() = platformModel.isPublic
         override val constructee: TypeDeclaration get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<Parameter> = parametersSequenceFor(platformModel, type)

@@ -5,13 +5,13 @@ import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtMethod
+import com.yandex.daggerlite.lang.compiled.CtMethodBase
 
 internal class KspMethodImpl(
     private val impl: KSFunctionDeclaration,
     override val owner: KspTypeDeclarationImpl,
     override val isStatic: Boolean,
-) : CtMethod(), CtAnnotated by KspAnnotatedImpl(impl) {
+) : CtMethodBase(), CtAnnotated by KspAnnotatedImpl(impl) {
     private val jvmSignature = JvmMethodSignature(impl)
 
     override val isEffectivelyPublic: Boolean

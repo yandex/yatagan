@@ -7,14 +7,14 @@ import com.yandex.daggerlite.base.BiObjectCache
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.common.NoDeclaration
-import com.yandex.daggerlite.lang.compiled.CtType
+import com.yandex.daggerlite.lang.compiled.CtTypeBase
 import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeImpl private constructor(
     val impl: KSType,
     private val jvmType: JvmTypeInfo,
-) : CtType() {
+) : CtTypeBase() {
 
     override val nameModel: CtTypeNameModel by lazy {
         CtTypeNameModel(type = impl, jvmTypeKind = jvmType)

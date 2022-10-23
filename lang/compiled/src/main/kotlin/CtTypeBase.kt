@@ -6,7 +6,7 @@ import com.yandex.daggerlite.lang.common.TypeBase
 /**
  * [Type] base class, that can be named by [CtTypeNameModel].
  */
-abstract class CtType : TypeBase() {
+abstract class CtTypeBase : TypeBase() {
     /**
      * Class name.
      * @see CtTypeNameModel

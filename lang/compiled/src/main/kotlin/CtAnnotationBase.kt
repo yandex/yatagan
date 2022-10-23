@@ -9,7 +9,7 @@ import com.yandex.daggerlite.lang.common.AnnotationBase
 /**
  * An [Annotation] which supports getting typed attribute values by name efficiently.
  */
-abstract class CtAnnotation : AnnotationBase() {
+abstract class CtAnnotationBase : AnnotationBase() {
     fun getBoolean(attribute: String): Boolean {
         return attributeValue(attribute).accept(AsBoolean)
     }
@@ -26,7 +26,7 @@ abstract class CtAnnotation : AnnotationBase() {
         return attributeValue(attribute).accept(AsString)
     }
 
-    fun getAnnotations(attribute: String): List<CtAnnotation> {
+    fun getAnnotations(attribute: String): List<CtAnnotationBase> {
         return attributeValue(attribute).accept(AsAnnotations)
     }
 
@@ -56,15 +56,15 @@ abstract class CtAnnotation : AnnotationBase() {
             override fun visitString(value: String) = value
         }
 
-        private object AsAnnotation : AnnotationValueVisitorAdapter<CtAnnotation>() {
+        private object AsAnnotation : AnnotationValueVisitorAdapter<CtAnnotationBase>() {
             override fun visitDefault() = throw IllegalStateException("Expected annotation value")
-            override fun visitAnnotation(value: Annotation) = value as CtAnnotation
+            override fun visitAnnotation(value: Annotation) = value as CtAnnotationBase
         }
 
-        private object AsAnnotations : AnnotationValueVisitorAdapter<List<CtAnnotation>>() {
+        private object AsAnnotations : AnnotationValueVisitorAdapter<List<CtAnnotationBase>>() {
             override fun visitDefault() = throw IllegalStateException("Expected annotation array value")
             override fun visitArray(value: List<Value>) = value.map { it.accept(AsAnnotation) }
-            override fun visitAnnotation(value: Annotation) = listOf(value as CtAnnotation)
+            override fun visitAnnotation(value: Annotation) = listOf(value as CtAnnotationBase)
         }
     }
 }

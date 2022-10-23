@@ -4,14 +4,14 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.common.NoDeclaration
-import com.yandex.daggerlite.lang.compiled.CtType
+import com.yandex.daggerlite.lang.compiled.CtTypeBase
 import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 
 internal class JavaxTypeImpl private constructor(
     val impl: TypeMirror,
-) : CtType() {
+) : CtTypeBase() {
     override val nameModel: CtTypeNameModel by lazy { CtTypeNameModel(impl) }
 
     override val declaration: TypeDeclaration by lazy {

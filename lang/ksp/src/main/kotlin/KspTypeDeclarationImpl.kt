@@ -26,19 +26,19 @@ import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.compiled.CtAnnotation
-import com.yandex.daggerlite.lang.compiled.CtConstructor
-import com.yandex.daggerlite.lang.compiled.CtField
-import com.yandex.daggerlite.lang.compiled.CtTypeDeclaration
+import com.yandex.daggerlite.lang.compiled.CtAnnotationBase
+import com.yandex.daggerlite.lang.compiled.CtConstructorBase
+import com.yandex.daggerlite.lang.compiled.CtFieldBase
+import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationBase
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
-) : CtTypeDeclaration() {
+) : CtTypeDeclarationBase() {
     private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
     private val annotated = KspAnnotatedImpl(impl)
 
-    override val annotations: Sequence<CtAnnotation> = annotated.annotations
+    override val annotations: Sequence<CtAnnotationBase> = annotated.annotations
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>) = annotated.isAnnotatedWith(type)
 
     override val isEffectivelyPublic: Boolean
@@ -377,7 +377,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: KSFunctionDeclaration,
-    ) : CtConstructor(), Annotated by KspAnnotatedImpl(platformModel) {
+    ) : CtConstructorBase(), Annotated by KspAnnotatedImpl(platformModel) {
         private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean
@@ -403,7 +403,7 @@ internal class KspTypeDeclarationImpl private constructor(
         override val owner: TypeDeclaration,
         override val type: Type = owner.asType(),
         override val name: String,
-    ) : CtField() {
+    ) : CtFieldBase() {
         override val isEffectivelyPublic: Boolean get() = true
         override val annotations: Sequence<Nothing> get() = emptySequence()
         override val platformModel: Any? get() = null

@@ -6,7 +6,7 @@ import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
 import javax.inject.Qualifier
 import javax.inject.Scope
 
-abstract class CtAnnotationDeclaration : AnnotationDeclarationBase() {
+abstract class CtAnnotationDeclarationBase : AnnotationDeclarationBase() {
     override fun <T : BuiltinAnnotation.OnAnnotationClass> getAnnotation(
         builtinAnnotation: BuiltinAnnotation.Target.OnAnnotationClass<T>,
     ): T? {

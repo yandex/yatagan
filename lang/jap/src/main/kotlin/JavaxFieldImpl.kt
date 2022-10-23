@@ -2,13 +2,13 @@ package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtField
+import com.yandex.daggerlite.lang.compiled.CtFieldBase
 import javax.lang.model.element.VariableElement
 
 internal class JavaxFieldImpl (
     override val owner: JavaxTypeDeclarationImpl,
     private val impl: VariableElement,
-) : CtField(), CtAnnotated by JavaxAnnotatedImpl(impl) {
+) : CtFieldBase(), CtAnnotated by JavaxAnnotatedImpl(impl) {
     override val isStatic: Boolean get() = impl.isStatic
 
     override val isEffectivelyPublic: Boolean

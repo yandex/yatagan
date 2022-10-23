@@ -3,12 +3,12 @@ package com.yandex.daggerlite.lang.ksp
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtMethod
+import com.yandex.daggerlite.lang.compiled.CtMethodBase
 
 internal abstract class KspPropertyAccessorBase<T : KSPropertyAccessor>(
     private val accessor: T,
     final override val isStatic: Boolean,
-) : CtMethod(),
+) : CtMethodBase(),
     // NOTE: We can't use annotations from |property| as they aren't properly accessible from Kapt.
     //  See https://youtrack.jetbrains.com/issue/KT-34684
     CtAnnotated by KspAnnotatedImpl(accessor) {

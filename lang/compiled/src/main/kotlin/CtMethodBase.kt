@@ -11,8 +11,8 @@ import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.common.MethodBase
 import javax.inject.Inject
 
-abstract class CtMethod : MethodBase() {
-    abstract override val annotations: Sequence<CtAnnotation>
+abstract class CtMethodBase : MethodBase() {
+    abstract override val annotations: Sequence<CtAnnotationBase>
 
     override fun <T : BuiltinAnnotation.OnMethod> getAnnotation(
         which: BuiltinAnnotation.Target.OnMethod<T>

@@ -5,7 +5,7 @@ import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.common.ConstructorBase
 import javax.inject.Inject
 
-abstract class CtConstructor : ConstructorBase() {
+abstract class CtConstructorBase : ConstructorBase() {
     override fun <T : BuiltinAnnotation.OnConstructor> getAnnotation(
         which: BuiltinAnnotation.Target.OnConstructor<T>,
     ): T? {

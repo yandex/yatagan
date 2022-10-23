@@ -12,14 +12,14 @@ import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Annotation.Value
 import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.compiled.CtAnnotation
-import com.yandex.daggerlite.lang.compiled.CtAnnotationDeclaration
+import com.yandex.daggerlite.lang.compiled.CtAnnotationBase
+import com.yandex.daggerlite.lang.compiled.CtAnnotationDeclarationBase
 import java.lang.annotation.RetentionPolicy
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspAnnotationImpl(
     private val impl: KSAnnotation,
-) : CtAnnotation() {
+) : CtAnnotationBase() {
     private val descriptor by lazy {
         this@KspAnnotationImpl.toString()
     }
@@ -150,7 +150,7 @@ internal class KspAnnotationImpl(
 
     internal class AnnotationClassImpl private constructor(
         declaration: KSClassDeclaration,
-    ) : CtAnnotationDeclaration() {
+    ) : CtAnnotationDeclarationBase() {
         private val annotated = KspAnnotatedImpl(declaration)
 
         override val annotations: Sequence<Annotation>

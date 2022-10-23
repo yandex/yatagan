@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang.compiled
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
- *  Represents a [com.yandex.daggerlite.lang.compiled.CtType] via its name and type arguments.
+ *  Represents a [com.yandex.daggerlite.lang.compiled.CtTypeBase] via its name and type arguments.
  */
 sealed interface CtTypeNameModel
 
