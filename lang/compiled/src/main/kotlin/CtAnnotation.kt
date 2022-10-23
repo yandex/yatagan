@@ -14,8 +14,8 @@ abstract class CtAnnotation : AnnotationBase() {
         return attributeValue(attribute).accept(AsBoolean)
     }
 
-    fun getTypes(attribute: String): Sequence<Type> {
-        return attributeValue(attribute).accept(AsTypes).asSequence()
+    fun getTypes(attribute: String): List<Type> {
+        return attributeValue(attribute).accept(AsTypes)
     }
 
     fun getType(attribute: String): Type {
@@ -26,8 +26,8 @@ abstract class CtAnnotation : AnnotationBase() {
         return attributeValue(attribute).accept(AsString)
     }
 
-    fun getAnnotations(attribute: String): Sequence<CtAnnotation> {
-        return attributeValue(attribute).accept(AsAnnotations).asSequence()
+    fun getAnnotations(attribute: String): List<CtAnnotation> {
+        return attributeValue(attribute).accept(AsAnnotations)
     }
 
     private fun attributeValue(attribute: String): Value {

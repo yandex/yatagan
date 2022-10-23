@@ -274,8 +274,8 @@ fun Class<*>.boxed(): Class<*> {
     }
 }
 
-@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
-internal inline val <reified A : Annotation> A.javaAnnotationClass: Class<A>
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST", "RemoveRedundantQualifierName")
+internal inline val <reified A : kotlin.Annotation> A.javaAnnotationClass: Class<A>
     get() = (this as java.lang.annotation.Annotation).annotationType() as Class<A>
 
 internal fun Class<*>.getAllFields(): List<ReflectField> = buildList {

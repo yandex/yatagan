@@ -19,7 +19,11 @@ interface Parameter : Annotated {
     val type: Type
 
     /**
-     * [com.yandex.daggerlite.Assisted] annotation model, or `null` if none present.
+     * Obtains framework annotation of the given kind.
+     *
+     * @return the annotation model or `null` if no such annotation is present.
      */
-    val assistedAnnotationIfPresent: AssistedAnnotationLangModel?
+    fun <T : BuiltinAnnotation.OnParameter> getAnnotation(
+        which: BuiltinAnnotation.Target.OnParameter<T>
+    ): T?
 }

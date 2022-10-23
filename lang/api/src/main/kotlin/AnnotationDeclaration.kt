@@ -39,6 +39,15 @@ interface AnnotationDeclaration : Annotated {
     val attributes: Sequence<Attribute>
 
     /**
+     * Obtains framework annotation of the given kind.
+     *
+     * @return the annotation model or `null` if no such annotation is present.
+     */
+    fun <T : BuiltinAnnotation.OnAnnotationClass> getAnnotation(
+        builtinAnnotation: BuiltinAnnotation.Target.OnAnnotationClass<T>
+    ): T?
+
+    /**
      * Computes annotation retention.
      *
      * @return annotation retention in Kotlin terms.

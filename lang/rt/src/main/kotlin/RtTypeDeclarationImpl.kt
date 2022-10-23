@@ -5,9 +5,11 @@ package com.yandex.daggerlite.lang.rt
 import com.yandex.daggerlite.AllConditions
 import com.yandex.daggerlite.AnyCondition
 import com.yandex.daggerlite.AnyConditions
-import com.yandex.daggerlite.Assisted
+import com.yandex.daggerlite.AssistedFactory
+import com.yandex.daggerlite.AssistedInject
 import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.ComponentFlavor
+import com.yandex.daggerlite.ComponentVariantDimension
 import com.yandex.daggerlite.Condition
 import com.yandex.daggerlite.Conditional
 import com.yandex.daggerlite.Conditionals
@@ -18,23 +20,17 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.Annotated
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
-import com.yandex.daggerlite.lang.ComponentAnnotationLangModel
-import com.yandex.daggerlite.lang.ComponentFlavorAnnotationLangModel
-import com.yandex.daggerlite.lang.ConditionLangModel
-import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.common.ConstructorBase
-import com.yandex.daggerlite.lang.common.ParameterBase
 import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
+import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class RtTypeDeclarationImpl private constructor(
@@ -150,31 +146,51 @@ internal class RtTypeDeclarationImpl private constructor(
     override val platformModel: Class<*>
         get() = impl
 
-    //region Annotations
+    override fun <T : BuiltinAnnotation.OnClass> getAnnotation(
+        which: BuiltinAnnotation.Target.OnClass<T>
+    ): T? {
+        val value: BuiltinAnnotation.OnClass? = when (which) {
+            BuiltinAnnotation.AssistedFactory -> (which as BuiltinAnnotation.AssistedFactory)
+                .takeIf { impl.isAnnotationPresent(AssistedFactory::class.java) }
+            BuiltinAnnotation.Module ->
+                impl.getDeclaredAnnotation(Module::class.java)?.let { RtModuleAnnotationImpl(it) }
+            BuiltinAnnotation.Component ->
+                impl.getDeclaredAnnotation(Component::class.java)?.let { RtComponentAnnotationImpl(it) }
+            BuiltinAnnotation.ComponentFlavor ->
+                impl.getDeclaredAnnotation(ComponentFlavor::class.java)?.let { RtComponentFlavorAnnotationImpl(it) }
+            BuiltinAnnotation.ComponentVariantDimension -> (which as BuiltinAnnotation.ComponentVariantDimension)
+                .takeIf {
+                    impl.isAnnotationPresent(ComponentVariantDimension::class.java)
+                }
+            BuiltinAnnotation.Component.Builder -> (which as BuiltinAnnotation.Component.Builder)
+                .takeIf { impl.isAnnotationPresent(Component.Builder::class.java) }
+        }
+        return which.modelClass.cast(value)
+    }
 
-    override val componentAnnotationIfPresent: ComponentAnnotationLangModel?
-        get() = impl.getAnnotation(Component::class.java)?.let { RtComponentAnnotationImpl(it) }
-    override val moduleAnnotationIfPresent: ModuleAnnotationLangModel?
-        get() = impl.getAnnotation(Module::class.java)?.let { RtModuleAnnotationImpl(it) }
-    override val conditions: Sequence<ConditionLangModel>
-        get() = buildList {
-            for (annotation in impl.declaredAnnotations) when (annotation) {
-                is Condition -> add(RtConditionAnnotationImpl(annotation))
-                is AnyCondition -> add(RtAnyConditionAnnotationImpl(annotation))
-                is AllConditions -> for (contained in annotation.value) add(RtConditionAnnotationImpl(contained))
-                is AnyConditions -> for (contained in annotation.value) add(RtAnyConditionAnnotationImpl(contained))
+    override fun <T : BuiltinAnnotation.OnClassRepeatable> getAnnotations(
+        which: BuiltinAnnotation.Target.OnClassRepeatable<T>
+    ): List<T> {
+        return when (which) {
+            BuiltinAnnotation.ConditionFamily -> buildList {
+                for (annotation in impl.declaredAnnotations) when (annotation) {
+                    is Condition -> add(which.modelClass.cast(RtConditionAnnotationImpl(annotation)))
+                    is AnyCondition -> add(which.modelClass.cast(RtAnyConditionAnnotationImpl(annotation)))
+                    is AllConditions -> for (contained in annotation.value)
+                        add(which.modelClass.cast(RtConditionAnnotationImpl(contained)))
+                    is AnyConditions -> for (contained in annotation.value)
+                        add(which.modelClass.cast(RtAnyConditionAnnotationImpl(contained)))
+                }
             }
-        }.asSequence()
-    override val conditionals: Sequence<ConditionalAnnotationLangModel>
-        get() = buildList {
-            for (annotation in impl.declaredAnnotations) when (annotation) {
-                is Conditional -> add(RtConditionalAnnotationImpl(annotation))
-                is Conditionals -> for (contained in annotation.value) add(RtConditionalAnnotationImpl(contained))
+            BuiltinAnnotation.Conditional -> buildList {
+                for (annotation in impl.declaredAnnotations) when (annotation) {
+                    is Conditional -> add(which.modelClass.cast(RtConditionalAnnotationImpl(annotation)))
+                    is Conditionals -> for (contained in annotation.value)
+                        add(which.modelClass.cast(RtConditionalAnnotationImpl(contained)))
+                }
             }
-        }.asSequence()
-    override val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel?
-        get() = impl.getAnnotation(ComponentFlavor::class.java)?.let { RtComponentFlavorAnnotationImpl(it) }
-    //endregion
+        }
+    }
 
     private inner class ConstructorImpl(
         override val platformModel: ReflectConstructor,
@@ -186,25 +202,28 @@ internal class RtTypeDeclarationImpl private constructor(
 
         override val isEffectivelyPublic: Boolean
             get() = platformModel.isPublic
+
         override val parameters: Sequence<Parameter> by lazy {
             Array(platformModel.getParameterCountCompat(), ::ParameterImpl).asSequence()
         }
 
+        override fun <T : BuiltinAnnotation.OnConstructor> getAnnotation(
+            which: BuiltinAnnotation.Target.OnConstructor<T>
+        ): T? {
+            val value: BuiltinAnnotation.OnConstructor? = when(which) {
+                BuiltinAnnotation.AssistedInject -> (which as BuiltinAnnotation.AssistedInject)
+                    .takeIf { platformModel.isAnnotationPresent(AssistedInject::class.java) }
+                BuiltinAnnotation.Inject -> (which as BuiltinAnnotation.Inject)
+                    .takeIf { platformModel.isAnnotationPresent(Inject::class.java) }
+            }
+            return which.modelClass.cast(value)
+        }
+
         private inner class ParameterImpl(
             private val index: Int,
-        ) : ParameterBase() {
-            override val annotations: Sequence<Annotation> by lazy {
-                parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
-            }
-
-            // region Annotations
-
-            override val assistedAnnotationIfPresent: AssistedAnnotationLangModel?
+        ) : RtParameterBase() {
+            override val parameterAnnotations: Array<kotlin.Annotation>
                 get() = parametersAnnotations[index]
-                    .find { it.javaAnnotationClass === Assisted::class.java }
-                    ?.let { RtAssistedAnnotationImpl(it as Assisted) }
-
-            // endregion
 
             override val name: String
                 get() = parametersNames[index]

@@ -1,10 +1,9 @@
 package com.yandex.daggerlite.core.model.impl
 
-import com.yandex.daggerlite.Binds
-import com.yandex.daggerlite.IntoMap
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.model.BindsBindingModel
 import com.yandex.daggerlite.core.model.CollectionTargetKind
+import com.yandex.daggerlite.core.model.ConditionalHoldingModel
 import com.yandex.daggerlite.core.model.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.model.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.daggerlite.core.model.ModuleModel
@@ -13,11 +12,10 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.ProvidesBindingModel
 import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.AnnotationValueVisitorAdapter
-import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.getCollectionType
-import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -37,20 +35,19 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
             BindingTargetModel.Plain(NodeModelImpl.Factory.VoidNode())
         } else {
             val target = NodeModelImpl(type = method.returnType, forQualifier = method)
-            val intoList = method.intoListAnnotationIfPresent
-            val intoSet = method.intoSetAnnotationIfPresent
+            val intoCollection = method.getAnnotations(BuiltinAnnotation.IntoCollectionFamily).firstOrNull()
             when {
-                intoList != null -> computeMultiContributionTarget(
-                    intoCollection = intoList,
+                intoCollection is BuiltinAnnotation.IntoCollectionFamily.IntoList -> computeMultiContributionTarget(
+                    intoCollection = intoCollection,
                     kind = CollectionTargetKind.List,
                 )
 
-                intoSet != null -> computeMultiContributionTarget(
-                    intoCollection = intoSet,
+                intoCollection is BuiltinAnnotation.IntoCollectionFamily.IntoSet -> computeMultiContributionTarget(
+                    intoCollection = intoCollection,
                     kind = CollectionTargetKind.Set,
                 )
 
-                method.isAnnotatedWith<IntoMap>() -> {
+                method.getAnnotation(BuiltinAnnotation.IntoMap) != null -> {
                     val key = method.annotations.find { it.isMapKey() }
                     val annotationClass = key?.annotationClass
                     val valueAttribute = annotationClass?.attributes?.find { it.name == "value" }
@@ -71,7 +68,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
     override fun validate(validator: Validator) {
         validator.child(target.node)
 
-        if (method.intoListAnnotationIfPresent != null && method.intoSetAnnotationIfPresent != null) {
+        if (method.getAnnotations(BuiltinAnnotation.IntoCollectionFamily).size > 1) {
             validator.reportError(Errors.conflictingCollectionBindingAnnotations())
         }
 
@@ -113,7 +110,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
     }
 
     private fun computeMultiContributionTarget(
-        intoCollection: IntoCollectionAnnotationLangModel,
+        intoCollection: BuiltinAnnotation.IntoCollectionFamily,
         kind: CollectionTargetKind,
     ) : BindingTargetModel {
         val target = NodeModelImpl(type = method.returnType, forQualifier = method)
@@ -199,7 +196,7 @@ internal class BindsImpl(
 
     companion object {
         fun canRepresent(method: Method): Boolean {
-            return method.isAnnotatedWith<Binds>()
+            return method.getAnnotation(BuiltinAnnotation.Binds) != null
         }
     }
 }
@@ -211,10 +208,12 @@ internal class ProvidesImpl(
     ModuleHostedBindingBase() {
 
     private val conditionalsModel by lazy {
-        ConditionalHoldingModelImpl(checkNotNull(method.providesAnnotationIfPresent) { "Not reached" }.conditionals)
+        ConditionalHoldingModelImpl(
+            checkNotNull(method.getAnnotation(BuiltinAnnotation.Provides)) { "Not reached" }.conditionals
+        )
     }
 
-    override val conditionals get() = conditionalsModel.conditionals
+    override val conditionals: List<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel> get() = conditionalsModel.conditionals
 
     override val inputs: List<NodeDependency> by lazy(PUBLICATION) {
         method.parameters.map { param ->
@@ -271,7 +270,7 @@ internal class ProvidesImpl(
 
     companion object {
         fun canRepresent(method: Method): Boolean {
-            return method.providesAnnotationIfPresent != null
+            return method.getAnnotation(BuiltinAnnotation.Provides) != null
         }
     }
 }

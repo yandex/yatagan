@@ -82,27 +82,20 @@ interface TypeDeclarationLangModel : Annotated, HasPlatformModel, Accessible,
     fun asType(): Type
 
     /**
-     * [com.yandex.daggerlite.Component] annotation if present.
+     * Obtains framework annotation of the given kind.
+     *
+     * @return the annotation model or `null` if no such annotation is present.
      */
-    val componentAnnotationIfPresent: ComponentAnnotationLangModel?
+    fun <T : BuiltinAnnotation.OnClass> getAnnotation(
+        which: BuiltinAnnotation.Target.OnClass<T>
+    ): T?
 
     /**
-     * [com.yandex.daggerlite.Module] annotation if present.
+     * Obtains framework annotations of the given class.
+     *
+     * @return the list of repeatable annotations or an empty list if no such annotations are present.
      */
-    val moduleAnnotationIfPresent: ModuleAnnotationLangModel?
-
-    /**
-     * Aggregated [com.yandex.daggerlite.Condition], ... etc. annotations.
-     */
-    val conditions: Sequence<ConditionLangModel>
-
-    /**
-     * [com.yandex.daggerlite.Conditional] annotations. If none present, the sequence is empty.
-     */
-    val conditionals: Sequence<ConditionalAnnotationLangModel>
-
-    /**
-     * [com.yandex.daggerlite.ComponentFlavor] annotation if present.
-     */
-    val componentFlavorIfPresent: ComponentFlavorAnnotationLangModel?
+    fun <T : BuiltinAnnotation.OnClassRepeatable> getAnnotations(
+        which: BuiltinAnnotation.Target.OnClassRepeatable<T>
+    ): List<T>
 }

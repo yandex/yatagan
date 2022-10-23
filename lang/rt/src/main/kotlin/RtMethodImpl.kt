@@ -1,18 +1,18 @@
 package com.yandex.daggerlite.lang.rt
 
-import com.yandex.daggerlite.Assisted
+import com.yandex.daggerlite.Binds
+import com.yandex.daggerlite.BindsInstance
 import com.yandex.daggerlite.IntoList
+import com.yandex.daggerlite.IntoMap
 import com.yandex.daggerlite.IntoSet
+import com.yandex.daggerlite.Multibinds
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.lang.Annotated
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
-import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Parameter
-import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.MethodBase
-import com.yandex.daggerlite.lang.common.ParameterBase
+import javax.inject.Inject
 
 internal class RtMethodImpl(
     private val impl: ReflectMethod,
@@ -47,25 +47,47 @@ internal class RtMethodImpl(
 
     override val platformModel: ReflectMethod get() = impl
 
-    //region Annotations
+    override fun <T : BuiltinAnnotation.OnMethod> getAnnotation(
+        which: BuiltinAnnotation.Target.OnMethod<T>,
+    ): T? {
+        val annotation: BuiltinAnnotation.OnMethod? = when (which) {
+            BuiltinAnnotation.Binds -> (which as BuiltinAnnotation.Binds)
+                .takeIf { impl.isAnnotationPresent(Binds::class.java) }
+            BuiltinAnnotation.BindsInstance -> (which as BuiltinAnnotation.BindsInstance)
+                .takeIf { impl.isAnnotationPresent(BindsInstance::class.java) }
+            BuiltinAnnotation.Provides ->
+                impl.getAnnotation(Provides::class.java)?.let { RtProvidesAnnotationImpl(it) }
+            BuiltinAnnotation.IntoMap -> (which as BuiltinAnnotation.IntoMap)
+                .takeIf { impl.isAnnotationPresent(IntoMap::class.java) }
+            BuiltinAnnotation.Multibinds -> (which as BuiltinAnnotation.Multibinds)
+                .takeIf { impl.isAnnotationPresent(Multibinds::class.java) }
+            BuiltinAnnotation.Inject -> (which as BuiltinAnnotation.Inject)
+                .takeIf { impl.isAnnotationPresent(Inject::class.java) }
+        }
+        return which.modelClass.cast(annotation)
+    }
 
-    override val providesAnnotationIfPresent: ProvidesAnnotationLangModel?
-        get() = impl.getAnnotation(Provides::class.java)?.let { RtProvidesAnnotationImpl(it) }
-
-    override val intoListAnnotationIfPresent: IntoCollectionAnnotationLangModel?
-        get() = impl.getAnnotation(IntoList::class.java)?.let { RtIntoListAnnotationImpl(it) }
-
-    override val intoSetAnnotationIfPresent: IntoCollectionAnnotationLangModel?
-        get() = impl.getAnnotation(IntoSet::class.java)?.let { RtIntoSetAnnotationImpl(it) }
-
-    //endregion
+    override fun <T : BuiltinAnnotation.OnMethodRepeatable> getAnnotations(
+        which: BuiltinAnnotation.Target.OnMethodRepeatable<T>,
+    ): List<T> {
+        return when (which) {
+            BuiltinAnnotation.IntoCollectionFamily -> {
+                impl.declaredAnnotations.mapNotNull {
+                    when (it) {
+                        is IntoList -> which.modelClass.cast(RtIntoListAnnotationImpl(it))
+                        is IntoSet -> which.modelClass.cast(RtIntoSetAnnotationImpl(it))
+                        else -> null
+                    }
+                }
+            }
+        }
+    }
 
     private inner class ParameterImpl(
         val index: Int,
-    ) : ParameterBase() {
-        override val annotations: Sequence<Annotation> by lazy {
-            parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
-        }
+    ) : RtParameterBase() {
+        override val parameterAnnotations: Array<kotlin.Annotation>
+            get() = parametersAnnotations[index]
 
         override val name: String
             get() = parameterNames[index]
@@ -76,14 +98,5 @@ internal class RtMethodImpl(
                 asMemberOf = owner,
             ))
         }
-
-        // region Annotations
-
-        override val assistedAnnotationIfPresent: AssistedAnnotationLangModel?
-            get() = parametersAnnotations[index]
-                .find { it.javaAnnotationClass === Assisted::class.java }
-                ?.let { RtAssistedAnnotationImpl(it as Assisted) }
-
-        // endregion
     }
 }

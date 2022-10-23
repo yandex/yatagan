@@ -12,8 +12,8 @@ import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.lang.Annotation.Value
 import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotation
+import com.yandex.daggerlite.lang.compiled.CtAnnotationDeclaration
 import java.lang.annotation.RetentionPolicy
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
@@ -150,7 +150,7 @@ internal class KspAnnotationImpl(
 
     internal class AnnotationClassImpl private constructor(
         declaration: KSClassDeclaration,
-    ) : AnnotationDeclarationBase() {
+    ) : CtAnnotationDeclaration() {
         private val annotated = KspAnnotatedImpl(declaration)
 
         override val annotations: Sequence<Annotation>

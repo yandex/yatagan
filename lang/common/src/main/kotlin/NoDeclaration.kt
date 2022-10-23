@@ -1,5 +1,6 @@
 package com.yandex.daggerlite.lang.common
 
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
@@ -20,15 +21,10 @@ class NoDeclaration(
     override val methods get() = emptySequence<Nothing>()
     override val fields get() = emptySequence<Nothing>()
     override val nestedClasses get() = emptySequence<Nothing>()
-    override val conditions get() = emptySequence<Nothing>()
-    override val conditionals get() = emptySequence<Nothing>()
 
     override val superType: Nothing? get() = null
     override val defaultCompanionObjectDeclaration: Nothing? get() = null
     override val enclosingType: Nothing? get() = null
-    override val componentAnnotationIfPresent: Nothing? get() = null
-    override val moduleAnnotationIfPresent: Nothing? get() = null
-    override val componentFlavorIfPresent: Nothing? get() = null
     override val platformModel: Nothing? get() = null
 
     override val kind: TypeDeclarationKind
@@ -36,6 +32,14 @@ class NoDeclaration(
 
     override val qualifiedName: String
         get() = type.toString()
+
+    override fun <T : BuiltinAnnotation.OnClass> getAnnotation(
+        which: BuiltinAnnotation.Target.OnClass<T>
+    ): Nothing? = null
+
+    override fun <T : BuiltinAnnotation.OnClassRepeatable> getAnnotations(
+        which: BuiltinAnnotation.Target.OnClassRepeatable<T>
+    ): List<T> = emptyList()
 
     override fun asType(): Type = type
 

@@ -1,14 +1,10 @@
-@file:OptIn(VariantApi::class)
-
 package com.yandex.daggerlite.core.model.impl
 
-import com.yandex.daggerlite.ComponentVariantDimension
-import com.yandex.daggerlite.VariantApi
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.Variant
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -21,7 +17,7 @@ internal class DimensionImpl private constructor(
 ) : Variant.DimensionModel {
 
     override fun validate(validator: Validator) {
-        if (!type.declaration.isAnnotatedWith<ComponentVariantDimension>()) {
+        if (type.declaration.getAnnotation(BuiltinAnnotation.ComponentVariantDimension) == null) {
             validator.reportError(Strings.Errors.nonComponentVariantDimension())
         }
     }

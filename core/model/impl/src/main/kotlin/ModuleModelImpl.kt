@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.core.model.impl
 
-import com.yandex.daggerlite.Multibinds
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.core.model.BindsBindingModel
@@ -9,10 +8,10 @@ import com.yandex.daggerlite.core.model.ModuleHostedBindingModel
 import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.MultiBindingDeclarationModel
 import com.yandex.daggerlite.core.model.ProvidesBindingModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.functionsWithCompanion
-import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -24,7 +23,7 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 internal class ModuleModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
 ) : ModuleModel {
-    private val impl = declaration.moduleAnnotationIfPresent
+    private val impl = declaration.getAnnotation(BuiltinAnnotation.Module)
 
     override val type: Type
         get() = declaration.asType()
@@ -39,7 +38,7 @@ internal class ModuleModelImpl private constructor(
 
     override val multiBindingDeclarations: Sequence<MultiBindingDeclarationModel> =
         declaration.methods
-            .filter { it.isAnnotatedWith<Multibinds>() }
+            .filter { it.getAnnotation(BuiltinAnnotation.Multibinds) != null }
             .map { method ->
                 when {
                     CollectionDeclarationImpl.canRepresent(method) -> CollectionDeclarationImpl(method)
@@ -105,7 +104,7 @@ internal class ModuleModelImpl private constructor(
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ModuleModelImpl)
 
         fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
-            return declaration.moduleAnnotationIfPresent != null
+            return declaration.getAnnotation(BuiltinAnnotation.Module) != null
         }
     }
 }

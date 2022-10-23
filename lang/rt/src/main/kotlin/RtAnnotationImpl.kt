@@ -1,12 +1,16 @@
 package com.yandex.daggerlite.lang.rt
 
+import com.yandex.daggerlite.IntoMap
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation.Value
 import com.yandex.daggerlite.lang.AnnotationDeclaration
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
 import com.yandex.daggerlite.lang.common.AnnotationBase
+import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
+import javax.inject.Qualifier
+import javax.inject.Scope
 
 internal class RtAnnotationImpl(
     private val impl: Annotation,
@@ -92,6 +96,21 @@ internal class RtAnnotationImpl(
 
         override val qualifiedName: String
             get() = impl.canonicalName
+
+        override fun <T : BuiltinAnnotation.OnAnnotationClass> getAnnotation(
+            builtinAnnotation: BuiltinAnnotation.Target.OnAnnotationClass<T>
+        ): T? {
+            val annotation: BuiltinAnnotation.OnAnnotationClass? = when(builtinAnnotation) {
+                BuiltinAnnotation.IntoMap.Key -> (builtinAnnotation as BuiltinAnnotation.IntoMap.Key)
+                    .takeIf { impl.isAnnotationPresent(IntoMap.Key::class.java) }
+                BuiltinAnnotation.Qualifier -> (builtinAnnotation as BuiltinAnnotation.Qualifier)
+                    .takeIf { impl.isAnnotationPresent(Qualifier::class.java) }
+                BuiltinAnnotation.Scope -> (builtinAnnotation as BuiltinAnnotation.Scope)
+                    .takeIf { impl.isAnnotationPresent(Scope::class.java) }
+            }
+
+            return builtinAnnotation.modelClass.cast(annotation)
+        }
 
         override fun getRetention(): AnnotationRetention = AnnotationRetention.RUNTIME
 

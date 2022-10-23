@@ -5,10 +5,6 @@ package com.yandex.daggerlite.lang
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-inline fun <reified A : kotlin.Annotation> Annotated.isAnnotatedWith() = isAnnotatedWith(A::class.java)
-
-inline fun <reified A : kotlin.Annotation> Annotation.hasType() = annotationClass.isClass(A::class.java)
-
 val TypeDeclarationLangModel.isKotlinObject get() = when(kind) {
     TypeDeclarationKind.KotlinObject, TypeDeclarationKind.KotlinCompanion -> true
     else -> false

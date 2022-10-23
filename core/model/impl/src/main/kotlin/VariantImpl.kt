@@ -16,7 +16,7 @@ import com.yandex.daggerlite.validation.format.reportError
 internal class VariantImpl private constructor(
     private val parts: Map<DimensionModel, List<FlavorModel>>,
 ) : Variant {
-    constructor(flavors: Sequence<Type>)
+    constructor(flavors: List<Type>)
             : this(flavors.map { FlavorImpl(it) }.groupBy(FlavorImpl::dimension))
 
     override fun plus(variant: Variant?): Variant {

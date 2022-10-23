@@ -4,10 +4,10 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.MembersInjectorModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -15,7 +15,6 @@ import com.yandex.daggerlite.validation.format.appendChildContextReference
 import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 import com.yandex.daggerlite.validation.format.reportMandatoryWarning
-import javax.inject.Inject
 
 internal class MembersInjectorModelImpl private constructor(
     override val injector: Method,
@@ -29,7 +28,7 @@ internal class MembersInjectorModelImpl private constructor(
     override val membersToInject: Map<Member, NodeDependency> by lazy {
         buildMap {
             injectee.declaration.fields.filter {
-                it.isAnnotatedWith<Inject>()
+                it.getAnnotation(BuiltinAnnotation.Inject) != null
             }.forEach { fieldInjectee ->
                 put(fieldInjectee, NodeDependency(
                     type = fieldInjectee.type,
@@ -37,7 +36,7 @@ internal class MembersInjectorModelImpl private constructor(
                 ))
             }
             injectee.declaration.methods.filter {
-                it.isAnnotatedWith<Inject>()
+                it.getAnnotation(BuiltinAnnotation.Inject) != null
             }.forEach { functionInjectee ->
                 put(functionInjectee, NodeDependency(
                     type = functionInjectee.parameters.single().type,

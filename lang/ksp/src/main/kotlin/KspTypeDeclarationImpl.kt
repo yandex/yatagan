@@ -26,9 +26,9 @@ import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.common.ConstructorBase
-import com.yandex.daggerlite.lang.common.FieldBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotation
+import com.yandex.daggerlite.lang.compiled.CtConstructor
+import com.yandex.daggerlite.lang.compiled.CtField
 import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
@@ -377,7 +377,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: KSFunctionDeclaration,
-    ) : ConstructorBase(), Annotated by KspAnnotatedImpl(platformModel) {
+    ) : CtConstructor(), Annotated by KspAnnotatedImpl(platformModel) {
         private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean
@@ -403,7 +403,7 @@ internal class KspTypeDeclarationImpl private constructor(
         override val owner: TypeDeclarationLangModel,
         override val type: Type = owner.asType(),
         override val name: String,
-    ) : FieldBase() {
+    ) : CtField() {
         override val isEffectivelyPublic: Boolean get() = true
         override val annotations: Sequence<Nothing> get() = emptySequence()
         override val platformModel: Any? get() = null

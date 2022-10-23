@@ -13,6 +13,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.lang.Annotation
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
@@ -28,13 +29,13 @@ import com.yandex.daggerlite.validation.format.reportError
 internal class ComponentModelImpl private constructor(
     private val declaration: TypeDeclarationLangModel,
 ) : ComponentModel, ConditionalHoldingModel {
-    private val impl = declaration.componentAnnotationIfPresent
+    private val impl = declaration.getAnnotation(BuiltinAnnotation.Component)
 
     private val conditionalsModel by lazy {
-        ConditionalHoldingModelImpl(declaration.conditionals)
+        ConditionalHoldingModelImpl(declaration.getAnnotations(BuiltinAnnotation.Conditional))
     }
 
-    override val conditionals
+    override val conditionals: List<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
         get() = conditionalsModel.conditionals
 
     override val type: Type
@@ -128,7 +129,7 @@ internal class ComponentModelImpl private constructor(
         get() = impl?.multiThreadAccess ?: false
 
     override val variant: Variant by lazy {
-        VariantImpl(impl?.variant ?: emptySequence())
+        VariantImpl(impl?.variant ?: emptyList())
     }
 
     override fun validate(validator: Validator) {
@@ -201,7 +202,7 @@ internal class ComponentModelImpl private constructor(
         operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)
 
         fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
-            return declaration.componentAnnotationIfPresent != null
+            return declaration.getAnnotation(BuiltinAnnotation.Component) != null
         }
     }
 }

@@ -2,10 +2,6 @@ package com.yandex.daggerlite.lang
 
 /**
  * Models annotation instance of any class.
- * Suits for modeling annotation of user-defined types or framework annotations, that have no attributes.
- *
- * This interface doesn't expose annotation attributes; to be able to get that, use class-specific annotation model,
- * e. g. [ComponentAnnotationLangModel], ... .
  */
 interface Annotation : HasPlatformModel {
     /**
@@ -19,10 +15,10 @@ interface Annotation : HasPlatformModel {
      * Please note, that using this method for obtaining attributes values is only justified for user-defined
      * annotations, whose definition is unknown to the framework.
      * For framework annotations use corresponding concrete annotation models, that may optimize the way they obtain
-     *  the attributes, like e.g. [ComponentAnnotationLangModel], [ModuleAnnotationLangModel], ...
+     *  the attributes, like e.g. [BuiltinAnnotation.Component], [BuiltinAnnotation.Module], ...
      *
      * @param attribute one of this model's [annotationClass]'s [attributes][AnnotationDeclaration.attributes].
-     *  Otherwise behaviour is undefined.
+     *  Otherwise, behaviour is undefined.
      */
     fun getValue(attribute: AnnotationDeclaration.Attribute): Value
 

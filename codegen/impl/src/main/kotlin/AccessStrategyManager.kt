@@ -9,7 +9,6 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.core.model.isNever
-import javax.inject.Provider
 
 internal class AccessStrategyManager(
     private val thisGraph: BindingGraph,

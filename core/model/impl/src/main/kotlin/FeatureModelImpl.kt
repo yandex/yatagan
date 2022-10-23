@@ -5,8 +5,7 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.ConditionModel
 import com.yandex.daggerlite.core.model.ConditionScope
 import com.yandex.daggerlite.core.model.ConditionalHoldingModel
-import com.yandex.daggerlite.lang.AnyConditionAnnotationLangModel
-import com.yandex.daggerlite.lang.ConditionAnnotationLangModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Member
@@ -33,19 +32,19 @@ internal class FeatureModelImpl private constructor(
     private val impl: TypeDeclarationLangModel,
 ) : ConditionalHoldingModel.FeatureModel {
     override val conditionScope: ConditionScope by lazy {
-        ConditionScope(impl.conditions.map { conditionModel ->
+        ConditionScope(impl.getAnnotations(BuiltinAnnotation.ConditionFamily).map { conditionModel ->
             when (conditionModel) {
-                is AnyConditionAnnotationLangModel ->
+                is BuiltinAnnotation.ConditionFamily.Any ->
                     conditionModel.conditions.map { ConditionLiteralImpl(it) }.toSet()
 
-                is ConditionAnnotationLangModel ->
+                is BuiltinAnnotation.ConditionFamily.One ->
                     setOf(ConditionLiteralImpl(conditionModel))
             }
         }.toSet())
     }
 
     override fun validate(validator: Validator) {
-        if (impl.conditions.none()) {
+        if (impl.getAnnotations(BuiltinAnnotation.ConditionFamily).none()) {
             // TODO: Forbid Never-scope/Always-scope.
             validator.reportError(Strings.Errors.noConditionsOnFeature())
         }
@@ -113,7 +112,7 @@ private class ConditionLiteralImpl private constructor(
     }
 
     companion object Factory : BiObjectCache<Boolean, LiteralPayload, ConditionLiteralImpl>() {
-        operator fun invoke(model: ConditionAnnotationLangModel): ConditionModel {
+        operator fun invoke(model: BuiltinAnnotation.ConditionFamily.One): ConditionModel {
             val condition = model.condition
             return ConditionRegex.matchEntire(condition)?.let { matched ->
                 val (negate, names) = matched.destructured

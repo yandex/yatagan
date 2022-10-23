@@ -7,19 +7,19 @@ import javax.lang.model.element.TypeElement
 
 class JavaxModelFactoryImpl : LangModelFactory {
     private val listElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(java.util.List::class.java.canonicalName)
+        Utils.elements.getTypeElement("java.util.List")
     }
     private val setElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(java.util.Set::class.java.canonicalName)
+        Utils.elements.getTypeElement("java.util.Set")
     }
     private val collectionElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(java.util.Collection::class.java.canonicalName)
+        Utils.elements.getTypeElement("java.util.Collection")
     }
     private val mapElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(java.util.Map::class.java.canonicalName)
+        Utils.elements.getTypeElement("java.util.Map")
     }
     private val providerElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(javax.inject.Provider::class.java.canonicalName)
+        Utils.elements.getTypeElement("javax.inject.Provider")
     }
 
     override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {

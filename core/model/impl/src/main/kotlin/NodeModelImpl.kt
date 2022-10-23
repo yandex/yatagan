@@ -9,13 +9,13 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.getListType
 import com.yandex.daggerlite.lang.getProviderType
 import com.yandex.daggerlite.lang.getSetType
-import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -26,7 +26,6 @@ import com.yandex.daggerlite.validation.format.appendRichString
 import com.yandex.daggerlite.validation.format.buildRichString
 import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
-import javax.inject.Inject
 
 internal class NodeModelImpl private constructor(
     override val type: Type,
@@ -43,14 +42,14 @@ internal class NodeModelImpl private constructor(
         override val constructor: Constructor,
     ) : InjectConstructorModel, ConditionalHoldingModel {
         init {
-            assert(constructor.isAnnotatedWith<Inject>())
+            assert(constructor.getAnnotation(BuiltinAnnotation.Inject) != null)
         }
 
         private val conditionalModel by lazy {
-            ConditionalHoldingModelImpl(constructor.constructee.conditionals)
+            ConditionalHoldingModelImpl(constructor.constructee.getAnnotations(BuiltinAnnotation.Conditional))
         }
 
-        override val conditionals: Sequence<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
+        override val conditionals: List<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
             get() = conditionalModel.conditionals
 
         override val inputs: List<NodeDependency> by lazy {
@@ -147,7 +146,7 @@ internal class NodeModelImpl private constructor(
     override fun getSpecificModel(): HasNodeModel? {
         val declaration = type.declaration
         val inject = if (qualifier == null) {
-            declaration.constructors.find { it.isAnnotatedWith<Inject>() }
+            declaration.constructors.find { it.getAnnotation(BuiltinAnnotation.Inject) != null }
         } else null
         return when {
             inject != null -> InjectConstructorImpl(inject)

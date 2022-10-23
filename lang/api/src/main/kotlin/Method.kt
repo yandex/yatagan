@@ -18,17 +18,20 @@ interface Method : Member, Callable, Comparable<Method> {
     val returnType: Type
 
     /**
-     * [com.yandex.daggerlite.Provides] annotation model if present. `null` if absent.
+     * Obtains framework annotation of the given kind.
+     *
+     * @return the annotation model or `null` if no such annotation is present.
      */
-    val providesAnnotationIfPresent: ProvidesAnnotationLangModel?
+    fun <T : BuiltinAnnotation.OnMethod> getAnnotation(
+        which: BuiltinAnnotation.Target.OnMethod<T>
+    ): T?
 
     /**
-     * [com.yandex.daggerlite.IntoList] annotation model if present. `null` if absent.
+     * Obtains framework annotations of the given class.
+     *
+     * @return the list of repeatable annotations or an empty list if no such annotations are present.
      */
-    val intoListAnnotationIfPresent: IntoCollectionAnnotationLangModel?
-
-    /**
-     * [com.yandex.daggerlite.IntoSet] annotation model if present. `null` if absent.
-     */
-    val intoSetAnnotationIfPresent: IntoCollectionAnnotationLangModel?
+    fun <T : BuiltinAnnotation.OnMethodRepeatable> getAnnotations(
+        which: BuiltinAnnotation.Target.OnMethodRepeatable<T>
+    ): List<T>
 }

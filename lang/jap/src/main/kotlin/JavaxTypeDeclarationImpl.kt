@@ -11,8 +11,8 @@ import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.common.ConstructorBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotated
+import com.yandex.daggerlite.lang.compiled.CtConstructor
 import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -187,7 +187,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: ExecutableElement,
-    ) : ConstructorBase(), Annotated by JavaxAnnotatedImpl(platformModel) {
+    ) : CtConstructor(), Annotated by JavaxAnnotatedImpl(platformModel) {
         override val isEffectivelyPublic: Boolean get() = platformModel.isPublic
         override val constructee: TypeDeclarationLangModel get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<Parameter> = parametersSequenceFor(platformModel, type)

@@ -6,8 +6,8 @@ import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation.Value
 import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotation
+import com.yandex.daggerlite.lang.compiled.CtAnnotationDeclaration
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ExecutableElement
@@ -104,7 +104,7 @@ internal class JavaxAnnotationImpl private constructor(
 
     private class AnnotationClassImpl private constructor(
         private val impl: TypeElement,
-    ) : AnnotationDeclarationBase(), Annotated by JavaxAnnotatedImpl(impl) {
+    ) : CtAnnotationDeclaration(), Annotated by JavaxAnnotatedImpl(impl) {
 
         override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             ElementFilter.methodsIn(impl.enclosedElements)

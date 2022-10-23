@@ -2,6 +2,7 @@ package com.yandex.daggerlite.core.model.impl
 
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.Variant
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -18,12 +19,13 @@ internal class FlavorImpl private constructor(
 ) : Variant.FlavorModel {
 
     override val dimension: Variant.DimensionModel =
-        type.declaration.componentFlavorIfPresent?.dimension?.let { DimensionImpl(it) } ?: MissingDimension(this)
+        type.declaration.getAnnotation(BuiltinAnnotation.ComponentFlavor)
+            ?.dimension?.let { DimensionImpl(it) } ?: MissingDimension(this)
 
     override fun validate(validator: Validator) {
         validator.child(dimension)
 
-        if (type.declaration.componentFlavorIfPresent == null) {
+        if (type.declaration.getAnnotation(BuiltinAnnotation.ComponentFlavor) == null) {
             validator.reportError(Strings.Errors.nonFlavor())
         }
     }

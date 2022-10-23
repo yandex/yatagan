@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.core.model.impl
 
-import com.yandex.daggerlite.IntoMap
 import com.yandex.daggerlite.core.model.DependencyKind
 import com.yandex.daggerlite.core.model.DependencyKind.Direct
 import com.yandex.daggerlite.core.model.DependencyKind.Lazy
@@ -12,16 +11,14 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.Annotated
 import com.yandex.daggerlite.lang.Annotation
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.TextColor
 import com.yandex.daggerlite.validation.format.append
 import com.yandex.daggerlite.validation.format.appendRichString
 import com.yandex.daggerlite.validation.format.buildRichString
-import javax.inject.Qualifier
-import javax.inject.Scope
 
 internal fun NodeDependency(
     type: Type,
@@ -60,9 +57,9 @@ internal fun isFrameworkType(type: Type) = when (type.declaration.qualifiedName)
 }
 
 internal object Names {
-    val Lazy: String = com.yandex.daggerlite.Lazy::class.qualifiedName!!
-    val Provider: String = javax.inject.Provider::class.qualifiedName!!
-    val Optional: String = com.yandex.daggerlite.Optional::class.qualifiedName!!
+    const val Lazy: String = "com.yandex.daggerlite.Lazy"
+    const val Provider: String = "javax.inject.Provider"
+    const val Optional: String = "com.yandex.daggerlite.Optional"
 
     const val List: String = "java.util.List"
     const val Set: String = "java.util.Set"
@@ -85,8 +82,8 @@ internal data class NodeDependencyImpl(
     override fun copyDependency(node: NodeModel, kind: DependencyKind) = copy(node = node, kind = kind)
 }
 
-internal fun Annotation.isScope() = annotationClass.isAnnotatedWith<Scope>()
+internal fun Annotation.isScope() = annotationClass.getAnnotation(BuiltinAnnotation.Scope) != null
 
-internal fun Annotation.isQualifier() = annotationClass.isAnnotatedWith<Qualifier>()
+internal fun Annotation.isQualifier() = annotationClass.getAnnotation(BuiltinAnnotation.Qualifier) != null
 
-internal fun Annotation.isMapKey() = annotationClass.isAnnotatedWith<IntoMap.Key>()
+internal fun Annotation.isMapKey() = annotationClass.getAnnotation(BuiltinAnnotation.IntoMap.Key) != null
