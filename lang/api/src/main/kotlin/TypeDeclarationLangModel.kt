@@ -63,7 +63,7 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     /**
      * All non-private declared fields (including static and inherited).
      */
-    val fields: Sequence<FieldLangModel>
+    val fields: Sequence<Field>
 
     /**
      * Nested non-private classes that are declared inside this declaration.

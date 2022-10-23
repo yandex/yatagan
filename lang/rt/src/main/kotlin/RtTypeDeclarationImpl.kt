@@ -25,7 +25,7 @@ import com.yandex.daggerlite.lang.ComponentFlavorAnnotationLangModel
 import com.yandex.daggerlite.lang.ConditionLangModel
 import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.lang.Parameter
@@ -122,7 +122,7 @@ internal class RtTypeDeclarationImpl private constructor(
             }.memoize()
     }
 
-    override val fields: Sequence<FieldLangModel> by lazy {
+    override val fields: Sequence<Field> by lazy {
         impl.getAllFields()
             .asSequence()
             .filter { !it.isPrivate }

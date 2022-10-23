@@ -20,14 +20,14 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
-import com.yandex.daggerlite.lang.common.FieldLangModelBase
+import com.yandex.daggerlite.lang.common.FieldBase
 import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
 import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
 import kotlin.LazyThreadSafetyMode.PUBLICATION
@@ -209,11 +209,11 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    private suspend fun SequenceScope<FieldLangModel>.yieldInheritedFields() {
+    private suspend fun SequenceScope<Field>.yieldInheritedFields() {
         val declared = impl.getDeclaredProperties().toSet()
 
         // We can't use `getAllProperties()` here, as it doesn't handle Java's "shadowed" fields properly.
-        suspend fun SequenceScope<FieldLangModel>.includeFieldsFrom(type: KSType) {
+        suspend fun SequenceScope<Field>.includeFieldsFrom(type: KSType) {
             val clazz = type.declaration as? KSClassDeclaration ?: return
             clazz.getDeclaredProperties()
                 .filter {
@@ -236,7 +236,7 @@ internal class KspTypeDeclarationImpl private constructor(
         includeFieldsFrom(type.impl)
     }
 
-    override val fields: Sequence<FieldLangModel> = run {
+    override val fields: Sequence<Field> = run {
         sequence {
             when (kind) {
                 TypeDeclarationKind.KotlinObject -> {
@@ -403,7 +403,7 @@ internal class KspTypeDeclarationImpl private constructor(
         override val owner: TypeDeclarationLangModel,
         override val type: Type = owner.asType(),
         override val name: String,
-    ) : FieldLangModelBase() {
+    ) : FieldBase() {
         override val isEffectivelyPublic: Boolean get() = true
         override val annotations: Sequence<Nothing> get() = emptySequence()
         override val platformModel: Any? get() = null

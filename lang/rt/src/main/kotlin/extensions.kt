@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 
@@ -16,7 +16,7 @@ fun ReflectMethod.signatureEquivalence() = MethodSignatureEquivalenceWrapper(thi
 val Method.rt
     get() = platformModel as ReflectMethod
 
-val FieldLangModel.rt
+val Field.rt
     get() = platformModel as ReflectField
 
 val TypeDeclarationLangModel.rt

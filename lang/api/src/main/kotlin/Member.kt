@@ -21,7 +21,7 @@ interface Member : AnnotatedLangModel, HasPlatformModel, Accessible {
 
     interface Visitor<R> {
         fun visitMethod(model: Method): R
-        fun visitField(model: FieldLangModel): R
+        fun visitField(model: Field): R
     }
 
     fun <R> accept(visitor: Visitor<R>): R

@@ -4,14 +4,14 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.FieldLangModelBase
+import com.yandex.daggerlite.lang.common.FieldBase
 
 internal class KspFieldImpl(
     private val impl: KSPropertyDeclaration,
     override val owner: KspTypeDeclarationImpl,
     override val isStatic: Boolean,
     private val refinedOwner: KSType? = null,
-) : FieldLangModelBase(), AnnotatedLangModel by KspAnnotatedImpl(impl) {
+) : FieldBase(), AnnotatedLangModel by KspAnnotatedImpl(impl) {
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()

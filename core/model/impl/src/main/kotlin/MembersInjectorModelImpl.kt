@@ -4,7 +4,7 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.MembersInjectorModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.isAnnotatedWith
@@ -93,7 +93,7 @@ internal class MembersInjectorModelImpl private constructor(
 
         private object IsField : Member.Visitor<Boolean> {
             override fun visitMethod(model: Method) = false
-            override fun visitField(model: FieldLangModel) = true
+            override fun visitField(model: Field) = true
         }
     }
 }

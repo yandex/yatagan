@@ -33,7 +33,7 @@ import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.lang.CallableLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.isKotlinObject
@@ -293,7 +293,7 @@ internal class RuntimeComponent(
 
     private class MemberEvaluator(private val instance: Any?) : Member.Visitor<Any?> {
         override fun visitMethod(model: Method): Any? = model.rt.invoke(instance)
-        override fun visitField(model: FieldLangModel): Any? = model.rt.get(instance)
+        override fun visitField(model: Field): Any? = model.rt.get(instance)
     }
 
     private inner class ProvisionEvaluator(val binding: ProvisionBinding) : CallableLangModel.Visitor<Any?> {
@@ -335,7 +335,7 @@ internal class RuntimeComponent(
             for ((member, dependency) in memberInject.membersToInject) {
                 val value = resolveAndAccess(dependency)
                 member.accept(object : Member.Visitor<Unit> {
-                    override fun visitField(model: FieldLangModel) = model.rt.set(injectee, value)
+                    override fun visitField(model: Field) = model.rt.set(injectee, value)
                     override fun visitMethod(model: Method) {
                         model.rt.invoke(injectee, value)
                     }

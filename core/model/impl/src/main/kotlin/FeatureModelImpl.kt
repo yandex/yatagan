@@ -7,7 +7,7 @@ import com.yandex.daggerlite.core.model.ConditionScope
 import com.yandex.daggerlite.core.model.ConditionalHoldingModel
 import com.yandex.daggerlite.lang.AnyConditionAnnotationLangModel
 import com.yandex.daggerlite.lang.ConditionAnnotationLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Member
 import com.yandex.daggerlite.lang.Method
@@ -160,7 +160,7 @@ private interface LiteralPayload : MayBeInvalid {
 
 private object MemberTypeVisitor : Member.Visitor<Type> {
     override fun visitMethod(model: Method) = model.returnType
-    override fun visitField(model: FieldLangModel) = model.type
+    override fun visitField(model: Field) = model.type
 }
 
 private typealias ValidationReport = (Validator) -> Unit

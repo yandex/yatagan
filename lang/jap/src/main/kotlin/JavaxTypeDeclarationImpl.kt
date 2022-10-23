@@ -5,7 +5,7 @@ import com.yandex.daggerlite.base.mapToArray
 import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
+import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
@@ -104,7 +104,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    override val fields: Sequence<FieldLangModel> by lazy {
+    override val fields: Sequence<Field> by lazy {
         impl.allNonPrivateFields()
         .map { JavaxFieldImpl(owner = this, impl = it) }
         .memoize()
