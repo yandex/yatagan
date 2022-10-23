@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.lang.jap
 
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
 import com.yandex.daggerlite.lang.compiled.CtFunctionLangModel
@@ -23,7 +23,7 @@ internal class JavaxFunctionImpl (
     }
     override val name: String get() = impl.simpleName.toString()
 
-    override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(impl, owner.type)
+    override val parameters: Sequence<Parameter> = parametersSequenceFor(impl, owner.type)
 
     override val platformModel: ExecutableElement get() = impl
 }

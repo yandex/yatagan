@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSPropertyGetter
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 
 internal class KspFunctionPropertyGetterImpl(
@@ -30,7 +30,7 @@ internal class KspFunctionPropertyGetterImpl(
         }
     }
 
-    override val parameters: Sequence<ParameterLangModel> = emptySequence()
+    override val parameters: Sequence<Parameter> = emptySequence()
 
     override val platformModel: Any?
         get() = null

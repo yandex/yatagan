@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSPropertySetter
 import com.google.devtools.ksp.symbol.Modifier
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 
 internal class KspFunctionPropertySetterImpl(
@@ -23,7 +23,7 @@ internal class KspFunctionPropertySetterImpl(
         Utils.resolver.getJvmName(setter) ?: "set${property.simpleName.asString().capitalize()}"
     }
 
-    override val parameters: Sequence<ParameterLangModel> = sequence {
+    override val parameters: Sequence<Parameter> = sequence {
         yield(KspParameterImpl(
             impl = setter.parameter,
             refinedTypeRef = property.type.replaceType(property.asMemberOf(owner.type.impl)),

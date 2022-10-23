@@ -22,7 +22,7 @@ import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
@@ -392,7 +392,7 @@ internal class KspTypeDeclarationImpl private constructor(
                 return platformModel.isPublicOrInternal()
             }
         override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
-        override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
+        override val parameters: Sequence<Parameter> = parametersSequenceFor(
             declaration = platformModel,
             containing = type.impl,
             jvmMethodSignature = jvmSignature,

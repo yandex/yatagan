@@ -28,12 +28,12 @@ import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
 import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
-import com.yandex.daggerlite.lang.common.ParameterLangModelBase
+import com.yandex.daggerlite.lang.common.ParameterBase
 import com.yandex.daggerlite.lang.common.TypeDeclarationLangModelBase
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
@@ -186,13 +186,13 @@ internal class RtTypeDeclarationImpl private constructor(
 
         override val isEffectivelyPublic: Boolean
             get() = platformModel.isPublic
-        override val parameters: Sequence<ParameterLangModel> by lazy {
+        override val parameters: Sequence<Parameter> by lazy {
             Array(platformModel.getParameterCountCompat(), ::ParameterImpl).asSequence()
         }
 
         private inner class ParameterImpl(
             private val index: Int,
-        ) : ParameterLangModelBase() {
+        ) : ParameterBase() {
             override val annotations: Sequence<AnnotationLangModel> by lazy {
                 parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
             }

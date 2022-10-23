@@ -8,7 +8,7 @@ interface CallableLangModel : HasPlatformModel {
     /**
      * Parameters required to call this callable.
      */
-    val parameters: Sequence<ParameterLangModel>
+    val parameters: Sequence<Parameter>
 
     fun <T> accept(visitor: Visitor<T>): T
 

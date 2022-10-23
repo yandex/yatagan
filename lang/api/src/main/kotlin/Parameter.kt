@@ -3,7 +3,7 @@ package com.yandex.daggerlite.lang
 /**
  * Models a [CallableLangModel] parameter.
  */
-interface ParameterLangModel : AnnotatedLangModel {
+interface Parameter : AnnotatedLangModel {
     /**
      * Parameter name.
      *

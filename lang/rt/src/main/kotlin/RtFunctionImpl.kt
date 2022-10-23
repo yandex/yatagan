@@ -8,11 +8,11 @@ import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.AssistedAnnotationLangModel
 import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.common.FunctionLangModelBase
-import com.yandex.daggerlite.lang.common.ParameterLangModelBase
+import com.yandex.daggerlite.lang.common.ParameterBase
 
 internal class RtFunctionImpl(
     private val impl: ReflectMethod,
@@ -22,7 +22,7 @@ internal class RtFunctionImpl(
     private val parametersTypes by lazy { impl.genericParameterTypes }
     private val parameterNames by lazy { impl.parameterNamesCompat() }
 
-    override val parameters: Sequence<ParameterLangModel> by lazy {
+    override val parameters: Sequence<Parameter> by lazy {
         Array(impl.getParameterCountCompat(), ::ParameterImpl).asSequence()
     }
 
@@ -62,7 +62,7 @@ internal class RtFunctionImpl(
 
     private inner class ParameterImpl(
         val index: Int,
-    ) : ParameterLangModelBase() {
+    ) : ParameterBase() {
         override val annotations: Sequence<AnnotationLangModel> by lazy {
             parametersAnnotations[index].map { RtAnnotationImpl(it) }.asSequence()
         }

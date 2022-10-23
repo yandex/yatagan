@@ -2,7 +2,7 @@ package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.yandex.daggerlite.base.ifOrElseNull
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
 import com.yandex.daggerlite.lang.compiled.CtFunctionLangModel
@@ -37,7 +37,7 @@ internal class KspFunctionImpl(
         Utils.resolver.getJvmName(impl) ?: impl.simpleName.asString()
     }
 
-    override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
+    override val parameters: Sequence<Parameter> = parametersSequenceFor(
         declaration = impl,
         containing = ifOrElseNull(!isStatic) { owner.type.impl },
         jvmMethodSignature = jvmSignature,
