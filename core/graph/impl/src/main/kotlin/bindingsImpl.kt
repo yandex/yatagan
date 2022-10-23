@@ -42,7 +42,7 @@ import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.core.model.isNever
 import com.yandex.daggerlite.core.model.isOptional
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -230,7 +230,7 @@ internal abstract class ModuleHostedMixin : BaseBindingMixin, ComparableBindingM
     }
 
     final override fun compareTo(other: ModuleHostedMixin): Int {
-        return impl.function.compareTo(other.impl.function)
+        return impl.method.compareTo(other.impl.method)
     }
 }
 
@@ -240,7 +240,7 @@ internal class ProvisionBindingImpl(
 ) : ProvisionBinding, ConditionalBindingMixin, ModuleHostedMixin() {
 
     override val scopes get() = impl.scopes
-    override val provision get() = impl.function
+    override val provision get() = impl.method
     override val inputs get() = impl.inputs
     override val requiresModuleInstance get() = impl.requiresModuleInstance
     override val variantMatch: VariantMatch by lazy { VariantMatch(impl, owner.variant) }
@@ -259,7 +259,7 @@ internal class ProvisionBindingImpl(
         representation = {
             append(impl.originModule.type)
             append("::")
-            append(impl.function.name)
+            append(impl.method.name)
         },
     )
 
@@ -417,7 +417,7 @@ internal class AliasBindingImpl(
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = "alias",
         childContext = childContext,
-        representation = { append(impl.originModule.type).append("::").append(impl.function.name) },
+        representation = { append(impl.originModule.type).append("::").append(impl.method.name) },
         ellipsisStatistics = { _, dependencies ->
             if (dependencies.isNotEmpty()) append(dependencies.first())  // Always include alias source
         },
@@ -456,7 +456,7 @@ internal class AlternativesBindingImpl(
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = "alias-with-alternatives",
         childContext = childContext,
-        representation = { append(impl.originModule.type).append("::").append(impl.function.name) },
+        representation = { append(impl.originModule.type).append("::").append(impl.method.name) },
     )
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
@@ -469,7 +469,7 @@ internal class AlternativesBindingImpl(
 internal class ComponentDependencyEntryPointBindingImpl(
     override val owner: BindingGraph,
     override val dependency: ComponentDependencyModel,
-    override val getter: FunctionLangModel,
+    override val getter: Method,
     override val target: NodeModel,
 ) : ComponentDependencyEntryPointBinding, BindingMixin, ComparableBindingMixin<ComponentDependencyEntryPointBindingImpl> {
 
@@ -555,7 +555,7 @@ internal class MultiBindingImpl(
         val origin: ModuleHostedBindingModel,
     ) : Comparable<Contribution> {
         override fun compareTo(other: Contribution): Int {
-            return origin.function.compareTo(other.origin.function)
+            return origin.method.compareTo(other.origin.method)
         }
     }
 
@@ -654,7 +654,7 @@ internal class MapBindingImpl(
         val origin: ModuleHostedBindingModel,
     ) : MapBinding.Contribution, Comparable<Contribution> {
         override fun compareTo(other: Contribution): Int {
-            return origin.function.compareTo(other.origin.function)
+            return origin.method.compareTo(other.origin.method)
         }
     }
 

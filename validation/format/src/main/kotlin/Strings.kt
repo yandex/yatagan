@@ -16,8 +16,8 @@ import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 
@@ -143,7 +143,7 @@ object Strings {
                     "an abstract method which returns the component interface").toError()
 
         @Covered
-        fun unknownMethodInCreator(method: FunctionLangModel) = buildRichString {
+        fun unknownMethodInCreator(method: Method) = buildRichString {
             color = TextColor.Inherit
             appendLine("Unexpected/unrecognized method")
             append(Indent).append("`").appendRichString { append(method) }.appendLine('`')
@@ -181,7 +181,7 @@ object Strings {
             "Multiple component factories detected declared".toError()
 
         @Covered
-        fun unknownMethodInComponent(method: FunctionLangModel) = buildRichString {
+        fun unknownMethodInComponent(method: Method) = buildRichString {
             color = TextColor.Inherit
             appendLine("Unexpected method")
             append(Indent).appendRichString{ append(method) }.appendLine()
@@ -415,10 +415,10 @@ object Strings {
         fun scopeRebindIsForbidden() = "Scope has no effect on 'alias' binding".toWarning()
 
         @Covered
-        fun ignoredDependencyOfFrameworkType(function: Any) = buildRichString {
+        fun ignoredDependencyOfFrameworkType(method: Any) = buildRichString {
             color = TextColor.Inherit
             appendLine("function")
-            append(Indent).appendRichString { append(function) }.appendLine()
+            append(Indent).appendRichString { append(method) }.appendLine()
             append("returns a framework type (Provider/Lazy/Optional) and such type can not be " +
                     "directly introduced to the graph via component dependency - the function will be ignored. " +
                     "If you need this to form a binding - change the return type, or use a wrapper type. " +

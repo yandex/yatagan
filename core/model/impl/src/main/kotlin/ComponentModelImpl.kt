@@ -13,7 +13,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
@@ -73,7 +73,7 @@ internal class ComponentModelImpl private constructor(
 
     override val entryPoints: Set<EntryPoint> by lazy {
         class EntryPointImpl(
-            override val getter: FunctionLangModel,
+            override val getter: Method,
             override val dependency: NodeDependency,
         ) : EntryPoint {
             override fun validate(validator: Validator) {
@@ -92,25 +92,25 @@ internal class ComponentModelImpl private constructor(
             )
         }
 
-        declaration.functions.filter {
+        declaration.methods.filter {
             it.isAbstract && it.parameters.none()
-        }.map { function ->
+        }.map { method ->
             EntryPointImpl(
                 dependency = NodeDependency(
-                    type = function.returnType,
-                    forQualifier = function,
+                    type = method.returnType,
+                    forQualifier = method,
                 ),
-                getter = function,
+                getter = method,
             )
         }.toSet()
     }
 
     override val memberInjectors: Set<MembersInjectorModel> by lazy {
-        declaration.functions.filter {
+        declaration.methods.filter {
             MembersInjectorModelImpl.canRepresent(it)
-        }.map { function ->
+        }.map { method ->
             MembersInjectorModelImpl(
-                injector = function,
+                injector = method,
             )
         }.toSet()
     }
@@ -156,10 +156,10 @@ internal class ComponentModelImpl private constructor(
 
         factory?.let(validator::child)
 
-        for (function in declaration.functions) {
-            if (!function.isAbstract) continue
-            if (function.parameters.count() > 1) {
-                validator.reportError(Errors.unknownMethodInComponent(method = function))
+        for (method in declaration.methods) {
+            if (!method.isAbstract) continue
+            if (method.parameters.count() > 1) {
+                validator.reportError(Errors.unknownMethodInComponent(method = method))
             }
         }
 

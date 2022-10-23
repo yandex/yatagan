@@ -39,7 +39,7 @@ internal class ComponentFactoryModelImpl private constructor(
         ComponentModelImpl(factoryDeclaration.enclosingType ?: LangModelFactory.errorType.declaration)
     }
 
-    override val factoryMethod = factoryDeclaration.functions.find {
+    override val factoryMethod = factoryDeclaration.methods.find {
         it.isAbstract && it.returnType == createdComponent.type
     }
 
@@ -55,7 +55,7 @@ internal class ComponentFactoryModelImpl private constructor(
         return visitor.visitComponentFactory(this)
     }
 
-    override val builderInputs: Collection<BuilderInputModel> = factoryDeclaration.functions.filter {
+    override val builderInputs: Collection<BuilderInputModel> = factoryDeclaration.methods.filter {
         it.isAbstract && it != factoryMethod && it.parameters.count() == 1
     }.map { method ->
         object : BuilderInputModel {
@@ -160,10 +160,10 @@ internal class ComponentFactoryModelImpl private constructor(
             validator.reportError(Strings.Errors.missingCreatingMethod())
         }
 
-        for (function in factoryDeclaration.functions) {
-            if (function == factoryMethod || function.parameters.count() == 1 || !function.isAbstract)
+        for (method in factoryDeclaration.methods) {
+            if (method == factoryMethod || method.parameters.count() == 1 || !method.isAbstract)
                 continue
-            validator.reportError(Strings.Errors.unknownMethodInCreator(method = function))
+            validator.reportError(Strings.Errors.unknownMethodInCreator(method = method))
         }
 
         // TODO: check for duplicates in modules, dependencies.

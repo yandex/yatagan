@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 
@@ -44,6 +44,6 @@ interface MultiBindingDeclarationModel : MayBeInvalid {
      * Denotes invalid [com.yandex.daggerlite.Multibinds] with unrecognized return value.
      */
     interface InvalidDeclarationModel : MultiBindingDeclarationModel {
-        val invalidMethod: FunctionLangModel
+        val invalidMethod: Method
     }
 }

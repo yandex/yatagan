@@ -8,7 +8,7 @@ import com.squareup.javapoet.WildcardTypeName
 import com.yandex.daggerlite.codegen.poetry.MethodSpecBuilder
 import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.core.model.ClassBackedModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.compiled.ArrayNameModel
 import com.yandex.daggerlite.lang.compiled.ClassNameModel
@@ -63,7 +63,7 @@ internal fun CtTypeNameModel.asTypeName(): TypeName {
 }
 
 internal inline fun TypeSpecBuilder.overrideMethod(
-    overridee: FunctionLangModel,
+    overridee: Method,
     block: MethodSpecBuilder.() -> Unit,
 ) {
     method(name = overridee.name) {

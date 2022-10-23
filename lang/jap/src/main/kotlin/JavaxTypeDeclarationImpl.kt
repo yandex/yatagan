@@ -6,7 +6,7 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
@@ -85,7 +85,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    override val functions: Sequence<FunctionLangModel> by lazy {
+    override val methods: Sequence<Method> by lazy {
         impl.allNonPrivateMethods()
         .run {
             when (kind) {
@@ -97,7 +97,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
             }
         }
         .map {
-            JavaxFunctionImpl(
+            JavaxMethodImpl(
                 owner = this@JavaxTypeDeclarationImpl,
                 impl = it,
             )

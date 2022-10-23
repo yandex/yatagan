@@ -23,7 +23,7 @@ import com.yandex.daggerlite.core.model.isAlways
 import com.yandex.daggerlite.core.model.isNever
 import com.yandex.daggerlite.lang.CallableLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 
 private class CreationGeneratorVisitor(
@@ -51,16 +51,16 @@ private class CreationGeneratorVisitor(
                     }
                 }
 
-                override fun visitFunction(function: FunctionLangModel) {
+                override fun visitMethod(method: Method) {
                     +"%T.checkProvisionNotNull(".formatCode(Names.Checks)
                     if (instance != null) {
-                        +"%L.%N(".formatCode(instance, function.name)
+                        +"%L.%N(".formatCode(instance, method.name)
                     } else {
-                        val ownerObject = when (function.owner.kind) {
+                        val ownerObject = when (method.owner.kind) {
                             TypeDeclarationKind.KotlinObject -> ".INSTANCE"
                             else -> ""
                         }
-                        +"%T%L.%L(".formatCode(function.ownerName.asTypeName(), ownerObject, function.name)
+                        +"%T%L.%L(".formatCode(method.ownerName.asTypeName(), ownerObject, method.name)
                     }
                     genArgs()
                     +"))"

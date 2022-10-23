@@ -20,7 +20,7 @@ interface Member : AnnotatedLangModel, HasPlatformModel, Accessible {
     val name: String
 
     interface Visitor<R> {
-        fun visitFunction(model: FunctionLangModel): R
+        fun visitMethod(model: Method): R
         fun visitField(model: FieldLangModel): R
     }
 

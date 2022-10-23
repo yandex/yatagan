@@ -11,13 +11,13 @@ import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
 import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.FunctionLangModelBase
+import com.yandex.daggerlite.lang.common.MethodBase
 import com.yandex.daggerlite.lang.common.ParameterBase
 
-internal class RtFunctionImpl(
+internal class RtMethodImpl(
     private val impl: ReflectMethod,
     override val owner: RtTypeDeclarationImpl,
-) : FunctionLangModelBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
+) : MethodBase(), AnnotatedLangModel by RtAnnotatedImpl(impl) {
     private val parametersAnnotations by lazy { impl.parameterAnnotations }
     private val parametersTypes by lazy { impl.genericParameterTypes }
     private val parameterNames by lazy { impl.parameterNamesCompat() }

@@ -2,19 +2,19 @@ package com.yandex.daggerlite.lang.common
 
 import com.yandex.daggerlite.base.zipOrNull
 import com.yandex.daggerlite.lang.CallableLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
 
-abstract class FunctionLangModelBase : FunctionLangModel {
+abstract class MethodBase : Method {
     final override fun <T> accept(visitor: CallableLangModel.Visitor<T>): T {
-        return visitor.visitFunction(this)
+        return visitor.visitMethod(this)
     }
 
     final override fun <R> accept(visitor: Member.Visitor<R>): R {
-        return visitor.visitFunction(this)
+        return visitor.visitMethod(this)
     }
 
-    final override fun compareTo(other: FunctionLangModel): Int {
+    final override fun compareTo(other: Method): Int {
         if (this == other) return 0
 
         name.compareTo(other.name).let { if (it != 0) return it }

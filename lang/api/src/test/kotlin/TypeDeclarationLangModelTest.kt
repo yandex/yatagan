@@ -61,11 +61,11 @@ class TypeDeclarationLangModelTest(
                 assertThat(declaration("A").kind).isEqualTo(TypeDeclarationKind.Annotation)
                 assertThat(declaration("O").kind).isEqualTo(TypeDeclarationKind.KotlinObject)
 
-                for (function in declaration("I").functions) {
-                    if ("forTest" !in function.name)
+                for (method in declaration("I").methods) {
+                    if ("forTest" !in method.name)
                         continue
-                    assertThat(function.returnType.declaration.kind)
-                        .`as`(function.name)
+                    assertThat(method.returnType.declaration.kind)
+                        .`as`(method.name)
                         .isEqualTo(TypeDeclarationKind.None)
                 }
             }
@@ -139,10 +139,10 @@ class TypeDeclarationLangModelTest(
         """.trimIndent())
 
         inspect {
-            val function = declaration("I", packageName = "com.example")
-                .functions.find { it.name == "forTest" }
-            assumeNotNull(function)
-            assertThat(function!!.parameters.map {
+            val method = declaration("I", packageName = "com.example")
+                .methods.find { it.name == "forTest" }
+            assumeNotNull(method)
+            assertThat(method!!.parameters.map {
                 it.type.declaration.qualifiedName
             }.toList()).containsExactly(
                 "java.lang.String",

@@ -3,12 +3,12 @@ package com.yandex.daggerlite.lang.ksp
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
-import com.yandex.daggerlite.lang.compiled.CtFunctionLangModel
+import com.yandex.daggerlite.lang.compiled.CtMethod
 
-internal abstract class KspFunctionPropertyAccessorBase<T : KSPropertyAccessor>(
+internal abstract class KspPropertyAccessorBase<T : KSPropertyAccessor>(
     private val accessor: T,
     final override val isStatic: Boolean,
-) : CtFunctionLangModel(),
+) : CtMethod(),
     // NOTE: We can't use annotations from |property| as they aren't properly accessible from Kapt.
     //  See https://youtrack.jetbrains.com/issue/KT-34684
     CtAnnotatedLangModel by KspAnnotatedImpl(accessor) {

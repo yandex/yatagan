@@ -51,14 +51,14 @@ interface TypeDeclarationLangModel : AnnotatedLangModel, HasPlatformModel, Acces
     val constructors: Sequence<ConstructorLangModel>
 
     /**
-     * All non-private functions (including static and inherited ones).
+     * All non-private methods (including static and inherited ones).
      *
-     * All returned functions (including inherited or overridden ones) have [owner][FunctionLangModel.owner] defined
+     * All returned methods (including inherited or overridden ones) have [owner][Method.owner] defined
      * as `this`.
      *
-     * Never includes functions defined in `java.lang.Object`/`kotlin.Any`, as they are of no interest to DL.
+     * Never includes methods defined in `java.lang.Object`/`kotlin.Any`, as they are of no interest to DL.
      */
-    val functions: Sequence<FunctionLangModel>
+    val methods: Sequence<Method>
 
     /**
      * All non-private declared fields (including static and inherited).

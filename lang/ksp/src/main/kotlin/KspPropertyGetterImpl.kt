@@ -4,11 +4,11 @@ import com.google.devtools.ksp.symbol.KSPropertyGetter
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 
-internal class KspFunctionPropertyGetterImpl(
+internal class KspPropertyGetterImpl(
     getter: KSPropertyGetter,
     override val owner: KspTypeDeclarationImpl,
     isStatic: Boolean,
-) : KspFunctionPropertyAccessorBase<KSPropertyGetter>(getter, isStatic) {
+) : KspPropertyAccessorBase<KSPropertyGetter>(getter, isStatic) {
 
     override val returnType: Type by lazy {
         var typeReference = property.type

@@ -5,10 +5,10 @@ import com.yandex.daggerlite.IntoSet
 import com.yandex.daggerlite.Provides
 import com.yandex.daggerlite.lang.IntoCollectionAnnotationLangModel
 import com.yandex.daggerlite.lang.ProvidesAnnotationLangModel
-import com.yandex.daggerlite.lang.common.FunctionLangModelBase
+import com.yandex.daggerlite.lang.common.MethodBase
 import com.yandex.daggerlite.lang.hasType
 
-abstract class CtFunctionLangModel : FunctionLangModelBase() {
+abstract class CtMethod : MethodBase() {
     abstract override val annotations: Sequence<CtAnnotationLangModel>
 
     final override val providesAnnotationIfPresent: ProvidesAnnotationLangModel?

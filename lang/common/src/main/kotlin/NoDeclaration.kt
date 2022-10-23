@@ -17,7 +17,7 @@ class NoDeclaration(
     override val annotations get() = emptySequence<Nothing>()
     override val interfaces get() = emptySequence<Nothing>()
     override val constructors get() = emptySequence<Nothing>()
-    override val functions get() = emptySequence<Nothing>()
+    override val methods get() = emptySequence<Nothing>()
     override val fields get() = emptySequence<Nothing>()
     override val nestedClasses get() = emptySequence<Nothing>()
     override val conditions get() = emptySequence<Nothing>()

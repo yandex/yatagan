@@ -9,7 +9,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
 import com.yandex.daggerlite.lang.CallableLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 
 interface ComponentDependencyBinding : Binding {
@@ -123,7 +123,7 @@ interface ComponentInstanceBinding : Binding
 
 interface ComponentDependencyEntryPointBinding : Binding {
     val dependency: ComponentDependencyModel
-    val getter: FunctionLangModel
+    val getter: Method
 }
 
 /**

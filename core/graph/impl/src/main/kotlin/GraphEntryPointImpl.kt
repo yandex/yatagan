@@ -3,7 +3,7 @@ package com.yandex.daggerlite.core.graph.impl
 import com.yandex.daggerlite.core.graph.GraphEntryPoint
 import com.yandex.daggerlite.core.model.ComponentModel
 import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.format.append
 import com.yandex.daggerlite.validation.format.appendChildContextReference
@@ -13,7 +13,7 @@ internal class GraphEntryPointImpl(
     override val graph: BindingGraphImpl,
     private val impl: ComponentModel.EntryPoint,
 ) : GraphEntryPoint, GraphEntryPointBase() {
-    override val getter: FunctionLangModel
+    override val getter: Method
         get() = impl.getter
 
     override val dependency: NodeDependency

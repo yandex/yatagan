@@ -6,7 +6,7 @@ package com.yandex.daggerlite.lang
  * - Top-level kotlin functions are not covered.
  * - Kotlin properties (setters and getters) are also represented by this.
  */
-interface FunctionLangModel : Member, CallableLangModel, Comparable<FunctionLangModel> {
+interface Method : Member, CallableLangModel, Comparable<Method> {
     /**
      * Whether the function is abstract.
      */

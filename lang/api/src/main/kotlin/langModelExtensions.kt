@@ -14,10 +14,10 @@ val TypeDeclarationLangModel.isKotlinObject get() = when(kind) {
     else -> false
 }
 
-val TypeDeclarationLangModel.functionsWithCompanion: Sequence<FunctionLangModel>
+val TypeDeclarationLangModel.functionsWithCompanion: Sequence<Method>
     get() = when (val companion = defaultCompanionObjectDeclaration) {
-        null -> functions
-        else -> functions + companion.functions
+        null -> methods
+        else -> methods + companion.methods
     }
 
 @OptIn(InternalLangApi::class)

@@ -34,8 +34,8 @@ import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.lang.CallableLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.lang.rt.kotlinObjectInstanceOrNull
 import com.yandex.daggerlite.lang.rt.rawValue
@@ -292,7 +292,7 @@ internal class RuntimeComponent(
     }
 
     private class MemberEvaluator(private val instance: Any?) : Member.Visitor<Any?> {
-        override fun visitFunction(model: FunctionLangModel): Any? = model.rt.invoke(instance)
+        override fun visitMethod(model: Method): Any? = model.rt.invoke(instance)
         override fun visitField(model: FieldLangModel): Any? = model.rt.get(instance)
     }
 
@@ -303,18 +303,18 @@ internal class RuntimeComponent(
             }
         }
 
-        override fun visitFunction(function: FunctionLangModel): Any? = function.rt.invoke(/*receiver*/ when {
+        override fun visitMethod(method: Method): Any? = method.rt.invoke(/*receiver*/ when {
             binding.requiresModuleInstance -> {
                 val module = binding.originModule!!
                 checkNotNull(moduleInstances[module]) {
                     "Provided module instance for $module is null"
                 }
             }
-            function.owner.isKotlinObject -> {
-                function.owner.kotlinObjectInstanceOrNull()
+            method.owner.isKotlinObject -> {
+                method.owner.kotlinObjectInstanceOrNull()
             }
             else -> null
-        }, /* function arguments*/ *args())
+        }, /* method arguments*/ *args())
 
         override fun visitConstructor(constructor: ConstructorLangModel): Any? = constructor.rt.newInstance(*args())
     }
@@ -336,7 +336,7 @@ internal class RuntimeComponent(
                 val value = resolveAndAccess(dependency)
                 member.accept(object : Member.Visitor<Unit> {
                     override fun visitField(model: FieldLangModel) = model.rt.set(injectee, value)
-                    override fun visitFunction(model: FunctionLangModel) {
+                    override fun visitMethod(model: Method) {
                         model.rt.invoke(injectee, value)
                     }
                 })

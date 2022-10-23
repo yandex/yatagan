@@ -38,7 +38,7 @@ internal class ModuleModelImpl private constructor(
     }
 
     override val multiBindingDeclarations: Sequence<MultiBindingDeclarationModel> =
-        declaration.functions
+        declaration.methods
             .filter { it.isAnnotatedWith<Multibinds>() }
             .map { method ->
                 when {
@@ -58,11 +58,11 @@ internal class ModuleModelImpl private constructor(
     override val bindings: Sequence<ModuleHostedBindingModel> = declaration.functionsWithCompanion.mapNotNull { method ->
         when {
             BindsImpl.canRepresent(method) -> BindsImpl(
-                function = method,
+                method = method,
                 originModule = this@ModuleModelImpl,
             )
             ProvidesImpl.canRepresent(method) -> ProvidesImpl(
-                function = method,
+                method = method,
                 originModule = this@ModuleModelImpl,
             )
             else -> null

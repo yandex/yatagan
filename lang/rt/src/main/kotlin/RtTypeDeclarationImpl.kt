@@ -26,7 +26,7 @@ import com.yandex.daggerlite.lang.ConditionLangModel
 import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.ModuleAnnotationLangModel
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
@@ -105,7 +105,7 @@ internal class RtTypeDeclarationImpl private constructor(
             }.memoize()
     }
 
-    override val functions: Sequence<FunctionLangModel> by lazy {
+    override val methods: Sequence<Method> by lazy {
         impl.getMethodsOverrideAware()
             .asSequence()
             .run {
@@ -118,7 +118,7 @@ internal class RtTypeDeclarationImpl private constructor(
                 }
             }
             .map {
-                RtFunctionImpl(impl = it, owner = this)
+                RtMethodImpl(impl = it, owner = this)
             }.memoize()
     }
 

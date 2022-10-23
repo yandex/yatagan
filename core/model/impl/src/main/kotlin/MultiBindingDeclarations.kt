@@ -4,7 +4,7 @@ import com.yandex.daggerlite.base.setOf
 import com.yandex.daggerlite.core.model.CollectionTargetKind
 import com.yandex.daggerlite.core.model.MultiBindingDeclarationModel
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -16,7 +16,7 @@ import com.yandex.daggerlite.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class MultiBindingDeclarationBase(
-    protected val method: FunctionLangModel,
+    protected val method: Method,
 ) : MultiBindingDeclarationModel {
     override fun validate(validator: Validator) {
         if (!method.isAbstract || method.parameters.any()) {
@@ -28,7 +28,7 @@ internal abstract class MultiBindingDeclarationBase(
 }
 
 internal class CollectionDeclarationImpl(
-    method: FunctionLangModel,
+    method: Method,
 ) : MultiBindingDeclarationBase(method), MultiBindingDeclarationModel.CollectionDeclarationModel {
     init {
         assert(canRepresent(method))
@@ -88,14 +88,14 @@ internal class CollectionDeclarationImpl(
     companion object {
         private val SupportedCollectionNames = setOf(Names.List, Names.Set)
 
-        fun canRepresent(method: FunctionLangModel): Boolean {
+        fun canRepresent(method: Method): Boolean {
             return method.returnType.declaration.qualifiedName in SupportedCollectionNames
         }
     }
 }
 
 internal class MapDeclarationImpl(
-    method: FunctionLangModel,
+    method: Method,
 ) : MultiBindingDeclarationBase(method), MultiBindingDeclarationModel.MapDeclarationModel {
     init {
         assert(canRepresent(method))
@@ -136,14 +136,14 @@ internal class MapDeclarationImpl(
             keyType == other.keyType && valueType == other.valueType)
 
     companion object {
-        fun canRepresent(method: FunctionLangModel): Boolean {
+        fun canRepresent(method: Method): Boolean {
             return method.returnType.declaration.qualifiedName == Names.Map
         }
     }
 }
 
 internal class InvalidDeclarationImpl(
-    override val invalidMethod: FunctionLangModel,
+    override val invalidMethod: Method,
 ) : MultiBindingDeclarationModel.InvalidDeclarationModel {
     override fun <R> accept(visitor: MultiBindingDeclarationModel.Visitor<R>): R {
         return visitor.visitInvalid(this)

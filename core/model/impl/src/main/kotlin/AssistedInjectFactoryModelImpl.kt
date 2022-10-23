@@ -7,7 +7,7 @@ import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel.Parameter
 import com.yandex.daggerlite.core.model.HasNodeModel
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
@@ -25,8 +25,8 @@ internal class AssistedInjectFactoryModelImpl private constructor(
         assert(canRepresent(impl))
     }
 
-    override val factoryMethod: FunctionLangModel? by lazy {
-        impl.functions.singleOrNull { it.isAbstract }
+    override val factoryMethod: Method? by lazy {
+        impl.methods.singleOrNull { it.isAbstract }
     }
 
     private val assistedInjectType: Type? by lazy {
@@ -79,7 +79,7 @@ internal class AssistedInjectFactoryModelImpl private constructor(
             validator.reportError(Strings.Errors.assistedInjectFactoryNotInterface())
         }
 
-        if (impl.functions.count { it.isAbstract } != 1) {
+        if (impl.methods.count { it.isAbstract } != 1) {
             validator.reportError(Strings.Errors.assistedInjectFactoryNoMethod())
             return  // All the following errors here will be induced, skip them.
         }

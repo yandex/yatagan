@@ -5,7 +5,7 @@ import com.yandex.daggerlite.core.model.ComponentDependencyModel
 import com.yandex.daggerlite.core.model.DependencyKind
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -17,19 +17,19 @@ internal class ComponentDependencyModelImpl private constructor(
     override val type: Type,
 ) : ComponentDependencyModel {
 
-    private val exposedEntryPoints: Map<NodeDependency, FunctionLangModel> by lazy {
-        type.declaration.functions.filter {
+    private val exposedEntryPoints: Map<NodeDependency, Method> by lazy {
+        type.declaration.methods.filter {
             it.parameters.none() && !it.returnType.isVoid
-        }.associateBy { function ->
-            NodeDependency(type = function.returnType, forQualifier = function)
+        }.associateBy { method ->
+            NodeDependency(type = method.returnType, forQualifier = method)
         }
     }
 
-    override val exposedDependencies: Map<NodeModel, FunctionLangModel> by lazy {
+    override val exposedDependencies: Map<NodeModel, Method> by lazy {
         buildMap {
-            exposedEntryPoints.forEach { (dependency, function) ->
+            exposedEntryPoints.forEach { (dependency, method) ->
                 if (dependency.kind == DependencyKind.Direct) {
-                    put(dependency.node, function)
+                    put(dependency.node, method)
                 }
             }
         }
@@ -46,10 +46,10 @@ internal class ComponentDependencyModelImpl private constructor(
             validator.reportWarning(Strings.Warnings.nonAbstractDependency())
         }
 
-        exposedEntryPoints.forEach { (dependency, function) ->
+        exposedEntryPoints.forEach { (dependency, method) ->
             if (dependency.kind != DependencyKind.Direct) {
                 validator.reportWarning(Strings.Warnings.ignoredDependencyOfFrameworkType(
-                    function = function,
+                    method = method,
                 ))
             }
         }

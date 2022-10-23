@@ -29,7 +29,7 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.ProvidesBindingModel
 import com.yandex.daggerlite.core.model.accept
 import com.yandex.daggerlite.core.model.allInputs
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.RichString
@@ -118,7 +118,7 @@ internal class GraphBindingsManager(
             // Binding for the dependency component itself.
             add(ComponentDependencyBindingImpl(dependency = dependency, owner = graph))
             // Bindings backed by the component entry-points.
-            for ((node: NodeModel, getter: FunctionLangModel) in dependency.exposedDependencies)
+            for ((node: NodeModel, getter: Method) in dependency.exposedDependencies)
                 add(ComponentDependencyEntryPointBindingImpl(
                     owner = graph,
                     dependency = dependency,

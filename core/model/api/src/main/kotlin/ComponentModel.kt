@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core.model
 
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -60,7 +60,7 @@ interface ComponentModel : ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
      * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
      */
     interface EntryPoint : MayBeInvalid {
-        val getter: FunctionLangModel
+        val getter: Method
         val dependency: NodeDependency
     }
 }

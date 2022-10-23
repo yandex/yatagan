@@ -21,7 +21,7 @@ import com.yandex.daggerlite.base.memoize
 import com.yandex.daggerlite.lang.AnnotatedLangModel
 import com.yandex.daggerlite.lang.ConstructorLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationKind
@@ -104,7 +104,7 @@ internal class KspTypeDeclarationImpl private constructor(
         fun filterAll(it: KSAnnotated) = true
     }
 
-    override val functions: Sequence<FunctionLangModel> by lazy {
+    override val methods: Sequence<Method> by lazy {
         sequence {
             when (kind) {
                 TypeDeclarationKind.KotlinObject -> {
@@ -158,17 +158,17 @@ internal class KspTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    private suspend fun SequenceScope<FunctionLangModel>.functionsImpl(
+    private suspend fun SequenceScope<Method>.functionsImpl(
         declaration: KSClassDeclaration,
         filter: FunctionFilter,
         isStatic: (KSAnnotated) -> Boolean,
     ) {
-        for (function in declaration.allNonPrivateFunctions()) {
-            if (!filter.filterFunction(function)) continue
-            yield(KspFunctionImpl(
+        for (method in declaration.allNonPrivateFunctions()) {
+            if (!filter.filterFunction(method)) continue
+            yield(KspMethodImpl(
                 owner = this@KspTypeDeclarationImpl,
-                impl = function,
-                isStatic = isStatic(function),
+                impl = method,
+                isStatic = isStatic(method),
             ))
         }
 
@@ -183,7 +183,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    private suspend fun SequenceScope<FunctionLangModel>.explodeProperty(
+    private suspend fun SequenceScope<Method>.explodeProperty(
         property: KSPropertyDeclaration,
         owner: KspTypeDeclarationImpl,
         filter: FunctionFilter,
@@ -192,7 +192,7 @@ internal class KspTypeDeclarationImpl private constructor(
         val isPropertyStatic = isStatic(property)
         property.getter?.let { getter ->
             if (filter.filterAccessor(getter)) {
-                yield(KspFunctionPropertyGetterImpl(
+                yield(KspPropertyGetterImpl(
                     owner = owner, getter = getter,
                     isStatic = isPropertyStatic || isStatic(getter)
                 ))
@@ -201,7 +201,7 @@ internal class KspTypeDeclarationImpl private constructor(
         property.setter?.let { setter ->
             val modifiers = setter.modifiers
             if (Modifier.PRIVATE !in modifiers && Modifier.PROTECTED !in modifiers && filter.filterAccessor(setter)) {
-                yield(KspFunctionPropertySetterImpl(
+                yield(KspPropertySetterImpl(
                     owner = owner, setter = setter,
                     isStatic = isPropertyStatic || isStatic(setter)
                 ))

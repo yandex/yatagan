@@ -5,11 +5,11 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.Type
 
-internal class KspFunctionPropertySetterImpl(
+internal class KspPropertySetterImpl(
     private val setter: KSPropertySetter,
     override val owner: KspTypeDeclarationImpl,
     isStatic: Boolean,
-) : KspFunctionPropertyAccessorBase<KSPropertySetter>(setter, isStatic) {
+) : KspPropertyAccessorBase<KSPropertySetter>(setter, isStatic) {
 
     override val isEffectivelyPublic: Boolean
         get() = super.isEffectivelyPublic && setter.modifiers.let {

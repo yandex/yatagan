@@ -2,7 +2,7 @@ package com.yandex.daggerlite.core.model
 
 import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
 import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 
@@ -27,11 +27,11 @@ interface ModuleHostedBindingModel : MayBeInvalid {
     val scopes: Set<AnnotationLangModel>
 
     /**
-     * Underlying function model.
+     * Underlying method model.
      *
      * Use only for extracting the info not available via the API of the model.
      */
-    val function: FunctionLangModel
+    val method: Method
 
     /**
      * Binding target variants.

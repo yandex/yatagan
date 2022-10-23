@@ -3,8 +3,8 @@ package com.yandex.daggerlite.core.graph.impl
 import com.yandex.daggerlite.core.graph.GraphMemberInjector
 import com.yandex.daggerlite.core.model.MembersInjectorModel
 import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.append
@@ -16,7 +16,7 @@ internal class GraphMemberInjectorImpl(
     private val owner: BindingGraphImpl,
     private val impl: MembersInjectorModel,
 ) : GraphMemberInjector {
-    override val injector: FunctionLangModel
+    override val injector: Method
         get() = impl.injector
 
     private val _membersToInject by lazy(PUBLICATION) {

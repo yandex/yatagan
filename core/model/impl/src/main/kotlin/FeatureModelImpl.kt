@@ -8,9 +8,9 @@ import com.yandex.daggerlite.core.model.ConditionalHoldingModel
 import com.yandex.daggerlite.lang.AnyConditionAnnotationLangModel
 import com.yandex.daggerlite.lang.ConditionAnnotationLangModel
 import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.TypeDeclarationLangModel
 import com.yandex.daggerlite.lang.isKotlinObject
@@ -159,7 +159,7 @@ private interface LiteralPayload : MayBeInvalid {
 }
 
 private object MemberTypeVisitor : Member.Visitor<Type> {
-    override fun visitFunction(model: FunctionLangModel) = model.returnType
+    override fun visitMethod(model: Method) = model.returnType
     override fun visitField(model: FieldLangModel) = model.type
 }
 
@@ -262,8 +262,8 @@ private class LiteralPayloadImpl private constructor(
                 return field
             }
 
-            val method = type.functions.find { function ->
-                function.name == name
+            val method = type.methods.find { method ->
+                method.name == name
             }
             if (method != null) {
                 return method
