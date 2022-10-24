@@ -5,7 +5,7 @@ import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
 import com.yandex.daggerlite.codegen.poetry.buildExpression
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.MapBinding
+import com.yandex.daggerlite.core.graph.bindings.MapBinding
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.lang.Annotation

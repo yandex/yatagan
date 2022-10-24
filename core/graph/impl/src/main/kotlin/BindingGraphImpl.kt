@@ -1,12 +1,12 @@
 package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.AliasBinding
-import com.yandex.daggerlite.core.graph.AssistedInjectFactoryBinding
-import com.yandex.daggerlite.core.graph.BaseBinding
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage
 import com.yandex.daggerlite.core.graph.BindingVisitorAdapter
+import com.yandex.daggerlite.core.graph.bindings.AliasBinding
+import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
+import com.yandex.daggerlite.core.graph.bindings.BaseBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.graph.childrenSequence
 import com.yandex.daggerlite.core.graph.normalized
 import com.yandex.daggerlite.core.graph.parentsSequence

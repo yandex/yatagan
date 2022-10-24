@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.validation.format
 
-import com.yandex.daggerlite.core.graph.AliasBinding
-import com.yandex.daggerlite.core.graph.BaseBinding
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.bindings.AliasBinding
+import com.yandex.daggerlite.core.graph.bindings.BaseBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.model.ComponentDependencyModel
 import com.yandex.daggerlite.core.model.ComponentFactoryModel

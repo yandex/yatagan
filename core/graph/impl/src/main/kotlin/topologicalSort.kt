@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2

@@ -2,10 +2,10 @@ package com.yandex.daggerlite.core.graph.impl
 
 import com.yandex.daggerlite.base.ifOrElseNull
 import com.yandex.daggerlite.base.traverseDepthFirstWithPath
-import com.yandex.daggerlite.core.graph.AliasBinding
-import com.yandex.daggerlite.core.graph.BaseBinding
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.bindings.AliasBinding
+import com.yandex.daggerlite.core.graph.bindings.BaseBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.graph.component1
 import com.yandex.daggerlite.core.graph.component2
 import com.yandex.daggerlite.core.model.NodeDependency

@@ -5,9 +5,9 @@ import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
 import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.codegen.poetry.buildClass
 import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.AssistedInjectFactoryBinding
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.Extensible
+import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2

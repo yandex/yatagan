@@ -1,5 +1,6 @@
-package com.yandex.daggerlite.core.graph
+package com.yandex.daggerlite.core.graph.bindings
 
+import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.validation.MayBeInvalid

@@ -2,6 +2,8 @@ package com.yandex.daggerlite.core.graph
 
 import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage.Eager
 import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage.Lazy
+import com.yandex.daggerlite.core.graph.bindings.BaseBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.model.ComponentDependencyModel
 import com.yandex.daggerlite.core.model.ComponentFactoryModel
