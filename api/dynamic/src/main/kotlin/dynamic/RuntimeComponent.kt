@@ -2,21 +2,21 @@ package com.yandex.daggerlite.dynamic
 
 import com.yandex.daggerlite.DynamicValidationDelegate
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.graph.AlternativesBinding
-import com.yandex.daggerlite.core.graph.AssistedInjectFactoryBinding
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.ComponentDependencyBinding
-import com.yandex.daggerlite.core.graph.ComponentDependencyEntryPointBinding
-import com.yandex.daggerlite.core.graph.ComponentInstanceBinding
-import com.yandex.daggerlite.core.graph.EmptyBinding
 import com.yandex.daggerlite.core.graph.GraphMemberInjector
-import com.yandex.daggerlite.core.graph.InstanceBinding
-import com.yandex.daggerlite.core.graph.MapBinding
-import com.yandex.daggerlite.core.graph.MultiBinding
-import com.yandex.daggerlite.core.graph.ProvisionBinding
-import com.yandex.daggerlite.core.graph.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.graph.WithParents
+import com.yandex.daggerlite.core.graph.bindings.AlternativesBinding
+import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
+import com.yandex.daggerlite.core.graph.bindings.ComponentDependencyBinding
+import com.yandex.daggerlite.core.graph.bindings.ComponentDependencyEntryPointBinding
+import com.yandex.daggerlite.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.daggerlite.core.graph.bindings.EmptyBinding
+import com.yandex.daggerlite.core.graph.bindings.InstanceBinding
+import com.yandex.daggerlite.core.graph.bindings.MapBinding
+import com.yandex.daggerlite.core.graph.bindings.MultiBinding
+import com.yandex.daggerlite.core.graph.bindings.ProvisionBinding
+import com.yandex.daggerlite.core.graph.bindings.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.graph.component1
 import com.yandex.daggerlite.core.graph.component2
 import com.yandex.daggerlite.core.graph.normalized
@@ -31,11 +31,11 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
-import com.yandex.daggerlite.lang.CallableLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Callable
+import com.yandex.daggerlite.lang.Constructor
+import com.yandex.daggerlite.lang.Field
+import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.lang.rt.kotlinObjectInstanceOrNull
 import com.yandex.daggerlite.lang.rt.rawValue
@@ -291,32 +291,32 @@ internal class RuntimeComponent(
         }
     }
 
-    private class MemberEvaluator(private val instance: Any?) : MemberLangModel.Visitor<Any?> {
-        override fun visitFunction(model: FunctionLangModel): Any? = model.rt.invoke(instance)
-        override fun visitField(model: FieldLangModel): Any? = model.rt.get(instance)
+    private class MemberEvaluator(private val instance: Any?) : Member.Visitor<Any?> {
+        override fun visitMethod(model: Method): Any? = model.rt.invoke(instance)
+        override fun visitField(model: Field): Any? = model.rt.get(instance)
     }
 
-    private inner class ProvisionEvaluator(val binding: ProvisionBinding) : CallableLangModel.Visitor<Any?> {
+    private inner class ProvisionEvaluator(val binding: ProvisionBinding) : Callable.Visitor<Any?> {
         private fun args(): Array<Any> = binding.inputs.let { inputs ->
             Array(inputs.size) { index ->
                 resolveAndAccess(inputs[index])
             }
         }
 
-        override fun visitFunction(function: FunctionLangModel): Any? = function.rt.invoke(/*receiver*/ when {
+        override fun visitMethod(method: Method): Any? = method.rt.invoke(/*receiver*/ when {
             binding.requiresModuleInstance -> {
                 val module = binding.originModule!!
                 checkNotNull(moduleInstances[module]) {
                     "Provided module instance for $module is null"
                 }
             }
-            function.owner.isKotlinObject -> {
-                function.owner.kotlinObjectInstanceOrNull()
+            method.owner.isKotlinObject -> {
+                method.owner.kotlinObjectInstanceOrNull()
             }
             else -> null
-        }, /* function arguments*/ *args())
+        }, /* method arguments*/ *args())
 
-        override fun visitConstructor(constructor: ConstructorLangModel): Any? = constructor.rt.newInstance(*args())
+        override fun visitConstructor(constructor: Constructor): Any? = constructor.rt.newInstance(*args())
     }
 
     override fun visitEmpty(binding: EmptyBinding): Any {
@@ -334,9 +334,9 @@ internal class RuntimeComponent(
             val (injectee) = args!!
             for ((member, dependency) in memberInject.membersToInject) {
                 val value = resolveAndAccess(dependency)
-                member.accept(object : MemberLangModel.Visitor<Unit> {
-                    override fun visitField(model: FieldLangModel) = model.rt.set(injectee, value)
-                    override fun visitFunction(model: FunctionLangModel) {
+                member.accept(object : Member.Visitor<Unit> {
+                    override fun visitField(model: Field) = model.rt.set(injectee, value)
+                    override fun visitMethod(model: Method) {
                         model.rt.invoke(injectee, value)
                     }
                 })

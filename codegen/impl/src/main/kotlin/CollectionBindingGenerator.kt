@@ -4,8 +4,8 @@ import com.yandex.daggerlite.codegen.poetry.CodeBuilder
 import com.yandex.daggerlite.codegen.poetry.buildExpression
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.MultiBinding
-import com.yandex.daggerlite.core.graph.MultiBinding.ContributionType
+import com.yandex.daggerlite.core.graph.bindings.MultiBinding
+import com.yandex.daggerlite.core.graph.bindings.MultiBinding.ContributionType
 import com.yandex.daggerlite.core.model.CollectionTargetKind
 import com.yandex.daggerlite.core.model.NodeModel
 

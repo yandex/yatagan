@@ -1,12 +1,12 @@
 package com.yandex.daggerlite.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.AliasBinding
-import com.yandex.daggerlite.core.graph.AssistedInjectFactoryBinding
-import com.yandex.daggerlite.core.graph.BaseBinding
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage
 import com.yandex.daggerlite.core.graph.BindingVisitorAdapter
+import com.yandex.daggerlite.core.graph.bindings.AliasBinding
+import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
+import com.yandex.daggerlite.core.graph.bindings.BaseBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.graph.childrenSequence
 import com.yandex.daggerlite.core.graph.normalized
 import com.yandex.daggerlite.core.graph.parentsSequence
@@ -21,7 +21,7 @@ import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.core.model.isNever
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -41,7 +41,7 @@ internal class BindingGraphImpl(
 
     override val variant: Variant = component.variant + parent?.variant
 
-    override val scopes: Set<AnnotationLangModel>
+    override val scopes: Set<Annotation>
         get() = component.scopes
 
     override val creator: ComponentFactoryModel?

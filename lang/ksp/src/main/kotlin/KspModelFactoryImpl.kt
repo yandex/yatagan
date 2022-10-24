@@ -4,8 +4,8 @@ import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 
 class KspModelFactoryImpl : LangModelFactory {
     private val listDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
@@ -36,9 +36,9 @@ class KspModelFactoryImpl : LangModelFactory {
 
     override fun getParameterizedType(
         type: LangModelFactory.ParameterizedType,
-        parameter: TypeLangModel,
+        parameter: Type,
         isCovariant: Boolean,
-    ): TypeLangModel {
+    ): Type {
         parameter as KspTypeImpl
         val declaration = when (type) {
             LangModelFactory.ParameterizedType.List -> listDeclaration
@@ -58,7 +58,7 @@ class KspModelFactoryImpl : LangModelFactory {
         }
     }
 
-    override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
+    override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
         keyType as KspTypeImpl
         valueType as KspTypeImpl
         with(Utils.resolver) {
@@ -81,7 +81,7 @@ class KspModelFactoryImpl : LangModelFactory {
         packageName: String,
         simpleName: String,
         vararg simpleNames: String
-    ): TypeDeclarationLangModel? {
+    ): TypeDeclaration? {
         val qualifiedName = buildString {
             if (packageName.isNotEmpty()) {
                 append(packageName).append('.')
@@ -97,7 +97,7 @@ class KspModelFactoryImpl : LangModelFactory {
         return KspTypeDeclarationImpl(KspTypeImpl(declaration.asType(emptyList())))
     }
 
-    override val errorType: TypeLangModel
+    override val errorType: Type
         get() = KspTypeImpl(ErrorTypeImpl)
 
     override val isInRuntimeEnvironment: Boolean

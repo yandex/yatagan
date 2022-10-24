@@ -4,29 +4,29 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.yandex.daggerlite.base.BiObjectCache
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.common.NoDeclaration
-import com.yandex.daggerlite.lang.compiled.CtTypeLangModel
+import com.yandex.daggerlite.lang.compiled.CtTypeBase
 import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeImpl private constructor(
     val impl: KSType,
     private val jvmType: JvmTypeInfo,
-) : CtTypeLangModel() {
+) : CtTypeBase() {
 
     override val nameModel: CtTypeNameModel by lazy {
         CtTypeNameModel(type = impl, jvmTypeKind = jvmType)
     }
 
-    override val declaration: TypeDeclarationLangModel by lazy(PUBLICATION) {
+    override val declaration: TypeDeclaration by lazy(PUBLICATION) {
         if (jvmType is JvmTypeInfo.Declared && impl.declaration is KSClassDeclaration) {
             KspTypeDeclarationImpl(this)
         } else NoDeclaration(this)
     }
 
-    override val typeArguments: List<TypeLangModel> by lazy {
+    override val typeArguments: List<Type> by lazy {
         when (jvmType) {
             JvmTypeInfo.Declared -> impl.arguments.map { arg ->
                 Factory(arg.type ?: Utils.objectType.asStarProjectedType().asReference())
@@ -38,7 +38,7 @@ internal class KspTypeImpl private constructor(
     override val isVoid: Boolean
         get() = jvmType == JvmTypeInfo.Void || impl == Utils.resolver.builtIns.unitType
 
-    override fun isAssignableFrom(another: TypeLangModel): Boolean {
+    override fun isAssignableFrom(another: Type): Boolean {
         return when (another) {
             // `mapToKotlinType` is required as `isAssignableFrom` doesn't work properly
             // with related Java platform types.
@@ -49,7 +49,7 @@ internal class KspTypeImpl private constructor(
         }
     }
 
-    override fun asBoxed(): TypeLangModel {
+    override fun asBoxed(): Type {
         return when (jvmType) {
             JvmTypeInfo.Boolean, JvmTypeInfo.Byte, JvmTypeInfo.Char, JvmTypeInfo.Double,
             JvmTypeInfo.Float, JvmTypeInfo.Int, JvmTypeInfo.Long, JvmTypeInfo.Short,

@@ -5,7 +5,6 @@ plugins {
 val autoCommonVersion: String by extra
 
 dependencies {
-    implementation(project(":api:public"))
     implementation(project(":base"))
 
     api(project(":lang:compiled"))

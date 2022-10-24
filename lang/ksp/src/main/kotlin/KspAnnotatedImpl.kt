@@ -2,13 +2,13 @@ package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
-import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotated
+import com.yandex.daggerlite.lang.compiled.CtAnnotationBase
 
 internal class KspAnnotatedImpl<T : KSAnnotated>(
      val impl: T
-) : CtAnnotatedLangModel {
-    override val annotations: Sequence<CtAnnotationLangModel> by lazy {
+) : CtAnnotated {
+    override val annotations: Sequence<CtAnnotationBase> by lazy {
         impl.annotations.map { KspAnnotationImpl(it) }.memoize()
     }
 

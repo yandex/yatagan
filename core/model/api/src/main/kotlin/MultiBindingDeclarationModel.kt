@@ -1,7 +1,7 @@
 package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Method
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -36,7 +36,7 @@ interface MultiBindingDeclarationModel : MayBeInvalid {
      * Declares empty map binding
      */
     interface MapDeclarationModel : MultiBindingDeclarationModel {
-        val keyType: TypeLangModel?
+        val keyType: Type?
         val valueType: NodeModel?
     }
 
@@ -44,6 +44,6 @@ interface MultiBindingDeclarationModel : MayBeInvalid {
      * Denotes invalid [com.yandex.daggerlite.Multibinds] with unrecognized return value.
      */
     interface InvalidDeclarationModel : MultiBindingDeclarationModel {
-        val invalidMethod: FunctionLangModel
+        val invalidMethod: Method
     }
 }

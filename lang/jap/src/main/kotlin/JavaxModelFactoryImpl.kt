@@ -1,28 +1,28 @@
 package com.yandex.daggerlite.lang.jap
 
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import javax.lang.model.element.TypeElement
 
 class JavaxModelFactoryImpl : LangModelFactory {
     private val listElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(java.util.List::class.java.canonicalName)
+        Utils.elements.getTypeElement("java.util.List")
     }
     private val setElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(java.util.Set::class.java.canonicalName)
+        Utils.elements.getTypeElement("java.util.Set")
     }
     private val collectionElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(java.util.Collection::class.java.canonicalName)
+        Utils.elements.getTypeElement("java.util.Collection")
     }
     private val mapElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(java.util.Map::class.java.canonicalName)
+        Utils.elements.getTypeElement("java.util.Map")
     }
     private val providerElement: TypeElement by lazy {
-        Utils.elements.getTypeElement(javax.inject.Provider::class.java.canonicalName)
+        Utils.elements.getTypeElement("javax.inject.Provider")
     }
 
-    override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
+    override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
         keyType as JavaxTypeImpl
         valueType as JavaxTypeImpl
         with(Utils.types) {
@@ -35,9 +35,9 @@ class JavaxModelFactoryImpl : LangModelFactory {
 
     override fun getParameterizedType(
         type: LangModelFactory.ParameterizedType,
-        parameter: TypeLangModel,
+        parameter: Type,
         isCovariant: Boolean,
-    ): TypeLangModel {
+    ): Type {
         parameter as JavaxTypeImpl
         val element = when(type) {
             LangModelFactory.ParameterizedType.List -> listElement
@@ -56,7 +56,7 @@ class JavaxModelFactoryImpl : LangModelFactory {
         packageName: String,
         simpleName: String,
         vararg simpleNames: String
-    ): TypeDeclarationLangModel? {
+    ): TypeDeclaration? {
         val name = buildString {
             if (packageName.isNotEmpty()) {
                 append(packageName).append('.')
@@ -68,7 +68,7 @@ class JavaxModelFactoryImpl : LangModelFactory {
         return JavaxTypeDeclarationImpl(element.asType().asDeclaredType())
     }
 
-    override val errorType: TypeLangModel
+    override val errorType: Type
         get() = JavaxTypeImpl(Utils.types.nullType)
 
     override val isInRuntimeEnvironment: Boolean

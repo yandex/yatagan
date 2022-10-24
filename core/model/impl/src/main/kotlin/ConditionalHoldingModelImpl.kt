@@ -4,19 +4,18 @@ import com.yandex.daggerlite.core.model.ConditionalHoldingModel
 import com.yandex.daggerlite.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.daggerlite.core.model.ConditionalHoldingModel.FeatureModel
 import com.yandex.daggerlite.core.model.Variant.FlavorModel
-import com.yandex.daggerlite.lang.ConditionalAnnotationLangModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.appendChildContextReference
 import com.yandex.daggerlite.validation.format.modelRepresentation
 
 internal open class ConditionalHoldingModelImpl(
-    sources: Sequence<ConditionalAnnotationLangModel>,
+    sources: List<BuiltinAnnotation.Conditional>,
 ) : ConditionalHoldingModel {
-    final override val conditionals: Sequence<ConditionalWithFlavorConstraintsModel> =
-        sources.map { annotation ->
-            ConditionalWithFlavorConstraintsModelImpl(annotation)
-        }
+    final override val conditionals: List<ConditionalWithFlavorConstraintsModel> = sources.map { annotation ->
+        ConditionalWithFlavorConstraintsModelImpl(annotation)
+    }
 
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
         modelClassName = "its conditions declaration",
@@ -40,11 +39,11 @@ internal open class ConditionalHoldingModelImpl(
     )
 
     private class ConditionalWithFlavorConstraintsModelImpl(
-        annotation: ConditionalAnnotationLangModel,
+        annotation: BuiltinAnnotation.Conditional,
     ) : ConditionalWithFlavorConstraintsModel {
-        override val onlyIn: Sequence<FlavorModel> =
+        override val onlyIn: List<FlavorModel> =
             annotation.onlyIn.map { FlavorImpl(it) }
-        override val featureTypes: Sequence<FeatureModel> =
+        override val featureTypes: List<FeatureModel> =
             annotation.featureTypes.map { FeatureModelImpl(it.declaration) }
 
         override fun validate(validator: Validator) {

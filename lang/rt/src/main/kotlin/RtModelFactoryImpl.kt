@@ -1,11 +1,8 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.lang.reflect.WildcardType
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 
 class RtModelFactoryImpl(
     private val classLoader: ClassLoader,
@@ -18,9 +15,9 @@ class RtModelFactoryImpl(
 
     override fun getParameterizedType(
         type: LangModelFactory.ParameterizedType,
-        parameter: TypeLangModel,
+        parameter: Type,
         isCovariant: Boolean,
-    ): TypeLangModel {
+    ): Type {
         parameter as RtTypeImpl
         val clazz = when (type) {
             LangModelFactory.ParameterizedType.List -> listClass
@@ -32,7 +29,7 @@ class RtModelFactoryImpl(
         return RtTypeImpl(ParameterizedTypeImpl(arg, raw = clazz))
     }
 
-    override fun getMapType(keyType: TypeLangModel, valueType: TypeLangModel, isCovariant: Boolean): TypeLangModel {
+    override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
         valueType as RtTypeImpl
         val valueArg = if (isCovariant) WildcardTypeImpl(upperBound = valueType.impl) else valueType.impl
         return RtTypeImpl(ParameterizedTypeImpl((keyType as RtTypeImpl).impl, valueArg, raw = mapClass))
@@ -42,7 +39,7 @@ class RtModelFactoryImpl(
         packageName: String,
         simpleName: String,
         vararg simpleNames: String
-    ): TypeDeclarationLangModel? {
+    ): TypeDeclaration? {
         val qualifiedName = buildString {
             if (packageName.isNotEmpty()) {
                 append(packageName).append('.')
@@ -59,29 +56,29 @@ class RtModelFactoryImpl(
         }
     }
 
-    override val errorType: TypeLangModel
+    override val errorType: Type
         get() = RtTypeImpl(ErrorType())
 
     override val isInRuntimeEnvironment: Boolean
         get() = true
 
-    private class ErrorType : Type {
+    private class ErrorType : ReflectType {
         override fun toString() = "<error>"
     }
 
     private class WildcardTypeImpl(
-        private val upperBound: Type,
-    ) : WildcardType {
+        private val upperBound: ReflectType,
+    ) : ReflectWildcardType {
         private val upperBounds = arrayOf(upperBound)
         override fun getUpperBounds() = upperBounds
-        override fun getLowerBounds() = emptyArray<Type>()
+        override fun getLowerBounds() = emptyArray<ReflectType>()
         override fun toString() = "? extends $upperBound"
     }
 
     private class ParameterizedTypeImpl(
-        private vararg val arguments: Type,
-        private val raw: Type,
-    ) : ParameterizedType {
+        private vararg val arguments: ReflectType,
+        private val raw: ReflectType,
+    ) : ReflectParameterizedType {
         override fun getActualTypeArguments() = arguments
         override fun getRawType() = raw
         override fun getOwnerType() = null

@@ -10,7 +10,7 @@ import com.yandex.daggerlite.validation.MayBeInvalid
  * variant-based resolution (See [Variant]).
  */
 interface ConditionalHoldingModel : MayBeInvalid {
-    val conditionals: Sequence<ConditionalWithFlavorConstraintsModel>
+    val conditionals: List<ConditionalWithFlavorConstraintsModel>
 
     /**
      * Represents a "feature" - a named [ConditionScope].
@@ -20,10 +20,10 @@ interface ConditionalHoldingModel : MayBeInvalid {
     }
 
     /**
-     * Core-level model of a [com.yandex.daggerlite.lang.ConditionalAnnotationLangModel].
+     * Model of a [com.yandex.daggerlite.lang.BuiltinAnnotation.Conditional].
      */
     interface ConditionalWithFlavorConstraintsModel : MayBeInvalid {
-        val featureTypes: Sequence<FeatureModel>
-        val onlyIn: Sequence<Variant.FlavorModel>
+        val featureTypes: List<FeatureModel>
+        val onlyIn: List<Variant.FlavorModel>
     }
 }

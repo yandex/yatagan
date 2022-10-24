@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Annotation
+import com.yandex.daggerlite.lang.AnnotationDeclaration
+import com.yandex.daggerlite.lang.Method
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -24,14 +24,14 @@ interface ModuleHostedBindingModel : MayBeInvalid {
     /**
      * Declared scope annotations.
      */
-    val scopes: Set<AnnotationLangModel>
+    val scopes: Set<Annotation>
 
     /**
-     * Underlying function model.
+     * Underlying method model.
      *
      * Use only for extracting the info not available via the API of the model.
      */
-    val function: FunctionLangModel
+    val method: Method
 
     /**
      * Binding target variants.
@@ -86,17 +86,17 @@ interface ModuleHostedBindingModel : MayBeInvalid {
             /**
              * Mapping key type. `null` when not-found/unresolved.
              */
-            val keyType: TypeLangModel?,
+            val keyType: Type?,
 
             /**
              * Mapping key value. `null` when not-found/unresolved.
              */
-            val keyValue: AnnotationLangModel.Value?,
+            val keyValue: Annotation.Value?,
 
             /**
              * Annotation class of the Map-key annotation. `null` when not-found/unresolved.
              */
-            val mapKeyClass: AnnotationDeclarationLangModel?,
+            val mapKeyClass: AnnotationDeclaration?,
         ) : BindingTargetModel()
     }
 

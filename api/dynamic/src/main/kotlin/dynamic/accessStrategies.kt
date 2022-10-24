@@ -3,7 +3,7 @@ package com.yandex.daggerlite.dynamic
 import com.yandex.daggerlite.Lazy
 import com.yandex.daggerlite.Optional
 import com.yandex.daggerlite.ThreadAssertions
-import com.yandex.daggerlite.core.graph.Binding
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.model.ConditionScope
 import javax.inject.Provider
 

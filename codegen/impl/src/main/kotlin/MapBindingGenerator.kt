@@ -5,11 +5,11 @@ import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
 import com.yandex.daggerlite.codegen.poetry.buildExpression
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.MapBinding
+import com.yandex.daggerlite.core.graph.bindings.MapBinding
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
-import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Annotation
+import com.yandex.daggerlite.lang.Type
 
 internal class MapBindingGenerator(
     methodsNs: Namespace,
@@ -60,7 +60,7 @@ internal class MapBindingGenerator(
 
     private class AnnotationValueFormatter(
         val builder: ExpressionBuilder,
-    ) : AnnotationLangModel.Value.Visitor<Unit> {
+    ) : Annotation.Value.Visitor<Unit> {
         override fun visitBoolean(value: Boolean) = with(builder) { +value.toString() }
         override fun visitByte(value: Byte) = with(builder) { +value.toString() }
         override fun visitShort(value: Short) = with(builder) { +value.toString() }
@@ -70,11 +70,11 @@ internal class MapBindingGenerator(
         override fun visitFloat(value: Float) = with(builder) { +value.toString() }
         override fun visitDouble(value: Double) = with(builder) { +value.toString() }
         override fun visitString(value: String) = with(builder) { +"%S".formatCode(value) }
-        override fun visitType(value: TypeLangModel) = with(builder) { +"%T.class".formatCode(value.typeName()) }
-        override fun visitAnnotation(value: AnnotationLangModel) = with(builder) { +"<unsupported>" }
-        override fun visitArray(value: List<AnnotationLangModel.Value>) = with(builder) { +"<unsupported>" }
+        override fun visitType(value: Type) = with(builder) { +"%T.class".formatCode(value.typeName()) }
+        override fun visitAnnotation(value: Annotation) = with(builder) { +"<unsupported>" }
+        override fun visitArray(value: List<Annotation.Value>) = with(builder) { +"<unsupported>" }
         override fun visitUnresolved() = with(builder) { +"<unresolved>" }
-        override fun visitEnumConstant(enum: TypeLangModel, constant: String) = with(builder) {
+        override fun visitEnumConstant(enum: Type, constant: String) = with(builder) {
             +"%T.%N".formatCode(enum.typeName(), constant)
         }
     }

@@ -8,7 +8,7 @@ import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
 import com.google.common.base.Equivalence
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 import com.yandex.daggerlite.lang.compiled.ArrayNameModel
 import com.yandex.daggerlite.lang.compiled.ClassNameModel
 import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
@@ -242,7 +242,7 @@ internal fun Element.asMemberOf(type: DeclaredType): TypeMirror {
 internal fun parametersSequenceFor(
     element: ExecutableElement,
     asMemberOf: DeclaredType,
-) = sequence<ParameterLangModel> {
+) = sequence<Parameter> {
     val parameters = element.parameters
     val types = element.asMemberOf(asMemberOf).asExecutableType().parameterTypes
     for (i in parameters.indices) {

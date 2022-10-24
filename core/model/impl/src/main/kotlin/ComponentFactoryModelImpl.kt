@@ -1,7 +1,5 @@
 package com.yandex.daggerlite.core.model.impl
 
-import com.yandex.daggerlite.BindsInstance
-import com.yandex.daggerlite.Component
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.ClassBackedModel
 import com.yandex.daggerlite.core.model.ComponentDependencyModel
@@ -14,13 +12,12 @@ import com.yandex.daggerlite.core.model.HasNodeModel
 import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.allInputs
-import com.yandex.daggerlite.lang.AnnotatedLangModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
-import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -32,18 +29,18 @@ import com.yandex.daggerlite.validation.format.reportWarning
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class ComponentFactoryModelImpl private constructor(
-    private val factoryDeclaration: TypeDeclarationLangModel,
+    private val factoryDeclaration: TypeDeclaration,
 ) : ComponentFactoryModel {
 
     override val createdComponent: ComponentModel by lazy {
         ComponentModelImpl(factoryDeclaration.enclosingType ?: LangModelFactory.errorType.declaration)
     }
 
-    override val factoryMethod = factoryDeclaration.functions.find {
+    override val factoryMethod = factoryDeclaration.methods.find {
         it.isAbstract && it.returnType == createdComponent.type
     }
 
-    override val type: TypeLangModel
+    override val type: Type
         get() = factoryDeclaration.asType()
 
     override fun asNode(): NodeModel = NodeModelImpl(
@@ -55,14 +52,14 @@ internal class ComponentFactoryModelImpl private constructor(
         return visitor.visitComponentFactory(this)
     }
 
-    override val builderInputs: Collection<BuilderInputModel> = factoryDeclaration.functions.filter {
+    override val builderInputs: Collection<BuilderInputModel> = factoryDeclaration.methods.filter {
         it.isAbstract && it != factoryMethod && it.parameters.count() == 1
     }.map { method ->
         object : BuilderInputModel {
             override val payload: InputPayload by lazy(PUBLICATION) {
                 InputPayload(
                     param = method.parameters.first(),
-                    forBindsInstance = method,
+                    hasBindsInstance = { method.getAnnotation(BuiltinAnnotation.BindsInstance) != null },
                 )
             }
             override val name get() = method.name
@@ -70,7 +67,7 @@ internal class ComponentFactoryModelImpl private constructor(
 
             override fun validate(validator: Validator) {
                 validator.child(payload)
-                if (method.parameters.first().isAnnotatedWith<BindsInstance>()) {
+                if (method.parameters.first().getAnnotation(BuiltinAnnotation.BindsInstance) != null) {
                     validator.reportWarning(Strings.Warnings.ignoredBindsInstance())
                 }
                 if (!method.returnType.isVoid && !method.returnType.isAssignableFrom(factoryDeclaration.asType())) {
@@ -100,7 +97,10 @@ internal class ComponentFactoryModelImpl private constructor(
         factoryMethod?.parameters?.map { param ->
             object : FactoryInputModel {
                 override val payload: InputPayload by lazy(PUBLICATION) {
-                    InputPayload(param = param)
+                    InputPayload(
+                        param = param,
+                        hasBindsInstance = { param.getAnnotation(BuiltinAnnotation.BindsInstance) != null },
+                    )
                 }
                 override val name get() = param.name
 
@@ -125,16 +125,16 @@ internal class ComponentFactoryModelImpl private constructor(
         }?.toList() ?: emptyList()
     }
 
-    private fun InputPayload(
-        param: ParameterLangModel,
-        forBindsInstance: AnnotatedLangModel = param,
+    private inline fun InputPayload(
+        param: Parameter,
+        hasBindsInstance: () -> Boolean,
     ): InputPayload {
         val declaration = param.type.declaration
         return when {
             ModuleModelImpl.canRepresent(declaration) ->
                 InputPayloadModuleImpl(module = ModuleModelImpl(declaration))
 
-            forBindsInstance.isAnnotatedWith<BindsInstance>() ->
+            hasBindsInstance() ->
                 InputPayloadInstanceImpl(node = NodeModelImpl(param.type, forQualifier = param))
 
             else -> InputPayloadDependencyImpl(dependency = ComponentDependencyModelImpl(declaration.asType()))
@@ -160,10 +160,10 @@ internal class ComponentFactoryModelImpl private constructor(
             validator.reportError(Strings.Errors.missingCreatingMethod())
         }
 
-        for (function in factoryDeclaration.functions) {
-            if (function == factoryMethod || function.parameters.count() == 1 || !function.isAbstract)
+        for (method in factoryDeclaration.methods) {
+            if (method == factoryMethod || method.parameters.count() == 1 || !method.isAbstract)
                 continue
-            validator.reportError(Strings.Errors.unknownMethodInCreator(method = function))
+            validator.reportError(Strings.Errors.unknownMethodInCreator(method = method))
         }
 
         // TODO: check for duplicates in modules, dependencies.
@@ -252,17 +252,17 @@ internal class ComponentFactoryModelImpl private constructor(
         )
     }
 
-    companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentFactoryModelImpl>() {
+    companion object Factory : ObjectCache<TypeDeclaration, ComponentFactoryModelImpl>() {
         operator fun invoke(
-            factoryDeclaration: TypeDeclarationLangModel,
+            factoryDeclaration: TypeDeclaration,
         ) = createCached(factoryDeclaration) {
             ComponentFactoryModelImpl(
                 factoryDeclaration = it,
             )
         }
 
-        fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
-            return declaration.isAnnotatedWith<Component.Builder>()
+        fun canRepresent(declaration: TypeDeclaration): Boolean {
+            return declaration.getAnnotation(BuiltinAnnotation.Component.Builder) != null
         }
     }
 }

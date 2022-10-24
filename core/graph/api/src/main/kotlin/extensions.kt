@@ -1,5 +1,17 @@
 package com.yandex.daggerlite.core.graph
 
+import com.yandex.daggerlite.core.graph.bindings.AlternativesBinding
+import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
+import com.yandex.daggerlite.core.graph.bindings.ComponentDependencyBinding
+import com.yandex.daggerlite.core.graph.bindings.ComponentDependencyEntryPointBinding
+import com.yandex.daggerlite.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.daggerlite.core.graph.bindings.EmptyBinding
+import com.yandex.daggerlite.core.graph.bindings.InstanceBinding
+import com.yandex.daggerlite.core.graph.bindings.MapBinding
+import com.yandex.daggerlite.core.graph.bindings.MultiBinding
+import com.yandex.daggerlite.core.graph.bindings.ProvisionBinding
+import com.yandex.daggerlite.core.graph.bindings.SubComponentFactoryBinding
 import com.yandex.daggerlite.core.model.ConditionModel
 
 /**

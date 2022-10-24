@@ -1,14 +1,31 @@
 package com.yandex.daggerlite.core.graph.impl
 
 import com.yandex.daggerlite.base.notIntersects
-import com.yandex.daggerlite.core.graph.AliasBinding
-import com.yandex.daggerlite.core.graph.BaseBinding
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.ExtensibleBinding
-import com.yandex.daggerlite.core.graph.MultiBinding.ContributionType
 import com.yandex.daggerlite.core.graph.WithParents
+import com.yandex.daggerlite.core.graph.bindings.AliasBinding
+import com.yandex.daggerlite.core.graph.bindings.BaseBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
+import com.yandex.daggerlite.core.graph.bindings.ExtensibleBinding
+import com.yandex.daggerlite.core.graph.bindings.MultiBinding.ContributionType
+import com.yandex.daggerlite.core.graph.impl.bindings.AliasBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.AliasLoopStubBinding
+import com.yandex.daggerlite.core.graph.impl.bindings.AlternativesBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.AssistedInjectFactoryBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.ComponentDependencyBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.ComponentDependencyEntryPointBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.ComponentInstanceBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.ExplicitEmptyBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.InjectConstructorProvisionBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.InstanceBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.MapBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.MissingBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.MultiBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.ProvisionBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.SelfDependentInvalidBinding
+import com.yandex.daggerlite.core.graph.impl.bindings.SubComponentFactoryBindingImpl
+import com.yandex.daggerlite.core.graph.impl.bindings.SyntheticAliasBindingImpl
 import com.yandex.daggerlite.core.graph.parentsSequence
 import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.model.BindsBindingModel
@@ -29,8 +46,8 @@ import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.ProvidesBindingModel
 import com.yandex.daggerlite.core.model.accept
 import com.yandex.daggerlite.core.model.allInputs
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Method
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.RichString
 import com.yandex.daggerlite.validation.Validator
@@ -118,7 +135,7 @@ internal class GraphBindingsManager(
             // Binding for the dependency component itself.
             add(ComponentDependencyBindingImpl(dependency = dependency, owner = graph))
             // Bindings backed by the component entry-points.
-            for ((node: NodeModel, getter: FunctionLangModel) in dependency.exposedDependencies)
+            for ((node: NodeModel, getter: Method) in dependency.exposedDependencies)
                 add(ComponentDependencyEntryPointBindingImpl(
                     owner = graph,
                     dependency = dependency,
@@ -175,7 +192,7 @@ internal class GraphBindingsManager(
         // Mappings
         for ((mapSignature, contributions) in mapBindings) {
             for (useProviders in booleanArrayOf(true, false)) {
-                val (keyType: TypeLangModel, valueType: NodeModel) = mapSignature
+                val (keyType: Type, valueType: NodeModel) = mapSignature
                 val nodes = valueType.multiBoundMapNodes(key = keyType, asProviders = useProviders)
                 val representativeNode = nodes.first()
                 val upstream = parentsSequence().mapNotNull { parentBindings ->
@@ -392,7 +409,7 @@ internal class GraphBindingsManager(
     }
 
     private data class MapSignature(
-        val keyType: TypeLangModel,
+        val keyType: Type,
         val valueType: NodeModel,
     )
 

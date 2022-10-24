@@ -1,6 +1,6 @@
 package com.yandex.daggerlite.processor.common
 
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.TypeDeclaration
 import java.io.Writer
 
 /**
@@ -14,14 +14,14 @@ interface ProcessorDelegate<Source> {
     val logger: Logger
 
     /**
-     * Get a [type declaration][TypeDeclarationLangModel] from a source
+     * Get a [type declaration][TypeDeclaration] from a source
      */
-    fun createDeclaration(source: Source): TypeDeclarationLangModel
+    fun createDeclaration(source: Source): TypeDeclaration
 
     /**
      * Get a Source for the given declaration.
      */
-    fun getSourceFor(declaration: TypeDeclarationLangModel): Source
+    fun getSourceFor(declaration: TypeDeclaration): Source
 
     /**
      * Opens file for writing generated Java code. Only a single class is permitted per file.

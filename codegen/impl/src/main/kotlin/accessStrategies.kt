@@ -4,8 +4,8 @@ import com.squareup.javapoet.ClassName
 import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
 import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
 import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.model.DependencyKind
 import com.yandex.daggerlite.core.model.isAlways
 import com.yandex.daggerlite.core.model.isOptional

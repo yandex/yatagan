@@ -4,10 +4,10 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.MembersInjectorModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
-import com.yandex.daggerlite.lang.isAnnotatedWith
+import com.yandex.daggerlite.lang.BuiltinAnnotation
+import com.yandex.daggerlite.lang.Field
+import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -15,10 +15,9 @@ import com.yandex.daggerlite.validation.format.appendChildContextReference
 import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 import com.yandex.daggerlite.validation.format.reportMandatoryWarning
-import javax.inject.Inject
 
 internal class MembersInjectorModelImpl private constructor(
-    override val injector: FunctionLangModel,
+    override val injector: Method,
 ) : MembersInjectorModel {
     init {
         assert(canRepresent(injector))
@@ -26,18 +25,18 @@ internal class MembersInjectorModelImpl private constructor(
 
     private val injectee = injector.parameters.single().type
 
-    override val membersToInject: Map<MemberLangModel, NodeDependency> by lazy {
+    override val membersToInject: Map<Member, NodeDependency> by lazy {
         buildMap {
             injectee.declaration.fields.filter {
-                it.isAnnotatedWith<Inject>()
+                it.getAnnotation(BuiltinAnnotation.Inject) != null
             }.forEach { fieldInjectee ->
                 put(fieldInjectee, NodeDependency(
                     type = fieldInjectee.type,
                     forQualifier = fieldInjectee,
                 ))
             }
-            injectee.declaration.functions.filter {
-                it.isAnnotatedWith<Inject>()
+            injectee.declaration.methods.filter {
+                it.getAnnotation(BuiltinAnnotation.Inject) != null
             }.forEach { functionInjectee ->
                 put(functionInjectee, NodeDependency(
                     type = functionInjectee.parameters.single().type,
@@ -84,16 +83,16 @@ internal class MembersInjectorModelImpl private constructor(
         },
     )
 
-    companion object Factory : ObjectCache<FunctionLangModel, MembersInjectorModelImpl>() {
-        operator fun invoke(injector: FunctionLangModel) = createCached(injector, ::MembersInjectorModelImpl)
+    companion object Factory : ObjectCache<Method, MembersInjectorModelImpl>() {
+        operator fun invoke(injector: Method) = createCached(injector, ::MembersInjectorModelImpl)
 
-        fun canRepresent(impl: FunctionLangModel): Boolean {
+        fun canRepresent(impl: Method): Boolean {
             return impl.isAbstract && impl.parameters.count() == 1
         }
 
-        private object IsField : MemberLangModel.Visitor<Boolean> {
-            override fun visitFunction(model: FunctionLangModel) = false
-            override fun visitField(model: FieldLangModel) = true
+        private object IsField : Member.Visitor<Boolean> {
+            override fun visitMethod(model: Method) = false
+            override fun visitField(model: Field) = true
         }
     }
 }

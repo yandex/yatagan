@@ -5,14 +5,13 @@ import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.core.model.ConditionModel
 import com.yandex.daggerlite.core.model.ConditionScope
 import com.yandex.daggerlite.core.model.ConditionalHoldingModel
-import com.yandex.daggerlite.lang.AnyConditionAnnotationLangModel
-import com.yandex.daggerlite.lang.ConditionAnnotationLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.BuiltinAnnotation
+import com.yandex.daggerlite.lang.Field
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.MemberLangModel
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.isKotlinObject
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
@@ -30,22 +29,22 @@ import com.yandex.daggerlite.validation.format.reportWarning
 import com.yandex.daggerlite.validation.format.toString
 
 internal class FeatureModelImpl private constructor(
-    private val impl: TypeDeclarationLangModel,
+    private val impl: TypeDeclaration,
 ) : ConditionalHoldingModel.FeatureModel {
     override val conditionScope: ConditionScope by lazy {
-        ConditionScope(impl.conditions.map { conditionModel ->
+        ConditionScope(impl.getAnnotations(BuiltinAnnotation.ConditionFamily).map { conditionModel ->
             when (conditionModel) {
-                is AnyConditionAnnotationLangModel ->
+                is BuiltinAnnotation.ConditionFamily.Any ->
                     conditionModel.conditions.map { ConditionLiteralImpl(it) }.toSet()
 
-                is ConditionAnnotationLangModel ->
+                is BuiltinAnnotation.ConditionFamily.One ->
                     setOf(ConditionLiteralImpl(conditionModel))
             }
         }.toSet())
     }
 
     override fun validate(validator: Validator) {
-        if (impl.conditions.none()) {
+        if (impl.getAnnotations(BuiltinAnnotation.ConditionFamily).none()) {
             // TODO: Forbid Never-scope/Always-scope.
             validator.reportError(Strings.Errors.noConditionsOnFeature())
         }
@@ -73,11 +72,11 @@ internal class FeatureModelImpl private constructor(
         },
     )
 
-    override val type: TypeLangModel
+    override val type: Type
         get() = impl.asType()
 
-    companion object Factory : ObjectCache<TypeDeclarationLangModel, FeatureModelImpl>() {
-        operator fun invoke(impl: TypeDeclarationLangModel) = createCached(impl, ::FeatureModelImpl)
+    companion object Factory : ObjectCache<TypeDeclaration, FeatureModelImpl>() {
+        operator fun invoke(impl: TypeDeclaration) = createCached(impl, ::FeatureModelImpl)
     }
 }
 
@@ -113,7 +112,7 @@ private class ConditionLiteralImpl private constructor(
     }
 
     companion object Factory : BiObjectCache<Boolean, LiteralPayload, ConditionLiteralImpl>() {
-        operator fun invoke(model: ConditionAnnotationLangModel): ConditionModel {
+        operator fun invoke(model: BuiltinAnnotation.ConditionFamily.One): ConditionModel {
             val condition = model.condition
             return ConditionRegex.matchEntire(condition)?.let { matched ->
                 val (negate, names) = matched.destructured
@@ -124,9 +123,9 @@ private class ConditionLiteralImpl private constructor(
             } ?: this(
                 negated = false,
                 payload = object : LiteralPayload {
-                    override val root: TypeDeclarationLangModel
+                    override val root: TypeDeclaration
                         get() = LangModelFactory.errorType.declaration
-                    override val path: List<MemberLangModel> get() = emptyList()
+                    override val path: List<Member> get() = emptyList()
                     override fun validate(validator: Validator) {
                         // Always invalid
                         validator.reportError(Strings.Errors.invalidCondition(expression = condition))
@@ -153,20 +152,20 @@ private class ConditionLiteralImpl private constructor(
 }
 
 private interface LiteralPayload : MayBeInvalid {
-    val root: TypeDeclarationLangModel
-    val path: List<MemberLangModel>
+    val root: TypeDeclaration
+    val path: List<Member>
     val nonStatic: Boolean
 }
 
-private object MemberTypeVisitor : MemberLangModel.Visitor<TypeLangModel> {
-    override fun visitFunction(model: FunctionLangModel) = model.returnType
-    override fun visitField(model: FieldLangModel) = model.type
+private object MemberTypeVisitor : Member.Visitor<Type> {
+    override fun visitMethod(model: Method) = model.returnType
+    override fun visitField(model: Field) = model.type
 }
 
 private typealias ValidationReport = (Validator) -> Unit
 
 private class LiteralPayloadImpl private constructor(
-    override val root: TypeDeclarationLangModel,
+    override val root: TypeDeclaration,
     private val pathSource: String,
 ) : LiteralPayload {
     private var validationReport: ValidationReport? = null
@@ -191,7 +190,7 @@ private class LiteralPayloadImpl private constructor(
         append(".$pathSource")
     }
 
-    override val path: List<MemberLangModel> by lazy {
+    override val path: List<Member> by lazy {
         buildList {
             var currentType = root.asType()
             var finished = false
@@ -249,21 +248,21 @@ private class LiteralPayloadImpl private constructor(
         }
     }
 
-    companion object Factory : BiObjectCache<TypeDeclarationLangModel, String, LiteralPayload>() {
-        operator fun invoke(root: TypeDeclarationLangModel, pathSource: String): LiteralPayload {
+    companion object Factory : BiObjectCache<TypeDeclaration, String, LiteralPayload>() {
+        operator fun invoke(root: TypeDeclaration, pathSource: String): LiteralPayload {
             return createCached(root, pathSource) {
                 LiteralPayloadImpl(root, pathSource)
             }
         }
 
-        private fun findAccessor(type: TypeDeclarationLangModel, name: String): MemberLangModel? {
+        private fun findAccessor(type: TypeDeclaration, name: String): Member? {
             val field = type.fields.find { it.name == name }
             if (field != null) {
                 return field
             }
 
-            val method = type.functions.find { function ->
-                function.name == name
+            val method = type.methods.find { method ->
+                method.name == name
             }
             if (method != null) {
                 return method

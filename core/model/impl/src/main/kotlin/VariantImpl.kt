@@ -3,7 +3,7 @@ package com.yandex.daggerlite.core.model.impl
 import com.yandex.daggerlite.core.model.Variant
 import com.yandex.daggerlite.core.model.Variant.DimensionModel
 import com.yandex.daggerlite.core.model.Variant.FlavorModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -16,7 +16,7 @@ import com.yandex.daggerlite.validation.format.reportError
 internal class VariantImpl private constructor(
     private val parts: Map<DimensionModel, List<FlavorModel>>,
 ) : Variant {
-    constructor(flavors: Sequence<TypeLangModel>)
+    constructor(flavors: List<Type>)
             : this(flavors.map { FlavorImpl(it) }.groupBy(FlavorImpl::dimension))
 
     override fun plus(variant: Variant?): Variant {

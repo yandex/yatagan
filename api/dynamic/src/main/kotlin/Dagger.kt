@@ -16,7 +16,7 @@ import com.yandex.daggerlite.dynamic.dlLog
 import com.yandex.daggerlite.lang.InternalLangApi
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
-import com.yandex.daggerlite.lang.rt.TypeDeclarationLangModel
+import com.yandex.daggerlite.lang.rt.TypeDeclaration
 import com.yandex.daggerlite.validation.LocatedMessage
 import com.yandex.daggerlite.validation.RichString
 import com.yandex.daggerlite.validation.ValidationMessage
@@ -68,7 +68,7 @@ object Dagger {
             }
 
             val graph = BindingGraph(
-                root = ComponentFactoryModel(TypeDeclarationLangModel(builderClass)).createdComponent
+                root = ComponentFactoryModel(TypeDeclaration(builderClass)).createdComponent
             )
             val promise = doValidate(graph)
             val factory = promise.awaitOnError {
@@ -108,7 +108,7 @@ object Dagger {
                 // Fallback to full reflection
             }
 
-            val graph = BindingGraph(ComponentModel(TypeDeclarationLangModel(componentClass)))
+            val graph = BindingGraph(ComponentModel(TypeDeclaration(componentClass)))
             val promise = doValidate(graph)
             val component = promise.awaitOnError {
                 RuntimeComponent(

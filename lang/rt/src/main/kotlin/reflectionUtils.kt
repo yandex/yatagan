@@ -1,38 +1,28 @@
 package com.yandex.daggerlite.lang.rt
 
 import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import java.lang.reflect.Constructor
-import java.lang.reflect.Field
-import java.lang.reflect.GenericArrayType
-import java.lang.reflect.Member
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.lang.reflect.TypeVariable
-import java.lang.reflect.WildcardType
 
-private typealias ArraysReflectionUtils = java.lang.reflect.Array
+internal fun ReflectType.equivalence() = TypeEquivalenceWrapper(this)
 
-internal fun Type.equivalence() = TypeEquivalenceWrapper(this)
+internal val ReflectMember.isStatic get() = ReflectModifier.isStatic(modifiers)
 
-internal val Member.isStatic get() = Modifier.isStatic(modifiers)
-
-internal val Member.isPublicStaticFinal get() = modifiers.let {
-    Modifier.isStatic(it) && Modifier.isFinal(it) && Modifier.isPublic(it)
+internal val ReflectMember.isPublicStaticFinal get() = modifiers.let {
+    ReflectModifier.isStatic(it) && ReflectModifier.isFinal(it) && ReflectModifier.isPublic(it)
 }
 
-internal val Member.isAbstract get() = Modifier.isAbstract(modifiers)
+internal val ReflectMember.isAbstract get() = ReflectModifier.isAbstract(modifiers)
 
-internal val Member.isPublic get() = Modifier.isPublic(modifiers)
+internal val Class<*>.isAbstract get() = ReflectModifier.isAbstract(modifiers)
 
-internal val Class<*>.isPublic get() = Modifier.isPublic(modifiers)
+internal val ReflectMember.isPublic get() = ReflectModifier.isPublic(modifiers)
 
-internal val Member.isPrivate get() = Modifier.isPrivate(modifiers)
+internal val Class<*>.isPublic get() = ReflectModifier.isPublic(modifiers)
 
-internal val Class<*>.isPrivate get() = Modifier.isPrivate(modifiers)
+internal val ReflectMember.isPrivate get() = ReflectModifier.isPrivate(modifiers)
+
+internal val Class<*>.isPrivate get() = ReflectModifier.isPrivate(modifiers)
 
 /**
  * This API is available since JVM 1.8, yet for Android it's not that simple, so
@@ -48,61 +38,61 @@ private val isExecutableApiAvailable = try {
     false
 }
 
-internal fun Method.getParameterCountCompat(): Int =
+internal fun ReflectMethod.getParameterCountCompat(): Int =
     if (isExecutableApiAvailable) parameterCount8() else parameterTypes.size
 
-internal fun Constructor<*>.getParameterCountCompat(): Int =
+internal fun ReflectConstructor.getParameterCountCompat(): Int =
     if (isExecutableApiAvailable) parameterCount8() else parameterTypes.size
 
-internal fun Method.parameterNamesCompat(): Array<String> {
+internal fun ReflectMethod.parameterNamesCompat(): Array<String> {
     return if (isExecutableApiAvailable) parameterNames8() else Array(parameterTypes.size) { index -> "p$index" }
 }
 
-internal fun Constructor<*>.parameterNamesCompat(): Array<String> {
+internal fun ReflectConstructor.parameterNamesCompat(): Array<String> {
     return if (isExecutableApiAvailable) parameterNames8() else Array(parameterTypes.size) { index -> "p$index" }
 }
 
-internal fun Type.asClass(): Class<*> = tryAsClass() ?: throw AssertionError("Not reached: not a class")
+internal fun ReflectType.asClass(): Class<*> = tryAsClass() ?: throw AssertionError("Not reached: not a class")
 
-internal fun Type.tryAsClass(): Class<*>? = when (this) {
+internal fun ReflectType.tryAsClass(): Class<*>? = when (this) {
     is Class<*> -> this
-    is ParameterizedType -> rawType.asClass()
+    is ReflectParameterizedType -> rawType.asClass()
     else -> null
 }
 
-internal fun Type.isAssignableFrom(another: Type): Boolean {
+internal fun ReflectType.isAssignableFrom(another: ReflectType): Boolean {
     return when(another) {
         is Class<*> -> isAssignableFrom(another.boxed())
-        is ParameterizedType -> isAssignableFrom(another)
-        is GenericArrayType -> isAssignableFrom(another)
+        is ReflectParameterizedType -> isAssignableFrom(another)
+        is ReflectGenericArrayType -> isAssignableFrom(another)
         else -> false  // NOTE: We don't care about wildcards here, they are not-reached
     }
 }
 
-internal fun Type.isAssignableFrom(another: Class<*>): Boolean {
+internal fun ReflectType.isAssignableFrom(another: Class<*>): Boolean {
     return when(this) {
         is Class<*> -> boxed().isAssignableFrom(another)
-        is ParameterizedType -> rawType.isAssignableFrom(another)  // As raw type (unchecked)
-        is GenericArrayType -> genericComponentType.isAssignableFrom(another)  // As raw type (unchecked)
+        is ReflectParameterizedType -> rawType.isAssignableFrom(another)  // As raw type (unchecked)
+        is ReflectGenericArrayType -> genericComponentType.isAssignableFrom(another)  // As raw type (unchecked)
         else -> false
     }
 }
 
-internal fun Type.isAssignableFrom(another: GenericArrayType): Boolean {
+internal fun ReflectType.isAssignableFrom(another: ReflectGenericArrayType): Boolean {
     return when(this) {
-        is GenericArrayType -> genericComponentType.isAssignableFrom(another.genericComponentType)
+        is ReflectGenericArrayType -> genericComponentType.isAssignableFrom(another.genericComponentType)
         else -> false
     }
 }
 
-internal fun Type.isAssignableFrom(another: ParameterizedType): Boolean {
+internal fun ReflectType.isAssignableFrom(another: ReflectParameterizedType): Boolean {
     return when(this) {
-        is ParameterizedType -> isAssignableFrom(another)
+        is ReflectParameterizedType -> isAssignableFrom(another)
         else -> false
     }
 }
 
-internal fun ParameterizedType.isAssignableFrom(another: ParameterizedType): Boolean {
+internal fun ReflectParameterizedType.isAssignableFrom(another: ReflectParameterizedType): Boolean {
     // Check if raw types are assignable
     if (!this.rawType.isAssignableFrom(another.rawType))
         return false
@@ -113,18 +103,18 @@ internal fun ParameterizedType.isAssignableFrom(another: ParameterizedType): Boo
         return false
 
     for (i in thisArgs.indices) {
-        val thisArg: Type = thisArgs[i]
-        val thatArg: Type = thatArgs[i]
+        val thisArg: ReflectType = thisArgs[i]
+        val thatArg: ReflectType = thatArgs[i]
 
         if (thisArg.isAssignableFrom(thatArg)) {
             continue
         }
 
-        if (thisArg !is WildcardType)
+        if (thisArg !is ReflectWildcardType)
             return false
 
         val thisUpperBound = thisArg.upperBounds.firstOrNull() ?: Any::class.java
-        if (thatArg is WildcardType) {
+        if (thatArg is ReflectWildcardType) {
             val thatUpperBound = thatArg.upperBounds.firstOrNull() ?: Any::class.java
             if (!thisUpperBound.isAssignableFrom(thatUpperBound)) {
                 return false
@@ -141,10 +131,10 @@ internal fun ParameterizedType.isAssignableFrom(another: ParameterizedType): Boo
 
 internal fun Class<*>.isFromKotlin() = isAnnotationPresent(Metadata::class.java)
 
-internal fun Type.formatString(): String = when (this) {
+internal fun ReflectType.formatString(): String = when (this) {
     is Class<*> -> canonicalName ?: "<unnamed>"
-    is ParameterizedType -> "${rawType.formatString()}<${actualTypeArguments.joinToString { it.formatString() }}>"
-    is WildcardType -> when {
+    is ReflectParameterizedType -> "${rawType.formatString()}<${actualTypeArguments.joinToString { it.formatString() }}>"
+    is ReflectWildcardType -> when {
         lowerBounds.isNotEmpty() -> "? super ${lowerBounds.first().formatString()}"
         upperBounds.isNotEmpty() -> when(val upperBound = upperBounds.first()) {
             Any::class.java -> "?"  // No need to write `<? extends java.langObject>`
@@ -152,12 +142,12 @@ internal fun Type.formatString(): String = when (this) {
         }
         else -> "?"
     }
-    is GenericArrayType -> "${genericComponentType.formatString()}[]"
-    is TypeVariable<*> -> "error.UnresolvedCla$$"
+    is ReflectGenericArrayType -> "${genericComponentType.formatString()}[]"
+    is ReflectTypeVariable -> "error.UnresolvedCla$$"
     else -> toString()
 }
 
-fun TypeDeclarationLangModel.kotlinObjectInstanceOrNull(): Any? {
+fun TypeDeclaration.kotlinObjectInstanceOrNull(): Any? {
     val model = this as RtTypeDeclarationImpl
     val impl = model.type.impl.asClass()
     return when(model.kind) {
@@ -171,13 +161,13 @@ fun TypeDeclarationLangModel.kotlinObjectInstanceOrNull(): Any? {
 }
 
 /**
- * @param declaringClass class that directly contains [this type][Type] in its declaration.
+ * @param declaringClass class that directly contains [this type][ReflectType] in its declaration.
  * @param asMemberOf type declaration, that this type was obtained from.
  */
-internal fun Type.resolveGenericsHierarchyAware(
+internal fun ReflectType.resolveGenericsHierarchyAware(
     declaringClass: Class<*>,
     asMemberOf: RtTypeDeclarationImpl,
-): Type {
+): ReflectType {
     return asMemberOf.typeHierarchy.find {
         // Find a type declaration that directly declares the type.
         it.type.impl.asClass() == declaringClass
@@ -193,50 +183,50 @@ private val RtTypeDeclarationImpl.typeHierarchy: Sequence<RtTypeDeclarationImpl>
         }
     }
 
-internal fun Type.resolveGenerics(genericsInfo: Lazy<Map<TypeVariable<*>, Type>>?): Type {
+internal fun ReflectType.resolveGenerics(genericsInfo: Lazy<Map<ReflectTypeVariable, ReflectType>>?): ReflectType {
     if (genericsInfo == null) {
         return this
     }
     return when (this) {
-        is TypeVariable<*> -> genericsInfo.value[this] ?: this
-        is ParameterizedType -> replaceTypeArguments { argument ->
+        is ReflectTypeVariable -> genericsInfo.value[this] ?: this
+        is ReflectParameterizedType -> replaceTypeArguments { argument ->
             argument.resolveGenerics(genericsInfo)
         }
-        is WildcardType -> replaceBounds { bound ->
+        is ReflectWildcardType -> replaceBounds { bound ->
             bound.resolveGenerics(genericsInfo)
         }
-        is GenericArrayType -> replaceComponentType(
+        is ReflectGenericArrayType -> replaceComponentType(
             componentType = genericComponentType.resolveGenerics(genericsInfo)
         )
         else -> this
     }
 }
 
-private fun GenericArrayType.replaceComponentType(
-    componentType: Type,
-): Type = when(componentType) {
+private fun ReflectGenericArrayType.replaceComponentType(
+    componentType: ReflectType,
+): ReflectType = when(componentType) {
     genericComponentType -> this
     is Class<*> -> ArraysReflectionUtils.newInstance(componentType, 0).javaClass
-    else -> @Suppress("ObjectLiteralToLambda") object : GenericArrayType {
-        override fun getGenericComponentType(): Type = componentType
+    else -> @Suppress("ObjectLiteralToLambda") object : ReflectGenericArrayType {
+        override fun getGenericComponentType(): ReflectType = componentType
     }
 }
 
-private fun ParameterizedType.replaceTypeArguments(
-    actualTypeArguments: Array<Type>,
-) = object : ParameterizedType by this {
+private fun ReflectParameterizedType.replaceTypeArguments(
+    actualTypeArguments: Array<ReflectType>,
+) = object : ReflectParameterizedType by this {
     override fun getActualTypeArguments() = actualTypeArguments
 }
 
-private fun WildcardType.replaceBounds(
-    lowerBounds: Array<Type>,
-    upperBounds: Array<Type>,
-) = object : WildcardType by this {
-    override fun getLowerBounds(): Array<Type> = lowerBounds
-    override fun getUpperBounds(): Array<Type> = upperBounds
+private fun ReflectWildcardType.replaceBounds(
+    lowerBounds: Array<ReflectType>,
+    upperBounds: Array<ReflectType>,
+) = object : ReflectWildcardType by this {
+    override fun getLowerBounds(): Array<ReflectType> = lowerBounds
+    override fun getUpperBounds(): Array<ReflectType> = upperBounds
 }
 
-private inline fun ParameterizedType.replaceTypeArguments(transform: (Type) -> Type): ParameterizedType {
+private inline fun ReflectParameterizedType.replaceTypeArguments(transform: (ReflectType) -> ReflectType): ReflectParameterizedType {
     var changed = false
     val new = Array(actualTypeArguments.size) { i ->
         val old = actualTypeArguments[i]
@@ -247,7 +237,7 @@ private inline fun ParameterizedType.replaceTypeArguments(transform: (Type) -> T
     return if (changed) replaceTypeArguments(new) else this
 }
 
-private inline fun WildcardType.replaceBounds(transform: (Type) -> Type): WildcardType {
+private inline fun ReflectWildcardType.replaceBounds(transform: (ReflectType) -> ReflectType): ReflectWildcardType {
     var changed = false
     val lowerBounds = lowerBounds
     val upperBounds = upperBounds
@@ -284,11 +274,11 @@ fun Class<*>.boxed(): Class<*> {
     }
 }
 
-@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
-internal inline val <reified A : Annotation> A.javaAnnotationClass: Class<A>
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST", "RemoveRedundantQualifierName")
+internal inline val <reified A : kotlin.Annotation> A.javaAnnotationClass: Class<A>
     get() = (this as java.lang.annotation.Annotation).annotationType() as Class<A>
 
-internal fun Class<*>.getAllFields(): List<Field> = buildList {
+internal fun Class<*>.getAllFields(): List<ReflectField> = buildList {
     tailrec fun handleClass(clazz: Class<*>, includeStatic: Boolean) {
         if (clazz === Any::class.java) {
             // Do not add fields from java.lang.Object.
@@ -312,7 +302,7 @@ internal fun Class<*>.getAllFields(): List<Field> = buildList {
     sortBy { it.name }
 }
 
-internal fun Class<*>.getMethodsOverrideAware(): List<Method> = buildList {
+internal fun Class<*>.getMethodsOverrideAware(): List<ReflectMethod> = buildList {
     val overrideControl = hashSetOf<MethodSignatureEquivalenceWrapper>()
     fun handleClass(clazz: Class<*>) {
         if (clazz === Any::class.java) {
@@ -335,16 +325,16 @@ internal fun Class<*>.getMethodsOverrideAware(): List<Method> = buildList {
     sortWith(MethodSignatureComparator)
 }
 
-private fun arrayHashCode(types: Array<Type>): Int = types.fold(1) { hash, type -> 31 * hash + hashCode(type) }
+private fun arrayHashCode(types: Array<ReflectType>): Int = types.fold(1) { hash, type -> 31 * hash + hashCode(type) }
 
-private fun hashCode(type: Type): Int = when (type) {
-    is ParameterizedType -> 31 * type.rawType.hashCode() + arrayHashCode(type.actualTypeArguments)
-    is WildcardType -> 31 * arrayHashCode(type.lowerBounds) + arrayHashCode(type.upperBounds)
-    is GenericArrayType -> hashCode(type.genericComponentType)
+private fun hashCode(type: ReflectType): Int = when (type) {
+    is ReflectParameterizedType -> 31 * type.rawType.hashCode() + arrayHashCode(type.actualTypeArguments)
+    is ReflectWildcardType -> 31 * arrayHashCode(type.lowerBounds) + arrayHashCode(type.upperBounds)
+    is ReflectGenericArrayType -> hashCode(type.genericComponentType)
     else -> type.hashCode()
 }
 
-private fun arrayEquals(one: Array<Type>, other: Array<Type>): Boolean {
+private fun arrayEquals(one: Array<ReflectType>, other: Array<ReflectType>): Boolean {
     if (one.size != other.size) return false
     for (i in one.indices) {
         if (!equals(one[i], other[i]))
@@ -353,20 +343,20 @@ private fun arrayEquals(one: Array<Type>, other: Array<Type>): Boolean {
     return true
 }
 
-private fun equals(one: Type, other: Type): Boolean = with(one) {
+private fun equals(one: ReflectType, other: ReflectType): Boolean = with(one) {
     when (this) {
-        is ParameterizedType -> {
+        is ReflectParameterizedType -> {
             // Take synthetic parameterized types into account.
-            other is ParameterizedType &&
+            other is ReflectParameterizedType &&
                     rawType == other.rawType && arrayEquals(actualTypeArguments, other.actualTypeArguments)
         }
-        is WildcardType -> {
+        is ReflectWildcardType -> {
             // Take synthetic wildcard types into account
-            other is WildcardType && arrayEquals(upperBounds, other.upperBounds) &&
+            other is ReflectWildcardType && arrayEquals(upperBounds, other.upperBounds) &&
                     arrayEquals(lowerBounds, other.lowerBounds)
         }
-        is GenericArrayType -> {
-            other is GenericArrayType && equals(genericComponentType, other.genericComponentType)
+        is ReflectGenericArrayType -> {
+            other is ReflectGenericArrayType && equals(genericComponentType, other.genericComponentType)
         }
         other -> true
         else -> false
@@ -374,16 +364,16 @@ private fun equals(one: Type, other: Type): Boolean = with(one) {
 }
 
 /**
- * This is required as [Type.equals] works only with its internal implementations on some platforms.
+ * This is required as [ReflectType.equals] works only with its internal implementations on some platforms.
  */
-internal class TypeEquivalenceWrapper private constructor(private val type: Type) {
+internal class TypeEquivalenceWrapper private constructor(private val type: ReflectType) {
     override fun hashCode(): Int = hashCode(type)
     override fun equals(other: Any?): Boolean {
         if (other !is TypeEquivalenceWrapper) return false
         return equals(type, other.type)
     }
 
-    companion object Cache : ObjectCache<Type, TypeEquivalenceWrapper>() {
-        operator fun invoke(type: Type) = createCached(type, ::TypeEquivalenceWrapper)
+    companion object Cache : ObjectCache<ReflectType, TypeEquivalenceWrapper>() {
+        operator fun invoke(type: ReflectType) = createCached(type, ::TypeEquivalenceWrapper)
     }
 }

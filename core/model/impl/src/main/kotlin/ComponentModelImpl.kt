@@ -12,11 +12,12 @@ import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Annotation
+import com.yandex.daggerlite.lang.BuiltinAnnotation
+import com.yandex.daggerlite.lang.Method
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -26,18 +27,18 @@ import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
 
 internal class ComponentModelImpl private constructor(
-    private val declaration: TypeDeclarationLangModel,
+    private val declaration: TypeDeclaration,
 ) : ComponentModel, ConditionalHoldingModel {
-    private val impl = declaration.componentAnnotationIfPresent
+    private val impl = declaration.getAnnotation(BuiltinAnnotation.Component)
 
     private val conditionalsModel by lazy {
-        ConditionalHoldingModelImpl(declaration.conditionals)
+        ConditionalHoldingModelImpl(declaration.getAnnotations(BuiltinAnnotation.Conditional))
     }
 
-    override val conditionals
+    override val conditionals: List<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
         get() = conditionalsModel.conditionals
 
-    override val type: TypeLangModel
+    override val type: Type
         get() = declaration.asType()
 
     override fun asNode(): NodeModel = NodeModelImpl(
@@ -49,14 +50,14 @@ internal class ComponentModelImpl private constructor(
         return visitor.visitComponent(this)
     }
 
-    override val scopes: Set<AnnotationLangModel> by lazy {
+    override val scopes: Set<Annotation> by lazy {
         declaration.annotations.filter { it.isScope() }.toSet()
     }
 
     override val modules: Set<ModuleModel> by lazy {
         val allModules = mutableSetOf<ModuleModel>()
         val moduleQueue: ArrayDeque<ModuleModel> = ArrayDeque(
-            impl?.modules?.map(TypeLangModel::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList())
+            impl?.modules?.map(Type::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList())
         while (moduleQueue.isNotEmpty()) {
             val module = moduleQueue.removeFirst()
             if (!allModules.add(module)) {
@@ -73,7 +74,7 @@ internal class ComponentModelImpl private constructor(
 
     override val entryPoints: Set<EntryPoint> by lazy {
         class EntryPointImpl(
-            override val getter: FunctionLangModel,
+            override val getter: Method,
             override val dependency: NodeDependency,
         ) : EntryPoint {
             override fun validate(validator: Validator) {
@@ -92,25 +93,25 @@ internal class ComponentModelImpl private constructor(
             )
         }
 
-        declaration.functions.filter {
+        declaration.methods.filter {
             it.isAbstract && it.parameters.none()
-        }.map { function ->
+        }.map { method ->
             EntryPointImpl(
                 dependency = NodeDependency(
-                    type = function.returnType,
-                    forQualifier = function,
+                    type = method.returnType,
+                    forQualifier = method,
                 ),
-                getter = function,
+                getter = method,
             )
         }.toSet()
     }
 
     override val memberInjectors: Set<MembersInjectorModel> by lazy {
-        declaration.functions.filter {
+        declaration.methods.filter {
             MembersInjectorModelImpl.canRepresent(it)
-        }.map { function ->
+        }.map { method ->
             MembersInjectorModelImpl(
-                injector = function,
+                injector = method,
             )
         }.toSet()
     }
@@ -128,7 +129,7 @@ internal class ComponentModelImpl private constructor(
         get() = impl?.multiThreadAccess ?: false
 
     override val variant: Variant by lazy {
-        VariantImpl(impl?.variant ?: emptySequence())
+        VariantImpl(impl?.variant ?: emptyList())
     }
 
     override fun validate(validator: Validator) {
@@ -156,10 +157,10 @@ internal class ComponentModelImpl private constructor(
 
         factory?.let(validator::child)
 
-        for (function in declaration.functions) {
-            if (!function.isAbstract) continue
-            if (function.parameters.count() > 1) {
-                validator.reportError(Errors.unknownMethodInComponent(method = function))
+        for (method in declaration.methods) {
+            if (!method.isAbstract) continue
+            if (method.parameters.count() > 1) {
+                validator.reportError(Errors.unknownMethodInComponent(method = method))
             }
         }
 
@@ -197,11 +198,11 @@ internal class ComponentModelImpl private constructor(
         representation = declaration,
     )
 
-    companion object Factory : ObjectCache<TypeDeclarationLangModel, ComponentModelImpl>() {
-        operator fun invoke(key: TypeDeclarationLangModel) = createCached(key, ::ComponentModelImpl)
+    companion object Factory : ObjectCache<TypeDeclaration, ComponentModelImpl>() {
+        operator fun invoke(key: TypeDeclaration) = createCached(key, ::ComponentModelImpl)
 
-        fun canRepresent(declaration: TypeDeclarationLangModel): Boolean {
-            return declaration.componentAnnotationIfPresent != null
+        fun canRepresent(declaration: TypeDeclaration): Boolean {
+            return declaration.getAnnotation(BuiltinAnnotation.Component) != null
         }
     }
 }

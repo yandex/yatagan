@@ -1,9 +1,9 @@
 package com.yandex.daggerlite.validation.format
 
-import com.yandex.daggerlite.core.graph.AliasBinding
-import com.yandex.daggerlite.core.graph.BaseBinding
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.daggerlite.core.graph.bindings.AliasBinding
+import com.yandex.daggerlite.core.graph.bindings.BaseBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.model.ComponentDependencyModel
 import com.yandex.daggerlite.core.model.ComponentFactoryModel
@@ -13,13 +13,13 @@ import com.yandex.daggerlite.core.model.ConditionalHoldingModel
 import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Annotation
+import com.yandex.daggerlite.lang.AnnotationDeclaration
+import com.yandex.daggerlite.lang.Constructor
+import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 
 object Strings {
     private const val Indent = "    "
@@ -38,7 +38,7 @@ object Strings {
         }.toError()
 
         @Covered
-        fun noMatchingScopeForBinding(binding: Binding, scopes: Set<AnnotationLangModel>) = buildRichString {
+        fun noMatchingScopeForBinding(binding: Binding, scopes: Set<Annotation>) = buildRichString {
             color = TextColor.Inherit
             appendLine("No components in the hierarchy match binding -> ")
             append(Indent).append(binding).appendLine()
@@ -52,7 +52,7 @@ object Strings {
         }.toError()
 
         @Covered
-        fun invalidFlatteningMultibinding(insteadOf: TypeLangModel) =
+        fun invalidFlatteningMultibinding(insteadOf: Type) =
             "Flattening multi-binding must return `Collection` or any of its subtypes instead of `$insteadOf`".toError()
 
         @Covered
@@ -80,7 +80,7 @@ object Strings {
             "Binding depends on itself".toError()
 
         @Covered
-        fun inconsistentBinds(param: TypeLangModel, returnType: TypeLangModel) =
+        fun inconsistentBinds(param: Type, returnType: Type) =
             "@Binds parameter `$param` is not compatible with its return type `$returnType`".toError()
 
         @Covered
@@ -143,7 +143,7 @@ object Strings {
                     "an abstract method which returns the component interface").toError()
 
         @Covered
-        fun unknownMethodInCreator(method: FunctionLangModel) = buildRichString {
+        fun unknownMethodInCreator(method: Method) = buildRichString {
             color = TextColor.Inherit
             appendLine("Unexpected/unrecognized method")
             append(Indent).append("`").appendRichString { append(method) }.appendLine('`')
@@ -181,7 +181,7 @@ object Strings {
             "Multiple component factories detected declared".toError()
 
         @Covered
-        fun unknownMethodInComponent(method: FunctionLangModel) = buildRichString {
+        fun unknownMethodInComponent(method: Method) = buildRichString {
             color = TextColor.Inherit
             appendLine("Unexpected method")
             append(Indent).appendRichString{ append(method) }.appendLine()
@@ -268,7 +268,7 @@ object Strings {
             "Unable to reach boolean result in the given expression".toError()
 
         @Covered
-        fun invalidConditionMissingMember(name: String, type: TypeLangModel) =
+        fun invalidConditionMissingMember(name: String, type: Type) =
             "Can not find accessible `$name` member in $type".toError()
 
 
@@ -283,7 +283,7 @@ object Strings {
             "Root component can not be a subcomponent".toError()
 
         @Covered
-        fun duplicateComponentScope(scope: AnnotationLangModel) =
+        fun duplicateComponentScope(scope: Annotation) =
             "A single scope `$scope` can not be present on more than one component in a hierarchy".toError()
 
         @Covered
@@ -317,7 +317,7 @@ object Strings {
             "Assisted inject factory must be an interface.".toError()
 
         @Covered
-        fun assistedInjectTypeNoConstructor(type: TypeLangModel?) = if (type == null) {
+        fun assistedInjectTypeNoConstructor(type: Type?) = if (type == null) {
             "No @AssistedInject constructor can be found"
         } else {
             "Type `$type` doesn't have an @AssistedInject constructor."
@@ -347,7 +347,7 @@ object Strings {
             "@Provides-annotated methods must be $AccessMessage.".toError()
 
         @Covered
-        fun invalidAccessForMemberToInject(member: MemberLangModel) =
+        fun invalidAccessForMemberToInject(member: Member) =
             "@Inject member `$member` must be $AccessMessage.".toError()
 
         @Covered
@@ -355,11 +355,11 @@ object Strings {
             "Module contains provisions and thus must be $AccessMessage.".toError()
 
         @Covered
-        fun invalidAccessForConditionClass(`class`: TypeDeclarationLangModel) =
+        fun invalidAccessForConditionClass(`class`: TypeDeclaration) =
             "Class `$`class`` is not accessible for condition computation, make it $AccessMessage".toError()
 
         @Covered
-        fun invalidAccessForConditionMember(member: MemberLangModel) =
+        fun invalidAccessForConditionMember(member: Member) =
             "Member `$member` is not accessible for condition computation, make it $AccessMessage".toError()
 
         @Covered
@@ -383,21 +383,21 @@ object Strings {
             "Multiple IntoMap.Key-annotations are present on the binding".toError()
 
         @Covered
-        fun missingMapKeyValue(annotationClass: AnnotationDeclarationLangModel) =
+        fun missingMapKeyValue(annotationClass: AnnotationDeclaration) =
             "Map key `$annotationClass` is missing a `value` attribute to be used as a key value".toError()
 
         @Covered
-        fun unsupportedAnnotationValueAsMapKey(annotationClass: AnnotationDeclarationLangModel) =
+        fun unsupportedAnnotationValueAsMapKey(annotationClass: AnnotationDeclaration) =
             ("Map key `$annotationClass`'s `value` attribute has annotation type, " +
                     "which is not supported as a map key").toError()
 
         @Covered
-        fun unsupportedArrayValueAsMapKey(annotationClass: AnnotationDeclarationLangModel) =
+        fun unsupportedArrayValueAsMapKey(annotationClass: AnnotationDeclaration) =
             ("Map key `$annotationClass`'s `value` attribute has array type, " +
                     "which is not supported as a map key").toError()
 
         @Covered
-        fun duplicateKeysInMapping(mapType: NodeModel, keyValue: AnnotationLangModel.Value) = buildRichString {
+        fun duplicateKeysInMapping(mapType: NodeModel, keyValue: Annotation.Value) = buildRichString {
             color = TextColor.Inherit
             append("Mapping for `").append(mapType).append("` contains duplicates for key `")
                 .append(keyValue).append("`")
@@ -405,7 +405,7 @@ object Strings {
 
         @Covered
         fun invalidAnnotationRetention(
-            annotationDeclaration: AnnotationDeclarationLangModel,
+            annotationDeclaration: AnnotationDeclaration,
             insteadOf: AnnotationRetention,
         ) = ("Annotation class `$annotationDeclaration` must have RUNTIME retention instead of $insteadOf").toError()
     }
@@ -415,10 +415,10 @@ object Strings {
         fun scopeRebindIsForbidden() = "Scope has no effect on 'alias' binding".toWarning()
 
         @Covered
-        fun ignoredDependencyOfFrameworkType(function: Any) = buildRichString {
+        fun ignoredDependencyOfFrameworkType(method: Any) = buildRichString {
             color = TextColor.Inherit
             appendLine("function")
-            append(Indent).appendRichString { append(function) }.appendLine()
+            append(Indent).appendRichString { append(method) }.appendLine()
             append("returns a framework type (Provider/Lazy/Optional) and such type can not be " +
                     "directly introduced to the graph via component dependency - the function will be ignored. " +
                     "If you need this to form a binding - change the return type, or use a wrapper type. " +
@@ -465,7 +465,7 @@ object Strings {
         }.toNote()
 
         @Covered
-        fun conflictingCreator(creator: TypeDeclarationLangModel) = buildRichString {
+        fun conflictingCreator(creator: TypeDeclaration) = buildRichString {
             color = TextColor.Inherit
             append("Declared `").append(creator).append('`')
         }.toNote()
@@ -511,7 +511,7 @@ object Strings {
             append('`')
         }.toNote()
 
-        fun inaccessibleAutoConstructorForMissingModule(constructor: ConstructorLangModel) =
+        fun inaccessibleAutoConstructorForMissingModule(constructor: Constructor) =
             ("found effectively not public parameterless constructor here: `$constructor`" +
                     "maybe make it public or internal to allow automatic module creation?").toNote()
 

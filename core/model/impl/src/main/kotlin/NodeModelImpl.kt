@@ -7,15 +7,15 @@ import com.yandex.daggerlite.core.model.HasNodeModel
 import com.yandex.daggerlite.core.model.InjectConstructorModel
 import com.yandex.daggerlite.core.model.NodeDependency
 import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.AnnotationLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
+import com.yandex.daggerlite.lang.Annotated
+import com.yandex.daggerlite.lang.Annotation
+import com.yandex.daggerlite.lang.BuiltinAnnotation
+import com.yandex.daggerlite.lang.Constructor
 import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.lang.getListType
 import com.yandex.daggerlite.lang.getProviderType
 import com.yandex.daggerlite.lang.getSetType
-import com.yandex.daggerlite.lang.isAnnotatedWith
 import com.yandex.daggerlite.validation.MayBeInvalid
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -26,11 +26,10 @@ import com.yandex.daggerlite.validation.format.appendRichString
 import com.yandex.daggerlite.validation.format.buildRichString
 import com.yandex.daggerlite.validation.format.modelRepresentation
 import com.yandex.daggerlite.validation.format.reportError
-import javax.inject.Inject
 
 internal class NodeModelImpl private constructor(
-    override val type: TypeLangModel,
-    override val qualifier: AnnotationLangModel?,
+    override val type: Type,
+    override val qualifier: Annotation?,
 ) : NodeModel, NodeDependency {
 
     init {
@@ -40,17 +39,17 @@ internal class NodeModelImpl private constructor(
     }
 
     private inner class InjectConstructorImpl(
-        override val constructor: ConstructorLangModel,
+        override val constructor: Constructor,
     ) : InjectConstructorModel, ConditionalHoldingModel {
         init {
-            assert(constructor.isAnnotatedWith<Inject>())
+            assert(constructor.getAnnotation(BuiltinAnnotation.Inject) != null)
         }
 
         private val conditionalModel by lazy {
-            ConditionalHoldingModelImpl(constructor.constructee.conditionals)
+            ConditionalHoldingModelImpl(constructor.constructee.getAnnotations(BuiltinAnnotation.Conditional))
         }
 
-        override val conditionals: Sequence<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
+        override val conditionals: List<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
             get() = conditionalModel.conditionals
 
         override val inputs: List<NodeDependency> by lazy {
@@ -59,7 +58,7 @@ internal class NodeModelImpl private constructor(
             }.toList()
         }
 
-        override val type: TypeLangModel = this@NodeModelImpl.type
+        override val type: Type = this@NodeModelImpl.type
 
         override fun asNode(): NodeModel = this@NodeModelImpl
 
@@ -67,7 +66,7 @@ internal class NodeModelImpl private constructor(
             return visitor.visitInjectConstructor(this)
         }
 
-        override val scopes: Set<AnnotationLangModel> by lazy {
+        override val scopes: Set<Annotation> by lazy {
             constructor.constructee.annotations.filter { it.isScope() }.toSet()
         }
 
@@ -126,7 +125,7 @@ internal class NodeModelImpl private constructor(
         )
     }
 
-    override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> {
+    override fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel> {
         val keyType = key.asBoxed()  // Need to use box as key may be a primitive type
         val valueType = if (asProviders) LangModelFactory.getProviderType(type) else type
         return arrayOf(
@@ -147,7 +146,7 @@ internal class NodeModelImpl private constructor(
     override fun getSpecificModel(): HasNodeModel? {
         val declaration = type.declaration
         val inject = if (qualifier == null) {
-            declaration.constructors.find { it.isAnnotatedWith<Inject>() }
+            declaration.constructors.find { it.getAnnotation(BuiltinAnnotation.Inject) != null }
         } else null
         return when {
             inject != null -> InjectConstructorImpl(inject)
@@ -186,7 +185,7 @@ internal class NodeModelImpl private constructor(
             override fun dropQualifier(): NodeModel = this
             override fun multiBoundListNodes(): Array<NodeModel> = emptyArray()
             override fun multiBoundSetNodes(): Array<NodeModel> = emptyArray()
-            override fun multiBoundMapNodes(key: TypeLangModel, asProviders: Boolean): Array<NodeModel> = emptyArray()
+            override fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel> = emptyArray()
             override fun validate(validator: Validator) {
                 validator.reportError(Strings.Errors.voidBinding())
             }
@@ -205,13 +204,13 @@ internal class NodeModelImpl private constructor(
         }
 
         operator fun invoke(
-            type: TypeLangModel,
-            forQualifier: AnnotatedLangModel?,
-        ) = this(type, forQualifier?.annotations?.find(AnnotationLangModel::isQualifier))
+            type: Type,
+            forQualifier: Annotated?,
+        ) = this(type, forQualifier?.annotations?.find(Annotation::isQualifier))
 
         operator fun invoke(
-            type: TypeLangModel,
-            qualifier: AnnotationLangModel? = null,
+            type: Type,
+            qualifier: Annotation? = null,
         ): NodeModelImpl {
             val boxed = type.asBoxed()
             val key: Any = if (qualifier != null) boxed to qualifier else boxed

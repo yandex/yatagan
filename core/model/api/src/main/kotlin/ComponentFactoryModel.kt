@@ -3,7 +3,7 @@ package com.yandex.daggerlite.core.model
 import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Dependency
 import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Instance
 import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Module
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -17,15 +17,15 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
     val createdComponent: ComponentModel
 
     /**
-     * Factory function inputs.
+     * Factory method's inputs.
      */
     val factoryInputs: Collection<FactoryInputModel>
 
     /**
-     * The component creating function to implement.
+     * The component creating method to implement.
      * `null` if no appropriate method is found.
      */
-    val factoryMethod: FunctionLangModel?
+    val factoryMethod: Method?
 
     /**
      * TODO: doc.
@@ -93,8 +93,8 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
         /**
          * Actual abstract setter.
          * Has *single parameter*; return type may be of the builder type itself or
-         * [void][com.yandex.daggerlite.lang.TypeLangModel.isVoid].
+         * [void][com.yandex.daggerlite.lang.Type.isVoid].
          */
-        val builderSetter: FunctionLangModel
+        val builderSetter: Method
     }
 }

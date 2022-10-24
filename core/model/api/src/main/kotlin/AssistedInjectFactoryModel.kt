@@ -1,8 +1,8 @@
 package com.yandex.daggerlite.core.model
 
-import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
+import com.yandex.daggerlite.lang.Constructor
+import com.yandex.daggerlite.lang.Method
+import com.yandex.daggerlite.lang.Type
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -13,13 +13,13 @@ interface AssistedInjectFactoryModel : MayBeInvalid, HasNodeModel {
      * Factory method that takes assisted parameters and creates the instance via [assistedInjectConstructor],
      * passing "assisted" parameters as is, providing non-assisted (injected) dependencies from a graph.
      */
-    val factoryMethod: FunctionLangModel?
+    val factoryMethod: Method?
 
     /**
      * an [@AssistedInject][com.yandex.daggerlite.AssistedInject]-annotated constructor from the
      * factory's target type.
      */
-    val assistedInjectConstructor: ConstructorLangModel?
+    val assistedInjectConstructor: Constructor?
 
     /**
      * Parsed parameter models from [assistedInjectConstructor].
@@ -37,7 +37,7 @@ interface AssistedInjectFactoryModel : MayBeInvalid, HasNodeModel {
          */
         data class Assisted(
             val identifier: String,
-            val type: TypeLangModel,
+            val type: Type,
         ) : Parameter {
             override fun toString() = "@Assisted(\"$identifier\") $type"
         }

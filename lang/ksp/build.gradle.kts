@@ -16,7 +16,6 @@ tasks.withType<KotlinCompile> {
 val kspVersion: String by extra
 
 dependencies {
-    implementation(project(":api:public"))
     implementation(project(":base"))
     api(project(":lang:api"))
     api(project(":lang:compiled"))

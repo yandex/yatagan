@@ -2,6 +2,8 @@ package com.yandex.daggerlite.core.graph
 
 import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage.Eager
 import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage.Lazy
+import com.yandex.daggerlite.core.graph.bindings.BaseBinding
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
 import com.yandex.daggerlite.core.model.ComponentDependencyModel
 import com.yandex.daggerlite.core.model.ComponentFactoryModel
@@ -12,7 +14,7 @@ import com.yandex.daggerlite.core.model.HasNodeModel
 import com.yandex.daggerlite.core.model.ModuleModel
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.lang.AnnotationLangModel
+import com.yandex.daggerlite.lang.Annotation
 import com.yandex.daggerlite.validation.MayBeInvalid
 
 /**
@@ -89,7 +91,7 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
      *
      * @see ComponentModel.scopes
      */
-    val scopes: Set<AnnotationLangModel>
+    val scopes: Set<Annotation>
 
     /**
      * Component creator model declared in the underlying model.

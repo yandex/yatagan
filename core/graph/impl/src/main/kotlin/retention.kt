@@ -2,7 +2,7 @@ package com.yandex.daggerlite.core.graph.impl
 
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.model.ModuleHostedBindingModel.BindingTargetModel
-import com.yandex.daggerlite.lang.AnnotationDeclarationLangModel
+import com.yandex.daggerlite.lang.AnnotationDeclaration
 import com.yandex.daggerlite.lang.LangModelFactory
 import com.yandex.daggerlite.validation.Validator
 import com.yandex.daggerlite.validation.format.Strings
@@ -15,7 +15,7 @@ fun validateAnnotationsRetention(graph: BindingGraph, validator: Validator) {
     }
 
     // Gather scopes, qualifiers and map-keys, that must have RUNTIME retention, so RT can read them.
-    val allAnnotationDeclarations: Set<AnnotationDeclarationLangModel> = buildSet {
+    val allAnnotationDeclarations: Set<AnnotationDeclaration> = buildSet {
         for (scope in graph.scopes) {
             add(scope.annotationClass)
         }

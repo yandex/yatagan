@@ -18,27 +18,27 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.yandex.daggerlite.base.ObjectCache
 import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.AnnotatedLangModel
-import com.yandex.daggerlite.lang.ConstructorLangModel
-import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Annotated
+import com.yandex.daggerlite.lang.Constructor
+import com.yandex.daggerlite.lang.Field
+import com.yandex.daggerlite.lang.Method
+import com.yandex.daggerlite.lang.Parameter
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.TypeDeclaration
 import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.TypeDeclarationLangModel
-import com.yandex.daggerlite.lang.TypeLangModel
-import com.yandex.daggerlite.lang.common.ConstructorLangModelBase
-import com.yandex.daggerlite.lang.common.FieldLangModelBase
-import com.yandex.daggerlite.lang.compiled.CtAnnotationLangModel
-import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationLangModel
+import com.yandex.daggerlite.lang.compiled.CtAnnotationBase
+import com.yandex.daggerlite.lang.compiled.CtConstructorBase
+import com.yandex.daggerlite.lang.compiled.CtFieldBase
+import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationBase
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
-) : CtTypeDeclarationLangModel() {
+) : CtTypeDeclarationBase() {
     private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
     private val annotated = KspAnnotatedImpl(impl)
 
-    override val annotations: Sequence<CtAnnotationLangModel> = annotated.annotations
+    override val annotations: Sequence<CtAnnotationBase> = annotated.annotations
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>) = annotated.isAnnotatedWith(type)
 
     override val isEffectivelyPublic: Boolean
@@ -63,10 +63,10 @@ internal class KspTypeDeclarationImpl private constructor(
     override val qualifiedName: String
         get() = impl.qualifiedName?.asString() ?: ""
 
-    override val enclosingType: TypeDeclarationLangModel?
+    override val enclosingType: TypeDeclaration?
         get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { Factory(KspTypeImpl(it.asType(emptyList()))) }
 
-    override val interfaces: Sequence<TypeLangModel> by lazy {
+    override val interfaces: Sequence<Type> by lazy {
         impl.superTypes.map {
             it.resolve()
         }.filter {
@@ -75,7 +75,7 @@ internal class KspTypeDeclarationImpl private constructor(
             .memoize()
     }
 
-    override val superType: TypeLangModel? by lazy {
+    override val superType: Type? by lazy {
         impl.superTypes.map {
             it.resolve()
         }.find {
@@ -84,7 +84,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }?.let { KspTypeImpl(it.asMemberOfThis()) }
     }
 
-    override val constructors: Sequence<ConstructorLangModel> by lazy {
+    override val constructors: Sequence<Constructor> by lazy {
         when(kind) {
             TypeDeclarationKind.Annotation -> {
                 // Kotlin treats annotations as classes, we don't.
@@ -104,7 +104,7 @@ internal class KspTypeDeclarationImpl private constructor(
         fun filterAll(it: KSAnnotated) = true
     }
 
-    override val functions: Sequence<FunctionLangModel> by lazy {
+    override val methods: Sequence<Method> by lazy {
         sequence {
             when (kind) {
                 TypeDeclarationKind.KotlinObject -> {
@@ -158,17 +158,17 @@ internal class KspTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    private suspend fun SequenceScope<FunctionLangModel>.functionsImpl(
+    private suspend fun SequenceScope<Method>.functionsImpl(
         declaration: KSClassDeclaration,
         filter: FunctionFilter,
         isStatic: (KSAnnotated) -> Boolean,
     ) {
-        for (function in declaration.allNonPrivateFunctions()) {
-            if (!filter.filterFunction(function)) continue
-            yield(KspFunctionImpl(
+        for (method in declaration.allNonPrivateFunctions()) {
+            if (!filter.filterFunction(method)) continue
+            yield(KspMethodImpl(
                 owner = this@KspTypeDeclarationImpl,
-                impl = function,
-                isStatic = isStatic(function),
+                impl = method,
+                isStatic = isStatic(method),
             ))
         }
 
@@ -183,7 +183,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    private suspend fun SequenceScope<FunctionLangModel>.explodeProperty(
+    private suspend fun SequenceScope<Method>.explodeProperty(
         property: KSPropertyDeclaration,
         owner: KspTypeDeclarationImpl,
         filter: FunctionFilter,
@@ -192,7 +192,7 @@ internal class KspTypeDeclarationImpl private constructor(
         val isPropertyStatic = isStatic(property)
         property.getter?.let { getter ->
             if (filter.filterAccessor(getter)) {
-                yield(KspFunctionPropertyGetterImpl(
+                yield(KspPropertyGetterImpl(
                     owner = owner, getter = getter,
                     isStatic = isPropertyStatic || isStatic(getter)
                 ))
@@ -201,7 +201,7 @@ internal class KspTypeDeclarationImpl private constructor(
         property.setter?.let { setter ->
             val modifiers = setter.modifiers
             if (Modifier.PRIVATE !in modifiers && Modifier.PROTECTED !in modifiers && filter.filterAccessor(setter)) {
-                yield(KspFunctionPropertySetterImpl(
+                yield(KspPropertySetterImpl(
                     owner = owner, setter = setter,
                     isStatic = isPropertyStatic || isStatic(setter)
                 ))
@@ -209,11 +209,11 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    private suspend fun SequenceScope<FieldLangModel>.yieldInheritedFields() {
+    private suspend fun SequenceScope<Field>.yieldInheritedFields() {
         val declared = impl.getDeclaredProperties().toSet()
 
         // We can't use `getAllProperties()` here, as it doesn't handle Java's "shadowed" fields properly.
-        suspend fun SequenceScope<FieldLangModel>.includeFieldsFrom(type: KSType) {
+        suspend fun SequenceScope<Field>.includeFieldsFrom(type: KSType) {
             val clazz = type.declaration as? KSClassDeclaration ?: return
             clazz.getDeclaredProperties()
                 .filter {
@@ -236,7 +236,7 @@ internal class KspTypeDeclarationImpl private constructor(
         includeFieldsFrom(type.impl)
     }
 
-    override val fields: Sequence<FieldLangModel> = run {
+    override val fields: Sequence<Field> = run {
         sequence {
             when (kind) {
                 TypeDeclarationKind.KotlinObject -> {
@@ -316,7 +316,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }.memoize()
     }
 
-    override val nestedClasses: Sequence<TypeDeclarationLangModel> by lazy {
+    override val nestedClasses: Sequence<TypeDeclaration> by lazy {
         impl.declarations
             .filterIsInstance<KSClassDeclaration>()
             .filter { !it.isPrivate() }
@@ -332,7 +332,7 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    override fun asType(): TypeLangModel {
+    override fun asType(): Type {
         return type
     }
 
@@ -377,7 +377,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: KSFunctionDeclaration,
-    ) : ConstructorLangModelBase(), AnnotatedLangModel by KspAnnotatedImpl(platformModel) {
+    ) : CtConstructorBase(), Annotated by KspAnnotatedImpl(platformModel) {
         private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean
@@ -391,8 +391,8 @@ internal class KspTypeDeclarationImpl private constructor(
                 }
                 return platformModel.isPublicOrInternal()
             }
-        override val constructee: TypeDeclarationLangModel get() = this@KspTypeDeclarationImpl
-        override val parameters: Sequence<ParameterLangModel> = parametersSequenceFor(
+        override val constructee: TypeDeclaration get() = this@KspTypeDeclarationImpl
+        override val parameters: Sequence<Parameter> = parametersSequenceFor(
             declaration = platformModel,
             containing = type.impl,
             jvmMethodSignature = jvmSignature,
@@ -400,10 +400,10 @@ internal class KspTypeDeclarationImpl private constructor(
     }
 
     private class PSFSyntheticField(
-        override val owner: TypeDeclarationLangModel,
-        override val type: TypeLangModel = owner.asType(),
+        override val owner: TypeDeclaration,
+        override val type: Type = owner.asType(),
         override val name: String,
-    ) : FieldLangModelBase() {
+    ) : CtFieldBase() {
         override val isEffectivelyPublic: Boolean get() = true
         override val annotations: Sequence<Nothing> get() = emptySequence()
         override val platformModel: Any? get() = null

@@ -1,15 +1,14 @@
 package com.yandex.daggerlite.codegen.impl
 
 import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.core.graph.Binding
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.Extensible
+import com.yandex.daggerlite.core.graph.bindings.Binding
 import com.yandex.daggerlite.core.model.DependencyKind
 import com.yandex.daggerlite.core.model.NodeModel
 import com.yandex.daggerlite.core.model.component1
 import com.yandex.daggerlite.core.model.component2
 import com.yandex.daggerlite.core.model.isNever
-import javax.inject.Provider
 
 internal class AccessStrategyManager(
     private val thisGraph: BindingGraph,

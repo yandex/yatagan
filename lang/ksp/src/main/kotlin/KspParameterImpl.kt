@@ -2,20 +2,20 @@ package com.yandex.daggerlite.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.KSValueParameter
-import com.yandex.daggerlite.lang.TypeLangModel
-import com.yandex.daggerlite.lang.compiled.CtAnnotatedLangModel
-import com.yandex.daggerlite.lang.compiled.CtParameterLangModel
+import com.yandex.daggerlite.lang.Type
+import com.yandex.daggerlite.lang.compiled.CtAnnotated
+import com.yandex.daggerlite.lang.compiled.CtParameterBase
 
 internal class KspParameterImpl(
     private val impl: KSValueParameter,
     private val refinedTypeRef: KSTypeReference,
     private val jvmSignatureSupplier: () -> String?,
-) : CtParameterLangModel(), CtAnnotatedLangModel by KspAnnotatedImpl(impl) {
+) : CtParameterBase(), CtAnnotated by KspAnnotatedImpl(impl) {
 
     override val name: String
         get() = impl.name?.asString() ?: "unnamed"
 
-    override val type: TypeLangModel by lazy {
+    override val type: Type by lazy {
         KspTypeImpl(
             reference = refinedTypeRef,
             jvmSignatureHint = jvmSignatureSupplier(),

@@ -11,7 +11,7 @@ import com.yandex.daggerlite.core.graph.Extensible
 import com.yandex.daggerlite.core.graph.normalized
 import com.yandex.daggerlite.core.model.ConditionModel
 import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.lang.FunctionLangModel
+import com.yandex.daggerlite.lang.Method
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 
@@ -198,7 +198,7 @@ internal class ConditionGenerator(
                     }
                 }
                 +".%N".formatCode(member.name)
-                if (member is FunctionLangModel) +"()"
+                if (member is Method) +"()"
             }
         }
     }

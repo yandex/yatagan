@@ -24,7 +24,7 @@ import com.google.devtools.ksp.symbol.NonExistLocation
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
-import com.yandex.daggerlite.lang.ParameterLangModel
+import com.yandex.daggerlite.lang.Parameter
 
 
 internal fun <A : Annotation> KSAnnotation.hasType(clazz: Class<A>): Boolean {
@@ -116,7 +116,7 @@ internal fun parametersSequenceFor(
     declaration: KSFunctionDeclaration,
     jvmMethodSignature: JvmMethodSignature,
     containing: KSType?,
-) = sequence<ParameterLangModel> {
+) = sequence<Parameter> {
     val parameters = declaration.parameters
     val types = containing?.let { declaration.asMemberOf(it).parameterTypes }
     for (i in parameters.indices) {

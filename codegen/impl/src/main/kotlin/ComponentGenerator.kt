@@ -8,11 +8,10 @@ import com.yandex.daggerlite.codegen.poetry.buildExpression
 import com.yandex.daggerlite.core.graph.BindingGraph
 import com.yandex.daggerlite.core.graph.component1
 import com.yandex.daggerlite.core.graph.component2
-import com.yandex.daggerlite.lang.FieldLangModel
-import com.yandex.daggerlite.lang.FunctionLangModel
-import com.yandex.daggerlite.lang.MemberLangModel
+import com.yandex.daggerlite.lang.Field
+import com.yandex.daggerlite.lang.Member
+import com.yandex.daggerlite.lang.Method
 import com.yandex.daggerlite.lang.compiled.ClassNameModel
-import javax.inject.Provider
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.Modifier.STATIC
@@ -140,8 +139,8 @@ internal class ComponentGenerator(
                 membersInjector.membersToInject.forEach { (member, dependency) ->
                     val binding = graph.resolveBinding(dependency.node)
                     +buildExpression {
-                        member.accept(object : MemberLangModel.Visitor<Unit> {
-                            override fun visitFunction(model: FunctionLangModel) {
+                        member.accept(object : Member.Visitor<Unit> {
+                            override fun visitMethod(model: Method) {
                                 +"%N.%N(".formatCode(instanceName, member.name)
                                 binding.generateAccess(
                                     builder = this@buildExpression,
@@ -152,7 +151,7 @@ internal class ComponentGenerator(
                                 +")"
                             }
 
-                            override fun visitField(model: FieldLangModel) {
+                            override fun visitField(model: Field) {
                                 +"%N.%N = ".formatCode(instanceName, member.name)
                                 binding.generateAccess(
                                     builder = this@buildExpression,
