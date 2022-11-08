@@ -38,7 +38,7 @@ Encountered:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 warning: function
-    test.MyDependency::getNotGonnaBeUsed(): com.yandex.daggerlite.Optional<java.lang.Object>
+    test.MyDependency::getNotGonnaBeUsed(): com.yandex.yatagan.Optional<java.lang.Object>
 returns a framework type (Provider/Lazy/Optional) and such type can not be directly introduced to the graph via component dependency - the function will be ignored. If you need this to form a binding - change the return type, or use a wrapper type. Otherwise remove the function from the dependency interface entirely.
 Encountered:
   in graph for root-component test.MyComponent

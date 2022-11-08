@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.procedural
+package com.yandex.yatagan.testing.procedural
 
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
@@ -11,9 +11,9 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
-import com.yandex.daggerlite.testing.procedural.GenerationParams.BindingType
-import com.yandex.daggerlite.testing.procedural.GenerationParams.DependencyKind
-import com.yandex.daggerlite.testing.procedural.GenerationParams.ProvisionScopes
+import com.yandex.yatagan.testing.procedural.GenerationParams.BindingType
+import com.yandex.yatagan.testing.procedural.GenerationParams.DependencyKind
+import com.yandex.yatagan.testing.procedural.GenerationParams.ProvisionScopes
 import java.io.File
 import kotlin.math.roundToInt
 import kotlin.random.Random

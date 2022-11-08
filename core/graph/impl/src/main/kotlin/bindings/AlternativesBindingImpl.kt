@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.AlternativesBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.impl.or
-import com.yandex.daggerlite.core.model.BindsBindingModel
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.bindingModelRepresentation
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.AlternativesBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.impl.or
+import com.yandex.yatagan.core.model.BindsBindingModel
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.bindingModelRepresentation
 
 internal class AlternativesBindingImpl(
     override val impl: BindsBindingModel,

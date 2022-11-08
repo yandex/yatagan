@@ -1,6 +1,6 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
-import com.yandex.daggerlite.validation.RichString
+import com.yandex.yatagan.validation.RichString
 
 /**
  * A delegate interface, that provides API for clients, that wish to enable full DL validation
@@ -12,7 +12,7 @@ import com.yandex.daggerlite.validation.RichString
  */
 interface DynamicValidationDelegate {
     /**
-     * Whether to load and use [com.yandex.daggerlite.validation.spi.ValidationPluginProvider]s.
+     * Whether to load and use [com.yandex.yatagan.validation.spi.ValidationPluginProvider]s.
      */
     val usePlugins: Boolean
 

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  * Annotates an annotation class that denotes a component variant dimension.

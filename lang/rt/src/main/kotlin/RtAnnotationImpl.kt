@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.IntoMap
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.lang.Annotated
-import com.yandex.daggerlite.lang.Annotation.Value
-import com.yandex.daggerlite.lang.AnnotationDeclaration
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.AnnotationBase
-import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
+import com.yandex.yatagan.IntoMap
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.Annotation.Value
+import com.yandex.yatagan.lang.AnnotationDeclaration
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.common.AnnotationBase
+import com.yandex.yatagan.lang.common.AnnotationDeclarationBase
 import javax.inject.Qualifier
 import javax.inject.Scope
 

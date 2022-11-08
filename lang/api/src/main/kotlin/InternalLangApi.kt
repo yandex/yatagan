@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang
+package com.yandex.yatagan.lang
 
 /**
  * Marker for a lang API that may be used for dagger-lite implementation and is restricted from client (SPI) usage.

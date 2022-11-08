@@ -1,4 +1,4 @@
-import com.yandex.daggerlite.gradle.isValidSemVerString
+import com.yandex.yatagan.gradle.isValidSemVerString
 
 plugins {
     id("daggerlite.base-module")
@@ -32,7 +32,7 @@ publishing {
         create<MavenPublication>("main") {
             from(components["java"])
             this.version = daggerLiteVersion
-            this.groupId = "com.yandex.daggerlite"
+            this.groupId = "com.yandex.yatagan"
             this.artifactId = path.trim(':').replace(':', '-')
         }
 

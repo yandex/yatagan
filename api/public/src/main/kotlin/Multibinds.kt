@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  *
@@ -9,7 +9,7 @@ package com.yandex.daggerlite
  * Example:
  * ```kotlin
  * /*@*/ package test
- * /*@*/ import com.yandex.daggerlite.*
+ * /*@*/ import com.yandex.yatagan.*
  * @Module
  * interface SomeModule {
  *   @Multibinds

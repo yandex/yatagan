@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
-import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtMethodBase
+import com.yandex.yatagan.lang.compiled.CtAnnotated
+import com.yandex.yatagan.lang.compiled.CtMethodBase
 
 internal abstract class KspPropertyAccessorBase<T : KSPropertyAccessor>(
     private val accessor: T,

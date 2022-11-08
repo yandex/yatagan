@@ -1,7 +1,7 @@
 @file:[JvmMultifileClass JvmName("Loader")]
-package com.yandex.daggerlite.common
+package com.yandex.yatagan.common
 
-import com.yandex.daggerlite.Component
+import com.yandex.yatagan.Component
 
 /**
  * Must be used on root components with declared builder.

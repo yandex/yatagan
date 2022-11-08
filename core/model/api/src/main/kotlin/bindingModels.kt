@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.AnnotationDeclaration
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.AnnotationDeclaration
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Declared in a [ModuleModel], and thus explicit, binding model.
@@ -109,14 +109,14 @@ interface ModuleHostedBindingModel : MayBeInvalid {
 }
 
 /**
- * [com.yandex.daggerlite.Binds] binding model.
+ * [com.yandex.yatagan.Binds] binding model.
  */
 interface BindsBindingModel : ModuleHostedBindingModel {
     val sources: Sequence<NodeModel>
 }
 
 /**
- * [com.yandex.daggerlite.Provides] binding model.
+ * [com.yandex.yatagan.Provides] binding model.
  */
 interface ProvidesBindingModel : ModuleHostedBindingModel, ConditionalHoldingModel {
     val inputs: List<NodeDependency>

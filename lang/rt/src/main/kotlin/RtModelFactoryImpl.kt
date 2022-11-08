@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.lang.LangModelFactory
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
 
 class RtModelFactoryImpl(
     private val classLoader: ClassLoader,

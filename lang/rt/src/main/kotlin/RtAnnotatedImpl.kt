@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.lang.Annotated
-import com.yandex.daggerlite.lang.Annotation
+import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.Annotation
 
 internal class RtAnnotatedImpl(
     private val impl: ReflectAnnotatedElement,

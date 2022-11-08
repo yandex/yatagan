@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.lang.jap
+package com.yandex.yatagan.lang.jap
 
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.common.NoDeclaration
-import com.yandex.daggerlite.lang.compiled.CtTypeBase
-import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.NoDeclaration
+import com.yandex.yatagan.lang.compiled.CtTypeBase
+import com.yandex.yatagan.lang.compiled.CtTypeNameModel
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 

@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +25,7 @@ class RetentionCheckTest(
     fun setUp() {
         usages = SourceSet {
             givenKotlinSource("test.TestCase", """
-                import com.yandex.daggerlite.*
+                import com.yandex.yatagan.*
                 import javax.inject.*                
 
                 @MyDefaultScope @MyBinaryScope @MyRuntimeScope
@@ -61,7 +61,7 @@ class RetentionCheckTest(
         includeFromSourceSet(usages)
 
         givenKotlinSource("test.Annotations", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @[Qualifier Retention(AnnotationRetention.BINARY)]
@@ -100,7 +100,7 @@ class RetentionCheckTest(
         includeFromSourceSet(usages)
 
         givenJavaSource("test.Annotations", """
-            import com.yandex.daggerlite.IntoMap;
+            import com.yandex.yatagan.IntoMap;
             import java.lang.annotation.Retention;
             import java.lang.annotation.RetentionPolicy;
             import javax.inject.Qualifier;

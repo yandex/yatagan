@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.processor.common
+package com.yandex.yatagan.processor.common
 
 class LoggerDecorator(
     private val wrapped: Logger,

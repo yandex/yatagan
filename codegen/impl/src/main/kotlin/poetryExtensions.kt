@@ -1,22 +1,22 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.WildcardTypeName
-import com.yandex.daggerlite.codegen.poetry.MethodSpecBuilder
-import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.core.model.ClassBackedModel
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.compiled.ArrayNameModel
-import com.yandex.daggerlite.lang.compiled.ClassNameModel
-import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
-import com.yandex.daggerlite.lang.compiled.ErrorNameModel
-import com.yandex.daggerlite.lang.compiled.KeywordTypeNameModel
-import com.yandex.daggerlite.lang.compiled.ParameterizedNameModel
-import com.yandex.daggerlite.lang.compiled.WildcardNameModel
+import com.yandex.yatagan.codegen.poetry.MethodSpecBuilder
+import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
+import com.yandex.yatagan.core.model.ClassBackedModel
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.compiled.ArrayNameModel
+import com.yandex.yatagan.lang.compiled.ClassNameModel
+import com.yandex.yatagan.lang.compiled.CtTypeNameModel
+import com.yandex.yatagan.lang.compiled.ErrorNameModel
+import com.yandex.yatagan.lang.compiled.KeywordTypeNameModel
+import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
+import com.yandex.yatagan.lang.compiled.WildcardNameModel
 
 internal fun ClassBackedModel.typeName(): TypeName {
     return name.asTypeName()

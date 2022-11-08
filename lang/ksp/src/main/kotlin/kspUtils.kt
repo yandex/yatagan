@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getVisibility
@@ -24,7 +24,7 @@ import com.google.devtools.ksp.symbol.NonExistLocation
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
-import com.yandex.daggerlite.lang.Parameter
+import com.yandex.yatagan.lang.Parameter
 
 
 internal fun <A : Annotation> KSAnnotation.hasType(clazz: Class<A>): Boolean {

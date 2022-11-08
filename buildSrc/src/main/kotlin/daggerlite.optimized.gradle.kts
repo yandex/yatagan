@@ -1,5 +1,5 @@
-import com.yandex.daggerlite.gradle.ComponentFactoryProvider
-import com.yandex.daggerlite.gradle.copyFrom
+import com.yandex.yatagan.gradle.ComponentFactoryProvider
+import com.yandex.yatagan.gradle.copyFrom
 import org.gradle.jvm.tasks.Jar
 import proguard.gradle.ProGuardTask
 

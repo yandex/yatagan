@@ -1,17 +1,17 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
-import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
-import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage
-import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.normalized
-import com.yandex.daggerlite.core.model.ConditionModel
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.lang.Method
+import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
+import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage
+import com.yandex.yatagan.core.graph.Extensible
+import com.yandex.yatagan.core.graph.normalized
+import com.yandex.yatagan.core.model.ConditionModel
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.lang.Method
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 

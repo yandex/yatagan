@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.validation
+package com.yandex.yatagan.validation
 
 data class LocatedMessage(
     /**

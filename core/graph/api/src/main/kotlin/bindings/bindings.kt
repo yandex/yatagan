@@ -1,18 +1,18 @@
-package com.yandex.daggerlite.core.graph.bindings
+package com.yandex.yatagan.core.graph.bindings
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.model.CollectionTargetKind
-import com.yandex.daggerlite.core.model.ComponentDependencyModel
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.Callable
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
+import com.yandex.yatagan.core.model.CollectionTargetKind
+import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.Callable
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
 
 /**
- * A [com.yandex.daggerlite.Binds] binding.
+ * A [com.yandex.yatagan.Binds] binding.
  * Sort of fictional binding, that must be resolved into some real [Binding].
  */
 interface AliasBinding : BaseBinding {
@@ -23,7 +23,7 @@ interface AliasBinding : BaseBinding {
 }
 
 /**
- * A specific case of [com.yandex.daggerlite.Binds] binding with multiple alternatives.
+ * A specific case of [com.yandex.yatagan.Binds] binding with multiple alternatives.
  */
 interface AlternativesBinding : Binding {
     val alternatives: Sequence<NodeModel>
@@ -47,13 +47,13 @@ interface ComponentInstanceBinding : Binding
 /**
  * Binding that can not be satisfied - it's codegen or runtime evaluation is *unreached*.
  *
- * Empty [com.yandex.daggerlite.Binds] binding is an example of such binding.
+ * Empty [com.yandex.yatagan.Binds] binding is an example of such binding.
  */
 interface EmptyBinding : Binding
 
 /**
- * A [com.yandex.daggerlite.BindsInstance] binding.
- * Introduced into a graph as [com.yandex.daggerlite.core.model.ComponentFactoryModel.InputModel].
+ * A [com.yandex.yatagan.BindsInstance] binding.
+ * Introduced into a graph as [com.yandex.yatagan.core.model.ComponentFactoryModel.InputModel].
  */
 interface InstanceBinding : Binding
 
@@ -83,7 +83,7 @@ interface MapBinding : ExtensibleBinding<MapBinding> {
 }
 
 /**
- * A binding for a `List<T>` aggregating all contributions for `T`, marked with [com.yandex.daggerlite.IntoList].
+ * A binding for a `List<T>` aggregating all contributions for `T`, marked with [com.yandex.yatagan.IntoList].
  * Such bindings exhibit "extends" behavior: bindings for the same list in child graphs inherit all the contributions
  *  from parent ones (in a cascading way) and are not considered conflicting.
  */
@@ -112,7 +112,7 @@ interface MultiBinding : ExtensibleBinding<MultiBinding> {
 }
 
 /**
- * A [com.yandex.daggerlite.Provides] binding.
+ * A [com.yandex.yatagan.Provides] binding.
  */
 interface ProvisionBinding : Binding {
     val provision: Callable

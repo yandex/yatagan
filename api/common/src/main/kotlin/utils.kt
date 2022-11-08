@@ -1,7 +1,7 @@
 @file:[JvmMultifileClass JvmName("Loader")]
-package com.yandex.daggerlite.common
+package com.yandex.yatagan.common
 
-import com.yandex.daggerlite.Component
+import com.yandex.yatagan.Component
 
 internal fun loadImplementationClass(componentClass: Class<*>): Class<*> {
     require(componentClass.getAnnotation(Component::class.java)?.isRoot == true) {

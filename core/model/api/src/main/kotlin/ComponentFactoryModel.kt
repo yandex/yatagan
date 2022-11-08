@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Dependency
-import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Instance
-import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputPayload.Module
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload.Dependency
+import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload.Instance
+import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload.Module
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * Represents [com.yandex.daggerlite.Component.Builder].
+ * Represents [com.yandex.yatagan.Component.Builder].
  */
 interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
 
@@ -40,7 +40,7 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
      */
     sealed interface InputPayload : ClassBackedModel, MayBeInvalid {
         /**
-         * Represent an externally given instance via [com.yandex.daggerlite.BindsInstance].
+         * Represent an externally given instance via [com.yandex.yatagan.BindsInstance].
          */
         interface Instance : InputPayload {
             val node: NodeModel
@@ -93,7 +93,7 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
         /**
          * Actual abstract setter.
          * Has *single parameter*; return type may be of the builder type itself or
-         * [void][com.yandex.daggerlite.lang.Type.isVoid].
+         * [void][com.yandex.yatagan.lang.Type.isVoid].
          */
         val builderSetter: Method
     }

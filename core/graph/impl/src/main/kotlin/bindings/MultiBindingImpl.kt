@@ -1,19 +1,19 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.base.MapComparator
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.bindings.MultiBinding
-import com.yandex.daggerlite.core.graph.impl.topologicalSort
-import com.yandex.daggerlite.core.model.CollectionTargetKind
-import com.yandex.daggerlite.core.model.ModuleHostedBindingModel
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.format.TextColor
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.appendRichString
-import com.yandex.daggerlite.validation.format.bindingModelRepresentation
-import com.yandex.daggerlite.validation.format.buildRichString
+import com.yandex.yatagan.base.MapComparator
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.bindings.MultiBinding
+import com.yandex.yatagan.core.graph.impl.topologicalSort
+import com.yandex.yatagan.core.model.CollectionTargetKind
+import com.yandex.yatagan.core.model.ModuleHostedBindingModel
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.format.TextColor
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.appendRichString
+import com.yandex.yatagan.validation.format.bindingModelRepresentation
+import com.yandex.yatagan.validation.format.buildRichString
 
 internal class MultiBindingImpl(
     override val owner: BindingGraph,

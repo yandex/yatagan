@@ -1,17 +1,17 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.TextColor
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.appendRichString
-import com.yandex.daggerlite.validation.format.bindingModelRepresentation
+import com.yandex.yatagan.base.memoize
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.TextColor
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.appendRichString
+import com.yandex.yatagan.validation.format.bindingModelRepresentation
 
 internal class AssistedInjectFactoryBindingImpl(
     override val owner: BindingGraph,

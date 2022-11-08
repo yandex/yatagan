@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  * A modifier annotation, which behaves largely like [IntoList] with the following differences:

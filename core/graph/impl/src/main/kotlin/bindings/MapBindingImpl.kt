@@ -1,25 +1,25 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.base.ListComparator
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.BaseBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.bindings.MapBinding
-import com.yandex.daggerlite.core.graph.impl.mergeMultiMapsForDuplicateCheck
-import com.yandex.daggerlite.core.model.ModuleHostedBindingModel
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.TextColor
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.appendRichString
-import com.yandex.daggerlite.validation.format.bindingModelRepresentation
-import com.yandex.daggerlite.validation.format.buildRichString
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.base.ListComparator
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.bindings.MapBinding
+import com.yandex.yatagan.core.graph.impl.mergeMultiMapsForDuplicateCheck
+import com.yandex.yatagan.core.model.ModuleHostedBindingModel
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.TextColor
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.appendRichString
+import com.yandex.yatagan.validation.format.bindingModelRepresentation
+import com.yandex.yatagan.validation.format.buildRichString
+import com.yandex.yatagan.validation.format.reportError
 
 internal class MapBindingImpl(
     override val owner: BindingGraph,

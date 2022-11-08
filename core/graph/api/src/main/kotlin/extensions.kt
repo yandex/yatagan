@@ -1,18 +1,18 @@
-package com.yandex.daggerlite.core.graph
+package com.yandex.yatagan.core.graph
 
-import com.yandex.daggerlite.core.graph.bindings.AlternativesBinding
-import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.bindings.ComponentDependencyBinding
-import com.yandex.daggerlite.core.graph.bindings.ComponentDependencyEntryPointBinding
-import com.yandex.daggerlite.core.graph.bindings.ComponentInstanceBinding
-import com.yandex.daggerlite.core.graph.bindings.EmptyBinding
-import com.yandex.daggerlite.core.graph.bindings.InstanceBinding
-import com.yandex.daggerlite.core.graph.bindings.MapBinding
-import com.yandex.daggerlite.core.graph.bindings.MultiBinding
-import com.yandex.daggerlite.core.graph.bindings.ProvisionBinding
-import com.yandex.daggerlite.core.graph.bindings.SubComponentFactoryBinding
-import com.yandex.daggerlite.core.model.ConditionModel
+import com.yandex.yatagan.core.graph.bindings.AlternativesBinding
+import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.bindings.ComponentDependencyBinding
+import com.yandex.yatagan.core.graph.bindings.ComponentDependencyEntryPointBinding
+import com.yandex.yatagan.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.yatagan.core.graph.bindings.EmptyBinding
+import com.yandex.yatagan.core.graph.bindings.InstanceBinding
+import com.yandex.yatagan.core.graph.bindings.MapBinding
+import com.yandex.yatagan.core.graph.bindings.MultiBinding
+import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
+import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
+import com.yandex.yatagan.core.model.ConditionModel
 
 /**
  * Discards negation from the literal.

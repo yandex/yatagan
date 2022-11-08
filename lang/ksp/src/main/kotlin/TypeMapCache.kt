@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getJavaClassByName
@@ -11,7 +11,7 @@ import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Variance
-import com.yandex.daggerlite.base.ObjectCache
+import com.yandex.yatagan.base.ObjectCache
 
 /**
  * Object cache for type normalization mapping.

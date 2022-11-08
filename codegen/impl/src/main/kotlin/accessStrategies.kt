@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
-import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
-import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.model.DependencyKind
-import com.yandex.daggerlite.core.model.isAlways
-import com.yandex.daggerlite.core.model.isOptional
+import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
+import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.DependencyKind
+import com.yandex.yatagan.core.model.isAlways
+import com.yandex.yatagan.core.model.isOptional
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.VOLATILE
 

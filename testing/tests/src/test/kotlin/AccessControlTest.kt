@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +20,7 @@ class AccessControlTest(
     @Test
     fun `@Binds declarations can be package-private`() {
         givenJavaSource("test.MyFeature", """
-            @com.yandex.daggerlite.Condition(value = MyFeature.class, condition = "sEnabled")
+            @com.yandex.yatagan.Condition(value = MyFeature.class, condition = "sEnabled")
             public @interface MyFeature {
                 boolean sEnabled = false;
             }
@@ -32,16 +32,16 @@ class AccessControlTest(
             public class MyClassA implements Api { @javax.inject.Inject public MyClassA() {} } 
         """.trimIndent())
         givenJavaSource("test.MyClassB", """
-            @com.yandex.daggerlite.Conditional(MyFeature.class)
+            @com.yandex.yatagan.Conditional(MyFeature.class)
             public class MyClassB implements Api { @javax.inject.Inject public MyClassB() {} } 
         """.trimIndent())
         givenKotlinSource("test.MyClassD", """
             class MyClassD @javax.inject.Inject internal constructor()
         """.trimIndent())
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Binds;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Binds;
             import javax.inject.Named;
             
             @Module /*package-private*/ abstract class MyModule {
@@ -52,7 +52,7 @@ class AccessControlTest(
             }
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Component(modules = [MyModule::class])
@@ -100,8 +100,8 @@ class AccessControlTest(
         """.trimIndent())
 
         givenJavaSource("test.PackagePrivateModule", """
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.Provides;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Provides;
             
             @Module public class PackagePrivateModule {
                 @Provides
@@ -110,8 +110,8 @@ class AccessControlTest(
         """.trimIndent())
 
         givenJavaSource("test.PackagePrivateProvidesModule", """
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.Provides;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Provides;
             
             @Module class PackagePrivateProvidesModule {
                 @Provides
@@ -144,7 +144,7 @@ class AccessControlTest(
             }
         """.trimIndent())
         givenJavaSource("test.Feature", """
-            import com.yandex.daggerlite.Condition;
+            import com.yandex.yatagan.Condition;
 
             @Condition(value = Flags.class, condition = "isEnabledA")
             @Condition(value = Flags2.class, condition = "isEnabledB")
@@ -152,12 +152,12 @@ class AccessControlTest(
         """.trimIndent())
 
         givenKotlinSource("test.UnderFeatureClass", """
-            @com.yandex.daggerlite.Conditional(Feature::class)
+            @com.yandex.yatagan.Conditional(Feature::class)
             class UnderFeatureClass @javax.inject.Inject constructor() 
         """.trimIndent())
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Component(modules = [
@@ -174,7 +174,7 @@ class AccessControlTest(
             }
         """.trimIndent())
         givenJavaSource("test.TestComponent2", """
-            @com.yandex.daggerlite.Component
+            @com.yandex.yatagan.Component
             /*package-private*/ interface TestComponent2 {
                 void inject2(Members2 m);
             }
@@ -186,32 +186,32 @@ class AccessControlTest(
     @Test
     fun `assisted inject constructor must be publicly accessible`() {
         givenJavaSource("test.FooFactory", """
-            import com.yandex.daggerlite.AssistedFactory;
-            import com.yandex.daggerlite.Assisted;
+            import com.yandex.yatagan.AssistedFactory;
+            import com.yandex.yatagan.Assisted;
             @AssistedFactory
             public interface FooFactory {
                 Foo create();
             }
         """.trimIndent())
         givenJavaSource("test.BarFactory", """
-            import com.yandex.daggerlite.AssistedFactory;
-            import com.yandex.daggerlite.Assisted;
+            import com.yandex.yatagan.AssistedFactory;
+            import com.yandex.yatagan.Assisted;
             @AssistedFactory
             public interface BarFactory {
                 Bar create();
             }
         """.trimIndent())
         givenJavaSource("test.Foo", """
-            import com.yandex.daggerlite.AssistedInject;
+            import com.yandex.yatagan.AssistedInject;
             public class Foo { @AssistedInject Foo() {} }
         """.trimIndent())
         givenJavaSource("test.Bar", """
-            import com.yandex.daggerlite.AssistedInject;
+            import com.yandex.yatagan.AssistedInject;
             class Bar { @AssistedInject Bar() {} }
         """.trimIndent())
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
 
             @Component
             interface TestComponent {

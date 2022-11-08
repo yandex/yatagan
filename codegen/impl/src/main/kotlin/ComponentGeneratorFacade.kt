@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.JavaFile
-import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.BindingGraph
 
 class ComponentGeneratorFacade(
     graph: BindingGraph,

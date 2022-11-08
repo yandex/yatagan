@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.validation.impl
+package com.yandex.yatagan.validation.impl
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.modelRepresentation
-import com.yandex.daggerlite.validation.spi.ValidationPlugin
-import com.yandex.daggerlite.validation.spi.ValidationPluginProvider
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.spi.ValidationPlugin
+import com.yandex.yatagan.validation.spi.ValidationPluginProvider
 
 class GraphValidationExtension(
     validationPluginProviders: List<ValidationPluginProvider>,

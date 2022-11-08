@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.bindings.ComponentInstanceBinding
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.format.modelRepresentation
 
 internal class ComponentInstanceBindingImpl(
     graph: BindingGraph,

@@ -1,20 +1,20 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.base.ifOrElseNull
-import com.yandex.daggerlite.base.traverseDepthFirstWithPath
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.AliasBinding
-import com.yandex.daggerlite.core.graph.bindings.BaseBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.component1
-import com.yandex.daggerlite.core.graph.component2
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.core.model.component1
-import com.yandex.daggerlite.core.model.component2
-import com.yandex.daggerlite.core.model.isEager
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.base.ifOrElseNull
+import com.yandex.yatagan.base.traverseDepthFirstWithPath
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.AliasBinding
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.component1
+import com.yandex.yatagan.core.graph.component2
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.core.model.component1
+import com.yandex.yatagan.core.model.component2
+import com.yandex.yatagan.core.model.isEager
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.reportError
 import kotlin.collections.component1
 import kotlin.collections.component2
 

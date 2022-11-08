@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.core.model.component1
-import com.yandex.daggerlite.core.model.component2
-import com.yandex.daggerlite.core.model.isEager
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.component1
+import com.yandex.yatagan.core.model.component2
+import com.yandex.yatagan.core.model.isEager
 
 internal fun topologicalSort(
     nodes: Collection<NodeModel>,

@@ -1,9 +1,9 @@
 # Module api-public
 
 Contains all client DL API - annotations and helpers. It doesn't contain DL entry-point code
-(`com.yandex.daggerlite.Dagger`) though, as that is backend-specific.
+(`com.yandex.yatagan.Dagger`) though, as that is backend-specific.
 
-One can start reading DL's docs from [the docs on @Component][com.yandex.daggerlite.Component].
+One can start reading DL's docs from [the docs on @Component][com.yandex.yatagan.Component].
 
 It makes sense to use this module as a direct
 dependency as a part of a _public api_ of a project module/library. Such choice won't confine clients of the module
@@ -26,19 +26,19 @@ project, please, file a feature request, which has a high probability of being i
 | `@dagger.Component`                           | (+) as is        |                                                                                 |
 | `@dagger.Component.Builder`                   | (+) as is        | supports factory method as well                                                 |
 | `@dagger.Component.Factory`                   | (+*) converged   | functionality merged into `@Builder`                                            |
-| `@dagger.Subcomponent`                        | (+*) converged   | replaced by [Component(isRoot = false)][com.yandex.daggerlite.Component]        |
-| `@dagger.Subcomponent.{Builder/Factory}`      | (+*) converged   | replaced by [Component.Builder][com.yandex.daggerlite.Component.Builder]        |
+| `@dagger.Subcomponent`                        | (+*) converged   | replaced by [Component(isRoot = false)][com.yandex.yatagan.Component]        |
+| `@dagger.Subcomponent.{Builder/Factory}`      | (+*) converged   | replaced by [Component.Builder][com.yandex.yatagan.Component.Builder]        |
 | `dagger.Lazy`                                 | (+) as is        | now also extends `javax.inject.Provider`                                        |
 | `@dagger.Module`                              | (+) as is        |                                                                                 |
-| `@dagger.Binds`                               | (+*) tweaked     | can bind zero/multiple alternatives, see [Binds][com.yandex.daggerlite.Binds]   |
+| `@dagger.Binds`                               | (+*) tweaked     | can bind zero/multiple alternatives, see [Binds][com.yandex.yatagan.Binds]   |
 | `@dagger.BindsInstance`                       | (+) as is        |                                                                                 |
 | `@dagger.Provides`                            | (+) as is        | supports conditional provision                                                  |
-| `@dagger.BindsOptionalOf`                     | (+*) replaced    | replaced with [Variant][com.yandex.daggerlite.ComponentVariantDimension] API.   |
+| `@dagger.BindsOptionalOf`                     | (+*) replaced    | replaced with [Variant][com.yandex.yatagan.ComponentVariantDimension] API.   |
 | `@dagger.Reusable`                            | (-) unsupported  |                                                                                 |
 | `dagger.MembersInjector`                      | (-) unsupported  |                                                                                 |
-| `@dagger.MapKey`                              | (+*) renamed     | [IntoMap.Key][com.yandex.daggerlite.IntoMap.Key], `unwrap=false` is unsupported |
+| `@dagger.MapKey`                              | (+*) renamed     | [IntoMap.Key][com.yandex.yatagan.IntoMap.Key], `unwrap=false` is unsupported |
 | `@dagger.multibindings.IntoSet`               | (+*) renamed     | as is                                                                           |
-| `@dagger.multibindings.ElementsIntoSet`       | (+/-*) converged | [IntoSet(flatten = true)][com.yandex.daggerlite.IntoSet]                        |
+| `@dagger.multibindings.ElementsIntoSet`       | (+/-*) converged | [IntoSet(flatten = true)][com.yandex.yatagan.IntoSet]                        |
 | `@dagger.multibindings.Multibinds`            | (+) as is        |                                                                                 |
 | `@dagger.multibindings.IntoMap`               | (+) as is        |                                                                                 |
 | `@dagger.multibindings.{Int,Class,String}Key` | (+) as is        |                                                                                 |
@@ -52,7 +52,7 @@ project, please, file a feature request, which has a high probability of being i
 
 Other behavioral changes:
 
-- [@Binds][com.yandex.daggerlite.Binds] can't be scoped (scope rebind is not allowed). Use scope on the implementation.
+- [@Binds][com.yandex.yatagan.Binds] can't be scoped (scope rebind is not allowed). Use scope on the implementation.
   Also, DL supports declaring multiple scopes on bindings.
 
 - DL requires components, builders, assisted inject factories to be declared as interfaces. 
@@ -60,8 +60,8 @@ Other behavioral changes:
 
 - If codegen is used, generated component implementations are not named `Dagger<component-name>`,
   their names are mangled, and the access should be made via
-  [Dagger.builder()][com.yandex.daggerlite/Dagger#builder@:api-compiled]/
-  [Dagger.create()][com.yandex.daggerlite/Dagger#create@:api-compiled] entry-point invocations.
+  [Dagger.builder()][com.yandex.yatagan/Dagger#builder@:api-compiled]/
+  [Dagger.create()][com.yandex.yatagan/Dagger#create@:api-compiled] entry-point invocations.
   This is made to support reflection backend.
   See [:api-dynamic] and [:api-compiled] for actual `Dagger` implementations.
 
@@ -87,7 +87,7 @@ Other behavioral changes:
 
 ```kotlin
  /*@*/ package test
- /*@*/ import com.yandex.daggerlite.*
+ /*@*/ import com.yandex.yatagan.*
  /*@*/ import javax.inject.*
  
  // Assume we have an interface and its implementation 

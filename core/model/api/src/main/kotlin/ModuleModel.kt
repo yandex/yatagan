@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * Represents [com.yandex.daggerlite.Module].
+ * Represents [com.yandex.yatagan.Module].
  */
 interface ModuleModel : ClassBackedModel, MayBeInvalid {
     /**

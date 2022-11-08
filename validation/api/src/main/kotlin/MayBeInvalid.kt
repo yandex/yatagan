@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.validation
+package com.yandex.yatagan.validation
 
 /**
  * An interface for the models, which are eligible for validation (which may be invalid).

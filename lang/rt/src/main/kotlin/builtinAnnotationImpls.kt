@@ -1,21 +1,21 @@
 @file:OptIn(ConditionsApi::class, VariantApi::class)
 
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.AnyCondition
-import com.yandex.daggerlite.Assisted
-import com.yandex.daggerlite.Component
-import com.yandex.daggerlite.ComponentFlavor
-import com.yandex.daggerlite.Condition
-import com.yandex.daggerlite.Conditional
-import com.yandex.daggerlite.ConditionsApi
-import com.yandex.daggerlite.IntoList
-import com.yandex.daggerlite.IntoSet
-import com.yandex.daggerlite.Module
-import com.yandex.daggerlite.Provides
-import com.yandex.daggerlite.VariantApi
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.Type
+import com.yandex.yatagan.AnyCondition
+import com.yandex.yatagan.Assisted
+import com.yandex.yatagan.Component
+import com.yandex.yatagan.ComponentFlavor
+import com.yandex.yatagan.Condition
+import com.yandex.yatagan.Conditional
+import com.yandex.yatagan.ConditionsApi
+import com.yandex.yatagan.IntoList
+import com.yandex.yatagan.IntoSet
+import com.yandex.yatagan.Module
+import com.yandex.yatagan.Provides
+import com.yandex.yatagan.VariantApi
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Type
 
 internal open class RtAnnotationImplBase<A : Annotation>(
     protected val impl: A,

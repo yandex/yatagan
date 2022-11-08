@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import com.tschuchort.compiletesting.KotlinCompilation
-import com.yandex.daggerlite.processor.common.Options
-import com.yandex.daggerlite.processor.jap.JapDaggerLiteProcessor
+import com.yandex.yatagan.processor.common.Options
+import com.yandex.yatagan.processor.jap.JapDaggerLiteProcessor
 import java.io.File
 
 class JapCompileTestDriver : CompileTestDriverBase() {

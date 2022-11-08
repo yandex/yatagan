@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.graph
+package com.yandex.yatagan.core.graph
 
 /**
  * A hierarchy trait, that allows accessing child nodes.

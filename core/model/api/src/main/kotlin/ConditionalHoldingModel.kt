@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel.FeatureModel
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
+import com.yandex.yatagan.core.model.ConditionalHoldingModel.FeatureModel
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Represents an entity which is decorated with one or multiple [ConditionalWithFlavorConstraintsModel].
@@ -20,7 +20,7 @@ interface ConditionalHoldingModel : MayBeInvalid {
     }
 
     /**
-     * Model of a [com.yandex.daggerlite.lang.BuiltinAnnotation.Conditional].
+     * Model of a [com.yandex.yatagan.lang.BuiltinAnnotation.Conditional].
      */
     interface ConditionalWithFlavorConstraintsModel : MayBeInvalid {
         val featureTypes: List<FeatureModel>

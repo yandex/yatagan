@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.base
+package com.yandex.yatagan.base
 
 /**
  * A base class for [ObjectCache] and its composite-key variants.

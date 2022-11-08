@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.gradle
+package com.yandex.yatagan.gradle
 
-import com.yandex.daggerlite.gradle.PatchModuleDocTask.SyntaxError
+import com.yandex.yatagan.gradle.PatchModuleDocTask.SyntaxError
 import java.io.File
 import kotlin.reflect.KProperty
 

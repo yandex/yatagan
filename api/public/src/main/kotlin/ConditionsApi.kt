@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 @RequiresOptIn("This is a part of the Conditions API, which is not stable yet.")
 annotation class ConditionsApi

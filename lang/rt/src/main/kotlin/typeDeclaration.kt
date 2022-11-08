@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclaration
 
 fun TypeDeclaration(declaration: Class<*>): TypeDeclaration {
     return RtTypeDeclarationImpl(RtTypeImpl(declaration))

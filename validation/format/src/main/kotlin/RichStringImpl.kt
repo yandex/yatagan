@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.validation.format
+package com.yandex.yatagan.validation.format
 
-import com.yandex.daggerlite.validation.RichString
+import com.yandex.yatagan.validation.RichString
 
 internal class RichStringImpl(
     val children: List<CharSequence>,

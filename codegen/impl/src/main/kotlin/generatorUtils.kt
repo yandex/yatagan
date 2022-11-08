@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.CodeBlock
-import com.yandex.daggerlite.codegen.poetry.CodeBuilder
-import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
-import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.model.DependencyKind
-import com.yandex.daggerlite.core.model.isAlways
-import com.yandex.daggerlite.core.model.isNever
+import com.yandex.yatagan.codegen.poetry.CodeBuilder
+import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.DependencyKind
+import com.yandex.yatagan.core.model.isAlways
+import com.yandex.yatagan.core.model.isNever
 
 internal fun componentInstance(
     inside: BindingGraph,

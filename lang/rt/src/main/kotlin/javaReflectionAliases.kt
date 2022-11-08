@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
 // NOTE: Do not use java.lang.reflect.* API directly throughout the implementation, use these aliases instead.
 //  This is done to avoid named clashes with lang-api.

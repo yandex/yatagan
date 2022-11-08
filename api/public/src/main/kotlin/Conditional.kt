@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 import kotlin.reflect.KClass
 
@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  * to inject a conditional type.
  *
  * ```kotlin
- * /*@*/ import com.yandex.daggerlite.*
+ * /*@*/ import com.yandex.yatagan.*
  * /*@*/ import javax.inject.*
  **
  * /*@*/object Flags {
@@ -80,7 +80,7 @@ annotation class Conditional(
      *
      * ## Examples:
      * ```kotlin
-     * /*@*/ import com.yandex.daggerlite.*
+     * /*@*/ import com.yandex.yatagan.*
      * /*@*/ import javax.inject.*
      *
      * /*@*/ object Flags { var a = false; var b = false; var c = false  }

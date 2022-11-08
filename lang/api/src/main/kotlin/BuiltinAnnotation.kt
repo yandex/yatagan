@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang
+package com.yandex.yatagan.lang
 
 /**
  * Marker interface for all framework (builtin) annotations.
@@ -68,7 +68,7 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Models `com.yandex.daggerlite.Module` annotation.
+     * Models `com.yandex.yatagan.Module` annotation.
      */
     interface Module : OnClass {
         val includes: List<Type>
@@ -80,14 +80,14 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Models `com.yandex.daggerlite.Binds` annotation.
+     * Models `com.yandex.yatagan.Binds` annotation.
      */
     object Binds : OnMethod, Target.OnMethod<Binds> {
         override val modelClass get() = Binds::class.java
     }
 
     /**
-     * Models `com.yandex.daggerlite.Provides` annotation.
+     * Models `com.yandex.yatagan.Provides` annotation.
      */
     interface Provides : OnMethod {
         val conditionals: List<Conditional>
@@ -98,7 +98,7 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Models `com.yandex.daggerlite.Component` annotation.
+     * Models `com.yandex.yatagan.Component` annotation.
      */
     interface Component : OnClass {
         val isRoot: Boolean
@@ -108,7 +108,7 @@ sealed interface BuiltinAnnotation{
         val multiThreadAccess: Boolean
 
         /**
-         * Models `com.yandex.daggerlite.Component.Builder` annotation.
+         * Models `com.yandex.yatagan.Component.Builder` annotation.
          */
         object Builder : OnClass, Target.OnClass<Builder> {
             override val modelClass get() = Builder::class.java
@@ -120,7 +120,7 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Models `com.yandex.daggerlite.BindsInstance` annotation.
+     * Models `com.yandex.yatagan.BindsInstance` annotation.
      */
     object BindsInstance :
         OnMethod, Target.OnMethod<BindsInstance>,
@@ -130,7 +130,7 @@ sealed interface BuiltinAnnotation{
 
     sealed interface ConditionFamily : OnClassRepeatable {
         /**
-         * Represents `com.yandex.daggerlite.Condition` annotation.
+         * Represents `com.yandex.yatagan.Condition` annotation.
          */
         interface One : ConditionFamily {
             val target: Type
@@ -138,7 +138,7 @@ sealed interface BuiltinAnnotation{
         }
 
         /**
-         * Represents `com.yandex.daggerlite.AnyCondition` annotation.
+         * Represents `com.yandex.yatagan.AnyCondition` annotation.
          */
         interface Any : ConditionFamily {
             val conditions: List<One>
@@ -150,7 +150,7 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Represents `com.yandex.daggerlite.Conditional` annotation.
+     * Represents `com.yandex.yatagan.Conditional` annotation.
      */
     interface Conditional : OnClassRepeatable {
         val featureTypes: List<Type>
@@ -162,14 +162,14 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Represents `com.yandex.daggerlite.ComponentVariantDimension` annotation.
+     * Represents `com.yandex.yatagan.ComponentVariantDimension` annotation.
      */
     object ComponentVariantDimension : OnClass, Target.OnClass<ComponentVariantDimension> {
         override val modelClass get() = ComponentVariantDimension::class.java
     }
 
     /**
-     * Represents `com.yandex.daggerlite.ComponentFlavor` annotation.
+     * Represents `com.yandex.yatagan.ComponentFlavor` annotation.
      */
     interface ComponentFlavor : OnClass {
         val dimension: Type
@@ -180,14 +180,14 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Represents `com.yandex.daggerlite.AssistedInject` annotation.
+     * Represents `com.yandex.yatagan.AssistedInject` annotation.
      */
     object AssistedInject : OnConstructor, Target.OnConstructor<AssistedInject> {
         override val modelClass get() = AssistedInject::class.java
     }
 
     /**
-     * `com.yandex.daggerlite.Assisted` annotation model.
+     * `com.yandex.yatagan.Assisted` annotation model.
      */
     interface Assisted : OnParameter {
         val value: String
@@ -198,14 +198,14 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Represents `com.yandex.daggerlite.AssistedFactory` annotation.
+     * Represents `com.yandex.yatagan.AssistedFactory` annotation.
      */
     object AssistedFactory : OnClass, Target.OnClass<AssistedFactory> {
         override val modelClass get() = AssistedFactory::class.java
     }
 
     /**
-     * Represents `com.yandex.daggerlite.Multibinds` annotation.
+     * Represents `com.yandex.yatagan.Multibinds` annotation.
      */
     object Multibinds : OnMethod, Target.OnMethod<Multibinds> {
         override val modelClass get() = Multibinds::class.java
@@ -215,12 +215,12 @@ sealed interface BuiltinAnnotation{
         val flatten: Boolean
 
         /**
-         * Models `com.yandex.daggerlite.IntoList` annotations.
+         * Models `com.yandex.yatagan.IntoList` annotations.
          */
         interface IntoList : IntoCollectionFamily
 
         /**
-         * Models `com.yandex.daggerlite.IntoSet` annotations.
+         * Models `com.yandex.yatagan.IntoSet` annotations.
          */
         interface IntoSet : IntoCollectionFamily
 
@@ -230,13 +230,13 @@ sealed interface BuiltinAnnotation{
     }
 
     /**
-     * Represents `com.yandex.daggerlite.IntoMap` annotation.
+     * Represents `com.yandex.yatagan.IntoMap` annotation.
      */
     object IntoMap : OnMethod, Target.OnMethod<IntoMap> {
         override val modelClass get() = IntoMap::class.java
 
         /**
-         * Represents `com.yandex.daggerlite.IntoMap.Key` annotation.
+         * Represents `com.yandex.yatagan.IntoMap.Key` annotation.
          */
         object Key : OnAnnotationClass, Target.OnAnnotationClass<Key> {
             override val modelClass get() = Key::class.java

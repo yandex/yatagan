@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.GraphEntryPoint
-import com.yandex.daggerlite.core.model.ComponentModel
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.appendChildContextReference
-import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.yatagan.core.graph.GraphEntryPoint
+import com.yandex.yatagan.core.model.ComponentModel
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.appendChildContextReference
+import com.yandex.yatagan.validation.format.modelRepresentation
 
 internal class GraphEntryPointImpl(
     override val graph: BindingGraphImpl,

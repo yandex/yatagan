@@ -1,9 +1,9 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
-import com.yandex.daggerlite.Dagger.builder
-import com.yandex.daggerlite.Dagger.create
-import com.yandex.daggerlite.common.loadImplementationByBuilderClass
-import com.yandex.daggerlite.common.loadImplementationByComponentClass
+import com.yandex.yatagan.Dagger.builder
+import com.yandex.yatagan.Dagger.create
+import com.yandex.yatagan.common.loadImplementationByBuilderClass
+import com.yandex.yatagan.common.loadImplementationByComponentClass
 
 /**
  * Dagger Lite entry-point object. Create instances of DL components by loading generated implementations for

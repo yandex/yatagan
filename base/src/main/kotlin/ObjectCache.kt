@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.base
+package com.yandex.yatagan.base
 
 /**
  * A single-key object cache. Does just that - caches an object by a single key.

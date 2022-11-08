@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract

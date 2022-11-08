@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.validation.spi
+package com.yandex.yatagan.validation.spi
 
-import com.yandex.daggerlite.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.BindingGraph
 
 /**
  * Service Provider Interface for [ValidationPlugin].

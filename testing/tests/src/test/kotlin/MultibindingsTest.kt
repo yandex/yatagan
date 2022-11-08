@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +31,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Singleton class ClassA @Inject constructor (b: ClassB) : Create
@@ -82,7 +82,7 @@ class MultibindingsTest(
     @Test
     fun `default binding ordering for list bindings`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface Create
@@ -203,7 +203,7 @@ class MultibindingsTest(
     @Test
     fun `list declaration binds empty list`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface Create
@@ -229,7 +229,7 @@ class MultibindingsTest(
     @Test
     fun `multi-bound list with conditional entries`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             class Features {
@@ -278,9 +278,9 @@ class MultibindingsTest(
     @Test
     fun `flattening contribution`() {
         givenJavaSource("test.TestModule", """
-            import com.yandex.daggerlite.IntoList;
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.Provides;
+            import com.yandex.yatagan.IntoList;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Provides;
             import java.util.Set;
             import java.util.List;
             import java.util.Collection;
@@ -299,7 +299,7 @@ class MultibindingsTest(
         """.trimIndent())
 
         givenKotlinSource("test.TestModuleKotlin", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
    
             @Module
             class TestModuleKotlin {
@@ -313,7 +313,7 @@ class MultibindingsTest(
         """.trimIndent())
 
         givenKotlinSource("test.TestComponent", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             
             @Component(modules = [TestModule::class, TestModuleKotlin::class])
             interface TestComponent {
@@ -330,7 +330,7 @@ class MultibindingsTest(
             public interface MyApi {}
         """.trimIndent())
         givenJavaSource("test.CustomClassKey", """
-            import com.yandex.daggerlite.IntoMap;
+            import com.yandex.yatagan.IntoMap;
             import java.lang.annotation.Retention;
             import java.lang.annotation.RetentionPolicy;
             
@@ -346,7 +346,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
         givenKotlinSource("test.KotlinConsumer", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             class KotlinConsumer @Inject constructor(
                 map1: Map<Integer, String>,
@@ -368,7 +368,7 @@ class MultibindingsTest(
             import javax.inject.Inject;
             import javax.inject.Provider;
             import javax.inject.Named;
-            import com.yandex.daggerlite.Lazy;
+            import com.yandex.yatagan.Lazy;
             
             public class JavaConsumer {
                 @Inject public JavaConsumer(
@@ -387,13 +387,13 @@ class MultibindingsTest(
             }
         """.trimIndent())
         givenKotlinSource("test.CustomEnumKey", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             @IntoMap.Key
             @Retention(AnnotationRetention.RUNTIME)
             annotation class CustomEnumKey(val value: MyEnum = MyEnum.ONE)
         """.trimIndent())
         givenJavaSource("test.CustomEnumKeyJava", """
-            import com.yandex.daggerlite.IntoMap;
+            import com.yandex.yatagan.IntoMap;
             import java.lang.annotation.Retention;
             import java.lang.annotation.RetentionPolicy;
             @IntoMap.Key
@@ -415,7 +415,7 @@ class MultibindingsTest(
             }
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             class Impl1 : MyApi
@@ -512,7 +512,7 @@ class MultibindingsTest(
     @Test
     fun `list bindings are inherited from super-components`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Module(subcomponents = [SubComponent::class, SubComponent2::class]) object RootModule {
@@ -588,7 +588,7 @@ class MultibindingsTest(
     @Test
     fun `map bindings are inherited from super-components`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Module(subcomponents = [SubComponent::class, SubComponent2::class]) object RootModule {
@@ -660,7 +660,7 @@ class MultibindingsTest(
     @Test
     fun `multi-bound set basic test`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             class Features {

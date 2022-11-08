@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
-import com.yandex.daggerlite.codegen.poetry.CodeBuilder
-import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.bindings.MultiBinding
-import com.yandex.daggerlite.core.graph.bindings.MultiBinding.ContributionType
-import com.yandex.daggerlite.core.model.CollectionTargetKind
-import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.yatagan.codegen.poetry.CodeBuilder
+import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.Extensible
+import com.yandex.yatagan.core.graph.bindings.MultiBinding
+import com.yandex.yatagan.core.graph.bindings.MultiBinding.ContributionType
+import com.yandex.yatagan.core.model.CollectionTargetKind
+import com.yandex.yatagan.core.model.NodeModel
 
 internal class CollectionBindingGenerator(
     methodsNs: Namespace,

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 import kotlin.reflect.KClass
 
@@ -56,7 +56,7 @@ annotation class Condition(
      * Examples:
      * ```kotlin
      * /*@*/ package test
-     * /*@*/ import com.yandex.daggerlite.*
+     * /*@*/ import com.yandex.yatagan.*
      * /*@*/ import javax.inject.*
      * /*@*/ object SomeObject { val isEnabled = false }
      * /*@*/ object SomeClass {

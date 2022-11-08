@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.codegen.poetry
+package com.yandex.yatagan.codegen.poetry
 
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.ClassName

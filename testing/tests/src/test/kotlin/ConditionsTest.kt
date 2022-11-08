@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assume.assumeFalse
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,8 +20,8 @@ class ConditionsTest(
     private val flavors by lazy {
         SourceSet {
             givenKotlinSource("test.Flavors", """
-                import com.yandex.daggerlite.ComponentVariantDimension
-                import com.yandex.daggerlite.ComponentFlavor
+                import com.yandex.yatagan.ComponentVariantDimension
+                import com.yandex.yatagan.ComponentFlavor
 
                 @ComponentVariantDimension
                 annotation class ProductType {
@@ -60,7 +60,7 @@ class ConditionsTest(
     private val features by lazy {
         SourceSet {
             givenKotlinSource("test.Features", """
-                import com.yandex.daggerlite.Condition
+                import com.yandex.yatagan.Condition
                 import javax.inject.Singleton
 
                 class FeatureC {
@@ -97,7 +97,7 @@ class ConditionsTest(
         includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Singleton
@@ -145,11 +145,11 @@ class ConditionsTest(
             import javax.inject.Inject
             import javax.inject.Provider
             import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Condition
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Conditionals
-            import com.yandex.daggerlite.Optional
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Condition
+            import com.yandex.yatagan.Conditional
+            import com.yandex.yatagan.Conditionals
+            import com.yandex.yatagan.Optional
 
             @Conditional(Conditions.FeatureA::class, onlyIn = [DeviceType.Phone::class])
             @Conditional(Conditions.FeatureB::class, onlyIn = [DeviceType.Tablet::class])
@@ -185,7 +185,7 @@ class ConditionsTest(
         includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Conditional(onlyIn = [DeviceType.Phone::class])
@@ -228,7 +228,7 @@ class ConditionsTest(
         includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Scope
@@ -288,10 +288,10 @@ class ConditionsTest(
         givenKotlinSource("test.TestCase", """
             import javax.inject.Inject
             import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Optional
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Module
+            import com.yandex.yatagan.Conditional
+            import com.yandex.yatagan.Optional
             
             @Conditional(Conditions.FeatureA::class) class ClassA @Inject constructor()
             @Conditional(Conditions.FeatureB::class) class ClassB @Inject constructor(a: Optional<ClassA>)
@@ -320,7 +320,7 @@ class ConditionsTest(
     fun `@Binds with multiple alternatives`() {
         includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             interface SomeApiBase
@@ -406,7 +406,7 @@ class ConditionsTest(
         includeFromSourceSet(features)
         includeFromSourceSet(flavors)
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface Api
@@ -478,7 +478,7 @@ class ConditionsTest(
         includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Conditional(onlyIn = [ProductType.Browser::class])
@@ -525,7 +525,7 @@ class ConditionsTest(
         includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*            
+            import com.yandex.yatagan.*            
             import javax.inject.*
             
             private const val EnabledB = "isEnabledB" 
@@ -596,7 +596,7 @@ class ConditionsTest(
         includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface Api
@@ -657,7 +657,7 @@ class ConditionsTest(
     @Test
     fun `lazy condition evaluation`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             var disabled1Requested = false
@@ -732,14 +732,14 @@ class ConditionsTest(
         })
 
         givenJavaSource("test.IsEnabled0", """
-            import com.yandex.daggerlite.Condition;
+            import com.yandex.yatagan.Condition;
             
             @Condition(value = CompiledConditionKt.class, condition = "FOO")
             @interface IsEnabled3 {}
         """.trimIndent())
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             object Constants {
@@ -766,7 +766,7 @@ class ConditionsTest(
     @Test
     fun `non-static conditions`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             class FeatureProvider(

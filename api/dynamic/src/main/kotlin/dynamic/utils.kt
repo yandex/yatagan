@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.dynamic
+package com.yandex.yatagan.dynamic
 
-import com.yandex.daggerlite.DynamicValidationDelegate
+import com.yandex.yatagan.DynamicValidationDelegate
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 

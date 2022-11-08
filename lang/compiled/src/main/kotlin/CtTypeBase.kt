@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.TypeBase
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.common.TypeBase
 
 /**
  * [Type] base class, that can be named by [CtTypeNameModel].

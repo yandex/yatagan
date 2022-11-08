@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import org.junit.Test
 
@@ -6,7 +6,7 @@ class RtOnlyTest : CompileTestDriver by DynamicCompileTestDriver() {
     @Test
     fun `check generated implementation is loaded when available`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
 
             @Component interface MyComponent {
                 fun getInt(): Int

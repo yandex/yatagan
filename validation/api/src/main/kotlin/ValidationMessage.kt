@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.validation
+package com.yandex.yatagan.validation
 
 /**
  * Validation message, issued by [MayBeInvalid].

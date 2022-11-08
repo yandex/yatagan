@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.Constructor
-import com.yandex.daggerlite.lang.Field
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.Constructor
+import com.yandex.yatagan.lang.Field
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.TypeDeclaration
 
 /**
  * Convenience extension for creating [MethodSignatureEquivalenceWrapper] for the given [Method].

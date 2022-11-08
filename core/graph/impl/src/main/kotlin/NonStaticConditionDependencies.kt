@@ -1,21 +1,21 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.bindings.BaseBinding
-import com.yandex.daggerlite.core.graph.impl.bindings.ConditionalBindingMixin
-import com.yandex.daggerlite.core.graph.impl.bindings.graphConditionScope
-import com.yandex.daggerlite.core.graph.impl.bindings.resolveAliasChain
-import com.yandex.daggerlite.core.model.ConditionExpression
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.TextColor
-import com.yandex.daggerlite.validation.format.appendChildContextReference
-import com.yandex.daggerlite.validation.format.modelRepresentation
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.impl.bindings.ConditionalBindingMixin
+import com.yandex.yatagan.core.graph.impl.bindings.graphConditionScope
+import com.yandex.yatagan.core.graph.impl.bindings.resolveAliasChain
+import com.yandex.yatagan.core.model.ConditionExpression
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.TextColor
+import com.yandex.yatagan.validation.format.appendChildContextReference
+import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.format.reportError
 
 /**
- * See [com.yandex.daggerlite.core.graph.bindings.Binding.nonStaticConditionProviders].
+ * See [com.yandex.yatagan.core.graph.bindings.Binding.nonStaticConditionProviders].
  */
 internal interface NonStaticConditionDependencies : MayBeInvalid {
     val conditionProviders: Set<NodeModel>

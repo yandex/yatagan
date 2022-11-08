@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 /**
  * For internal classes provisions

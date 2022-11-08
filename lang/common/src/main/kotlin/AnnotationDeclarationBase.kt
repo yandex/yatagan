@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.lang.common
+package com.yandex.yatagan.lang.common
 
-import com.yandex.daggerlite.lang.AnnotationDeclaration
+import com.yandex.yatagan.lang.AnnotationDeclaration
 
 abstract class AnnotationDeclarationBase : AnnotationDeclaration {
     final override fun toString(): String {

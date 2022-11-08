@@ -6,12 +6,12 @@
 }
 
 # Keep component interfaces, as their names must be be preserved to find correspondent implementation.
--keep @com.yandex.daggerlite.Component interface *
+-keep @com.yandex.yatagan.Component interface *
 
 # Keep component builder interfaces, to allow finding their component interfaces.
--keep @com.yandex.daggerlite.Component$Builder interface *
+-keep @com.yandex.yatagan.Component$Builder interface *
 
 # Remove null-checks in release.
--assumenosideeffects class com.yandex.daggerlite.internal.Checks {
+-assumenosideeffects class com.yandex.yatagan.internal.Checks {
     public static void assertNotNull(...);
 }

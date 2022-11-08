@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.Variance
-import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.lang.LangModelFactory
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
 
 class KspModelFactoryImpl : LangModelFactory {
     private val listDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {

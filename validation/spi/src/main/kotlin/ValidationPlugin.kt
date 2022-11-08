@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.validation.spi
+package com.yandex.yatagan.validation.spi
 
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * A Service Interface for a dagger-lite plugin for graph visitation/validation.

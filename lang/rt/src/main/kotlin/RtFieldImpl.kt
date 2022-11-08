@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.lang.Annotated
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.FieldBase
+import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.common.FieldBase
 import javax.inject.Inject
 
 internal class RtFieldImpl(

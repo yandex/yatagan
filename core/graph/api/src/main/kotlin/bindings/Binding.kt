@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.core.graph.bindings
+package com.yandex.yatagan.core.graph.bindings
 
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.Annotation
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.lang.Annotation
 
 /**
  * A base class for all concrete binding implementations, apart from [AliasBinding].
@@ -12,7 +12,7 @@ interface Binding : BaseBinding {
     /**
      * A condition scope of this binding. Part of the *Conditions API*.
      *
-     * If this is [never-scoped][com.yandex.daggerlite.core.model.ConditionExpression.NeverScoped],
+     * If this is [never-scoped][com.yandex.yatagan.core.model.ConditionExpression.NeverScoped],
      * then [dependencies] **must** yield an empty sequence.
      */
     val conditionScope: ConditionScope
@@ -26,17 +26,17 @@ interface Binding : BaseBinding {
     /**
      * The binding's dependencies on other bindings.
      *
-     * If [conditionScope] is ["never"][com.yandex.daggerlite.core.model.ConditionExpression.NeverScoped],
+     * If [conditionScope] is ["never"][com.yandex.yatagan.core.model.ConditionExpression.NeverScoped],
      * then the sequence **must** be empty.
      *
      * Backends can only use bindings that are reported here for codegen/runtime, as the use of any undeclared
-     *  dependencies will result in incorrect [BindingUsage][com.yandex.daggerlite.core.graph.BindingGraph.BindingUsage]
+     *  dependencies will result in incorrect [BindingUsage][com.yandex.yatagan.core.graph.BindingGraph.BindingUsage]
      *  computation, internal errors, etc.
      */
     val dependencies: Sequence<NodeDependency>
 
     /**
-     * A set of selected [condition model's roots][com.yandex.daggerlite.core.model.ConditionModel.root] from
+     * A set of selected [condition model's roots][com.yandex.yatagan.core.model.ConditionModel.root] from
      * [conditionScope].
      *
      * NOTE: the set may be empty if the binding doesn't _own_ the condition models, e.g. an alternatives binding whose

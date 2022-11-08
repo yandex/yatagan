@@ -1,23 +1,23 @@
 @file:OptIn(ConditionsApi::class, VariantApi::class)
 
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.AllConditions
-import com.yandex.daggerlite.AnyCondition
-import com.yandex.daggerlite.AnyConditions
-import com.yandex.daggerlite.AssistedFactory
-import com.yandex.daggerlite.Component
-import com.yandex.daggerlite.ComponentFlavor
-import com.yandex.daggerlite.ComponentVariantDimension
-import com.yandex.daggerlite.Condition
-import com.yandex.daggerlite.Conditional
-import com.yandex.daggerlite.Conditionals
-import com.yandex.daggerlite.ConditionsApi
-import com.yandex.daggerlite.Module
-import com.yandex.daggerlite.VariantApi
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.common.TypeDeclarationBase
+import com.yandex.yatagan.AllConditions
+import com.yandex.yatagan.AnyCondition
+import com.yandex.yatagan.AnyConditions
+import com.yandex.yatagan.AssistedFactory
+import com.yandex.yatagan.Component
+import com.yandex.yatagan.ComponentFlavor
+import com.yandex.yatagan.ComponentVariantDimension
+import com.yandex.yatagan.Condition
+import com.yandex.yatagan.Conditional
+import com.yandex.yatagan.Conditionals
+import com.yandex.yatagan.ConditionsApi
+import com.yandex.yatagan.Module
+import com.yandex.yatagan.VariantApi
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.TypeDeclarationBase
 
 /**
  * [TypeDeclaration] specialized for compile time implementations.

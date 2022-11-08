@@ -1,15 +1,15 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.bindings.ProvisionBinding
-import com.yandex.daggerlite.core.graph.impl.NonStaticConditionDependencies
-import com.yandex.daggerlite.core.graph.impl.VariantMatch
-import com.yandex.daggerlite.core.model.ProvidesBindingModel
-import com.yandex.daggerlite.core.model.isNever
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.bindingModelRepresentation
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
+import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
+import com.yandex.yatagan.core.graph.impl.VariantMatch
+import com.yandex.yatagan.core.model.ProvidesBindingModel
+import com.yandex.yatagan.core.model.isNever
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.bindingModelRepresentation
 
 internal class ProvisionBindingImpl(
     override val impl: ProvidesBindingModel,

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.base
+package com.yandex.yatagan.base
 
 private class MemoizedSequence<T>(sequence: Sequence<T>) : Sequence<T> {
     @Volatile

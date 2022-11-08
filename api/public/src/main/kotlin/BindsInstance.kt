@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  * Used in [Component.Builder] declaration to annotate setters or factory arguments.

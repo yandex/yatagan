@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSPropertySetter
 import com.google.devtools.ksp.symbol.Modifier
-import com.yandex.daggerlite.lang.Parameter
-import com.yandex.daggerlite.lang.Type
+import com.yandex.yatagan.lang.Parameter
+import com.yandex.yatagan.lang.Type
 
 internal class KspPropertySetterImpl(
     private val setter: KSPropertySetter,

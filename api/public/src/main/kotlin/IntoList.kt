@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  * A special modifier annotation that can be applied together with [Binds] or [Provides].
@@ -20,7 +20,7 @@ package com.yandex.daggerlite
  * Let's assume we have the following bindings
  * ```kotlin
  * /*@*/ package test
- * /*@*/ import com.yandex.daggerlite.*
+ * /*@*/ import com.yandex.yatagan.*
  * /*@*/ import javax.inject.*
  *
  * /*@*/@Module interface TestModule {

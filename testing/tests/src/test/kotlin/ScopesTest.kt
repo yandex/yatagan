@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,7 +19,7 @@ class ScopesTest(
     fun `singleton implicit binding is cached`() {
         givenKotlinSource(
             "test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
            @Singleton 
@@ -44,7 +44,7 @@ class ScopesTest(
     fun `unscoped implicit binding is not cached`() {
         givenKotlinSource(
             "test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             class ClassA @Inject constructor()
@@ -67,7 +67,7 @@ class ScopesTest(
     @Test
     fun `multi-threaded mode`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import java.util.concurrent.CountDownLatch
             import javax.inject.*
             import kotlin.concurrent.thread

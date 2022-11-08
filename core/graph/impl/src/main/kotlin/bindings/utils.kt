@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.AliasBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.bindings.ExtensibleBinding
-import com.yandex.daggerlite.core.graph.impl.and
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.AliasBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.bindings.ExtensibleBinding
+import com.yandex.yatagan.core.graph.impl.and
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.core.model.NodeModel
 
 internal fun Binding.graphConditionScope(): ConditionScope = conditionScope and owner.conditionScope
 

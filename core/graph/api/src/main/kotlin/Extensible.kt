@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.graph
+package com.yandex.yatagan.core.graph
 
 /**
  * An extension API, which allows an object to have associated data, accessible by strictly-typed keys.

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.validation.impl
+package com.yandex.yatagan.validation.impl
 
 internal object CharSequenceComparator : Comparator<CharSequence> {
     override fun compare(one: CharSequence, another: CharSequence): Int {

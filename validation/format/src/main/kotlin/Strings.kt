@@ -1,25 +1,25 @@
-package com.yandex.daggerlite.validation.format
+package com.yandex.yatagan.validation.format
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.AliasBinding
-import com.yandex.daggerlite.core.graph.bindings.BaseBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.model.ComponentDependencyModel
-import com.yandex.daggerlite.core.model.ComponentFactoryModel
-import com.yandex.daggerlite.core.model.ComponentModel
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel
-import com.yandex.daggerlite.core.model.ModuleModel
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.AnnotationDeclaration
-import com.yandex.daggerlite.lang.Constructor
-import com.yandex.daggerlite.lang.Member
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.AliasBinding
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
+import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentModel
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.core.model.ConditionalHoldingModel
+import com.yandex.yatagan.core.model.ModuleModel
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.Variant
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.AnnotationDeclaration
+import com.yandex.yatagan.lang.Constructor
+import com.yandex.yatagan.lang.Member
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
 
 object Strings {
     private const val Indent = "    "

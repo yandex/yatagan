@@ -1,25 +1,25 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.base.notIntersects
-import com.yandex.daggerlite.core.graph.bindings.BaseBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.impl.NonStaticConditionDependencies
-import com.yandex.daggerlite.core.graph.impl.VariantMatch
-import com.yandex.daggerlite.core.graph.impl.contains
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.core.model.ModuleHostedBindingModel
-import com.yandex.daggerlite.core.model.ModuleModel
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.core.model.component1
-import com.yandex.daggerlite.core.model.component2
-import com.yandex.daggerlite.core.model.isOptional
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.modelRepresentation
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.base.notIntersects
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
+import com.yandex.yatagan.core.graph.impl.VariantMatch
+import com.yandex.yatagan.core.graph.impl.contains
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.core.model.ModuleHostedBindingModel
+import com.yandex.yatagan.core.model.ModuleModel
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.component1
+import com.yandex.yatagan.core.model.component2
+import com.yandex.yatagan.core.model.isOptional
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.format.reportError
 
 internal interface BaseBindingDefaultsMixin : BaseBinding {
     override val originModule: ModuleModel?

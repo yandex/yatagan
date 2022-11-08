@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.base
+package com.yandex.yatagan.base
 
 import java.util.ServiceLoader
 import kotlin.contracts.InvocationKind

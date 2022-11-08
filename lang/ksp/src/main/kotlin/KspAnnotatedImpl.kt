@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtAnnotationBase
+import com.yandex.yatagan.base.memoize
+import com.yandex.yatagan.lang.compiled.CtAnnotated
+import com.yandex.yatagan.lang.compiled.CtAnnotationBase
 
 internal class KspAnnotatedImpl<T : KSAnnotated>(
      val impl: T

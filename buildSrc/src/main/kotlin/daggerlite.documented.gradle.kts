@@ -1,6 +1,6 @@
-import com.yandex.daggerlite.gradle.PatchModuleDocTask
-import com.yandex.daggerlite.gradle.publishedArtifactName
-import com.yandex.daggerlite.gradle.RepositoryBrowseUrl
+import com.yandex.yatagan.gradle.PatchModuleDocTask
+import com.yandex.yatagan.gradle.publishedArtifactName
+import com.yandex.yatagan.gradle.RepositoryBrowseUrl
 import org.intellij.lang.annotations.Language
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.DokkaBaseConfiguration
@@ -90,7 +90,7 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
         }
     """.trimIndent()
     pluginsMapConfiguration.set(mapOf(
-        "com.yandex.daggerlite.testing.doc_testing.DLDokkaPlugin" to config
+        "com.yandex.yatagan.testing.doc_testing.DLDokkaPlugin" to config
     ))
 
     moduleName.set(project.publishedArtifactName())
@@ -112,7 +112,7 @@ val testDocumentationCodeBlocks by tasks.registering(JavaExec::class) {
     inputs.dir(kdocsTestsDir)
 
     classpath = runCodeBlockTestsClasspath
-    mainClass.set("com.yandex.daggerlite.testing.tests.Standalone")
+    mainClass.set("com.yandex.yatagan.testing.tests.Standalone")
     argumentProviders += CommandLineArgumentProvider {
         listOf("--backend", "ksp", "--test-cases-dir", kdocsTestsDir.get().asFile.toString())
     }

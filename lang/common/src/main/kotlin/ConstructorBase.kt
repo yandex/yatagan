@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.lang.common
+package com.yandex.yatagan.lang.common
 
-import com.yandex.daggerlite.lang.Callable
-import com.yandex.daggerlite.lang.Constructor
+import com.yandex.yatagan.lang.Callable
+import com.yandex.yatagan.lang.Constructor
 
 abstract class ConstructorBase : Constructor {
     final override fun <T> accept(visitor: Callable.Visitor<T>): T {

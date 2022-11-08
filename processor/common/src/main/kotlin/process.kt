@@ -1,19 +1,19 @@
-package com.yandex.daggerlite.processor.common
+package com.yandex.yatagan.processor.common
 
-import com.yandex.daggerlite.base.ObjectCacheRegistry
-import com.yandex.daggerlite.base.loadServices
-import com.yandex.daggerlite.codegen.impl.ComponentGeneratorFacade
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.childrenSequence
-import com.yandex.daggerlite.core.graph.impl.BindingGraph
-import com.yandex.daggerlite.core.model.impl.ComponentModel
-import com.yandex.daggerlite.validation.ValidationMessage.Kind.Error
-import com.yandex.daggerlite.validation.ValidationMessage.Kind.MandatoryWarning
-import com.yandex.daggerlite.validation.ValidationMessage.Kind.Warning
-import com.yandex.daggerlite.validation.format.format
-import com.yandex.daggerlite.validation.impl.GraphValidationExtension
-import com.yandex.daggerlite.validation.impl.validate
-import com.yandex.daggerlite.validation.spi.ValidationPluginProvider
+import com.yandex.yatagan.base.ObjectCacheRegistry
+import com.yandex.yatagan.base.loadServices
+import com.yandex.yatagan.codegen.impl.ComponentGeneratorFacade
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.childrenSequence
+import com.yandex.yatagan.core.graph.impl.BindingGraph
+import com.yandex.yatagan.core.model.impl.ComponentModel
+import com.yandex.yatagan.validation.ValidationMessage.Kind.Error
+import com.yandex.yatagan.validation.ValidationMessage.Kind.MandatoryWarning
+import com.yandex.yatagan.validation.ValidationMessage.Kind.Warning
+import com.yandex.yatagan.validation.format.format
+import com.yandex.yatagan.validation.impl.GraphValidationExtension
+import com.yandex.yatagan.validation.impl.validate
+import com.yandex.yatagan.validation.spi.ValidationPluginProvider
 
 /**
  * Main processor routine. Takes [sources] and processes them using [delegate].

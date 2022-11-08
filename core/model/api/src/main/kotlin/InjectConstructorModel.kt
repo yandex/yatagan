@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.Constructor
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.Constructor
 
 /**
  * A model for type that has [javax.inject.Inject]-annotated constructor.

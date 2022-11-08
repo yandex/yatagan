@@ -1,6 +1,6 @@
 @file:JvmName("Checks")
 
-package com.yandex.daggerlite.internal
+package com.yandex.yatagan.internal
 
 import kotlin.contracts.contract
 

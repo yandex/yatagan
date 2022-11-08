@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.BuiltinAnnotation
 
 internal abstract class CtBuiltinAnnotationBase(
     protected val impl: CtAnnotationBase

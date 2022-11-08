@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.lang.Annotated
+import com.yandex.yatagan.lang.Annotated
 
 interface CtAnnotated : Annotated {
     override val annotations: Sequence<CtAnnotationBase>

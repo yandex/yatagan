@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.lang.jap
+package com.yandex.yatagan.lang.jap
 
-import com.yandex.daggerlite.lang.Parameter
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtMethodBase
+import com.yandex.yatagan.lang.Parameter
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.compiled.CtAnnotated
+import com.yandex.yatagan.lang.compiled.CtMethodBase
 import javax.lang.model.element.ExecutableElement
 
 internal class JavaxMethodImpl (

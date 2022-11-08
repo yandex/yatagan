@@ -1,16 +1,16 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
-import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
-import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.codegen.poetry.buildClass
-import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
-import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.model.component1
-import com.yandex.daggerlite.core.model.component2
+import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
+import com.yandex.yatagan.codegen.poetry.buildClass
+import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.Extensible
+import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
+import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
+import com.yandex.yatagan.core.model.component1
+import com.yandex.yatagan.core.model.component2
 import javax.lang.model.element.Modifier
 
 internal class AssistedInjectFactoryGenerator(

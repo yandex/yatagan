@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.lang.common
+package com.yandex.yatagan.lang.common
 
-import com.yandex.daggerlite.lang.Type
+import com.yandex.yatagan.lang.Type
 
 abstract class TypeBase : Type {
     final override fun compareTo(other: Type): Int {

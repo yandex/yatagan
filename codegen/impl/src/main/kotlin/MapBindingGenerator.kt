@@ -1,15 +1,15 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
-import com.yandex.daggerlite.codegen.poetry.CodeBuilder
-import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
-import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.bindings.MapBinding
-import com.yandex.daggerlite.core.model.component1
-import com.yandex.daggerlite.core.model.component2
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.Type
+import com.yandex.yatagan.codegen.poetry.CodeBuilder
+import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.Extensible
+import com.yandex.yatagan.core.graph.bindings.MapBinding
+import com.yandex.yatagan.core.model.component1
+import com.yandex.yatagan.core.model.component2
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.Type
 
 internal class MapBindingGenerator(
     methodsNs: Namespace,

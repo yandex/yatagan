@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  * A delegate holder for Dagger Lite thread checking for single-thread components.

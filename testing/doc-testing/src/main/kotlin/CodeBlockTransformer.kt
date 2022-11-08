@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.doc_testing
+package com.yandex.yatagan.testing.doc_testing
 
 import org.jetbrains.dokka.base.parsers.MarkdownParser
 import org.jetbrains.dokka.model.doc.*

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.validation
+package com.yandex.yatagan.validation
 
 /**
  * A visitor-like object that validates [MayBeInvalid].

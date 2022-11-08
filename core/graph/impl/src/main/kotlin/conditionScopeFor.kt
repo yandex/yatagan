@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
-import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.core.model.Variant.DimensionModel
-import com.yandex.daggerlite.core.model.Variant.FlavorModel
-import com.yandex.daggerlite.validation.ValidationMessage
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.buildError
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.core.model.ConditionalHoldingModel
+import com.yandex.yatagan.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
+import com.yandex.yatagan.core.model.Variant
+import com.yandex.yatagan.core.model.Variant.DimensionModel
+import com.yandex.yatagan.core.model.Variant.FlavorModel
+import com.yandex.yatagan.validation.ValidationMessage
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.buildError
 
 internal sealed interface VariantMatch {
     val conditionScope: ConditionScope

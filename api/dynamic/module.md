@@ -4,13 +4,13 @@ An API dependency for clients, that wish to use reflection for parsing and servi
 (RT backend).
 
 Specializes base [:api] dependency.
-Provides an entry-point implementation [Dagger][com.yandex.daggerlite.Dagger], that uses the same logic, as AP backends,
+Provides an entry-point implementation [Dagger][com.yandex.yatagan.Dagger], that uses the same logic, as AP backends,
 at runtime to process annotations. The components and other required interfaces are implemented using
 `java.lang.reflect.Proxy` mechanism.
 
 ## Optimized variant
 
-One can depend on pre-optimized variant of this artifact: `com.yandex.daggerlite:api-dynamic-optimized:<version>`.
+One can depend on pre-optimized variant of this artifact: `com.yandex.yatagan:api-dynamic-optimized:<version>`.
 It may provide improved performance in comparison with the default variant.
 
 ## Validation
@@ -20,8 +20,8 @@ Although there's an API for opting in the full validation with SPI plugins suppo
 This API is designed in a way that allows the "good path" (when there are no errors in a graph) to perform 
 un-penalized by validation.
 Yet if the graph is invalid, all errors will be reported.
-To make use of this, a [DynamicValidationDelegate][com.yandex.daggerlite.DynamicValidationDelegate] implementation
-may be supplied via [setDynamicValidationDelegate][com.yandex.daggerlite.Dagger.setDynamicValidationDelegate].
+To make use of this, a [DynamicValidationDelegate][com.yandex.yatagan.DynamicValidationDelegate] implementation
+may be supplied via [setDynamicValidationDelegate][com.yandex.yatagan.Dagger.setDynamicValidationDelegate].
 
 ## Memory consumption
 

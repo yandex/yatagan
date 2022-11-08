@@ -1,5 +1,5 @@
-import com.yandex.daggerlite.gradle.PatchModuleDocTask
-import com.yandex.daggerlite.gradle.RepositoryBrowseUrl
+import com.yandex.yatagan.gradle.PatchModuleDocTask
+import com.yandex.yatagan.gradle.RepositoryBrowseUrl
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.DokkaBaseConfiguration
 

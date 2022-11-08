@@ -28,8 +28,8 @@ Measurements show build time decrease by at least 50% for kapt backend for a lar
 though numbers may, of course, vary across projects and D2 usage patterns.
 
 This is achieved mostly due to the fact, that DL doesn't generate a factory class for every `@Inject` constructor and
-[@Provides][com.yandex.daggerlite/Provides@:api] binding.
-Hence, no need to run DL on a project module if there's no root [@Component][com.yandex.daggerlite/Component@:api]
+[@Provides][com.yandex.yatagan/Provides@:api] binding.
+Hence, no need to run DL on a project module if there's no root [@Component][com.yandex.yatagan/Component@:api]
 there.
 Also, those factories needed to be generated and compiled, which by itself introduces build time overhead.
 
@@ -53,7 +53,7 @@ similar error messages and listing places where they occur.
 
 DL may slightly improve runtime performance for graphs, that are known to be used only from a single thread.
 For graphs, that are used from multiple threads, one should explicitly declare it:
-[@Component(multiThreadAccess = true)][com.yandex.daggerlite/Component#multiThreadAccess@:api]
+[@Component(multiThreadAccess = true)][com.yandex.yatagan/Component#multiThreadAccess@:api]
 Also, some other small optimizations are made and there are plans to keep researching for more opportunities.
 See the corresponding [issues](https://st.yandex-team.ru/issues/?queue=%22DAGGERLITE%22&tags=%22RuntimeSpeed%22).
 
@@ -81,17 +81,17 @@ For full API compatibility consult the [:api] doc.
 
 The general idea of steps one needs to take to migrate from DL to D2:
 
-1. Replace `import dagger\.multibindings\.` -> `import com.yandex.daggerlite.`
-2. Replace `import dagger\.assisted\.` -> `import com.yandex.daggerlite.`
-3. Replace `import dagger\.` -> `import com.yandex.daggerlite.`
+1. Replace `import dagger\.multibindings\.` -> `import com.yandex.yatagan.`
+2. Replace `import dagger\.assisted\.` -> `import com.yandex.yatagan.`
+3. Replace `import dagger\.` -> `import com.yandex.yatagan.`
 4. Replace `@Subcomponent` annotations with `@Component(isRoot = false)` ones.
 5. Replace `@Component.Factory` with `@Component.Builder`.
 6. Run build and fix all remaining inconsistencies (like implicitly included subcomponents, etc..).
 7. Get rid of all nullable provisions. DL does not support them.
 8. Mark all components, that are accessed from multiple threads as
-   [@Component(multiThreadAccess = true)][com.yandex.daggerlite/Component#multiThreadAccess@:api].
+   [@Component(multiThreadAccess = true)][com.yandex.yatagan/Component#multiThreadAccess@:api].
    If you are unsure, if a component is accessed from a single thread, but ideally it should be,
-   you can set up [ThreadAssertions][com.yandex.daggerlite/ThreadAssertions@:api].
+   you can set up [ThreadAssertions][com.yandex.yatagan/ThreadAssertions@:api].
 
 DL was written from scratch, and as major known inconsistencies are documented in the [:api] doc,
 there is a possibility for differences that are overlooked.
@@ -105,9 +105,9 @@ For java-only project:
 
 ```kotlin
 dependencies {
-    implementation("com.yandex.daggerlite:api-compiled:%%version%%")
+    implementation("com.yandex.yatagan:api-compiled:%%version%%")
     // best codegen backend for Java-only, no need to use kapt/ksp.
-    annotationProcessor("com.yandex.daggerlite:processor-jap:%%version%%")
+    annotationProcessor("com.yandex.yatagan:processor-jap:%%version%%")
 }
 ```
 
@@ -116,9 +116,9 @@ For kotlin-only/mixed project using `kapt`:
 ```kotlin
 // Ensure `kotlin-kapt` plugin is applied
 dependencies {
-    implementation("com.yandex.daggerlite:api-compiled:%%version%%")
+    implementation("com.yandex.yatagan:api-compiled:%%version%%")
     // kapt is slow but generally reliable for mixed projects.
-    kapt("com.yandex.daggerlite:processor-jap:%%version%%")
+    kapt("com.yandex.yatagan:processor-jap:%%version%%")
 }
 ```
 
@@ -128,9 +128,9 @@ For kotlin-only/mixed project using `KSP`:
 ```kotlin
 // Ensure `com.google.devtools.ksp` plugin is applied
 dependencies {
-    implementation("com.yandex.daggerlite:api-compiled:%%version%%")
+    implementation("com.yandex.yatagan:api-compiled:%%version%%")
     // KSP implementation is unstable. Works best for pure-Kotlin projects.
-    ksp("com.yandex.daggerlite:processor-jap:%%version%%")
+    ksp("com.yandex.yatagan:processor-jap:%%version%%")
 }
 ```
 
@@ -138,7 +138,7 @@ To speed up build (most relevant for `kapt` users) one can replace codegen with 
 
 ```kotlin
 dependencies {
-    implementation("com.yandex.daggerlite:api-dynamic:%%version%%")
+    implementation("com.yandex.yatagan:api-dynamic:%%version%%")
     // No codegen dependency is required, the reflection engine comes as a dependency of the `api-dynamic` artifact.
 }
 ```
@@ -147,8 +147,8 @@ dependencies {
 
 DL has some extensions to the vanilla D2 API:
 
-**Condition API** (see [@Conditional][com.yandex.daggerlite/Conditional@:api]),
-and **Variant API** (see [@Conditional.onlyIn][com.yandex.daggerlite/Conditional#onlyIn@:api]).
+**Condition API** (see [@Conditional][com.yandex.yatagan/Conditional@:api]),
+and **Variant API** (see [@Conditional.onlyIn][com.yandex.yatagan/Conditional#onlyIn@:api]).
 
 _NOTE:_ Usage of these APIs often leads to questionable architectural solutions;
 All these APIs were introduced to solve SuperApp-specific needs due to its pre-Dagger history.
