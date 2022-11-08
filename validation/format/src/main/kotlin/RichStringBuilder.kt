@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.validation.format
+package com.yandex.yatagan.validation.format
 
-import com.yandex.daggerlite.validation.RichString
+import com.yandex.yatagan.validation.RichString
 
 /**
  * Use [buildRichString] functions to build [RichString]s.

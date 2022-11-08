@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.lang.jap
+package com.yandex.yatagan.lang.jap
 
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.Annotated
-import com.yandex.daggerlite.lang.Annotation.Value
-import com.yandex.daggerlite.lang.AnnotationDeclaration
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.compiled.CtAnnotationBase
-import com.yandex.daggerlite.lang.compiled.CtAnnotationDeclarationBase
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.base.memoize
+import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.Annotation.Value
+import com.yandex.yatagan.lang.AnnotationDeclaration
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.compiled.CtAnnotationBase
+import com.yandex.yatagan.lang.compiled.CtAnnotationDeclarationBase
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ExecutableElement

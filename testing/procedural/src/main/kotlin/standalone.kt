@@ -1,9 +1,9 @@
 @file:JvmName("Standalone")
 
-package com.yandex.daggerlite.testing.procedural
+package com.yandex.yatagan.testing.procedural
 
-import com.yandex.daggerlite.testing.procedural.GenerationParams.BindingType
-import com.yandex.daggerlite.testing.procedural.GenerationParams.DependencyKind
+import com.yandex.yatagan.testing.procedural.GenerationParams.BindingType
+import com.yandex.yatagan.testing.procedural.GenerationParams.DependencyKind
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
@@ -13,9 +13,9 @@ import kotlin.system.exitProcess
 
 @OptIn(ExperimentalGenerationApi::class)
 fun main(args: Array<String>) {
-    val parser = ArgParser("dagger-lite-graphs-generator")
+    val parser = ArgParser("yatagan-graphs-generator")
     val projectRootPath by parser.option(ArgType.String, fullName = "output-dir", shortName = "o").required()
-    val daggerLitePath by parser.option(ArgType.String, fullName = "dagger-lite-dir", shortName = "d").required()
+    val yataganPath by parser.option(ArgType.String, fullName = "yatagan-dir", shortName = "d").required()
     val forceGenerate by parser.option(ArgType.Boolean, fullName = "force-regenerate", shortName = "f").default(false)
     parser.parse(args)
 
@@ -30,9 +30,9 @@ fun main(args: Array<String>) {
         projectRoot.deleteRecursively()
         println("Done")
     }
-    val daggerLiteDir = File(daggerLitePath)
-    if (!daggerLiteDir.isDirectory) {
-        System.err.println("dagger-lite project path `$daggerLitePath` is not an existing directory")
+    val yataganDir = File(yataganPath)
+    if (!yataganDir.isDirectory) {
+        System.err.println("yatagan project path `$yataganPath` is not an existing directory")
         exitProcess(2)
     }
     println("Creating project root")
@@ -83,7 +83,7 @@ fun main(args: Array<String>) {
         dependencies {
             implementation("javax.inject:javax.inject:1")
             implementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
-            implementation("com.yandex.daggerlite:api-dynamic:0.2.4-rc1")
+            implementation("com.yandex.yatagan:api-dynamic:0.2.4-rc1")
         }
         application {
             mainClassName = "test.TestCaseKt"
@@ -96,9 +96,9 @@ fun main(args: Array<String>) {
             }
         }
         
-        rootProject.name = "dagger-lite-performance-test"
+        rootProject.name = "yatagan-performance-test"
         
-        includeBuild("${daggerLiteDir.absolutePath}")
+        includeBuild("${yataganDir.absolutePath}")
     """.trimIndent())
     projectRoot.resolve("gradle.properties").writeText("""
         org.gradle.configureondemand=true
@@ -110,7 +110,7 @@ fun main(args: Array<String>) {
     println("Project generation done!")
 
     ProcessBuilder().run {
-        command(daggerLiteDir.resolve("gradlew").absolutePath, "run")
+        command(yataganDir.resolve("gradlew").absolutePath, "run")
         println("Assembling and running code via `${command()}`")
         directory(projectRoot)
         inheritIO()

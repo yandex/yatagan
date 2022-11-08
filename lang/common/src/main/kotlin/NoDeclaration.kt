@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.lang.common
+package com.yandex.yatagan.lang.common
 
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.TypeDeclarationKind
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclarationKind
 
 /**
  * A [TypeDeclaration] implementation, that is convenient to return when no declaration makes sense at all,

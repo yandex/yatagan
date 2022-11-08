@@ -1,29 +1,34 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
-import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.codegen.poetry.buildClass
-import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.component1
-import com.yandex.daggerlite.core.graph.component2
-import com.yandex.daggerlite.lang.Field
-import com.yandex.daggerlite.lang.Member
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.compiled.ClassNameModel
+import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
+import com.yandex.yatagan.codegen.poetry.buildClass
+import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.component1
+import com.yandex.yatagan.core.graph.component2
+import com.yandex.yatagan.lang.Field
+import com.yandex.yatagan.lang.Member
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.compiled.ClassNameModel
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.Modifier.STATIC
 
-internal class ComponentGenerator(
+internal class ComponentGenerator private constructor(
     private val graph: BindingGraph,
-    val generatedClassName: ClassName = graph.model.name.let { name ->
-        check(name is ClassNameModel)
-        // Keep name mangling in sync with loader!
-        ClassName.get(name.packageName, "Dagger$" + name.simpleNames.joinToString(separator = "$"))
-    },
+    val generatedClassName: ClassName,
 ) {
+    constructor(graph: BindingGraph): this(
+        graph = graph,
+        generatedClassName = graph.model.name.let { name ->
+            check(name is ClassNameModel)
+            // Keep name mangling in sync with loader!
+            ClassName.get(name.packageName, "Yatagan$" + name.simpleNames.joinToString(separator = "$"))
+        },
+    )
+
     interface Contributor {
         fun generate(builder: TypeSpecBuilder)
     }

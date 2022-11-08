@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
 // Api in this file (effectively - class) wraps Java reflection API available since 1.8 (API 26+ for Android).
 // All such API should be wrapped and declared here to avoid runtime class verification issues on Android.

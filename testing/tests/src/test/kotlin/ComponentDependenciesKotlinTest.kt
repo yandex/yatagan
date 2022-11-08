@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,10 +22,10 @@ class ComponentDependenciesKotlinTest(
             import javax.inject.Provider
             import javax.inject.Scope
             import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Lazy
-            import com.yandex.daggerlite.Module            
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Binds
+            import com.yandex.yatagan.Lazy
+            import com.yandex.yatagan.Module            
 
             @Scope
             annotation class ActivityScoped
@@ -70,7 +70,7 @@ class ComponentDependenciesKotlinTest(
     @Test
     fun `plain interfaces are allowed as dependencies`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Component
+            import com.yandex.yatagan.Component
             import javax.inject.Named
 
             class MyClass
@@ -100,8 +100,8 @@ class ComponentDependenciesKotlinTest(
             import javax.inject.Provider
             import javax.inject.Scope
             import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Lazy
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Lazy
 
             @Scope
             annotation class ActivityScoped

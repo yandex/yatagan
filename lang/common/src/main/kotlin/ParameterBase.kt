@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.lang.common
+package com.yandex.yatagan.lang.common
 
-import com.yandex.daggerlite.lang.Parameter
+import com.yandex.yatagan.lang.Parameter
 
 abstract class ParameterBase : Parameter {
     final override fun toString(): String {

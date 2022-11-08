@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.model.ComponentModel
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.model.ComponentModel
 
 /**
  * Creates [BindingGraph] instance given the root component.

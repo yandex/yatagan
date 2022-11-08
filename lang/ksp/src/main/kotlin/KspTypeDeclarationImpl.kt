@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.getConstructors
 import com.google.devtools.ksp.getDeclaredProperties
@@ -16,20 +16,20 @@ import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.Annotated
-import com.yandex.daggerlite.lang.Constructor
-import com.yandex.daggerlite.lang.Field
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Parameter
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.lang.compiled.CtAnnotationBase
-import com.yandex.daggerlite.lang.compiled.CtConstructorBase
-import com.yandex.daggerlite.lang.compiled.CtFieldBase
-import com.yandex.daggerlite.lang.compiled.CtTypeDeclarationBase
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.base.memoize
+import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.Constructor
+import com.yandex.yatagan.lang.Field
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Parameter
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclarationKind
+import com.yandex.yatagan.lang.compiled.CtAnnotationBase
+import com.yandex.yatagan.lang.compiled.CtConstructorBase
+import com.yandex.yatagan.lang.compiled.CtFieldBase
+import com.yandex.yatagan.lang.compiled.CtTypeDeclarationBase
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeDeclarationImpl private constructor(

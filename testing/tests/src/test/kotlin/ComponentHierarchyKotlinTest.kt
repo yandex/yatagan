@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,11 +22,11 @@ class ComponentHierarchyKotlinTest(
             import javax.inject.Inject
             import javax.inject.Scope
             import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.Module
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Binds
+            import com.yandex.yatagan.Module
             import javax.inject.Provider
-            import com.yandex.daggerlite.Lazy
+            import com.yandex.yatagan.Lazy
 
             @Scope
             annotation class ActivityScoped
@@ -72,7 +72,7 @@ class ComponentHierarchyKotlinTest(
         givenKotlinSource(
             "test.TestCase",
             """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Scope annotation class ActivityScoped
@@ -154,7 +154,7 @@ class ComponentHierarchyKotlinTest(
             }
 
             fun test() {
-                val factory: MyApplicationComponent.Factory = Dagger.builder(MyApplicationComponent.Factory::class.java)
+                val factory: MyApplicationComponent.Factory = Yatagan.builder(MyApplicationComponent.Factory::class.java)
                 val appComponent = factory.create("foo")
                  
                 with(appComponent.activityFactory.create("bar")) {
@@ -186,10 +186,10 @@ class ComponentHierarchyKotlinTest(
     @Test
     fun `alias binding across component boundary`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Module            
-            import com.yandex.daggerlite.Component            
-            import com.yandex.daggerlite.Binds
-            import com.yandex.daggerlite.BindsInstance
+            import com.yandex.yatagan.Module            
+            import com.yandex.yatagan.Component            
+            import com.yandex.yatagan.Binds
+            import com.yandex.yatagan.BindsInstance
             import javax.inject.Inject      
 
             interface MyApi
@@ -229,7 +229,7 @@ class ComponentHierarchyKotlinTest(
             "test.TestCase",
             """
             import javax.inject.*
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
 
             @Scope annotation class ActivityScoped
              
@@ -360,7 +360,7 @@ class ComponentHierarchyKotlinTest(
             }
             
             fun test() {
-                val c = Dagger.create(ApplicationComponent::class.java)
+                val c = Yatagan.create(ApplicationComponent::class.java)
                 val settingsActivityFragmentModule = SettingsActivityFragmentModule(SettingsActivity())
                 
                 val mainActivityC = c.mainActivity.create()

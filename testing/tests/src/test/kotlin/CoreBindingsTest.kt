@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
@@ -72,9 +72,9 @@ class CoreBindingsTest(
         givenJavaSource(
             "test.TestComponent", """
             import javax.inject.Singleton;
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Lazy;
+            import com.yandex.yatagan.Lazy;
                         
             @Component @Singleton
             public interface TestComponent {
@@ -97,8 +97,8 @@ class CoreBindingsTest(
 
         givenJavaSource(
             "test.MyModule", """
-        import com.yandex.daggerlite.Binds;
-        import com.yandex.daggerlite.Module;
+        import com.yandex.yatagan.Binds;
+        import com.yandex.yatagan.Module;
                     
         @Module
         public interface MyModule {
@@ -110,9 +110,9 @@ class CoreBindingsTest(
         givenJavaSource(
             "test.TestComponent", """
             import javax.inject.Singleton;
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Lazy;
+            import com.yandex.yatagan.Lazy;
             
             @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
@@ -124,9 +124,9 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Dagger
+            import com.yandex.yatagan.Yatagan
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """.trimIndent()
@@ -141,8 +141,8 @@ class CoreBindingsTest(
 
         givenJavaSource(
             "test.MyModule", """
-        import com.yandex.daggerlite.Provides;
-        import com.yandex.daggerlite.Module;
+        import com.yandex.yatagan.Provides;
+        import com.yandex.yatagan.Module;
         
         @Module
         public interface MyModule {
@@ -155,9 +155,9 @@ class CoreBindingsTest(
         givenJavaSource(
             "test.TestComponent", """
             import javax.inject.Singleton;
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Lazy;
+            import com.yandex.yatagan.Lazy;
 
             @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
@@ -169,9 +169,9 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Dagger
+            import com.yandex.yatagan.Yatagan
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """
@@ -188,8 +188,8 @@ class CoreBindingsTest(
         givenJavaSource(
             "test.MyModule", """
         import javax.inject.Provider;
-        import com.yandex.daggerlite.Provides;
-        import com.yandex.daggerlite.Module;
+        import com.yandex.yatagan.Provides;
+        import com.yandex.yatagan.Module;
 
         @Module
         public interface MyModule {
@@ -202,9 +202,9 @@ class CoreBindingsTest(
         givenJavaSource(
             "test.TestComponent", """
             import javax.inject.Singleton;
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Lazy;
+            import com.yandex.yatagan.Lazy;
 
             @Component(modules = {MyModule.class}) @Singleton
             public interface TestComponent {
@@ -216,9 +216,9 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Dagger
+            import com.yandex.yatagan.Yatagan
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """
@@ -242,7 +242,7 @@ class CoreBindingsTest(
 
         givenJavaSource("test.TestComponent", """
             import javax.inject.Singleton;
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             
             @Component @Singleton
             public interface TestComponent {
@@ -276,7 +276,7 @@ class CoreBindingsTest(
         )
 
         givenJavaSource("test.TestComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             
             @Component
             interface TestComponent {
@@ -292,8 +292,8 @@ class CoreBindingsTest(
         includeFromSourceSet(apiImpl)
 
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.Binds;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Binds;
 
             @Module
             interface MyModule {
@@ -303,14 +303,14 @@ class CoreBindingsTest(
         """)
 
         givenJavaSource("test.MySubModule", """
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Module;
             
             @Module
             interface MySubModule extends MyModule {}
         """)
 
         givenJavaSource("test.TestComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
 
             @Component(modules = MySubModule.class)
             public interface TestComponent {
@@ -324,8 +324,8 @@ class CoreBindingsTest(
     @Test
     fun `basic component - provide primitive type`() {
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
             
             @Module
             public interface MyModule {
@@ -338,8 +338,8 @@ class CoreBindingsTest(
 
         givenJavaSource("test.TestComponent", """
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Component;
-            import com.yandex.daggerlite.Lazy;
+            import com.yandex.yatagan.Component;
+            import com.yandex.yatagan.Lazy;
             
             @Component(modules = MyModule.class)
             public interface TestComponent {
@@ -355,8 +355,8 @@ class CoreBindingsTest(
     @Test
     fun `basic component - convert class to primitive type`() {
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
             
             @Module
             public interface MyModule {
@@ -368,7 +368,7 @@ class CoreBindingsTest(
         """)
 
         givenJavaSource("test.TestComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
 
             @Component(modules = MyModule.class)
             public interface TestComponent {
@@ -382,8 +382,8 @@ class CoreBindingsTest(
     @Test
     fun `basic component - provide array type`() {
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
             
             @Module
             public interface MyModule {
@@ -418,8 +418,8 @@ class CoreBindingsTest(
         givenJavaSource("test.TestComponent", """
             import javax.inject.Inject;
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Component;
-            import com.yandex.daggerlite.Lazy;
+            import com.yandex.yatagan.Component;
+            import com.yandex.yatagan.Lazy;
             
             @Component(modules = MyModule.class)
             public interface TestComponent {
@@ -444,8 +444,8 @@ class CoreBindingsTest(
     @Test
     fun `basic component - provide Object`() {
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
 
             @Module
             public interface MyModule {
@@ -457,7 +457,7 @@ class CoreBindingsTest(
         """.trimIndent())
 
         givenJavaSource("test.TestComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             
             @Component(modules = MyModule.class)
             public interface TestComponent {
@@ -472,7 +472,7 @@ class CoreBindingsTest(
     fun `java component interface extends kotlin one with properties`() {
         givenPrecompiledModule(SourceSet {
             givenKotlinSource("mod.Precompiled", """
-                import com.yandex.daggerlite.*
+                import com.yandex.yatagan.*
                 import javax.inject.*
 
                 class SomeClass @Inject constructor()
@@ -482,7 +482,7 @@ class CoreBindingsTest(
             """.trimIndent())
         })
         givenJavaSource("test.TestComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             import mod.KotlinInterface;
             @Component
             public interface TestComponent extends KotlinInterface {
@@ -499,7 +499,7 @@ class CoreBindingsTest(
         assumeFalse(backendUnderTest == Backend.Ksp)  // TODO: revisit in KSP 1.0.7
 
         givenJavaSource("test.TestComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             
             @Component(dependencies = {TestComponent.Dependency.class})
             public interface TestComponent {
@@ -528,8 +528,8 @@ class CoreBindingsTest(
             public class ClassB { public @Inject ClassB() {} }
         """.trimIndent())
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.Binds;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Binds;
             import javax.inject.Named;
             
             @Module
@@ -557,7 +557,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
         givenJavaSource("test.TestCase", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
             
             @Component(modules = {MyModule.class})
             interface TestComponent {
@@ -566,7 +566,7 @@ class CoreBindingsTest(
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = com.yandex.daggerlite.Dagger.create(TestComponent::class.java)
+                val c = com.yandex.yatagan.Yatagan.create(TestComponent::class.java)
                 c.injectFoo(Foo())
             }
         """.trimIndent())
@@ -577,8 +577,8 @@ class CoreBindingsTest(
     @Test
     fun `trivially constructable module`() {
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.Provides;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Provides;
             
             @Module
             public class MyModule {
@@ -589,7 +589,7 @@ class CoreBindingsTest(
         """.trimIndent())
 
         givenJavaSource("test.MyComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
 
             @Component(modules = MyModule.class)
             interface MyComponent {
@@ -613,10 +613,10 @@ class CoreBindingsTest(
             import java.util.Collections;
             import javax.inject.Provider;
             import javax.inject.Singleton;
-            import com.yandex.daggerlite.Binds;
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.IntoList;
+            import com.yandex.yatagan.Binds;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.IntoList;
 
             @Module
             public interface MyModule {
@@ -659,7 +659,7 @@ class CoreBindingsTest(
             import javax.inject.Provider;
             import javax.inject.Inject;
             import javax.inject.Singleton;
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
     
             interface MySpecificDeferredEvent {}
 
@@ -673,7 +673,7 @@ class CoreBindingsTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = com.yandex.daggerlite.Dagger.create(MyComponent::class.java)
+                val c = com.yandex.yatagan.Yatagan.create(MyComponent::class.java)
                 c.deferred();
                 c.deferredProvider().get();
             }
@@ -685,7 +685,7 @@ class CoreBindingsTest(
     @Test
     fun `creator inputs are null-checked`() {
         givenJavaSource("test.MyComponentBase", """
-            import com.yandex.daggerlite.BindsInstance;
+            import com.yandex.yatagan.BindsInstance;
             
             public interface MyComponentBase {
                 char getChar();
@@ -700,14 +700,14 @@ class CoreBindingsTest(
             }
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
 
             @Component interface MyComponent : MyComponentBase {
                 @Component.Builder interface Builder : MyComponentBase.Builder<MyComponent>
             }
 
             fun test() {
-                fun builder() = Dagger.builder(MyComponent.Builder::class.java)
+                fun builder() = Yatagan.builder(MyComponent.Builder::class.java)
                 // Creates normally
                 builder().run { 
                     setChar('A')
@@ -745,16 +745,16 @@ class CoreBindingsTest(
     @Test
     fun `provision results are null-checked`() {
         givenJavaSource("test.MyModule", """
-            @com.yandex.daggerlite.Module
+            @com.yandex.yatagan.Module
             public interface MyModule {
-                @com.yandex.daggerlite.Provides
+                @com.yandex.yatagan.Provides
                 static Integer provideNullInt() {
                     return null;
                 }
             }
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
 
             @Component(modules = [MyModule::class])
             interface TestComponent {
@@ -762,7 +762,7 @@ class CoreBindingsTest(
             }
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 try { 
                     c.integer
                     throw AssertionError("Fail expected, but not occurred")
@@ -792,24 +792,24 @@ class CoreBindingsTest(
             }
         """.trimIndent())
         givenJavaSource("test.BarFactory", """
-            import com.yandex.daggerlite.AssistedFactory;
-            import com.yandex.daggerlite.Assisted;
+            import com.yandex.yatagan.AssistedFactory;
+            import com.yandex.yatagan.Assisted;
             @AssistedFactory
             public interface BarFactory {
                 Bar buildBar(@Assisted("c2") int count2, @Assisted("c1") int count1, String value);
             }
         """.trimIndent())
         givenJavaSource("test.FooFactory", """
-            import com.yandex.daggerlite.AssistedFactory;
-            import com.yandex.daggerlite.Assisted;
+            import com.yandex.yatagan.AssistedFactory;
+            import com.yandex.yatagan.Assisted;
             @AssistedFactory
             public interface FooFactory {
                 Foo createFoo(@Assisted("c1") int count1, @Assisted("c2") int count2, String value);
             }
         """.trimIndent())
         givenJavaSource("test.Foo", """
-            import com.yandex.daggerlite.AssistedInject;
-            import com.yandex.daggerlite.Assisted;
+            import com.yandex.yatagan.AssistedInject;
+            import com.yandex.yatagan.Assisted;
             import javax.inject.Named;
             
             public class Foo { 
@@ -828,8 +828,8 @@ class CoreBindingsTest(
             }
         """.trimIndent())
         givenJavaSource("test.Bar", """
-            import com.yandex.daggerlite.AssistedInject;
-            import com.yandex.daggerlite.Assisted;            
+            import com.yandex.yatagan.AssistedInject;
+            import com.yandex.yatagan.Assisted;            
 
             public class Bar { 
                 public final int c1;
@@ -848,7 +848,7 @@ class CoreBindingsTest(
         """.trimIndent())
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Module(subcomponents = [SubComponent::class])
@@ -866,7 +866,7 @@ class CoreBindingsTest(
             }
             
             fun test() {
-                val c: TestComponent = Dagger.builder(TestComponent.Factory::class.java).create("foo")
+                val c: TestComponent = Yatagan.builder(TestComponent.Factory::class.java).create("foo")
                 val f = c.fooFactory().createFoo(1, 2, "hello")
                 assert(f.bar.c1 == 1)
                 assert(f.bar.c2 == 2)
@@ -874,7 +874,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
         givenKotlinSource("test.SubComponent", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             @Component(isRoot = false)
             interface SubComponent {
                 fun fooFactory(): FooFactory
@@ -889,7 +889,7 @@ class CoreBindingsTest(
     @Test
     fun `assisted inject in subcomponents`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @[Scope Retention(AnnotationRetention.RUNTIME)] annotation class RootScope
@@ -941,7 +941,7 @@ class CoreBindingsTest(
             }
     
             fun test() {
-                val c: RootComponent.Creator = Dagger.builder(RootComponent.Creator::class.java)
+                val c: RootComponent.Creator = Yatagan.builder(RootComponent.Creator::class.java)
                 val component = c.create(object : Dep { override val input get() = "" })    
                 component.sub.create().factory.create(1)            
             }        
@@ -962,7 +962,7 @@ class CoreBindingsTest(
             }
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
 
             interface MyDependencies1 { fun classA(): ClassA }
             interface MyDependencies2 { fun classA(): ClassA }
@@ -975,7 +975,7 @@ class CoreBindingsTest(
     @Test
     fun `multiple scopes`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Scope
@@ -1014,7 +1014,7 @@ class CoreBindingsTest(
         """.trimIndent())
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             @Module class MyModule {
                 @Provides fun provideInt() = 228
                 @Provides fun provideString() = "hello"

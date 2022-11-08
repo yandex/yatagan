@@ -1,21 +1,21 @@
 @file:Suppress("UnstableApiUsage")
 
-package com.yandex.daggerlite.lang.jap
+package com.yandex.yatagan.lang.jap
 
 import com.google.auto.common.AnnotationMirrors
 import com.google.auto.common.AnnotationValues
 import com.google.auto.common.MoreElements
 import com.google.auto.common.MoreTypes
 import com.google.common.base.Equivalence
-import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.lang.Parameter
-import com.yandex.daggerlite.lang.compiled.ArrayNameModel
-import com.yandex.daggerlite.lang.compiled.ClassNameModel
-import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
-import com.yandex.daggerlite.lang.compiled.ErrorNameModel
-import com.yandex.daggerlite.lang.compiled.KeywordTypeNameModel
-import com.yandex.daggerlite.lang.compiled.ParameterizedNameModel
-import com.yandex.daggerlite.lang.compiled.WildcardNameModel
+import com.yandex.yatagan.base.memoize
+import com.yandex.yatagan.lang.Parameter
+import com.yandex.yatagan.lang.compiled.ArrayNameModel
+import com.yandex.yatagan.lang.compiled.ClassNameModel
+import com.yandex.yatagan.lang.compiled.CtTypeNameModel
+import com.yandex.yatagan.lang.compiled.ErrorNameModel
+import com.yandex.yatagan.lang.compiled.KeywordTypeNameModel
+import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
+import com.yandex.yatagan.lang.compiled.WildcardNameModel
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Element

@@ -1,12 +1,12 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 import kotlin.reflect.KClass
 
 /**
  * Interfaces, annotated with `@Component` are called *Component declarations*.
- * Component interface declarations will be implemented (generated or proxied) by DL framework.
+ * Component interface declarations will be implemented (generated or proxied) by Yatagan framework.
  *
- * The instances of these generated implementations are called DL *components* - they host DI graph and are ready to
+ * The instances of these generated implementations are called Yatagan *components* - they host DI graph and are ready to
  * construct and provide/inject *dependencies*.
  *
  * ## Entry-points
@@ -60,7 +60,7 @@ import kotlin.reflect.KClass
  * Example component declaration (with accompanying declarations):
  * ```kotlin
  * /*@*/ package test
- * /*@*/ import com.yandex.daggerlite.*
+ * /*@*/ import com.yandex.yatagan.*
  * /*@*/ import javax.inject.*
  *
  * class ClassA @Inject constructor(b: ClassB)
@@ -137,7 +137,7 @@ annotation class Component(
      * The main idea behind the *variant system* is to be able to have the following hierarchies (example):
      * ```kotlin
      * /*@*/ package test
-     * /*@*/ import com.yandex.daggerlite.*
+     * /*@*/ import com.yandex.yatagan.*
      * /*@*/ @ComponentVariantDimension annotation class Device {
      * /*@*/   @ComponentFlavor(dimension = Device::class) annotation class Tablet
      * /*@*/   @ComponentFlavor(dimension = Device::class) annotation class Phone
@@ -188,7 +188,7 @@ annotation class Component(
      *
      * Example:
      * ```kotlin
-     * /*@*/ import com.yandex.daggerlite.*
+     * /*@*/ import com.yandex.yatagan.*
      * /*@*/ import javax.inject.*
      *
      * @Component

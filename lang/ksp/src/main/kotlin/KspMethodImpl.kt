@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.yandex.daggerlite.base.ifOrElseNull
-import com.yandex.daggerlite.lang.Parameter
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtMethodBase
+import com.yandex.yatagan.base.ifOrElseNull
+import com.yandex.yatagan.lang.Parameter
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.compiled.CtAnnotated
+import com.yandex.yatagan.lang.compiled.CtMethodBase
 
 internal class KspMethodImpl(
     private val impl: KSFunctionDeclaration,

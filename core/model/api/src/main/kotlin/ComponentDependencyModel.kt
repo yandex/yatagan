@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Component dependency.
  * Every "getter" is exposed as a graph-level binding.
  *
- * @see com.yandex.daggerlite.Component.dependencies
+ * @see com.yandex.yatagan.Component.dependencies
  */
 interface ComponentDependencyModel : MayBeInvalid, ClassBackedModel {
     val exposedDependencies: Map<NodeModel, Method>

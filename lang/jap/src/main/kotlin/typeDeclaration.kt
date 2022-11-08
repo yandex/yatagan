@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.lang.jap
+package com.yandex.yatagan.lang.jap
 
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclaration
 import javax.lang.model.element.TypeElement
 
 fun TypeDeclaration(typeElement: TypeElement): TypeDeclaration {

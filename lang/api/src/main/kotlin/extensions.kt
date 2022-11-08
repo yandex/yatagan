@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package com.yandex.daggerlite.lang
+package com.yandex.yatagan.lang
 
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract

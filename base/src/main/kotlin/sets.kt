@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package com.yandex.daggerlite.base
+package com.yandex.yatagan.base
 
 private class PairSet<out T>(
     private val one: T,

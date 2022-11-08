@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.base
+package com.yandex.yatagan.base
 
 /**
  * The same as [ObjectCache] yet supports a composite key with two parts.

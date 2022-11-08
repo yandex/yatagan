@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
 internal object MethodSignatureComparator : Comparator<ReflectMethod> {
     override fun compare(one: ReflectMethod, other: ReflectMethod): Int {

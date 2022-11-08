@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.processor.common
+package com.yandex.yatagan.processor.common
 
 interface Logger {
     fun error(message: String)

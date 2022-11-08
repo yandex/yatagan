@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang
+package com.yandex.yatagan.lang
 
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
@@ -6,11 +6,11 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.symbolProcessorProviders
-import com.yandex.daggerlite.base.ObjectCacheRegistry
-import com.yandex.daggerlite.lang.jap.JavaxModelFactoryImpl
-import com.yandex.daggerlite.lang.ksp.KspModelFactoryImpl
-import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.base.ObjectCacheRegistry
+import com.yandex.yatagan.lang.jap.JavaxModelFactoryImpl
+import com.yandex.yatagan.lang.ksp.KspModelFactoryImpl
+import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
+import com.yandex.yatagan.testing.source_set.SourceSet
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
@@ -22,8 +22,8 @@ import javax.lang.model.util.Types
 
 typealias InspectBlock = LangModelFactory.() -> Unit
 
-private typealias JapProcessingUtils = com.yandex.daggerlite.lang.jap.ProcessingUtils
-private typealias KspProcessingUtils = com.yandex.daggerlite.lang.ksp.ProcessingUtils
+private typealias JapProcessingUtils = com.yandex.yatagan.lang.jap.ProcessingUtils
+private typealias KspProcessingUtils = com.yandex.yatagan.lang.ksp.ProcessingUtils
 
 interface LangTestDriver : SourceSet {
     /**

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.procedural
+package com.yandex.yatagan.testing.procedural
 
 import java.util.EnumMap
 import kotlin.random.Random

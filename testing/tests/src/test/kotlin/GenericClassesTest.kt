@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -22,8 +22,8 @@ class GenericClassesTest(
         givenJavaSource("test.MyClass", """public class MyClass <T> {}""")
 
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
            
             @Module public interface MyModule {
                 @Provides static MyClass<Integer> getMyClassInt() {
@@ -33,8 +33,8 @@ class GenericClassesTest(
         """.trimIndent())
         givenJavaSource("test.TestComponent", """
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Component;
-            import com.yandex.daggerlite.Lazy;
+            import com.yandex.yatagan.Component;
+            import com.yandex.yatagan.Lazy;
             
             @Component(modules = MyModule.class) interface TestComponent {
                 MyClass<Integer> get();
@@ -51,8 +51,8 @@ class GenericClassesTest(
         givenJavaSource("test.MyClass", """public class MyClass <T> {}""")
 
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
 
             @Module public interface MyModule {
                 @Provides static MyClass<Integer> getMyClassInt() {
@@ -66,7 +66,7 @@ class GenericClassesTest(
         """.trimIndent())
         givenJavaSource("test.TestComponent", """
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
 
             @Component(modules = MyModule.class) interface TestComponent {
                 MyClass<Integer> getInt();
@@ -85,8 +85,8 @@ class GenericClassesTest(
         givenJavaSource("test.MySecondClass", """public class MySecondClass <T> {}""")
 
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
 
             @Module public interface MyModule {
                 @Provides static MyClass<MySecondClass<Object>> getMyClassObj() {
@@ -100,7 +100,7 @@ class GenericClassesTest(
         """.trimIndent())
         givenJavaSource("test.TestComponent", """
             import javax.inject.Provider;
-            import com.yandex.daggerlite.Component;      
+            import com.yandex.yatagan.Component;      
 
             @Component(modules = MyModule.class) interface TestComponent {
                 MyClass<MySecondClass<Object>> getObj();
@@ -118,8 +118,8 @@ class GenericClassesTest(
         givenJavaSource("test.MyClass", """public class MyClass <T> {}""")
 
         givenJavaSource("test.MyModule", """
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;        
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;        
 
             @Module public interface MyModule {
                 @Provides static MyClass getMyClassObj() {
@@ -128,7 +128,7 @@ class GenericClassesTest(
                  }
         """.trimIndent())
         givenJavaSource("test.TestComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
 
             @Component(modules = MyModule.class) interface TestComponent {
                 MyClass get();
@@ -141,7 +141,7 @@ class GenericClassesTest(
     @Test
     fun `jvm wildcard annotations are honored`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             interface Api
@@ -213,7 +213,7 @@ class GenericClassesTest(
         """.trimIndent())
 
         givenJavaSource("test.TestComponent", """
-            import com.yandex.daggerlite.Component;
+            import com.yandex.yatagan.Component;
 
             @SuppressWarnings({"rawtypes", "RedundantSuppression"})
             @Component
@@ -225,7 +225,7 @@ class GenericClassesTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = com.yandex.daggerlite.Dagger.create(TestComponent::class.java)
+                val c = com.yandex.yatagan.Yatagan.create(TestComponent::class.java)
                 c.get()
                 c.get2()
             }

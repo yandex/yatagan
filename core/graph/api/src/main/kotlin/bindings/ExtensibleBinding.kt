@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.core.graph.bindings
+package com.yandex.yatagan.core.graph.bindings
 
-import com.yandex.daggerlite.core.model.NodeModel
+import com.yandex.yatagan.core.model.NodeModel
 
 /**
  * A binding that can override/extend a binding with the same [target] from the parent graph.

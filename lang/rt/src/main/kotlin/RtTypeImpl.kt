@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.common.NoDeclaration
-import com.yandex.daggerlite.lang.common.TypeBase
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.NoDeclaration
+import com.yandex.yatagan.lang.common.TypeBase
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.WildcardType
 

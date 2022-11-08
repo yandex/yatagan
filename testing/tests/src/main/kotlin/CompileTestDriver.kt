@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description

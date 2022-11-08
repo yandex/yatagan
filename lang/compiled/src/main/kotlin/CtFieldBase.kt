@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.common.FieldBase
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.common.FieldBase
 import javax.inject.Inject
 
 abstract class CtFieldBase : FieldBase() {

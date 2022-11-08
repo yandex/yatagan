@@ -1,14 +1,14 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.core.model.ComponentFactoryModel.InputModel
-import com.yandex.daggerlite.core.model.DependencyKind.Direct
-import com.yandex.daggerlite.core.model.DependencyKind.Lazy
-import com.yandex.daggerlite.core.model.DependencyKind.Optional
-import com.yandex.daggerlite.core.model.DependencyKind.OptionalLazy
-import com.yandex.daggerlite.core.model.DependencyKind.OptionalProvider
-import com.yandex.daggerlite.core.model.DependencyKind.Provider
+import com.yandex.yatagan.core.model.ComponentFactoryModel.InputModel
+import com.yandex.yatagan.core.model.DependencyKind.Direct
+import com.yandex.yatagan.core.model.DependencyKind.Lazy
+import com.yandex.yatagan.core.model.DependencyKind.Optional
+import com.yandex.yatagan.core.model.DependencyKind.OptionalLazy
+import com.yandex.yatagan.core.model.DependencyKind.OptionalProvider
+import com.yandex.yatagan.core.model.DependencyKind.Provider
 
 val ComponentFactoryModel.allInputs: Sequence<InputModel>
     get() = factoryInputs.asSequence() + builderInputs.asSequence()

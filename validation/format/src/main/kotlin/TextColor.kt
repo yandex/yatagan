@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.validation.format
+package com.yandex.yatagan.validation.format
 
 /**
  * Text color for rich strings.

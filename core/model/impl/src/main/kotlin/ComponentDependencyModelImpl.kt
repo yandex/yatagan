@@ -1,17 +1,17 @@
-package com.yandex.daggerlite.core.model.impl
+package com.yandex.yatagan.core.model.impl
 
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.model.ComponentDependencyModel
-import com.yandex.daggerlite.core.model.DependencyKind
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.modelRepresentation
-import com.yandex.daggerlite.validation.format.reportWarning
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.DependencyKind
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.format.reportWarning
 
 internal class ComponentDependencyModelImpl private constructor(
     override val type: Type,

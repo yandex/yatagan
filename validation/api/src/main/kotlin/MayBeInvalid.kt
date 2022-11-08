@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.validation
+package com.yandex.yatagan.validation
 
 /**
  * An interface for the models, which are eligible for validation (which may be invalid).
@@ -9,9 +9,9 @@ package com.yandex.daggerlite.validation
  * # For external clients
  *
  * This API is merely used as an extension point to report validation messages, that can be seamlessly plugged into
- * DL's internal validation pipeline
+ * Yatagan's internal validation pipeline
  *
- * # For DL internal validation pipeline
+ * # For Yatagan internal validation pipeline
  *
  * Model implementations should internally support two states:
  *   - valid state where all contracts of the API are met.

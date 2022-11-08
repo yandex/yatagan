@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.processor.common
+package com.yandex.yatagan.processor.common
 
 import kotlin.reflect.KProperty
 
@@ -42,10 +42,10 @@ class Options(
 
     companion object {
         // TODO: Hook with docs
-        val StrictMode = BooleanOption("daggerlite.enableStrictMode", default = true)
+        val StrictMode = BooleanOption("yatagan.enableStrictMode", default = true)
 
-        val MaxIssueEncounterPaths = IntOption("daggerlite.maxIssueEncounterPaths", default = 5)
+        val MaxIssueEncounterPaths = IntOption("yatagan.maxIssueEncounterPaths", default = 5)
 
-        val UsePlainOutput = BooleanOption("daggerlite.usePlainOutput", default = false)
+        val UsePlainOutput = BooleanOption("yatagan.usePlainOutput", default = false)
     }
 }

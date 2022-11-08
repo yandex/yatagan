@@ -1,5 +1,5 @@
 @file:JvmName("Standalone")
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -12,12 +12,12 @@ import kotlin.system.exitProcess
 private const val TAG = "[Standalone-Runner]"
 
 fun main(args: Array<String>) {
-    val parser = ArgParser("dagger-lite-testing")
+    val parser = ArgParser("yatagan-testing")
     val backend: Backend by parser.option(
         type = ArgType.Choice<Backend>(),
         fullName = "backend",
         description = """
-            What DL backend to use for running test code.
+            What Yatagan backend to use for running test code.
         """.trimIndent(),
     ).required()
     val testCasesDir: String by parser.option(

@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.base
+package com.yandex.yatagan.base
 
-import com.yandex.daggerlite.base.ObjectCacheRegistry.close
+import com.yandex.yatagan.base.ObjectCacheRegistry.close
 import java.io.Closeable
 
 /**

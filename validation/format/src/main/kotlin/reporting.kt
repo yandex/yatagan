@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.validation.format
+package com.yandex.yatagan.validation.format
 
-import com.yandex.daggerlite.validation.ValidationMessage
-import com.yandex.daggerlite.validation.Validator
+import com.yandex.yatagan.validation.ValidationMessage
+import com.yandex.yatagan.validation.Validator
 
 /**
  * An API for building [messages][ValidationMessage].

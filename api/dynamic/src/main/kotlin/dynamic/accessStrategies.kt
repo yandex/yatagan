@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.dynamic
+package com.yandex.yatagan.dynamic
 
-import com.yandex.daggerlite.Lazy
-import com.yandex.daggerlite.Optional
-import com.yandex.daggerlite.ThreadAssertions
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.model.ConditionScope
+import com.yandex.yatagan.Lazy
+import com.yandex.yatagan.Optional
+import com.yandex.yatagan.ThreadAssertions
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.ConditionScope
 import javax.inject.Provider
 
 

@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.lang.Member
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.lang.Member
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Represents a parsed runtime condition model.

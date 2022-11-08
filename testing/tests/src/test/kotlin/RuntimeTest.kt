@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,10 +19,10 @@ class RuntimeTest(
     fun `check qualified providings are correct`() {
         givenKotlinSource("test.TestCase", """
             import javax.inject.Named
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Provides
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Dagger
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Provides
+            import com.yandex.yatagan.Module
+            import com.yandex.yatagan.Yatagan
 
             class Simple(val value: String)
 
@@ -41,7 +41,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.simple().value == "simple")
                 assert(c.one().value == "one")
                 assert(c.two().value == "two")
@@ -70,9 +70,9 @@ class RuntimeTest(
 
         givenJavaSource("test.MyModuleHello", """
             import javax.inject.Named;
-            import com.yandex.daggerlite.Component;
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Component;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
 
             @Module(includes = {MyModuleBye.class, MyModuleFoo.class})
             public interface MyModuleHello {
@@ -82,9 +82,9 @@ class RuntimeTest(
 
         givenJavaSource("test.MyModuleBye", """
             import javax.inject.Named;
-            import com.yandex.daggerlite.Component;
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Component;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
             
             @Module(includes = {MyModuleFoo.class})
             public interface MyModuleBye{
@@ -94,9 +94,9 @@ class RuntimeTest(
 
         givenJavaSource("test.MyModuleFoo", """
             import javax.inject.Named;
-            import com.yandex.daggerlite.Component;
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Component;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
             
             @Module
             public interface MyModuleFoo{
@@ -106,9 +106,9 @@ class RuntimeTest(
 
         givenJavaSource("test.TestComponent", """
             import javax.inject.Named;
-            import com.yandex.daggerlite.Component;
-            import com.yandex.daggerlite.Provides;
-            import com.yandex.daggerlite.Module;
+            import com.yandex.yatagan.Component;
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
             
             @Component(modules = {MyModuleHello.class, MyModuleBye.class})
             public interface TestComponent {
@@ -119,10 +119,10 @@ class RuntimeTest(
         """)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Dagger
+            import com.yandex.yatagan.Yatagan
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c == c) { "Equality test" }
                 assert(c.hello().value == "hello")
                 assert(c.bye().value == "bye")
@@ -136,7 +136,7 @@ class RuntimeTest(
     @Test
     fun `check @Provides used instead of @Inject constructor if exists`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             class Impl(val value: Int)
@@ -155,7 +155,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.impl().value == 1)
                 assert(c.wrapper().i.value == 2)
             }
@@ -168,7 +168,7 @@ class RuntimeTest(
     @Test
     fun `thread assertions`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import java.util.concurrent.*
             import javax.inject.*
             
@@ -181,7 +181,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c: MySTComponent = Dagger.create(MySTComponent::class.java)
+                val c: MySTComponent = Yatagan.create(MySTComponent::class.java)
                 val mainTid = Thread.currentThread().id
                 ThreadAssertions.asserter = ThreadAssertions.Asserter {
                     if (Thread.currentThread().id != mainTid) {

@@ -1,21 +1,21 @@
-package com.yandex.daggerlite.core.graph
+package com.yandex.yatagan.core.graph
 
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.lang.Member
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.lang.Member
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * Graph-level abstraction over [MembersInjectorModel][com.yandex.daggerlite.core.MembersInjectorModel].
+ * Graph-level abstraction over [MembersInjectorModel][com.yandex.yatagan.core.MembersInjectorModel].
  */
 interface GraphMemberInjector : MayBeInvalid {
     /**
-     * See [injector][com.yandex.daggerlite.core.MembersInjectorModel.injector]
+     * See [injector][com.yandex.yatagan.core.MembersInjectorModel.injector]
      */
     val injector: Method
 
     /**
-     * See [membersToInject][com.yandex.daggerlite.core.MembersInjectorModel.membersToInject]
+     * See [membersToInject][com.yandex.yatagan.core.MembersInjectorModel.membersToInject]
      */
     val membersToInject: Map<out Member, NodeDependency>
 }

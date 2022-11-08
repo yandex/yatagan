@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang
+package com.yandex.yatagan.lang
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assume.assumeNotNull

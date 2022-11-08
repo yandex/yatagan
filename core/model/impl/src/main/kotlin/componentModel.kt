@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.core.model.impl
+package com.yandex.yatagan.core.model.impl
 
-import com.yandex.daggerlite.core.model.ComponentFactoryModel
-import com.yandex.daggerlite.core.model.ComponentModel
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentModel
+import com.yandex.yatagan.lang.TypeDeclaration
 
 fun ComponentModel(declaration: TypeDeclaration): ComponentModel {
     return ComponentModelImpl(declaration)

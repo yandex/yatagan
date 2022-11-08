@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  * A special modifier annotation that can be applied together with [Binds] or [Provides].
@@ -32,7 +32,7 @@ package com.yandex.daggerlite
  * Example:
  * ```kotlin
  * /*@*/ package test
- * /*@*/ import com.yandex.daggerlite.*
+ * /*@*/ import com.yandex.yatagan.*
  * /*@*/ import javax.inject.*
  *
  * /*@*/ class A; class B; class C
@@ -64,7 +64,7 @@ package com.yandex.daggerlite
  *
  * // And the following would hold true:
  * /*@*/ fun test() {
- * /*@*/ val component = Dagger.create(ExampleComponent::class.java)
+ * /*@*/ val component = Yatagan.create(ExampleComponent::class.java)
  * /*@*/assert(
  * component.mapOfClassToNumber == mapOf(A::class to 1, B::class to 2, C::class to 3.0f)
  * /*@*/)
@@ -84,7 +84,7 @@ annotation class IntoMap {
      * Example for constrained class keys, that should only accept types implementing `MyApi`:
      * ```kotlin
      * /*@*/ import kotlin.reflect.KClass
-     * /*@*/ import com.yandex.daggerlite.*
+     * /*@*/ import com.yandex.yatagan.*
      * /*@*/ interface MyApi
      * @IntoMap.Key
      * @Retention(AnnotationRetention.RUNTIME)

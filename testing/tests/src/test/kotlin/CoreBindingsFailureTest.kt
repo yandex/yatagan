@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,7 +23,7 @@ class CoreBindingsFailureTest(
     fun setUp() {
         features = SourceSet {
             givenKotlinSource("test.features", """
-                import com.yandex.daggerlite.Condition                
+                import com.yandex.yatagan.Condition                
 
                 object Foo { 
                     val isEnabledA = true 
@@ -41,7 +41,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `rebind scope is forbidden`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             @Module interface TestModule {
                 @Binds @Singleton fun number(i: Int): Number
@@ -60,7 +60,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `missing dependency`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             class Foo @Inject constructor(obj: Any, foo: Lazy<Foo2>)
@@ -86,9 +86,9 @@ class CoreBindingsFailureTest(
     @Test
     fun `no compatible scope for inject`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Lazy
-            import com.yandex.daggerlite.Module
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Lazy
+            import com.yandex.yatagan.Module
             import javax.inject.Inject
             import javax.inject.Singleton
             import javax.inject.Scope
@@ -122,10 +122,10 @@ class CoreBindingsFailureTest(
     @Test
     fun `no compatible scope for provision`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Lazy
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Provides
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Lazy
+            import com.yandex.yatagan.Module
+            import com.yandex.yatagan.Provides
             import javax.inject.Inject
             import javax.inject.Named
             import javax.inject.Singleton
@@ -163,7 +163,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `invalid bindings`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             @Module
             class TestModule {
@@ -197,7 +197,7 @@ class CoreBindingsFailureTest(
     fun `condition propagates through alias and is validated`() {
         includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             annotation class NotAFeature
@@ -230,7 +230,7 @@ class CoreBindingsFailureTest(
         includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @AllConditions(
@@ -291,7 +291,7 @@ class CoreBindingsFailureTest(
         includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface Heater
@@ -364,7 +364,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `invalid features & variants`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             annotation class NotAFeature
@@ -394,7 +394,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `invalid conditions`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             object Foo {
@@ -430,7 +430,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `inconsistent non-static bindings`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             class FeatureProvider(
@@ -476,7 +476,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `conflicting bindings`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Qualifier
@@ -553,7 +553,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `manual framework type usage`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             class WithInject @Inject constructor()
@@ -587,7 +587,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `multi-thread status mismatch`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             
             @Module(subcomponents = [SubComponent1::class]) interface RootModule
             @Component(modules = [RootModule::class]) interface RootComponent
@@ -609,7 +609,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `unresolved complex annotation as qualifier`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             enum class MyEnum {
@@ -660,8 +660,8 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
         givenJavaSource("test.FactoryA", """
-            import com.yandex.daggerlite.Assisted;
-            import com.yandex.daggerlite.AssistedFactory;
+            import com.yandex.yatagan.Assisted;
+            import com.yandex.yatagan.AssistedFactory;
 
             @AssistedFactory
             public abstract class FactoryA {
@@ -669,20 +669,20 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
         givenJavaSource("test.FactoryB", """
-            @com.yandex.daggerlite.AssistedFactory
+            @com.yandex.yatagan.AssistedFactory
             public interface FactoryB {}
         """.trimIndent())
         givenJavaSource("test.ClassA", """
-            import com.yandex.daggerlite.AssistedInject;
-            import com.yandex.daggerlite.Assisted;
+            import com.yandex.yatagan.AssistedInject;
+            import com.yandex.yatagan.Assisted;
 
             public class ClassA {
                 @AssistedInject public ClassA(@Assisted("A") int a, ClassI i, @Assisted("A") int b) {}
             }
         """.trimIndent())
         givenJavaSource("test.FactoryC", """
-            import com.yandex.daggerlite.Assisted;
-            import com.yandex.daggerlite.AssistedFactory;
+            import com.yandex.yatagan.Assisted;
+            import com.yandex.yatagan.AssistedFactory;
             @AssistedFactory
             public interface FactoryC {
                 ClassA createA(@Assisted("A") int a, @Assisted("B") int b);
@@ -690,7 +690,7 @@ class CoreBindingsFailureTest(
         """.trimIndent())
 
         givenKotlinSource("test.TestComponent", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             @Component
             interface TestComponent {
                 fun a(): FactoryA
@@ -705,7 +705,7 @@ class CoreBindingsFailureTest(
     @Test
     fun `invalid map binding`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             import kotlin.reflect.KClass
 
@@ -763,8 +763,8 @@ class CoreBindingsFailureTest(
     @Test
     fun `invalid multibinding declaration`() {
         givenJavaSource("test.JavaModule", """
-            import com.yandex.daggerlite.Module;
-            import com.yandex.daggerlite.Multibinds;
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Multibinds;
             import java.util.List;
             import java.util.Map;
 
@@ -778,7 +778,7 @@ class CoreBindingsFailureTest(
             }
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Module class MyModule {

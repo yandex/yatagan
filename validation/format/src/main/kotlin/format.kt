@@ -1,14 +1,14 @@
 @file:[JvmMultifileClass JvmName("Format") ]
-package com.yandex.daggerlite.validation.format
+package com.yandex.yatagan.validation.format
 
-import com.yandex.daggerlite.core.graph.bindings.AliasBinding
-import com.yandex.daggerlite.core.graph.bindings.BaseBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.model.ConditionExpression
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.RichString
+import com.yandex.yatagan.core.graph.bindings.AliasBinding
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.ConditionExpression
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.RichString
 
 inline fun buildRichString(
     block: RichStringBuilder.() -> Unit,

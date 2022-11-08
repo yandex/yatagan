@@ -1,30 +1,30 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.CodeBlock
-import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
-import com.yandex.daggerlite.codegen.poetry.buildExpression
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.AlternativesBinding
-import com.yandex.daggerlite.core.graph.bindings.AssistedInjectFactoryBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.bindings.ComponentDependencyBinding
-import com.yandex.daggerlite.core.graph.bindings.ComponentDependencyEntryPointBinding
-import com.yandex.daggerlite.core.graph.bindings.ComponentInstanceBinding
-import com.yandex.daggerlite.core.graph.bindings.EmptyBinding
-import com.yandex.daggerlite.core.graph.bindings.InstanceBinding
-import com.yandex.daggerlite.core.graph.bindings.MapBinding
-import com.yandex.daggerlite.core.graph.bindings.MultiBinding
-import com.yandex.daggerlite.core.graph.bindings.ProvisionBinding
-import com.yandex.daggerlite.core.graph.bindings.SubComponentFactoryBinding
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.core.model.component1
-import com.yandex.daggerlite.core.model.component2
-import com.yandex.daggerlite.core.model.isAlways
-import com.yandex.daggerlite.core.model.isNever
-import com.yandex.daggerlite.lang.Callable
-import com.yandex.daggerlite.lang.Constructor
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.TypeDeclarationKind
+import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.AlternativesBinding
+import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.bindings.ComponentDependencyBinding
+import com.yandex.yatagan.core.graph.bindings.ComponentDependencyEntryPointBinding
+import com.yandex.yatagan.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.yatagan.core.graph.bindings.EmptyBinding
+import com.yandex.yatagan.core.graph.bindings.InstanceBinding
+import com.yandex.yatagan.core.graph.bindings.MapBinding
+import com.yandex.yatagan.core.graph.bindings.MultiBinding
+import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
+import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.component1
+import com.yandex.yatagan.core.model.component2
+import com.yandex.yatagan.core.model.isAlways
+import com.yandex.yatagan.core.model.isNever
+import com.yandex.yatagan.lang.Callable
+import com.yandex.yatagan.lang.Constructor
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.TypeDeclarationKind
 
 private class CreationGeneratorVisitor(
     private val builder: ExpressionBuilder,

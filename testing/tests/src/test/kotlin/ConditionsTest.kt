@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assume.assumeFalse
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,8 +20,8 @@ class ConditionsTest(
     private val flavors by lazy {
         SourceSet {
             givenKotlinSource("test.Flavors", """
-                import com.yandex.daggerlite.ComponentVariantDimension
-                import com.yandex.daggerlite.ComponentFlavor
+                import com.yandex.yatagan.ComponentVariantDimension
+                import com.yandex.yatagan.ComponentFlavor
 
                 @ComponentVariantDimension
                 annotation class ProductType {
@@ -60,7 +60,7 @@ class ConditionsTest(
     private val features by lazy {
         SourceSet {
             givenKotlinSource("test.Features", """
-                import com.yandex.daggerlite.Condition
+                import com.yandex.yatagan.Condition
                 import javax.inject.Singleton
 
                 class FeatureC {
@@ -97,7 +97,7 @@ class ConditionsTest(
         includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Singleton
@@ -118,12 +118,12 @@ class ConditionsTest(
             }
 
             fun test() {
-                val component = Dagger.create(TestComponent::class.java)
+                val component = Yatagan.create(TestComponent::class.java)
                 assert(!component.opt.isPresent)
                 Features.enabledA = true
-                assert(!Dagger.create(TestComponent::class.java).opt.isPresent)
+                assert(!Yatagan.create(TestComponent::class.java).opt.isPresent)
                 Features.isEnabledB = true
-                val new = Dagger.create(TestComponent::class.java)
+                val new = Yatagan.create(TestComponent::class.java)
                 assert(new.opt.isPresent)
                 assert(new.opt.get() === new.provider.get().get())
 
@@ -145,11 +145,11 @@ class ConditionsTest(
             import javax.inject.Inject
             import javax.inject.Provider
             import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Condition
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Conditionals
-            import com.yandex.daggerlite.Optional
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Condition
+            import com.yandex.yatagan.Conditional
+            import com.yandex.yatagan.Conditionals
+            import com.yandex.yatagan.Optional
 
             @Conditional(Conditions.FeatureA::class, onlyIn = [DeviceType.Phone::class])
             @Conditional(Conditions.FeatureB::class, onlyIn = [DeviceType.Tablet::class])
@@ -185,7 +185,7 @@ class ConditionsTest(
         includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Conditional(onlyIn = [DeviceType.Phone::class])
@@ -207,8 +207,8 @@ class ConditionsTest(
             }
 
             fun test() {
-                val phone = Dagger.create(TestPhoneComponent::class.java)
-                val tablet = Dagger.create(TestTabletComponent::class.java)
+                val phone = Yatagan.create(TestPhoneComponent::class.java)
+                val tablet = Yatagan.create(TestTabletComponent::class.java)
 
                 assert(phone.phone.isPresent)
                 assert(!phone.tablet.isPresent)
@@ -228,7 +228,7 @@ class ConditionsTest(
         includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             @Scope
@@ -270,8 +270,8 @@ class ConditionsTest(
 
             fun test() {
                 Features.isEnabledB = true
-                val phone: TestComponent = Dagger.create(TestPhoneComponent::class.java)
-                val tablet: TestComponent = Dagger.create(TestTabletComponent::class.java)
+                val phone: TestComponent = Yatagan.create(TestPhoneComponent::class.java)
+                val tablet: TestComponent = Yatagan.create(TestTabletComponent::class.java)
 
                 assert(!phone.myFeatureActivity.isPresent)
                 assert(tablet.myFeatureActivity.isPresent)
@@ -288,10 +288,10 @@ class ConditionsTest(
         givenKotlinSource("test.TestCase", """
             import javax.inject.Inject
             import javax.inject.Singleton
-            import com.yandex.daggerlite.Component
-            import com.yandex.daggerlite.Module
-            import com.yandex.daggerlite.Conditional
-            import com.yandex.daggerlite.Optional
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Module
+            import com.yandex.yatagan.Conditional
+            import com.yandex.yatagan.Optional
             
             @Conditional(Conditions.FeatureA::class) class ClassA @Inject constructor()
             @Conditional(Conditions.FeatureB::class) class ClassB @Inject constructor(a: Optional<ClassA>)
@@ -320,7 +320,7 @@ class ConditionsTest(
     fun `@Binds with multiple alternatives`() {
         includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             interface SomeApiBase
@@ -380,7 +380,7 @@ class ConditionsTest(
             
             fun test() {
                 Features.isEnabledB = true
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(!c.apiV1.isPresent)
                 assert(c.apiV2.get() is Stub)
                 assert(c.apiV3.get() is ImplB)
@@ -406,7 +406,7 @@ class ConditionsTest(
         includeFromSourceSet(features)
         includeFromSourceSet(flavors)
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface Api
@@ -451,22 +451,22 @@ class ConditionsTest(
             }
             
             fun test() {
-                assert(Dagger.create(TestMainComponent::class.java).namedApi.isPresent)
-                assert(!Dagger.create(TestCustomComponent::class.java).namedApi.isPresent)
+                assert(Yatagan.create(TestMainComponent::class.java).namedApi.isPresent)
+                assert(!Yatagan.create(TestCustomComponent::class.java).namedApi.isPresent)
             
-                assert(!Dagger.create(TestMainComponent::class.java).api.isPresent)
+                assert(!Yatagan.create(TestMainComponent::class.java).api.isPresent)
             
                 Features.isEnabledB = true
-                assert(!Dagger.create(TestMainComponent::class.java).api.isPresent)
+                assert(!Yatagan.create(TestMainComponent::class.java).api.isPresent)
             
                 Features.enabledA = true
                 Features.isEnabledB = false
-                assert(Dagger.create(TestMainComponent::class.java).api.isPresent)
-                assert(!Dagger.create(TestCustomComponent::class.java).api.isPresent)
+                assert(Yatagan.create(TestMainComponent::class.java).api.isPresent)
+                assert(!Yatagan.create(TestCustomComponent::class.java).api.isPresent)
                 
                 Features.enabledA = false
                 Features.isEnabledB = true
-                assert(Dagger.create(TestCustomComponent::class.java).api.isPresent)
+                assert(Yatagan.create(TestCustomComponent::class.java).api.isPresent)
             }
         """.trimIndent())
 
@@ -478,7 +478,7 @@ class ConditionsTest(
         includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Conditional(onlyIn = [ProductType.Browser::class])
@@ -508,8 +508,8 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = Dagger.create(MyBrowserComponent::class.java)
-                val searchAppC = Dagger.create(MySearchAppComponent::class.java)
+                val browserC = Yatagan.create(MyBrowserComponent::class.java)
+                val searchAppC = Yatagan.create(MySearchAppComponent::class.java)
                 
                 assert(browserC.myC.create().impl.isPresent)
                 assert(!searchAppC.myC.create().impl.isPresent)
@@ -525,7 +525,7 @@ class ConditionsTest(
         includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*            
+            import com.yandex.yatagan.*            
             import javax.inject.*
             
             private const val EnabledB = "isEnabledB" 
@@ -596,7 +596,7 @@ class ConditionsTest(
         includeFromSourceSet(flavors)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface Api
@@ -641,9 +641,9 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = Dagger.create(MyBrowserComponent::class.java)
-                val searchAppC = Dagger.create(MySearchAppComponent::class.java)
-                val myProductC = Dagger.create(MyProductComponent::class.java)
+                val browserC = Yatagan.create(MyBrowserComponent::class.java)
+                val searchAppC = Yatagan.create(MySearchAppComponent::class.java)
+                val myProductC = Yatagan.create(MyProductComponent::class.java)
                 
                 assert(browserC.apiC.create().api.get() is ImplA)
                 assert(searchAppC.apiC.create().api.get() is ImplB)
@@ -657,7 +657,7 @@ class ConditionsTest(
     @Test
     fun `lazy condition evaluation`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             var disabled1Requested = false
@@ -704,7 +704,7 @@ class ConditionsTest(
 
             fun test() {
                 assert(!disabled1Requested && !disabled2Requested)
-                val c: MyComponent = Dagger.create(MyComponent::class.java)
+                val c: MyComponent = Yatagan.create(MyComponent::class.java)
                 assert(disabled1Requested && disabled2Requested)
 
                 assert(!c.a.isPresent)
@@ -732,14 +732,14 @@ class ConditionsTest(
         })
 
         givenJavaSource("test.IsEnabled0", """
-            import com.yandex.daggerlite.Condition;
+            import com.yandex.yatagan.Condition;
             
             @Condition(value = CompiledConditionKt.class, condition = "FOO")
             @interface IsEnabled3 {}
         """.trimIndent())
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             object Constants {
@@ -766,7 +766,7 @@ class ConditionsTest(
     @Test
     fun `non-static conditions`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             class FeatureProvider(
@@ -830,7 +830,7 @@ class ConditionsTest(
             }
 
             fun test() {
-                val factory: TestComponent.Builder = Dagger.builder(TestComponent.Builder::class.java)
+                val factory: TestComponent.Builder = Yatagan.builder(TestComponent.Builder::class.java)
                 val features = FeatureProvider(
                     isEnabledA = false,
                     isEnabledB = true,

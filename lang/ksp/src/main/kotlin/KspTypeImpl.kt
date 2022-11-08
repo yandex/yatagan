@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
-import com.yandex.daggerlite.base.BiObjectCache
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.common.NoDeclaration
-import com.yandex.daggerlite.lang.compiled.CtTypeBase
-import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
+import com.yandex.yatagan.base.BiObjectCache
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.NoDeclaration
+import com.yandex.yatagan.lang.compiled.CtTypeBase
+import com.yandex.yatagan.lang.compiled.CtTypeNameModel
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeImpl private constructor(

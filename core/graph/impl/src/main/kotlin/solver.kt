@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.base.setOf
-import com.yandex.daggerlite.core.model.ConditionExpression.Literal
+import com.yandex.yatagan.base.setOf
+import com.yandex.yatagan.core.model.ConditionExpression.Literal
 
 internal fun solveContains(a: ConjunctiveNormalForm, b: ConjunctiveNormalForm): Boolean {
     val cnf = buildNegativeImplicationCNF(source = a, target = b)

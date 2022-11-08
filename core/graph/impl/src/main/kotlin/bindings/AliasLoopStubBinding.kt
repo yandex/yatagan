@@ -1,17 +1,17 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.AliasBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.graph.bindings.EmptyBinding
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.TextColor
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.buildRichString
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.AliasBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.bindings.EmptyBinding
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.TextColor
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.buildRichString
+import com.yandex.yatagan.validation.format.reportError
 
 internal class AliasLoopStubBinding(
     override val owner: BindingGraph,

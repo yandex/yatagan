@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Represents a dependency on a particular [node] with the specified dependency [kind].

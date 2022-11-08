@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.Extensible
+import com.yandex.yatagan.core.graph.Extensible
 
 internal open class ExtensibleImpl : Extensible {
     private val data = hashMapOf<Extensible.Key<*>, Any>()

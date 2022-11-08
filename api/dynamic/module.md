@@ -1,16 +1,16 @@
 # Module api-dynamic
 
-An API dependency for clients, that wish to use reflection for parsing and serving DL components at runtime
+An API dependency for clients, that wish to use reflection for parsing and serving Yatagan components at runtime
 (RT backend).
 
 Specializes base [:api] dependency.
-Provides an entry-point implementation [Dagger][com.yandex.daggerlite.Dagger], that uses the same logic, as AP backends,
+Provides an entry-point implementation [Yatagan][com.yandex.yatagan.Yatagan], that uses the same logic, as AP backends,
 at runtime to process annotations. The components and other required interfaces are implemented using
 `java.lang.reflect.Proxy` mechanism.
 
 ## Optimized variant
 
-One can depend on pre-optimized variant of this artifact: `com.yandex.daggerlite:api-dynamic-optimized:<version>`.
+One can depend on pre-optimized variant of this artifact: `com.yandex.yatagan:api-dynamic-optimized:<version>`.
 It may provide improved performance in comparison with the default variant.
 
 ## Validation
@@ -20,12 +20,13 @@ Although there's an API for opting in the full validation with SPI plugins suppo
 This API is designed in a way that allows the "good path" (when there are no errors in a graph) to perform 
 un-penalized by validation.
 Yet if the graph is invalid, all errors will be reported.
-To make use of this, a [DynamicValidationDelegate][com.yandex.daggerlite.DynamicValidationDelegate] implementation
-may be supplied via [setDynamicValidationDelegate][com.yandex.daggerlite.Dagger.setDynamicValidationDelegate].
+To make use of this, a [DynamicValidationDelegate][com.yandex.yatagan.DynamicValidationDelegate] implementation
+may be supplied via [setDynamicValidationDelegate][com.yandex.yatagan.Yatagan.setDynamicValidationDelegate].
 
 ## Memory consumption
 
-Every DL backend maintains a global static cache of all the required framework models, that resemble a built DL graph.
+Every Yatagan backend maintains a global static cache of all the required framework models, 
+that resemble a built Yatagan graph.
 Though such an approach is fine when using it in compile-time, an actual application 
 should be aware of **potential memory consumption increase**, when using reflection backend.
 Strict measurements were not done on the subject though.

@@ -1,9 +1,9 @@
 @file:[JvmMultifileClass JvmName("Format") ]
-package com.yandex.daggerlite.validation.format
+package com.yandex.yatagan.validation.format
 
-import com.yandex.daggerlite.validation.LocatedMessage
-import com.yandex.daggerlite.validation.RichString
-import com.yandex.daggerlite.validation.ValidationMessage
+import com.yandex.yatagan.validation.LocatedMessage
+import com.yandex.yatagan.validation.RichString
+import com.yandex.yatagan.validation.ValidationMessage
 import kotlin.math.max
 
 

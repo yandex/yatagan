@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
 /**
  * Equivalence wrapper for [java.lang.reflect.Method] using Java language method signature -

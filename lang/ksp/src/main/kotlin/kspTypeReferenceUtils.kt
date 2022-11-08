@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference

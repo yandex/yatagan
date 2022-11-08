@@ -1,23 +1,23 @@
-package com.yandex.daggerlite.core.model.impl
+package com.yandex.yatagan.core.model.impl
 
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.base.memoize
-import com.yandex.daggerlite.core.model.BindsBindingModel
-import com.yandex.daggerlite.core.model.ComponentModel
-import com.yandex.daggerlite.core.model.ModuleHostedBindingModel
-import com.yandex.daggerlite.core.model.ModuleModel
-import com.yandex.daggerlite.core.model.MultiBindingDeclarationModel
-import com.yandex.daggerlite.core.model.ProvidesBindingModel
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.functionsWithCompanion
-import com.yandex.daggerlite.lang.isKotlinObject
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.modelRepresentation
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.base.memoize
+import com.yandex.yatagan.core.model.BindsBindingModel
+import com.yandex.yatagan.core.model.ComponentModel
+import com.yandex.yatagan.core.model.ModuleHostedBindingModel
+import com.yandex.yatagan.core.model.ModuleModel
+import com.yandex.yatagan.core.model.MultiBindingDeclarationModel
+import com.yandex.yatagan.core.model.ProvidesBindingModel
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.functionsWithCompanion
+import com.yandex.yatagan.lang.isKotlinObject
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class ModuleModelImpl private constructor(

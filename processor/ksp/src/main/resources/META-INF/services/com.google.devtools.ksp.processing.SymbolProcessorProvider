@@ -1,1 +1,1 @@
-com.yandex.daggerlite.processor.ksp.KspDaggerLiteProcessorProvider
+com.yandex.yatagan.processor.ksp.KspYataganProcessorProvider

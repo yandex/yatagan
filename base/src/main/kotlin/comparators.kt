@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.base
+package com.yandex.yatagan.base
 
 class ListComparator<T>(
     private val comparator: Comparator<T>,

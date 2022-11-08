@@ -1,20 +1,20 @@
-import com.yandex.daggerlite.gradle.PatchModuleDocTask
-import com.yandex.daggerlite.gradle.RepositoryBrowseUrl
+import com.yandex.yatagan.gradle.PatchModuleDocTask
+import com.yandex.yatagan.gradle.RepositoryBrowseUrl
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.DokkaBaseConfiguration
 
 plugins {
-    id("daggerlite.base-module")
+    id("yatagan.base-module")
     id("org.jetbrains.dokka")
 }
 
-val daggerLiteVersion: String by extra
+val yataganVersion: String by extra
 val kotlinVersion: String by extra
 
 val patchRootDoc by tasks.registering(PatchModuleDocTask::class) {
-    inputFile.set(file("docs/dagger-lite.md"))
+    inputFile.set(file("docs/yatagan.md"))
     macros.putAll(mapOf(
-        "version" to daggerLiteVersion,
+        "version" to yataganVersion,
         "kotlin_version" to kotlinVersion,
         "repo_link" to RepositoryBrowseUrl,
     ))
@@ -44,7 +44,7 @@ tasks {
     if (isUnderTeamcity) {
         register("publish") {
             doLast {
-                println("##teamcity[buildStatus text='${daggerLiteVersion}: {build.status.text}']")
+                println("##teamcity[buildStatus text='${yataganVersion}: {build.status.text}']")
             }
         }
     }

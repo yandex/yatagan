@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.processor.common
+package com.yandex.yatagan.processor.common
 
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclaration
 import java.io.Writer
 
 /**

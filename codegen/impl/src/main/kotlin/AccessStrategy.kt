@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
-import com.yandex.daggerlite.codegen.poetry.ExpressionBuilder
-import com.yandex.daggerlite.codegen.poetry.TypeSpecBuilder
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.model.DependencyKind
+import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.model.DependencyKind
 
 internal interface AccessStrategy {
     fun generateInComponent(builder: TypeSpecBuilder) {

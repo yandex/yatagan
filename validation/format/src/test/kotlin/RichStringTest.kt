@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.validation.format
+package com.yandex.yatagan.validation.format
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.Assisted
-import com.yandex.daggerlite.BindsInstance
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.common.ParameterBase
+import com.yandex.yatagan.Assisted
+import com.yandex.yatagan.BindsInstance
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.common.ParameterBase
 
 abstract class RtParameterBase : ParameterBase() {
     protected abstract val parameterAnnotations: Array<kotlin.Annotation>

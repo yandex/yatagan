@@ -1,18 +1,18 @@
 @file:[JvmMultifileClass JvmName("Loader")]
-package com.yandex.daggerlite.common
+package com.yandex.yatagan.common
 
-import com.yandex.daggerlite.Component
+import com.yandex.yatagan.Component
 
 internal fun loadImplementationClass(componentClass: Class<*>): Class<*> {
     require(componentClass.getAnnotation(Component::class.java)?.isRoot == true) {
-        "$componentClass is not a root dagger-lite component"
+        "$componentClass is not a root Yatagan component"
     }
 
     // Keep name mangling in sync with codegen!
     val (packageName, binaryName) = splitComponentName(componentClass)
     // no need to parse and join simple names, as codegen joins them with '$' and
     // that's what JVM binary class name already is.
-    val implementationName = "$packageName.Dagger\$$binaryName"
+    val implementationName = "$packageName.Yatagan\$$binaryName"
 
     return componentClass.classLoader.loadClass(implementationName)
 }

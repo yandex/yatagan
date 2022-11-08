@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,7 +23,7 @@ class GraphLoopsFailureTest(
     fun setUp() {
         features = SourceSet {
             givenKotlinSource("test.features", """
-                import com.yandex.daggerlite.Condition                
+                import com.yandex.yatagan.Condition                
 
                 object Foo { 
                     val isEnabledA = true 
@@ -41,7 +41,7 @@ class GraphLoopsFailureTest(
     @Test
     fun `simple dependency loop`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             class ClassA @Inject constructor(b: ClassB)
@@ -59,7 +59,7 @@ class GraphLoopsFailureTest(
     @Test
     fun `dependency loop with alias`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface ApiA
@@ -87,7 +87,7 @@ class GraphLoopsFailureTest(
         includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface ApiA
@@ -118,7 +118,7 @@ class GraphLoopsFailureTest(
         includeFromSourceSet(features)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface ApiA : ApiB
@@ -142,7 +142,7 @@ class GraphLoopsFailureTest(
     @Test
     fun `looped component hierarchy`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
 
             interface NotAModule

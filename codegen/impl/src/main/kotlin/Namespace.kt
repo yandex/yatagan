@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.codegen.impl
+package com.yandex.yatagan.codegen.impl
 
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.compiled.ArrayNameModel
-import com.yandex.daggerlite.lang.compiled.ClassNameModel
-import com.yandex.daggerlite.lang.compiled.CtTypeNameModel
-import com.yandex.daggerlite.lang.compiled.ErrorNameModel
-import com.yandex.daggerlite.lang.compiled.KeywordTypeNameModel
-import com.yandex.daggerlite.lang.compiled.ParameterizedNameModel
-import com.yandex.daggerlite.lang.compiled.WildcardNameModel
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.compiled.ArrayNameModel
+import com.yandex.yatagan.lang.compiled.ClassNameModel
+import com.yandex.yatagan.lang.compiled.CtTypeNameModel
+import com.yandex.yatagan.lang.compiled.ErrorNameModel
+import com.yandex.yatagan.lang.compiled.KeywordTypeNameModel
+import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
+import com.yandex.yatagan.lang.compiled.WildcardNameModel
 import java.util.Locale
 
 private fun String.capitalize() = replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }

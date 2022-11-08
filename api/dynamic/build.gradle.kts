@@ -1,7 +1,7 @@
 plugins {
-    id("daggerlite.optimized")
-    id("daggerlite.artifact")
-    id("daggerlite.documented")
+    id("yatagan.optimized")
+    id("yatagan.artifact")
+    id("yatagan.documented")
 }
 
 dependencies {

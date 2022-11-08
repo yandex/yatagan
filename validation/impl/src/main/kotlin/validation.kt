@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.validation.impl
+package com.yandex.yatagan.validation.impl
 
-import com.yandex.daggerlite.base.traverseDepthFirstWithPath
-import com.yandex.daggerlite.base.zipWithNextOrNull
-import com.yandex.daggerlite.validation.LocatedMessage
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.ValidationMessage
-import com.yandex.daggerlite.validation.Validator
+import com.yandex.yatagan.base.traverseDepthFirstWithPath
+import com.yandex.yatagan.base.zipWithNextOrNull
+import com.yandex.yatagan.validation.LocatedMessage
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.ValidationMessage
+import com.yandex.yatagan.validation.Validator
 import kotlin.LazyThreadSafetyMode.NONE
 
 private class ValidatorImpl : Validator {

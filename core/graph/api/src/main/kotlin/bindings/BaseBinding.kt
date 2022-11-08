@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.core.graph.bindings
+package com.yandex.yatagan.core.graph.bindings
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.model.ModuleModel
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.model.ModuleModel
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Represents a way to provide a [NodeModel].

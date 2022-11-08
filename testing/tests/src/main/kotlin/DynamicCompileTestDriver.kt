@@ -1,15 +1,15 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import com.squareup.javapoet.ClassName
-import com.yandex.daggerlite.Component
-import com.yandex.daggerlite.base.ObjectCacheRegistry
-import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.jap.asTypeElement
-import com.yandex.daggerlite.lang.jap.isAnnotatedWith
-import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
-import com.yandex.daggerlite.lang.use
-import com.yandex.daggerlite.processor.common.Logger
-import com.yandex.daggerlite.processor.common.LoggerDecorator
+import com.yandex.yatagan.Component
+import com.yandex.yatagan.base.ObjectCacheRegistry
+import com.yandex.yatagan.lang.LangModelFactory
+import com.yandex.yatagan.lang.jap.asTypeElement
+import com.yandex.yatagan.lang.jap.isAnnotatedWith
+import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
+import com.yandex.yatagan.lang.use
+import com.yandex.yatagan.processor.common.Logger
+import com.yandex.yatagan.processor.common.LoggerDecorator
 import org.intellij.lang.annotations.Language
 import java.io.File
 import java.lang.reflect.Method
@@ -139,8 +139,8 @@ class DynamicCompileTestDriver(
                 @Language("Java")
                 val code = """
                     package ${componentName.packageName()};
-                    import com.yandex.daggerlite.validation.RichString;
-                    import com.yandex.daggerlite.*;
+                    import com.yandex.yatagan.validation.RichString;
+                    import com.yandex.yatagan.*;
                     import java.util.function.*;
                     import java.util.*;
                     public final class ${bootstrapperName.simpleName()} implements Supplier<List<String[]>> {
@@ -148,8 +148,8 @@ class DynamicCompileTestDriver(
                             class InvalidGraph extends RuntimeException {}
 
                             final List<String[]> log = new ArrayList<>();
-                            Dagger.setMaxIssueEncounterPaths(100);
-                            Dagger.setDynamicValidationDelegate(new DynamicValidationDelegate() {
+                            Yatagan.setMaxIssueEncounterPaths(100);
+                            Yatagan.setDynamicValidationDelegate(new DynamicValidationDelegate() {
                                 private boolean hasErrors;
                                 public boolean getUsePlugins() { return true; }
                                 public DynamicValidationDelegate.Promise dispatchValidation(
@@ -176,7 +176,7 @@ class DynamicCompileTestDriver(
                                 }
                             });
                             try {
-                                Dagger.$bootstrapInvocation;
+                                Yatagan.$bootstrapInvocation;
                             } catch (InvalidGraph e) {/*nothing here*/}
                             return log;
                         }

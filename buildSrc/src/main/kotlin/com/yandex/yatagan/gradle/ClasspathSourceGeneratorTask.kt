@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.gradle
+package com.yandex.yatagan.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.Directory

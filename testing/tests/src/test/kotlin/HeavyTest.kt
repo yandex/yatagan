@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
-import com.yandex.daggerlite.testing.procedural.Distribution
-import com.yandex.daggerlite.testing.procedural.ExperimentalGenerationApi
-import com.yandex.daggerlite.testing.procedural.GenerationParams
-import com.yandex.daggerlite.testing.procedural.generate
+import com.yandex.yatagan.testing.procedural.Distribution
+import com.yandex.yatagan.testing.procedural.ExperimentalGenerationApi
+import com.yandex.yatagan.testing.procedural.GenerationParams
+import com.yandex.yatagan.testing.procedural.generate
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -23,7 +23,7 @@ class HeavyTest(
 
     @Test
     fun `base case`() {
-        val sourceDir = Files.createTempDirectory("dagger-lite-test").toFile()
+        val sourceDir = Files.createTempDirectory("yatagan-test").toFile()
         try {
             val params = GenerationParams(
                 componentTreeMaxDepth = 6,

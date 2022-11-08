@@ -1,14 +1,14 @@
-import com.yandex.daggerlite.gradle.isValidSemVerString
+import com.yandex.yatagan.gradle.isValidSemVerString
 
 plugins {
-    id("daggerlite.base-module")
+    id("yatagan.base-module")
     `maven-publish`
 }
 
-val daggerLiteVersion: String by extra
+val yataganVersion: String by extra
 
-check(isValidSemVerString(daggerLiteVersion)) {
-    "`$daggerLiteVersion` is not a valid version"
+check(isValidSemVerString(yataganVersion)) {
+    "`$yataganVersion` is not a valid version"
 }
 
 // For release publications
@@ -31,8 +31,8 @@ publishing {
     publications {
         create<MavenPublication>("main") {
             from(components["java"])
-            this.version = daggerLiteVersion
-            this.groupId = "com.yandex.daggerlite"
+            this.version = yataganVersion
+            this.groupId = "com.yandex.yatagan"
             this.artifactId = path.trim(':').replace(':', '-')
         }
 
@@ -51,7 +51,7 @@ publishing {
                 }
             }
 
-            val isSnapshotVersion = daggerLiteVersion.endsWith("SNAPSHOT")
+            val isSnapshotVersion = yataganVersion.endsWith("SNAPSHOT")
             when {
                 !isSnapshotVersion && mavenUrl.isPresent -> maven {
                     url = uri(mavenUrl.get())

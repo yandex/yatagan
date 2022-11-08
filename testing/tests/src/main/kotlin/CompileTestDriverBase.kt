@@ -1,12 +1,12 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import com.yandex.daggerlite.generated.CompiledApiClasspath
-import com.yandex.daggerlite.generated.DynamicApiClasspath
-import com.yandex.daggerlite.generated.DynamicOptimizedApiClasspath
-import com.yandex.daggerlite.processor.common.LoggerDecorator
-import com.yandex.daggerlite.testing.source_set.SourceSet
+import com.yandex.yatagan.generated.CompiledApiClasspath
+import com.yandex.yatagan.generated.DynamicApiClasspath
+import com.yandex.yatagan.generated.DynamicOptimizedApiClasspath
+import com.yandex.yatagan.processor.common.LoggerDecorator
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assert
 import java.io.File
 import java.lang.reflect.Method
@@ -134,8 +134,8 @@ abstract class CompileTestDriverBase protected constructor(
             inheritClassPath = false
             javacArguments += "-Xdiags:verbose"
             kotlincArguments = listOf(
-                "-opt-in=com.yandex.daggerlite.ConditionsApi",
-                "-opt-in=com.yandex.daggerlite.VariantApi",
+                "-opt-in=com.yandex.yatagan.ConditionsApi",
+                "-opt-in=com.yandex.yatagan.VariantApi",
             )
             classpaths = buildList {
                 when (apiType) {
@@ -187,7 +187,7 @@ abstract class CompileTestDriverBase protected constructor(
 
         private val MessageSeparator = "~".repeat(80)
 
-        val goldenSourceDirForUpdate: String? = System.getProperty("com.yandex.daggerlite.updateGoldenFiles")
+        val goldenSourceDirForUpdate: String? = System.getProperty("com.yandex.yatagan.updateGoldenFiles")
 
         val isInUpdateGoldenMode: Boolean
             get() = goldenSourceDirForUpdate != null

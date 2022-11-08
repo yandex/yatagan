@@ -1,24 +1,24 @@
-package com.yandex.daggerlite.core.graph
+package com.yandex.yatagan.core.graph
 
-import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage.Eager
-import com.yandex.daggerlite.core.graph.BindingGraph.LiteralUsage.Lazy
-import com.yandex.daggerlite.core.graph.bindings.BaseBinding
-import com.yandex.daggerlite.core.graph.bindings.Binding
-import com.yandex.daggerlite.core.model.AssistedInjectFactoryModel
-import com.yandex.daggerlite.core.model.ComponentDependencyModel
-import com.yandex.daggerlite.core.model.ComponentFactoryModel
-import com.yandex.daggerlite.core.model.ComponentModel
-import com.yandex.daggerlite.core.model.ConditionModel
-import com.yandex.daggerlite.core.model.ConditionScope
-import com.yandex.daggerlite.core.model.HasNodeModel
-import com.yandex.daggerlite.core.model.ModuleModel
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage.Eager
+import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage.Lazy
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
+import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentModel
+import com.yandex.yatagan.core.model.ConditionModel
+import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.core.model.HasNodeModel
+import com.yandex.yatagan.core.model.ModuleModel
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.Variant
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * A Fully built dagger-lite graph of [Binding]s.
+ * A Fully built Yatagan graph of [Binding]s.
  *
  * Each [BindingGraph] is built around [ComponentModel]. For each given [ComponentModel] multiple different
  * [BindingGraph]s may exist if [ComponentModel.isRoot] is `false`, because the model may have different parents.
@@ -117,7 +117,7 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
     /**
      * A condition for this graph.
      *
-     * Equals [Always][com.yandex.daggerlite.core.ConditionExpression.Unscoped] for [root][BindingGraph.isRoot] components.
+     * Equals [Always][com.yandex.yatagan.core.ConditionExpression.Unscoped] for [root][BindingGraph.isRoot] components.
      * Arbitrary for non-root components.
      */
     val conditionScope: ConditionScope
@@ -133,7 +133,7 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *
      * @return resolved binding (it may be [EmptyBinding] due to
-     * [NeverScoped][com.yandex.daggerlite.core.ConditionExpression.NeverScoped] or because it was requested and
+     * [NeverScoped][com.yandex.yatagan.core.ConditionExpression.NeverScoped] or because it was requested and
      * could not be satisfied)
      *
      * @throws IllegalStateException if no such binding is found at all (requested but missing bindings are still safe
@@ -147,7 +147,7 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
     fun resolveBindingRaw(node: NodeModel): BaseBinding
 
     /**
-     * Provides counts of each dependency [kind][com.yandex.daggerlite.core.DependencyKind] requests for the
+     * Provides counts of each dependency [kind][com.yandex.yatagan.core.DependencyKind] requests for the
      * [target][Binding.target].
      */
     interface BindingUsage {

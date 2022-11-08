@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.procedural
+package com.yandex.yatagan.testing.procedural
 
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
@@ -11,16 +11,16 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
-import com.yandex.daggerlite.testing.procedural.GenerationParams.BindingType
-import com.yandex.daggerlite.testing.procedural.GenerationParams.DependencyKind
-import com.yandex.daggerlite.testing.procedural.GenerationParams.ProvisionScopes
+import com.yandex.yatagan.testing.procedural.GenerationParams.BindingType
+import com.yandex.yatagan.testing.procedural.GenerationParams.DependencyKind
+import com.yandex.yatagan.testing.procedural.GenerationParams.ProvisionScopes
 import java.io.File
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.random.nextInt
 
 /**
- * Generates a valid Dagger-Lite graph(s) by given parameters.
+ * Generates a valid Yatagan graph(s) by given parameters.
  *
  * @param params various aspects that constrain and define the resulting graph.
  * @param sourceDir target sources directory, where to place generated files.
@@ -558,7 +558,7 @@ fun generate(
                         if (creatorVar != null) {
                             add("%L", creatorVar)
                         } else {
-                            add("%T.builder(%T::class.java)", ClassNames.Dagger, component.value.creatorName)
+                            add("%T.builder(%T::class.java)", ClassNames.Yatagan, component.value.creatorName)
                         }
                         component.value.localBindings.values
                             .filterIsInstance<Binding.Instance>().forEachIndexed { setterIndex, _ ->

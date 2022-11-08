@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
 /**
  * Formally denotes graph edges' type.
@@ -13,7 +13,7 @@ enum class DependencyKind {
     Direct,
 
     /**
-     * [com.yandex.daggerlite.Lazy]-wrapped type is requested.
+     * [com.yandex.yatagan.Lazy]-wrapped type is requested.
      */
     Lazy,
 
@@ -23,22 +23,22 @@ enum class DependencyKind {
     Provider,
 
     /**
-     * [com.yandex.daggerlite.Optional]-wrapped type is requested.
+     * [com.yandex.yatagan.Optional]-wrapped type is requested.
      */
     Optional,
 
     /**
      * `Optional<Lazy<...>>`-wrapped type is requested.
      *
-     * @see com.yandex.daggerlite.Optional
-     * @see com.yandex.daggerlite.Lazy
+     * @see com.yandex.yatagan.Optional
+     * @see com.yandex.yatagan.Lazy
      */
     OptionalLazy,
 
     /**
      * `Optional<Provider<...>>`-wrapped type is requested.
      *
-     * @see com.yandex.daggerlite.Optional
+     * @see com.yandex.yatagan.Optional
      * @see javax.inject.Provider
      */
     OptionalProvider,

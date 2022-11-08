@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.Binds
-import com.yandex.daggerlite.BindsInstance
-import com.yandex.daggerlite.IntoList
-import com.yandex.daggerlite.IntoMap
-import com.yandex.daggerlite.IntoSet
-import com.yandex.daggerlite.Multibinds
-import com.yandex.daggerlite.Provides
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.common.MethodBase
+import com.yandex.yatagan.Binds
+import com.yandex.yatagan.BindsInstance
+import com.yandex.yatagan.IntoList
+import com.yandex.yatagan.IntoMap
+import com.yandex.yatagan.IntoSet
+import com.yandex.yatagan.Multibinds
+import com.yandex.yatagan.Provides
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.common.MethodBase
 import javax.inject.Inject
 
 abstract class CtMethodBase : MethodBase() {

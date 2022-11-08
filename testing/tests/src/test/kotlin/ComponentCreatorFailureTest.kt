@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.testing.tests
+package com.yandex.yatagan.testing.tests
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,7 +18,7 @@ class ComponentCreatorFailureTest(
     @Test
     fun `missing creator`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Module(subcomponents = [SubComponent::class, NotAComponent::class, AnotherRootComponent::class])
@@ -43,7 +43,7 @@ class ComponentCreatorFailureTest(
     @Test
     fun `invalid member-injector`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface Injectee
@@ -61,7 +61,7 @@ class ComponentCreatorFailureTest(
     @Test
     fun `missing entities in creator`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             @Module
@@ -102,7 +102,7 @@ class ComponentCreatorFailureTest(
     @Test
     fun `invalid component creator`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.daggerlite.*
+            import com.yandex.yatagan.*
             import javax.inject.*
             
             interface FooBaseBase {

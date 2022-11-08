@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.AssistedInject
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.common.ConstructorBase
+import com.yandex.yatagan.AssistedInject
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.common.ConstructorBase
 import javax.inject.Inject
 
 abstract class CtConstructorBase : ConstructorBase() {

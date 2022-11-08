@@ -1,12 +1,12 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.lang.Constructor
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.lang.Constructor
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * Represents [com.yandex.daggerlite.AssistedFactory].
+ * Represents [com.yandex.yatagan.AssistedFactory].
  */
 interface AssistedInjectFactoryModel : MayBeInvalid, HasNodeModel {
     /**
@@ -16,7 +16,7 @@ interface AssistedInjectFactoryModel : MayBeInvalid, HasNodeModel {
     val factoryMethod: Method?
 
     /**
-     * an [@AssistedInject][com.yandex.daggerlite.AssistedInject]-annotated constructor from the
+     * an [@AssistedInject][com.yandex.yatagan.AssistedInject]-annotated constructor from the
      * factory's target type.
      */
     val assistedInjectConstructor: Constructor?

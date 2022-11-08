@@ -1,38 +1,36 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
-import com.yandex.daggerlite.Dagger.builder
-import com.yandex.daggerlite.Dagger.create
-import com.yandex.daggerlite.base.loadServices
-import com.yandex.daggerlite.common.loadImplementationByBuilderClass
-import com.yandex.daggerlite.common.loadImplementationByComponentClass
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.impl.BindingGraph
-import com.yandex.daggerlite.core.model.impl.ComponentFactoryModel
-import com.yandex.daggerlite.core.model.impl.ComponentModel
-import com.yandex.daggerlite.dynamic.RuntimeComponent
-import com.yandex.daggerlite.dynamic.RuntimeFactory
-import com.yandex.daggerlite.dynamic.awaitOnError
-import com.yandex.daggerlite.dynamic.dlLog
-import com.yandex.daggerlite.lang.InternalLangApi
-import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.rt.RtModelFactoryImpl
-import com.yandex.daggerlite.lang.rt.TypeDeclaration
-import com.yandex.daggerlite.validation.LocatedMessage
-import com.yandex.daggerlite.validation.RichString
-import com.yandex.daggerlite.validation.ValidationMessage
-import com.yandex.daggerlite.validation.format.format
-import com.yandex.daggerlite.validation.impl.GraphValidationExtension
-import com.yandex.daggerlite.validation.impl.validate
-import com.yandex.daggerlite.validation.spi.ValidationPluginProvider
+import com.yandex.yatagan.base.loadServices
+import com.yandex.yatagan.common.loadImplementationByBuilderClass
+import com.yandex.yatagan.common.loadImplementationByComponentClass
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.impl.BindingGraph
+import com.yandex.yatagan.core.model.impl.ComponentFactoryModel
+import com.yandex.yatagan.core.model.impl.ComponentModel
+import com.yandex.yatagan.dynamic.RuntimeComponent
+import com.yandex.yatagan.dynamic.RuntimeFactory
+import com.yandex.yatagan.dynamic.awaitOnError
+import com.yandex.yatagan.dynamic.dlLog
+import com.yandex.yatagan.lang.InternalLangApi
+import com.yandex.yatagan.lang.LangModelFactory
+import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
+import com.yandex.yatagan.lang.rt.TypeDeclaration
+import com.yandex.yatagan.validation.LocatedMessage
+import com.yandex.yatagan.validation.RichString
+import com.yandex.yatagan.validation.ValidationMessage
+import com.yandex.yatagan.validation.format.format
+import com.yandex.yatagan.validation.impl.GraphValidationExtension
+import com.yandex.yatagan.validation.impl.validate
+import com.yandex.yatagan.validation.spi.ValidationPluginProvider
 import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis
 
 /**
- * Dagger Lite entry-point object. Create instances of DL components using reflection.
+ * Yatagan entry-point object. Create instances of Yatagan components using reflection.
  *
  * Use either [builder] or [create].
  */
-object Dagger {
+object Yatagan {
     @Volatile
     private var validationDelegate: DynamicValidationDelegate? = null
     @Volatile
@@ -121,7 +119,7 @@ object Dagger {
                 )
             }
             require(graph.creator == null) {
-                "$componentClass has explicit creator interface declared, use `Dagger.builder()` instead"
+                "$componentClass has explicit creator interface declared, use `Yatagan.builder()` instead"
             }
 
             val proxy = Proxy.newProxyInstance(componentClass.classLoader, arrayOf(componentClass), component)
@@ -133,7 +131,7 @@ object Dagger {
     }
 
     /**
-     * Sets [DynamicValidationDelegate] to be used with all following DL graph creations.
+     * Sets [DynamicValidationDelegate] to be used with all following Yatagan graph creations.
      */
     @JvmStatic
     fun setDynamicValidationDelegate(delegate: DynamicValidationDelegate?) {

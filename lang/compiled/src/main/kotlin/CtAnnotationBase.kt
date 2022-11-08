@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.Annotation.Value
-import com.yandex.daggerlite.lang.AnnotationValueVisitorAdapter
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.common.AnnotationBase
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.Annotation.Value
+import com.yandex.yatagan.lang.AnnotationValueVisitorAdapter
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.common.AnnotationBase
 
 /**
  * An [Annotation] which supports getting typed attribute values by name efficiently.

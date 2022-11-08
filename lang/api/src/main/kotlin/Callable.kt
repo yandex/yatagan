@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang
+package com.yandex.yatagan.lang
 
 /**
  * A sealed marker interface for an entity that can be called.

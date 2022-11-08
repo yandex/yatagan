@@ -1,7 +1,7 @@
-import com.yandex.daggerlite.gradle.ClasspathSourceGeneratorTask
+import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
 
 plugins {
-    id("daggerlite.base-module")
+    id("yatagan.base-module")
 }
 
 val kotlinCompileTestingVersion: String by extra
@@ -77,19 +77,19 @@ dependencies {
 }
 
 val generateDynamicApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    packageName.set("com.yandex.daggerlite.generated")
+    packageName.set("com.yandex.yatagan.generated")
     propertyName.set("DynamicApiClasspath")
     classpath.set(dynamicTestRuntime)
 }
 
 val generateDynamicOptimizedApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    packageName.set("com.yandex.daggerlite.generated")
+    packageName.set("com.yandex.yatagan.generated")
     propertyName.set("DynamicOptimizedApiClasspath")
     classpath.set(dynamicOptimizedTestRuntime)
 }
 
 val generateCompiledApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    packageName.set("com.yandex.daggerlite.generated")
+    packageName.set("com.yandex.yatagan.generated")
     propertyName.set("CompiledApiClasspath")
     classpath.set(compiledTestRuntime)
 }
@@ -104,7 +104,7 @@ val updateGoldenFiles by tasks.registering(Test::class) {
             "but write their *actual* results as *expected*. Use with care after you've changed some error-reporting " +
             "format and need to regenerate the actual results in batch"
     // Pass the resource directory absolute path
-    systemProperty("com.yandex.daggerlite.updateGoldenFiles",
+    systemProperty("com.yandex.yatagan.updateGoldenFiles",
         sourceSets.test.get().resources.sourceDirectories.singleFile.absolutePath)
 }
 

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
 /**
  * Represents a boolean expression in Conjunctive Normal Form.

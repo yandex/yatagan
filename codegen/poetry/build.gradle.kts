@@ -1,5 +1,5 @@
 plugins {
-    id("daggerlite.artifact")
+    id("yatagan.artifact")
 }
 
 val javaPoetVersion: String by extra

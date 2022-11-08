@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.lang.rt
+package com.yandex.yatagan.lang.rt
 
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.TypeDeclarationKind
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclarationKind
 
 internal fun ReflectType.equivalence() = TypeEquivalenceWrapper(this)
 

@@ -1,14 +1,14 @@
-package com.yandex.daggerlite.core.model.impl
+package com.yandex.yatagan.core.model.impl
 
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel.FeatureModel
-import com.yandex.daggerlite.core.model.Variant.FlavorModel
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.appendChildContextReference
-import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.yatagan.core.model.ConditionalHoldingModel
+import com.yandex.yatagan.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
+import com.yandex.yatagan.core.model.ConditionalHoldingModel.FeatureModel
+import com.yandex.yatagan.core.model.Variant.FlavorModel
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.appendChildContextReference
+import com.yandex.yatagan.validation.format.modelRepresentation
 
 internal open class ConditionalHoldingModelImpl(
     sources: List<BuiltinAnnotation.Conditional>,

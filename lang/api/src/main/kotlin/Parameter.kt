@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang
+package com.yandex.yatagan.lang
 
 /**
  * Models a [Callable] parameter.

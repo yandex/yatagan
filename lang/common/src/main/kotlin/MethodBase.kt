@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.lang.common
+package com.yandex.yatagan.lang.common
 
-import com.yandex.daggerlite.base.zipOrNull
-import com.yandex.daggerlite.lang.Callable
-import com.yandex.daggerlite.lang.Member
-import com.yandex.daggerlite.lang.Method
+import com.yandex.yatagan.base.zipOrNull
+import com.yandex.yatagan.lang.Callable
+import com.yandex.yatagan.lang.Member
+import com.yandex.yatagan.lang.Method
 
 abstract class MethodBase : Method {
     final override fun <T> accept(visitor: Callable.Visitor<T>): T {

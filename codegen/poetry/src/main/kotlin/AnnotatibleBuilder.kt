@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.codegen.poetry
+package com.yandex.yatagan.codegen.poetry
 
 import javax.lang.model.element.AnnotationMirror
 import kotlin.reflect.KClass

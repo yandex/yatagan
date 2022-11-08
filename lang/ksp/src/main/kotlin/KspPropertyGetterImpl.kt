@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSPropertyGetter
-import com.yandex.daggerlite.lang.Parameter
-import com.yandex.daggerlite.lang.Type
+import com.yandex.yatagan.lang.Parameter
+import com.yandex.yatagan.lang.Type
 
 internal class KspPropertyGetterImpl(
     getter: KSPropertyGetter,

@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 import kotlin.reflect.KClass
 
@@ -56,7 +56,7 @@ annotation class Condition(
      * Examples:
      * ```kotlin
      * /*@*/ package test
-     * /*@*/ import com.yandex.daggerlite.*
+     * /*@*/ import com.yandex.yatagan.*
      * /*@*/ import javax.inject.*
      * /*@*/ object SomeObject { val isEnabled = false }
      * /*@*/ object SomeClass {
@@ -90,7 +90,7 @@ annotation class Condition(
      * /*@*/ @Conditional(A::class, B::class, C::class, D::class, E::class)
      * /*@*/ class Sample @Inject constructor() {}
      * /*@*/ @Component interface SampleComponent { val s: Optional<Sample> }
-     * /*@*/ fun test() { Dagger.create(SampleComponent::class.java).s }
+     * /*@*/ fun test() { Yatagan.create(SampleComponent::class.java).s }
      * ```
      */
     val condition: String,

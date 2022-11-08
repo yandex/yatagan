@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.processor.ksp
+package com.yandex.yatagan.processor.ksp
 
 import com.google.devtools.ksp.processing.KSPLogger
-import com.yandex.daggerlite.processor.common.Logger
+import com.yandex.yatagan.processor.common.Logger
 
 internal class KspLogger(
     private val logger: KSPLogger,

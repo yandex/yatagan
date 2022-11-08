@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.processor.ksp
+package com.yandex.yatagan.processor.ksp
 
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -6,20 +6,20 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.yandex.daggerlite.Component
-import com.yandex.daggerlite.lang.LangModelFactory
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.ksp.KspModelFactoryImpl
-import com.yandex.daggerlite.lang.ksp.ProcessingUtils
-import com.yandex.daggerlite.lang.ksp.TypeDeclaration
-import com.yandex.daggerlite.lang.use
-import com.yandex.daggerlite.processor.common.Logger
-import com.yandex.daggerlite.processor.common.Options
-import com.yandex.daggerlite.processor.common.ProcessorDelegate
-import com.yandex.daggerlite.processor.common.process
+import com.yandex.yatagan.Component
+import com.yandex.yatagan.lang.LangModelFactory
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.ksp.KspModelFactoryImpl
+import com.yandex.yatagan.lang.ksp.ProcessingUtils
+import com.yandex.yatagan.lang.ksp.TypeDeclaration
+import com.yandex.yatagan.lang.use
+import com.yandex.yatagan.processor.common.Logger
+import com.yandex.yatagan.processor.common.Options
+import com.yandex.yatagan.processor.common.ProcessorDelegate
+import com.yandex.yatagan.processor.common.process
 import java.io.Writer
 
-internal class KspDaggerLiteProcessor(
+internal class KspYataganProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor, ProcessorDelegate<KSClassDeclaration> {
     override val logger: Logger = KspLogger(environment.logger)

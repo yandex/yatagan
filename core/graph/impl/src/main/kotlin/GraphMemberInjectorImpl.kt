@@ -1,15 +1,15 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.GraphMemberInjector
-import com.yandex.daggerlite.core.model.MembersInjectorModel
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.lang.Member
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.appendChildContextReference
-import com.yandex.daggerlite.validation.format.modelRepresentation
+import com.yandex.yatagan.core.graph.GraphMemberInjector
+import com.yandex.yatagan.core.model.MembersInjectorModel
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.lang.Member
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.appendChildContextReference
+import com.yandex.yatagan.validation.format.modelRepresentation
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class GraphMemberInjectorImpl(

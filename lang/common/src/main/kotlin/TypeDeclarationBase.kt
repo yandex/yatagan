@@ -1,6 +1,6 @@
-package com.yandex.daggerlite.lang.common
+package com.yandex.yatagan.lang.common
 
-import com.yandex.daggerlite.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclaration
 
 abstract class TypeDeclarationBase : TypeDeclaration {
     final override fun toString() = asType().toString()

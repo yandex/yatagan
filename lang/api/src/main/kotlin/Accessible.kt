@@ -1,4 +1,4 @@
-package com.yandex.daggerlite.lang
+package com.yandex.yatagan.lang
 
 /**
  * A trait for models that encodes a language construct's accessibility.

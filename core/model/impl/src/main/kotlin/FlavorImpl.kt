@@ -1,18 +1,18 @@
-package com.yandex.daggerlite.core.model.impl
+package com.yandex.yatagan.core.model.impl
 
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.TextColor
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.appendChildContextReference
-import com.yandex.daggerlite.validation.format.appendRichString
-import com.yandex.daggerlite.validation.format.modelRepresentation
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.core.model.Variant
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.TextColor
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.appendChildContextReference
+import com.yandex.yatagan.validation.format.appendRichString
+import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.format.reportError
 
 internal class FlavorImpl private constructor(
     override val type: Type,

@@ -1,6 +1,6 @@
 plugins {
-    id("daggerlite.artifact")
-    id("daggerlite.documented")
+    id("yatagan.artifact")
+    id("yatagan.documented")
 }
 
 dependencies {

@@ -1,9 +1,9 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
- *  Represents a [com.yandex.daggerlite.lang.compiled.CtTypeBase] via its name and type arguments.
+ *  Represents a [com.yandex.yatagan.lang.compiled.CtTypeBase] via its name and type arguments.
  */
 sealed interface CtTypeNameModel
 

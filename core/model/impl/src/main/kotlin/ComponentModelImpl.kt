@@ -1,30 +1,30 @@
-package com.yandex.daggerlite.core.model.impl
+package com.yandex.yatagan.core.model.impl
 
-import com.yandex.daggerlite.base.ObjectCache
-import com.yandex.daggerlite.core.model.ComponentDependencyModel
-import com.yandex.daggerlite.core.model.ComponentFactoryModel
-import com.yandex.daggerlite.core.model.ComponentModel
-import com.yandex.daggerlite.core.model.ComponentModel.EntryPoint
-import com.yandex.daggerlite.core.model.ConditionalHoldingModel
-import com.yandex.daggerlite.core.model.HasNodeModel
-import com.yandex.daggerlite.core.model.MembersInjectorModel
-import com.yandex.daggerlite.core.model.ModuleModel
-import com.yandex.daggerlite.core.model.NodeDependency
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.core.model.Variant
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.TypeDeclaration
-import com.yandex.daggerlite.lang.TypeDeclarationKind
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.Strings.Errors
-import com.yandex.daggerlite.validation.format.appendChildContextReference
-import com.yandex.daggerlite.validation.format.modelRepresentation
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentModel
+import com.yandex.yatagan.core.model.ComponentModel.EntryPoint
+import com.yandex.yatagan.core.model.ConditionalHoldingModel
+import com.yandex.yatagan.core.model.HasNodeModel
+import com.yandex.yatagan.core.model.MembersInjectorModel
+import com.yandex.yatagan.core.model.ModuleModel
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.Variant
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclarationKind
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.Strings.Errors
+import com.yandex.yatagan.validation.format.appendChildContextReference
+import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.format.reportError
 
 internal class ComponentModelImpl private constructor(
     private val declaration: TypeDeclaration,

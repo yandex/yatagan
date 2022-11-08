@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/Assisted.html), behavior should be identical.

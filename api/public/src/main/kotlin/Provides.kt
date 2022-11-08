@@ -1,4 +1,4 @@
-package com.yandex.daggerlite
+package com.yandex.yatagan
 
 /**
  * A **binding** declaration marker.
@@ -11,7 +11,7 @@ package com.yandex.daggerlite
  * Examples:
  * ```kotlin
  * /*@*/ package test
- * /*@*/ import com.yandex.daggerlite.*
+ * /*@*/ import com.yandex.yatagan.*
  * /*@*/ import javax.inject.*
  * /*@*/ class Application
  * /*@*/ object ApplicationManager { fun getApplication() = Application() }

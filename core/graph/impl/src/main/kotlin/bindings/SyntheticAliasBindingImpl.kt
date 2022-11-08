@@ -1,12 +1,12 @@
-package com.yandex.daggerlite.core.graph.impl.bindings
+package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.graph.bindings.AliasBinding
-import com.yandex.daggerlite.core.graph.bindings.BaseBinding
-import com.yandex.daggerlite.core.model.ModuleModel
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.bindings.AliasBinding
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.model.ModuleModel
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
 
 internal class SyntheticAliasBindingImpl(
     override val source: NodeModel,

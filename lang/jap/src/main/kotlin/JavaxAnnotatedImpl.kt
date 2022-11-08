@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.lang.jap
+package com.yandex.yatagan.lang.jap
 
-import com.yandex.daggerlite.lang.compiled.CtAnnotated
-import com.yandex.daggerlite.lang.compiled.CtAnnotationBase
+import com.yandex.yatagan.lang.compiled.CtAnnotated
+import com.yandex.yatagan.lang.compiled.CtAnnotationBase
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
 

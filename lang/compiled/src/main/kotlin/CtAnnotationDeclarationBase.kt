@@ -1,8 +1,8 @@
-package com.yandex.daggerlite.lang.compiled
+package com.yandex.yatagan.lang.compiled
 
-import com.yandex.daggerlite.IntoMap
-import com.yandex.daggerlite.lang.BuiltinAnnotation
-import com.yandex.daggerlite.lang.common.AnnotationDeclarationBase
+import com.yandex.yatagan.IntoMap
+import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.common.AnnotationDeclarationBase
 import javax.inject.Qualifier
 import javax.inject.Scope
 

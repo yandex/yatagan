@@ -1,7 +1,7 @@
-package com.yandex.daggerlite.core.graph.impl
+package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.daggerlite.core.graph.Extensible
-import com.yandex.daggerlite.core.graph.WithParents
+import com.yandex.yatagan.core.graph.Extensible
+import com.yandex.yatagan.core.graph.WithParents
 
 internal fun <K, V> mergeMultiMapsForDuplicateCheck(
     fromParent: Map<K, List<V>>?,

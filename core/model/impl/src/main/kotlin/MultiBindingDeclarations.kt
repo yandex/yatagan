@@ -1,18 +1,18 @@
-package com.yandex.daggerlite.core.model.impl
+package com.yandex.yatagan.core.model.impl
 
-import com.yandex.daggerlite.base.setOf
-import com.yandex.daggerlite.core.model.CollectionTargetKind
-import com.yandex.daggerlite.core.model.MultiBindingDeclarationModel
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.validation.MayBeInvalid
-import com.yandex.daggerlite.validation.Validator
-import com.yandex.daggerlite.validation.format.Strings
-import com.yandex.daggerlite.validation.format.TextColor
-import com.yandex.daggerlite.validation.format.append
-import com.yandex.daggerlite.validation.format.modelRepresentation
-import com.yandex.daggerlite.validation.format.reportError
+import com.yandex.yatagan.base.setOf
+import com.yandex.yatagan.core.model.CollectionTargetKind
+import com.yandex.yatagan.core.model.MultiBindingDeclarationModel
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.validation.MayBeInvalid
+import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.TextColor
+import com.yandex.yatagan.validation.format.append
+import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class MultiBindingDeclarationBase(

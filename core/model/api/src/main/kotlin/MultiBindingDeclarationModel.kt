@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * A [com.yandex.daggerlite.Multibinds] model.
+ * A [com.yandex.yatagan.Multibinds] model.
  */
 interface MultiBindingDeclarationModel : MayBeInvalid {
 
@@ -41,7 +41,7 @@ interface MultiBindingDeclarationModel : MayBeInvalid {
     }
 
     /**
-     * Denotes invalid [com.yandex.daggerlite.Multibinds] with unrecognized return value.
+     * Denotes invalid [com.yandex.yatagan.Multibinds] with unrecognized return value.
      */
     interface InvalidDeclarationModel : MultiBindingDeclarationModel {
         val invalidMethod: Method

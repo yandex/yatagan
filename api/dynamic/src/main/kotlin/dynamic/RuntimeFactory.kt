@@ -1,13 +1,13 @@
-package com.yandex.daggerlite.dynamic
+package com.yandex.yatagan.dynamic
 
-import com.yandex.daggerlite.DynamicValidationDelegate
-import com.yandex.daggerlite.core.graph.BindingGraph
-import com.yandex.daggerlite.core.model.ComponentDependencyModel
-import com.yandex.daggerlite.core.model.ComponentFactoryModel
-import com.yandex.daggerlite.core.model.ModuleModel
-import com.yandex.daggerlite.core.model.NodeModel
-import com.yandex.daggerlite.core.model.allInputs
-import com.yandex.daggerlite.lang.rt.rt
+import com.yandex.yatagan.DynamicValidationDelegate
+import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ModuleModel
+import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.allInputs
+import com.yandex.yatagan.lang.rt.rt
 import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis
 

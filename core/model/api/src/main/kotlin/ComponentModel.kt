@@ -1,11 +1,11 @@
-package com.yandex.daggerlite.core.model
+package com.yandex.yatagan.core.model
 
-import com.yandex.daggerlite.lang.Annotation
-import com.yandex.daggerlite.lang.Method
-import com.yandex.daggerlite.validation.MayBeInvalid
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * Represents @[com.yandex.daggerlite.Component] annotated class - Component.
+ * Represents @[com.yandex.yatagan.Component] annotated class - Component.
  */
 interface ComponentModel : ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
     /**

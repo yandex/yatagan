@@ -1,5 +1,5 @@
 plugins {
-    id("daggerlite.base-module")
+    id("yatagan.base-module")
     application
 }
 
@@ -12,5 +12,5 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.yandex.daggerlite.testing.procedural.Standalone")
+    mainClass.set("com.yandex.yatagan.testing.procedural.Standalone")
 }

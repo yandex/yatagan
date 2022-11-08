@@ -1,10 +1,10 @@
-package com.yandex.daggerlite.lang.ksp
+package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.yandex.daggerlite.lang.Annotated
-import com.yandex.daggerlite.lang.Type
-import com.yandex.daggerlite.lang.compiled.CtFieldBase
+import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.compiled.CtFieldBase
 
 internal class KspFieldImpl(
     private val impl: KSPropertyDeclaration,
