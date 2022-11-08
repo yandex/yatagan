@@ -1,7 +1,7 @@
 package com.yandex.yatagan
 
 /**
- * A delegate holder for Dagger Lite thread checking for single-thread components.
+ * A delegate holder for Yatagan thread checking for single-thread components.
  *
  * @see Component.multiThreadAccess
  * @see asserter

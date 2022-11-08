@@ -4,9 +4,9 @@ import kotlin.reflect.KClass
 
 /**
  * Interfaces, annotated with `@Component` are called *Component declarations*.
- * Component interface declarations will be implemented (generated or proxied) by DL framework.
+ * Component interface declarations will be implemented (generated or proxied) by Yatagan framework.
  *
- * The instances of these generated implementations are called DL *components* - they host DI graph and are ready to
+ * The instances of these generated implementations are called Yatagan *components* - they host DI graph and are ready to
  * construct and provide/inject *dependencies*.
  *
  * ## Entry-points

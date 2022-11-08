@@ -148,8 +148,8 @@ class DynamicCompileTestDriver(
                             class InvalidGraph extends RuntimeException {}
 
                             final List<String[]> log = new ArrayList<>();
-                            Dagger.setMaxIssueEncounterPaths(100);
-                            Dagger.setDynamicValidationDelegate(new DynamicValidationDelegate() {
+                            Yatagan.setMaxIssueEncounterPaths(100);
+                            Yatagan.setDynamicValidationDelegate(new DynamicValidationDelegate() {
                                 private boolean hasErrors;
                                 public boolean getUsePlugins() { return true; }
                                 public DynamicValidationDelegate.Promise dispatchValidation(
@@ -176,7 +176,7 @@ class DynamicCompileTestDriver(
                                 }
                             });
                             try {
-                                Dagger.$bootstrapInvocation;
+                                Yatagan.$bootstrapInvocation;
                             } catch (InvalidGraph e) {/*nothing here*/}
                             return log;
                         }

@@ -1,10 +1,10 @@
 # Module api-dynamic
 
-An API dependency for clients, that wish to use reflection for parsing and serving DL components at runtime
+An API dependency for clients, that wish to use reflection for parsing and serving Yatagan components at runtime
 (RT backend).
 
 Specializes base [:api] dependency.
-Provides an entry-point implementation [Dagger][com.yandex.yatagan.Dagger], that uses the same logic, as AP backends,
+Provides an entry-point implementation [Yatagan][com.yandex.yatagan.Yatagan], that uses the same logic, as AP backends,
 at runtime to process annotations. The components and other required interfaces are implemented using
 `java.lang.reflect.Proxy` mechanism.
 
@@ -21,11 +21,12 @@ This API is designed in a way that allows the "good path" (when there are no err
 un-penalized by validation.
 Yet if the graph is invalid, all errors will be reported.
 To make use of this, a [DynamicValidationDelegate][com.yandex.yatagan.DynamicValidationDelegate] implementation
-may be supplied via [setDynamicValidationDelegate][com.yandex.yatagan.Dagger.setDynamicValidationDelegate].
+may be supplied via [setDynamicValidationDelegate][com.yandex.yatagan.Yatagan.setDynamicValidationDelegate].
 
 ## Memory consumption
 
-Every DL backend maintains a global static cache of all the required framework models, that resemble a built DL graph.
+Every Yatagan backend maintains a global static cache of all the required framework models, 
+that resemble a built Yatagan graph.
 Though such an approach is fine when using it in compile-time, an actual application 
 should be aware of **potential memory consumption increase**, when using reflection backend.
 Strict measurements were not done on the subject though.

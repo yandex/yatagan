@@ -1,7 +1,7 @@
 import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
 
 plugins {
-    id("daggerlite.base-module")
+    id("yatagan.base-module")
 }
 
 val kotlinCompileTestingVersion: String by extra

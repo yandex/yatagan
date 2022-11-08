@@ -19,7 +19,7 @@ import com.yandex.yatagan.processor.common.ProcessorDelegate
 import com.yandex.yatagan.processor.common.process
 import java.io.Writer
 
-internal class KspDaggerLiteProcessor(
+internal class KspYataganProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor, ProcessorDelegate<KSClassDeclaration> {
     override val logger: Logger = KspLogger(environment.logger)

@@ -64,7 +64,7 @@ package com.yandex.yatagan
  *
  * // And the following would hold true:
  * /*@*/ fun test() {
- * /*@*/ val component = Dagger.create(ExampleComponent::class.java)
+ * /*@*/ val component = Yatagan.create(ExampleComponent::class.java)
  * /*@*/assert(
  * component.mapOfClassToNumber == mapOf(A::class to 1, B::class to 2, C::class to 3.0f)
  * /*@*/)

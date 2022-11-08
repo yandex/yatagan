@@ -118,12 +118,12 @@ class ConditionsTest(
             }
 
             fun test() {
-                val component = Dagger.create(TestComponent::class.java)
+                val component = Yatagan.create(TestComponent::class.java)
                 assert(!component.opt.isPresent)
                 Features.enabledA = true
-                assert(!Dagger.create(TestComponent::class.java).opt.isPresent)
+                assert(!Yatagan.create(TestComponent::class.java).opt.isPresent)
                 Features.isEnabledB = true
-                val new = Dagger.create(TestComponent::class.java)
+                val new = Yatagan.create(TestComponent::class.java)
                 assert(new.opt.isPresent)
                 assert(new.opt.get() === new.provider.get().get())
 
@@ -207,8 +207,8 @@ class ConditionsTest(
             }
 
             fun test() {
-                val phone = Dagger.create(TestPhoneComponent::class.java)
-                val tablet = Dagger.create(TestTabletComponent::class.java)
+                val phone = Yatagan.create(TestPhoneComponent::class.java)
+                val tablet = Yatagan.create(TestTabletComponent::class.java)
 
                 assert(phone.phone.isPresent)
                 assert(!phone.tablet.isPresent)
@@ -270,8 +270,8 @@ class ConditionsTest(
 
             fun test() {
                 Features.isEnabledB = true
-                val phone: TestComponent = Dagger.create(TestPhoneComponent::class.java)
-                val tablet: TestComponent = Dagger.create(TestTabletComponent::class.java)
+                val phone: TestComponent = Yatagan.create(TestPhoneComponent::class.java)
+                val tablet: TestComponent = Yatagan.create(TestTabletComponent::class.java)
 
                 assert(!phone.myFeatureActivity.isPresent)
                 assert(tablet.myFeatureActivity.isPresent)
@@ -380,7 +380,7 @@ class ConditionsTest(
             
             fun test() {
                 Features.isEnabledB = true
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(!c.apiV1.isPresent)
                 assert(c.apiV2.get() is Stub)
                 assert(c.apiV3.get() is ImplB)
@@ -451,22 +451,22 @@ class ConditionsTest(
             }
             
             fun test() {
-                assert(Dagger.create(TestMainComponent::class.java).namedApi.isPresent)
-                assert(!Dagger.create(TestCustomComponent::class.java).namedApi.isPresent)
+                assert(Yatagan.create(TestMainComponent::class.java).namedApi.isPresent)
+                assert(!Yatagan.create(TestCustomComponent::class.java).namedApi.isPresent)
             
-                assert(!Dagger.create(TestMainComponent::class.java).api.isPresent)
+                assert(!Yatagan.create(TestMainComponent::class.java).api.isPresent)
             
                 Features.isEnabledB = true
-                assert(!Dagger.create(TestMainComponent::class.java).api.isPresent)
+                assert(!Yatagan.create(TestMainComponent::class.java).api.isPresent)
             
                 Features.enabledA = true
                 Features.isEnabledB = false
-                assert(Dagger.create(TestMainComponent::class.java).api.isPresent)
-                assert(!Dagger.create(TestCustomComponent::class.java).api.isPresent)
+                assert(Yatagan.create(TestMainComponent::class.java).api.isPresent)
+                assert(!Yatagan.create(TestCustomComponent::class.java).api.isPresent)
                 
                 Features.enabledA = false
                 Features.isEnabledB = true
-                assert(Dagger.create(TestCustomComponent::class.java).api.isPresent)
+                assert(Yatagan.create(TestCustomComponent::class.java).api.isPresent)
             }
         """.trimIndent())
 
@@ -508,8 +508,8 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = Dagger.create(MyBrowserComponent::class.java)
-                val searchAppC = Dagger.create(MySearchAppComponent::class.java)
+                val browserC = Yatagan.create(MyBrowserComponent::class.java)
+                val searchAppC = Yatagan.create(MySearchAppComponent::class.java)
                 
                 assert(browserC.myC.create().impl.isPresent)
                 assert(!searchAppC.myC.create().impl.isPresent)
@@ -641,9 +641,9 @@ class ConditionsTest(
             }
             
             fun test() {
-                val browserC = Dagger.create(MyBrowserComponent::class.java)
-                val searchAppC = Dagger.create(MySearchAppComponent::class.java)
-                val myProductC = Dagger.create(MyProductComponent::class.java)
+                val browserC = Yatagan.create(MyBrowserComponent::class.java)
+                val searchAppC = Yatagan.create(MySearchAppComponent::class.java)
+                val myProductC = Yatagan.create(MyProductComponent::class.java)
                 
                 assert(browserC.apiC.create().api.get() is ImplA)
                 assert(searchAppC.apiC.create().api.get() is ImplB)
@@ -704,7 +704,7 @@ class ConditionsTest(
 
             fun test() {
                 assert(!disabled1Requested && !disabled2Requested)
-                val c: MyComponent = Dagger.create(MyComponent::class.java)
+                val c: MyComponent = Yatagan.create(MyComponent::class.java)
                 assert(disabled1Requested && disabled2Requested)
 
                 assert(!c.a.isPresent)
@@ -830,7 +830,7 @@ class ConditionsTest(
             }
 
             fun test() {
-                val factory: TestComponent.Builder = Dagger.builder(TestComponent.Builder::class.java)
+                val factory: TestComponent.Builder = Yatagan.builder(TestComponent.Builder::class.java)
                 val features = FeatureProvider(
                     isEnabledA = false,
                     isEnabledB = true,

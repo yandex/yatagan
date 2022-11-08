@@ -22,7 +22,7 @@ class RuntimeTest(
             import com.yandex.yatagan.Component
             import com.yandex.yatagan.Provides
             import com.yandex.yatagan.Module
-            import com.yandex.yatagan.Dagger
+            import com.yandex.yatagan.Yatagan
 
             class Simple(val value: String)
 
@@ -41,7 +41,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.simple().value == "simple")
                 assert(c.one().value == "one")
                 assert(c.two().value == "two")
@@ -119,10 +119,10 @@ class RuntimeTest(
         """)
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.yatagan.Dagger
+            import com.yandex.yatagan.Yatagan
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c == c) { "Equality test" }
                 assert(c.hello().value == "hello")
                 assert(c.bye().value == "bye")
@@ -155,7 +155,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.impl().value == 1)
                 assert(c.wrapper().i.value == 2)
             }
@@ -181,7 +181,7 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c: MySTComponent = Dagger.create(MySTComponent::class.java)
+                val c: MySTComponent = Yatagan.create(MySTComponent::class.java)
                 val mainTid = Thread.currentThread().id
                 ThreadAssertions.asserter = ThreadAssertions.Asserter {
                     if (Thread.currentThread().id != mainTid) {

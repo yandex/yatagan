@@ -1,7 +1,5 @@
 package com.yandex.yatagan
 
-import com.yandex.yatagan.Dagger.builder
-import com.yandex.yatagan.Dagger.create
 import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.common.loadImplementationByBuilderClass
 import com.yandex.yatagan.common.loadImplementationByComponentClass
@@ -28,11 +26,11 @@ import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis
 
 /**
- * Dagger Lite entry-point object. Create instances of DL components using reflection.
+ * Yatagan entry-point object. Create instances of Yatagan components using reflection.
  *
  * Use either [builder] or [create].
  */
-object Dagger {
+object Yatagan {
     @Volatile
     private var validationDelegate: DynamicValidationDelegate? = null
     @Volatile
@@ -121,7 +119,7 @@ object Dagger {
                 )
             }
             require(graph.creator == null) {
-                "$componentClass has explicit creator interface declared, use `Dagger.builder()` instead"
+                "$componentClass has explicit creator interface declared, use `Yatagan.builder()` instead"
             }
 
             val proxy = Proxy.newProxyInstance(componentClass.classLoader, arrayOf(componentClass), component)
@@ -133,7 +131,7 @@ object Dagger {
     }
 
     /**
-     * Sets [DynamicValidationDelegate] to be used with all following DL graph creations.
+     * Sets [DynamicValidationDelegate] to be used with all following Yatagan graph creations.
      */
     @JvmStatic
     fun setDynamicValidationDelegate(delegate: DynamicValidationDelegate?) {

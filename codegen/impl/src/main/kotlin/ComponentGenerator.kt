@@ -16,14 +16,19 @@ import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.Modifier.STATIC
 
-internal class ComponentGenerator(
+internal class ComponentGenerator private constructor(
     private val graph: BindingGraph,
-    val generatedClassName: ClassName = graph.model.name.let { name ->
-        check(name is ClassNameModel)
-        // Keep name mangling in sync with loader!
-        ClassName.get(name.packageName, "Dagger$" + name.simpleNames.joinToString(separator = "$"))
-    },
+    val generatedClassName: ClassName,
 ) {
+    constructor(graph: BindingGraph): this(
+        graph = graph,
+        generatedClassName = graph.model.name.let { name ->
+            check(name is ClassNameModel)
+            // Keep name mangling in sync with loader!
+            ClassName.get(name.packageName, "Yatagan$" + name.simpleNames.joinToString(separator = "$"))
+        },
+    )
+
     interface Contributor {
         fun generate(builder: TypeSpecBuilder)
     }

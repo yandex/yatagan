@@ -3,7 +3,7 @@ package com.yandex.yatagan
 import com.yandex.yatagan.validation.RichString
 
 /**
- * A delegate interface, that provides API for clients, that wish to enable full DL validation
+ * A delegate interface, that provides API for clients, that wish to enable full Yatagan validation
  * routine for reflection backend.
  *
  * Such API is required, as straightforward approach with full validation performed at the moment of graph

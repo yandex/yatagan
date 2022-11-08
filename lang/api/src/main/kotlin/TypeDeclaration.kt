@@ -55,7 +55,7 @@ interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<
      * All returned methods (including inherited or overridden ones) have [owner][Method.owner] defined
      * as `this`.
      *
-     * Never includes methods defined in `java.lang.Object`/`kotlin.Any`, as they are of no interest to DL.
+     * Never includes methods defined in `java.lang.Object`/`kotlin.Any`, as they are of no interest to Yatagan.
      */
     val methods: Sequence<Method>
 

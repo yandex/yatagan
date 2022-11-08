@@ -11,7 +11,7 @@ internal object ClassNames {
     val Provides = ClassName("com.yandex.yatagan", "Provides")
     val Binds = ClassName("com.yandex.yatagan", "Binds")
     val ComponentBuilder = ClassName("com.yandex.yatagan", "Component", "Builder")
-    val Dagger = ClassName("com.yandex.yatagan", "Dagger")
+    val Yatagan = ClassName("com.yandex.yatagan", "Yatagan")
 
     val Retention = ClassName("kotlin.annotation", "Retention")
     val AnnotationRetention = ClassName("kotlin.annotation", "AnnotationRetention")

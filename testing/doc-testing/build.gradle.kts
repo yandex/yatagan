@@ -1,5 +1,5 @@
 plugins {
-    id("daggerlite.base-module")
+    id("yatagan.base-module")
 }
 
 val dokkaVersion: String by extra

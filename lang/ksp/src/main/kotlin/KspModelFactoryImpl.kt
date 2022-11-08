@@ -30,7 +30,7 @@ class KspModelFactoryImpl : LangModelFactory {
     }
     private val providerDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
         checkNotNull(Utils.resolver.getClassDeclarationByName("javax.inject.Provider")) {
-            "FATAL: unable to define `javax.inject.Provider` declaration, ensure DL API is present on the classpath"
+            "FATAL: unable to define `javax.inject.Provider` declaration, ensure Yatagan API is present on the classpath"
         }
     }
 

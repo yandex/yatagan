@@ -65,7 +65,7 @@ class MultibindingsTest(
             }
             
             fun test() {
-                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                val c: TestComponent = Yatagan.create(TestComponent::class.java)
                 
                 val bootstrapList = c.bootstrap()
                 assert(bootstrapList !== c.bootstrap())
@@ -165,7 +165,7 @@ class MultibindingsTest(
             }
             
             fun test() {
-                val builder: MyComponent.Builder = Dagger.builder(MyComponent.Builder::class.java)
+                val builder: MyComponent.Builder = Yatagan.builder(MyComponent.Builder::class.java)
                 val c = builder.create(CreateX(), MyDependencyImpl())
                        
                 val create = c.bootstrapCreate
@@ -219,7 +219,7 @@ class MultibindingsTest(
             }
             
             fun test() {
-                assert(Dagger.create(TestComponent::class.java).bootstrap().isEmpty())
+                assert(Yatagan.create(TestComponent::class.java).bootstrap().isEmpty())
             }
         """.trimIndent())
 
@@ -267,7 +267,7 @@ class MultibindingsTest(
             }
 
             fun test() {
-                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                val c: TestComponent = Yatagan.create(TestComponent::class.java)
                 assert(c.bootstrap().map { it::class } == listOf(ClassA::class, ClassC::class)) 
             }
         """.trimIndent())
@@ -481,7 +481,7 @@ class MultibindingsTest(
             }
             
             fun test() {
-                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                val c: TestComponent = Yatagan.create(TestComponent::class.java)
                 assert(c.map == mapOf(
                     1 to "hello",
                     2 to "world",
@@ -571,7 +571,7 @@ class MultibindingsTest(
             }
 
             fun test() {
-                val c: RootComponent = Dagger.create(RootComponent::class.java)
+                val c: RootComponent = Yatagan.create(RootComponent::class.java)
                 assert(c.qInts.toSet() == setOf(1, 2, 3))
 
                 assert(c.sub.create().numbers.toSet() == setOf<Number>(0, 1, 2.0, 3.0f, 4L, 5, 6, 7))
@@ -643,7 +643,7 @@ class MultibindingsTest(
             }
 
             fun test() {
-                val c: RootComponent = Dagger.create(RootComponent::class.java)
+                val c: RootComponent = Yatagan.create(RootComponent::class.java)
                 assert(c.qInts == mapOf(1 to 1, 2 to 2))
 
                 assert(c.sub.create().map == mapOf(1 to "one", 2 to "two", 3 to "three", 4 to "four"))
@@ -720,7 +720,7 @@ class MultibindingsTest(
             }
 
             fun test() {
-                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                val c: TestComponent = Yatagan.create(TestComponent::class.java)
                 assert(c.handlers() !== c.handlers())
                 assert(c.handlers() == setOf(c.a, c.c, MyModule.x, MyModule.y))
                 assert(c.numbers.isEmpty())

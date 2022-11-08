@@ -3,7 +3,7 @@ package com.yandex.yatagan
 /**
  *
  * Helps to just declare a multi-bound list to a type in case *there's no actual multi-bindings to that type*, so
- * that DL won't complain with about a missing binding. If no bindings are present for a list, then an empty list
+ * that Yatagan won't complain with about a missing binding. If no bindings are present for a list, then an empty list
  * is provided.
  *
  * Example:
@@ -30,7 +30,7 @@ package com.yandex.yatagan
  * // Then the following holds true:
  *
  * /*@*/ fun test() {
- * Dagger.create(ExampleComponent::class.java).run {
+ * Yatagan.create(ExampleComponent::class.java).run {
  * /*@*/assert(
  *     numbers.isEmpty()
  * /*@*/ &&

@@ -5,7 +5,7 @@ import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * Represents a node in a Dagger Graph, that can be resolved.
+ * Represents a node in a Yatagan Graph, that can be resolved.
  * Basically, it's a type with some other information to fine tune resolution.
  *
  * The main properties that resemble a node are [type] and [qualifier].

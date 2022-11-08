@@ -54,7 +54,7 @@ package com.yandex.yatagan
  * // And the following will hold true for the list:
  *
  * /*@*/ fun test() {
- * /*@*/ val component = Dagger.create(ExampleComponent::class.java)
+ * /*@*/ val component = Yatagan.create(ExampleComponent::class.java)
  * /*@*/assert(
  * component.numbers == listOf<Number>(1.1f, 2.0, 3, -4L, 5)
  * /*@*/)

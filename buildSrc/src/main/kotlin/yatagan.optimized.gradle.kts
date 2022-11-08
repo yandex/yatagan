@@ -4,11 +4,11 @@ import org.gradle.jvm.tasks.Jar
 import proguard.gradle.ProGuardTask
 
 plugins {
-    id("daggerlite.base-module")
+    id("yatagan.base-module")
 }
 
-if (pluginManager.hasPlugin("daggerlite.artifact")) {
-    throw GradleException("`daggerlite.optimized` must be applied before `daggerlite.artifact`.")
+if (pluginManager.hasPlugin("yatagan.artifact")) {
+    throw GradleException("`yatagan.optimized` must be applied before `yatagan.artifact`.")
 }
 
 val flatApi: Configuration by configurations.creating {

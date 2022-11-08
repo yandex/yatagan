@@ -1,17 +1,15 @@
 package com.yandex.yatagan
 
-import com.yandex.yatagan.Dagger.builder
-import com.yandex.yatagan.Dagger.create
 import com.yandex.yatagan.common.loadImplementationByBuilderClass
 import com.yandex.yatagan.common.loadImplementationByComponentClass
 
 /**
- * Dagger Lite entry-point object. Create instances of DL components by loading generated implementations for
+ * Yatagan entry-point object. Create instances of Yatagan components by loading generated implementations for
  * the given components/builders classes.
  *
  * Use either [builder] or [create].
  */
-object Dagger {
+object Yatagan {
 
     /**
      * Use this to create a component builder instance for root components that declare it.

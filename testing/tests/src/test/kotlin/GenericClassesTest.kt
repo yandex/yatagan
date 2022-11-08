@@ -225,7 +225,7 @@ class GenericClassesTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = com.yandex.yatagan.Dagger.create(TestComponent::class.java)
+                val c = com.yandex.yatagan.Yatagan.create(TestComponent::class.java)
                 c.get()
                 c.get2()
             }

@@ -8,7 +8,7 @@ import kotlin.contracts.contract
  *
  * `java.util.Optional` is not used because it may not be available on some platforms.
  *
- * NOTE: This is the framework interface, that has special treatment in dagger-lite graphs.
+ * NOTE: This is the framework interface, that has special treatment in Yatagan graphs.
  * An explicit [provision][Provides] or any other binding for `Optional<...>` is ill formed -
  * framework manages optional instances by itself.
  */

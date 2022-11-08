@@ -31,7 +31,7 @@ class ScopesTest(
            }
 
            fun test() {
-              val component = Dagger.create(TestComponent::class.java)
+              val component = Yatagan.create(TestComponent::class.java)
               assert(component.getA() === component.getA())
            }
         """.trimIndent()
@@ -55,7 +55,7 @@ class ScopesTest(
             }
             
             fun test() {
-            val component = Dagger.create(TestComponent::class.java)
+            val component = Yatagan.create(TestComponent::class.java)
             assert(component.getA() !== component.getA())
             }
         """.trimIndent()
@@ -94,7 +94,7 @@ class ScopesTest(
             }
             
             fun test() {
-                val c: TestComponent = Dagger.create(TestComponent::class.java)
+                val c: TestComponent = Yatagan.create(TestComponent::class.java)
                 val threads = arrayListOf<Thread>()
                 val cd = CountDownLatch(8)
                 repeat(8) {

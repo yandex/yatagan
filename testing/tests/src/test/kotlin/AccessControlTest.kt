@@ -71,7 +71,7 @@ class AccessControlTest(
             
             fun test() {
                 // must not crash on RT
-                val component: TestComponent = Dagger.create(TestComponent::class.java)
+                val component: TestComponent = Yatagan.create(TestComponent::class.java)
                 component.api
                 component.api2
                 component.api3
@@ -220,7 +220,7 @@ class AccessControlTest(
             }
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 c.fooFactory().create()
                 c.barFactory().create()
             }

@@ -75,8 +75,8 @@ class CoreBindingsKotlinTest(
             }
 
             fun test() {
-                Dagger.create(TopLevelClass.NestedClass.Component1::class.java)
-                Dagger.builder(TopLevelClass.Component2.Builder::class.java)
+                Yatagan.create(TopLevelClass.NestedClass.Component1::class.java)
+                Yatagan.builder(TopLevelClass.Component2.Builder::class.java)
             }
         """.trimIndent())
 
@@ -211,7 +211,7 @@ class CoreBindingsKotlinTest(
             import javax.inject.*
             fun test() {
                 val m = MyModule(52)
-                val c = Dagger.builder(TestComponent.Factory::class.java).create(m)
+                val c = Yatagan.builder(TestComponent.Factory::class.java).create(m)
                 assert(c.get().id == 52)
             }
         """.trimIndent())
@@ -567,7 +567,7 @@ class CoreBindingsKotlinTest(
             
             fun test() {
                 val foo = Foo()
-                Dagger.create(TestComponent::class.java).injectFoo(foo)
+                Yatagan.create(TestComponent::class.java).injectFoo(foo)
                 foo.helloA; foo.bye; foo.b; foo.a
             }""".trimIndent())
 
@@ -653,7 +653,7 @@ class CoreBindingsKotlinTest(
             }
 
             fun test() {
-                val c: TestComponent.Creator = Dagger.builder(TestComponent.Creator::class.java)
+                val c: TestComponent.Creator = Yatagan.builder(TestComponent.Creator::class.java)
                 val module = MyModule()
                 val component = c.create(module = module, arg = 1)
                     

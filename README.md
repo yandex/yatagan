@@ -1,4 +1,4 @@
-# Dagger Lite (DL)
+# Yatagan
 
 This is the developer and contributor doc.
 
@@ -6,7 +6,7 @@ For the user docs, see [the latest user documentation](https://teamcity.browser.
 
 ## Assembling
 
-DL uses [Gradle](https://docs.gradle.org/current/userguide/userguide.html) build system.
+Yatagan uses [Gradle](https://docs.gradle.org/current/userguide/userguide.html) build system.
 
 ```shell
 # To assemble everything
@@ -15,13 +15,13 @@ DL uses [Gradle](https://docs.gradle.org/current/userguide/userguide.html) build
 # To run tests
 ./gradlew test
 
-# To assemble DL and publish it to local maven repository
+# To assemble Yatagan and publish it to local maven repository
 ./gradlew publishToMavenLocal --no-configuration-cache
 ```
 
 ## Versioning
 
-DL uses [semantic versioning](https://semver.org/) scheme. 
+Yatagan uses [semantic versioning](https://semver.org/) scheme. 
 Before version `1.0.0` there's no stable API and no strict breaking changes tracking is performed. 
 
 ## Coding conventions

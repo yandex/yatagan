@@ -1,4 +1,4 @@
-rootProject.name = "dagger-lite"
+rootProject.name = "yatagan"
 
 include(":base")
 

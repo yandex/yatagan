@@ -6,7 +6,7 @@ import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-class JapDaggerLiteProcessor : BasicAnnotationProcessor() {
+class JapYataganProcessor : BasicAnnotationProcessor() {
     override fun getSupportedOptions(): Set<String> {
         return setOf(
             Options.StrictMode.key,

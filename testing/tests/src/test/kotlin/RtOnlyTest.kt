@@ -23,25 +23,25 @@ class RtOnlyTest : CompileTestDriver by DynamicCompileTestDriver() {
             const val ID1 = 1234567
             const val ID2 = 89101112
 
-            class `Dagger${'$'}MyComponent` : MyComponent {
+            class `Yatagan${'$'}MyComponent` : MyComponent {
                 override fun getInt(): Int = ID1
                 companion object {
-                    @JvmStatic fun create() = `Dagger${'$'}MyComponent`()
+                    @JvmStatic fun create() = `Yatagan${'$'}MyComponent`()
                 }
             }
 
-            class `Dagger${'$'}MyComponentWithBuilder` : MyComponentWithBuilder {
+            class `Yatagan${'$'}MyComponentWithBuilder` : MyComponentWithBuilder {
                 override fun getInt(): Int = ID2
                 companion object {
                     @JvmStatic fun builder() = object : MyComponentWithBuilder.Builder {
-                        override fun create() = `Dagger${'$'}MyComponentWithBuilder`()
+                        override fun create() = `Yatagan${'$'}MyComponentWithBuilder`()
                     }
                 }
             }
 
             fun test() {
-                val c1: MyComponent = Dagger.create(MyComponent::class.java)
-                val c2: MyComponentWithBuilder = Dagger.builder(MyComponentWithBuilder.Builder::class.java).create()
+                val c1: MyComponent = Yatagan.create(MyComponent::class.java)
+                val c2: MyComponentWithBuilder = Yatagan.builder(MyComponentWithBuilder.Builder::class.java).create()
                 assert(c1.getInt() == ID1)
                 assert(c2.getInt() == ID2)
             }

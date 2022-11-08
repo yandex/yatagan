@@ -124,9 +124,9 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.yatagan.Dagger
+            import com.yandex.yatagan.Yatagan
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """.trimIndent()
@@ -169,9 +169,9 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.yatagan.Dagger
+            import com.yandex.yatagan.Yatagan
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """
@@ -216,9 +216,9 @@ class CoreBindingsTest(
         )
 
         givenKotlinSource("test.TestCase", """
-            import com.yandex.yatagan.Dagger
+            import com.yandex.yatagan.Yatagan
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 assert(c.get() is Impl)
             }
         """
@@ -566,7 +566,7 @@ class CoreBindingsTest(
         """.trimIndent())
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = com.yandex.yatagan.Dagger.create(TestComponent::class.java)
+                val c = com.yandex.yatagan.Yatagan.create(TestComponent::class.java)
                 c.injectFoo(Foo())
             }
         """.trimIndent())
@@ -673,7 +673,7 @@ class CoreBindingsTest(
 
         givenKotlinSource("test.TestCase", """
             fun test() {
-                val c = com.yandex.yatagan.Dagger.create(MyComponent::class.java)
+                val c = com.yandex.yatagan.Yatagan.create(MyComponent::class.java)
                 c.deferred();
                 c.deferredProvider().get();
             }
@@ -707,7 +707,7 @@ class CoreBindingsTest(
             }
 
             fun test() {
-                fun builder() = Dagger.builder(MyComponent.Builder::class.java)
+                fun builder() = Yatagan.builder(MyComponent.Builder::class.java)
                 // Creates normally
                 builder().run { 
                     setChar('A')
@@ -762,7 +762,7 @@ class CoreBindingsTest(
             }
 
             fun test() {
-                val c = Dagger.create(TestComponent::class.java)
+                val c = Yatagan.create(TestComponent::class.java)
                 try { 
                     c.integer
                     throw AssertionError("Fail expected, but not occurred")
@@ -866,7 +866,7 @@ class CoreBindingsTest(
             }
             
             fun test() {
-                val c: TestComponent = Dagger.builder(TestComponent.Factory::class.java).create("foo")
+                val c: TestComponent = Yatagan.builder(TestComponent.Factory::class.java).create("foo")
                 val f = c.fooFactory().createFoo(1, 2, "hello")
                 assert(f.bar.c1 == 1)
                 assert(f.bar.c2 == 2)
@@ -941,7 +941,7 @@ class CoreBindingsTest(
             }
     
             fun test() {
-                val c: RootComponent.Creator = Dagger.builder(RootComponent.Creator::class.java)
+                val c: RootComponent.Creator = Yatagan.builder(RootComponent.Creator::class.java)
                 val component = c.create(object : Dep { override val input get() = "" })    
                 component.sub.create().factory.create(1)            
             }        

@@ -154,7 +154,7 @@ class ComponentHierarchyKotlinTest(
             }
 
             fun test() {
-                val factory: MyApplicationComponent.Factory = Dagger.builder(MyApplicationComponent.Factory::class.java)
+                val factory: MyApplicationComponent.Factory = Yatagan.builder(MyApplicationComponent.Factory::class.java)
                 val appComponent = factory.create("foo")
                  
                 with(appComponent.activityFactory.create("bar")) {
@@ -360,7 +360,7 @@ class ComponentHierarchyKotlinTest(
             }
             
             fun test() {
-                val c = Dagger.create(ApplicationComponent::class.java)
+                val c = Yatagan.create(ApplicationComponent::class.java)
                 val settingsActivityFragmentModule = SettingsActivityFragmentModule(SettingsActivity())
                 
                 val mainActivityC = c.mainActivity.create()

@@ -13,9 +13,9 @@ import kotlin.system.exitProcess
 
 @OptIn(ExperimentalGenerationApi::class)
 fun main(args: Array<String>) {
-    val parser = ArgParser("dagger-lite-graphs-generator")
+    val parser = ArgParser("yatagan-graphs-generator")
     val projectRootPath by parser.option(ArgType.String, fullName = "output-dir", shortName = "o").required()
-    val daggerLitePath by parser.option(ArgType.String, fullName = "dagger-lite-dir", shortName = "d").required()
+    val yataganPath by parser.option(ArgType.String, fullName = "yatagan-dir", shortName = "d").required()
     val forceGenerate by parser.option(ArgType.Boolean, fullName = "force-regenerate", shortName = "f").default(false)
     parser.parse(args)
 
@@ -30,9 +30,9 @@ fun main(args: Array<String>) {
         projectRoot.deleteRecursively()
         println("Done")
     }
-    val daggerLiteDir = File(daggerLitePath)
-    if (!daggerLiteDir.isDirectory) {
-        System.err.println("dagger-lite project path `$daggerLitePath` is not an existing directory")
+    val yataganDir = File(yataganPath)
+    if (!yataganDir.isDirectory) {
+        System.err.println("yatagan project path `$yataganPath` is not an existing directory")
         exitProcess(2)
     }
     println("Creating project root")
@@ -96,9 +96,9 @@ fun main(args: Array<String>) {
             }
         }
         
-        rootProject.name = "dagger-lite-performance-test"
+        rootProject.name = "yatagan-performance-test"
         
-        includeBuild("${daggerLiteDir.absolutePath}")
+        includeBuild("${yataganDir.absolutePath}")
     """.trimIndent())
     projectRoot.resolve("gradle.properties").writeText("""
         org.gradle.configureondemand=true
@@ -110,7 +110,7 @@ fun main(args: Array<String>) {
     println("Project generation done!")
 
     ProcessBuilder().run {
-        command(daggerLiteDir.resolve("gradlew").absolutePath, "run")
+        command(yataganDir.resolve("gradlew").absolutePath, "run")
         println("Assembling and running code via `${command()}`")
         directory(projectRoot)
         inheritIO()

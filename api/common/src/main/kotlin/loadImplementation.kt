@@ -9,13 +9,13 @@ import com.yandex.yatagan.Component
 @Throws(ClassNotFoundException::class)
 fun <T : Any> loadImplementationByBuilderClass(builderClass: Class<T>): T {
     require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
-        "$builderClass is not a builder for a dagger-lite component"
+        "$builderClass is not a builder for a Yatagan component"
     }
     val componentClass = checkNotNull(builderClass.enclosingClass) {
         "No enclosing component class found for $builderClass"
     }
     require(componentClass.getAnnotation(Component::class.java)?.isRoot == true) {
-        "$componentClass is not a root dagger-lite component"
+        "$componentClass is not a root Yatagan component"
     }
     val daggerComponentClass = loadImplementationClass(componentClass)
     return builderClass.cast(daggerComponentClass.getDeclaredMethod("builder").invoke(null))

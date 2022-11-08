@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("daggerlite.artifact")
+    id("yatagan.artifact")
 }
 
 tasks.withType<KotlinCompile> {

@@ -23,7 +23,7 @@ class HeavyTest(
 
     @Test
     fun `base case`() {
-        val sourceDir = Files.createTempDirectory("dagger-lite-test").toFile()
+        val sourceDir = Files.createTempDirectory("yatagan-test").toFile()
         try {
             val params = GenerationParams(
                 componentTreeMaxDepth = 6,

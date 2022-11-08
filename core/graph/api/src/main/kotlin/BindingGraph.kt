@@ -18,7 +18,7 @@ import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * A Fully built dagger-lite graph of [Binding]s.
+ * A Fully built Yatagan graph of [Binding]s.
  *
  * Each [BindingGraph] is built around [ComponentModel]. For each given [ComponentModel] multiple different
  * [BindingGraph]s may exist if [ComponentModel.isRoot] is `false`, because the model may have different parents.

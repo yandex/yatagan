@@ -47,7 +47,7 @@ val kotlinxCliVersion by extra("0.3.4")
 val junitVersion by extra("4.13.2")
 val mockitoKotlinVersion by extra("4.0.0")
 
-val daggerLiteVersion: String by extra(
-    providers.fileContents(rootProject.layout.projectDirectory.file("daggerlite.version"))
+val yataganVersion: String by extra(
+    providers.fileContents(rootProject.layout.projectDirectory.file("yatagan.version"))
         .asText.get().trim()
 )
