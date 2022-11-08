@@ -1,6 +1,5 @@
 package com.yandex.daggerlite.gradle
 
-import gradle.kotlin.dsl.accessors._19a95a576b7b06f136cb52e0fec15dfb.publishing
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory

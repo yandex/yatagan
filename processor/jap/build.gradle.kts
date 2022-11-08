@@ -1,6 +1,5 @@
 plugins {
     id("daggerlite.artifact")
-    id("daggerlite.documented")
 }
 
 val autoCommonVersion: String by extra
