@@ -1,4 +1,5 @@
 import com.yandex.daggerlite.gradle.PatchModuleDocTask
+import com.yandex.daggerlite.gradle.publishedArtifactName
 import com.yandex.daggerlite.gradle.RepositoryBrowseUrl
 import org.intellij.lang.annotations.Language
 import org.jetbrains.dokka.base.DokkaBase
@@ -44,6 +45,16 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
         plugins(project(":testing:doc-testing"))
     }
 
+    doFirst {
+        // Clean of any stale files.
+        delete(kdocsTestsDir)
+    }
+
+    doLast {
+        // Ensure created in case no output was done.
+        mkdir(kdocsTestsDir)
+    }
+
     dokkaSourceSets {
         named("main") {
             noStdlibLink.set(true)
@@ -81,6 +92,8 @@ val dokkaTask = tasks.named<DokkaTaskPartial>("dokkaHtmlPartial") {
     pluginsMapConfiguration.set(mapOf(
         "com.yandex.daggerlite.testing.doc_testing.DLDokkaPlugin" to config
     ))
+
+    moduleName.set(project.publishedArtifactName())
 
     outputs.dir(kdocsTestsDir)
 }

@@ -1,8 +1,12 @@
 package com.yandex.daggerlite.gradle
 
+import org.gradle.api.Project
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.AttributeContainer
 import org.gradle.api.component.SoftwareComponentFactory
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.kotlin.dsl.findByType
 import javax.inject.Inject
 
 // See https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
@@ -28,3 +32,8 @@ fun AttributeContainer.copyFrom(another: AttributeContainer) {
 abstract class ComponentFactoryProvider @Inject constructor(
     val softwareComponentFactory: SoftwareComponentFactory,
 )
+
+fun Project.publishedArtifactName(): String = project.extensions.findByType<PublishingExtension>()?.let {
+    val mainArtifactPublication = it.publications.getByName("main") as MavenPublication
+    mainArtifactPublication.artifactId
+} ?: project.name
