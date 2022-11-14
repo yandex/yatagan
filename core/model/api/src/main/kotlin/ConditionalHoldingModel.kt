@@ -9,21 +9,21 @@ import com.yandex.yatagan.validation.MayBeInvalid
  * Such entities are conditionally included into a graph, based on runtime conditions (See [FeatureModel]) and
  * variant-based resolution (See [Variant]).
  */
-interface ConditionalHoldingModel : MayBeInvalid {
-    val conditionals: List<ConditionalWithFlavorConstraintsModel>
+public interface ConditionalHoldingModel : MayBeInvalid {
+    public val conditionals: List<ConditionalWithFlavorConstraintsModel>
 
     /**
      * Represents a "feature" - a named [ConditionScope].
      */
-    interface FeatureModel : MayBeInvalid, ClassBackedModel {
-        val conditionScope: ConditionScope
+    public interface FeatureModel : MayBeInvalid, ClassBackedModel {
+        public val conditionScope: ConditionScope
     }
 
     /**
      * Model of a [com.yandex.yatagan.lang.BuiltinAnnotation.Conditional].
      */
-    interface ConditionalWithFlavorConstraintsModel : MayBeInvalid {
-        val featureTypes: List<FeatureModel>
-        val onlyIn: List<Variant.FlavorModel>
+    public interface ConditionalWithFlavorConstraintsModel : MayBeInvalid {
+        public val featureTypes: List<FeatureModel>
+        public val onlyIn: List<Variant.FlavorModel>
     }
 }

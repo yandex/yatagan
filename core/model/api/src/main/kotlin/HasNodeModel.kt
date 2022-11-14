@@ -5,7 +5,7 @@ package com.yandex.yatagan.core.model
  * NOTE: The main requirement is that the model can be uniquely parsed from a node using
  * [NodeModel.getSpecificModel].
  */
-interface HasNodeModel : ClassBackedModel {
+public interface HasNodeModel : ClassBackedModel {
     /**
      *
      * Provides a [node][NodeModel] for this model.
@@ -13,15 +13,15 @@ interface HasNodeModel : ClassBackedModel {
      *
      * @return [NodeModel] representing the model.
      */
-    fun asNode(): NodeModel
+    public fun asNode(): NodeModel
 
-    fun <R> accept(visitor: Visitor<R>): R
+    public fun <R> accept(visitor: Visitor<R>): R
 
-    interface Visitor<R> {
-        fun visitDefault(): R
-        fun visitComponent(model: ComponentModel): R = visitDefault()
-        fun visitComponentFactory(model: ComponentFactoryModel): R = visitDefault()
-        fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): R = visitDefault()
-        fun visitInjectConstructor(model: InjectConstructorModel): R = visitDefault()
+    public interface Visitor<R> {
+        public fun visitDefault(): R
+        public fun visitComponent(model: ComponentModel): R = visitDefault()
+        public fun visitComponentFactory(model: ComponentFactoryModel): R = visitDefault()
+        public fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): R = visitDefault()
+        public fun visitInjectConstructor(model: InjectConstructorModel): R = visitDefault()
     }
 }

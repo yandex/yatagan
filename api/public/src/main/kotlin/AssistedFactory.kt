@@ -6,4 +6,4 @@ package com.yandex.yatagan
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class AssistedFactory
+public annotation class AssistedFactory

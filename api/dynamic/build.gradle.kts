@@ -11,3 +11,7 @@ dependencies {
     api(project(":api:public"))
     api(project(":rt:support"))
 }
+
+kotlin {
+    explicitApi()
+}

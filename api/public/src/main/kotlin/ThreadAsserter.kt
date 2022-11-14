@@ -6,9 +6,9 @@ package com.yandex.yatagan
  *
  * @see Component.multiThreadAccess
  */
-fun interface ThreadAsserter {
+public fun interface ThreadAsserter {
     /**
      * Called on each provider/lazy/entry-point access in a single-thread component to ensure correct thread id.
      */
-    fun assertThreadAccess()
+    public fun assertThreadAccess()
 }

@@ -5,18 +5,18 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * TODO: doc.
  */
-interface Variant : MayBeInvalid {
-    interface DimensionModel : ClassBackedModel, MayBeInvalid {
-        val isInvalid: Boolean
+public interface Variant : MayBeInvalid {
+    public interface DimensionModel : ClassBackedModel, MayBeInvalid {
+        public val isInvalid: Boolean
     }
 
-    interface FlavorModel : ClassBackedModel, MayBeInvalid {
-        val dimension: DimensionModel
+    public interface FlavorModel : ClassBackedModel, MayBeInvalid {
+        public val dimension: DimensionModel
     }
 
-    operator fun get(dimension: DimensionModel): FlavorModel?
+    public operator fun get(dimension: DimensionModel): FlavorModel?
 
-    operator fun plus(variant: Variant?): Variant
+    public operator fun plus(variant: Variant?): Variant
 
-    fun asMap(): Map<DimensionModel, FlavorModel>
+    public fun asMap(): Map<DimensionModel, FlavorModel>
 }

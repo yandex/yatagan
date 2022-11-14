@@ -8,6 +8,6 @@ package com.yandex.yatagan
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 @JvmRepeatable(AnyConditions::class)
-annotation class AnyCondition(
+public annotation class AnyCondition(
     vararg val value: Condition,
 )

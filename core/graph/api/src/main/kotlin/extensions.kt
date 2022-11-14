@@ -13,36 +13,38 @@ import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
 import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
 import com.yandex.yatagan.core.model.ConditionModel
+import com.yandex.yatagan.core.model.NodeDependency
+import com.yandex.yatagan.lang.Method
 
 /**
  * Discards negation from the literal.
  *
  * @return `!this` if negated, `this` otherwise.
  */
-fun ConditionModel.normalized(): ConditionModel {
+public fun ConditionModel.normalized(): ConditionModel {
     return if (negated) !this else this
 }
 
-operator fun GraphEntryPoint.component1() = getter
+public operator fun GraphEntryPoint.component1(): Method = getter
 
-operator fun GraphEntryPoint.component2() = dependency
+public operator fun GraphEntryPoint.component2(): NodeDependency = dependency
 
-abstract class BindingVisitorAdapter<R> : Binding.Visitor<R> {
-    abstract fun visitDefault(): R
-    override fun visitProvision(binding: ProvisionBinding) = visitDefault()
-    override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) = visitDefault()
-    override fun visitInstance(binding: InstanceBinding) = visitDefault()
-    override fun visitAlternatives(binding: AlternativesBinding) = visitDefault()
-    override fun visitSubComponentFactory(binding: SubComponentFactoryBinding) = visitDefault()
-    override fun visitComponentDependency(binding: ComponentDependencyBinding) = visitDefault()
-    override fun visitComponentInstance(binding: ComponentInstanceBinding) = visitDefault()
-    override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding) = visitDefault()
-    override fun visitMulti(binding: MultiBinding) = visitDefault()
-    override fun visitMap(binding: MapBinding) = visitDefault()
-    override fun visitEmpty(binding: EmptyBinding) = visitDefault()
+public abstract class BindingVisitorAdapter<R> : Binding.Visitor<R> {
+    public abstract fun visitDefault(): R
+    override fun visitProvision(binding: ProvisionBinding): R = visitDefault()
+    override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R = visitDefault()
+    override fun visitInstance(binding: InstanceBinding): R = visitDefault()
+    override fun visitAlternatives(binding: AlternativesBinding): R = visitDefault()
+    override fun visitSubComponentFactory(binding: SubComponentFactoryBinding): R = visitDefault()
+    override fun visitComponentDependency(binding: ComponentDependencyBinding): R = visitDefault()
+    override fun visitComponentInstance(binding: ComponentInstanceBinding): R = visitDefault()
+    override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R = visitDefault()
+    override fun visitMulti(binding: MultiBinding): R = visitDefault()
+    override fun visitMap(binding: MapBinding): R = visitDefault()
+    override fun visitEmpty(binding: EmptyBinding): R = visitDefault()
 }
 
-fun <P : WithParents<P>> P.parentsSequence(
+public fun <P : WithParents<P>> P.parentsSequence(
     includeThis: Boolean = false,
 ): Sequence<P> {
     return object : Sequence<P> {
@@ -55,7 +57,7 @@ fun <P : WithParents<P>> P.parentsSequence(
     }
 }
 
-fun <C : WithChildren<C>> C.childrenSequence(
+public fun <C : WithChildren<C>> C.childrenSequence(
     includeThis: Boolean = true,
 ): Sequence<C> {
     return object : Sequence<C> {

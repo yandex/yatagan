@@ -8,3 +8,7 @@ dependencies {
 
     implementation(project(":api:common"))
 }
+
+kotlin {
+    explicitApi()
+}

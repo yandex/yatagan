@@ -74,7 +74,7 @@ package com.yandex.yatagan
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class IntoMap {
+public annotation class IntoMap {
 
     /**
      * Denotes a key-annotation for [IntoMap] multi-binding modifier.
@@ -96,5 +96,5 @@ annotation class IntoMap {
     @MustBeDocumented
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.ANNOTATION_CLASS)
-    annotation class Key
+    public annotation class Key
 }

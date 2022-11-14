@@ -9,3 +9,7 @@ dependencies {
 
     implementation(kotlin("stdlib"))
 }
+
+kotlin {
+    explicitApi()
+}

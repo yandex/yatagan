@@ -12,7 +12,7 @@ import kotlin.contracts.contract
  * An explicit [provision][Provides] or any other binding for `Optional<...>` is ill formed -
  * framework manages optional instances by itself.
  */
-class Optional<out T : Any> private constructor(
+public class Optional<out T : Any> private constructor(
     @PublishedApi
     internal val value: T?,
 ) {
@@ -24,26 +24,26 @@ class Optional<out T : Any> private constructor(
      * @return stored value
      * @throws NoSuchElementException if no value is present.
      */
-    fun get(): T = value ?: throw NoSuchElementException("No value present")
+    public fun get(): T = value ?: throw NoSuchElementException("No value present")
 
     /**
      *
      * Stored value nullable access.
      * @return the stored value or `null` if no value present.
      */
-    fun orNull(): T? = value
+    public fun orNull(): T? = value
 
     /**
      * `true` if value is present, `false` otherwise.
      */
-    val isPresent: Boolean get() = value != null
+    public val isPresent: Boolean get() = value != null
 
     /**
      * Stored value access with alternative.
      *
      * @return stored value if present. Otherwise, returns [alternative].
      */
-    fun orElse(alternative: @UnsafeVariance T): T = value ?: alternative
+    public fun orElse(alternative: @UnsafeVariance T): T = value ?: alternative
 
     // endregion Common API
 
@@ -52,22 +52,22 @@ class Optional<out T : Any> private constructor(
     /**
      * A function consumer interface designed to be used with [Optional] in Java code.
      */
-    fun interface Consumer<in T> {
-        fun accept(value: T)
+    public fun interface Consumer<in T> {
+        public fun accept(value: T)
     }
 
     /**
      * A function interface designed to be used with [Optional] in Java code.
      */
-    fun interface Function<in T, out R> {
-        fun apply(value: T): R
+    public fun interface Function<in T, out R> {
+        public fun apply(value: T): R
     }
 
     /**
      * See [ifPresent].
      */
     @JvmName("ifPresent")
-    fun ifPresentJava(consumer: Consumer<T>) {
+    public fun ifPresentJava(consumer: Consumer<T>) {
         ifPresent(consumer::accept)
     }
 
@@ -75,7 +75,7 @@ class Optional<out T : Any> private constructor(
      * See [ifPresentOrElse].
      */
     @JvmName("ifPresentOrElse")
-    fun ifPresentOrElseJava(consumer: Consumer<T>, onEmpty: Runnable) {
+    public fun ifPresentOrElseJava(consumer: Consumer<T>, onEmpty: Runnable) {
         ifPresentOrElse(consumer::accept, onEmpty::run)
     }
 
@@ -83,7 +83,7 @@ class Optional<out T : Any> private constructor(
      * See [map].
      */
     @JvmName("map")
-    fun <U : Any> mapJava(mapper: Function<T, U?>): Optional<U> = map(mapper::apply)
+    public fun <U : Any> mapJava(mapper: Function<T, U?>): Optional<U> = map(mapper::apply)
 
     // endregion Java API
 
@@ -93,7 +93,7 @@ class Optional<out T : Any> private constructor(
      * Runs [consumer] function with the value *if the value is present*.
      */
     @JvmSynthetic
-    inline fun ifPresent(consumer: (T) -> Unit) {
+    public inline fun ifPresent(consumer: (T) -> Unit) {
         contract { callsInPlace(consumer, InvocationKind.AT_MOST_ONCE) }
         value?.let(consumer)
     }
@@ -102,7 +102,7 @@ class Optional<out T : Any> private constructor(
      * Runs [consumer] function with the value *if the value is present*. Otherwise runs [onEmpty].
      */
     @JvmSynthetic
-    inline fun ifPresentOrElse(consumer: (T) -> Unit, onEmpty: () -> Unit) {
+    public inline fun ifPresentOrElse(consumer: (T) -> Unit, onEmpty: () -> Unit) {
         contract {
             callsInPlace(consumer, InvocationKind.AT_MOST_ONCE)
             callsInPlace(onEmpty, InvocationKind.AT_MOST_ONCE)
@@ -119,31 +119,31 @@ class Optional<out T : Any> private constructor(
      * If there's no value, [Optional.empty] is returned.
      */
     @JvmSynthetic
-    inline fun <U : Any> map(mapper: (T) -> (U?)): Optional<U> {
+    public inline fun <U : Any> map(mapper: (T) -> (U?)): Optional<U> {
         contract { callsInPlace(mapper, InvocationKind.AT_MOST_ONCE) }
         return if (value != null) ofNullable(mapper(value)) else empty()
     }
 
     // endregion Kotlin API
 
-    companion object {
+    public companion object {
         /**
          * Creates optional holder for a ready instance.
          */
         @JvmStatic
-        fun <T : Any> of(value: T) = Optional(value)
+        public fun <T : Any> of(value: T): Optional<T> = Optional(value)
 
         /**
          * Returns "empty" holder instance.
          */
         @JvmStatic
-        fun <T : Any> empty(): Optional<T> = Empty
+        public fun <T : Any> empty(): Optional<T> = Empty
 
         /**
          * Creates optional holder with the given value, if it is not `null`. Otherwise [Optional.empty] is returned.
          */
         @JvmStatic
-        fun <T : Any> ofNullable(value: T?): Optional<T> = value?.let(::Optional) ?: Empty
+        public fun <T : Any> ofNullable(value: T?): Optional<T> = value?.let(::Optional) ?: Empty
 
         @JvmStatic
         private val Empty: Optional<Nothing> = Optional(null)

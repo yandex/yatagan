@@ -8,44 +8,44 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * Represents [com.yandex.yatagan.AssistedFactory].
  */
-interface AssistedInjectFactoryModel : MayBeInvalid, HasNodeModel {
+public interface AssistedInjectFactoryModel : MayBeInvalid, HasNodeModel {
     /**
      * Factory method that takes assisted parameters and creates the instance via [assistedInjectConstructor],
      * passing "assisted" parameters as is, providing non-assisted (injected) dependencies from a graph.
      */
-    val factoryMethod: Method?
+    public val factoryMethod: Method?
 
     /**
      * an [@AssistedInject][com.yandex.yatagan.AssistedInject]-annotated constructor from the
      * factory's target type.
      */
-    val assistedInjectConstructor: Constructor?
+    public val assistedInjectConstructor: Constructor?
 
     /**
      * Parsed parameter models from [assistedInjectConstructor].
      */
-    val assistedConstructorParameters: List<Parameter>
+    public val assistedConstructorParameters: List<Parameter>
 
     /**
      * Parsed parameter models from [factoryMethod].
      */
-    val assistedFactoryParameters: List<Parameter.Assisted>
+    public val assistedFactoryParameters: List<Parameter.Assisted>
 
-    sealed interface Parameter {
+    public sealed interface Parameter {
         /**
          * Models parameters, arguments for which are to be passed in externally.
          */
-        data class Assisted(
+        public data class Assisted(
             val identifier: String,
             val type: Type,
         ) : Parameter {
-            override fun toString() = "@Assisted(\"$identifier\") $type"
+            override fun toString(): String = "@Assisted(\"$identifier\") $type"
         }
 
         /**
          * Model parameters, values for which are to be provided from the graph.
          */
-        data class Injected(
+        public data class Injected(
             val dependency: NodeDependency,
         ) : Parameter
     }

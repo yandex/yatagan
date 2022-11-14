@@ -8,7 +8,7 @@ package com.yandex.yatagan
  * - No duplicates (as per `Set` contract) could be present in the set. E.g. if any two `@Provides` return the same
  *  instance/instance that compare equals via `equals` - there'll be only one of them in the set.
  */
-annotation class IntoSet(
+public annotation class IntoSet(
     /**
      * Same as [IntoList.flatten].
      */

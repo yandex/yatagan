@@ -23,11 +23,11 @@ import com.yandex.yatagan.validation.MayBeInvalid
  * Each [BindingGraph] is built around [ComponentModel]. For each given [ComponentModel] multiple different
  * [BindingGraph]s may exist if [ComponentModel.isRoot] is `false`, because the model may have different parents.
  */
-interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, WithChildren<BindingGraph> {
+public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, WithChildren<BindingGraph> {
     /**
      * A model behind this graph.
      */
-    val model: HasNodeModel
+    public val model: HasNodeModel
 
     /**
      * Requested bindings that are **hosted** in this component.
@@ -37,7 +37,7 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
      *
      * The associated info is [BindingUsage].
      */
-    val localBindings: Map<Binding, BindingUsage>
+    public val localBindings: Map<Binding, BindingUsage>
 
     /**
      * All [condition literals][ConditionScope.Literal]s that are **hosted** in this component.
@@ -47,72 +47,72 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
      *
      * The associated info is [LiteralUsage].
      */
-    val localConditionLiterals: Map<ConditionModel, LiteralUsage>
+    public val localConditionLiterals: Map<ConditionModel, LiteralUsage>
 
     /**
      * [AssistedInjectFactoryModel]s that are hosted in this graph.
      */
-    val localAssistedInjectFactories: Collection<AssistedInjectFactoryModel>
+    public val localAssistedInjectFactories: Collection<AssistedInjectFactoryModel>
 
     /**
      * A collection of parent (not necessarily direct) [BindingGraph]s, from which bindings and/or conditions are used
      * to satisfy dependencies from `this` graph.
      */
-    val usedParents: Set<BindingGraph>
+    public val usedParents: Set<BindingGraph>
 
     /**
      * See [ComponentModel.isRoot].
      */
-    val isRoot: Boolean
+    public val isRoot: Boolean
 
     /**
      * Graph variant (full - merged with parents)
      *
      * @see ComponentModel.variant
      */
-    val variant: Variant
+    public val variant: Variant
 
     /**
      * Modules of the underlying model.
      *
      * @see ComponentModel.modules
      */
-    val modules: Collection<ModuleModel>
+    public val modules: Collection<ModuleModel>
 
     /**
      * Component dependencies declared in the underlying model.
      *
      * @see ComponentModel.dependencies
      */
-    val dependencies: Collection<ComponentDependencyModel>
+    public val dependencies: Collection<ComponentDependencyModel>
 
     /**
      * Graph scopes.
      *
      * @see ComponentModel.scopes
      */
-    val scopes: Set<Annotation>
+    public val scopes: Set<Annotation>
 
     /**
      * Component creator model declared in the underlying model.
      *
      * @see [ComponentModel.factory]
      */
-    val creator: ComponentFactoryModel?
+    public val creator: ComponentFactoryModel?
 
     /**
      * All explicit graph entry-points - getter functions declared in the underlying model.
      *
      * @see [ComponentModel.entryPoints]
      */
-    val entryPoints: Collection<GraphEntryPoint>
+    public val entryPoints: Collection<GraphEntryPoint>
 
     /**
      * All injector functions (a kind of entry-points) declared in the underlying model.
      *
      * @see [ComponentModel.memberInjectors]
      */
-    val memberInjectors: Collection<GraphMemberInjector>
+    public val memberInjectors: Collection<GraphMemberInjector>
 
     /**
      * A condition for this graph.
@@ -120,14 +120,14 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
      * Equals [Always][com.yandex.yatagan.core.ConditionExpression.Unscoped] for [root][BindingGraph.isRoot] components.
      * Arbitrary for non-root components.
      */
-    val conditionScope: ConditionScope
+    public val conditionScope: ConditionScope
 
     /**
      * Multi-thread access status declared in the underlying model.
      *
      * @see ComponentModel.requiresSynchronizedAccess
      */
-    val requiresSynchronizedAccess: Boolean
+    public val requiresSynchronizedAccess: Boolean
 
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
@@ -139,24 +139,24 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
      * @throws IllegalStateException if no such binding is found at all (requested but missing bindings are still safe
      * to request).
      */
-    fun resolveBinding(node: NodeModel): Binding
+    public fun resolveBinding(node: NodeModel): Binding
 
     /**
      * Behaves as [resolveBinding] only doesn't follow aliases.
      */
-    fun resolveBindingRaw(node: NodeModel): BaseBinding
+    public fun resolveBindingRaw(node: NodeModel): BaseBinding
 
     /**
      * Provides counts of each dependency [kind][com.yandex.yatagan.core.DependencyKind] requests for the
      * [target][Binding.target].
      */
-    interface BindingUsage {
-        val direct: Int
-        val provider: Int
-        val lazy: Int
-        val optional: Int
-        val optionalLazy: Int
-        val optionalProvider: Int
+    public interface BindingUsage {
+        public val direct: Int
+        public val provider: Int
+        public val lazy: Int
+        public val optional: Int
+        public val optionalLazy: Int
+        public val optionalProvider: Int
     }
 
     /**
@@ -165,7 +165,7 @@ interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, Wi
      * In expression `A && B || C`, `A` is [Eager], while `B`, `C` are [Lazy].
      * In other words, a literal is [Eager] iff it is present in eager position at in at least one expression.
      */
-    enum class LiteralUsage {
+    public enum class LiteralUsage {
         /**
          * When a literal is certainly going to be evaluated.
          */

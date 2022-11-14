@@ -28,7 +28,7 @@ import kotlin.reflect.KClass
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 @JvmRepeatable(AllConditions::class)
-annotation class Condition(
+public annotation class Condition(
     /**
      * A root class from which a condition accessor chain is built.
      */

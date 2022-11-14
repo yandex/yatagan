@@ -7,14 +7,14 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * TODO: doc.
  */
-interface MembersInjectorModel : MayBeInvalid {
+public interface MembersInjectorModel : MayBeInvalid {
     /**
      * A function (in a component interface) that performs injection
      */
-    val injector: Method
+    public val injector: Method
 
     /**
      * The @[javax.inject.Inject]-annotated fields/setters discovered in the injectee.
      */
-    val membersToInject: Map<Member, NodeDependency>
+    public val membersToInject: Map<Member, NodeDependency>
 }

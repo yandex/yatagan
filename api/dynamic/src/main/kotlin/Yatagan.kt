@@ -13,14 +13,14 @@ import com.yandex.yatagan.rt.support.Logger
  *
  * Use either [builder] or [create].
  */
-object Yatagan {
+public object Yatagan {
     private val engineHolder = singleInitWithFallback { RuntimeEngine(Params()) }
     private var engine: RuntimeEngine<Params> by engineHolder
 
     /**
      * Configures global Yatagan reflection parameters.
      */
-    class Initializer {
+    public class Initializer {
         private val params = Params()
 
         /**
@@ -28,7 +28,7 @@ object Yatagan {
          *
          * `null` by default - no explicit validation is performed.
          */
-        fun validation(delegate: DynamicValidationDelegate?): Initializer = apply {
+        public fun validation(delegate: DynamicValidationDelegate?): Initializer = apply {
             params.validationDelegate = delegate
         }
 
@@ -37,7 +37,7 @@ object Yatagan {
          *
          * `5` by default.
          */
-        fun maxIssueEncounterPaths(count: Int): Initializer = apply {
+        public fun maxIssueEncounterPaths(count: Int): Initializer = apply {
             require(count >= 1) {
                 "Max issue encounter paths can't be less then 1"
             }
@@ -49,7 +49,7 @@ object Yatagan {
          *
          * `true` by default.
          */
-        fun strictMode(enabled: Boolean): Initializer = apply {
+        public fun strictMode(enabled: Boolean): Initializer = apply {
             params.isStrictMode = enabled
         }
 
@@ -65,7 +65,7 @@ object Yatagan {
          *
          * `false` by default.
          */
-        fun useCompiledImplementationIfAvailable(enabled: Boolean): Initializer = apply {
+        public fun useCompiledImplementationIfAvailable(enabled: Boolean): Initializer = apply {
             params.useCompiledImplementationIfAvailable = enabled
         }
 
@@ -74,14 +74,14 @@ object Yatagan {
          *
          * `null` by default.
          */
-        fun logger(logger: Logger?): Initializer = apply {
+        public fun logger(logger: Logger?): Initializer = apply {
             params.logger = logger
         }
 
         /**
          * Invoke this to apply configured parameters to the global Yatagan state.
          */
-        fun apply() {
+        public fun apply() {
             engine = RuntimeEngine(params.copy())
         }
     }
@@ -90,7 +90,7 @@ object Yatagan {
      * Sets [ThreadAsserter] object to be used in Single Thread component implementations.
      */
     @JvmStatic
-    fun setThreadAsserter(threadAsserter: ThreadAsserter?) {
+    public fun setThreadAsserter(threadAsserter: ThreadAsserter?) {
         ThreadAssertions.setAsserter(threadAsserter)
     }
 
@@ -99,7 +99,7 @@ object Yatagan {
      * If a client decides to use it, then the call must be made before any graphs are created.
      */
     @JvmStatic
-    fun setupReflectionBackend(): Initializer {
+    public fun setupReflectionBackend(): Initializer {
         return Initializer()
     }
 
@@ -113,7 +113,7 @@ object Yatagan {
      * the very application termination, and it doesn't make much sense to call `reset()` right before that.
      */
     @JvmStatic
-    fun resetReflectionBackend() {
+    public fun resetReflectionBackend() {
         if (engineHolder.isInitialized()) {
             engine.destroy()
             engineHolder.deinitialize()
@@ -129,7 +129,7 @@ object Yatagan {
      * @see Component.Builder
      */
     @JvmStatic
-    fun <T : Any> builder(builderClass: Class<T>): T {
+    public fun <T : Any> builder(builderClass: Class<T>): T {
         if (engine.params.useCompiledImplementationIfAvailable) {
             try {
                 return loadImplementationByBuilderClass(builderClass).also {
@@ -151,7 +151,7 @@ object Yatagan {
      * @return ready component instance of the given class
      */
     @JvmStatic
-    fun <T : Any> create(componentClass: Class<T>): T {
+    public fun <T : Any> create(componentClass: Class<T>): T {
         if (engine.params.useCompiledImplementationIfAvailable) {
             try {
                 return loadImplementationByComponentClass(componentClass).also {

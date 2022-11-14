@@ -7,9 +7,9 @@ package com.yandex.yatagan.core.graph
  *
  * Implementations are not required to be thread-safe.
  */
-interface Extensible {
-    interface Key<V : Any> {
-        val keyType: Class<V>
+public interface Extensible {
+    public interface Key<V : Any> {
+        public val keyType: Class<V>
     }
 
     /**
@@ -19,7 +19,7 @@ interface Extensible {
      * @return the associated value
      * @throws IllegalStateException if there's no value for the key present
      */
-    operator fun <V : Any> get(key: Key<V>): V
+    public operator fun <V : Any> get(key: Key<V>): V
 
     /**
      * Associates the key with the value.
@@ -29,5 +29,5 @@ interface Extensible {
      * @param value the value to associate with the key
      * @throws IllegalStateException if there's already a value associated with the key
      */
-    operator fun <V : Any> set(key: Key<V>, value: V)
+    public operator fun <V : Any> set(key: Key<V>, value: V)
 }

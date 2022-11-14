@@ -5,19 +5,20 @@ package com.yandex.yatagan.lang
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-val TypeDeclaration.isKotlinObject get() = when(kind) {
-    TypeDeclarationKind.KotlinObject, TypeDeclarationKind.KotlinCompanion -> true
-    else -> false
-}
+public val TypeDeclaration.isKotlinObject: Boolean
+    get() = when (kind) {
+        TypeDeclarationKind.KotlinObject, TypeDeclarationKind.KotlinCompanion -> true
+        else -> false
+    }
 
-val TypeDeclaration.functionsWithCompanion: Sequence<Method>
+public val TypeDeclaration.functionsWithCompanion: Sequence<Method>
     get() = when (val companion = defaultCompanionObjectDeclaration) {
         null -> methods
         else -> methods + companion.methods
     }
 
 @OptIn(InternalLangApi::class)
-inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -> Unit) {
+public inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -> Unit) {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
     check(delegate == null)
     delegate = factory
@@ -29,25 +30,25 @@ inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -
     }
 }
 
-abstract class AnnotationValueVisitorAdapter<R> : Annotation.Value.Visitor<R> {
-    abstract fun visitDefault(): R
-    override fun visitBoolean(value: Boolean) = visitDefault()
-    override fun visitByte(value: Byte) = visitDefault()
-    override fun visitShort(value: Short) = visitDefault()
-    override fun visitInt(value: Int) = visitDefault()
-    override fun visitLong(value: Long) = visitDefault()
-    override fun visitChar(value: Char) = visitDefault()
-    override fun visitFloat(value: Float) = visitDefault()
-    override fun visitDouble(value: Double) = visitDefault()
-    override fun visitString(value: String) = visitDefault()
-    override fun visitType(value: Type) = visitDefault()
-    override fun visitAnnotation(value: Annotation) = visitDefault()
-    override fun visitEnumConstant(enum: Type, constant: String) = visitDefault()
-    override fun visitArray(value: List<Annotation.Value>) = visitDefault()
-    override fun visitUnresolved() = visitDefault()
+public abstract class AnnotationValueVisitorAdapter<R> : Annotation.Value.Visitor<R> {
+    public abstract fun visitDefault(): R
+    override fun visitBoolean(value: Boolean): R = visitDefault()
+    override fun visitByte(value: Byte): R = visitDefault()
+    override fun visitShort(value: Short): R = visitDefault()
+    override fun visitInt(value: Int): R = visitDefault()
+    override fun visitLong(value: Long): R = visitDefault()
+    override fun visitChar(value: Char): R = visitDefault()
+    override fun visitFloat(value: Float): R = visitDefault()
+    override fun visitDouble(value: Double): R = visitDefault()
+    override fun visitString(value: String): R = visitDefault()
+    override fun visitType(value: Type): R = visitDefault()
+    override fun visitAnnotation(value: Annotation): R = visitDefault()
+    override fun visitEnumConstant(enum: Type, constant: String): R = visitDefault()
+    override fun visitArray(value: List<Annotation.Value>): R = visitDefault()
+    override fun visitUnresolved(): R = visitDefault()
 }
 
-inline fun LangModelFactory.getListType(parameter: Type, isCovariant: Boolean = false): Type {
+public inline fun LangModelFactory.getListType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(
         type = LangModelFactory.ParameterizedType.List,
         parameter = parameter,
@@ -55,7 +56,7 @@ inline fun LangModelFactory.getListType(parameter: Type, isCovariant: Boolean = 
     )
 }
 
-inline fun LangModelFactory.getSetType(parameter: Type, isCovariant: Boolean = false): Type {
+public inline fun LangModelFactory.getSetType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(
         type = LangModelFactory.ParameterizedType.Set,
         parameter = parameter,
@@ -63,7 +64,7 @@ inline fun LangModelFactory.getSetType(parameter: Type, isCovariant: Boolean = f
     )
 }
 
-inline fun LangModelFactory.getCollectionType(parameter: Type, isCovariant: Boolean = false): Type {
+public inline fun LangModelFactory.getCollectionType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(
         type = LangModelFactory.ParameterizedType.Collection,
         parameter = parameter,
@@ -71,7 +72,7 @@ inline fun LangModelFactory.getCollectionType(parameter: Type, isCovariant: Bool
     )
 }
 
-inline fun LangModelFactory.getProviderType(parameter: Type, isCovariant: Boolean = false): Type {
+public inline fun LangModelFactory.getProviderType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(
         type = LangModelFactory.ParameterizedType.Provider,
         parameter = parameter,

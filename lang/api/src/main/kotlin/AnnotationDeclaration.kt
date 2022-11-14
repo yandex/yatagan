@@ -3,20 +3,20 @@ package com.yandex.yatagan.lang
 /**
  * An annotation class declaration.
  */
-interface AnnotationDeclaration : Annotated {
+public interface AnnotationDeclaration : Annotated {
     /**
      * Represents an annotation class' property/@interface's method.
      */
-    interface Attribute {
+    public interface Attribute {
         /**
          * Name of the attribute.
          */
-        val name: String
+        public val name: String
 
         /**
          * Type of the attribute.
          */
-        val type: Type
+        public val type: Type
     }
 
     /**
@@ -24,26 +24,26 @@ interface AnnotationDeclaration : Annotated {
      *
      * @param clazz Java class to check
      */
-    fun isClass(clazz: Class<out kotlin.Annotation>): Boolean {
+    public fun isClass(clazz: Class<out kotlin.Annotation>): Boolean {
         return clazz.canonicalName == qualifiedName
     }
 
     /**
      * Qualified name of the annotation class.
      */
-    val qualifiedName: String
+    public val qualifiedName: String
 
     /**
      * Attributes (annotation class' properties for Kotlin and @interface's methods for Java).
      */
-    val attributes: Sequence<Attribute>
+    public val attributes: Sequence<Attribute>
 
     /**
      * Obtains framework annotation of the given kind.
      *
      * @return the annotation model or `null` if no such annotation is present.
      */
-    fun <T : BuiltinAnnotation.OnAnnotationClass> getAnnotation(
+    public fun <T : BuiltinAnnotation.OnAnnotationClass> getAnnotation(
         builtinAnnotation: BuiltinAnnotation.Target.OnAnnotationClass<T>
     ): T?
 
@@ -55,5 +55,5 @@ interface AnnotationDeclaration : Annotated {
      * @see java.lang.annotation.Retention
      * @see kotlin.annotation.Retention
      */
-    fun getRetention(): AnnotationRetention
+    public fun getRetention(): AnnotationRetention
 }

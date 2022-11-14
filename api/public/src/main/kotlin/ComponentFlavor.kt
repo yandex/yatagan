@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
-annotation class ComponentFlavor(
+public annotation class ComponentFlavor(
     /**
      * Dimension, that this flavor belongs to.
      */

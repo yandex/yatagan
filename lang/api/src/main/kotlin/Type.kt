@@ -14,31 +14,31 @@ package com.yandex.yatagan.lang
  * [Type] only provides [typeArguments]; variance, projection and type variables are not exposed as of now.
  *
  */
-interface Type : Comparable<Type> {
+public interface Type : Comparable<Type> {
     /**
      * The corresponding type declaration.
      */
-    val declaration: TypeDeclaration
+    public val declaration: TypeDeclaration
 
     /**
      * Type arguments. If any of the arguments has non-invariant variance (or a wildcard type) -
      * such is info is not available via the current API.
      */
-    val typeArguments: List<Type>
+    public val typeArguments: List<Type>
 
     /**
      * Checks if the type is the `void` JVM type.
      */
-    val isVoid: Boolean
+    public val isVoid: Boolean
 
     /**
      * Checks if a variable of this type can be assigned a value of [another] type.
      */
-    fun isAssignableFrom(another: Type): Boolean
+    public fun isAssignableFrom(another: Type): Boolean
 
     /**
      * @return If this is a primitive type, returns its *boxed* counterpart. Returns this type otherwise.
      *
      */
-    fun asBoxed(): Type
+    public fun asBoxed(): Type
 }

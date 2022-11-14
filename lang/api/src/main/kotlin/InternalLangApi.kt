@@ -5,4 +5,4 @@ package com.yandex.yatagan.lang
  */
 @RequiresOptIn(message = "This API is intended to be used only in yatagan implementation and " +
         "is not designed for client (SPI) usage.")
-annotation class InternalLangApi
+public annotation class InternalLangApi

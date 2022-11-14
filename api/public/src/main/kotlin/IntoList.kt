@@ -65,7 +65,7 @@ package com.yandex.yatagan
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class IntoList(
+public annotation class IntoList(
     /**
      * If this is set to `true`, then multi-binding
      * treats return type as a collection, elements of which will all be contributed to the multi-bound list.

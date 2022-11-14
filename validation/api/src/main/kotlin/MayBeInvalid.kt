@@ -26,7 +26,7 @@ package com.yandex.yatagan.validation
  *
  * @see Validator
  */
-interface MayBeInvalid {
+public interface MayBeInvalid {
     /**
      * `accept`-like method with a [Validator] as visitor.
      * Implementations should report their validity state and build validation graph.
@@ -36,12 +36,12 @@ interface MayBeInvalid {
      *
      * @param validator tracing validator object.
      */
-    fun validate(validator: Validator)
+    public fun validate(validator: Validator)
 
     /**
      * @return string representation of the node within an optional context.
      * @param childContext an optional validation graph node, that this node reported as a [child][Validator.child].
      *  an instance *may be* used to provide more laconic string representation.
      */
-    fun toString(childContext: MayBeInvalid?): CharSequence
+    public fun toString(childContext: MayBeInvalid?): CharSequence
 }

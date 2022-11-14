@@ -3,9 +3,9 @@ package com.yandex.yatagan.lang
 /**
  * An interface that provides an API to create `lang`-level model objects.
  */
-interface LangModelFactory {
+public interface LangModelFactory {
 
-    enum class ParameterizedType {
+    public enum class ParameterizedType {
         /**
          * `java.util.List`
          */
@@ -37,7 +37,7 @@ interface LangModelFactory {
      *
      * @return a `java.util.Map` type, parameterized by the given [keyType] and [valueType].
      */
-    fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean = false): Type
+    public fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean = false): Type
 
     /**
      * Obtains a parameterized type.
@@ -49,7 +49,7 @@ interface LangModelFactory {
      * @param isCovariant `true` if the resulting type needs to be covariant
      * (`? extends T`/`out T`, where T - [parameter])
      */
-    fun getParameterizedType(
+    public fun getParameterizedType(
         type: ParameterizedType,
         parameter: Type,
         isCovariant: Boolean,
@@ -65,7 +65,7 @@ interface LangModelFactory {
      * @param simpleName a single simple class name.
      * @param simpleNames multiple names if the class is nested, empty if the class is top-level.
      */
-    fun getTypeDeclaration(
+    public fun getTypeDeclaration(
         packageName: String,
         simpleName: String,
         vararg simpleNames: String,
@@ -75,17 +75,17 @@ interface LangModelFactory {
      * An "error" type, which is usually applicable in places, where type information is unresolved due to a semantic
      * error in the underlying code.
      */
-    val errorType: Type
+    public val errorType: Type
 
     /**
      * `true` if the code runs in RT mode (using reflection). `false` if codegen mode.
      */
-    val isInRuntimeEnvironment: Boolean
+    public val isInRuntimeEnvironment: Boolean
 
     @OptIn(InternalLangApi::class)
-    companion object : LangModelFactory {
+    public companion object : LangModelFactory {
         @InternalLangApi
-        var delegate: LangModelFactory? = null
+        public var delegate: LangModelFactory? = null
 
         override fun getParameterizedType(
             type: ParameterizedType,

@@ -12,4 +12,4 @@ import javax.inject.Provider
  *
  * @param T wrapped type. Can't be another *framework type*.
  */
-fun interface Lazy<out T> : Provider<@UnsafeVariance T>
+public fun interface Lazy<out T> : Provider<@UnsafeVariance T>

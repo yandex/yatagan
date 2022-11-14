@@ -8,20 +8,20 @@ import com.yandex.yatagan.lang.Annotation
 /**
  * A base class for all concrete binding implementations, apart from [AliasBinding].
  */
-interface Binding : BaseBinding {
+public interface Binding : BaseBinding {
     /**
      * A condition scope of this binding. Part of the *Conditions API*.
      *
      * If this is [never-scoped][com.yandex.yatagan.core.model.ConditionExpression.NeverScoped],
      * then [dependencies] **must** yield an empty sequence.
      */
-    val conditionScope: ConditionScope
+    public val conditionScope: ConditionScope
 
     /**
      * All scopes, that this binding is compatible with (can be cached within).
      * If empty, then the binding is *unscoped* (not cached) and is compatible with *any* scope.
      */
-    val scopes: Set<Annotation>
+    public val scopes: Set<Annotation>
 
     /**
      * The binding's dependencies on other bindings.
@@ -33,7 +33,7 @@ interface Binding : BaseBinding {
      *  dependencies will result in incorrect [BindingUsage][com.yandex.yatagan.core.graph.BindingGraph.BindingUsage]
      *  computation, internal errors, etc.
      */
-    val dependencies: Sequence<NodeDependency>
+    public val dependencies: Sequence<NodeDependency>
 
     /**
      * A set of selected [condition model's roots][com.yandex.yatagan.core.model.ConditionModel.root] from
@@ -42,21 +42,21 @@ interface Binding : BaseBinding {
      * NOTE: the set may be empty if the binding doesn't _own_ the condition models, e.g. an alternatives binding whose
      * condition scope is inferred from its dependencies and require resolution to be computed.
      */
-    val nonStaticConditionProviders: Set<NodeModel>
+    public val nonStaticConditionProviders: Set<NodeModel>
 
-    fun <R> accept(visitor: Visitor<R>): R
+    public fun <R> accept(visitor: Visitor<R>): R
 
-    interface Visitor<R> {
-        fun visitProvision(binding: ProvisionBinding): R
-        fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R
-        fun visitInstance(binding: InstanceBinding): R
-        fun visitAlternatives(binding: AlternativesBinding): R
-        fun visitSubComponentFactory(binding: SubComponentFactoryBinding): R
-        fun visitComponentDependency(binding: ComponentDependencyBinding): R
-        fun visitComponentInstance(binding: ComponentInstanceBinding): R
-        fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R
-        fun visitMulti(binding: MultiBinding): R
-        fun visitMap(binding: MapBinding): R
-        fun visitEmpty(binding: EmptyBinding): R
+    public interface Visitor<R> {
+        public fun visitProvision(binding: ProvisionBinding): R
+        public fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R
+        public fun visitInstance(binding: InstanceBinding): R
+        public fun visitAlternatives(binding: AlternativesBinding): R
+        public fun visitSubComponentFactory(binding: SubComponentFactoryBinding): R
+        public fun visitComponentDependency(binding: ComponentDependencyBinding): R
+        public fun visitComponentInstance(binding: ComponentInstanceBinding): R
+        public fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R
+        public fun visitMulti(binding: MultiBinding): R
+        public fun visitMap(binding: MapBinding): R
+        public fun visitEmpty(binding: EmptyBinding): R
     }
 }

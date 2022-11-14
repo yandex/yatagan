@@ -10,116 +10,116 @@ import com.yandex.yatagan.validation.MayBeInvalid
  * Declared in a [ModuleModel], and thus explicit, binding model.
  * Backed by a `lang`-level construct.
  */
-interface ModuleHostedBindingModel : MayBeInvalid {
+public interface ModuleHostedBindingModel : MayBeInvalid {
     /**
      * Module the binding originates from.
      */
-    val originModule: ModuleModel
+    public val originModule: ModuleModel
 
     /**
      * Parsed return value of the binding. See [BindingTargetModel] for the details.
      */
-    val target: BindingTargetModel
+    public val target: BindingTargetModel
 
     /**
      * Declared scope annotations.
      */
-    val scopes: Set<Annotation>
+    public val scopes: Set<Annotation>
 
     /**
      * Underlying method model.
      *
      * Use only for extracting the info not available via the API of the model.
      */
-    val method: Method
+    public val method: Method
 
     /**
      * Binding target variants.
      */
-    sealed class BindingTargetModel {
+    public sealed class BindingTargetModel {
         /**
          * A node corresponding to the return type of the binding model.
          * Doesn't always directly correspond to the effective binding target - multi-bindings can be in effect.
          */
-        abstract val node: NodeModel
+        public abstract val node: NodeModel
 
-        override fun toString() = node.toString(childContext = null).toString()
+        override fun toString(): String = node.toString(childContext = null).toString()
 
         /**
          * Binding for the plain [node].
          */
-        class Plain(
+        public class Plain(
             override val node: NodeModel,
         ) : BindingTargetModel()
 
         /**
          * Single element list contribution to the List of [node]s.
          */
-        class DirectMultiContribution(
+        public class DirectMultiContribution(
             override val node: NodeModel,
-            val kind: CollectionTargetKind,
+            public val kind: CollectionTargetKind,
         ) : BindingTargetModel()
 
         /**
          * Collection contribution to the List of [flattened], which is an unwrapped [node].
          */
-        class FlattenMultiContribution(
+        public class FlattenMultiContribution(
             override val node: NodeModel,
 
             /**
              * An unwrapped [node] (its type argument, given [node] is a collection).
              */
-            val flattened: NodeModel,
+            public val flattened: NodeModel,
 
             /**
              * Collection kind.
              */
-            val kind: CollectionTargetKind,
+            public val kind: CollectionTargetKind,
         ) : BindingTargetModel()
 
         /**
          * Contribution of a single [node] as a value to a map with the [keyType] under [keyValue].
          */
-        class MappingContribution(
+        public class MappingContribution(
             override val node: NodeModel,
 
             /**
              * Mapping key type. `null` when not-found/unresolved.
              */
-            val keyType: Type?,
+            public val keyType: Type?,
 
             /**
              * Mapping key value. `null` when not-found/unresolved.
              */
-            val keyValue: Annotation.Value?,
+            public val keyValue: Annotation.Value?,
 
             /**
              * Annotation class of the Map-key annotation. `null` when not-found/unresolved.
              */
-            val mapKeyClass: AnnotationDeclaration?,
+            public val mapKeyClass: AnnotationDeclaration?,
         ) : BindingTargetModel()
     }
 
-    interface Visitor<R> {
-        fun visitBinds(model: BindsBindingModel): R
-        fun visitProvides(model: ProvidesBindingModel): R
+    public interface Visitor<R> {
+        public fun visitBinds(model: BindsBindingModel): R
+        public fun visitProvides(model: ProvidesBindingModel): R
     }
 
-    fun <R> accept(visitor: Visitor<R>): R
+    public fun <R> accept(visitor: Visitor<R>): R
 }
 
 /**
  * [com.yandex.yatagan.Binds] binding model.
  */
-interface BindsBindingModel : ModuleHostedBindingModel {
-    val sources: Sequence<NodeModel>
+public interface BindsBindingModel : ModuleHostedBindingModel {
+    public val sources: Sequence<NodeModel>
 }
 
 /**
  * [com.yandex.yatagan.Provides] binding model.
  */
-interface ProvidesBindingModel : ModuleHostedBindingModel, ConditionalHoldingModel {
-    val inputs: List<NodeDependency>
-    val requiresModuleInstance: Boolean
+public interface ProvidesBindingModel : ModuleHostedBindingModel, ConditionalHoldingModel {
+    public val inputs: List<NodeDependency>
+    public val requiresModuleInstance: Boolean
 }
 

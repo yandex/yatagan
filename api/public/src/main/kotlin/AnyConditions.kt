@@ -9,6 +9,6 @@ package com.yandex.yatagan
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
-annotation class AnyConditions(
+public annotation class AnyConditions(
     vararg val value: AnyCondition,
 )

@@ -1,6 +1,6 @@
 package com.yandex.yatagan.core.model
 
-enum class CollectionTargetKind {
+public enum class CollectionTargetKind {
     /**
      * For a list multi-binding
      */

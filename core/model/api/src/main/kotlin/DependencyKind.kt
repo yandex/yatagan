@@ -6,7 +6,7 @@ package com.yandex.yatagan.core.model
  *
  * @see NodeDependency
  */
-enum class DependencyKind {
+public enum class DependencyKind {
     /**
      * Type is requested directly (eagerly).
      */

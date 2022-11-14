@@ -108,7 +108,7 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class Component(
+public annotation class Component(
     /**
      * If `true` (default), then the component is a root of a hierarchy and may be created directly.
      * Otherwise, the component serves as a subcomponent and must be installed into its parent via
@@ -208,5 +208,5 @@ annotation class Component(
     @MustBeDocumented
     @Retention(AnnotationRetention.RUNTIME)
     @Target(AnnotationTarget.CLASS)
-    annotation class Builder
+    public annotation class Builder
 }

@@ -6,8 +6,8 @@ import com.yandex.yatagan.lang.Constructor
 /**
  * A model for type that has [javax.inject.Inject]-annotated constructor.
  */
-interface InjectConstructorModel : ConditionalHoldingModel, HasNodeModel {
-    val constructor: Constructor
-    val scopes: Set<Annotation>
-    val inputs: List<NodeDependency>
+public interface InjectConstructorModel : ConditionalHoldingModel, HasNodeModel {
+    public val constructor: Constructor
+    public val scopes: Set<Annotation>
+    public val inputs: List<NodeDependency>
 }

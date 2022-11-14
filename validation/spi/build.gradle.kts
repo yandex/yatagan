@@ -12,3 +12,7 @@ dependencies {
     // Validation API
     api(project(":validation:api"))
 }
+
+kotlin {
+    explicitApi()
+}

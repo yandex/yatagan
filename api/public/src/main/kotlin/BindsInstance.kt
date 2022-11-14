@@ -10,5 +10,5 @@ package com.yandex.yatagan
     AnnotationTarget.FUNCTION,
     AnnotationTarget.VALUE_PARAMETER,
 )
-annotation class BindsInstance(
+public annotation class BindsInstance(
 )

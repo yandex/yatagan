@@ -3,7 +3,7 @@ package com.yandex.yatagan.lang
 /**
  * Denotes type declaration kind.
  */
-enum class TypeDeclarationKind {
+public enum class TypeDeclarationKind {
     /**
      * No declaration is logically present for the type.
      * Arrays, primitive types, void, etc.

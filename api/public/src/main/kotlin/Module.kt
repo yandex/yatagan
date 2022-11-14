@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class Module(
+public annotation class Module(
     /**
      * Additional [Modules][Module] to be transitively included into a [Component]/another [Module].
      * Allows duplicates, recursively.

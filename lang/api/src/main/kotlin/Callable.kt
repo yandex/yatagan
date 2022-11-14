@@ -3,17 +3,17 @@ package com.yandex.yatagan.lang
 /**
  * A sealed marker interface for an entity that can be called.
  */
-interface Callable : HasPlatformModel {
+public interface Callable : HasPlatformModel {
 
     /**
      * Parameters required to call this callable.
      */
-    val parameters: Sequence<Parameter>
+    public val parameters: Sequence<Parameter>
 
-    fun <T> accept(visitor: Visitor<T>): T
+    public fun <T> accept(visitor: Visitor<T>): T
 
-    interface Visitor<T> {
-        fun visitMethod(method: Method): T
-        fun visitConstructor(constructor: Constructor): T
+    public interface Visitor<T> {
+        public fun visitMethod(method: Method): T
+        public fun visitConstructor(constructor: Constructor): T
     }
 }

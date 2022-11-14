@@ -45,7 +45,7 @@ package com.yandex.yatagan
     AnnotationTarget.PROPERTY_GETTER,
 )
 @OptIn(ConditionsApi::class)
-annotation class Provides(
+public annotation class Provides(
     /**
      * One or more [Conditional] specifiers for this provision.
      */

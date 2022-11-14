@@ -5,36 +5,36 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * Represents [com.yandex.yatagan.Module].
  */
-interface ModuleModel : ClassBackedModel, MayBeInvalid {
+public interface ModuleModel : ClassBackedModel, MayBeInvalid {
     /**
      * Included modules.
      */
-    val includes: Collection<ModuleModel>
+    public val includes: Collection<ModuleModel>
 
     /**
      * Subcomponents installed by this module.
      */
-    val subcomponents: Collection<ComponentModel>
+    public val subcomponents: Collection<ComponentModel>
 
     /**
      * A sequence of all multibinding declarations from the module.
      */
-    val multiBindingDeclarations: Sequence<MultiBindingDeclarationModel>
+    public val multiBindingDeclarations: Sequence<MultiBindingDeclarationModel>
 
     /**
      * Whether module instance is required to use some (or all) of its bindings.
      * NOTE: Kotlin's objects and companions does not count as they are handled on lang level.
      */
-    val requiresInstance: Boolean
+    public val requiresInstance: Boolean
 
     /**
      * Whether this module can be trivially constructed inside a component.
      * Makes sense when [requiresInstance] is `true`.
      */
-    val isTriviallyConstructable: Boolean
+    public val isTriviallyConstructable: Boolean
 
     /**
      * [Binding models][ModuleHostedBindingModel] that are declared in this module.
      */
-    val bindings: Sequence<ModuleHostedBindingModel>
+    public val bindings: Sequence<ModuleHostedBindingModel>
 }
