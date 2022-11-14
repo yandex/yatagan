@@ -1,6 +1,5 @@
-package com.yandex.yatagan.dynamic
+package com.yandex.yatagan.rt.engine
 
-import com.yandex.yatagan.DynamicValidationDelegate
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.GraphMemberInjector
@@ -40,9 +39,12 @@ import com.yandex.yatagan.lang.isKotlinObject
 import com.yandex.yatagan.lang.rt.kotlinObjectInstanceOrNull
 import com.yandex.yatagan.lang.rt.rawValue
 import com.yandex.yatagan.lang.rt.rt
+import com.yandex.yatagan.rt.support.DynamicValidationDelegate
+import com.yandex.yatagan.rt.support.Logger
 import java.lang.reflect.Proxy
 
 internal class RuntimeComponent(
+    private val logger: Logger?,
     override val parent: RuntimeComponent?,
     private val graph: BindingGraph,
     private val givenInstances: Map<NodeModel, Any>,
@@ -235,6 +237,7 @@ internal class RuntimeComponent(
             creatorClass.classLoader,
             arrayOf(creatorClass),
             RuntimeFactory(
+                logger = logger,
                 graph = binding.targetGraph,
                 parent = this@RuntimeComponent,
                 validationPromise = validationPromise,  // The same validation session for children.

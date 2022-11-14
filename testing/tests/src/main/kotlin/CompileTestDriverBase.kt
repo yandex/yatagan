@@ -4,7 +4,6 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.yandex.yatagan.generated.CompiledApiClasspath
 import com.yandex.yatagan.generated.DynamicApiClasspath
-import com.yandex.yatagan.generated.DynamicOptimizedApiClasspath
 import com.yandex.yatagan.processor.common.LoggerDecorator
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assert
@@ -141,7 +140,6 @@ abstract class CompileTestDriverBase protected constructor(
                 when (apiType) {
                     ApiType.Compiled -> CompiledApiClasspath
                     ApiType.Dynamic -> DynamicApiClasspath
-                    ApiType.DynamicOptimized -> DynamicOptimizedApiClasspath
                 }.split(':').forEach { add(File(it)) }
                 precompiledModuleOutputDir?.let { add(it) }
             }
@@ -162,7 +160,6 @@ abstract class CompileTestDriverBase protected constructor(
     enum class ApiType {
         Compiled,
         Dynamic,
-        DynamicOptimized,
     }
 
     /**

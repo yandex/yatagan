@@ -1,11 +1,11 @@
 // Copyright 2022 Yandex LLC. All rights reserved.
 
-package com.yandex.yatagan.dynamic
+package com.yandex.yatagan.rt.engine
 
-import com.yandex.yatagan.DynamicValidationDelegate
 import com.yandex.yatagan.lang.rt.MethodSignatureEquivalenceWrapper
 import com.yandex.yatagan.lang.rt.boxed
 import com.yandex.yatagan.lang.rt.signatureEquivalence
+import com.yandex.yatagan.rt.support.DynamicValidationDelegate
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 

@@ -2,6 +2,7 @@ package com.yandex.yatagan
 
 import com.yandex.yatagan.common.loadImplementationByBuilderClass
 import com.yandex.yatagan.common.loadImplementationByComponentClass
+import com.yandex.yatagan.internal.ThreadAssertions
 
 /**
  * Yatagan entry-point object. Create instances of Yatagan components by loading generated implementations for
@@ -10,6 +11,14 @@ import com.yandex.yatagan.common.loadImplementationByComponentClass
  * Use either [builder] or [create].
  */
 object Yatagan {
+
+    /**
+     * Sets [ThreadAsserter] object to be used in Single Thread component implementations.
+     */
+    @JvmStatic
+    fun setThreadAsserter(threadAsserter: ThreadAsserter?) {
+        ThreadAssertions.setAsserter(threadAsserter)
+    }
 
     /**
      * Use this to create a component builder instance for root components that declare it.
