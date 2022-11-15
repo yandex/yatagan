@@ -9,28 +9,28 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * Represents [com.yandex.yatagan.Component.Builder].
  */
-interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
+public interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
 
     /**
      * TODO: doc.
      */
-    val createdComponent: ComponentModel
+    public val createdComponent: ComponentModel
 
     /**
      * Factory method's inputs.
      */
-    val factoryInputs: Collection<FactoryInputModel>
+    public val factoryInputs: Collection<FactoryInputModel>
 
     /**
      * The component creating method to implement.
      * `null` if no appropriate method is found.
      */
-    val factoryMethod: Method?
+    public val factoryMethod: Method?
 
     /**
      * TODO: doc.
      */
-    val builderInputs: Collection<BuilderInputModel>
+    public val builderInputs: Collection<BuilderInputModel>
 
     /**
      * Encodes actual input data model, that [InputModel] introduces to the graph.
@@ -38,20 +38,20 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
      *
      * @see InputModel
      */
-    sealed interface InputPayload : ClassBackedModel, MayBeInvalid {
+    public sealed interface InputPayload : ClassBackedModel, MayBeInvalid {
         /**
          * Represent an externally given instance via [com.yandex.yatagan.BindsInstance].
          */
-        interface Instance : InputPayload {
-            val node: NodeModel
+        public interface Instance : InputPayload {
+            public val node: NodeModel
         }
 
         /**
          * A [Module][ModuleModel] for which [ModuleModel.requiresInstance] holds `true` and it should be externally
          * supplied as a factory input.
          */
-        interface Module : InputPayload {
-            val module: ModuleModel
+        public interface Module : InputPayload {
+            public val module: ModuleModel
         }
 
         /**
@@ -59,8 +59,8 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
          *
          * @see ComponentDependencyModel
          */
-        interface Dependency : InputPayload {
-            val dependency: ComponentDependencyModel
+        public interface Dependency : InputPayload {
+            public val dependency: ComponentDependencyModel
         }
     }
 
@@ -69,32 +69,32 @@ interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
      *
      * @see InputPayload
      */
-    interface InputModel : MayBeInvalid {
+    public interface InputModel : MayBeInvalid {
         /**
          * @see InputPayload
          */
-        val payload: InputPayload
+        public val payload: InputPayload
 
         /**
          * An input name. May not be unique across [all inputs][allInputs] for the factory.
          */
-        val name: String
+        public val name: String
     }
 
     /**
      * Represents an input parameter of the factory method.
      */
-    interface FactoryInputModel : InputModel
+    public interface FactoryInputModel : InputModel
 
     /**
      * Represents a setter method for the input in builder-like fashion.
      */
-    interface BuilderInputModel : InputModel {
+    public interface BuilderInputModel : InputModel {
         /**
          * Actual abstract setter.
          * Has *single parameter*; return type may be of the builder type itself or
          * [void][com.yandex.yatagan.lang.Type.isVoid].
          */
-        val builderSetter: Method
+        public val builderSetter: Method
     }
 }

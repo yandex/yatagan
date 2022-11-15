@@ -9,8 +9,8 @@ import com.yandex.yatagan.validation.MayBeInvalid
  *
  * @see com.yandex.yatagan.Component.dependencies
  */
-interface ComponentDependencyModel : MayBeInvalid, ClassBackedModel {
-    val exposedDependencies: Map<NodeModel, Method>
+public interface ComponentDependencyModel : MayBeInvalid, ClassBackedModel {
+    public val exposedDependencies: Map<NodeModel, Method>
 
-    fun asNode(): NodeModel
+    public fun asNode(): NodeModel
 }

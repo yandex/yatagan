@@ -45,5 +45,5 @@ package com.yandex.yatagan
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class Multibinds(
+public annotation class Multibinds(
 )

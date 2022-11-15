@@ -15,23 +15,23 @@ import com.yandex.yatagan.validation.MayBeInvalid
  * [NodeModel] can be used as [NodeDependency] directly to avoid additional allocations,
  * if the requested [DependencyKind] is [Direct][DependencyKind.Direct].
  */
-interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, NodeDependency {
+public interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, NodeDependency {
     /**
      * Optional qualifier.
      * An opaque object representing additional qualifier information that can help to disambiguate nodes with the
      * same type.
      */
-    val qualifier: Annotation?
+    public val qualifier: Annotation?
 
     /**
      * Provides all nodes that must be bound to a list-binding of this node.
      */
-    fun multiBoundListNodes(): Array<NodeModel>
+    public fun multiBoundListNodes(): Array<NodeModel>
 
     /**
      * Provides all nodes that must be bound to a set-binding of this node.
      */
-    fun multiBoundSetNodes(): Array<NodeModel>
+    public fun multiBoundSetNodes(): Array<NodeModel>
 
     /**
      * Provides all nodes that must be bound to a mapping of [key] to this node.
@@ -39,13 +39,13 @@ interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, Nod
      * @param key a type to use as Map's key type.
      * @param asProviders whether wrap this type into `javax.inject.Provider` as Map's value.
      */
-    fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel>
+    public fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel>
 
     /**
      * What specific core-level model the node represents. `null` if none.
      * Use [HasNodeModel.accept] to determine which specific model it is.
      */
-    fun getSpecificModel(): HasNodeModel?
+    public fun getSpecificModel(): HasNodeModel?
 
     /**
      * Returns a node that is equal to this one without qualifier.
@@ -53,13 +53,13 @@ interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, Nod
      * @return the same node only with [qualifier] = `null`.
      * If `this` node already has no qualifier, `this` is returned.
      */
-    fun dropQualifier(): NodeModel
+    public fun dropQualifier(): NodeModel
 
     /**
      * `true` if such node can not be satisfied by definition for whatever reason, e.g. framework type.
      * `false` for any normal node.
      */
-    val hintIsFrameworkType: Boolean
+    public val hintIsFrameworkType: Boolean
 
     /**
      * [NodeDependency] compatibility function.

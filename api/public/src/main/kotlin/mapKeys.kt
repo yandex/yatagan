@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class ClassKey(val value: KClass<*>)
+public annotation class ClassKey(val value: KClass<*>)
 
 /**
  * Builtin [IntoMap.Key]-annotation for `int` keys.
@@ -18,7 +18,7 @@ annotation class ClassKey(val value: KClass<*>)
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class IntKey(val value: Int)
+public annotation class IntKey(val value: Int)
 
 /**
  * Builtin [IntoMap.Key]-annotation for `String` keys.
@@ -27,4 +27,4 @@ annotation class IntKey(val value: Int)
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class StringKey(val value: String)
+public annotation class StringKey(val value: String)

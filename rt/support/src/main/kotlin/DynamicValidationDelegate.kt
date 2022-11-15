@@ -1,4 +1,4 @@
-package com.yandex.yatagan
+package com.yandex.yatagan.rt.support
 
 import com.yandex.yatagan.validation.RichString
 
@@ -9,6 +9,9 @@ import com.yandex.yatagan.validation.RichString
  * Such API is required, as straightforward approach with full validation performed at the moment of graph
  * construction may be overly costly for large graphs. Such approach penalizes the __good path__ if no errors are
  * present in a graph.
+ *
+ * @see SimpleDynamicValidationDelegate
+ * @see AsyncDynamicValidationDelegate
  */
 interface DynamicValidationDelegate {
     /**
@@ -46,13 +49,6 @@ interface DynamicValidationDelegate {
          * Invoked by the framework to report a warning.
          */
         fun reportWarning(message: RichString)
-
-        /**
-         * Invoked by the framework to report a mandatory warning.
-         */
-        fun reportMandatoryWarning(message: RichString) {
-            reportWarning(message)
-        }
     }
 
     /**

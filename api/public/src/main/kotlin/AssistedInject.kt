@@ -6,4 +6,4 @@ package com.yandex.yatagan
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CONSTRUCTOR)
-annotation class AssistedInject
+public annotation class AssistedInject

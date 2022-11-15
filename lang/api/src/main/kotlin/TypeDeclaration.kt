@@ -8,33 +8,33 @@ package com.yandex.yatagan.lang
  * for a public API for `asMemberOf()` and the likes. This should be taken into account while comparing two type
  * declarations for equality - they may compare unequal for they have different underlying types.
  */
-interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<TypeDeclaration> {
+public interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<TypeDeclaration> {
     /**
      * Declaration kind.
      */
-    val kind: TypeDeclarationKind
+    public val kind: TypeDeclarationKind
 
     /**
      * Whether the declaration is abstract (abstract class or interface).
      */
-    val isAbstract: Boolean
+    public val isAbstract: Boolean
 
     /**
      * Qualified/Canonical name of the represented class from the Java point of view.
      *
      * Example: `"com.example.TopLevel.Nested"`, `"int"`, `"void"`, ...
      */
-    val qualifiedName: String
+    public val qualifiedName: String
 
     /**
      * If this declaration is nested, returns enclosing declaration. `null` otherwise.
      */
-    val enclosingType: TypeDeclaration?
+    public val enclosingType: TypeDeclaration?
 
     /**
      * Interfaces directly implemented/extended by the declaration.
      */
-    val interfaces: Sequence<Type>
+    public val interfaces: Sequence<Type>
 
     /**
      * Super-type, if present.
@@ -42,12 +42,12 @@ interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<
      * NOTE: Never returns `java.lang.Object`/`kotlin.Any`, `null` is returned instead.
      * This is done to counter uniformity issues.
      */
-    val superType: Type?
+    public val superType: Type?
 
     /**
      * All declared non-private constructors.
      */
-    val constructors: Sequence<Constructor>
+    public val constructors: Sequence<Constructor>
 
     /**
      * All non-private methods (including static and inherited ones).
@@ -57,35 +57,35 @@ interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<
      *
      * Never includes methods defined in `java.lang.Object`/`kotlin.Any`, as they are of no interest to Yatagan.
      */
-    val methods: Sequence<Method>
+    public val methods: Sequence<Method>
 
     /**
      * All non-private declared fields (including static and inherited).
      */
-    val fields: Sequence<Field>
+    public val fields: Sequence<Field>
 
     /**
      * Nested non-private classes that are declared inside this declaration.
      */
-    val nestedClasses: Sequence<TypeDeclaration>
+    public val nestedClasses: Sequence<TypeDeclaration>
 
     /**
      * Kotlin's default companion object declaration, if one exists for the type.
      * If a companion object has non-default name (`"Companion"`), it won't be found here.
      */
-    val defaultCompanionObjectDeclaration: TypeDeclaration?
+    public val defaultCompanionObjectDeclaration: TypeDeclaration?
 
     /**
      * Returns an underlying [Type].
      */
-    fun asType(): Type
+    public fun asType(): Type
 
     /**
      * Obtains framework annotation of the given kind.
      *
      * @return the annotation model or `null` if no such annotation is present.
      */
-    fun <T : BuiltinAnnotation.OnClass> getAnnotation(
+    public fun <T : BuiltinAnnotation.OnClass> getAnnotation(
         which: BuiltinAnnotation.Target.OnClass<T>
     ): T?
 
@@ -94,7 +94,7 @@ interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<
      *
      * @return the list of repeatable annotations or an empty list if no such annotations are present.
      */
-    fun <T : BuiltinAnnotation.OnClassRepeatable> getAnnotations(
+    public fun <T : BuiltinAnnotation.OnClassRepeatable> getAnnotations(
         which: BuiltinAnnotation.Target.OnClassRepeatable<T>
     ): List<T>
 }

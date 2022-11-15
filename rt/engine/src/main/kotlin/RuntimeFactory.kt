@@ -1,6 +1,5 @@
-package com.yandex.yatagan.dynamic
+package com.yandex.yatagan.rt.engine
 
-import com.yandex.yatagan.DynamicValidationDelegate
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
@@ -8,6 +7,8 @@ import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.allInputs
 import com.yandex.yatagan.lang.rt.rt
+import com.yandex.yatagan.rt.support.DynamicValidationDelegate
+import com.yandex.yatagan.rt.support.Logger
 import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis
 
@@ -15,6 +16,7 @@ internal class RuntimeFactory(
     private val graph: BindingGraph,
     private val parent: RuntimeComponent?,
     validationPromise: DynamicValidationDelegate.Promise?,
+    private val logger: Logger?,
 ) : InvocationHandlerBase(validationPromise), InvocationHandlerBase.MethodHandler {
     private val creator = checkNotNull(graph.creator) {
         "Component $graph has no explicit creator (builder/factory)"
@@ -69,6 +71,7 @@ internal class RuntimeFactory(
             }
             val componentClass = creator.createdComponent.type.declaration.rt
             val runtimeComponent = RuntimeComponent(
+                logger = logger,
                 graph = graph,
                 parent = parent,
                 givenInstances = givenInstances,
@@ -84,7 +87,7 @@ internal class RuntimeFactory(
                 runtimeComponent.thisProxy = it
             }
         }
-        dlLog("Dynamic component creation via ${creator.toString(childContext = null)} took $time ms")
+        logger?.log("Dynamic component creation via ${creator.toString(childContext = null)} took $time ms")
         return componentProxy
     }
 

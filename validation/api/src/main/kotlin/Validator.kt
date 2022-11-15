@@ -3,19 +3,19 @@ package com.yandex.yatagan.validation
 /**
  * A visitor-like object that validates [MayBeInvalid].
  */
-interface Validator {
+public interface Validator {
     /**
      * Reports given message for a [MayBeInvalid] node that is currently being visited.
      * Paths on which the message occurs will be grouped.
      */
-    fun report(message: ValidationMessage)
+    public fun report(message: ValidationMessage)
 
     /**
      * Adds a child node to a validation graph.
      *
      * @see inline
      */
-    fun child(node: MayBeInvalid)
+    public fun child(node: MayBeInvalid)
 
     /**
      * Similar to [child], yet
@@ -25,5 +25,5 @@ interface Validator {
      * Useful on objects that doesn't resemble any public entity but rather an implementation detail of a complex
      * entity.
      */
-    fun inline(node: MayBeInvalid)
+    public fun inline(node: MayBeInvalid)
 }

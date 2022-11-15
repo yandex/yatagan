@@ -1,6 +1,6 @@
 package com.yandex.yatagan.validation
 
-interface RichString : CharSequence {
+public interface RichString : CharSequence {
     /**
      * @return plain string, discarding all "rich" info.
      */
@@ -9,5 +9,5 @@ interface RichString : CharSequence {
     /**
      * @return rich string representation with ANSI control sequences.
      */
-    fun toAnsiEscapedString(): String
+    public fun toAnsiEscapedString(): String
 }

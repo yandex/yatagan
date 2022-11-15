@@ -7,3 +7,7 @@ dependencies {
     api(project(":core:model:api"))
     implementation(kotlin("stdlib"))
 }
+
+kotlin {
+    explicitApi()
+}

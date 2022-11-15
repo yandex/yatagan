@@ -1,6 +1,6 @@
-package com.yandex.yatagan.dynamic
+package com.yandex.yatagan.rt.engine
 
-import com.yandex.yatagan.DynamicValidationDelegate
+import com.yandex.yatagan.rt.support.DynamicValidationDelegate
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
@@ -17,11 +17,6 @@ internal inline fun <R> DynamicValidationDelegate.Promise?.awaitOnError(block: (
         await()
         throw PossiblyInvalidGraphException(e)
     }
-}
-
-internal fun dlLog(message: String) {
-    // TODO: provide a dedicated reporting API
-    println("[YataganRt] $message")
 }
 
 internal class PossiblyInvalidGraphException(

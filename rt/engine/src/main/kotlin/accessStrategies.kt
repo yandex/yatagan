@@ -1,12 +1,11 @@
-package com.yandex.yatagan.dynamic
+package com.yandex.yatagan.rt.engine
 
 import com.yandex.yatagan.Lazy
 import com.yandex.yatagan.Optional
-import com.yandex.yatagan.ThreadAssertions
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.internal.ThreadAssertions
 import javax.inject.Provider
-
 
 internal abstract class AccessStrategy : Provider<Any> {
     fun getProvider(): Provider<*> = this

@@ -1,6 +1,6 @@
 package com.yandex.yatagan.validation
 
-data class LocatedMessage(
+public data class LocatedMessage(
     /**
      * Message payload.
      */

@@ -7,7 +7,6 @@ internal fun compileTestDrivers(
     includeKsp: Boolean = true,
     includeJap: Boolean = true,
     includeRt: Boolean = true,
-    includeOptimizedRt: Boolean = false,
 ): Collection<Provider<CompileTestDriverBase>> {
     class NamedProvider(
         private val initializer: () -> CompileTestDriverBase,
@@ -26,9 +25,6 @@ internal fun compileTestDrivers(
         }
         if (includeRt) {
             add(NamedProvider(::DynamicCompileTestDriver, name = "RT"))
-        }
-        if (includeOptimizedRt) {
-            add(NamedProvider({ DynamicCompileTestDriver(apiType = ApiType.DynamicOptimized) }, name = "RT-optimized"))
         }
     }
     return if (CompileTestDriverBase.isInUpdateGoldenMode) {

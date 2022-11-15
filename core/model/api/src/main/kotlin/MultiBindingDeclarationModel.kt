@@ -7,43 +7,43 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * A [com.yandex.yatagan.Multibinds] model.
  */
-interface MultiBindingDeclarationModel : MayBeInvalid {
+public interface MultiBindingDeclarationModel : MayBeInvalid {
 
-    fun <R> accept(visitor: Visitor<R>): R
+    public fun <R> accept(visitor: Visitor<R>): R
 
-    interface Visitor<R> {
-        fun visitCollectionDeclaration(model: CollectionDeclarationModel): R
-        fun visitMapDeclaration(model: MapDeclarationModel): R
-        fun visitInvalid(model: InvalidDeclarationModel): R
+    public interface Visitor<R> {
+        public fun visitCollectionDeclaration(model: CollectionDeclarationModel): R
+        public fun visitMapDeclaration(model: MapDeclarationModel): R
+        public fun visitInvalid(model: InvalidDeclarationModel): R
     }
 
     /**
      * Declares empty list binding
      */
-    interface CollectionDeclarationModel : MultiBindingDeclarationModel {
+    public interface CollectionDeclarationModel : MultiBindingDeclarationModel {
         /**
          * An element's type for a multi-bound list.
          */
-        val elementType: NodeModel?
+        public val elementType: NodeModel?
 
         /**
          * Target collection kind for a multi-binding.
          */
-        val kind: CollectionTargetKind
+        public val kind: CollectionTargetKind
     }
 
     /**
      * Declares empty map binding
      */
-    interface MapDeclarationModel : MultiBindingDeclarationModel {
-        val keyType: Type?
-        val valueType: NodeModel?
+    public interface MapDeclarationModel : MultiBindingDeclarationModel {
+        public val keyType: Type?
+        public val valueType: NodeModel?
     }
 
     /**
      * Denotes invalid [com.yandex.yatagan.Multibinds] with unrecognized return value.
      */
-    interface InvalidDeclarationModel : MultiBindingDeclarationModel {
-        val invalidMethod: Method
+    public interface InvalidDeclarationModel : MultiBindingDeclarationModel {
+        public val invalidMethod: Method
     }
 }

@@ -13,7 +13,7 @@ class CoreBindingsKotlinTest(
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
-        fun parameters() = compileTestDrivers(includeOptimizedRt = true)
+        fun parameters() = compileTestDrivers()
     }
 
     @Test

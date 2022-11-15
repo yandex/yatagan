@@ -63,7 +63,7 @@ import kotlin.reflect.KClass
 @JvmRepeatable(Conditionals::class)
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class Conditional(
+public annotation class Conditional(
     /**
      * A list of **feature declarations** - annotation types, annotated with
      * [Condition]-family annotations to form an expression.

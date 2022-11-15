@@ -27,3 +27,7 @@ dependencies {
     testImplementation("junit:junit:$junitVersion")
     testImplementation("org.assertj:assertj-core:3.23.1")
 }
+
+kotlin {
+    explicitApi()
+}

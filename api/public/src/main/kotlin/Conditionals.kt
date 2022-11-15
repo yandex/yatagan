@@ -7,6 +7,6 @@ package com.yandex.yatagan
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class Conditionals(
+public annotation class Conditionals(
     vararg val value: Conditional,
 )

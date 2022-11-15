@@ -9,27 +9,27 @@ import com.yandex.yatagan.validation.MayBeInvalid
  * Represents a way to provide a [NodeModel].
  * Each [NodeModel] must have a single [BaseBinding] for a [BindingGraph] to be valid.
  */
-interface BaseBinding : MayBeInvalid, Comparable<BaseBinding> {
+public interface BaseBinding : MayBeInvalid, Comparable<BaseBinding> {
     /**
      * A node that this binding provides.
      */
-    val target: NodeModel
+    public val target: NodeModel
 
     /**
      * A graph which hosts the binding.
      */
-    val owner: BindingGraph
+    public val owner: BindingGraph
 
     /**
      * If binding came from a [ModuleModel] then this is it.
      * If it's intrinsic - `null` is returned.
      */
-    val originModule: ModuleModel?
+    public val originModule: ModuleModel?
 
-    fun <R> accept(visitor: Visitor<R>): R
+    public fun <R> accept(visitor: Visitor<R>): R
 
-    interface Visitor<R> {
-        fun visitAlias(alias: AliasBinding): R
-        fun visitBinding(binding: Binding): R
+    public interface Visitor<R> {
+        public fun visitAlias(alias: AliasBinding): R
+        public fun visitBinding(binding: Binding): R
     }
 }

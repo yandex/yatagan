@@ -4,11 +4,11 @@ package com.yandex.yatagan.validation
  * Validation message, issued by [MayBeInvalid].
  * Should have reasonable [equals]/[hashCode] implementation for grouping.
  */
-interface ValidationMessage {
+public interface ValidationMessage {
     /**
      * Validation message Kind.
      */
-    enum class Kind {
+    public enum class Kind {
         /**
          * Fatal message, if any message of such kind is issued, a processing will be marked as failed.
          */
@@ -28,15 +28,15 @@ interface ValidationMessage {
     /**
      * Validation message Kind.
      */
-    val kind: Kind
+    public val kind: Kind
 
     /**
      * Message text. Maybe [RichString] or any other [CharSequence].
      */
-    val contents: CharSequence
+    public val contents: CharSequence
 
     /**
      * Notes, related to the message, helping/clarifying/adding more info.
      */
-    val notes: Collection<CharSequence>
+    public val notes: Collection<CharSequence>
 }

@@ -8,14 +8,14 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * Graph-level abstraction over [MembersInjectorModel][com.yandex.yatagan.core.MembersInjectorModel].
  */
-interface GraphMemberInjector : MayBeInvalid {
+public interface GraphMemberInjector : MayBeInvalid {
     /**
      * See [injector][com.yandex.yatagan.core.MembersInjectorModel.injector]
      */
-    val injector: Method
+    public val injector: Method
 
     /**
      * See [membersToInject][com.yandex.yatagan.core.MembersInjectorModel.membersToInject]
      */
-    val membersToInject: Map<out Member, NodeDependency>
+    public val membersToInject: Map<out Member, NodeDependency>
 }

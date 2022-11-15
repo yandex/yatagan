@@ -1,8 +1,8 @@
-package com.yandex.yatagan.dynamic
+package com.yandex.yatagan.rt.engine
 
-import com.yandex.yatagan.DynamicValidationDelegate
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.lang.rt.rt
+import com.yandex.yatagan.rt.support.DynamicValidationDelegate
 
 internal class RuntimeAssistedInjectFactory(
     private val model: AssistedInjectFactoryModel,

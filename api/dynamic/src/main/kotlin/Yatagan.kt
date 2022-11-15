@@ -1,44 +1,123 @@
 package com.yandex.yatagan
 
-import com.yandex.yatagan.base.loadServices
+import com.yandex.yatagan.base.singleInitWithFallback
 import com.yandex.yatagan.common.loadImplementationByBuilderClass
 import com.yandex.yatagan.common.loadImplementationByComponentClass
-import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.impl.BindingGraph
-import com.yandex.yatagan.core.model.impl.ComponentFactoryModel
-import com.yandex.yatagan.core.model.impl.ComponentModel
-import com.yandex.yatagan.dynamic.RuntimeComponent
-import com.yandex.yatagan.dynamic.RuntimeFactory
-import com.yandex.yatagan.dynamic.awaitOnError
-import com.yandex.yatagan.dynamic.dlLog
-import com.yandex.yatagan.lang.InternalLangApi
-import com.yandex.yatagan.lang.LangModelFactory
-import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
-import com.yandex.yatagan.lang.rt.TypeDeclaration
-import com.yandex.yatagan.validation.LocatedMessage
-import com.yandex.yatagan.validation.RichString
-import com.yandex.yatagan.validation.ValidationMessage
-import com.yandex.yatagan.validation.format.format
-import com.yandex.yatagan.validation.impl.GraphValidationExtension
-import com.yandex.yatagan.validation.impl.validate
-import com.yandex.yatagan.validation.spi.ValidationPluginProvider
-import java.lang.reflect.Proxy
-import kotlin.system.measureTimeMillis
+import com.yandex.yatagan.rt.engine.RuntimeEngine
+import com.yandex.yatagan.internal.ThreadAssertions
+import com.yandex.yatagan.rt.support.DynamicValidationDelegate
+import com.yandex.yatagan.rt.support.Logger
 
 /**
  * Yatagan entry-point object. Create instances of Yatagan components using reflection.
  *
  * Use either [builder] or [create].
  */
-object Yatagan {
-    @Volatile
-    private var validationDelegate: DynamicValidationDelegate? = null
-    @Volatile
-    private var maxIssueEncounterPaths: Int = 5
+public object Yatagan {
+    private val engineHolder = singleInitWithFallback { RuntimeEngine(Params()) }
+    private var engine: RuntimeEngine<Params> by engineHolder
 
-    init {
-        @OptIn(InternalLangApi::class)
-        LangModelFactory.delegate = RtModelFactoryImpl(javaClass.classLoader)
+    /**
+     * Configures global Yatagan reflection parameters.
+     */
+    public class Initializer {
+        private val params = Params()
+
+        /**
+         * Sets [DynamicValidationDelegate] to be used with all following Yatagan graph creations.
+         *
+         * `null` by default - no explicit validation is performed.
+         */
+        public fun validation(delegate: DynamicValidationDelegate?): Initializer = apply {
+            params.validationDelegate = delegate
+        }
+
+        /**
+         * Sets max issue encounter path count. No more than [count] paths will be reported for the single message.
+         *
+         * `5` by default.
+         */
+        public fun maxIssueEncounterPaths(count: Int): Initializer = apply {
+            require(count >= 1) {
+                "Max issue encounter paths can't be less then 1"
+            }
+            params.maxIssueEncounterPaths = count
+        }
+
+        /**
+         * Whether all *mandatory warnings* should be promoted to errors.
+         *
+         * `true` by default.
+         */
+        public fun strictMode(enabled: Boolean): Initializer = apply {
+            params.isStrictMode = enabled
+        }
+
+        /**
+         * If `true`, then Yatagan will try to locate and load compiled implementation in the classpath first.
+         * Then, if no required classes found, Yatagan will proceed to utilizing reflection backend.
+         * If `false` then Yatagan will just use the reflection backend.
+         *
+         * NOTE: Keep in mind, that build systems may leave stale generated classes in place
+         * if incremental compilation/annotation processing is utilized. This may cause stale/invalid implementations
+         * being loaded at runtime if Yatagan backend is switched from compiled to dynamic.
+         * So if reflection usage is intended, leave this option off.
+         *
+         * `false` by default.
+         */
+        public fun useCompiledImplementationIfAvailable(enabled: Boolean): Initializer = apply {
+            params.useCompiledImplementationIfAvailable = enabled
+        }
+
+        /**
+         * Sets logger instance to use.
+         *
+         * `null` by default.
+         */
+        public fun logger(logger: Logger?): Initializer = apply {
+            params.logger = logger
+        }
+
+        /**
+         * Invoke this to apply configured parameters to the global Yatagan state.
+         */
+        public fun apply() {
+            engine = RuntimeEngine(params.copy())
+        }
+    }
+
+    /**
+     * Sets [ThreadAsserter] object to be used in Single Thread component implementations.
+     */
+    @JvmStatic
+    public fun setThreadAsserter(threadAsserter: ThreadAsserter?) {
+        ThreadAssertions.setAsserter(threadAsserter)
+    }
+
+    /**
+     * Clients may (optionally) call this to supply reflection backend with additional parameters, customizing its work.
+     * If a client decides to use it, then the call must be made before any graphs are created.
+     */
+    @JvmStatic
+    public fun setupReflectionBackend(): Initializer {
+        return Initializer()
+    }
+
+    /**
+     * Clients may optionally call this method after all the work with Yatagan graphs is done.
+     * This call clears all internal global states and caches, freeing memory.
+     * **Any further usage of already created graphs may result in Undefined Behavior**,
+     * so make sure no methods on any created components are called after `shutdown()`.
+     *
+     * NOTE: In most of the cases **it's best not to call this method at all**, as DI is often being used up until
+     * the very application termination, and it doesn't make much sense to call `reset()` right before that.
+     */
+    @JvmStatic
+    public fun resetReflectionBackend() {
+        if (engineHolder.isInitialized()) {
+            engine.destroy()
+            engineHolder.deinitialize()
+        }
     }
 
     /**
@@ -50,37 +129,18 @@ object Yatagan {
      * @see Component.Builder
      */
     @JvmStatic
-    fun <T : Any> builder(builderClass: Class<T>): T {
-        val builder: T
-        val time = measureTimeMillis {
-            require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
-                "$builderClass is not a component builder"
-            }
-
+    public fun <T : Any> builder(builderClass: Class<T>): T {
+        if (engine.params.useCompiledImplementationIfAvailable) {
             try {
                 return loadImplementationByBuilderClass(builderClass).also {
-                    dlLog("Found generated implementation for `$builderClass`, using it")
+                    engine.params.logger?.log("Found generated implementation for `$builderClass`, using it")
                 }
             } catch (_: ClassNotFoundException) {
                 // Fallback to full reflection
             }
-
-            val graph = BindingGraph(
-                root = ComponentFactoryModel(TypeDeclaration(builderClass)).createdComponent
-            )
-            val promise = doValidate(graph)
-            val factory = promise.awaitOnError {
-                RuntimeFactory(
-                    graph = graph,
-                    parent = null,
-                    validationPromise = promise,
-                )
-            }
-            val proxy = Proxy.newProxyInstance(builderClass.classLoader, arrayOf(builderClass), factory)
-            builder = builderClass.cast(proxy)
         }
-        dlLog("Dynamic builder creation for `$builderClass` took $time ms")
-        return builder
+
+        return engine.builder(builderClass)
     }
 
     /**
@@ -91,91 +151,24 @@ object Yatagan {
      * @return ready component instance of the given class
      */
     @JvmStatic
-    fun <T : Any> create(componentClass: Class<T>): T {
-        val componentInstance: T
-        val time = measureTimeMillis {
-            require(componentClass.isAnnotationPresent(Component::class.java)) {
-                "$componentClass is not a component"
-            }
-
+    public fun <T : Any> create(componentClass: Class<T>): T {
+        if (engine.params.useCompiledImplementationIfAvailable) {
             try {
                 return loadImplementationByComponentClass(componentClass).also {
-                    dlLog("Found generated implementation for `$componentClass`, using it")
+                    engine.params.logger?.log("Found generated implementation for `$componentClass`, using it")
                 }
             } catch (_: ClassNotFoundException) {
                 // Fallback to full reflection
             }
-
-            val graph = BindingGraph(ComponentModel(TypeDeclaration(componentClass)))
-            val promise = doValidate(graph)
-            val component = promise.awaitOnError {
-                RuntimeComponent(
-                    graph = graph,
-                    parent = null,
-                    givenDependencies = emptyMap(),
-                    givenInstances = emptyMap(),
-                    givenModuleInstances = emptyMap(),
-                    validationPromise = promise,
-                )
-            }
-            require(graph.creator == null) {
-                "$componentClass has explicit creator interface declared, use `Yatagan.builder()` instead"
-            }
-
-            val proxy = Proxy.newProxyInstance(componentClass.classLoader, arrayOf(componentClass), component)
-            component.thisProxy = proxy
-            componentInstance = componentClass.cast(proxy)
         }
-        dlLog("Dynamic component creation for `$componentClass` took $time ms")
-        return componentInstance
+        return engine.create(componentClass)
     }
 
-    /**
-     * Sets [DynamicValidationDelegate] to be used with all following Yatagan graph creations.
-     */
-    @JvmStatic
-    fun setDynamicValidationDelegate(delegate: DynamicValidationDelegate?) {
-        validationDelegate = delegate
-    }
-
-    /**
-     * Sets max issue encounter path count. No more than [value] paths will be reported for the single message.
-     */
-    @JvmStatic
-    fun setMaxIssueEncounterPaths(value: Int) {
-        maxIssueEncounterPaths = value
-    }
-
-    private val pluginProviders by lazy {
-        loadServices<ValidationPluginProvider>()
-    }
-
-    private fun reportMessages(
-        messages: Collection<LocatedMessage>,
-        reporting: DynamicValidationDelegate.ReportingDelegate,
-    ) {
-        messages.forEach { locatedMessage ->
-            val text: RichString = locatedMessage.format(
-                maxEncounterPaths = maxIssueEncounterPaths,
-            )
-            when (locatedMessage.message.kind) {
-                ValidationMessage.Kind.Error -> reporting.reportError(text)
-                ValidationMessage.Kind.Warning -> reporting.reportWarning(text)
-                ValidationMessage.Kind.MandatoryWarning -> reporting.reportMandatoryWarning(text)
-            }
-        }
-    }
-
-    private fun doValidate(graph: BindingGraph) = validationDelegate?.let { delegate ->
-        delegate.dispatchValidation(title = graph.model.type.toString()) { reporting ->
-            reportMessages(messages = validate(graph), reporting = reporting)
-            if (delegate.usePlugins) {
-                val extension = GraphValidationExtension(
-                    validationPluginProviders = pluginProviders,
-                    graph = graph,
-                )
-                reportMessages(messages = validate(extension), reporting = reporting)
-            }
-        }
-    }
+    private data class Params (
+        override var validationDelegate: DynamicValidationDelegate? = null,
+        override var maxIssueEncounterPaths: Int = 5,
+        override var isStrictMode: Boolean = true,
+        override var logger: Logger? = null,
+        var useCompiledImplementationIfAvailable: Boolean = false,
+    ) : RuntimeEngine.Params
 }

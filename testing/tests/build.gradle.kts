@@ -15,9 +15,6 @@ val baseTestRuntime: Configuration by configurations.creating
 val dynamicTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
-val dynamicOptimizedTestRuntime: Configuration by configurations.creating {
-    extendsFrom(baseTestRuntime)
-}
 val compiledTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
@@ -71,21 +68,14 @@ dependencies {
     testImplementation(project(":validation:format"))
 
     baseTestRuntime("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")  // required for heavy tests
-    dynamicTestRuntime(project(":api:dynamic", configuration = "runtimeElements"))
-    dynamicOptimizedTestRuntime(project(":api:dynamic", configuration = "optimizedRuntimeElements"))
-    compiledTestRuntime(project(":api:compiled", configuration = "runtimeElements"))
+    dynamicTestRuntime(project(":api:dynamic"))
+    compiledTestRuntime(project(":api:compiled"))
 }
 
 val generateDynamicApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
     packageName.set("com.yandex.yatagan.generated")
     propertyName.set("DynamicApiClasspath")
     classpath.set(dynamicTestRuntime)
-}
-
-val generateDynamicOptimizedApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    packageName.set("com.yandex.yatagan.generated")
-    propertyName.set("DynamicOptimizedApiClasspath")
-    classpath.set(dynamicOptimizedTestRuntime)
 }
 
 val generateCompiledApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
@@ -95,7 +85,7 @@ val generateCompiledApiClasspath by tasks.registering(ClasspathSourceGeneratorTa
 }
 
 tasks.named("compileKotlin") {
-    dependsOn(generateDynamicApiClasspath, generateDynamicOptimizedApiClasspath, generateCompiledApiClasspath)
+    dependsOn(generateDynamicApiClasspath, generateCompiledApiClasspath)
 }
 
 val updateGoldenFiles by tasks.registering(Test::class) {
@@ -118,7 +108,6 @@ kotlin {
     sourceSets {
         main {
             kotlin.srcDir(generateDynamicApiClasspath.map { it.generatedSourceDir })
-            kotlin.srcDir(generateDynamicOptimizedApiClasspath.map { it.generatedSourceDir })
             kotlin.srcDir(generateCompiledApiClasspath.map { it.generatedSourceDir })
         }
     }

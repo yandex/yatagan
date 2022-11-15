@@ -29,6 +29,9 @@ include(":processor:common")
 include(":processor:jap")
 include(":processor:ksp")
 
+include(":rt:engine")
+include(":rt:support")
+
 include(":codegen:impl")
 include(":codegen:poetry")
 

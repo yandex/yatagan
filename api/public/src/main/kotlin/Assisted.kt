@@ -6,7 +6,7 @@ package com.yandex.yatagan
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER)
-annotation class Assisted(
+public annotation class Assisted(
     /**
      * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/Assisted.html#value--),
      * behavior should be identical.
