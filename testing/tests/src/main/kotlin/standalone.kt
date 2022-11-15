@@ -4,9 +4,7 @@ package com.yandex.yatagan.testing.tests
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
-import kotlin.io.path.Path
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
+import java.io.File
 import kotlin.system.exitProcess
 
 private const val TAG = "[Standalone-Runner]"
@@ -30,8 +28,8 @@ fun main(args: Array<String>) {
     ).required()
     parser.parse(args)
 
-    val dir = Path(testCasesDir)
-    val testCaseDirs = dir.listDirectoryEntries()
+    val dir = File(testCasesDir)
+    val testCaseDirs = dir.listFiles() ?: emptyArray()
     if (testCaseDirs.isEmpty()) {
         println("$TAG No tests")
         return
@@ -41,8 +39,8 @@ fun main(args: Array<String>) {
 
     println("$TAG Using $backend backend to run tests")
 
-    dir.listDirectoryEntries().forEach { testCaseDir ->
-        if (!testCaseDir.isDirectory()) {
+    testCaseDirs.forEach { testCaseDir ->
+        if (!testCaseDir.isDirectory) {
             System.err.println("Directory `$testCaseDir` does not exist/not a directory")
             exitProcess(2)
         }
@@ -51,13 +49,39 @@ fun main(args: Array<String>) {
             Backend.Ksp -> KspCompileTestDriver()
             Backend.Rt -> DynamicCompileTestDriver()
         }) {
-            includeAllFromDirectory(testCaseDir.toFile())
+            testCaseDir.walk()
+                .filter { it.isFile}
+                .forEach {
+                    when(it.extension) {
+                        "java" -> {
+                            val packageName = it.relativeTo(testCaseDir)
+                                .parentFile.path.replace(File.pathSeparatorChar, '.')
+                            val name = if (packageName.isNotEmpty()) {
+                                "$packageName.${it.nameWithoutExtension}"
+                            } else {
+                                it.nameWithoutExtension
+                            }
+                            givenJavaSource(
+                                name = name,
+                                source = it.readText(),
+                                addPackageDirective = false,
+                            )
+                        }
+                        "kt" -> {
+                            givenKotlinSource(
+                                name = it.nameWithoutExtension,
+                                source = it.readText(),
+                                addPackageDirective = false,
+                            )
+                        }
+                    }
+                }
             println("$TAG Running test from $testCaseDir")
             try {
                 compileRunAndValidate()
                 println("$TAG OK")
             } catch (e: Exception) {
-                System.err.println("$TAG Validation failure for ${testCaseDir.fileName}: ${e.message}")
+                System.err.println("$TAG Validation failure for ${testCaseDir.name}: ${e.message}")
                 exitProcess(3)
             }
         }

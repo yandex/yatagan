@@ -14,7 +14,7 @@ import com.squareup.kotlinpoet.TypeVariableName
 import com.yandex.yatagan.testing.procedural.GenerationParams.BindingType
 import com.yandex.yatagan.testing.procedural.GenerationParams.DependencyKind
 import com.yandex.yatagan.testing.procedural.GenerationParams.ProvisionScopes
-import java.io.File
+import com.yandex.yatagan.testing.source_set.SourceSet
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -28,8 +28,8 @@ import kotlin.random.nextInt
 @ExperimentalGenerationApi
 fun generate(
     params: GenerationParams,
-    sourceDir: File,
     testMethodName: String = "main",
+    output: SourceSet,
 ) {
     val rng = Random(params.seed)
     var id = 0L  // This is global entity id, that is used to ensure entities' names are globally unique.
@@ -524,8 +524,8 @@ fun generate(
 
 
     // 7. Flush the code to files.
-    sourceDir.mkdirs()
     for ((name, builder) in classes) {
+        val codeBuilder = StringBuilder()
         FileSpec.builder(name.packageName, name.simpleName)
             .addAnnotation(AnnotationSpec.builder(ClassNames.Suppress)
                 .useSiteTarget(AnnotationSpec.UseSiteTarget.FILE)
@@ -534,8 +534,15 @@ fun generate(
             .addFileComment("THIS CODE IS GENERATED")
             .addType(builder.build())
             .build()
-            .writeTo(sourceDir)
+            .writeTo(codeBuilder)
+        output.givenKotlinSource(
+            name = name.canonicalName,
+            source = codeBuilder.toString(),
+            addPackageDirective = false,
+        )
     }
+
+    val codeBuilder = StringBuilder()
     FileSpec.builder("test", "TestCase")
         .addFunction(FunSpec.builder("myMock")
             .addModifiers(KModifier.INLINE)
@@ -591,5 +598,10 @@ fun generate(
                 .build())
             .build())
         .build()
-        .writeTo(sourceDir)
+        .writeTo(codeBuilder)
+    output.givenKotlinSource(
+        name = "test.TestCase",
+        source = codeBuilder.toString(),
+        addPackageDirective = false,
+    )
 }

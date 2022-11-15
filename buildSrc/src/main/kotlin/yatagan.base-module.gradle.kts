@@ -9,6 +9,7 @@ repositories {
         name = "mavenCentral"
         url = uri("https://artifactory.yandex.net/central")
     }
+    google()
 }
 
 tasks.withType<KotlinCompile> {

@@ -5,8 +5,8 @@ dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     versionCatalogs {
         create("libs") {
-            val kotlinVersion = "1.7.10"
-            val kspVersion = "1.0.6"
+            val kotlinVersion = "1.7.20"
+            val kspVersion = "1.0.8"
             version("kotlin", kotlinVersion)
             version("ksp", "$kotlinVersion-$kspVersion")
 
@@ -28,6 +28,7 @@ dependencyResolutionManagement {
 
         create("testingLibs") {
             library("kotlinCompileTesting", "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.9")
+            library("roomCompileTesting", "androidx.room:room-compiler-processing-testing:2.5.0-beta02")
             library("junit4", "junit:junit:4.13.2")
             library("mockito-kotlin", "org.mockito.kotlin:mockito-kotlin:4.0.0")
             library("assertj", "org.assertj:assertj-core:3.23.1")

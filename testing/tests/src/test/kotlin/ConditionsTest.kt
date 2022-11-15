@@ -731,7 +731,7 @@ class ConditionsTest(
             """.trimIndent())
         })
 
-        givenJavaSource("test.IsEnabled0", """
+        givenJavaSource("test.IsEnabled3", """
             import com.yandex.yatagan.Condition;
             
             @Condition(value = CompiledConditionKt.class, condition = "FOO")

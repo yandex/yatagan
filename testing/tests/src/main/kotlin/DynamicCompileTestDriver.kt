@@ -1,12 +1,12 @@
 package com.yandex.yatagan.testing.tests
 
 import com.squareup.javapoet.ClassName
-import com.tschuchort.compiletesting.SourceFile
 import com.yandex.yatagan.Component
 import com.yandex.yatagan.lang.jap.asTypeElement
 import com.yandex.yatagan.lang.jap.isAnnotatedWith
 import com.yandex.yatagan.processor.common.Logger
 import com.yandex.yatagan.processor.common.LoggerDecorator
+import com.yandex.yatagan.testing.source_set.SourceFile
 import org.intellij.lang.annotations.Language
 import java.io.File
 import java.lang.reflect.Method
@@ -18,15 +18,13 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 
 class DynamicCompileTestDriver(
     apiType: ApiType = ApiType.Dynamic,
 ) : CompileTestDriverBase(apiType) {
     private val accumulator = ComponentBootstrapperGenerator()
 
-    private val runnerSource = SourceFile.java("RuntimeTestRunner.java", """
+    private val runnerSource = SourceFile.java("RuntimeTestRunner", """
         import com.yandex.yatagan.Yatagan;
         import java.util.function.*;
         import java.util.*;
@@ -46,9 +44,13 @@ class DynamicCompileTestDriver(
         }
     """.trimIndent())
 
+    override fun generatedFilesSubDir(): String? = null
+
     override fun doCompile(): TestCompilationResult {
         val testCompilationResult = super.doCompile()
-        check(testCompilationResult.success) { "Test source compilation failed, check the code" }
+        check(testCompilationResult.success) {
+            "Test source compilation failed, check the code.\n${testCompilationResult.messageLog}"
+        }
         val log = StringBuilder()
         val runtimeValidationSuccess = validateRuntimeComponents(
             componentBootstrapperNames = accumulator.bootstrapperNames,
@@ -71,11 +73,13 @@ class DynamicCompileTestDriver(
         }
     }
 
-    override fun createKotlinCompilation() = super.createKotlinCompilation().apply {
-        sources = sourceFiles + runnerSource
-        javacArguments += "-parameters"
-        javaParameters = true
-        annotationProcessors = listOf(accumulator)
+    override fun createCompilationArguments() = super.createCompilationArguments().let {
+        it.copy(
+            sources = it.sources + runnerSource,
+            javacArguments = it.javacArguments + "-parameters",
+            kotlincArguments = it.kotlincArguments + "-java-parameters",
+            kaptProcessors = listOf(accumulator),
+        )
     }
 
     override val backendUnderTest: Backend

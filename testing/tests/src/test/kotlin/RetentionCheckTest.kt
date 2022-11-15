@@ -99,36 +99,76 @@ class RetentionCheckTest(
     fun `check annotations retention with java origin`() {
         includeFromSourceSet(usages)
 
-        givenJavaSource("test.Annotations", """
-            import com.yandex.yatagan.IntoMap;
+        givenJavaSource("test.MyBinaryQualifier", """
             import java.lang.annotation.Retention;
             import java.lang.annotation.RetentionPolicy;
             import javax.inject.Qualifier;
-            import javax.inject.Scope;
-
+            
             @Qualifier @Retention(RetentionPolicy.CLASS)
             @interface MyBinaryQualifier {}
+        """.trimIndent())
 
+        givenJavaSource("test.MySourceQualifier", """
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            import javax.inject.Qualifier;
+            
             @Qualifier @Retention(RetentionPolicy.SOURCE)
             @interface MySourceQualifier {}
+        """.trimIndent())
+
+        givenJavaSource("test.MyRuntimeQualifier", """
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            import javax.inject.Qualifier;
             
             @Qualifier @Retention(RetentionPolicy.RUNTIME)
             @interface MyRuntimeQualifier {}
+        """.trimIndent())
+
+        givenJavaSource("test.MyDefaultQualifier", """
+            import javax.inject.Qualifier;
             
             @Qualifier
             @interface MyDefaultQualifier {}
+        """.trimIndent())
 
+        givenJavaSource("test.MyBinaryScope", """
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            import javax.inject.Scope;
+            
             @Scope @Retention(RetentionPolicy.CLASS)
             @interface MyBinaryScope {}
+        """.trimIndent())
 
+        givenJavaSource("test.MySourceScope", """
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            import javax.inject.Scope;
+            
             @Scope @Retention(RetentionPolicy.SOURCE)
             @interface MySourceScope {}
+        """.trimIndent())
 
+        givenJavaSource("test.MyRuntimeScope", """
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            import javax.inject.Scope;
+            
             @Scope @Retention(RetentionPolicy.RUNTIME)
             @interface MyRuntimeScope {}
+        """.trimIndent())
+
+        givenJavaSource("test.MyDefaultScope", """
+            import javax.inject.Scope;
             
             @Scope
             @interface MyDefaultScope {}
+        """.trimIndent())
+
+        givenJavaSource("test.TestMapKey", """
+            import com.yandex.yatagan.IntoMap;
 
             @IntoMap.Key
             @interface TestMapKey { int value(); }

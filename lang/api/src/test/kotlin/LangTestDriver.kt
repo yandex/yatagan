@@ -1,16 +1,19 @@
 package com.yandex.yatagan.lang
 
+import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
+import androidx.room.compiler.processing.util.compiler.compile
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.tschuchort.compiletesting.KotlinCompilation
-import com.tschuchort.compiletesting.symbolProcessorProviders
 import com.yandex.yatagan.base.ObjectCacheRegistry
+import com.yandex.yatagan.base.mapToArray
 import com.yandex.yatagan.lang.jap.JavaxModelFactoryImpl
 import com.yandex.yatagan.lang.ksp.KspModelFactoryImpl
 import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
 import com.yandex.yatagan.testing.source_set.SourceSet
+import java.io.File
+import java.net.URLClassLoader
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
@@ -19,6 +22,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
+import kotlin.io.path.createTempDirectory
 
 typealias InspectBlock = LangModelFactory.() -> Unit
 
@@ -55,16 +59,19 @@ interface LangTestDriver : SourceSet {
         )
 
         private abstract class LangTestDriverBase : LangTestDriver, SourceSet by SourceSet() {
-            protected fun createCompilation(): KotlinCompilation {
-                return KotlinCompilation().apply {
-                    sources = sourceFiles
-                    verbose = false
-                    inheritClassPath = false
-                    javacArguments += "-Xdiags:verbose"
-                }
+            protected fun createCompilation(): TestCompilationArguments {
+                return TestCompilationArguments(
+                    sources = sourceFiles,
+                    inheritClasspath = false,
+                    classpath = StdLibClasspath.split(':').map(::File),
+                    javacArguments = listOf("-Xdiags:verbose"),
+                )
             }
 
-            protected open fun setUpCompilation(compilation: KotlinCompilation, block: InspectBlock) {}
+            protected open fun setUpCompilation(
+                compilation: TestCompilationArguments,
+                block: InspectBlock,
+            ) = compilation
 
             override fun inspect(block: InspectBlock) {
                 ObjectCacheRegistry.use {
@@ -79,12 +86,20 @@ interface LangTestDriver : SourceSet {
                     val compilation = createCompilation().apply {
                         setUpCompilation(this, safeBlock)
                     }
-                    val result = compilation.compile()
+                    val tmpDir = createTempDirectory(
+                        prefix = "ylt",
+                    ).toFile()
+                    val result = compile(
+                        workingDir = tmpDir,
+                        arguments = compilation,
+                    )
 
                     error?.let { throw it }
 
-                    check(result.exitCode == KotlinCompilation.ExitCode.OK) {
-                        "Lang test should compile, yet the compilation failed with ${result.exitCode}"
+                    check(result.success) {
+                        System.err.println(result.diagnostics.values.flatten()
+                            .joinToString(separator = "\n") { it.msg })
+                        "Lang test should compile, yet the compilation failed"
                     }
                 }
             }
@@ -92,9 +107,20 @@ interface LangTestDriver : SourceSet {
 
         private class RtLangTestDriver : LangTestDriverBase() {
             override fun inspect(block: InspectBlock) {
-                val result = createCompilation().compile()
+                val tmpDir = createTempDirectory(
+                    prefix = "ylt",
+                ).toFile()
+                val arguments = createCompilation()
+                val result = compile(
+                    workingDir = tmpDir,
+                    arguments = arguments,
+                )
                 ObjectCacheRegistry.use {
-                    LangModelFactory.use(RtModelFactoryImpl(result.classLoader)) {
+                    val classLoader = URLClassLoader(
+                        (arguments.classpath + result.outputClasspath)
+                            .mapToArray { it.toURI().toURL() }
+                    )
+                    LangModelFactory.use(RtModelFactoryImpl(classLoader)) {
                         block(LangModelFactory)
                     }
                 }
@@ -102,9 +128,12 @@ interface LangTestDriver : SourceSet {
         }
 
         private class KspLangTestDriver : LangTestDriverBase() {
-            override fun setUpCompilation(compilation: KotlinCompilation, block: InspectBlock) {
-                compilation.symbolProcessorProviders = listOf(SymbolProcessorProvider { Inspector(block) })
-            }
+            override fun setUpCompilation(
+                compilation: TestCompilationArguments,
+                block: InspectBlock,
+            ) = compilation.copy(
+                symbolProcessorProviders = listOf(SymbolProcessorProvider { Inspector(block) })
+            )
 
             private class Inspector(
                 private val inspectBlock: InspectBlock,
@@ -121,9 +150,12 @@ interface LangTestDriver : SourceSet {
         }
 
         private class JapLangTestDriver : LangTestDriverBase() {
-            override fun setUpCompilation(compilation: KotlinCompilation, block: InspectBlock) {
-                compilation.annotationProcessors = listOf(Inspector(block))
-            }
+            override fun setUpCompilation(
+                compilation: TestCompilationArguments,
+                block: InspectBlock,
+            ) = compilation.copy(
+                kaptProcessors = listOf(Inspector(block)),
+            )
 
             @SupportedSourceVersion(SourceVersion.RELEASE_8)
             private class Inspector(

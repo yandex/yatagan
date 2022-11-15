@@ -4,10 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlinx.cli)
-    implementation(libs.poets.kotlin)
-}
+    api(project(":testing:source-set"))
 
-application {
-    mainClass.set("com.yandex.yatagan.testing.procedural.Standalone")
+    implementation(libs.poets.kotlin)
 }

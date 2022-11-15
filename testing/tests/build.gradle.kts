@@ -31,6 +31,7 @@ dependencies {
 
     // Third-party test dependencies
     implementation(testingLibs.junit4)
+    implementation(testingLibs.roomCompileTesting)
 
     // Base test dependencies
     implementation(project(":processor:common"))
@@ -95,6 +96,10 @@ tasks.test {
     // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
     jvmArgs = listOf("-Xmx4G", "-Xms256m")
     shouldRunAfter(updateGoldenFiles)
+
+    // Increasing this will likely get a negative effect on tests performance as kotlin-compilation seems to be shared
+    // between compilation invocations and I still haven't found a way to make it in-process.
+    maxParallelForks = 2
 }
 
 kotlin {

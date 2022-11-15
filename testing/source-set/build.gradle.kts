@@ -11,5 +11,5 @@ configurations.configureEach {
 }
 
 dependencies {
-    api(testingLibs.kotlinCompileTesting)
+    api(testingLibs.roomCompileTesting)
 }

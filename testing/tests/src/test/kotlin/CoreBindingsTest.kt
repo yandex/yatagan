@@ -1,7 +1,6 @@
 package com.yandex.yatagan.testing.tests
 
 import com.yandex.yatagan.testing.source_set.SourceSet
-import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -495,9 +494,6 @@ class CoreBindingsTest(
 
     @Test
     fun `java component declaration with builder and nested dependency`() {
-        // KSP is broken: https://github.com/google/ksp/issues/1034
-        assumeFalse(backendUnderTest == Backend.Ksp)  // TODO: revisit in KSP 1.0.7
-
         givenJavaSource("test.TestComponent", """
             import com.yandex.yatagan.Component;
             
@@ -556,7 +552,7 @@ class CoreBindingsTest(
                 public void setClassA(ClassA classA) { bye = classA; }
             }
         """.trimIndent())
-        givenJavaSource("test.TestCase", """
+        givenJavaSource("test.TestComponent", """
             import com.yandex.yatagan.Component;
             
             @Component(modules = {MyModule.class})
@@ -651,8 +647,11 @@ class CoreBindingsTest(
 //            import javax.inject.Provider;
 //            public class Deferred<T> { public @javax.inject.Inject Deferred (Provider<T> provider) {} }
 //        """.trimIndent())
+        givenJavaSource("test.MySpecificDeferredEvent", """
+            interface MySpecificDeferredEvent {}
+        """.trimIndent())
 
-        givenJavaSource("test.TestCase", """
+        givenJavaSource("test.MyComponent", """
             import java.util.Collections;
             import java.util.Collection;
             import java.util.List;
@@ -661,8 +660,6 @@ class CoreBindingsTest(
             import javax.inject.Singleton;
             import com.yandex.yatagan.Component;
     
-            interface MySpecificDeferredEvent {}
-
             @Singleton
             @Component(modules = MyModule.class)
             interface MyComponent {
