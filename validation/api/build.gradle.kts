@@ -3,10 +3,6 @@ plugins {
     id("yatagan.documented")
 }
 
-dependencies {
-    implementation(kotlin("stdlib"))
-}
-
 kotlin {
     explicitApi()
 }

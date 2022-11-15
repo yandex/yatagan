@@ -7,7 +7,5 @@ dependencies {
     api(project(":core:graph:api"))
     api(project(":validation:api"))
 
-    implementation(kotlin("stdlib"))
-
     testImplementation(kotlin("test"))
 }

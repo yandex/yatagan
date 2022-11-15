@@ -8,6 +8,4 @@ dependencies {
 
     implementation(project(":base"))
     implementation(project(":validation:format"))
-
-    implementation(kotlin("stdlib"))
 }

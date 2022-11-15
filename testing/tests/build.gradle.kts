@@ -4,13 +4,6 @@ plugins {
     id("yatagan.base-module")
 }
 
-val kotlinCompileTestingVersion: String by extra
-val kspVersion: String by extra
-val junitVersion: String by extra
-val mockitoKotlinVersion: String by extra
-val kotlinxCliVersion: String by extra
-val javaPoetVersion: String by extra
-
 val baseTestRuntime: Configuration by configurations.creating
 val dynamicTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
@@ -22,8 +15,8 @@ val compiledTestRuntime: Configuration by configurations.creating {
 configurations.configureEach {
     resolutionStrategy {
         // Force KSP version as testing framework may depend on an older version.
-        force("com.google.devtools.ksp:symbol-processing:$kspVersion")
-        force("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+        force(libs.ksp.impl)
+        force(libs.ksp.api)
     }
 }
 
@@ -37,7 +30,7 @@ dependencies {
     api(project(":testing:source-set"))
 
     // Third-party test dependencies
-    implementation("junit:junit:$junitVersion")
+    implementation(testingLibs.junit4)
 
     // Base test dependencies
     implementation(project(":processor:common"))
@@ -56,10 +49,10 @@ dependencies {
 
     // RT dependencies
     implementation(project(":lang:rt"))
-    implementation("com.squareup:javapoet:$javaPoetVersion")
+    implementation(libs.poets.java)
 
     // Standalone launcher dependencies
-    implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
+    implementation(libs.kotlinx.cli)
 
     // Heavy test dependencies
     testImplementation(project(":testing:procedural"))
@@ -67,7 +60,7 @@ dependencies {
     // For strings
     testImplementation(project(":validation:format"))
 
-    baseTestRuntime("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")  // required for heavy tests
+    baseTestRuntime(testingLibs.mockito.kotlin.get())  // required for heavy tests
     dynamicTestRuntime(project(":api:dynamic"))
     compiledTestRuntime(project(":api:compiled"))
 }

@@ -9,5 +9,4 @@ dependencies {
     implementation(project(":core:graph:impl"))
     implementation(project(":core:model:impl"))
     implementation(project(":codegen:impl"))
-    implementation(kotlin("stdlib"))
 }
