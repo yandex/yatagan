@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     api(project(":lang:api"))
-    implementation(project(":base"))
 
-    implementation(kotlin("stdlib"))
+    implementation(project(":base"))
 }

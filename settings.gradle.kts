@@ -1,5 +1,7 @@
 rootProject.name = "yatagan"
 
+apply(from = "buildSrc/settings.gradle.kts")
+
 include(":base")
 
 include(":api:public")

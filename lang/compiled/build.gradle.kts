@@ -7,5 +7,4 @@ dependencies {
 
     implementation(project(":api:public"))
     implementation(project(":base"))
-    implementation(kotlin("stdlib"))
 }

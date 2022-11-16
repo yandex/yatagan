@@ -8,5 +8,4 @@ dependencies {
     implementation(project(":base"))
     implementation(project(":codegen:poetry"))
     implementation(project(":lang:compiled"))
-    implementation(kotlin("stdlib"))
 }

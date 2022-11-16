@@ -1,10 +1,12 @@
 package com.yandex.yatagan.testing.tests
 
-import com.tschuchort.compiletesting.KotlinCompilation
-import com.tschuchort.compiletesting.SourceFile
+import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
+import androidx.room.compiler.processing.util.compiler.compile
 import com.yandex.yatagan.generated.CompiledApiClasspath
 import com.yandex.yatagan.generated.DynamicApiClasspath
 import com.yandex.yatagan.processor.common.LoggerDecorator
+import com.yandex.yatagan.processor.common.Options
+import com.yandex.yatagan.testing.source_set.SourceFile
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assert
 import java.io.File
@@ -12,82 +14,75 @@ import java.lang.reflect.Method
 import java.net.URLClassLoader
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
+import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
 
-abstract class CompileTestDriverBase protected constructor(
-    private val apiType: ApiType = ApiType.Compiled,
-) : CompileTestDriver {
-    private val mainSourceSet = SourceSet()
-    private var precompiledModuleOutputDir: File? = null
+abstract class CompileTestDriverBase private constructor(
+    private val apiType: ApiType,
+    private val mainSourceSet: SourceSet,
+) : CompileTestDriver, SourceSet by mainSourceSet {
+    private var precompiledModuleOutputDirs: List<File>? = null
+
+    protected constructor(
+        apiType: ApiType = ApiType.Compiled,
+    ) : this(apiType, SourceSet())
 
     override val testNameRule = TestNameRule()
 
-    final override val sourceFiles: List<SourceFile>
-        get() = mainSourceSet.sourceFiles
-
-    final override fun givenJavaSource(name: String, source: String) {
-        mainSourceSet.givenJavaSource(name, source)
-    }
-
-    final override fun givenKotlinSource(name: String, source: String) {
-        mainSourceSet.givenKotlinSource(name, source)
-    }
-
-    final override fun includeFromSourceSet(sourceSet: SourceSet) {
-        mainSourceSet.includeFromSourceSet(sourceSet)
-    }
-
-    override fun includeAllFromDirectory(sourceDir: File) {
-        mainSourceSet.includeAllFromDirectory(sourceDir)
-    }
-
     final override fun givenPrecompiledModule(sources: SourceSet) {
-        check(precompiledModuleOutputDir == null) {
-            "Can't have multiple precompiled modules"
+        if(precompiledModuleOutputDirs != null) {
+            throw UnsupportedOperationException("Multiple precompiled modules are not supported")
         }
 
-        val compilation = createBaseKotlinCompilation().apply {
-            this.sources = sources.sourceFiles
-        }
-        val result = compilation.compile()
-        if (result.exitCode != KotlinCompilation.ExitCode.OK) {
-            throw RuntimeException("Pre-compilation failed, check the code")
+        val compilation = createBaseCompilationArguments().copy(
+            sources = sources.sourceFiles,
+        )
+        val result = compile(
+            workingDir = createTempDirectory(prefix = "ytc").toFile(),
+            arguments = compilation,
+        )
+        check(result.success) {
+            "Pre-compilation failed, check the code"
         }
 
-        precompiledModuleOutputDir = result.outputDirectory
+        precompiledModuleOutputDirs = result.outputClasspath
     }
 
     data class TestCompilationResult(
+        val workingDir: File,
         val runtimeClasspath: List<File>,
         val messageLog: String,
         val success: Boolean,
-        val generatedFiles: Collection<File>,
+        val generatedFiles: Collection<SourceFile>,
     )
 
     protected open fun doCompile(): TestCompilationResult {
-        val compilation = createKotlinCompilation()
-        val result = compilation.compile()
-        return TestCompilationResult(
-            runtimeClasspath = compilation.classpaths + compilation.classesDir,
-            messageLog = result.messages,
-            success = result.exitCode == KotlinCompilation.ExitCode.OK,
-            generatedFiles = getGeneratedFiles(compilation),
+        val compilation = createCompilationArguments()
+        val workingDir = createTempDirectory(prefix = "yct-${testNameRule.testMethodName}").toFile()
+        val result = compile(
+            workingDir = workingDir,
+            arguments = compilation,
         )
-    }
-
-    protected open fun getGeneratedFiles(from: KotlinCompilation): Collection<File> {
-        return emptyList()
+        return TestCompilationResult(
+            workingDir = workingDir,
+            runtimeClasspath = compilation.classpath + result.outputClasspath,
+            messageLog = result.diagnostics.values.flatten().joinToString(separator = "\n") { it.msg },
+            success = result.success,
+            generatedFiles = result.generatedSources,
+        )
     }
 
     protected open fun runRuntimeTest(test: Method) {
         test.invoke(null)
     }
 
+    abstract fun generatedFilesSubDir(): String?
+
     override fun compileRunAndValidate() {
         val goldenResourcePath = "golden/${testNameRule.testClassSimpleName}/${testNameRule.testMethodName}.golden.txt"
 
-        val (runtimeClasspath, messageLog, success, generatedFiles) = doCompile()
+        val (workingDir, runtimeClasspath, messageLog, success, generatedFiles) = doCompile()
         val strippedLog = normalizeMessages(messageLog)
 
         if (goldenSourceDirForUpdate != null) {
@@ -112,43 +107,50 @@ abstract class CompileTestDriverBase protected constructor(
                 try {
                     runRuntimeTest(classLoader.loadClass("test.TestCaseKt").getDeclaredMethod("test"))
                 } catch (e: ClassNotFoundException) {
+                    println(runtimeClasspath)
                     println("NOTE: No runtime test detected.")
                 } catch (e: NoSuchMethodException) {
                     println("NOTE: No runtime test detected in TestCaseKt class.")
                 }
             } else {
+                System.err.println(messageLog)
                 Assert.assertTrue("Compilation failed, yet expected output is blank", goldenOutput.isNotBlank())
             }
         } finally {
-            // print generated files
-            for (generatedFile in generatedFiles) {
-                println("Generated file://${generatedFile.absolutePath}")
+            generatedFilesSubDir()?.let { generatedFilesSubDir ->
+                for (generatedFile in generatedFiles) {
+                    val fileUrl = "file://" + workingDir
+                        .resolve(generatedFilesSubDir)
+                        .resolve(generatedFile.relativePath).absolutePath
+                    println("Generated $fileUrl")
+                }
             }
         }
     }
 
-    private fun createBaseKotlinCompilation(): KotlinCompilation {
-        return KotlinCompilation().apply {
-            verbose = false
-            inheritClassPath = false
-            javacArguments += "-Xdiags:verbose"
-            kotlincArguments = listOf(
-                "-opt-in=com.yandex.yatagan.ConditionsApi",
-                "-opt-in=com.yandex.yatagan.VariantApi",
-            )
-            classpaths = buildList {
-                when (apiType) {
-                    ApiType.Compiled -> CompiledApiClasspath
-                    ApiType.Dynamic -> DynamicApiClasspath
-                }.split(':').forEach { add(File(it)) }
-                precompiledModuleOutputDir?.let { add(it) }
-            }
-        }
-    }
+    private fun createBaseCompilationArguments() = TestCompilationArguments(
+        sources = sourceFiles,
+        classpath = buildList {
+            when (apiType) {
+                ApiType.Compiled -> CompiledApiClasspath
+                ApiType.Dynamic -> DynamicApiClasspath
+            }.split(':').forEach { add(File(it)) }
+            precompiledModuleOutputDirs?.let { addAll(it) }
+        },
+        inheritClasspath = false,
+        javacArguments = listOf(
+            "-Xdiags:verbose",
+        ),
+        kotlincArguments = listOf(
+            "-opt-in=com.yandex.yatagan.ConditionsApi",
+            "-opt-in=com.yandex.yatagan.VariantApi",
+        ),
+        processorOptions = mapOf(
+            Options.MaxIssueEncounterPaths.key to "100",
+        ),
+    )
 
-    protected open fun createKotlinCompilation(): KotlinCompilation {
-        return createBaseKotlinCompilation()
-    }
+    protected open fun createCompilationArguments() = createBaseCompilationArguments()
 
     protected fun makeClassLoader(classpaths: List<File>): ClassLoader {
         return URLClassLoader(

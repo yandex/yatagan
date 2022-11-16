@@ -3,14 +3,8 @@ plugins {
     application
 }
 
-val kotlinPoetVersion: String by extra
-val kotlinxCliVersion: String by extra
-
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
-    implementation("com.squareup:kotlinpoet:$kotlinPoetVersion")
-}
+    api(project(":testing:source-set"))
 
-application {
-    mainClass.set("com.yandex.yatagan.testing.procedural.Standalone")
+    implementation(libs.poets.kotlin)
 }

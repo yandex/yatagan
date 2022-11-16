@@ -9,13 +9,12 @@ plugins {
 }
 
 val yataganVersion: String by extra
-val kotlinVersion: String by extra
 
 val patchRootDoc by tasks.registering(PatchModuleDocTask::class) {
     inputFile.set(file("docs/yatagan.md"))
     macros.putAll(mapOf(
         "version" to yataganVersion,
-        "kotlin_version" to kotlinVersion,
+        "kotlin_version" to libs.versions.kotlin.get(),
         "repo_link" to RepositoryBrowseUrl,
     ))
 }
