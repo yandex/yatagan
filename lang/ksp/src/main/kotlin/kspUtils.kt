@@ -47,6 +47,10 @@ internal fun KSPropertyDeclaration.isKotlinFieldInObject(): Boolean {
     return Modifier.CONST in modifiers || isAnnotationPresent<JvmField>()
 }
 
+internal fun KSPropertyDeclaration.isLateInit(): Boolean {
+    return Modifier.LATEINIT in modifiers
+}
+
 internal fun KSDeclaration.isPublicOrInternal() = when (getVisibility()) {
     Visibility.PUBLIC, Visibility.INTERNAL -> true
     else -> false
@@ -72,6 +76,10 @@ internal fun KSType.resolveAliasIfNeeded(): KSType = when (val declaration = dec
 internal fun KSType.classDeclaration(): KSClassDeclaration? = when (val declaration = declaration) {
     is KSTypeAlias -> declaration.type.resolve().classDeclaration()
     else -> declaration as? KSClassDeclaration
+}
+
+internal fun KSType.isRaw(): Boolean {
+    return Utils.resolver.isJavaRawType(this)
 }
 
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
