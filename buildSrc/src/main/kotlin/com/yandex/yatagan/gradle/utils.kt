@@ -17,23 +17,3 @@ private val semVerRegex = ("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((
 fun isValidSemVerString(string: String): Boolean {
     return semVerRegex.matches(string)
 }
-
-const val RepositoryBrowseUrl = "https://bitbucket.browser.yandex-team.ru/projects/ML/repos/dagger-lite/browse"
-
-@Suppress("UNCHECKED_CAST")
-fun AttributeContainer.copyFrom(another: AttributeContainer) {
-    for (keyAttribute: Attribute<*> in another.keySet()) {
-        keyAttribute as Attribute<Any?>
-        val value = another.getAttribute(keyAttribute)!!
-        attribute(keyAttribute, value)
-    }
-}
-
-abstract class ComponentFactoryProvider @Inject constructor(
-    val softwareComponentFactory: SoftwareComponentFactory,
-)
-
-fun Project.publishedArtifactName(): String = project.extensions.findByType<PublishingExtension>()?.let {
-    val mainArtifactPublication = it.publications.getByName("main") as MavenPublication
-    mainArtifactPublication.artifactId
-} ?: project.name

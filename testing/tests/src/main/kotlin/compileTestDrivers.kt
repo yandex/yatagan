@@ -1,6 +1,5 @@
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.testing.tests.CompileTestDriverBase.ApiType
 import javax.inject.Provider
 
 internal fun compileTestDrivers(
