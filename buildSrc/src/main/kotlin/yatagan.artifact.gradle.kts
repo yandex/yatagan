@@ -36,13 +36,6 @@ publishing {
             this.artifactId = path.trim(':').replace(':', '-')
         }
 
-        components.findByName("optimizedJava")?.let { optimizedJava ->
-            create<MavenPublication>("optimized") {
-                from(optimizedJava)
-                artifactId = "${project.name}-optimized"
-            }
-        }
-
         repositories {
             fun MavenArtifactRepository.setupCredentials() {
                 credentials {

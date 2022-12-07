@@ -12,22 +12,16 @@ dependencyResolutionManagement {
 
             library("kotlin-gradle", "org.jetbrains.kotlin", "kotlin-gradle-plugin").versionRef("kotlin")
 
-            library("dokka-gradle", "org.jetbrains.dokka", "dokka-gradle-plugin").versionRef("kotlin")
-            library("dokka-base", "org.jetbrains.dokka", "dokka-base").versionRef("kotlin")
-            library("dokka-core", "org.jetbrains.dokka", "dokka-core").versionRef("kotlin")
-
             library("ksp-impl", "com.google.devtools.ksp", "symbol-processing").versionRef("ksp")
             library("ksp-api", "com.google.devtools.ksp", "symbol-processing-api").versionRef("ksp")
 
             library("autoCommon", "com.google.auto:auto-common:1.2.1")
-            library("kotlinx-cli", "org.jetbrains.kotlinx:kotlinx-cli:0.3.4")
 
             library("poets-java", "com.squareup:javapoet:1.13.0")
             library("poets-kotlin", "com.squareup:kotlinpoet:1.11.0")
         }
 
         create("testingLibs") {
-            library("kotlinCompileTesting", "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.9")
             library("roomCompileTesting", "androidx.room:room-compiler-processing-testing:2.5.0-beta02")
             library("junit4", "junit:junit:4.13.2")
             library("mockito-kotlin", "org.mockito.kotlin:mockito-kotlin:4.0.0")

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022 Yandex LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.getDeclaredFunctions
@@ -47,6 +63,10 @@ internal fun KSPropertyDeclaration.isKotlinFieldInObject(): Boolean {
     return Modifier.CONST in modifiers || isAnnotationPresent<JvmField>()
 }
 
+internal fun KSPropertyDeclaration.isLateInit(): Boolean {
+    return Modifier.LATEINIT in modifiers
+}
+
 internal fun KSDeclaration.isPublicOrInternal() = when (getVisibility()) {
     Visibility.PUBLIC, Visibility.INTERNAL -> true
     else -> false
@@ -72,6 +92,10 @@ internal fun KSType.resolveAliasIfNeeded(): KSType = when (val declaration = dec
 internal fun KSType.classDeclaration(): KSClassDeclaration? = when (val declaration = declaration) {
     is KSTypeAlias -> declaration.type.resolve().classDeclaration()
     else -> declaration as? KSClassDeclaration
+}
+
+internal fun KSType.isRaw(): Boolean {
+    return Utils.resolver.isJavaRawType(this)
 }
 
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022 Yandex LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.yandex.yatagan.gradle
 
 import org.gradle.api.Project
@@ -17,23 +33,3 @@ private val semVerRegex = ("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((
 fun isValidSemVerString(string: String): Boolean {
     return semVerRegex.matches(string)
 }
-
-const val RepositoryBrowseUrl = "https://bitbucket.browser.yandex-team.ru/projects/ML/repos/dagger-lite/browse"
-
-@Suppress("UNCHECKED_CAST")
-fun AttributeContainer.copyFrom(another: AttributeContainer) {
-    for (keyAttribute: Attribute<*> in another.keySet()) {
-        keyAttribute as Attribute<Any?>
-        val value = another.getAttribute(keyAttribute)!!
-        attribute(keyAttribute, value)
-    }
-}
-
-abstract class ComponentFactoryProvider @Inject constructor(
-    val softwareComponentFactory: SoftwareComponentFactory,
-)
-
-fun Project.publishedArtifactName(): String = project.extensions.findByType<PublishingExtension>()?.let {
-    val mainArtifactPublication = it.publications.getByName("main") as MavenPublication
-    mainArtifactPublication.artifactId
-} ?: project.name

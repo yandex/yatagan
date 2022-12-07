@@ -52,9 +52,6 @@ dependencies {
     implementation(project(":lang:rt"))
     implementation(libs.poets.java)
 
-    // Standalone launcher dependencies
-    implementation(libs.kotlinx.cli)
-
     // Heavy test dependencies
     testImplementation(project(":testing:procedural"))
 

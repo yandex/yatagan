@@ -39,5 +39,4 @@ include(":codegen:poetry")
 
 include(":testing:tests")
 include(":testing:procedural")
-include(":testing:doc-testing")
 include(":testing:source-set")

@@ -1,32 +1,27 @@
+/*
+ * Copyright 2022 Yandex LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSName
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.Modifier
-import com.google.devtools.ksp.symbol.impl.binary.KSPropertyDeclarationDescriptorImpl
-import com.google.devtools.ksp.symbol.impl.kotlin.KSTypeImpl
 import org.jetbrains.kotlin.builtins.jvm.JavaToKotlinClassMap
 import org.jetbrains.kotlin.name.FqNameUnsafe
-import org.jetbrains.kotlin.types.RawType
 
-internal fun KSType.isRaw(): Boolean {
-    // FIXME: Remove this ksp-impl workaround when fix is available for the public api.
-    return when(this) {
-        is KSTypeImpl -> kotlinType.unwrap() is RawType
-        else -> Utils.resolver.isJavaRawType(this)
-    }
-}
-
-internal fun KSPropertyDeclaration.isLateInit(): Boolean {
-    // FIXME: Remove this ksp-impl workaround when fix is available for the public api.
-    return when(this) {
-        is KSPropertyDeclarationDescriptorImpl -> descriptor.isLateInit
-        else -> Modifier.LATEINIT in modifiers
-    }
-}
 
 internal fun Resolver.getKotlinClassByName(qualifiedName: KSName, forceMutable: Boolean): KSClassDeclaration? {
     // FIXME: Remove this ksp-impl workaround when this is available in the public api.

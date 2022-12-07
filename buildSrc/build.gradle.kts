@@ -15,8 +15,6 @@ repositories {
 
 dependencies {
     implementation(libs.kotlin.gradle)
-    implementation(libs.dokka.gradle)
-    implementation(libs.dokka.base)
 
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))

@@ -2,7 +2,6 @@ import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
 
 plugins {
     id("yatagan.artifact")
-    id("yatagan.documented")
 }
 
 val stdLib: Configuration by configurations.creating
