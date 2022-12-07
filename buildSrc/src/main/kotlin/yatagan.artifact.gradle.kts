@@ -1,8 +1,11 @@
 import com.yandex.yatagan.gradle.isValidSemVerString
+import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
     id("yatagan.base-module")
+    id("org.jetbrains.dokka")
     `maven-publish`
+    signing
 }
 
 val yataganVersion: String by extra
@@ -23,19 +26,82 @@ val mavenUsername: Provider<String> = providers.environmentVariable("MAVEN_USERN
 // maven password - must be valid both for snapshot and release repos.
 val mavenPassword: Provider<String> = providers.environmentVariable("MAVEN_PASSWORD")
 
+val signingKeyId: Provider<String> = providers.environmentVariable("MAVEN_SIGNING_KEY_ID")
+val signingPassword: Provider<String> = providers.environmentVariable("MAVEN_SIGNING_PASSWORD")
+val signingSecretKey: Provider<String> = providers.environmentVariable("MAVEN_SIGNING_SECRET_KEYRING_FILE")
+
+val isPublishToMavenEnabled = (mavenUrl.isPresent || mavenSnapshotUrl.isPresent)
+        && mavenUsername.isPresent && mavenPassword.isPresent
+
+val isSigningEnabled = signingKeyId.isPresent && signingPassword.isPresent && signingSecretKey.isPresent
+
 java {
     withSourcesJar()
+}
+
+val artifactName = path.trim(':').replace(':', '-')
+
+if (isPublishToMavenEnabled) {
+    // Only enable Dokka to generate javadoc artifact for publishing.
+    tasks.withType<DokkaTask>().configureEach {
+        moduleName.set(artifactName)
+    }
+
+    val javadocJar by tasks.creating(Jar::class) {
+        archiveClassifier.set("javadoc")
+        from(tasks.dokkaJavadoc.map { it.outputDirectory })
+        dependsOn(tasks.dokkaJavadoc)
+    }
+
+    artifacts {
+        add(configurations.archives.name, javadocJar)
+    }
 }
 
 publishing {
     publications {
         create<MavenPublication>("main") {
             from(components["java"])
+            tasks.findByName("javadocJar")?.let {
+                artifact(it)
+            }
+
             this.version = yataganVersion
             this.groupId = "com.yandex.yatagan"
-            this.artifactId = path.trim(':').replace(':', '-')
-        }
+            this.artifactId = artifactName
 
+            pom {
+                name.set("Yatagan")
+                description.set("Yatagan is a Dependency Injection framework, " +
+                        "specializing on runtime performance and build speed. " +
+                        "Supports code generation (apt/kapt/ksp) or reflection.")
+                url.set("http://github.com/yandex/yatagan/")
+
+                licenses {
+                    license {
+                        name.set("Apache License, version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0")
+                        distribution.set("repo")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git://github.com/yandex/yatagan.git")
+                    developerConnection.set("scm:git://github.com/yandex/yatagan.git")
+                    url.set("https://github.com/yandex/yatagan.git")
+                }
+
+                developers {
+                    developer {
+                        name.set("Yandex LLC")
+                        url.set("https://yandex.com")
+                    }
+                }
+            }
+        }
+    }
+
+    if (isPublishToMavenEnabled) {
         repositories {
             fun MavenArtifactRepository.setupCredentials() {
                 credentials {
@@ -56,6 +122,19 @@ publishing {
                 }
             }
         }
+    }
+}
+
+if (isSigningEnabled) {
+    signing {
+        sign(publishing.publications)
+        sign(configurations.archives.get())
+
+        useInMemoryPgpKeys(
+            signingKeyId.get(),
+            signingSecretKey.get(),
+            signingPassword.get(),
+        )
     }
 }
 
