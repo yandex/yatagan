@@ -18,6 +18,7 @@ package com.yandex.yatagan
 
 /**
  * Container annotation for [AnyCondition].
+ * All expressions from `value` are joined with 'AND' (&&) operator.
  *
  * @see Condition
  */

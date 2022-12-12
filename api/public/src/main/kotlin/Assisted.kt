@@ -17,15 +17,14 @@
 package com.yandex.yatagan
 
 /**
- * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/Assisted.html), behavior should be identical.
+ * See Dagger [docs](https://dagger.dev/api/latest/dagger/assisted/Assisted.html).
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 public annotation class Assisted(
     /**
-     * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/Assisted.html#value--),
-     * behavior should be identical.
+     * See the Dagger [docs](https://dagger.dev/api/latest/dagger/assisted/Assisted.html#value--).
      */
     val value: String = "",
 )
