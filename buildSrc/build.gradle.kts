@@ -3,14 +3,8 @@ plugins {
 }
 
 repositories {
-    maven {
-        name = "mavenCentral"
-        url = uri("https://artifactory.yandex.net/central")
-    }
-    maven {
-        name = "gradlePluginPortal"
-        url = uri("https://artifactory.yandex.net/gradle")
-    }
+    mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
