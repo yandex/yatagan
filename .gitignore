@@ -46,8 +46,3 @@
 
 # Local config files
 /local.properties
-
-# gclient
-/deps
-/.gclient_entries
-/.cipd
