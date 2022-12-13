@@ -1,7 +1,7 @@
 # Yatagan
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.yandex.yatagan/api-compiled/badge.svg)](https://maven-badges.herokuapp.com/maven-central//com.yandex.yatagan/api-compiled)
-[![Build status](https://github.com/github/docs/actions/workflows/CI/badge.svg)](https://github.com/yandex/yatagan/actions)
+[![CI](https://github.com/yandex/yatagan/actions/workflows/main.yaml/badge.svg)](https://github.com/yandex/yatagan/actions/workflows/main.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Yatagan is a fast **Dependency Injection framework** based on Google's [Dagger2][D2] API.
