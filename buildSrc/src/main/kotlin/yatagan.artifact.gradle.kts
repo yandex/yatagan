@@ -21,9 +21,11 @@ val mavenUrl: Provider<String> = providers.environmentVariable("MAVEN_REPOSITORY
 val mavenSnapshotUrl: Provider<String> = providers.environmentVariable("MAVEN_REPOSITORY_SNAPSHOT_URL")
 
 // maven username - must be valid both for snapshot and release repos.
+// WARNING: For nexus (sonatype) publications, use NEXUS_USERNAME variable.
 val mavenUsername: Provider<String> = providers.environmentVariable("MAVEN_USERNAME")
 
 // maven password - must be valid both for snapshot and release repos.
+// WARNING: For nexus (sonatype) publications, use NEXUS_PASSWORD variable.
 val mavenPassword: Provider<String> = providers.environmentVariable("MAVEN_PASSWORD")
 
 val signingKeyId: Provider<String> = providers.environmentVariable("MAVEN_SIGNING_KEY_ID")
@@ -33,29 +35,24 @@ val signingSecretKey: Provider<String> = providers.environmentVariable("MAVEN_SI
 val isPublishToMavenEnabled = (mavenUrl.isPresent || mavenSnapshotUrl.isPresent)
         && mavenUsername.isPresent && mavenPassword.isPresent
 
-val isSigningEnabled = signingKeyId.isPresent && signingPassword.isPresent && signingSecretKey.isPresent
-
 java {
     withSourcesJar()
 }
 
 val artifactName = path.trim(':').replace(':', '-')
 
-if (isPublishToMavenEnabled) {
-    // Only enable Dokka to generate javadoc artifact for publishing.
-    tasks.withType<DokkaTask>().configureEach {
-        moduleName.set(artifactName)
-    }
+tasks.withType<DokkaTask>().configureEach {
+    moduleName.set(artifactName)
+}
 
-    val javadocJar by tasks.creating(Jar::class) {
-        archiveClassifier.set("javadoc")
-        from(tasks.dokkaJavadoc.map { it.outputDirectory })
-        dependsOn(tasks.dokkaJavadoc)
-    }
+val javadocJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("javadoc")
+    from(tasks.dokkaJavadoc.map { it.outputDirectory })
+    dependsOn(tasks.dokkaJavadoc)
+}
 
-    artifacts {
-        add(configurations.archives.name, javadocJar)
-    }
+artifacts {
+    add(configurations.archives.name, javadocJar)
 }
 
 publishing {
@@ -125,7 +122,7 @@ publishing {
     }
 }
 
-if (isSigningEnabled) {
+if (signingKeyId.isPresent && signingPassword.isPresent && signingSecretKey.isPresent) {
     signing {
         sign(publishing.publications)
         sign(configurations.archives.get())
