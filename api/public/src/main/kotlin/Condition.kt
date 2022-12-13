@@ -51,8 +51,7 @@ public annotation class Condition(
     val value: KClass<*>,
 
     /**
-     * A string consisting from plain Java identifiers, separated by '.' and optionally staring with
-     * '!'.
+     * A string consisting from plain Java identifiers, separated by '.' and optionally staring with '!'.
      *
      * Each identifier in chain represents a non-private field, method, resolved on a
      * resulting type of previous identifier or the root class if this is the first identifier.
@@ -71,42 +70,34 @@ public annotation class Condition(
      *
      * Examples:
      * ```kotlin
-     * /*@*/ package test
-     * /*@*/ import com.yandex.yatagan.*
-     * /*@*/ import javax.inject.*
-     * /*@*/ object SomeObject { val isEnabled = false }
-     * /*@*/ object SomeClass {
-     * /*@*/   @JvmStatic fun staticComputeCondition() = false
-     * /*@*/   @JvmStatic fun staticGetSubObject() = AnotherClass()
-     * /*@*/ }
-     * /*@*/ class AnotherClass { val memberCondition = false }
-     * /*@*/ class WithCompanion { companion object { val prop = false } }
-     * /*@*/ class ConditionProviderWithInject @Inject constructor() { val memberCondition = true }
+     * object SomeObject { val isEnabled = false }
+     * object SomeClass {
+     *   @JvmStatic fun staticComputeCondition() = false
+     *   @JvmStatic fun staticGetSubObject() = AnotherClass()
+     * }
+     * class AnotherClass { val memberCondition = false }
+     * class WithCompanion { companion object { val prop = false } }
+     * class ConditionProviderWithInject @Inject constructor() { val memberCondition = true }
      *
      * // Kotlin's singletons require explicit INSTANCE identifier:
      * @Condition(SomeObject::class, "INSTANCE.isEnabled")
-     * /*@*/ annotation class A
+     * annotation class A
      *
      * // Static function from a class:
      * @Condition(SomeClass::class, "staticComputeCondition")
-     * /*@*/ annotation class B
+     * annotation class B
      *
      * // Calls can be chained. Properties are accessible through explicit getters:
      * @Condition(SomeClass::class, "staticGetSubObject.getMemberCondition")
-     * /*@*/ annotation class C
+     * annotation class C
      *
      * // Companion object must be mentioned explicitly:
      * @Condition(WithCompanion::class, "Companion.getProp")
-     * /*@*/ annotation class D
+     * annotation class D
      *
      * // Non-static condition - an injectable class with non-static member:
      * @Condition(ConditionProviderWithInject::class, "!getMemberCondition")
-     * /*@*/ annotation class E
-     *
-     * /*@*/ @Conditional(A::class, B::class, C::class, D::class, E::class)
-     * /*@*/ class Sample @Inject constructor() {}
-     * /*@*/ @Component interface SampleComponent { val s: Optional<Sample> }
-     * /*@*/ fun test() { Yatagan.create(SampleComponent::class.java).s }
+     * annotation class E
      * ```
      */
     val condition: String,

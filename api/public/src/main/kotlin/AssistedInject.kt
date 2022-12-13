@@ -17,7 +17,7 @@
 package com.yandex.yatagan
 
 /**
- * See the D2 [docs](https://dagger.dev/api/latest/dagger/assisted/AssistedInject.html), behavior should be identical.
+ * See the Dagger [docs](https://dagger.dev/api/latest/dagger/assisted/AssistedInject.html).
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)

@@ -17,58 +17,27 @@
 package com.yandex.yatagan
 
 /**
- * A **binding** declaration marker.
+ * See Dagger [docs](https://dagger.dev/api/latest/dagger/Binds.html).
  *
- * Annotates *abstract* methods of a [Module] that *delegate* bindings.
- * In general, method parameters' (if any, see below) types must be assignable to the return type.
- *
- * `@Binds` usage variants by example:
- *
+ * In Yatagan, `Binds` can play a special role as a part of Condition API.
+ * One can use _multiple alternatives_ for binds arguments:
  * ```kotlin
- * /*@*/ package test
- * /*@*/ import com.yandex.yatagan.*
- * /*@*/ import javax.inject.*
- *
- * /*@*/ interface Api
- * /*@*/ class Impl1 @Inject constructor() : Api {}
- * /*@*/ class Impl2 @Inject constructor() : Api {}
- * /*@*/ class Stub @Inject constructor() : Api {}
- *
- * /*@*/ @Module interface TestModule1 {
- * // `@Binds` methods with a single parameter constitutes an **alias** binding:
- * // whenever `Api` is requested, `Impl` is injected.
- * // This is the basic and the most common usage:
- * @Binds
- * fun aliasForApi(i: Impl1): Api
- * /*@*/ }
- *
- * // Other variants are more advanced cases, that are part of the *Conditions API*.
- * //
- *
- * // `@Binds` methods with *more than one* parameter constitute an **alternatives** binding:
- * /*@*/ @Module interface TestModule2 {
  * @Binds
  * fun alternatives(impl: Impl1, orThis: Impl2, fallback: Stub): Api
- * /*@*/}
- *
- * // `@Binds` methods with *zero* parameters constitute an explicit **empty** or **absent** binding.
- * // Directly requesting `Api` will always be a condition violation,
- * // while `Optional<Api>` dependencies will always be *empty*.
- * /*@*/ @Module interface TestModule3 {
- * @Binds
- * fun noApi(): Api
- * /*@*/}
- *
- * /*@*/ @Component(modules=[TestModule1::class]) interface TestComponent1 { val api: Api }
- * /*@*/ @Component(modules=[TestModule2::class]) interface TestComponent2 { val api: Api }
- * /*@*/ @Component(modules=[TestModule3::class]) interface TestComponent3 { val api: Optional<Api> }
  * ```
- * All these cases can be [qualified][javax.inject.Qualifier].
- * The **alternatives** can also be [scoped][javax.inject.Scope].
- * All these cases can be [multi-bindings][IntoList].
+ * This will bind `Impl1` to `Api` if it is present in the graph;
+ * `Impl2` will be tried if `Impl1` is not present and ultimately `Stub` will be used if no previous alternatives
+ * are present. If even `Stub` is under a condition itself, then the `Api` is also under a condition.
  *
- * @see Provides
+ * One can use `@Binds` without an argument at all, like this:
+ * ```kotlin
+ * @Binds fun noApi(): Api
+ * ```
+ * This is an _explicitly absent_ binding, which declares that `Api` is always absent (under "never"-condition).
+ *
  * @see Optional
+ * @see Condition
+ * @see Conditional
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)

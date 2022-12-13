@@ -19,10 +19,7 @@ package com.yandex.yatagan
 import kotlin.reflect.KClass
 
 /**
- * Annotates a class/object/interface that contains explicit bindings that contribute to the object graph.
- *
- * If Module declaration contain a *companion object with the default name*, methods from it are also treated like
- * static bindings.
+ * See Dagger [docs](https://dagger.dev/api/latest/dagger/Module.html).
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
@@ -37,10 +34,10 @@ public annotation class Module(
     /**
      * [Component]-annotated interfaces, that should be children in a [Component] which includes this
      * module.
-     *
-     * Allows duplicates, recursively via [includes].
-     *
+     * Duplicates are allowed, recursively via [includes].
      * Any included [components][Component] must have [Component.isRoot] to be set to `false`.
+     *
+     * This is the only way to declare child components.
      */
     val subcomponents: Array<KClass<*>> = [],
 )

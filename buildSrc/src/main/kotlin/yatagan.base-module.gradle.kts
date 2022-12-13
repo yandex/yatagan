@@ -5,10 +5,7 @@ plugins {
 }
 
 repositories {
-    maven {
-        name = "mavenCentral"
-        url = uri("https://artifactory.yandex.net/central")
-    }
+    mavenCentral()
     google()
 }
 

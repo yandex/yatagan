@@ -98,6 +98,8 @@ public object Yatagan {
 
         /**
          * Invoke this to apply configured parameters to the global Yatagan state.
+         * This call can only be made once per `Yatagan` session and before any graphs are created.
+         * If not used, the defaults will be automatically applied for every parameter upon first graph creation.
          */
         public fun apply() {
             engine = RuntimeEngine(params.copy())

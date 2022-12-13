@@ -17,8 +17,7 @@
 package com.yandex.yatagan
 
 /**
- * Used in [Component.Builder] declaration to annotate setters or factory arguments.
- * The types (may be qualified) are then accessible in the graph.
+ * See Dagger [docs](https://dagger.dev/api/latest/dagger/BindsInstance.html).
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)

@@ -30,13 +30,10 @@ import kotlin.reflect.KClass
  * to inject a conditional type.
  *
  * ```kotlin
- * /*@*/ import com.yandex.yatagan.*
- * /*@*/ import javax.inject.*
- **
- * /*@*/object Flags {
- * /*@*/ var flagA: Boolean = true
- * /*@*/ var flagB: Boolean = false
- * /*@*/}
+ * object Flags {
+ *  var flagA: Boolean = true
+ *  var flagB: Boolean = false
+ * }
  *
  * // Assume we have the following features declared:
  *
@@ -96,13 +93,10 @@ public annotation class Conditional(
      *
      * ## Examples:
      * ```kotlin
-     * /*@*/ import com.yandex.yatagan.*
-     * /*@*/ import javax.inject.*
-     *
-     * /*@*/ object Flags { var a = false; var b = false; var c = false  }
-     * /*@*/ @Condition(Flags::class, "a") annotation class FeatureA
-     * /*@*/ @Condition(Flags::class, "b") annotation class FeatureB
-     * /*@*/ @Condition(Flags::class, "c") annotation class FeatureC
+     * object Flags { var a = false; var b = false; var c = false  }
+     * @Condition(Flags::class, "a") annotation class FeatureA
+     * @Condition(Flags::class, "b") annotation class FeatureB
+     * @Condition(Flags::class, "c") annotation class FeatureC
      *
      * // Assume the following *flavors* and *dimensions* are declared:
      * @ComponentVariantDimension annotation class Product {

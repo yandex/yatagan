@@ -31,6 +31,8 @@ One can consider migrating to Yatagan from vanilla Dagger if at least one of the
 
 Yatagan tackles both of these issues.
 
+More on the matter and other technical detail on can read in the [article][MEDIUM]. 
+
 ### Performance
 
 As of the first point, performance gains can vary per project due to specific details and Yatagan usage configuration.
@@ -146,10 +148,6 @@ yet doesn't create any root components itself.
 In this case, the library can depend on `com.yandex.yatagan:api-public`,
 which provides pure Yatagan API and no backend-specific entry-points.
 
-### Options
-
-/TODO
-
 ## Backends
 
 ### KAPT/APT
@@ -179,16 +177,10 @@ Reflection support is considered stable in Yatagan. There's already a very simil
 as generated implementation would.
 If a new feature is implemented in Yatagan, reflection automatically works with it.
 
-As of performance, reflection currently uses global object cache and eagerly traverses DI graph hierarchies,
-as codegen does, because the core code is fully shared.
-For large DI graph hierarchies it may take from hundreds of milliseconds to a couple of seconds to parse all necessary
-constructs and build a graph, so startup times may be penalized, 
-depending on the platform, device and graph size and contents.
-However, practice shows, that startup time losses are insignificant compared to build speed gains,
-so reflection mode is well suited for debug builds, which are often less performant themselves anyway.
-
 Technically, reflection mode can be used in production, though it's advised not to do so, as code generation naturally
 produces much more performant code. Also, reflection mode is broken by code minifiers, such as Proguard or R8.
+
+Read more in [reflection backend specific notes](rt/README.md).
 
 #### Android
 
@@ -284,20 +276,50 @@ The general idea of steps one needs to take to migrate from Yatagan to Dagger:
 4. Replace `@Subcomponent` annotations with `@Component(isRoot = false)` ones.
 5. Replace `@Component.Factory` with `@Component.Builder`.
 6. Get rid of all nullable provisions. Yatagan does not support them.
-7. Mark all components, that are accessed from multiple threads as `@Component(.., multiThreadAccess = true)`.
+7. Replace `DaggerMyComponent.builder()` with `Yatagan.builder(MyComponent.Builder::class.java)` or similar.
+8. Mark all components, that are accessed from multiple threads as `@Component(.., multiThreadAccess = true)`.
    If you are unsure, if a component is accessed from a single thread, but ideally it should be,
    you can set up a check with `Yatagan.setThreadAsserter()`.
-8. Run build and fix all remaining inconsistencies (like implicitly included subcomponents, etc..).
+9. Run build and fix all remaining inconsistencies (like implicitly included subcomponents, etc..).
 
 ## Added APIs
 
-/TODO
+Yatagan introduces the following new APIs, that can be utilized to work with **conditional bindings**
+
+The first one is [`@Condition`](api/public/src/main/kotlin/Condition.kt).
+With this annotation, one can declare a **runtime condition** that can be evaluated and its value will
+determine the presence/absence of a binding under the condition.
+
+To put a binding under a given condition, one must use [`@Conditional`](api/public/src/main/kotlin/Conditional.kt)
+annotation on a binding or a class with `@Inject`-annotated constructor.
+
+Variant API ideally replaces Dagger's `@BindsOptionalOf` and makes it more powerful.
+It's very alike to how Android works with flavors and dimensions, only here we can declare components having
+such flavors and include/exclude bindings based on them.
+To use that, one can employ `@Conditional(.., onlyIn = ...)` and `@Component(variant = ...)` attributes. 
+
+Feel free to read a small tutorial doc, that includes [how to use conditions and variants](api/README.md).
 
 ## Plugins
 
-/TODO
+One can write an extension for _validation_ pipeline for Yatagan to implement one's custom graph inspections.
+No additional code generation is currently supported for plugins, and they can not modify graphs under inspection.
+This works, as for Dagger, via SPI. Read more [here](validation/spi/README.md).
+
+## Options
+
+Yatagan has some options, that tweak its behavior. They are provided as normal annotation processor options.
+However, reflection backend requires a different approach in specifying them,
+as documented [here](rt/README.md#reflection-specific-api).
+
+| Option key                       | Default value | Description                                                                   |
+|----------------------------------|---------------|-------------------------------------------------------------------------------|
+| `yatagan.enableStrictMode`       | true          | if enabled, every _mandatory warning_ is reported as an error                 |
+| `yatagan.maxIssueEncounterPaths` | 5             | the max number of places `Encountered in` in an error message to be mentioned |
+| `yatagan.usePlainOutput`         | false         | if enabled, reporting is done in plain text, without ANSI coloring            |
 
 [D2]: https://dagger.dev/
 [KSP]: https://kotlinlang.org/docs/ksp-quickstart.html
 [DR]: https://github.com/JakeWharton/dagger-reflect
 [REF]: #yatagan-vs-dagger-api-reference
+[MEDIUM]: https://medium.com/p/eb58ca20d52f/
