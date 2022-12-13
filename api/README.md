@@ -209,4 +209,4 @@ class PhoneSpecificUnderFeatureA @Inject constructor()
 ])  // accessible in BarApp (in all form-factors) under FeatureC.
 class Complex @Inject constructor()
 ```
- 
+Such approach is only suited for some app architectures, nevertheless it's quite useful if applicable. 

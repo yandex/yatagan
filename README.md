@@ -31,6 +31,8 @@ One can consider migrating to Yatagan from vanilla Dagger if at least one of the
 
 Yatagan tackles both of these issues.
 
+More on the matter and other technical detail on can read in the [article][MEDIUM]. 
+
 ### Performance
 
 As of the first point, performance gains can vary per project due to specific details and Yatagan usage configuration.
@@ -304,11 +306,6 @@ One can write an extension for _validation_ pipeline for Yatagan to implement on
 No additional code generation is currently supported for plugins, and they can not modify graphs under inspection.
 This works, as for Dagger, via SPI. Read more [here](validation/spi/README.md).
 
-[D2]: https://dagger.dev/
-[KSP]: https://kotlinlang.org/docs/ksp-quickstart.html
-[DR]: https://github.com/JakeWharton/dagger-reflect
-[REF]: #yatagan-vs-dagger-api-reference
-
 ## Options
 
 Yatagan has some options, that tweak its behavior. They are provided as normal annotation processor options.
@@ -320,3 +317,9 @@ as documented [here](rt/README.md#reflection-specific-api).
 | `yatagan.enableStrictMode`       | true          | if enabled, every _mandatory warning_ is reported as an error                 |
 | `yatagan.maxIssueEncounterPaths` | 5             | the max number of places `Encountered in` in an error message to be mentioned |
 | `yatagan.usePlainOutput`         | false         | if enabled, reporting is done in plain text, without ANSI coloring            |
+
+[D2]: https://dagger.dev/
+[KSP]: https://kotlinlang.org/docs/ksp-quickstart.html
+[DR]: https://github.com/JakeWharton/dagger-reflect
+[REF]: #yatagan-vs-dagger-api-reference
+[MEDIUM]: https://medium.com/p/eb58ca20d52f/
