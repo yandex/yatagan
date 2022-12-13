@@ -16,7 +16,7 @@ if (nexusUsername.isPresent && nexusPassword.isPresent) {
     extensions.configure<NexusPublishExtension> {
         repositories {
             sonatype {
-                nexusUrl.set(uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/"))
+                nexusUrl.set(uri("https://oss.sonatype.org/service/local/"))
                 snapshotRepositoryUrl.set(uri("https://oss.sonatype.org/content/repositories/snapshots/"))
 
                 username.set(nexusUsername)
