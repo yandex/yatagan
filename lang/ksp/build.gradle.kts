@@ -16,9 +16,4 @@ dependencies {
 
     implementation(project(":base"))
     implementation(libs.ksp.api)
-
-    // KSP internals, sometimes required for workarounds
-    // FIXME: Remove this once there are no workarounds with access to internals employed.
-    implementation(libs.ksp.impl)
-    compileOnly(kotlin("compiler-embeddable"))
 }

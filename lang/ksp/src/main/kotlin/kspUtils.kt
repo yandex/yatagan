@@ -20,6 +20,7 @@ import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getVisibility
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isPrivate
+import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.FunctionKind
 import com.google.devtools.ksp.symbol.KSAnnotated
@@ -210,4 +211,30 @@ private object ErrorDeclarationImpl : KSClassDeclaration {
         check(typeArguments.isEmpty()) { "Not reached" }
         return ErrorTypeImpl
     }
+}
+
+internal fun Resolver.getKotlinClassByName(qualifiedName: KSName, forceMutable: Boolean): KSClassDeclaration? {
+    // TODO: Remove this workaround when this is available in the public api.
+    // https://github.com/google/ksp/pull/1201
+    var name = mapJavaNameToKotlin(qualifiedName) ?: qualifiedName
+    if (forceMutable) {
+        val mutable = mapKotlinClassMutabilityMapping(name.asString())
+        if (mutable != null) {
+            name = getKSNameFromString(mutable)
+        }
+    }
+    return getClassDeclarationByName(name)
+}
+
+private fun mapKotlinClassMutabilityMapping(maybeReadOnly: String) = when(maybeReadOnly) {
+    // based on info from `org.jetbrains.kotlin.builtins.jvm.JavaToKotlinClassMap`.
+    "kotlin.collections.Iterable" -> "kotlin.collections.MutableIterable"
+    "kotlin.collections.Iterator" -> "kotlin.collections.MutableIterator"
+    "kotlin.collections.Collection" -> "kotlin.collections.MutableCollection"
+    "kotlin.collections.List" -> "kotlin.collections.MutableList"
+    "kotlin.collections.Set" -> "kotlin.collections.MutableSet"
+    "kotlin.collections.ListIterator" -> "kotlin.collections.MutableListIterator"
+    "kotlin.collections.Map" -> "kotlin.collections.MutableMap"
+    "kotlin.collections.Map.Entry" -> "kotlin.collections.MutableMap.MutableEntry"
+    else -> null
 }

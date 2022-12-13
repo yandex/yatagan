@@ -12,14 +12,6 @@ val compiledTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
 
-configurations.configureEach {
-    resolutionStrategy {
-        // Force KSP version as testing framework may depend on an older version.
-        force(libs.ksp.impl)
-        force(libs.ksp.api)
-    }
-}
-
 kotlin {
     jvmToolchain {
         languageVersion.set(JavaLanguageVersion.of(11))

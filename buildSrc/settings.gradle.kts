@@ -13,7 +13,6 @@ dependencyResolutionManagement {
             library("kotlin-gradle", "org.jetbrains.kotlin", "kotlin-gradle-plugin").versionRef("kotlin")
             library("dokka-gradle", "org.jetbrains.dokka", "dokka-gradle-plugin").versionRef("kotlin")
 
-            library("ksp-impl", "com.google.devtools.ksp", "symbol-processing").versionRef("ksp")
             library("ksp-api", "com.google.devtools.ksp", "symbol-processing-api").versionRef("ksp")
 
             library("autoCommon", "com.google.auto:auto-common:1.2.1")
