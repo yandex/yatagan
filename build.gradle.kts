@@ -21,6 +21,8 @@ if (nexusUsername.isPresent && nexusPassword.isPresent) {
 
                 username.set(nexusUsername)
                 password.set(nexusPassword)
+
+                packageGroup.set("com.yandex.yatagan")
             }
         }
     }
