@@ -1,6 +1,6 @@
 # Yatagan
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.yandex.yatagan/api-compiled/badge.svg)](https://maven-badges.herokuapp.com/maven-central//com.yandex.yatagan/api-compiled)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.yandex.yatagan/api-compiled/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.yandex.yatagan/api-compiled)
 [![CI](https://github.com/yandex/yatagan/actions/workflows/main.yaml/badge.svg)](https://github.com/yandex/yatagan/actions/workflows/main.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -35,7 +35,7 @@ One can consider migrating to Yatagan from vanilla Dagger if at least one of the
 
 Yatagan tackles both of these issues.
 
-More on the matter and other technical details on can read in the [article][MEDIUM]. 
+Read more and dive into technical details in the Medium [article][MEDIUM]. 
 
 ### Performance
 
