@@ -6,6 +6,28 @@ Encountered:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Extra/unneeded module instance is present
+NOTE: The module doesn't declare any bindings that require module instance
+Encountered:
+  in graph for root-component test.MyComponent
+  in component-creator test.MyComponent.Foo
+  in creator-setter setModule3(m: test.NoBindings): void
+                               ^-[*1]------------
+  here: [1*] input module test.NoBindings
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Extra/unneeded module instance is present
+NOTE: The module is a Kotlin `object` - no need to provide it explicitly, remove it from component creator
+Encountered:
+  in graph for root-component test.MyComponent
+  in component-creator test.MyComponent.Foo
+  in creator-setter setModule2(m: test.ObjectModule): void
+                               ^-[*1]--------------
+  here: [1*] input module test.ObjectModule
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Extra/unneeded module instance is present
 NOTE: The module is undeclared, i. m. not present in @Component(.., module = [<here>], ..)
 Encountered:
   in graph for root-component test.MyComponent
