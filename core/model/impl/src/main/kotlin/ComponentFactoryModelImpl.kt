@@ -34,6 +34,7 @@ import com.yandex.yatagan.lang.Parameter
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.TypeDeclarationKind
+import com.yandex.yatagan.lang.isKotlinObject
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -225,7 +226,11 @@ internal class ComponentFactoryModelImpl private constructor(
                         addNote(Strings.Notes.undeclaredModulePresent())
                     } else {
                         assert(!module.requiresInstance)
-                        addNote(Strings.Notes.moduleDoesNotRequireInstance())
+                        if (module.type.declaration.isKotlinObject) {
+                            addNote(Strings.Notes.objectModuleInBuilder())
+                        } else {
+                            addNote(Strings.Notes.moduleDoesNotRequireInstance())
+                        }
                     }
                 }
             }

@@ -543,6 +543,12 @@ object Strings {
         fun undeclaredModulePresent() =
             "The module is undeclared, i. m. not present in @Component(.., module = [<here>], ..)".toNote()
 
+        @Covered
+        fun objectModuleInBuilder() =
+            ("The module is a Kotlin `object` - no need to provide it explicitly, " +
+                    "remove it from component creator").toNote()
+
+        @Covered
         fun moduleDoesNotRequireInstance() =
             "The module doesn't declare any bindings that require module instance".toNote()
 

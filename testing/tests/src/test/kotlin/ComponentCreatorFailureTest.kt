@@ -134,7 +134,13 @@ class ComponentCreatorFailureTest(
             @Module
             interface Unnecessary
             
-            @Component
+            @Module
+            class NoBindings
+            
+            @Module
+            object ObjectModule
+            
+            @Component(modules = [ObjectModule::class, NoBindings::class])
             interface MyComponent {
                 @Component.Builder
                 interface Foo : FooBase {
@@ -143,6 +149,8 @@ class ComponentCreatorFailureTest(
                     @BindsInstance fun setDouble(i: Double): Foo
                     fun setString(@BindsInstance i: String): String
                     fun setModule(m: Unnecessary)
+                    fun setModule2(m: ObjectModule)
+                    fun setModule3(m: NoBindings)
                     fun create()
                 }
             
