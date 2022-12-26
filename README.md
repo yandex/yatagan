@@ -112,7 +112,7 @@ For kotlin-only/mixed project using **KSP** (use with caution for Java code):
 // Ensure `com.google.devtools.ksp` plugin is applied
 api("com.yandex.yatagan:api-compiled:${yataganVer}")
 // KSP implementation is unstable. Works best for pure-Kotlin projects.
-ksp("com.yandex.yatagan:processor-jap:${yataganVer}")
+ksp("com.yandex.yatagan:processor-ksp:${yataganVer}")
 ```
 
 To dramatically speed up build one can use **runtime reflection** instead of codegen:
