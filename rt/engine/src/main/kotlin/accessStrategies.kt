@@ -55,8 +55,8 @@ internal class CachingAccessStrategy(
     private var value: Any? = null
 
     override fun get(): Any {
-        ThreadAssertions.assertThreadAccess()
         value?.let { local -> return local }
+        ThreadAssertions.assertThreadAccess()
         return binding.accept(creationVisitor).also { value = it }
     }
     override fun getLazy(): Lazy<*> = this

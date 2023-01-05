@@ -184,16 +184,20 @@ class RuntimeTest(
     @Test
     fun `thread assertions`() {
         givenKotlinSource("test.TestCase", """
-            import com.yandex.yatagan.*
+            import com.yandex.yatagan.*import java.lang.AssertionError
             import java.util.concurrent.*
             import javax.inject.*
             
             @Singleton class MyClassA @Inject constructor()
             @Singleton class MyClassB @Inject constructor()
+            @Singleton class MyClassC @Inject constructor()
+            /*un-scoped*/ class MyClassD @Inject constructor()
             
             @Component @Singleton interface MySTComponent {
                 fun getA(): Lazy<MyClassA>
                 fun getB(): MyClassB
+                fun getC(): MyClassC
+                fun getD(): Lazy<MyClassD>
             }
 
             fun test() {
@@ -205,11 +209,22 @@ class RuntimeTest(
                     }
                 })
                 try {
+                    c.getC()  // Create ClassC ahead of time
+                    val d1 = c.getD()
+                    d1.get()  // Create ClassD inside d1 holder.
+                    val d2 = c.getD()
+
                     val executor = Executors.newFixedThreadPool(2)
                     val t1 = executor.submit { 
                         try {
                             c.getA().get()
                             throw IllegalStateException("Test failed")
+                        } catch (_: AssertionError) {}
+                        c.getC()  // Shouldn't throw as ClassC is already 
+                        d1.get()  // Shouldn't throw as object in d1 is pre-created
+                        try {
+                           d2.get()
+                           throw IllegalStateException("Test failed")
                         } catch (_: AssertionError) {}
                     }
                     val t2 = executor.submit {
@@ -217,6 +232,8 @@ class RuntimeTest(
                             c.getB()
                             throw IllegalStateException("Test failed")
                         } catch (_: AssertionError) {}
+                        c.getC() // Shouldn't throw as ClassC is already created
+                        d1.get()  // Shouldn't throw as object in d1 is pre-created
                     }
                     t1.get()
                     t2.get()
