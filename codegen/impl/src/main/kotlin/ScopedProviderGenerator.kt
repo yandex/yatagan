@@ -55,9 +55,6 @@ internal class ScopedProviderGenerator(
                     modifiers(PUBLIC)
                     annotation<Override>()
                     returnType(ClassName.OBJECT)
-                    if (!useDoubleChecking) {
-                        +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
-                    }
                     +"%T local = mValue".formatCode(ClassName.OBJECT)
                     controlFlow("if (local == null)") {
                         if (useDoubleChecking) {
@@ -69,6 +66,7 @@ internal class ScopedProviderGenerator(
                                 }
                             }
                         } else {
+                            +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
                             +"local = mDelegate.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                             +"mValue = local"
                         }
