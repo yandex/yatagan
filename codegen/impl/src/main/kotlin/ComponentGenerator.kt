@@ -35,9 +35,14 @@ import javax.lang.model.element.Modifier.STATIC
 internal class ComponentGenerator private constructor(
     private val graph: BindingGraph,
     val generatedClassName: ClassName,
+    maxSlotsPerSwitch: Int,
 ) {
-    constructor(graph: BindingGraph): this(
+    constructor(
+        graph: BindingGraph,
+        maxSlotsPerSwitch: Int,
+    ): this(
         graph = graph,
+        maxSlotsPerSwitch = maxSlotsPerSwitch,
         generatedClassName = graph.model.name.let { name ->
             check(name is ClassNameModel)
             // Keep name mangling in sync with loader!
@@ -57,6 +62,7 @@ internal class ComponentGenerator private constructor(
     private val slotSwitchingGenerator = lazyProvider {
         SlotSwitchingGenerator(
             thisGraph = graph,
+            maxSlotsPerSwitch = maxSlotsPerSwitch,
         ).also(::registerContributor)
     }
     private val unscopedProviderGenerator = lazyProvider {
@@ -120,6 +126,7 @@ internal class ComponentGenerator private constructor(
     private val childGenerators: Collection<ComponentGenerator> = graph.children.map { childGraph ->
         ComponentGenerator(
             graph = childGraph,
+            maxSlotsPerSwitch = maxSlotsPerSwitch,
             generatedClassName = generatedClassName.nestedClass(
                 subcomponentNs.name(childGraph.model.name, suffix = "Impl", firstCapital = true)
             ),

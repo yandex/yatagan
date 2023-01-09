@@ -113,7 +113,7 @@ internal class AccessStrategyManager(
                             lazyStrategy = if (usage.lazy + usage.provider > 0) {
                                 SlotProviderStrategy(
                                     binding = binding,
-                                    multiFactory = multiFactory.get(),
+                                    slot = multiFactory.get().requestSlot(binding),
                                     cachingProvider = unscopedProviderGenerator.get(),
                                 )
                             } else null

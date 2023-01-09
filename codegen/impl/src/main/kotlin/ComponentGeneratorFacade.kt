@@ -21,9 +21,11 @@ import com.yandex.yatagan.core.graph.BindingGraph
 
 class ComponentGeneratorFacade(
     graph: BindingGraph,
+    maxSlotsPerSwitch: Int,
 ) {
     private val generator = ComponentGenerator(
         graph = graph,
+        maxSlotsPerSwitch = maxSlotsPerSwitch,
     )
 
     val targetPackageName: String

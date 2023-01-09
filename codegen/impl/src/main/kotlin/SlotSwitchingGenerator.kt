@@ -21,16 +21,23 @@ import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
+import javax.lang.model.element.Modifier
 
 internal class SlotSwitchingGenerator(
     private val thisGraph: BindingGraph,
+    private val maxSlotsPerSwitch: Int,
 ) : ComponentGenerator.Contributor {
+    init {
+        require(maxSlotsPerSwitch > 1 || maxSlotsPerSwitch == -1) {
+            "maxSlotsPerSwitch should be at least 2 or -1 (infinity)"
+        }
+    }
 
-    private val boundSlots = mutableMapOf<Binding, Int>()
-    private var nextFreeSlot = 0
+    private val bindings = arrayListOf<Binding>()
 
     fun requestSlot(forBinding: Binding): Int {
-        return boundSlots.getOrPut(forBinding) { nextFreeSlot++ }
+        bindings += forBinding
+        return bindings.lastIndex
     }
 
     override fun generate(builder: TypeSpecBuilder) {
@@ -38,18 +45,57 @@ internal class SlotSwitchingGenerator(
             modifiers(/*package-private*/)
             returnType(ClassName.OBJECT)
             parameter(ClassName.INT, "slot")
-            controlFlow("switch(slot)") {
-                boundSlots.forEach { (binding, slot) ->
-                    +buildExpression {
-                        +"case $slot: return "
-                        binding.generateAccess(
-                            builder = this,
-                            inside = thisGraph,
-                            isInsideInnerClass = false,
-                        )
+            if (maxSlotsPerSwitch > 1 && bindings.size > maxSlotsPerSwitch) {
+                // Strategy with two-level-nested switches
+
+                val outerSlotsCount = bindings.size / maxSlotsPerSwitch
+                controlFlow("switch(slot / $maxSlotsPerSwitch)") {
+                    for(outerSlot in 0 .. outerSlotsCount) {
+                        val nestedFactoryName = "$FactoryMethodName\$$outerSlot"
+                        builder.method(nestedFactoryName) {
+                            modifiers(Modifier.PRIVATE)
+                            returnType(ClassName.OBJECT)
+                            parameter(ClassName.INT, "slot")
+                            controlFlow("switch(slot)") {
+                                val startIndex = outerSlot * maxSlotsPerSwitch
+                                var nestedSlot = 0
+                                while((startIndex + nestedSlot) < bindings.size && nestedSlot < maxSlotsPerSwitch) {
+                                    val binding = bindings[startIndex + nestedSlot]
+                                    +buildExpression {
+                                        +"case $nestedSlot: return "
+                                        binding.generateAccess(
+                                            builder = this,
+                                            inside = thisGraph,
+                                            isInsideInnerClass = false,
+                                        )
+                                    }
+                                    ++nestedSlot
+                                }
+                                +"default: throw new %T()".formatCode(Names.AssertionError)
+                            }
+                        }
+                        +buildExpression {
+                            +"case $outerSlot: return %N(slot %L 100)".formatCode(nestedFactoryName, "%")
+                        }
                     }
+                    +"default: throw new %T()".formatCode(Names.AssertionError)
                 }
-                +"default: throw new %T()".formatCode(Names.AssertionError)
+            } else {
+                // Single switch statement
+
+                controlFlow("switch(slot)") {
+                    bindings.forEachIndexed { slot, binding ->
+                        +buildExpression {
+                            +"case $slot: return "
+                            binding.generateAccess(
+                                builder = this,
+                                inside = thisGraph,
+                                isInsideInnerClass = false,
+                            )
+                        }
+                    }
+                    +"default: throw new %T()".formatCode(Names.AssertionError)
+                }
             }
         }
     }

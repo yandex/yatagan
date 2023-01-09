@@ -130,12 +130,11 @@ internal class CachingStrategyMultiThread(
 
 internal class SlotProviderStrategy(
     private val binding: Binding,
-    multiFactory: SlotSwitchingGenerator,
+    private val slot: Int,
     cachingProvider: UnscopedProviderGenerator,
 ) : AccessStrategy {
 
     private val providerName = cachingProvider.name
-    private val slot = multiFactory.requestSlot(binding)
 
     override fun generateAccess(
         builder: ExpressionBuilder,
