@@ -63,5 +63,7 @@ class Options(
         val MaxIssueEncounterPaths = IntOption("yatagan.maxIssueEncounterPaths", default = 5)
 
         val UsePlainOutput = BooleanOption("yatagan.usePlainOutput", default = false)
+
+        val MaxSlotsPerSwitch = IntOption("yatagan.experimental.maxSlotsPerSwitch", default = -1)
     }
 }

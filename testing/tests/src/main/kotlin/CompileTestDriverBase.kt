@@ -163,6 +163,7 @@ abstract class CompileTestDriverBase private constructor(
         ),
         processorOptions = mapOf(
             Options.MaxIssueEncounterPaths.key to "100",
+            Options.MaxSlotsPerSwitch.key to "100",
         ),
     )
 
