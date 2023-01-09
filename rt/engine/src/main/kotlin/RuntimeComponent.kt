@@ -339,7 +339,8 @@ internal class RuntimeComponent(
     }
 
     override fun visitEmpty(binding: EmptyBinding): Any {
-        throw IllegalStateException("Missing binding encountered in `$graph`: $binding")
+        throw IllegalStateException(
+            "Missing binding encountered in `${graph.toString(null)}`: ${binding.toString(null)}")
     }
 
     private inner class EntryPointHandler(val dependency: NodeDependency) : MethodHandler {
