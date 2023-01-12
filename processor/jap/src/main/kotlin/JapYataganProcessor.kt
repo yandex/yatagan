@@ -24,11 +24,7 @@ import javax.lang.model.SourceVersion
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 class JapYataganProcessor : BasicAnnotationProcessor() {
     override fun getSupportedOptions(): Set<String> {
-        return setOf(
-            Options.StrictMode.key,
-            Options.MaxIssueEncounterPaths.key,
-            Options.UsePlainOutput.key,
-        )
+        return Options.all().mapTo(mutableSetOf()) { it.key }
     }
 
     override fun steps(): Iterable<Step> = with(processingEnv) {

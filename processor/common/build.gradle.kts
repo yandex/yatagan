@@ -9,4 +9,6 @@ dependencies {
     implementation(project(":core:graph:impl"))
     implementation(project(":core:model:impl"))
     implementation(project(":codegen:impl"))
+
+    runtimeOnly(kotlin("reflect"))
 }
