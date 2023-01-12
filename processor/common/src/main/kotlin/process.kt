@@ -38,8 +38,8 @@ fun <Source> process(
     sources: Sequence<Source>,
     delegate: ProcessorDelegate<Source>,
 ) {
-    val usePlainOutput = delegate.options[Options.UsePlainOutput]
-    val strictMode = delegate.options[Options.StrictMode]
+    val usePlainOutput = delegate.options[BooleanOption.UsePlainOutput]
+    val strictMode = delegate.options[BooleanOption.StrictMode]
     ObjectCacheRegistry.use {
         val rootModels = sources.mapNotNull { source ->
             ComponentModel(delegate.createDeclaration(source))
@@ -62,7 +62,7 @@ fun <Source> process(
 
             allMessages.forEach { locatedMessage ->
                 val message = locatedMessage.format(
-                    maxEncounterPaths = delegate.options[Options.MaxIssueEncounterPaths],
+                    maxEncounterPaths = delegate.options[IntOption.MaxIssueEncounterPaths],
                 ).run {
                     if (usePlainOutput) toString() else toAnsiEscapedString()
                 }
@@ -85,7 +85,7 @@ fun <Source> process(
             try {
                 val generator = ComponentGeneratorFacade(
                     graph = graphRoot,
-                    maxSlotsPerSwitch = delegate.options[Options.MaxSlotsPerSwitch],
+                    maxSlotsPerSwitch = delegate.options[IntOption.MaxSlotsPerSwitch],
                 )
                 delegate.openFileForGenerating(
                     sources = allSourcesSequence(delegate, graphRoot),

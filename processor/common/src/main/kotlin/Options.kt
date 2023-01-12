@@ -16,54 +16,65 @@
 
 package com.yandex.yatagan.processor.common
 
-import kotlin.reflect.KProperty
-
 /**
  * A wrapper around a simple options map that provides safe option accessing API.
  */
 class Options(
     private val values: Map<String, String>,
 ) {
-    operator fun get(option: BooleanOption): Boolean {
+    operator fun <T> get(option: Option<T>): T {
         val value = values[option.key] ?: return option.default
-        return when (value.lowercase()) {
-            "yes", "enabled", "enable", "true" -> true
-            "no", "disabled", "disable", "false" -> false
-            else -> throw RuntimeException("Invalid boolean option value: $value")
-        }
-    }
-
-    operator fun get(option: IntOption): Int {
-        val value = values[option.key] ?: return option.default
-        return value.toIntOrNull() ?: throw RuntimeException("Invalid integer option value: $value")
-    }
-
-    class BooleanOption internal constructor(
-        val key: String,
-        val default: Boolean,
-    ) {
-        operator fun getValue(delegate: ProcessorDelegate<*>, property: KProperty<*>): Boolean {
-            return delegate.options[this]
-        }
-    }
-
-    class IntOption internal constructor(
-        val key: String,
-        val default: Int,
-    ) {
-        operator fun getValue(delegate: ProcessorDelegate<*>, property: KProperty<*>): Int {
-            return delegate.options[this]
-        }
+        return option.parse(value)
     }
 
     companion object {
-        // TODO: Hook with docs
-        val StrictMode = BooleanOption("yatagan.enableStrictMode", default = true)
-
-        val MaxIssueEncounterPaths = IntOption("yatagan.maxIssueEncounterPaths", default = 5)
-
-        val UsePlainOutput = BooleanOption("yatagan.usePlainOutput", default = false)
-
-        val MaxSlotsPerSwitch = IntOption("yatagan.experimental.maxSlotsPerSwitch", default = -1)
+        fun all(): Set<Option<*>> = buildSet {
+            @Suppress("NO_REFLECTION_IN_CLASS_PATH")
+            for (sealedSubclass in Option::class.sealedSubclasses) {
+                check(sealedSubclass.java.isEnum) { "Unexpected option class" }
+                addAll(sealedSubclass.java.enumConstants)
+            }
+        }
     }
 }
+
+sealed interface Option<out T> {
+    val key: String
+    val default: T
+    fun parse(rawValue: String): T
+}
+
+enum class BooleanOption(
+    override val key: String,
+    override val default: Boolean,
+) : Option<Boolean> {
+
+    StrictMode("yatagan.enableStrictMode", default = true),
+    UsePlainOutput("yatagan.usePlainOutput", default = false),
+
+    ;
+
+    override fun parse(rawValue: String): Boolean {
+        return when (rawValue.lowercase()) {
+            "yes", "enabled", "enable", "true" -> true
+            "no", "disabled", "disable", "false" -> false
+            else -> throw RuntimeException("Invalid boolean option value: $rawValue")
+        }
+    }
+}
+
+enum class IntOption(
+    override val key: String,
+    override val default: Int,
+) : Option<Int> {
+
+    MaxIssueEncounterPaths("yatagan.maxIssueEncounterPaths", default = 5),
+    MaxSlotsPerSwitch("yatagan.experimental.maxSlotsPerSwitch", default = -1),
+
+    ;
+
+    override fun parse(rawValue: String): Int {
+        return rawValue.toIntOrNull() ?: throw RuntimeException("Invalid integer option value: $rawValue")
+    }
+}
+

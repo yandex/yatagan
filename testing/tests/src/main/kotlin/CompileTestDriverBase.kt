@@ -20,8 +20,8 @@ import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
 import androidx.room.compiler.processing.util.compiler.compile
 import com.yandex.yatagan.generated.CompiledApiClasspath
 import com.yandex.yatagan.generated.DynamicApiClasspath
+import com.yandex.yatagan.processor.common.IntOption
 import com.yandex.yatagan.processor.common.LoggerDecorator
-import com.yandex.yatagan.processor.common.Options
 import com.yandex.yatagan.testing.source_set.SourceFile
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assert
@@ -162,8 +162,8 @@ abstract class CompileTestDriverBase private constructor(
             "-opt-in=com.yandex.yatagan.VariantApi",
         ),
         processorOptions = mapOf(
-            Options.MaxIssueEncounterPaths.key to "100",
-            Options.MaxSlotsPerSwitch.key to "100",
+            IntOption.MaxIssueEncounterPaths.key to "100",
+            IntOption.MaxSlotsPerSwitch.key to "100",
         ),
     )
 
