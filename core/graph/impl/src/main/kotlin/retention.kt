@@ -33,12 +33,12 @@ fun validateAnnotationsRetention(graph: BindingGraph, validator: Validator) {
     // Gather scopes, qualifiers and map-keys, that must have RUNTIME retention, so RT can read them.
     val allAnnotationDeclarations: Set<AnnotationDeclaration> = buildSet {
         for (scope in graph.scopes) {
-            add(scope.annotationClass)
+            scope.customAnnotationClass?.let(::add)
         }
 
         for (binding in graph.localBindings.keys) {
             for (scope in binding.scopes) {
-                add(scope.annotationClass)
+                scope.customAnnotationClass?.let(::add)
             }
             binding.target.qualifier?.let { add(it.annotationClass) }
         }

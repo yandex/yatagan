@@ -134,4 +134,44 @@ class ScopesTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `reusable scope is compatible with every scope and is cached`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Scope annotation class ScopeA
+            @Scope annotation class ScopeB
+
+            @ScopeA @Component interface ComponentA {
+                val my: Provider<MyClass>
+            }
+            @ScopeB @Component(modules = [MyModule::class]) interface ComponentB {
+                val my: Provider<MyClass>
+                val any: Provider<Any>
+                val sub: Subcomponent.Builder
+            }
+
+            @Component(isRoot = false) @ScopeA interface Subcomponent {
+                val any: Any
+                @Component.Builder interface Builder { fun create(): Subcomponent }
+            }
+
+            @Reusable class MyClass @Inject constructor()
+            @Module(subcomponents = [Subcomponent::class]) object MyModule {
+                @Provides @Reusable fun provide(): Any = Any()
+            }
+
+            fun test() {
+                val a: ComponentA = Yatagan.create(ComponentA::class.java)
+                val b: ComponentB = Yatagan.create(ComponentB::class.java)
+
+                assert(a.my.get() === a.my.get())
+                assert(b.any.get() === b.any.get() && b.any.get() === b.sub.create().any)
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

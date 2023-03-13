@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model
 
-import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.Constructor
 
 /**
@@ -24,6 +23,6 @@ import com.yandex.yatagan.lang.Constructor
  */
 public interface InjectConstructorModel : ConditionalHoldingModel, HasNodeModel {
     public val constructor: Constructor
-    public val scopes: Set<Annotation>
+    public val scopes: Set<ScopeModel>
     public val inputs: List<NodeDependency>
 }

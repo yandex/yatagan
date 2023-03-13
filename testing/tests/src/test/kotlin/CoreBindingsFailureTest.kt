@@ -822,4 +822,22 @@ class CoreBindingsFailureTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `invalid reusable scope usage`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Reusable @Singleton 
+            class MyClass @Inject constructor()
+
+            @Reusable @Component 
+            interface MyComponent {
+                val c: MyClass
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

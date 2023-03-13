@@ -24,7 +24,6 @@ import com.yandex.yatagan.core.graph.impl.VariantMatch
 import com.yandex.yatagan.core.model.InjectConstructorModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.isNever
-import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.append
@@ -36,7 +35,7 @@ internal class InjectConstructorProvisionBindingImpl(
 ) : ProvisionBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin {
     override val target get() = impl.asNode()
     override val originModule: Nothing? get() = null
-    override val scopes: Set<Annotation> get() = impl.scopes
+    override val scopes get() = impl.scopes
     override val provision get() = impl.constructor
     override val inputs: List<NodeDependency> get() = impl.inputs
     override val requiresModuleInstance: Boolean = false

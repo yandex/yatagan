@@ -1,0 +1,13 @@
+error: @Reusable scope is for bindings only and doesn't make sense on a @Component declaration and thus not supported here. Did you mean to make the component with no dedicated scope?
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: @Reusable scope is used along with other scopes which doesn't make much sense. Other scopes can be safely removed without changing the behavior.
+Encountered:
+  in graph for root-component test.MyComponent
+  in entry-point getC: test.MyClass
+                       ^-[*1]------
+  here: [1*] inject-constructor test.MyClass()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

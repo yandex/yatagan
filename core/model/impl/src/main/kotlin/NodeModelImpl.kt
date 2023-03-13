@@ -23,6 +23,7 @@ import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.InjectConstructorModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
@@ -82,8 +83,8 @@ internal class NodeModelImpl private constructor(
             return visitor.visitInjectConstructor(this)
         }
 
-        override val scopes: Set<Annotation> by lazy {
-            constructor.constructee.annotations.filter { it.isScope() }.toSet()
+        override val scopes: Set<ScopeModel> by lazy {
+            buildScopeModels(constructor.constructee)
         }
 
         override fun validate(validator: Validator) {

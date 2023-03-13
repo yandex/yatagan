@@ -35,9 +35,9 @@ import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.core.model.isNever
-import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -57,7 +57,7 @@ internal class BindingGraphImpl(
 
     override val variant: Variant = component.variant + parent?.variant
 
-    override val scopes: Set<Annotation>
+    override val scopes: Set<ScopeModel>
         get() = component.scopes
 
     override val creator: ComponentFactoryModel?
@@ -280,6 +280,10 @@ internal class BindingGraphImpl(
                     addNote(Strings.Notes.duplicateScopeComponent(component = this@BindingGraphImpl))
                 }
             }
+        }
+
+        if (ScopeModel.Reusable in scopes) {
+            validator.reportError(Strings.Errors.reusableScopeOnComponent())
         }
 
         // Report hierarchy loops

@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model.impl
 
+import com.yandex.yatagan.base.ifOrElseNull
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.DependencyKind.Direct
 import com.yandex.yatagan.core.model.DependencyKind.Lazy
@@ -25,6 +26,7 @@ import com.yandex.yatagan.core.model.DependencyKind.OptionalProvider
 import com.yandex.yatagan.core.model.DependencyKind.Provider
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
@@ -77,6 +79,8 @@ internal object Names {
     const val Provider: String = "javax.inject.Provider"
     const val Optional: String = "com.yandex.yatagan.Optional"
 
+    const val Reusable: String = "com.yandex.yatagan.Reusable"
+
     const val List: String = "java.util.List"
     const val Set: String = "java.util.Set"
     const val Map: String = "java.util.Map"
@@ -103,3 +107,9 @@ internal fun Annotation.isScope() = annotationClass.getAnnotation(BuiltinAnnotat
 internal fun Annotation.isQualifier() = annotationClass.getAnnotation(BuiltinAnnotation.Qualifier) != null
 
 internal fun Annotation.isMapKey() = annotationClass.getAnnotation(BuiltinAnnotation.IntoMap.Key) != null
+
+internal fun buildScopeModels(from: Annotated): Set<ScopeModel> {
+    return from.annotations.mapNotNullTo(mutableSetOf()) {
+        ifOrElseNull(it.isScope()) { ScopeModelImpl(it) }
+    }
+}

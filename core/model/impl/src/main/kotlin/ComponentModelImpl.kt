@@ -27,8 +27,8 @@ import com.yandex.yatagan.core.model.MembersInjectorModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.Variant
-import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
@@ -66,8 +66,8 @@ internal class ComponentModelImpl private constructor(
         return visitor.visitComponent(this)
     }
 
-    override val scopes: Set<Annotation> by lazy {
-        declaration.annotations.filter { it.isScope() }.toSet()
+    override val scopes: Set<ScopeModel> by lazy {
+        buildScopeModels(declaration)
     }
 
     override val modules: Set<ModuleModel> by lazy {
