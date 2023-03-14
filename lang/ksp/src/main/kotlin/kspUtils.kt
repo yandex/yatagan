@@ -33,12 +33,7 @@ import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
-import com.google.devtools.ksp.symbol.KSTypeArgument
-import com.google.devtools.ksp.symbol.KSVisitor
-import com.google.devtools.ksp.symbol.Location
 import com.google.devtools.ksp.symbol.Modifier
-import com.google.devtools.ksp.symbol.NonExistLocation
-import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
 import com.yandex.yatagan.lang.Parameter
@@ -151,65 +146,10 @@ internal fun parametersSequenceFor(
                 impl = parameter,
                 jvmSignatureSupplier = { jvmMethodSignature.parameterTypesSignatures?.get(i) },
                 refinedTypeRef = parameter.type.run {
-                    if (types != null) replaceType(types[i] ?: ErrorTypeImpl) else this
+                    types?.get(i)?.let { replaceType(it) } ?: this
                 },
             )
         )
-    }
-}
-
-internal object ErrorTypeImpl : KSType {
-    override val annotations get() = emptySequence<Nothing>()
-    override val arguments get() = emptyList<Nothing>()
-    override val declaration: KSDeclaration get() = ErrorDeclarationImpl
-    override val isError: Boolean get() = true
-    override val isFunctionType: Boolean get() = false
-    override val isMarkedNullable: Boolean get() = false
-    override val isSuspendFunctionType: Boolean get() = false
-    override val nullability: Nullability get() = Nullability.NOT_NULL
-    override fun isAssignableFrom(that: KSType): Boolean = false
-    override fun isCovarianceFlexible(): Boolean = false
-    override fun isMutabilityFlexible(): Boolean = false
-    override fun makeNotNullable(): KSType = this
-    override fun makeNullable(): KSType = this
-    override fun replace(arguments: List<KSTypeArgument>): KSType = this
-    override fun starProjection(): KSType = this
-}
-
-private object ErrorDeclarationImpl : KSClassDeclaration {
-    override val annotations get() = emptySequence<Nothing>()
-    override val classKind: ClassKind get() = ClassKind.CLASS
-    override val containingFile: Nothing? get() = null
-    override val declarations get() = emptySequence<Nothing>()
-    override val docString: Nothing? get() = null
-    override val isActual: Boolean get() = false
-    override val isCompanionObject: Boolean get() = false
-    override val isExpect: Boolean get() = false
-    override val location: Location get() = NonExistLocation
-    override val modifiers: Set<Modifier> get() = emptySet()
-    override val origin: Origin get() = Origin.SYNTHETIC
-    override val packageName: KSName get() = Utils.resolver.getKSNameFromString("")
-    override val parent: Nothing? get() = null
-    override val parentDeclaration: Nothing? get() = null
-    override val primaryConstructor: Nothing? get() = null
-    override val qualifiedName: Nothing? get() = null
-    override val simpleName: KSName get() = Utils.resolver.getKSNameFromString("<Error>")
-    override val superTypes get() = emptySequence<Nothing>()
-    override val typeParameters get() = emptyList<Nothing>()
-    override fun asStarProjectedType() = ErrorTypeImpl
-    override fun findActuals() = emptySequence<Nothing>()
-    override fun findExpects() = emptySequence<Nothing>()
-    override fun getAllFunctions() = emptySequence<Nothing>()
-    override fun getAllProperties() = emptySequence<Nothing>()
-    override fun getSealedSubclasses() = emptySequence<Nothing>()
-
-    override fun <D, R> accept(visitor: KSVisitor<D, R>, data: D): R {
-        return visitor.visitClassDeclaration(this, data)
-    }
-
-    override fun asType(typeArguments: List<KSTypeArgument>): KSType {
-        check(typeArguments.isEmpty()) { "Not reached" }
-        return ErrorTypeImpl
     }
 }
 

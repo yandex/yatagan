@@ -38,10 +38,11 @@ internal class KspMethodImpl(
 
 
     override val returnType: Type by lazy {
-        var typeReference = impl.returnType ?: ErrorTypeImpl.asReference()
-        if (!isStatic) {
+        var typeReference = impl.returnType
+        if (!isStatic && typeReference != null) {
             // No need to resolve generics for static functions.
-            typeReference = typeReference.replaceType(impl.asMemberOf(owner.type.impl).returnType ?: ErrorTypeImpl)
+            val returnType = impl.asMemberOf(owner.type.impl).returnType
+            typeReference = returnType?.let(typeReference::replaceType)
         }
         KspTypeImpl(
             reference = typeReference,

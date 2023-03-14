@@ -14,17 +14,30 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.lang.compiled
+package com.yandex.yatagan.lang.common
 
 import com.yandex.yatagan.lang.Type
-import com.yandex.yatagan.lang.common.TypeBase
 
-/**
- * [Type] base class, that can be named by [CtTypeNameModel].
- */
-abstract class CtTypeBase : TypeBase(), CtNamedType {
-    final override fun toString() = nameModel.toString()
+open class ErrorType(
+    private val nameHint: String,
+    final override val isUnresolved: Boolean = true,
+) : TypeBase() {
+    final override val declaration: NoDeclaration
+        get() = NoDeclaration(this)
 
-    final override val isUnresolved: Boolean
+    final override val typeArguments: List<Nothing>
+        get() = emptyList()
+
+    final override val isVoid: Boolean
         get() = false
+
+    final override fun isAssignableFrom(another: Type): Boolean {
+        return this === another
+    }
+
+    final override fun asBoxed(): Type {
+        return this
+    }
+
+    final override fun toString() = nameHint
 }

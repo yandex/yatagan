@@ -94,8 +94,9 @@ fun <Source> process(
                 ).use(generator::generateTo)
             } catch (e: Throwable) {
                 logger.error(buildString {
-                    appendLine("Internal Processor Error while processing $graphRoot")
-                    appendLine("Please, report this to the maintainers, along with the code (diff) that triggered this.")
+                    appendLine("Internal Processor Error while processing ${graphRoot.toString(null)}")
+                    appendLine("Please, report this via https://github.com/yandex/yatagan/issues/new, " +
+                            "preferably with the sample code/project that reproduces this.")
                     appendLine(e.message)
                     appendLine(e.stackTraceToString())
                 })

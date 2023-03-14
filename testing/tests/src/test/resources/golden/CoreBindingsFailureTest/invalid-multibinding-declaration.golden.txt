@@ -33,14 +33,14 @@ Encountered:
 Encountered:
   in graph for root-component test.MyComponent
   in module test.MyModule2
-  here: multibinding declaration (list) test.MyModule2::listDeclaration3(arg: int): java.util.List<error.UnresolvedCla$$>
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: multibinding declaration (list) test.MyModule2::listDeclaration3(arg: int): java.util.List<<unresolved-type-var: T>>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Encountered:
   in graph for root-component test.MyComponent
   in module test.MyModule2
-  here: multibinding declaration (map) test.MyModule2::mapDeclaration3(arg: int): java.util.Map<error.UnresolvedCla$$, ?>
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: multibinding declaration (map) test.MyModule2::mapDeclaration3(arg: int): java.util.Map<<unresolved-type-var: T>, ?>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Encountered:
   in graph for root-component test.MyComponent

@@ -69,7 +69,11 @@ internal data class MissingBindingImpl(
         }
 
         override fun visitDefault() = reportMissingBinding {
-            addNote(Strings.Notes.unknownBinding())
+            if (target.type.isUnresolved) {
+                addNote(Strings.Notes.missingBecauseUnresolved())
+            } else {
+                addNote(Strings.Notes.unknownBinding())
+            }
         }
 
         override fun visitInjectConstructor(model: InjectConstructorModel) {

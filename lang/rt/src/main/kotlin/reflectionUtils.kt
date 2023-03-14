@@ -159,7 +159,7 @@ internal fun ReflectType.formatString(): String = when (this) {
         else -> "?"
     }
     is ReflectGenericArrayType -> "${genericComponentType.formatString()}[]"
-    is ReflectTypeVariable -> "error.UnresolvedCla$$"
+    is ReflectTypeVariable -> "<unresolved-type-var: ${name}>"
     else -> toString()
 }
 
@@ -194,6 +194,8 @@ private val RtTypeDeclarationImpl.typeHierarchy: Sequence<RtTypeDeclarationImpl>
     get() = sequence {
         yield(this@typeHierarchy)
         for (superType in superTypes) {
+            if (superType !is RtTypeDeclarationImpl)
+                continue
             yield(superType)
             yieldAll(superType.typeHierarchy)
         }

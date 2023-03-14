@@ -20,7 +20,7 @@ import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.compiled.ArrayNameModel
 import com.yandex.yatagan.lang.compiled.ClassNameModel
 import com.yandex.yatagan.lang.compiled.CtTypeNameModel
-import com.yandex.yatagan.lang.compiled.ErrorNameModel
+import com.yandex.yatagan.lang.compiled.InvalidNameModel
 import com.yandex.yatagan.lang.compiled.KeywordTypeNameModel
 import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 import com.yandex.yatagan.lang.compiled.WildcardNameModel
@@ -88,7 +88,7 @@ internal class Namespace(
                 }
             }
             is KeywordTypeNameModel -> singleValueIterator(nameModel.name)
-            is ErrorNameModel -> singleValueIterator(nameModel.toString())
+            is InvalidNameModel -> singleValueIterator(nameModel.toString())
         }
     }
 

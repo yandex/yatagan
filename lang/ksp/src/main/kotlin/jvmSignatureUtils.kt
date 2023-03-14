@@ -101,7 +101,7 @@ internal fun JvmTypeInfo(jvmSignature: CharSequence?, type: KSType?): JvmTypeInf
         'Z' -> JvmTypeInfo.Boolean
         '[' -> JvmTypeInfo.Array(elementInfo = JvmTypeInfo(
             jvmSignature = jvmSignature.subSequence(startIndex = 1, endIndex = jvmSignature.length),
-            type = type?.arguments?.firstOrNull()?.type?.resolveOrError(),
+            type = type?.arguments?.firstOrNull()?.type?.resolve(),
         ))
         'V' -> JvmTypeInfo.Void
         null -> JvmTypeInfo(checkNotNull(type) { "Not reached: both signature and type can not be null" })

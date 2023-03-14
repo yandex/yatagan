@@ -24,6 +24,7 @@ import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -40,6 +41,9 @@ internal class MembersInjectorModelImpl private constructor(
     }
 
     private val injectee = injector.parameters.single().type
+
+    override val type: Type
+        get() = injectee
 
     override val membersToInject: Map<Member, NodeDependency> by lazy {
         buildMap {

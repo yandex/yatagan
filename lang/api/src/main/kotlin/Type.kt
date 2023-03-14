@@ -48,6 +48,13 @@ public interface Type : Comparable<Type> {
     public val isVoid: Boolean
 
     /**
+     * Checks if the type is either of:
+     * 1. Unresolved/missing/error type.
+     * 2. Unsubstituted type variable.
+     */
+    public val isUnresolved: Boolean
+
+    /**
      * Checks if a variable of this type can be assigned a value of [another] type.
      */
     public fun isAssignableFrom(another: Type): Boolean

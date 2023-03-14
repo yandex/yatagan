@@ -88,10 +88,9 @@ public interface LangModelFactory {
     ): TypeDeclaration?
 
     /**
-     * An "error" type, which is usually applicable in places, where type information is unresolved due to a semantic
-     * error in the underlying code.
+     * Creates a synthetic "no"-type which can be used when type object is required but no actual type is present.
      */
-    public val errorType: Type
+    public fun createNoType(name: String): Type
 
     /**
      * `true` if the code runs in RT mode (using reflection). `false` if codegen mode.
@@ -121,7 +120,7 @@ public interface LangModelFactory {
             vararg simpleNames: String
         ): TypeDeclaration? = checkNotNull(delegate).getTypeDeclaration(packageName, simpleName, *simpleNames)
 
-        override val errorType: Type get() = checkNotNull(delegate).errorType
+        override fun createNoType(name: String): Type = checkNotNull(delegate).createNoType(name)
 
         override val isInRuntimeEnvironment: Boolean get() = checkNotNull(delegate).isInRuntimeEnvironment
     }

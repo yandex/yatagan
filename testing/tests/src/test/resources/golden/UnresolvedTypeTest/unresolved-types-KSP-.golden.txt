@@ -1,0 +1,129 @@
+error: A class for members injection must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  here: injector-function inject(a: <unresolved: UnresolvedInjectee>)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved-type-var: T>
+NOTE: Unsubstituted type variables are not allowed here. Please, remove the unsupported generic from the containing class.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getTypeVar(): <unresolved-type-var: T>
+                               ^-[*1]------------------
+  here: [1*] <unresolved-type-var: T>
+             ^~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved: UnresolvedDep>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in module test.TestModule
+  in @provides test.TestModule::provide(.., foo: <unresolved: UnresolvedDep>, ..)
+                                            ^-[*1]--------------------------
+  here: [1*] <unresolved: UnresolvedDep>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved: UnresolvedEee>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getFoo: test.Foo
+                         ^-[*1]--
+  in [1*] inject-constructor test.Foo(test.Goo)
+                                      ^-[*2]--
+  in [2*] inject-constructor test.Goo(.. 1 dependency)
+  here: <unresolved: UnresolvedEee>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved: UnresolvedEp>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEp(): <unresolved: UnresolvedEp>
+                          ^-[*1]--------------------
+  here: [1*] <unresolved: UnresolvedEp>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved: UnresolvedInjectee>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  here: injector-function inject(a: <unresolved: UnresolvedInjectee>)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved: UnresolvedProvision>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in module test.TestModule
+  in @provides test.TestModule::provide(): <unresolved: UnresolvedProvision>
+                                           ^-[*1]---------------------------
+  here: [1*] <unresolved: UnresolvedProvision>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: kotlin.collections.List<<unresolved: ???>>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEpList(): kotlin.collections.List<<unresolved: ???>>
+                              ^-[*1]------------------------------------
+  here: [1*] kotlin.collections.List<<unresolved: ???>>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: test.TestComponent<<unresolved-type-var: T>>
+NOTE: Unsubstituted type variables are not allowed here. Please, remove the unsupported generic from the containing class.
+Encountered:
+  here: graph for root-component test.TestComponent<<unresolved-type-var: T>>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for <unresolved-type-var: T>
+NOTE: The type is unresolved, no binding could be matched for such type.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getTypeVar: <unresolved-type-var: T>
+                             ^-[*1]------------------
+  here: [1*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for <unresolved: UnresolvedEee>
+NOTE: The type is unresolved, no binding could be matched for such type.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getFoo: test.Foo
+                         ^-[*1]--
+  in [1*] inject-constructor test.Foo(test.Goo)
+                                      ^-[*2]--
+  in [2*] inject-constructor test.Goo(<unresolved: UnresolvedEee>)
+                                      ^-[*3]---------------------
+  here: [3*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for <unresolved: UnresolvedEp>
+NOTE: The type is unresolved, no binding could be matched for such type.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEp: <unresolved: UnresolvedEp>
+                        ^-[*1]--------------------
+  here: [1*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for kotlin.collections.List<<unresolved: ???>>
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEpList: kotlin.collections.List<<unresolved: ???>>
+                            ^-[*1]------------------------------------
+  here: [1*] <missing>
+             ^~~~~~~~~

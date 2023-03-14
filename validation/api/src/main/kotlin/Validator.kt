@@ -40,6 +40,8 @@ public interface Validator {
      *
      * Useful on objects that doesn't resemble any public entity but rather an implementation detail of a complex
      * entity.
+     *
+     * WARNING: This should be called instead of making direct [MayBeInvalid.validate] calls.
      */
     public fun inline(node: MayBeInvalid)
 }

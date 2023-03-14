@@ -18,12 +18,12 @@ package com.yandex.yatagan.core.model.impl
 
 import com.yandex.yatagan.base.BiObjectCache
 import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.core.model.ClassBackedModel
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Field
-import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
@@ -111,7 +111,7 @@ private class ConditionLiteralImpl private constructor(
 
     override val root
         get() = NodeModelImpl(
-            type = payload.root.asType(),
+            type = payload.type,
             qualifier = null,
         )
 
@@ -134,13 +134,16 @@ private class ConditionLiteralImpl private constructor(
                 val (negate, names) = matched.destructured
                 this(
                     negated = negate.isNotEmpty(),
-                    payload = LiteralPayloadImpl(model.target.declaration, names),
+                    payload = LiteralPayloadImpl(
+                        type = model.target,
+                        pathSource = names,
+                    ),
                 )
             } ?: this(
                 negated = false,
                 payload = object : LiteralPayload {
-                    override val root: TypeDeclaration
-                        get() = LangModelFactory.errorType.declaration
+                    override val type: Type
+                        get() = model.target
                     override val path: List<Member> get() = emptyList()
                     override fun validate(validator: Validator) {
                         // Always invalid
@@ -167,8 +170,7 @@ private class ConditionLiteralImpl private constructor(
     }
 }
 
-private interface LiteralPayload : MayBeInvalid {
-    val root: TypeDeclaration
+private interface LiteralPayload : ClassBackedModel {
     val path: List<Member>
     val nonStatic: Boolean
 }
@@ -181,7 +183,7 @@ private object MemberTypeVisitor : Member.Visitor<Type> {
 private typealias ValidationReport = (Validator) -> Unit
 
 private class LiteralPayloadImpl private constructor(
-    override val root: TypeDeclaration,
+    override val type: Type,
     private val pathSource: String,
 ) : LiteralPayload {
     private var validationReport: ValidationReport? = null
@@ -201,14 +203,14 @@ private class LiteralPayloadImpl private constructor(
     override fun toString(childContext: MayBeInvalid?) = buildRichString {
         appendRichString {
             color = TextColor.BrightYellow
-            append(root)
+            append(type)
         }
         append(".$pathSource")
     }
 
     override val path: List<Member> by lazy {
         buildList {
-            var currentType = root.asType()
+            var currentType = type
             var finished = false
 
             var isFirst = true
@@ -264,10 +266,10 @@ private class LiteralPayloadImpl private constructor(
         }
     }
 
-    companion object Factory : BiObjectCache<TypeDeclaration, String, LiteralPayload>() {
-        operator fun invoke(root: TypeDeclaration, pathSource: String): LiteralPayload {
-            return createCached(root, pathSource) {
-                LiteralPayloadImpl(root, pathSource)
+    companion object Factory : BiObjectCache<Type, String, LiteralPayload>() {
+        operator fun invoke(type: Type, pathSource: String): LiteralPayload {
+            return createCached(type, pathSource) {
+                LiteralPayloadImpl(type, pathSource)
             }
         }
 

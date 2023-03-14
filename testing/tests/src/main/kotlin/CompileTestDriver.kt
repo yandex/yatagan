@@ -42,6 +42,11 @@ class TestNameRule : TestWatcher() {
     var testClassSimpleName: String? = ""
     var testMethodName: String = "no-test"
 
+    fun assignFrom(other: TestNameRule) {
+        testClassSimpleName = other.testClassSimpleName
+        testMethodName = other.testMethodName
+    }
+
     override fun starting(description: Description) {
         testClassSimpleName = description.className.substringAfterLast('.')
         testMethodName = description.methodName

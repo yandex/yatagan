@@ -22,8 +22,9 @@ import com.google.devtools.ksp.symbol.Variance
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.compiled.CtLangModelFactoryBase
 
-class KspModelFactoryImpl : LangModelFactory {
+class KspModelFactoryImpl : CtLangModelFactoryBase() {
     private val listDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
         checkNotNull(Utils.resolver.getClassDeclarationByName("java.util.List")) {
             "FATAL: Unable to define `java.util.List`, check classpath"
@@ -55,7 +56,9 @@ class KspModelFactoryImpl : LangModelFactory {
         parameter: Type,
         isCovariant: Boolean,
     ): Type {
-        parameter as KspTypeImpl
+        if (parameter !is KspTypeImpl) {
+            return super.getParameterizedType(type, parameter, isCovariant)
+        }
         val declaration = when (type) {
             LangModelFactory.ParameterizedType.List -> listDeclaration
             LangModelFactory.ParameterizedType.Set -> setDeclaration
@@ -75,8 +78,9 @@ class KspModelFactoryImpl : LangModelFactory {
     }
 
     override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
-        keyType as KspTypeImpl
-        valueType as KspTypeImpl
+        if (keyType !is KspTypeImpl || valueType !is KspTypeImpl) {
+            return super.getMapType(keyType, valueType, isCovariant)
+        }
         with(Utils.resolver) {
             val keyTypeArgument = getTypeArgument(
                 typeRef = keyType.impl.asReference(),
@@ -110,11 +114,8 @@ class KspModelFactoryImpl : LangModelFactory {
             // Explicitly prohibit directly getting enum entries to get consistent behavior.
             return null
         }
-        return KspTypeDeclarationImpl(KspTypeImpl(declaration.asType(emptyList())))
+        return KspTypeImpl(declaration.asType(emptyList())).declaration
     }
-
-    override val errorType: Type
-        get() = KspTypeImpl(ErrorTypeImpl)
 
     override val isInRuntimeEnvironment: Boolean
         get() = false

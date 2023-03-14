@@ -18,26 +18,27 @@ package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.Variance
 import com.yandex.yatagan.lang.compiled.ArrayNameModel
 import com.yandex.yatagan.lang.compiled.ClassNameModel
 import com.yandex.yatagan.lang.compiled.CtTypeNameModel
-import com.yandex.yatagan.lang.compiled.ErrorNameModel
+import com.yandex.yatagan.lang.compiled.InvalidNameModel
 import com.yandex.yatagan.lang.compiled.KeywordTypeNameModel
 import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 import com.yandex.yatagan.lang.compiled.WildcardNameModel
 
 
 internal fun CtTypeNameModel(
-    type: KSType,
-    jvmTypeKind: JvmTypeInfo = JvmTypeInfo(type),
+    type: KSType?,
+    jvmTypeKind: JvmTypeInfo? = type?.let(::JvmTypeInfo),
 ): CtTypeNameModel {
     return nameModelImpl(type = type, jvmTypeKind = jvmTypeKind)
 }
 
 private fun nameModelImpl(
     type: KSType?,
-    jvmTypeKind: JvmTypeInfo,
+    jvmTypeKind: JvmTypeInfo?,
 ): CtTypeNameModel {
     return when (jvmTypeKind) {
         JvmTypeInfo.Void -> KeywordTypeNameModel.Void
@@ -50,14 +51,18 @@ private fun nameModelImpl(
         JvmTypeInfo.Short -> KeywordTypeNameModel.Short
         JvmTypeInfo.Boolean -> KeywordTypeNameModel.Boolean
         JvmTypeInfo.Declared -> {
-            checkNotNull(type) { "Not reached: type info is absent for declared type" }
-            if (type.isError) {
-                return ErrorNameModel()
+            if (type == null || type.isError) {
+                return InvalidNameModel.Unresolved(null)
             }
-            val declaration = type.classDeclaration() ?: return ErrorNameModel()
-            val raw = ClassNameModel(declaration)
+            val classDeclaration = type.classDeclaration()
+                ?: return if (type.declaration is KSTypeParameter) {
+                    InvalidNameModel.TypeVariable(typeVar = type.declaration.simpleName.asString())
+                } else {
+                    InvalidNameModel.Unresolved(hint = type.declaration.simpleName.asString())
+                }
+            val raw = ClassNameModel(classDeclaration)
             val typeArguments = type.arguments.map { argument ->
-                fun argType() = argument.type.resolveOrError()
+                fun argType() = argument.type?.resolve()
                 when (argument.variance) {
                     Variance.STAR -> WildcardNameModel.Star
                     Variance.INVARIANT -> CtTypeNameModel(argType())
@@ -77,13 +82,14 @@ private fun nameModelImpl(
                             // We don't trust KSP to return the correctly mapped type with STAR projection.
                             Utils.objectType.asStarProjectedType()
                         } else {
-                            it?.type.resolveOrError()
+                            it?.type?.resolve()
                         }
                     },
                     jvmTypeKind = jvmTypeKind.elementInfo,
                 )
             )
         }
+        null -> InvalidNameModel.Unresolved(null)
     }
 }
 

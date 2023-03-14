@@ -17,7 +17,8 @@
 package com.yandex.yatagan.core.model
 
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.validation.MayBeInvalid
 
-public interface ClassBackedModel {
+public interface ClassBackedModel : MayBeInvalid {
     public val type: Type
 }

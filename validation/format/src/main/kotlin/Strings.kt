@@ -47,6 +47,11 @@ object Strings {
     private annotation class Covered
 
     object Errors {
+        fun invalidType(type: Type) = buildRichString {
+            color = TextColor.Inherit
+            append("Invalid/unresolved type: ").append(type)
+        }.toError()
+
         @Covered
         fun missingBinding(`for`: NodeModel) = buildRichString {
             color = TextColor.Inherit
@@ -512,6 +517,8 @@ object Strings {
             }
         }.toNote()
 
+        fun missingBecauseUnresolved() = ("The type is unresolved, no binding could be matched for such type.").toNote()
+
         fun subcomponentFactoryInjectionHint(
             factory: ComponentFactoryModel,
             component: ComponentModel,
@@ -597,5 +604,17 @@ object Strings {
         @Covered
         fun invalidMultiBindingAdvice() = ("Multibinding declaration must be abstract with no parameters" +
                 " and return either a `List<..>`, `Set<..>` or a `Map<.., ..>`").toNote()
+
+        fun whyTypeCanBeUnresolved() = (
+                "Types can be unresolved due to actually non-existent/misspelled/un-imported class; " +
+                        "or the compilation classpath may be inconsistent: " +
+                        "if the type is from the library, make sure the library is present in compilation classpath " +
+                        "of the current module."
+                ).toNote()
+
+        fun unresolvedTypeVar() = (
+                "Unsubstituted type variables are not allowed here. " +
+                        "Please, remove the unsupported generic from the containing class."
+                ).toNote()
     }
 }

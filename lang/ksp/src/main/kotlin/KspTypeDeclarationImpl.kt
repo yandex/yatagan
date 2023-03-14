@@ -80,7 +80,7 @@ internal class KspTypeDeclarationImpl private constructor(
         get() = impl.qualifiedName?.asString() ?: ""
 
     override val enclosingType: TypeDeclaration?
-        get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { Factory(KspTypeImpl(it.asType(emptyList()))) }
+        get() = (impl.parentDeclaration as? KSClassDeclaration)?.let { KspTypeImpl(it.asType(emptyList())).declaration }
 
     override val interfaces: Sequence<Type> by lazy {
         impl.superTypes.map {
@@ -336,15 +336,15 @@ internal class KspTypeDeclarationImpl private constructor(
         impl.declarations
             .filterIsInstance<KSClassDeclaration>()
             .filter { !it.isPrivate() }
-            .map { Factory(KspTypeImpl(it.asType(emptyList()))) }
+            .map { KspTypeImpl(it.asType(emptyList())).declaration }
             .memoize()
     }
 
-    override val defaultCompanionObjectDeclaration: KspTypeDeclarationImpl? by lazy {
+    override val defaultCompanionObjectDeclaration: TypeDeclaration? by lazy {
         impl.getCompanionObject()?.takeIf {
             it.simpleName.asString() == "Companion"
         }?.let { companion ->
-            KspTypeDeclarationImpl(KspTypeImpl(companion.asType(emptyList())))
+            KspTypeImpl(companion.asType(emptyList())).declaration
         }
     }
 

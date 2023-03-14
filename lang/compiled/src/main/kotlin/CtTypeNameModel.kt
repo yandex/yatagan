@@ -105,10 +105,16 @@ enum class KeywordTypeNameModel : CtTypeNameModel {
     override fun toString() = name.lowercase()
 }
 
-class ErrorNameModel : CtTypeNameModel {
-    // No equals/hashCode overloading - no need.
-    override fun toString() = "error.UnresolvedCla$$"
+sealed interface InvalidNameModel : CtTypeNameModel {
+    class Unresolved(private val hint: String?) : InvalidNameModel {
+        override fun toString() = "<unresolved: ${hint ?: "???"}>"
+    }
 
-    override fun equals(other: Any?): Boolean = this === other
-    override fun hashCode(): Int = System.identityHashCode(this)
+    class Error(private val error: String) : InvalidNameModel {
+        override fun toString() = "<error-type: $error>"
+    }
+
+    class TypeVariable(private val typeVar: String) : InvalidNameModel {
+        override fun toString() = "<unresolved-type-var: $typeVar>"
+    }
 }

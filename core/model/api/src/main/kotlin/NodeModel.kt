@@ -18,7 +18,6 @@ package com.yandex.yatagan.core.model
 
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.Type
-import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Represents a node in a Yatagan Graph, that can be resolved.
@@ -31,7 +30,7 @@ import com.yandex.yatagan.validation.MayBeInvalid
  * [NodeModel] can be used as [NodeDependency] directly to avoid additional allocations,
  * if the requested [DependencyKind] is [Direct][DependencyKind.Direct].
  */
-public interface NodeModel : ClassBackedModel, MayBeInvalid, Comparable<NodeModel>, NodeDependency {
+public interface NodeModel : ClassBackedModel, Comparable<NodeModel>, NodeDependency {
     /**
      * Optional qualifier.
      * An opaque object representing additional qualifier information that can help to disambiguate nodes with the

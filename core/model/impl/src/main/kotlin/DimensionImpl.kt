@@ -52,8 +52,7 @@ internal class DimensionImpl private constructor(
 }
 
 internal class MissingDimension(private val flavor: Variant.FlavorModel) : Variant.DimensionModel {
-    override val type: Type
-        get() = LangModelFactory.errorType
+    override val type: Type = LangModelFactory.createNoType("missing-dimension-type")
 
     override fun validate(validator: Validator) {
         // Do not report anything here, as not-a-flavor error will be reported for flavor.

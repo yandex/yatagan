@@ -48,7 +48,3 @@ internal fun KSTypeReference.replaceType(typeReference: KSTypeReference): KSType
 }
 
 internal fun KSType.asReference(): KSTypeReference = Utils.resolver.createKSTypeReferenceFromKSType(this)
-
-internal fun KSTypeReference?.resolveOrError(): KSType {
-    return this?.resolve() ?: ErrorTypeImpl
-}

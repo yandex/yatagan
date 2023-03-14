@@ -1,0 +1,114 @@
+error: A class for members injection must be public/internal.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  here: injector-function inject(a: <unresolved: error.NonExistentClass>)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved-type-var: T>
+NOTE: Unsubstituted type variables are not allowed here. Please, remove the unsupported generic from the containing class.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getTypeVar(): <unresolved-type-var: T>
+                               ^-[*1]------------------
+  here: [1*] <unresolved-type-var: T>
+             ^~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved: error.NonExistentClass>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  here: injector-function inject(a: <unresolved: error.NonExistentClass>)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEp(): <unresolved: error.NonExistentClass>
+                          ^-[*1]------------------------------
+  here: [1*] <unresolved: error.NonExistentClass>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in module test.TestModule
+  in @provides test.TestModule::provide(): <unresolved: error.NonExistentClass>
+                                           ^-[*1]------------------------------
+  here: [1*] <unresolved: error.NonExistentClass>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in module test.TestModule
+  in @provides test.TestModule::provide(.., foo: <unresolved: error.NonExistentClass>, ..)
+                                            ^-[*1]-----------------------------------
+  here: [1*] <unresolved: error.NonExistentClass>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getFoo: test.Foo
+                         ^-[*1]--
+  in [1*] inject-constructor test.Foo(test.Goo)
+                                      ^-[*2]--
+  in [2*] inject-constructor test.Goo(.. 1 dependency)
+  here: <unresolved: error.NonExistentClass>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: java.util.List<error.NonExistentClass>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEpList(): java.util.List<error.NonExistentClass>
+                              ^-[*1]--------------------------------
+  here: [1*] java.util.List<error.NonExistentClass>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: test.TestComponent<<unresolved-type-var: T>>
+NOTE: Unsubstituted type variables are not allowed here. Please, remove the unsupported generic from the containing class.
+Encountered:
+  here: graph for root-component test.TestComponent<<unresolved-type-var: T>>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for <unresolved-type-var: T>
+NOTE: The type is unresolved, no binding could be matched for such type.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getTypeVar: <unresolved-type-var: T>
+                             ^-[*1]------------------
+  here: [1*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for <unresolved: error.NonExistentClass>
+NOTE: The type is unresolved, no binding could be matched for such type.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEp: <unresolved: error.NonExistentClass>
+                        ^-[*1]------------------------------
+  here: [1*] <missing>
+             ^~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getFoo: test.Foo
+                         ^-[*1]--
+  in [1*] inject-constructor test.Foo(test.Goo)
+                                      ^-[*2]--
+  in [2*] inject-constructor test.Goo(<unresolved: error.NonExistentClass>)
+                                      ^-[*3]------------------------------
+  here: [3*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for java.util.List<error.NonExistentClass>
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEpList: java.util.List<error.NonExistentClass>
+                            ^-[*1]--------------------------------
+  here: [1*] <missing>
+             ^~~~~~~~~

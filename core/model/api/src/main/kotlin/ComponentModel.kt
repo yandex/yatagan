@@ -23,7 +23,7 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * Represents @[com.yandex.yatagan.Component] annotated class - Component.
  */
-public interface ComponentModel : ConditionalHoldingModel, MayBeInvalid, HasNodeModel {
+public interface ComponentModel : ConditionalHoldingModel, HasNodeModel {
     /**
      * A set of *all* modules that are included into the component (transitively).
      */

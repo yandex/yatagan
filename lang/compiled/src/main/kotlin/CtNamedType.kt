@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.lang.ksp
+package com.yandex.yatagan.lang.compiled
 
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.yandex.yatagan.lang.TypeDeclaration
-
-fun TypeDeclaration(declaration: KSClassDeclaration): TypeDeclaration {
-    return KspTypeImpl(declaration.asType(emptyList())).declaration
+/**
+ * TODO: Merge this and all the naming logic into `:common` - no need to restrict this to "compiled" implementations.
+ */
+interface CtNamedType {
+    /**
+     * Class name.
+     * @see CtTypeNameModel
+     */
+    val nameModel: CtTypeNameModel
 }
