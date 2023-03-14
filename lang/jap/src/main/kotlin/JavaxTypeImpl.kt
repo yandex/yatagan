@@ -20,8 +20,10 @@ import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.common.NoDeclaration
+import com.yandex.yatagan.lang.compiled.CtErrorType
 import com.yandex.yatagan.lang.compiled.CtTypeBase
 import com.yandex.yatagan.lang.compiled.CtTypeNameModel
+import com.yandex.yatagan.lang.compiled.InvalidNameModel
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 
@@ -67,8 +69,23 @@ internal class JavaxTypeImpl private constructor(
     }
 
     companion object Factory : ObjectCache<TypeMirrorEquivalence, JavaxTypeImpl>() {
-        operator fun invoke(impl: TypeMirror): JavaxTypeImpl {
-            return createCached(TypeMirrorEquivalence(impl)) { JavaxTypeImpl(impl = impl) }
+        operator fun invoke(impl: TypeMirror): Type {
+            return when(impl.kind) {
+                TypeKind.ERROR -> CtErrorType(
+                    nameModel = InvalidNameModel.Unresolved(hint = impl.toString())
+                )
+                TypeKind.TYPEVAR -> CtErrorType(
+                    nameModel = InvalidNameModel.TypeVariable(
+                        typeVar = impl.asTypeVariable().asElement().simpleName.toString(),
+                    )
+                )
+                TypeKind.DECLARED -> {
+                    if (impl.asTypeElement().qualifiedName.contentEquals("error.NonExistentClass"))
+                        CtErrorType(nameModel = InvalidNameModel.Unresolved(hint = "error.NonExistentClass"))
+                    else createCached(TypeMirrorEquivalence(impl)) { JavaxTypeImpl(impl = impl) }
+                }
+                else -> createCached(TypeMirrorEquivalence(impl)) { JavaxTypeImpl(impl = impl) }
+            }
         }
     }
 }

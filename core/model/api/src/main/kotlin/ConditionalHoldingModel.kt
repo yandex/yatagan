@@ -31,7 +31,7 @@ public interface ConditionalHoldingModel : MayBeInvalid {
     /**
      * Represents a "feature" - a named [ConditionScope].
      */
-    public interface FeatureModel : MayBeInvalid, ClassBackedModel {
+    public interface FeatureModel : ClassBackedModel {
         public val conditionScope: ConditionScope
     }
 

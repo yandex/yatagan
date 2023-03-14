@@ -16,12 +16,10 @@
 
 package com.yandex.yatagan.core.model
 
-import com.yandex.yatagan.validation.MayBeInvalid
-
 /**
  * Represents [com.yandex.yatagan.Module].
  */
-public interface ModuleModel : ClassBackedModel, MayBeInvalid {
+public interface ModuleModel : ClassBackedModel {
     /**
      * Included modules.
      */

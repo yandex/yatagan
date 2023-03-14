@@ -50,7 +50,9 @@ internal class ComponentFactoryModelImpl private constructor(
 ) : ComponentFactoryModel {
 
     override val createdComponent: ComponentModel by lazy {
-        ComponentModelImpl(factoryDeclaration.enclosingType ?: LangModelFactory.errorType.declaration)
+        val declaration = factoryDeclaration.enclosingType
+            ?: LangModelFactory.createNoType("missing-component-type").declaration
+        ComponentModelImpl(declaration)
     }
 
     override val factoryMethod = factoryDeclaration.methods.find {
@@ -245,10 +247,6 @@ internal class ComponentFactoryModelImpl private constructor(
     private class InputPayloadInstanceImpl(
         override val node: NodeModel,
     ) : InputPayload.Instance, ClassBackedModel by node {
-        override fun validate(validator: Validator) {
-            validator.inline(node)
-        }
-
         override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
             modelClassName = "input",
             representation = node,
@@ -259,6 +257,7 @@ internal class ComponentFactoryModelImpl private constructor(
         override val dependency: ComponentDependencyModel,
     ) : InputPayload.Dependency, ClassBackedModel by dependency {
         override fun validate(validator: Validator) {
+            // dependency itself is not validated here; it's validated as a ComponentModel's child (if present there).
             if (dependency !in createdComponent.dependencies) {
                 validator.reportError(Strings.Errors.extraComponentDependency()) {
                     addNote(Strings.Notes.adviceBindInstanceForUnknownInput())

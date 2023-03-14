@@ -25,7 +25,7 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * Represents [com.yandex.yatagan.Component.Builder].
  */
-public interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
+public interface ComponentFactoryModel : HasNodeModel {
 
     /**
      * TODO: doc.
@@ -54,7 +54,7 @@ public interface ComponentFactoryModel : MayBeInvalid, HasNodeModel {
      *
      * @see InputModel
      */
-    public sealed interface InputPayload : ClassBackedModel, MayBeInvalid {
+    public sealed interface InputPayload : ClassBackedModel {
         /**
          * Represent an externally given instance via [com.yandex.yatagan.BindsInstance].
          */

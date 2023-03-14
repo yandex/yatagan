@@ -28,6 +28,7 @@ import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.compiled.ClassNameModel
+import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.Modifier.STATIC
@@ -43,8 +44,12 @@ internal class ComponentGenerator private constructor(
     ): this(
         graph = graph,
         maxSlotsPerSwitch = maxSlotsPerSwitch,
-        generatedClassName = graph.model.name.let { name ->
-            check(name is ClassNameModel)
+        generatedClassName = graph.model.name.let {
+            val name = when(it) {
+                is ClassNameModel -> it
+                is ParameterizedNameModel -> it.raw
+                else -> throw AssertionError("Unexpected component name: $it")
+            }
             // Keep name mangling in sync with loader!
             ClassName.get(name.packageName, "Yatagan$" + name.simpleNames.joinToString(separator = "$"))
         },

@@ -18,10 +18,14 @@ package com.yandex.yatagan.validation.impl
 
 import com.yandex.yatagan.base.traverseDepthFirstWithPath
 import com.yandex.yatagan.base.zipWithNextOrNull
+import com.yandex.yatagan.core.model.ClassBackedModel
+import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.validation.LocatedMessage
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.ValidationMessage
 import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.NONE
 
 private class ValidatorImpl : Validator {
@@ -41,6 +45,19 @@ private class ValidatorImpl : Validator {
     }
 
     override fun inline(node: MayBeInvalid) {
+        if (node is ClassBackedModel) {
+            val type = node.type
+            // A uniform mechanism of reporting unresolved types.
+            if (type.isInvalid()) {
+                reportError(Strings.Errors.invalidType(type)) {
+                    if ("unresolved-type-var" in type.toString()) {
+                        addNote(Strings.Notes.unresolvedTypeVar())
+                    } else {
+                        addNote(Strings.Notes.whyTypeCanBeUnresolved())
+                    }
+                }
+            }
+        }
         node.validate(this)
     }
 }
@@ -56,7 +73,7 @@ fun validate(
         childrenOf = { cache[it]?.children ?: emptyList() },
         visit = { path, node ->
             val validator = cache.getOrPut(node) {
-                ValidatorImpl().apply(node::validate)
+                ValidatorImpl().also { validator -> validator.inline(node) }
             }
             for (message in validator.messages) {
                 // Extract current path from stack::substack
@@ -80,4 +97,8 @@ fun validate(
             encounterPaths = pathStrings,
         )
     }
+}
+
+private fun Type.isInvalid(): Boolean {
+    return isUnresolved || typeArguments.any(Type::isInvalid)
 }

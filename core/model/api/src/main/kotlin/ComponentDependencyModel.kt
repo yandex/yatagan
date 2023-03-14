@@ -17,7 +17,6 @@
 package com.yandex.yatagan.core.model
 
 import com.yandex.yatagan.lang.Method
-import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Component dependency.
@@ -25,7 +24,7 @@ import com.yandex.yatagan.validation.MayBeInvalid
  *
  * @see com.yandex.yatagan.Component.dependencies
  */
-public interface ComponentDependencyModel : MayBeInvalid, ClassBackedModel {
+public interface ComponentDependencyModel : ClassBackedModel {
     public val exposedDependencies: Map<NodeModel, Method>
 
     public fun asNode(): NodeModel

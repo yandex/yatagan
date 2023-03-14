@@ -29,7 +29,7 @@ import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.ArrayNameModel
 import com.yandex.yatagan.lang.compiled.ClassNameModel
 import com.yandex.yatagan.lang.compiled.CtTypeNameModel
-import com.yandex.yatagan.lang.compiled.ErrorNameModel
+import com.yandex.yatagan.lang.compiled.InvalidNameModel
 import com.yandex.yatagan.lang.compiled.KeywordTypeNameModel
 import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 import com.yandex.yatagan.lang.compiled.WildcardNameModel
@@ -74,7 +74,7 @@ internal fun CtTypeNameModel.asTypeName(): TypeName {
         KeywordTypeNameModel.Char -> TypeName.CHAR
         KeywordTypeNameModel.Void -> TypeName.VOID
         is ArrayNameModel -> ArrayTypeName.of(elementType.asTypeName())
-        is ErrorNameModel -> ClassName.get("", toString())
+        is InvalidNameModel -> ClassName.get("error", "UnresolvedCla$$")
     }
 }
 

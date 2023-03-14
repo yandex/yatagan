@@ -82,16 +82,20 @@ internal class RtTypeDeclarationImpl private constructor(
     }
 
     override val enclosingType: TypeDeclaration?
-        get() = impl.enclosingClass?.let { Factory(RtTypeImpl(it)) }
+        get() = impl.enclosingClass?.let { RtTypeImpl(it).declaration }
 
     override val interfaces: Sequence<Type>
         get() = superTypes
-            .filter { it.impl.isInterface }
-            .map { it.type }
+            .mapNotNull {
+                ifOrElseNull(it is RtTypeDeclarationImpl && it.impl.isInterface) {
+                    it.asType()
+                }
+            }
 
     override val superType: Type?
-        get() = superTypes.firstOrNull { !it.impl.isInterface }
-            ?.takeUnless { it.qualifiedName == "java.lang.Object" }?.type
+        get() = superTypes
+            .firstOrNull { it is RtTypeDeclarationImpl && !it.impl.isInterface }
+            ?.takeUnless { it.qualifiedName == "java.lang.Object" }?.asType()
 
     override fun asType(): Type {
         return type
@@ -100,7 +104,7 @@ internal class RtTypeDeclarationImpl private constructor(
     override val nestedClasses: Sequence<TypeDeclaration> by lazy {
         impl.declaredClasses.asSequence()
             .filter { !it.isPrivate }
-            .map { Factory(RtTypeImpl(it)) }
+            .map { RtTypeImpl(it).declaration }
             .memoize()
     }
 
@@ -154,7 +158,7 @@ internal class RtTypeDeclarationImpl private constructor(
             }?.let { maybeCompanion ->
                 ifOrElseNull(impl.declaredFields.any {
                     it.name == "Companion" && it.isPublicStaticFinal
-                }) { RtTypeDeclarationImpl(RtTypeImpl(maybeCompanion)) }
+                }) { RtTypeImpl(maybeCompanion).declaration }
             }
         }
     }
@@ -253,13 +257,13 @@ internal class RtTypeDeclarationImpl private constructor(
         }
     }
 
-    internal val superTypes: Sequence<RtTypeDeclarationImpl> by lazy(PUBLICATION) {
+    internal val superTypes: Sequence<TypeDeclaration> by lazy(PUBLICATION) {
         sequence {
             impl.genericSuperclass?.let { superClass ->
-                yield(Factory(superClass.resolveGenerics(genericsInfo)))
+                yield(RtTypeImpl(superClass.resolveGenerics(genericsInfo)).declaration)
             }
             for (superInterface in impl.genericInterfaces) {
-                yield(Factory(superInterface.resolveGenerics(genericsInfo)))
+                yield(RtTypeImpl(superInterface.resolveGenerics(genericsInfo)).declaration)
             }
         }.memoize()
     }
@@ -279,6 +283,5 @@ internal class RtTypeDeclarationImpl private constructor(
 
     companion object Factory : ObjectCache<RtTypeImpl, RtTypeDeclarationImpl>() {
         operator fun invoke(type: RtTypeImpl) = createCached(type, ::RtTypeDeclarationImpl)
-        operator fun invoke(type: ReflectType) = createCached(RtTypeImpl(type), ::RtTypeDeclarationImpl)
     }
 }

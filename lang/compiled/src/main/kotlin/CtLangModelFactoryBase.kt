@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.lang.ksp
+package com.yandex.yatagan.lang.compiled
 
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.common.LangModelFactoryFallback
 
-fun TypeDeclaration(declaration: KSClassDeclaration): TypeDeclaration {
-    return KspTypeImpl(declaration.asType(emptyList())).declaration
+abstract class CtLangModelFactoryBase : LangModelFactoryFallback() {
+    final override fun createNoType(name: String): Type {
+        return CtErrorType(
+            nameModel = InvalidNameModel.Error(error = name),
+            // This is a synthetic "no"-type, it's assumed to be resolved: no need to report it in validation.
+            isUnresolved = false,
+        )
+    }
 }

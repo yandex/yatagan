@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.lang.ksp
+package com.yandex.yatagan.lang.compiled
 
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.ErrorType
 
-fun TypeDeclaration(declaration: KSClassDeclaration): TypeDeclaration {
-    return KspTypeImpl(declaration.asType(emptyList())).declaration
-}
+class CtErrorType(
+    override val nameModel: InvalidNameModel,
+    isUnresolved: Boolean = true,
+) : ErrorType(
+    nameHint = nameModel.toString(),
+    isUnresolved = isUnresolved,
+), CtNamedType

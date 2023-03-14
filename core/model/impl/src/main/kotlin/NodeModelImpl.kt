@@ -195,7 +195,7 @@ internal class NodeModelImpl private constructor(
 
     companion object Factory : ObjectCache<Any, NodeModelImpl>() {
         class VoidNode : NodeModel {
-            override val type get() = LangModelFactory.errorType
+            override val type = LangModelFactory.createNoType("void")
             override val qualifier: Nothing? get() = null
             override fun getSpecificModel(): Nothing? = null
             override fun dropQualifier(): NodeModel = this

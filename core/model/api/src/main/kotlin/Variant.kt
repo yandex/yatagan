@@ -22,11 +22,11 @@ import com.yandex.yatagan.validation.MayBeInvalid
  * TODO: doc.
  */
 public interface Variant : MayBeInvalid {
-    public interface DimensionModel : ClassBackedModel, MayBeInvalid {
+    public interface DimensionModel : ClassBackedModel {
         public val isInvalid: Boolean
     }
 
-    public interface FlavorModel : ClassBackedModel, MayBeInvalid {
+    public interface FlavorModel : ClassBackedModel {
         public val dimension: DimensionModel
     }
 

@@ -19,9 +19,11 @@ package com.yandex.yatagan.lang.rt
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.ErrorType
 import com.yandex.yatagan.lang.common.NoDeclaration
 import com.yandex.yatagan.lang.common.TypeBase
 import java.lang.reflect.ParameterizedType
+import java.lang.reflect.TypeVariable
 import java.lang.reflect.WildcardType
 
 internal class RtTypeImpl private constructor(
@@ -49,6 +51,9 @@ internal class RtTypeImpl private constructor(
     override val isVoid: Boolean
         get() = impl.tryAsClass() == Void.TYPE
 
+    override val isUnresolved: Boolean
+        get() = false
+
     override fun asBoxed(): Type {
         return Factory(when(impl) {
             is Class<*> -> impl.boxed()
@@ -66,7 +71,10 @@ internal class RtTypeImpl private constructor(
     override fun toString(): String = impl.formatString()
 
     companion object Factory : ObjectCache<TypeEquivalenceWrapper, RtTypeImpl>() {
-        operator fun invoke(type: ReflectType): RtTypeImpl {
+        operator fun invoke(type: ReflectType): Type {
+            if (type is TypeVariable<*>) {
+                return ErrorType(nameHint = "<unresolved-type-var: ${type.name}>")
+            }
             return createCached(type.equivalence()) { RtTypeImpl(type) }
         }
     }

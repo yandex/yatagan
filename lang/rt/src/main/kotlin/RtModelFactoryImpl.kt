@@ -19,10 +19,11 @@ package com.yandex.yatagan.lang.rt
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.LangModelFactoryFallback
 
 class RtModelFactoryImpl(
     private val classLoader: ClassLoader,
-) : LangModelFactory {
+) : LangModelFactoryFallback() {
     private val listClass = classLoader.loadClass("java.util.List")
     private val setClass = classLoader.loadClass("java.util.Set")
     private val mapClass = classLoader.loadClass("java.util.Map")
@@ -34,7 +35,9 @@ class RtModelFactoryImpl(
         parameter: Type,
         isCovariant: Boolean,
     ): Type {
-        parameter as RtTypeImpl
+        if (parameter !is RtTypeImpl) {
+            return super.getParameterizedType(type, parameter, isCovariant)
+        }
         val clazz = when (type) {
             LangModelFactory.ParameterizedType.List -> listClass
             LangModelFactory.ParameterizedType.Set -> setClass
@@ -46,9 +49,11 @@ class RtModelFactoryImpl(
     }
 
     override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
-        valueType as RtTypeImpl
+        if (keyType !is RtTypeImpl || valueType !is RtTypeImpl) {
+            return super.getMapType(keyType, valueType, isCovariant)
+        }
         val valueArg = if (isCovariant) WildcardTypeImpl(upperBound = valueType.impl) else valueType.impl
-        return RtTypeImpl(ParameterizedTypeImpl((keyType as RtTypeImpl).impl, valueArg, raw = mapClass))
+        return RtTypeImpl(ParameterizedTypeImpl(keyType.impl, valueArg, raw = mapClass))
     }
 
     override fun getTypeDeclaration(
@@ -66,21 +71,14 @@ class RtModelFactoryImpl(
             }
         }
         return try {
-            RtTypeDeclarationImpl(RtTypeImpl(classLoader.loadClass(qualifiedName)))
+            RtTypeImpl(classLoader.loadClass(qualifiedName)).declaration
         } catch (e: ClassNotFoundException) {
             null
         }
     }
 
-    override val errorType: Type
-        get() = RtTypeImpl(ErrorType())
-
     override val isInRuntimeEnvironment: Boolean
         get() = true
-
-    private class ErrorType : ReflectType {
-        override fun toString() = "<error>"
-    }
 
     private class WildcardTypeImpl(
         private val upperBound: ReflectType,

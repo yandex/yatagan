@@ -19,9 +19,10 @@ package com.yandex.yatagan.lang.jap
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.compiled.CtLangModelFactoryBase
 import javax.lang.model.element.TypeElement
 
-class JavaxModelFactoryImpl : LangModelFactory {
+class JavaxModelFactoryImpl : CtLangModelFactoryBase() {
     private val listElement: TypeElement by lazy {
         Utils.elements.getTypeElement("java.util.List")
     }
@@ -39,8 +40,9 @@ class JavaxModelFactoryImpl : LangModelFactory {
     }
 
     override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
-        keyType as JavaxTypeImpl
-        valueType as JavaxTypeImpl
+        if (keyType !is JavaxTypeImpl || valueType !is JavaxTypeImpl) {
+            return super.getMapType(keyType, valueType, isCovariant)
+        }
         with(Utils.types) {
             val valueArgType =
                 if (isCovariant) getWildcardType(/*extends*/ valueType.impl, /*super*/ null)
@@ -54,7 +56,9 @@ class JavaxModelFactoryImpl : LangModelFactory {
         parameter: Type,
         isCovariant: Boolean,
     ): Type {
-        parameter as JavaxTypeImpl
+        if (parameter !is JavaxTypeImpl) {
+            return super.getParameterizedType(type, parameter, isCovariant)
+        }
         val element = when(type) {
             LangModelFactory.ParameterizedType.List -> listElement
             LangModelFactory.ParameterizedType.Set -> setElement
@@ -83,9 +87,6 @@ class JavaxModelFactoryImpl : LangModelFactory {
         val element = Utils.elements.getTypeElement(name) ?: return null
         return JavaxTypeDeclarationImpl(element.asType().asDeclaredType())
     }
-
-    override val errorType: Type
-        get() = JavaxTypeImpl(Utils.types.nullType)
 
     override val isInRuntimeEnvironment: Boolean
         get() = false
