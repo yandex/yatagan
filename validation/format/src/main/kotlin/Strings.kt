@@ -28,6 +28,7 @@ import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.AnnotationDeclaration
@@ -59,7 +60,7 @@ object Strings {
         }.toError()
 
         @Covered
-        fun noMatchingScopeForBinding(binding: Binding, scopes: Set<Annotation>) = buildRichString {
+        fun noMatchingScopeForBinding(binding: Binding, scopes: Set<ScopeModel>) = buildRichString {
             color = TextColor.Inherit
             appendLine("No components in the hierarchy match binding -> ")
             append(Indent).append(binding).appendLine()
@@ -304,7 +305,7 @@ object Strings {
             "Root component can not be a subcomponent".toError()
 
         @Covered
-        fun duplicateComponentScope(scope: Annotation) =
+        fun duplicateComponentScope(scope: ScopeModel) =
             "A single scope `$scope` can not be present on more than one component in a hierarchy".toError()
 
         @Covered
@@ -429,6 +430,18 @@ object Strings {
             annotationDeclaration: AnnotationDeclaration,
             insteadOf: AnnotationRetention,
         ) = ("Annotation class `$annotationDeclaration` must have RUNTIME retention instead of $insteadOf").toError()
+
+        @Covered
+        fun reusableScopeOnComponent() = (
+                "@Reusable scope is for bindings only and doesn't make sense on a @Component declaration " +
+                        "and thus not supported here. Did you mean to make the component with no dedicated scope?"
+                ).toError()
+
+        @Covered
+        fun reusableScopeShouldBeSingle() = (
+                "@Reusable scope is used along with other scopes which doesn't make much sense. " +
+                        "Other scopes can be safely removed without changing the behavior."
+                ).toError()
     }
 
     object Warnings {

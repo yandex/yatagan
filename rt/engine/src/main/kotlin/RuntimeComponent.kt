@@ -44,6 +44,7 @@ import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import com.yandex.yatagan.lang.Callable
@@ -73,8 +74,9 @@ internal class RuntimeComponent(
     private val parentsSequence = parentsSequence(includeThis = true).memoize()
 
     private val accessStrategies: Map<Binding, AccessStrategy> = buildMap(capacity = graph.localBindings.size) {
-        val requiresSynchronizedAccess = graph.requiresSynchronizedAccess
+        val graphRequiresSynchronizedAccess = graph.requiresSynchronizedAccess
         for ((binding: Binding, usage) in graph.localBindings) {
+            val requiresSynchronizedAccess = graphRequiresSynchronizedAccess && ScopeModel.Reusable !in binding.scopes
             val strategy = run {
                 val provision: AccessStrategy = if (binding.scopes.isNotEmpty()) {
                     if (requiresSynchronizedAccess) {

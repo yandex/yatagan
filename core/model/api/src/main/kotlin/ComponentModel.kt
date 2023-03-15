@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model
 
-import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.validation.MayBeInvalid
 
@@ -32,7 +31,7 @@ public interface ComponentModel : ConditionalHoldingModel, HasNodeModel {
     /**
      * All supported scopes for bindings, that component can cache.
      */
-    public val scopes: Set<Annotation>
+    public val scopes: Set<ScopeModel>
 
     /**
      * A set of component *dependencies*.

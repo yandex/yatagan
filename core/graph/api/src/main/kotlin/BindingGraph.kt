@@ -29,8 +29,8 @@ import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.Variant
-import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
@@ -107,7 +107,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      *
      * @see ComponentModel.scopes
      */
-    public val scopes: Set<Annotation>
+    public val scopes: Set<ScopeModel>
 
     /**
      * Component creator model declared in the underlying model.

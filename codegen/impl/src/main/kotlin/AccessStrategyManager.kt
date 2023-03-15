@@ -22,6 +22,7 @@ import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import com.yandex.yatagan.core.model.isNever
@@ -95,8 +96,10 @@ internal class AccessStrategyManager(
                         )
                     }
                     null -> {
+                        val useMultiThreadCaching =
+                            thisGraph.requiresSynchronizedAccess && ScopeModel.Reusable !in binding.scopes
                         CompositeStrategy(
-                            directStrategy = if (thisGraph.requiresSynchronizedAccess) {
+                            directStrategy = if (useMultiThreadCaching) {
                                 CachingStrategyMultiThread(
                                     binding = binding,
                                     fieldsNs = fieldsNs,
@@ -217,8 +220,14 @@ internal class AccessStrategyManager(
         //  dependant binding. If we find it - cool, can use inline. Otherwise, this single dependant may be
         //  from the child graphs or entry-point(s)/member-injector(s), etc... - not correct to use inline.
 
-        if (singleDependentBinding.scopes.isNotEmpty()) {
-            // If it is scoped (cached), can use the optimization
+        if (singleDependentBinding.scopes.let {
+                // If it is scoped (cached), can use the optimization
+                it.isNotEmpty() &&
+                        // If the binding is Reusable and the component requires MT-access,
+                        // then we can't use the optimization as it *might* be created multiple times in contended
+                        // MT environments - can't risk that.
+                        (!singleDependentBinding.owner.requiresSynchronizedAccess || ScopeModel.Reusable !in it)
+            }) {
             return potentialCase
         }
 

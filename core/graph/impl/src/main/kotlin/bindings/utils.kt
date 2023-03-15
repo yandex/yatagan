@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.impl.bindings
 
+import com.yandex.yatagan.base.intersects
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -24,6 +25,7 @@ import com.yandex.yatagan.core.graph.impl.and
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 
 internal fun Binding.graphConditionScope(): ConditionScope = conditionScope and owner.conditionScope
 
@@ -39,4 +41,16 @@ internal fun ExtensibleBinding<*>.extensibleAwareDependencies(
     baseDependencies: Sequence<NodeDependency>,
 ): Sequence<NodeDependency> {
     return upstream?.let { baseDependencies + it.targetForDownstream } ?: baseDependencies
+}
+
+internal fun BindingGraph.canHost(bindingScopes: Set<ScopeModel>): Boolean {
+    if (bindingScopes.isEmpty()) {
+        return true
+    }
+
+    if (ScopeModel.Reusable in bindingScopes) {
+        return true
+    }
+
+    return bindingScopes intersects scopes
 }

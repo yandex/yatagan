@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.yatagan.base.notIntersects
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.WithParents
@@ -42,6 +41,7 @@ import com.yandex.yatagan.core.graph.impl.bindings.ProvisionBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SelfDependentInvalidBinding
 import com.yandex.yatagan.core.graph.impl.bindings.SubComponentFactoryBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SyntheticAliasBindingImpl
+import com.yandex.yatagan.core.graph.impl.bindings.canHost
 import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.BindsBindingModel
@@ -394,7 +394,7 @@ internal class GraphBindingsManager(
         override fun visitDefault(): Binding? = null
 
         override fun visitInjectConstructor(model: InjectConstructorModel): Binding? {
-            if (model.scopes.isNotEmpty() && model.scopes notIntersects graph.scopes) {
+            if (!graph.canHost(model.scopes)) {
                 return null
             }
 

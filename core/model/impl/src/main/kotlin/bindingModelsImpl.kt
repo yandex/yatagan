@@ -26,6 +26,7 @@ import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ProvidesBindingModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.AnnotationValueVisitorAdapter
 import com.yandex.yatagan.lang.BuiltinAnnotation
@@ -42,8 +43,8 @@ import com.yandex.yatagan.validation.format.reportError
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
-    override val scopes: Set<Annotation> by lazy {
-        method.annotations.filter { it.isScope() }.toSet()
+    override val scopes: Set<ScopeModel> by lazy {
+        buildScopeModels(method)
     }
 
     override val target: BindingTargetModel by lazy {

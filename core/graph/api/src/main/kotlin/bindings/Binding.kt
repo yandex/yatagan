@@ -19,7 +19,7 @@ package com.yandex.yatagan.core.graph.bindings
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
-import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.core.model.ScopeModel
 
 /**
  * A base class for all concrete binding implementations, apart from [AliasBinding].
@@ -37,7 +37,7 @@ public interface Binding : BaseBinding {
      * All scopes, that this binding is compatible with (can be cached within).
      * If empty, then the binding is *unscoped* (not cached) and is compatible with *any* scope.
      */
-    public val scopes: Set<Annotation>
+    public val scopes: Set<ScopeModel>
 
     /**
      * The binding's dependencies on other bindings.

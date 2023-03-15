@@ -209,7 +209,7 @@ So consider using `minSdk = 24` at least for debug build type to safely use Yata
 | `@BindsInstance`                       | 🟢 as is          |                                               |
 | `@Provides`                            | 🟢 as is          | supports conditional provision                |
 | `@BindsOptionalOf`                     | 🟡 replaced       | replaced with [Variants API](#added-apis)     |
-| `@Reusable`                            | 🔴 unsupported    |                                               |
+| `@Reusable`                            | 🟢 as is          |                                               |
 | `MembersInjector`                      | 🔴 unsupported    |                                               |
 | `@MapKey`                              | 🟡 renamed*       | `IntoMap.Key`, *`unwrap=false` is unsupported |
 | `@multibindings.IntoSet`               | 🟢 as is          |                                               |

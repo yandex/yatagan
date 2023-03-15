@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.yatagan.base.notIntersects
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
@@ -27,10 +26,10 @@ import com.yandex.yatagan.core.model.ModuleHostedBindingModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import com.yandex.yatagan.core.model.isOptional
-import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -49,7 +48,7 @@ internal interface BindingDefaultsMixin : Binding, BaseBindingDefaultsMixin {
     override val nonStaticConditionProviders: Set<NodeModel>
         get() = emptySet()
 
-    override val scopes: Set<Annotation>
+    override val scopes: Set<ScopeModel>
         get() = emptySet()
 
     val nonStaticConditionDependencies: NonStaticConditionDependencies?
@@ -93,8 +92,12 @@ internal interface BindingDefaultsMixin : Binding, BaseBindingDefaultsMixin {
             }
         }
 
-        if (scopes.isNotEmpty() && scopes notIntersects owner.scopes) {
+        if (!owner.canHost(scopes)) {
             validator.reportError(Strings.Errors.noMatchingScopeForBinding(binding = this, scopes = scopes))
+        }
+
+        if (ScopeModel.Reusable in scopes && scopes.size > 1) {
+            validator.reportError(Strings.Errors.reusableScopeShouldBeSingle())
         }
     }
 

@@ -40,7 +40,7 @@ public interface ModuleHostedBindingModel : MayBeInvalid {
     /**
      * Declared scope annotations.
      */
-    public val scopes: Set<Annotation>
+    public val scopes: Set<ScopeModel>
 
     /**
      * Underlying method model.
