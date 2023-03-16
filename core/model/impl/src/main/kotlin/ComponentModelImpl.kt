@@ -189,10 +189,6 @@ internal class ComponentModelImpl private constructor(
         }
 
         if (factory == null) {
-            if (!isRoot) {
-                validator.reportError(Errors.missingCreatorForNonRoot())
-            }
-
             if (dependencies.isNotEmpty()) {
                 validator.reportError(Errors.missingCreatorForDependencies())
             }

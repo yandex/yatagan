@@ -48,6 +48,7 @@ object Strings {
     private annotation class Covered
 
     object Errors {
+        @Covered
         fun invalidType(type: Type) = buildRichString {
             color = TextColor.Inherit
             append("Invalid/unresolved type: ").append(type)
@@ -217,10 +218,6 @@ object Strings {
         @Covered
         fun nonInterfaceComponent() =
             "Component declaration must be an `interface`".toError()
-
-        @Covered
-        fun missingCreatorForNonRoot() =
-            "Non-root component declaration must include creator declaration".toError()
 
         @Covered
         fun missingCreatorForDependencies() =
@@ -480,6 +477,18 @@ object Strings {
             ("Non-static member of a Kotlin singleton object is used as a condition. " +
                     "Framework will try to find the object instance in the graph, which may not be what you wanted. " +
                     "Did you forget to add `INSTANCE.` to access the object from static context?").toWarning()
+
+        @Covered
+        fun subcomponentViaEntryPointWithCreator(
+            subcomponent: ComponentModel,
+            creator: ComponentFactoryModel,
+        ) = buildRichString {
+            color = TextColor.Inherit
+            append("`").append(subcomponent).append("` has an explicitly declared `")
+            append(creator).appendLine("` so it can't be created directly.")
+            append("Changing the entry-point type to the `${creator.type}` would fix the problem " +
+                    "and allow the component to be recognized as a child (if not included explicitly).")
+        }.toWarning()
     }
 
     object Notes {
@@ -530,6 +539,7 @@ object Strings {
             }
         }.toNote()
 
+        @Covered
         fun missingBecauseUnresolved() = ("The type is unresolved, no binding could be matched for such type.").toNote()
 
         fun subcomponentFactoryInjectionHint(
@@ -553,6 +563,10 @@ object Strings {
 
         fun suspiciousComponentInstanceInject() =
             "A dependency seems to be a component, though it does not belong to the current hierarchy.".toNote()
+
+        @Covered
+        fun childComponentUsageWithoutFactory() =
+            "A dependency seems to be a child component, try injecting its factory instead.".toNote()
 
         fun suspiciousRootComponentFactoryInject(factoryLike: NodeModel) = buildRichString {
             append('`').append(factoryLike).append(" is a factory for a root component, injecting such " +
@@ -618,6 +632,7 @@ object Strings {
         fun invalidMultiBindingAdvice() = ("Multibinding declaration must be abstract with no parameters" +
                 " and return either a `List<..>`, `Set<..>` or a `Map<.., ..>`").toNote()
 
+        @Covered
         fun whyTypeCanBeUnresolved() = (
                 "Types can be unresolved due to actually non-existent/misspelled/un-imported class; " +
                         "or the compilation classpath may be inconsistent: " +
@@ -625,6 +640,7 @@ object Strings {
                         "of the current module."
                 ).toNote()
 
+        @Covered
         fun unresolvedTypeVar() = (
                 "Unsubstituted type variables are not allowed here. " +
                         "Please, remove the unsupported generic from the containing class."

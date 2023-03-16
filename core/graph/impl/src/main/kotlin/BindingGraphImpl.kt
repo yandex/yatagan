@@ -32,11 +32,13 @@ import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.Variant
+import com.yandex.yatagan.core.model.accept
 import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
@@ -76,8 +78,32 @@ internal class BindingGraphImpl(
     override val requiresSynchronizedAccess: Boolean
         get() = component.requiresSynchronizedAccess
 
+    val childrenModels: Set<ComponentModel> = buildSet {
+        // hierarchy loop guard
+        if (parentsSequence().none { it.model == model }) {
+            for (module in modules) {
+                addAll(module.subcomponents)
+            }
+        }
+        val hierarchy = parentsSequence(includeThis = true)
+            .mapTo(hashSetOf()) { it.model }
+        // Detect subcomponents (directly or via factories) and add them as children.
+        val detector = object : HasNodeModel.Visitor<ComponentModel?> {
+            override fun visitDefault() = null
+            override fun visitComponent(model: ComponentModel) = model
+            override fun visitComponentFactory(model: ComponentFactoryModel) = model.createdComponent
+        }
+        for (entryPoint in entryPoints) {
+            val component = entryPoint.dependency.node.getSpecificModel().accept(detector) ?: continue
+            if (!component.isRoot && component !in hierarchy) {
+                add(component)
+            }
+        }
+    }
+
     private val bindings: GraphBindingsManager = GraphBindingsManager(
         graph = this,
+        subcomponents = childrenModels,
     )
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
@@ -105,10 +131,8 @@ internal class BindingGraphImpl(
 
     init {
         // Build children
-        children = if (parentsSequence().any { it.model == model }) /*loop guard*/ emptyList() else modules
+        children = childrenModels
             .asSequence()
-            .flatMap(ModuleModel::subcomponents)
-            .distinct()
             .map { it to VariantMatch(it, variant).conditionScope }
             .filter { (_, conditionScope) -> !conditionScope.isNever }
             .map { (childComponent, childConditionScope) ->

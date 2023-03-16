@@ -27,7 +27,7 @@ import com.yandex.yatagan.core.graph.bindings.InstanceBinding
 import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
-import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
+import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.lang.Method
@@ -51,7 +51,7 @@ public abstract class BindingVisitorAdapter<R> : Binding.Visitor<R> {
     override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R = visitDefault()
     override fun visitInstance(binding: InstanceBinding): R = visitDefault()
     override fun visitAlternatives(binding: AlternativesBinding): R = visitDefault()
-    override fun visitSubComponentFactory(binding: SubComponentFactoryBinding): R = visitDefault()
+    override fun visitSubComponent(binding: SubComponentBinding): R = visitDefault()
     override fun visitComponentDependency(binding: ComponentDependencyBinding): R = visitDefault()
     override fun visitComponentInstance(binding: ComponentInstanceBinding): R = visitDefault()
     override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R = visitDefault()

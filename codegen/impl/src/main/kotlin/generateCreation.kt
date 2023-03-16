@@ -31,7 +31,7 @@ import com.yandex.yatagan.core.graph.bindings.InstanceBinding
 import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
-import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
+import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
@@ -151,7 +151,7 @@ private class CreationGeneratorVisitor(
         }
     }
 
-    override fun visitSubComponentFactory(binding: SubComponentFactoryBinding) {
+    override fun visitSubComponent(binding: SubComponentBinding) {
         with(builder) {
             +"new %T(".formatCode(binding.targetGraph[ComponentFactoryGenerator].implName)
             join(binding.targetGraph.usedParents) { parentGraph ->

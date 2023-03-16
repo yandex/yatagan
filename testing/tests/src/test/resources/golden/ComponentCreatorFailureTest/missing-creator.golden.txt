@@ -20,18 +20,6 @@ Encountered:
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Non-root component declaration must include creator declaration
-Encountered:
-  in graph for root-component test.RootComponent
-  here: graph for component test.SubComponent
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Encountered:
-  in graph for root-component test.RootComponent
-  here: graph for component test.NotAComponent
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 error: Root component can not be a subcomponent
 Encountered:
   in graph for root-component test.RootComponent

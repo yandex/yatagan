@@ -31,7 +31,7 @@ import com.yandex.yatagan.core.graph.bindings.InstanceBinding
 import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
-import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
+import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
 import com.yandex.yatagan.core.graph.component1
 import com.yandex.yatagan.core.graph.component2
 import com.yandex.yatagan.core.graph.normalized
@@ -247,18 +247,25 @@ internal class RuntimeComponent(
         throw AssertionError("Not reached: inconsistent condition")
     }
 
-    override fun visitSubComponentFactory(binding: SubComponentFactoryBinding): Any {
-        val creatorClass = checkNotNull(binding.targetGraph.creator) {
-            "No creator is declared in ${binding.targetGraph.toString(null)}"
-        }.type.declaration.rt
+    override fun visitSubComponent(binding: SubComponentBinding): Any {
+        val creator = binding.targetGraph.creator
+        val clazz = (creator ?: binding.targetGraph.model).type.declaration.rt
         return Proxy.newProxyInstance(
-            creatorClass.classLoader,
-            arrayOf(creatorClass),
-            RuntimeFactory(
+            clazz.classLoader,
+            arrayOf(clazz),
+            if (creator != null) RuntimeFactory(
                 logger = logger,
                 graph = binding.targetGraph,
                 parent = this@RuntimeComponent,
                 validationPromise = validationPromise,  // The same validation session for children.
+            ) else RuntimeComponent(
+                logger = logger,
+                parent = this@RuntimeComponent,
+                graph = binding.targetGraph,
+                givenInstances = emptyMap(),
+                givenDependencies = emptyMap(),
+                givenModuleInstances = emptyMap(),
+                validationPromise = validationPromise,
             )
         )
     }

@@ -67,7 +67,7 @@ public interface Binding : BaseBinding {
         public fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R
         public fun visitInstance(binding: InstanceBinding): R
         public fun visitAlternatives(binding: AlternativesBinding): R
-        public fun visitSubComponentFactory(binding: SubComponentFactoryBinding): R
+        public fun visitSubComponent(binding: SubComponentBinding): R
         public fun visitComponentDependency(binding: ComponentDependencyBinding): R
         public fun visitComponentInstance(binding: ComponentInstanceBinding): R
         public fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R
