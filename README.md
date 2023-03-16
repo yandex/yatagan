@@ -244,10 +244,6 @@ Other behavioral changes:
 - Yatagan does not support `@Nullable` provisions. If a binding returns `null`, or a `@BindsInstance` is supplied with
   `null`, an error will be thrown at run-time. Currently, no compile-time validation is done in the matter.
 
-- Declaring subcomponents only works explicitly via `Module.subcomponents` list.
-  Implicit bindings for subcomponent factory, when declaring entry-point of its type in a parent component,
-  will not trigger subcomponent inclusion.
-
 - Automatic component factory/builder generation is not supported - an explicit one must be written if required.
 
 - Member inject in Kotlin code should be used with care:
