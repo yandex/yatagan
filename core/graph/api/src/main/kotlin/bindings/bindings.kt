@@ -136,6 +136,10 @@ public interface ProvisionBinding : Binding {
     public val requiresModuleInstance: Boolean
 }
 
-public interface SubComponentFactoryBinding : Binding {
+/**
+ * A binding for a child component instance or its creator.
+ * The first case is valid only when a child component doesn't have a declared creator.
+ */
+public interface SubComponentBinding : Binding {
     public val targetGraph: BindingGraph
 }

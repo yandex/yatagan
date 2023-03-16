@@ -72,7 +72,10 @@ internal class ComponentFactoryGenerator(
             fieldsNs.name(graph.model.name)
         }
 
-    val implName: ClassName = componentImplName.nestedClass("ComponentFactoryImpl")
+    val implName: ClassName = componentImplName.run {
+        // If no factory is present, use the component name itself (constructor).
+        if (thisGraph.creator != null) nestedClass("ComponentFactoryImpl") else this
+    }
 
     fun fieldNameFor(boundInstance: NodeModel) = checkNotNull(instanceFieldNames[boundInstance])
     fun fieldNameFor(dependency: ComponentDependencyModel) = checkNotNull(componentInstanceFieldNames[dependency])
@@ -82,30 +85,34 @@ internal class ComponentFactoryGenerator(
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
         val isSubComponentFactory = !thisGraph.isRoot
         val creator = thisGraph.creator
-        if (creator != null) {
-            inputFieldNames.forEach { (input, name) ->
-                field(input.payload.typeName(), name) { modifiers(/*package-private*/ FINAL) }
-            }
-            superComponentFieldNames.forEach { (input, name) ->
-                field(input[ComponentImplClassName], name) { modifiers(/*package-private*/ FINAL) }
-            }
-            constructor {
+        inputFieldNames.forEach { (input, name) ->
+            field(input.payload.typeName(), name) { modifiers(/*package-private*/ FINAL) }
+        }
+        superComponentFieldNames.forEach { (input, name) ->
+            field(input[ComponentImplClassName], name) { modifiers(/*package-private*/ FINAL) }
+        }
+        constructor {
+            if (creator != null) {
                 modifiers(/*package-private*/)
-                val paramsNs = Namespace(prefix = "p")
-                // Firstly - used parents
-                thisGraph.usedParents.forEach { graph ->
-                    val name = paramsNs.name(graph.model.name)
-                    parameter(graph[ComponentImplClassName], name)
-                    +"this.${fieldNameFor(graph)} = $name"
-                }
-                // Secondly and thirdly - factory inputs and builder inputs respectively.
-                creator.allInputs.forEach { input ->
-                    val name = paramsNs.name(input.name)
-                    parameter(input.payload.typeName(), name)
-                    +"this.%N = %T.checkInputNotNull(%N)".formatCode(inputFieldNames[input]!!, Names.Checks, name)
-                }
-                generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
+            } else {
+                modifiers(PRIVATE)
             }
+            val paramsNs = Namespace(prefix = "p")
+            // Firstly - used parents
+            thisGraph.usedParents.forEach { graph ->
+                val name = paramsNs.name(graph.model.name)
+                parameter(graph[ComponentImplClassName], name)
+                +"this.${fieldNameFor(graph)} = $name"
+            }
+            // Secondly and thirdly - factory inputs and builder inputs respectively.
+            creator?.allInputs?.forEach { input ->
+                val name = paramsNs.name(input.name)
+                parameter(input.payload.typeName(), name)
+                +"this.%N = %T.checkInputNotNull(%N)".formatCode(inputFieldNames[input]!!, Names.Checks, name)
+            }
+            generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
+        }
+        if (creator != null) {
             nestedType {
                 buildClass(implName) {
                     modifiers(PRIVATE, FINAL, STATIC)
@@ -162,12 +169,9 @@ internal class ComponentFactoryGenerator(
                     +"return new %T()".formatCode(implName)
                 }
             }
-        } else {
-            constructor {
-                modifiers(PRIVATE)
-                generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
-            }
+        }
 
+        if (creator == null && thisGraph.isRoot) {
             method("create") {
                 modifiers(PUBLIC, STATIC)
                 returnType(thisGraph.model.typeName())

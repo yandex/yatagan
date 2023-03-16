@@ -163,4 +163,45 @@ class ComponentCreatorFailureTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `invalid subcomponent inclusion`() {
+        givenKotlinSource("test.TestSource", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Component(isRoot = false)
+            interface SubComponent1 {
+                @Component.Builder interface Builder { fun create(): SubComponent1 }
+            }
+
+            @Component(isRoot = false)
+            interface SubComponent2 {
+                @Component.Builder interface Builder { fun create(): SubComponent2 }
+            }
+
+            @Module(subcomponents = [SubComponent2::class])
+            interface MyModule
+
+            @Component(modules = [MyModule::class])
+            interface RootComponent {
+                val sub1: SubComponent1
+                val sub2: SubComponent2
+                val fsub: FeatureComponent
+            }
+
+            @Condition(Features::class, "isEnabled")
+            annotation class Feature
+
+            @Component(isRoot = false)
+            @Conditional(Feature::class)
+            interface FeatureComponent
+
+            class Features @Inject constructor() {
+                val isEnabled get() = false
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

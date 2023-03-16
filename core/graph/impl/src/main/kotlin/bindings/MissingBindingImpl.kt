@@ -89,7 +89,12 @@ internal data class MissingBindingImpl(
         }
 
         override fun visitComponent(model: ComponentModel) = reportMissingBinding {
-            addNote(Strings.Notes.suspiciousComponentInstanceInject())
+            if (owner.children.any { it.model == model }) {
+                // If the component is a child, then it's factory should be used instead.
+                addNote(Strings.Notes.childComponentUsageWithoutFactory())
+            } else {
+                addNote(Strings.Notes.suspiciousComponentInstanceInject())
+            }
         }
 
         override fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): Nothing {

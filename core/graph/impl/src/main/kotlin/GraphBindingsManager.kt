@@ -39,6 +39,7 @@ import com.yandex.yatagan.core.graph.impl.bindings.MissingBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.MultiBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ProvisionBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SelfDependentInvalidBinding
+import com.yandex.yatagan.core.graph.impl.bindings.SubComponentBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SubComponentFactoryBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SyntheticAliasBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.canHost
@@ -73,6 +74,7 @@ import com.yandex.yatagan.validation.format.reportError
 
 internal class GraphBindingsManager(
     private val graph: BindingGraph,
+    subcomponents: Collection<ComponentModel>,
 ) : MayBeInvalid, WithParents<GraphBindingsManager> by hierarchyExtension(graph, GraphBindingsManager) {
     init {
         graph[GraphBindingsManager] = this
@@ -85,7 +87,6 @@ internal class GraphBindingsManager(
         val bindingModelVisitor = ModuleHostedBindingsCreator()
 
         // Gather bindings from modules
-        val seenSubcomponents = hashSetOf<ComponentModel>()
         val listBindings = linkedMapOf<NodeModel, MutableMap<MultiBindingImpl.Contribution, ContributionType>>()
         val setBindings = linkedMapOf<NodeModel, MutableMap<MultiBindingImpl.Contribution, ContributionType>>()
         val mapBindings = linkedMapOf<MapSignature, MutableList<MapBindingImpl.Contribution>>()
@@ -134,16 +135,21 @@ internal class GraphBindingsManager(
                     is BindingTargetModel.Plain -> Unit // Nothing to do
                 }
             }
-            // Subcomponent factories (distinct).
-            for (subcomponent: ComponentModel in module.subcomponents) {
-                if (seenSubcomponents.add(subcomponent)) {
-                    subcomponent.factory?.let { factory: ComponentFactoryModel ->
-                        add(SubComponentFactoryBindingImpl(
-                            owner = graph,
-                            factory = factory,
-                        ))
-                    }
-                }
+        }
+
+        // Subcomponent factories (distinct).
+        val seenSubcomponents = hashSetOf<ComponentModel>()
+        for (subcomponent: ComponentModel in subcomponents) {
+            if (seenSubcomponents.add(subcomponent)) {
+                add(subcomponent.factory?.let { factory ->
+                    SubComponentFactoryBindingImpl(
+                        owner = graph,
+                        factory = factory,
+                    )
+                } ?: SubComponentBindingImpl(
+                    owner = graph,
+                    targetComponent = subcomponent,
+                ))
             }
         }
         // Gather dependencies

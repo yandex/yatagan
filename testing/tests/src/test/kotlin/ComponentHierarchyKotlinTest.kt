@@ -406,4 +406,72 @@ class ComponentHierarchyKotlinTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `implicit subcomponent inclusion`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Scope annotation class Sub
+            @Scope annotation class Sub2
+
+            @Singleton class Foo @Inject constructor()
+
+            @Sub2 @Component(isRoot = false)
+            interface Sub2Component {
+                val foo: Foo
+                val opt: Optional<FeatureComponent>
+            }
+
+            @Sub @Component(isRoot = false)
+            interface SubComponent1 {
+                val opt: Optional<FeatureComponent>
+
+                @Component.Builder
+                interface Builder { fun create(): SubComponent1 }
+            }
+            
+            @Sub @Component(isRoot = false)
+            interface SubComponent2 {
+                val sub2: Sub2Component
+                val foo: Foo
+            }
+
+            @Singleton @Component
+            interface RootComponent {
+                val sub1: SubComponent1.Builder
+                val sub2: Provider<SubComponent2>
+                val sub2lazy: Lazy<SubComponent2>
+                @Component.Builder
+                interface Factory { fun create(@BindsInstance features: Features): RootComponent }
+            }
+            
+            class Features(
+                val isEnabled: Boolean,
+            ) {
+                @Condition(Features::class, "isEnabled")
+                annotation class IsEnabled
+            }
+            
+            @Component(isRoot = false)
+            @Conditional(Features.IsEnabled::class)
+            interface FeatureComponent {
+                val foo: Provider<Foo>
+            }
+
+            fun test() {
+                val root: RootComponent = Yatagan.builder(RootComponent.Factory::class.java).create(Features(true))
+                root.sub1.create().opt.get().foo.get()
+                root.sub2.get().sub2.foo
+                root.sub2lazy.get().sub2.foo
+
+                val root2: RootComponent = Yatagan.builder(RootComponent.Factory::class.java).create(Features(false))
+                assert(!root2.sub1.create().opt.isPresent)
+                assert(!root2.sub2.get().sub2.opt.isPresent)
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

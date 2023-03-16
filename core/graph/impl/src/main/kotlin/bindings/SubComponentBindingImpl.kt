@@ -21,21 +21,24 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
-import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.format.modelRepresentation
 
-internal class SubComponentFactoryBindingImpl(
+internal class SubComponentBindingImpl(
     override val owner: BindingGraph,
-    private val factory: ComponentFactoryModel,
+    private val targetComponent: ComponentModel,
 ) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin {
+    init {
+        require(targetComponent.factory == null)
+    }
+
     override val target: NodeModel
-        get() = factory.asNode()
+        get() = targetComponent.asNode()
 
     override val targetGraph: BindingGraph by lazy {
-        val targetComponent = factory.createdComponent
         checkNotNull(owner.children.find { it.model == targetComponent }) {
             "Not reached: $this: Can't find child component $targetComponent among $owner's children."
         }
@@ -47,16 +50,16 @@ internal class SubComponentFactoryBindingImpl(
     }
 
     override val variantMatch: VariantMatch by lazy {
-        VariantMatch(factory.createdComponent, owner.variant)
+        VariantMatch(targetComponent, owner.variant)
     }
 
     override val nonStaticConditionDependencies by lazy {
-        NonStaticConditionDependencies(this@SubComponentFactoryBindingImpl)
+        NonStaticConditionDependencies(this@SubComponentBindingImpl)
     }
 
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
-        modelClassName = "child-component-factory",
-        representation = factory,
+        modelClassName = "child",
+        representation = targetComponent,
     )
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
