@@ -30,7 +30,7 @@ import com.yandex.yatagan.validation.format.modelRepresentation
 internal class SubComponentBindingImpl(
     override val owner: BindingGraph,
     private val targetComponent: ComponentModel,
-) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin {
+) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker {
     init {
         require(targetComponent.factory == null)
     }

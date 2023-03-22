@@ -422,6 +422,7 @@ class ComponentHierarchyKotlinTest(
             interface Sub2Component {
                 val foo: Foo
                 val opt: Optional<FeatureComponent>
+                val s: Sub2Component
             }
 
             @Sub @Component(isRoot = false)
