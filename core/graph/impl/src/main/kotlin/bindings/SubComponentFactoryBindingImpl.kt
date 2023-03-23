@@ -30,7 +30,7 @@ import com.yandex.yatagan.validation.format.modelRepresentation
 internal class SubComponentFactoryBindingImpl(
     override val owner: BindingGraph,
     private val factory: ComponentFactoryModel,
-) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin {
+) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker {
     override val target: NodeModel
         get() = factory.asNode()
 

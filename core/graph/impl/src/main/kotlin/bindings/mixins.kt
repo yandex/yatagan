@@ -36,6 +36,11 @@ import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.modelRepresentation
 import com.yandex.yatagan.validation.format.reportError
 
+/**
+ * Binding that is **implicitly** created by the framework, not ordered by the user.
+ */
+internal interface IntrinsicBindingMarker
+
 internal interface BaseBindingDefaultsMixin : BaseBinding {
     override val originModule: ModuleModel?
         get() = null

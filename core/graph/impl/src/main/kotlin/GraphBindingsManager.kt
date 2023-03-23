@@ -34,6 +34,7 @@ import com.yandex.yatagan.core.graph.impl.bindings.ComponentInstanceBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ExplicitEmptyBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.InjectConstructorProvisionBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.InstanceBindingImpl
+import com.yandex.yatagan.core.graph.impl.bindings.IntrinsicBindingMarker
 import com.yandex.yatagan.core.graph.impl.bindings.MapBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.MissingBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.MultiBindingImpl
@@ -351,6 +352,14 @@ internal class GraphBindingsManager(
                     // There can be no two+ different multi-bindings for the same node in the same graph,
                     //  so here we definitely have bindings from different graphs - no need to check that.
                     if (distinct.all { it is ExtensibleBinding<*> }) continue
+
+                    // Intrinsic bindings are allowed to override each other in child graphs.
+                    if (distinct.all { it is IntrinsicBindingMarker }) {
+                        assert(distinct.distinctBy { it.owner }.size == distinct.size) {
+                            "Not reached: duplicate intrinsic bindings in one graph"
+                        }
+                        continue
+                    }
 
                     validator.reportError(Strings.Errors.conflictingBindings(`for` = node)) {
                         distinct.forEach { binding ->

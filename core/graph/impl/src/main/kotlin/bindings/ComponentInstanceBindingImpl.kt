@@ -24,7 +24,7 @@ import com.yandex.yatagan.validation.format.modelRepresentation
 
 internal class ComponentInstanceBindingImpl(
     graph: BindingGraph,
-) : ComponentInstanceBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin {
+) : ComponentInstanceBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker {
     override val owner: BindingGraph = graph
     override val target get() = owner.model.asNode()
 
