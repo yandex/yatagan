@@ -16,7 +16,7 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.core.model.ComponentModel
+import com.yandex.yatagan.core.model.ComponentEntryPoint
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -27,7 +27,7 @@ import com.yandex.yatagan.validation.format.modelRepresentation
 internal class ComponentEntryPointImpl(
     override val getter: Method,
     override val dependency: NodeDependency,
-) : ComponentModel.EntryPoint {
+) : ComponentEntryPoint {
     override fun validate(validator: Validator) {
         validator.child(dependency.node)
     }

@@ -17,6 +17,7 @@
 package com.yandex.yatagan.core.graph.impl
 
 import com.yandex.yatagan.core.graph.GraphEntryPoint
+import com.yandex.yatagan.core.model.ComponentEntryPoint
 import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.NodeDependency
@@ -32,7 +33,7 @@ import com.yandex.yatagan.validation.format.reportWarning
 
 internal class GraphEntryPointImpl(
     override val graph: BindingGraphImpl,
-    private val impl: ComponentModel.EntryPoint,
+    private val impl: ComponentEntryPoint,
 ) : GraphEntryPoint, GraphEntryPointBase() {
     override val getter: Method
         get() = impl.getter

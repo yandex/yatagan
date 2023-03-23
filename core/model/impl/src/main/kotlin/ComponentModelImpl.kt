@@ -18,9 +18,9 @@ package com.yandex.yatagan.core.model.impl
 
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.ComponentEntryPoint
 import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ComponentModel
-import com.yandex.yatagan.core.model.ComponentModel.EntryPoint
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.MembersInjectorModel
@@ -176,7 +176,7 @@ internal class ComponentModelImpl private constructor(
     )
 
     private inner class MethodParser {
-        val entryPoints = arrayListOf<EntryPoint>()
+        val entryPoints = arrayListOf<ComponentEntryPoint>()
         val memberInjectors = arrayListOf<MembersInjectorModel>()
         val childComponentFactories = arrayListOf<SubComponentFactoryMethodModel>()
         val unknown = arrayListOf<Method>()

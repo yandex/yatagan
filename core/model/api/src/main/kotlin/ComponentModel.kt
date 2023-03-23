@@ -16,9 +16,6 @@
 
 package com.yandex.yatagan.core.model
 
-import com.yandex.yatagan.lang.Method
-import com.yandex.yatagan.validation.MayBeInvalid
-
 /**
  * Represents @[com.yandex.yatagan.Component] annotated class - Component.
  */
@@ -39,9 +36,9 @@ public interface ComponentModel : ConditionalHoldingModel, HasNodeModel {
     public val dependencies: Set<ComponentDependencyModel>
 
     /**
-     * A list of [EntryPoint]s in the component.
+     * A list of [ComponentEntryPoint]s in the component.
      */
-    public val entryPoints: List<EntryPoint>
+    public val entryPoints: List<ComponentEntryPoint>
 
     /**
      * A list of [MembersInjectorModel]s defined for this component.
@@ -74,13 +71,4 @@ public interface ComponentModel : ConditionalHoldingModel, HasNodeModel {
      * `false` otherwise.
      */
     public val requiresSynchronizedAccess: Boolean
-
-    /**
-     * Represents a function/property exposed from a component interface.
-     * All graph building starts from a set of [EntryPoint]s recursively resolving dependencies.
-     */
-    public interface EntryPoint : MayBeInvalid {
-        public val getter: Method
-        public val dependency: NodeDependency
-    }
 }
