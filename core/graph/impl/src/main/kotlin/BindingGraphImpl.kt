@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage
 import com.yandex.yatagan.core.graph.BindingVisitorAdapter
+import com.yandex.yatagan.core.graph.GraphSubComponentFactoryMethod
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
@@ -29,6 +30,7 @@ import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
@@ -50,6 +52,7 @@ internal class BindingGraphImpl(
     private val component: ComponentModel,
     override val parent: BindingGraphImpl? = null,
     override val conditionScope: ConditionScope = ConditionScope.Unscoped,
+    private val factoryMethodInParent: ComponentFactoryModel? = null,
 ) : BindingGraph, ExtensibleImpl() {
     override val model: ComponentModel
         get() = component
@@ -63,7 +66,7 @@ internal class BindingGraphImpl(
         get() = component.scopes
 
     override val creator: ComponentFactoryModel?
-        get() = component.factory
+        get() = factoryMethodInParent ?: component.factory
 
     override val modules: Collection<ModuleModel>
         get() = component.modules
@@ -74,6 +77,9 @@ internal class BindingGraphImpl(
     override val entryPoints = component.entryPoints.map { GraphEntryPointImpl(graph = this, impl = it) }
 
     override val memberInjectors = component.memberInjectors.map { GraphMemberInjectorImpl(owner = this, impl = it) }
+
+    override val subComponentFactoryMethods: Collection<GraphSubComponentFactoryMethod> =
+        component.subComponentFactoryMethods.map { GraphSubComponentFactoryMethodImpl(owner = this, model = it) }
 
     override val requiresSynchronizedAccess: Boolean
         get() = component.requiresSynchronizedAccess
@@ -91,7 +97,7 @@ internal class BindingGraphImpl(
         val detector = object : HasNodeModel.Visitor<ComponentModel?> {
             override fun visitDefault() = null
             override fun visitComponent(model: ComponentModel) = model
-            override fun visitComponentFactory(model: ComponentFactoryModel) = model.createdComponent
+            override fun visitComponentFactory(model: ComponentFactoryWithBuilderModel) = model.createdComponent
         }
         for (entryPoint in entryPoints) {
             val component = entryPoint.dependency.node.getSpecificModel().accept(detector) ?: continue
@@ -99,11 +105,18 @@ internal class BindingGraphImpl(
                 add(component)
             }
         }
+        for (factory in component.subComponentFactoryMethods) {
+            if (factory.createdComponent !in hierarchy) {
+                add(factory.createdComponent)
+            }
+        }
     }
 
     private val bindings: GraphBindingsManager = GraphBindingsManager(
         graph = this,
-        subcomponents = childrenModels,
+        subcomponents = childrenModels.associateWith { child ->
+            child.factory ?: component.subComponentFactoryMethods.find { it.createdComponent == child }
+        },
     )
 
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
@@ -140,6 +153,9 @@ internal class BindingGraphImpl(
                     component = childComponent,
                     parent = this,
                     conditionScope = conditionScope and childConditionScope,
+                    factoryMethodInParent = component.subComponentFactoryMethods.find {
+                        it.createdComponent == childComponent
+                    },
                 )
             }
             .toList()
@@ -273,12 +289,34 @@ internal class BindingGraphImpl(
         validator.child(variant)
         children.forEach(validator::child)
 
+        if (factoryMethodInParent != null && component.factory != null) {
+            validator.reportError(Strings.Errors.conflictingExplicitCreatorAndFactoryMethod()) {
+                addNote(Strings.Notes.factoryMethodDeclaredHere(factory = factoryMethodInParent))
+            }
+        } else if (creator == null) {
+            if (dependencies.isNotEmpty()) {
+                validator.reportError(Strings.Errors.missingCreatorForDependencies())
+            }
+
+            if (modules.any { it.requiresInstance && !it.isTriviallyConstructable }) {
+                validator.reportError(Strings.Errors.missingCreatorForModules()) {
+                    modules.filter {
+                        it.requiresInstance && !it.isTriviallyConstructable
+                    }.forEach { module ->
+                        addNote(Strings.Notes.missingModuleInstance(module))
+                    }
+                }
+            }
+        }
+
         // Validate every used binding in a graph structure.
 
         // Reachable via entry-points.
         entryPoints.forEach(validator::child)
         // Reachable via members-inject.
         memberInjectors.forEach(validator::child)
+
+        subComponentFactoryMethods.forEach(validator::child)
 
         // Check component root status
         if (parent != null && isRoot) {

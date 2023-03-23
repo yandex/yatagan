@@ -20,7 +20,7 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.EmptyBinding
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
-import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.InjectConstructorModel
@@ -101,7 +101,7 @@ internal data class MissingBindingImpl(
             throw AssertionError("Not reached: assisted inject factory can't be missing")
         }
 
-        override fun visitComponentFactory(model: ComponentFactoryModel) = reportMissingBinding {
+        override fun visitComponentFactory(model: ComponentFactoryWithBuilderModel) = reportMissingBinding {
             addNote(
                 if (!model.createdComponent.isRoot) {
                     Strings.Notes.subcomponentFactoryInjectionHint(

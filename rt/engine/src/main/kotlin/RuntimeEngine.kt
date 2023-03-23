@@ -21,7 +21,7 @@ import com.yandex.yatagan.base.ObjectCacheRegistry
 import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
-import com.yandex.yatagan.core.model.impl.ComponentFactoryModel
+import com.yandex.yatagan.core.model.impl.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.impl.ComponentModel
 import com.yandex.yatagan.lang.InternalLangApi
 import com.yandex.yatagan.lang.LangModelFactory
@@ -71,7 +71,7 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
             }
 
             val graph = BindingGraph(
-                root = ComponentFactoryModel(TypeDeclaration(builderClass)).createdComponent
+                root = ComponentFactoryWithBuilderModel(TypeDeclaration(builderClass)).createdComponent
             )
             val promise = doValidate(graph)
             val factory = promise.awaitOnError {

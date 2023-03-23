@@ -17,12 +17,14 @@
 package com.yandex.yatagan.validation.format
 
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.GraphSubComponentFactoryMethod
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
@@ -133,6 +135,20 @@ object Strings {
                 .appendLine("` under condition:")
             append(Indent).append("(2) ").append(bCondition).appendLine()
             append("without Optional<..> wrapper, because component condition (2) does not imply condition (1)")
+        }.toError()
+
+        @Covered
+        fun incompatibleConditionChildComponentFactory(
+            aCondition: ConditionScope, bCondition: ConditionScope,
+            factory: GraphSubComponentFactoryMethod,
+        ) = buildRichString {
+            color = TextColor.Inherit
+            append("`").append(factory.createdGraph).appendLine("` with a condition:")
+            append(Indent).append("(1) ").append(aCondition).appendLine()
+            append("cannot be created via component factory method `").append(factory)
+                .appendLine("` of component under condition:`")
+            append(Indent).append("(2) ").append(bCondition).appendLine()
+            append("because component condition (2) does not imply condition (1)")
         }.toError()
 
         @Covered
@@ -439,6 +455,18 @@ object Strings {
                 "@Reusable scope is used along with other scopes which doesn't make much sense. " +
                         "Other scopes can be safely removed without changing the behavior."
                 ).toError()
+
+        @Covered
+        fun conflictingExplicitCreatorAndFactoryMethod() = (
+                "Child components can't have a factory methods declared for them in their parents, " +
+                        "if they have an explicit @Component.Builder declared."
+                ).toError()
+
+        @Covered
+        fun multipleChildComponentFactoryMethodsForComponent(component: ComponentModel) = buildRichString {
+            color = TextColor.Inherit
+            append("Multiple factory methods detected for a `").append(component).append('`')
+        }.toError()
     }
 
     object Warnings {
@@ -481,7 +509,7 @@ object Strings {
         @Covered
         fun subcomponentViaEntryPointWithCreator(
             subcomponent: ComponentModel,
-            creator: ComponentFactoryModel,
+            creator: ComponentFactoryWithBuilderModel,
         ) = buildRichString {
             color = TextColor.Inherit
             append("`").append(subcomponent).append("` has an explicitly declared `")
@@ -543,7 +571,7 @@ object Strings {
         fun missingBecauseUnresolved() = ("The type is unresolved, no binding could be matched for such type.").toNote()
 
         fun subcomponentFactoryInjectionHint(
-            factory: ComponentFactoryModel,
+            factory: ComponentFactoryWithBuilderModel,
             component: ComponentModel,
             owner: BindingGraph,
         ) = buildRichString {
@@ -645,5 +673,15 @@ object Strings {
                 "Unsubstituted type variables are not allowed here. " +
                         "Please, remove the unsupported generic from the containing class."
                 ).toNote()
+
+        @Covered
+        fun factoryMethodDeclaredHere(factory: ComponentFactoryModel) = buildRichString {
+            append("Factory method declared here: ").append(factory)
+        }.toNote()
+
+        @Covered
+        fun duplicateChildComponentFactory(factory: ComponentFactoryModel) = buildRichString {
+            append("Duplicate declared as `").append(factory).append('`')
+        }.toNote()
     }
 }

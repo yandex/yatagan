@@ -26,6 +26,7 @@ import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload
+import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.allInputs
@@ -74,7 +75,7 @@ internal class ComponentFactoryGenerator(
 
     val implName: ClassName = componentImplName.run {
         // If no factory is present, use the component name itself (constructor).
-        if (thisGraph.creator != null) nestedClass("ComponentFactoryImpl") else this
+        if (thisGraph.model.factory != null) nestedClass("ComponentFactoryImpl") else this
     }
 
     fun fieldNameFor(boundInstance: NodeModel) = checkNotNull(instanceFieldNames[boundInstance])
@@ -83,8 +84,6 @@ internal class ComponentFactoryGenerator(
     fun fieldNameFor(module: ModuleModel) = checkNotNull(moduleInstanceFieldNames[module])
 
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
-        val isSubComponentFactory = !thisGraph.isRoot
-        val creator = thisGraph.creator
         inputFieldNames.forEach { (input, name) ->
             field(input.payload.typeName(), name) { modifiers(/*package-private*/ FINAL) }
         }
@@ -92,6 +91,7 @@ internal class ComponentFactoryGenerator(
             field(input[ComponentImplClassName], name) { modifiers(/*package-private*/ FINAL) }
         }
         constructor {
+            val creator = thisGraph.creator
             if (creator != null) {
                 modifiers(/*package-private*/)
             } else {
@@ -112,14 +112,17 @@ internal class ComponentFactoryGenerator(
             }
             generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
         }
-        if (creator != null) {
+
+        val isSubComponent = !thisGraph.isRoot
+        val factory: ComponentFactoryWithBuilderModel? = thisGraph.model.factory
+        if (factory != null) {
             nestedType {
                 buildClass(implName) {
                     modifiers(PRIVATE, FINAL, STATIC)
-                    implements(creator.typeName())
+                    implements(factory.typeName())
 
                     val builderAccess = arrayListOf<String>()
-                    if (isSubComponentFactory) {
+                    if (isSubComponent) {
                         val paramsNs = Namespace(prefix = "f")
                         constructor {
                             thisGraph.usedParents.forEach { graph ->
@@ -133,9 +136,9 @@ internal class ComponentFactoryGenerator(
                         }
                     }
 
-                    creator.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.InputModel::name)
+                    factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.InputModel::name)
                     with(Namespace("m")) {
-                        creator.builderInputs.forEach { builderInput ->
+                        factory.builderInputs.forEach { builderInput ->
                             val fieldName = name(builderInput.name)
                             builderAccess += "this.$fieldName"
                             field(builderInput.payload.typeName(), fieldName) {
@@ -150,7 +153,7 @@ internal class ComponentFactoryGenerator(
                             }
                         }
                     }
-                    creator.factoryMethod?.let { factoryMethod ->
+                    factory.factoryMethod?.let { factoryMethod ->
                         overrideMethod(factoryMethod) {
                             modifiers(PUBLIC)
                             +buildExpression {
@@ -162,16 +165,16 @@ internal class ComponentFactoryGenerator(
                     }
                 }
             }
-            if (!isSubComponentFactory) {
+            if (!isSubComponent) {
                 method("builder") {
                     modifiers(PUBLIC, STATIC)
-                    returnType(creator.typeName())
+                    returnType(factory.typeName())
                     +"return new %T()".formatCode(implName)
                 }
             }
         }
 
-        if (creator == null && thisGraph.isRoot) {
+        if (factory == null && thisGraph.isRoot) {
             method("create") {
                 modifiers(PUBLIC, STATIC)
                 returnType(thisGraph.model.typeName())

@@ -34,7 +34,7 @@ internal class RuntimeFactory(
     validationPromise: DynamicValidationDelegate.Promise?,
     private val logger: Logger?,
 ) : InvocationHandlerBase(validationPromise), InvocationHandlerBase.MethodHandler {
-    private val creator = checkNotNull(graph.creator) {
+    private val creator = checkNotNull(graph.model.factory) {
         "Component $graph has no explicit creator (builder/factory)"
     }
 

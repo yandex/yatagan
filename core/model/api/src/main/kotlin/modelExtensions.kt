@@ -27,6 +27,12 @@ import com.yandex.yatagan.core.model.DependencyKind.OptionalProvider
 import com.yandex.yatagan.core.model.DependencyKind.Provider
 
 public val ComponentFactoryModel.allInputs: Sequence<InputModel>
+    get() = this.accept(object : ComponentFactoryModel.Visitor<Sequence<InputModel>> {
+        override fun visitSubComponentFactoryMethod(model: SubComponentFactoryMethodModel) = model.factoryInputs.asSequence()
+        override fun visitWithBuilder(model: ComponentFactoryWithBuilderModel) = model.allInputs
+    })
+
+public val ComponentFactoryWithBuilderModel.allInputs: Sequence<InputModel>
     get() = factoryInputs.asSequence() + builderInputs.asSequence()
 
 public val DependencyKind.isOptional: Boolean

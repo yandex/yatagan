@@ -26,7 +26,6 @@ import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
-import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ScopeModel
@@ -43,7 +42,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     /**
      * A model behind this graph.
      */
-    public val model: HasNodeModel
+    public val model: ComponentModel
 
     /**
      * Requested bindings that are **hosted** in this component.
@@ -110,9 +109,13 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     public val scopes: Set<ScopeModel>
 
     /**
-     * Component creator model declared in the underlying model.
+     * Component creator [model][ComponentModel.factory] declared in the underlying model
+     * or the child component factory [method][ComponentModel.subComponentFactoryMethods]
+     * declared in the parent component model.
      *
      * @see [ComponentModel.factory]
+     * @see [ComponentModel.subComponentFactoryMethods]
+     * @see [subComponentFactoryMethods]
      */
     public val creator: ComponentFactoryModel?
 
@@ -129,6 +132,11 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      * @see [ComponentModel.memberInjectors]
      */
     public val memberInjectors: Collection<GraphMemberInjector>
+
+    /**
+     * @see ComponentModel.subComponentFactoryMethods
+     */
+    public val subComponentFactoryMethods: Collection<GraphSubComponentFactoryMethod>
 
     /**
      * A condition for this graph.

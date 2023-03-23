@@ -18,16 +18,16 @@ package com.yandex.yatagan.core.model.impl
 
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.ComponentDependencyModel
-import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.ComponentModel.EntryPoint
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.MembersInjectorModel
 import com.yandex.yatagan.core.model.ModuleModel
-import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ScopeModel
+import com.yandex.yatagan.core.model.SubComponentFactoryMethodModel
 import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Method
@@ -38,7 +38,6 @@ import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.Strings.Errors
-import com.yandex.yatagan.validation.format.appendChildContextReference
 import com.yandex.yatagan.validation.format.modelRepresentation
 import com.yandex.yatagan.validation.format.reportError
 
@@ -50,6 +49,8 @@ internal class ComponentModelImpl private constructor(
     private val conditionalsModel by lazy {
         ConditionalHoldingModelImpl(declaration.getAnnotations(BuiltinAnnotation.Conditional))
     }
+
+    private val parsedMethods: MethodParser by lazy { MethodParser() }
 
     override val conditionals: List<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
         get() = conditionalsModel.conditionals
@@ -88,54 +89,19 @@ internal class ComponentModelImpl private constructor(
         impl?.dependencies?.map { ComponentDependencyModelImpl(it) }?.toSet() ?: emptySet()
     }
 
-    override val entryPoints: Set<EntryPoint> by lazy {
-        class EntryPointImpl(
-            override val getter: Method,
-            override val dependency: NodeDependency,
-        ) : EntryPoint {
-            override fun validate(validator: Validator) {
-                validator.child(dependency.node)
-            }
+    override val entryPoints
+        get() = parsedMethods.entryPoints
 
-            override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
-                modelClassName = "entry-point",
-                representation = {
-                    append("${getter.name}()")
-                    if (childContext == dependency.node) {
-                        append(": ")
-                        appendChildContextReference(reference = getter.returnType)
-                    }
-                },
-            )
-        }
+    override val memberInjectors
+        get() = parsedMethods.memberInjectors
 
-        declaration.methods.filter {
-            it.isAbstract && it.parameters.none()
-        }.map { method ->
-            EntryPointImpl(
-                dependency = NodeDependency(
-                    type = method.returnType,
-                    forQualifier = method,
-                ),
-                getter = method,
-            )
-        }.toSet()
-    }
+    override val subComponentFactoryMethods
+        get() = parsedMethods.childComponentFactories
 
-    override val memberInjectors: Set<MembersInjectorModel> by lazy {
-        declaration.methods.filter {
-            MembersInjectorModelImpl.canRepresent(it)
-        }.map { method ->
-            MembersInjectorModelImpl(
-                injector = method,
-            )
-        }.toSet()
-    }
-
-    override val factory: ComponentFactoryModel? by lazy {
+    override val factory: ComponentFactoryWithBuilderModel? by lazy {
         declaration.nestedClasses
-            .find { ComponentFactoryModelImpl.canRepresent(it) }?.let {
-                ComponentFactoryModelImpl(factoryDeclaration = it)
+            .find { ComponentFactoryWithBuilderModelImpl.canRepresent(it) }?.let {
+                ComponentFactoryWithBuilderModelImpl(factoryDeclaration = it)
             }
     }
 
@@ -163,9 +129,27 @@ internal class ComponentModelImpl private constructor(
         for (memberInjector in memberInjectors) {
             validator.child(memberInjector)
         }
-        if (declaration.nestedClasses.count(ComponentFactoryModelImpl::canRepresent) > 1) {
+        for (childComponentFactory in subComponentFactoryMethods) {
+            validator.child(childComponentFactory)
+        }
+
+        subComponentFactoryMethods
+            .groupBy { it.createdComponent }
+            .forEach { (createdComponent, factories) ->
+                if (factories.size > 1) {
+                    validator.reportError(Strings.Errors.multipleChildComponentFactoryMethodsForComponent(
+                        component = createdComponent,
+                    )) {
+                        factories.forEach {
+                            addNote(Strings.Notes.duplicateChildComponentFactory(factory = it))
+                        }
+                    }
+                }
+            }
+
+        if (declaration.nestedClasses.count(ComponentFactoryWithBuilderModelImpl::canRepresent) > 1) {
             validator.reportError(Errors.multipleCreators()) {
-                declaration.nestedClasses.filter(ComponentFactoryModelImpl::canRepresent).forEach {
+                declaration.nestedClasses.filter(ComponentFactoryWithBuilderModelImpl::canRepresent).forEach {
                     addNote(Strings.Notes.conflictingCreator(it))
                 }
             }
@@ -173,11 +157,8 @@ internal class ComponentModelImpl private constructor(
 
         factory?.let(validator::child)
 
-        for (method in declaration.methods) {
-            if (!method.isAbstract) continue
-            if (method.parameters.count() > 1) {
-                validator.reportError(Errors.unknownMethodInComponent(method = method))
-            }
+        for (method in parsedMethods.unknown) {
+            validator.reportError(Errors.unknownMethodInComponent(method = method))
         }
 
         if (impl == null) {
@@ -187,28 +168,51 @@ internal class ComponentModelImpl private constructor(
         if (declaration.kind != TypeDeclarationKind.Interface) {
             validator.reportError(Errors.nonInterfaceComponent())
         }
-
-        if (factory == null) {
-            if (dependencies.isNotEmpty()) {
-                validator.reportError(Errors.missingCreatorForDependencies())
-            }
-
-            if (modules.any { it.requiresInstance && !it.isTriviallyConstructable }) {
-                validator.reportError(Errors.missingCreatorForModules()) {
-                    modules.filter {
-                        it.requiresInstance && !it.isTriviallyConstructable
-                    }.forEach { module ->
-                        addNote(Strings.Notes.missingModuleInstance(module))
-                    }
-                }
-            }
-        }
     }
 
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
         modelClassName = if (isRoot) "root-component" else "component",
         representation = declaration,
     )
+
+    private inner class MethodParser {
+        val entryPoints = arrayListOf<EntryPoint>()
+        val memberInjectors = arrayListOf<MembersInjectorModel>()
+        val childComponentFactories = arrayListOf<SubComponentFactoryMethodModel>()
+        val unknown = arrayListOf<Method>()
+
+        init {
+            for (method in declaration.methods) {
+                // Parse with priorities
+                when {
+                    SubComponentFactoryMethodImpl.canRepresent(method) -> {
+                        childComponentFactories += SubComponentFactoryMethodImpl(
+                            factoryMethod = method,
+                        )
+                    }
+                    MembersInjectorModelImpl.canRepresent(method) -> {
+                        memberInjectors += MembersInjectorModelImpl(
+                            injector = method,
+                        )
+                    }
+                    ComponentEntryPointImpl.canRepresent(method) -> {
+                        entryPoints += ComponentEntryPointImpl(
+                            dependency = NodeDependency(
+                                type = method.returnType,
+                                forQualifier = method,
+                            ),
+                            getter = method,
+                        )
+                    }
+                    else -> {
+                        if (method.isAbstract) {
+                            unknown += method
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     companion object Factory : ObjectCache<TypeDeclaration, ComponentModelImpl>() {
         operator fun invoke(key: TypeDeclaration) = createCached(key, ::ComponentModelImpl)

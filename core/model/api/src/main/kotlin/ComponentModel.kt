@@ -39,19 +39,24 @@ public interface ComponentModel : ConditionalHoldingModel, HasNodeModel {
     public val dependencies: Set<ComponentDependencyModel>
 
     /**
-     * A set of [EntryPoint]s in the component.
+     * A list of [EntryPoint]s in the component.
      */
-    public val entryPoints: Set<EntryPoint>
+    public val entryPoints: List<EntryPoint>
 
     /**
-     * A set of [MembersInjectorModel]s defined for this component.
+     * A list of [MembersInjectorModel]s defined for this component.
      */
-    public val memberInjectors: Set<MembersInjectorModel>
+    public val memberInjectors: List<MembersInjectorModel>
+
+    /**
+     * A list of [ComponentFactoryModel]s declared in this component for its children components.
+     */
+    public val subComponentFactoryMethods: List<SubComponentFactoryMethodModel>
 
     /**
      * An optional explicit factory for this component creation.
      */
-    public val factory: ComponentFactoryModel?
+    public val factory: ComponentFactoryWithBuilderModel?
 
     /**
      * Whether this component is marked as a component hierarchy root.

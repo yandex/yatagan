@@ -204,4 +204,59 @@ class ComponentCreatorFailureTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `invalid sub-component factory methods`() {
+        givenKotlinSource("test.TestSource", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            interface MyDependencies
+
+            class ConditionProvider @Inject constructor() {
+                var isEnabled: Boolean = false
+                @Condition(ConditionProvider::class, "isEnabled") annotation class IsEnabled
+            }
+            
+            @Component
+            interface RootComponent2 {
+                fun sub1EP(): SubComponent1.Factory
+            }
+
+            @Conditional(ConditionProvider.IsEnabled::class)
+            @Component(isRoot = false, dependencies = [MyDependencies::class])
+            interface SubUnderFeature
+
+            @Component
+            interface RootComponent1 {
+                fun sub1EP(): SubComponent1
+                fun sub1FactoryMethod(dep: MyDependencies): SubComponent1
+
+                fun sub2FactoryMethod1(foo: Any): SubComponent2
+                fun sub2FactoryMethod2(dep: MyDependencies): SubComponent2
+                
+                fun createSubComponent3(@BindsInstance i: Int): SubComponent3
+                
+                fun unknown(): RootComponent2
+                
+                fun subUnderFeature(dep: MyDependencies): SubUnderFeature
+            }
+
+            @Component(isRoot=false, dependencies = [MyDependencies::class])
+            interface SubComponent1 {
+                @Component.Builder interface Factory { fun create(dep: MyDependencies): SubComponent1 }
+            }
+
+            @Component(isRoot=false, dependencies = [MyDependencies::class])
+            interface SubComponent2
+
+            @Component(isRoot=false)
+            interface SubComponent3 {
+                val i: Int
+                fun createSubComponent3(@BindsInstance i: Int): SubComponent3
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }
