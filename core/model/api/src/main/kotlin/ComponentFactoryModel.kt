@@ -23,12 +23,16 @@ import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
- * Represents [com.yandex.yatagan.Component.Builder].
+ * Models a factory method which creates a component instance.
+ * Accepts [ModuleModel], [ComponentDependencyModel] and bound instances as parameters.
+ *
+ * This interface is fit to model a child component factory method. Its extension - [ComponentFactoryWithBuilderModel] -
+ * models `@Component.Builder` declaration.
  */
-public interface ComponentFactoryModel : HasNodeModel {
+public interface ComponentFactoryModel : MayBeInvalid {
 
     /**
-     * TODO: doc.
+     * A component which the factory produces.
      */
     public val createdComponent: ComponentModel
 
@@ -42,11 +46,6 @@ public interface ComponentFactoryModel : HasNodeModel {
      * `null` if no appropriate method is found.
      */
     public val factoryMethod: Method?
-
-    /**
-     * TODO: doc.
-     */
-    public val builderInputs: Collection<BuilderInputModel>
 
     /**
      * Encodes actual input data model, that [InputModel] introduces to the graph.
@@ -98,19 +97,14 @@ public interface ComponentFactoryModel : HasNodeModel {
     }
 
     /**
-     * Represents an input parameter of the factory method.
+     * Represents an input parameter of the factory.
      */
     public interface FactoryInputModel : InputModel
 
-    /**
-     * Represents a setter method for the input in builder-like fashion.
-     */
-    public interface BuilderInputModel : InputModel {
-        /**
-         * Actual abstract setter.
-         * Has *single parameter*; return type may be of the builder type itself or
-         * [void][com.yandex.yatagan.lang.Type.isVoid].
-         */
-        public val builderSetter: Method
+    public fun <R> accept(visitor: Visitor<R>): R
+
+    public interface Visitor<R> {
+        public fun visitSubComponentFactoryMethod(model: SubComponentFactoryMethodModel): R
+        public fun visitWithBuilder(model: ComponentFactoryWithBuilderModel): R
     }
 }

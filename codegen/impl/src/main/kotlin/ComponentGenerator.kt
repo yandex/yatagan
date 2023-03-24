@@ -199,6 +199,30 @@ internal class ComponentGenerator private constructor(
             }
         }
 
+        graph.subComponentFactoryMethods.forEach { factory ->
+            val createdGraph = factory.createdGraph ?: return@forEach
+            overrideMethod(factory.model.factoryMethod) {
+                modifiers(PUBLIC)
+                +buildExpression {
+                    +"return new %T(".formatCode(createdGraph[ComponentImplClassName])
+                    val arguments = buildList {
+                        for (parentGraph in createdGraph.usedParents) {
+                            add(componentInstance(
+                                inside = graph,
+                                graph = parentGraph,
+                                isInsideInnerClass = false,
+                            ))
+                        }
+                        for (input in factory.model.factoryInputs) {
+                            add(buildExpression { +input.name })
+                        }
+                    }
+                    join(arguments) { +it }
+                    +")"
+                }
+            }
+        }
+
         childGenerators.forEach { childGenerator ->
             nestedType {
                 childGenerator.generate()

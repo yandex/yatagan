@@ -21,7 +21,7 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
-import com.yandex.yatagan.core.model.ComponentFactoryModel
+import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -29,7 +29,7 @@ import com.yandex.yatagan.validation.format.modelRepresentation
 
 internal class SubComponentFactoryBindingImpl(
     override val owner: BindingGraph,
-    private val factory: ComponentFactoryModel,
+    private val factory: ComponentFactoryWithBuilderModel,
 ) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker {
     override val target: NodeModel
         get() = factory.asNode()

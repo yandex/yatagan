@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.core.model.impl
+package com.yandex.yatagan.core.model
 
-import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
-import com.yandex.yatagan.core.model.ComponentModel
-import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.validation.MayBeInvalid
 
-fun ComponentModel(declaration: TypeDeclaration): ComponentModel {
-    return ComponentModelImpl(declaration)
-}
+/**
+ * Represents a function/property exposed from a component interface.
+ *
+ * @see ComponentModel.entryPoints
+ */
+public interface ComponentEntryPoint : MayBeInvalid {
+    /**
+     * Method in the component interface corresponding to the entry-point.
+     */
+    public val getter: Method
 
-fun ComponentFactoryWithBuilderModel(declaration: TypeDeclaration): ComponentFactoryWithBuilderModel {
-    return ComponentFactoryWithBuilderModelImpl(declaration)
+    /**
+     * A parsed [getter]s return value.
+     */
+    public val dependency: NodeDependency
 }

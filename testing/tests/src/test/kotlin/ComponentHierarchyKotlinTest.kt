@@ -417,6 +417,8 @@ class ComponentHierarchyKotlinTest(
             @Scope annotation class Sub2
 
             @Singleton class Foo @Inject constructor()
+            interface MyDep
+            @Module class MyModule(@get:Provides val i: Int)
 
             @Sub2 @Component(isRoot = false)
             interface Sub2Component {
@@ -439,11 +441,21 @@ class ComponentHierarchyKotlinTest(
                 val foo: Foo
             }
 
+            @Sub @Component(isRoot = false, modules = [MyModule::class], dependencies = [MyDep::class])
+            interface SubComponent3 {
+                val i: Int
+                val d: MyDep
+                val d2: Double
+                val foo: Foo
+            }
+
             @Singleton @Component
             interface RootComponent {
                 val sub1: SubComponent1.Builder
                 val sub2: Provider<SubComponent2>
                 val sub2lazy: Lazy<SubComponent2>
+                fun createSubComponent3(dep: MyDep, mod: MyModule, @BindsInstance d: Double): SubComponent3
+                
                 @Component.Builder
                 interface Factory { fun create(@BindsInstance features: Features): RootComponent }
             }
@@ -459,13 +471,31 @@ class ComponentHierarchyKotlinTest(
             @Conditional(Features.IsEnabled::class)
             interface FeatureComponent {
                 val foo: Provider<Foo>
+                
+                fun createFeatureComponent2(dep: MyDep): FeatureComponent2
+            }
+
+            @Component(isRoot = false, dependencies = [MyDep::class])
+            @Conditional(Features.IsEnabled::class)
+            interface FeatureComponent2 {
+                val dep: MyDep
             }
 
             fun test() {
                 val root: RootComponent = Yatagan.builder(RootComponent.Factory::class.java).create(Features(true))
-                root.sub1.create().opt.get().foo.get()
+                val foo: Foo = root.sub1.create().opt.get().foo.get()
                 root.sub2.get().sub2.foo
                 root.sub2lazy.get().sub2.foo
+
+                val dep = object : MyDep {}
+                val mod = MyModule(740)
+                val sub3 = root.createSubComponent3(dep, mod, 0.5)
+                assert(sub3.foo === foo)
+                assert(sub3.d === dep)
+                assert(sub3.d2 == 0.5)
+                assert(sub3.i == 740)
+
+                root.sub1.create().opt.get().createFeatureComponent2(dep)
 
                 val root2: RootComponent = Yatagan.builder(RootComponent.Factory::class.java).create(Features(false))
                 assert(!root2.sub1.create().opt.isPresent)

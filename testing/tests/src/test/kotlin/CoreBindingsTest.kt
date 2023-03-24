@@ -99,6 +99,8 @@ class CoreBindingsTest(
                 Lazy<MySimpleClass> getMySimpleClassLazy();
                 Provider<MyScopedClass> getMyScopedClassProvider();
                 Lazy<MyScopedClass> getMyScopedClassLazy();
+                
+                default void someNonAbstractMethod() { }
             }
         """.trimIndent()
         )

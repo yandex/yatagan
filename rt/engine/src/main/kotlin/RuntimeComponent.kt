@@ -19,6 +19,7 @@ package com.yandex.yatagan.rt.engine
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.GraphMemberInjector
+import com.yandex.yatagan.core.graph.GraphSubComponentFactoryMethod
 import com.yandex.yatagan.core.graph.WithParents
 import com.yandex.yatagan.core.graph.bindings.AlternativesBinding
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
@@ -38,6 +39,7 @@ import com.yandex.yatagan.core.graph.normalized
 import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.DependencyKind
@@ -144,6 +146,9 @@ internal class RuntimeComponent(
         for (memberInject in graph.memberInjectors) {
             implementMethod(memberInject.injector.rt, MemberInjectorHandler(memberInject))
         }
+        for (factory in graph.subComponentFactoryMethods) {
+            implementMethod(factory.model.factoryMethod.rt, ChildComponentFactoryHandler(factory))
+        }
     }
 
     fun resolveAndAccess(dependency: NodeDependency): Any {
@@ -248,7 +253,7 @@ internal class RuntimeComponent(
     }
 
     override fun visitSubComponent(binding: SubComponentBinding): Any {
-        val creator = binding.targetGraph.creator
+        val creator = binding.targetGraph.model.factory
         val clazz = (creator ?: binding.targetGraph.model).type.declaration.rt
         return Proxy.newProxyInstance(
             clazz.classLoader,
@@ -371,6 +376,48 @@ internal class RuntimeComponent(
                 })
             }
             return null
+        }
+    }
+
+    private inner class ChildComponentFactoryHandler(
+        val factory: GraphSubComponentFactoryMethod,
+    ) : MethodHandler {
+        override fun invoke(proxy: Any, args: Array<Any?>?): Any? {
+            val givenInstances = hashMapOf<NodeModel, Any>()
+            val givenDependencies = hashMapOf<ComponentDependencyModel, Any>()
+            val givenModuleInstances = hashMapOf<ModuleModel, Any>()
+            fun consumePayload(payload: ComponentFactoryModel.InputPayload, arg: Any) {
+                when (payload) {
+                    is ComponentFactoryModel.InputPayload.Dependency ->
+                        givenDependencies[payload.dependency] = arg
+                    is ComponentFactoryModel.InputPayload.Instance ->
+                        givenInstances[payload.node] = arg
+                    is ComponentFactoryModel.InputPayload.Module ->
+                        givenModuleInstances[payload.module] = arg
+                }
+            }
+
+            for ((input, arg) in factory.model.factoryInputs.zip(args!!)) {
+                consumePayload(payload = input.payload, arg = arg!!)
+            }
+
+            val componentClass = factory.model.createdComponent.type.declaration.rt
+            val runtimeComponent = RuntimeComponent(
+                logger = logger,
+                graph = checkNotNull(factory.createdGraph),
+                parent = this@RuntimeComponent,
+                givenInstances = givenInstances,
+                givenDependencies = givenDependencies,
+                givenModuleInstances = givenModuleInstances,
+                validationPromise = validationPromise,
+            )
+            return Proxy.newProxyInstance(
+                componentClass.classLoader,
+                arrayOf(componentClass),
+                runtimeComponent
+            ).also {
+                runtimeComponent.thisProxy = it
+            }
         }
     }
 }

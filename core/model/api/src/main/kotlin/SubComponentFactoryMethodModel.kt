@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2023 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.core.model.impl
+package com.yandex.yatagan.core.model
 
-import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
-import com.yandex.yatagan.core.model.ComponentModel
-import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.Method
 
-fun ComponentModel(declaration: TypeDeclaration): ComponentModel {
-    return ComponentModelImpl(declaration)
-}
+/**
+ * Models a factory method exposed from a parent component to create a child.
+ */
+public interface SubComponentFactoryMethodModel : ComponentFactoryModel {
 
-fun ComponentFactoryWithBuilderModel(declaration: TypeDeclaration): ComponentFactoryWithBuilderModel {
-    return ComponentFactoryWithBuilderModelImpl(declaration)
+    /**
+     * The component creating method to implement.
+     */
+    override val factoryMethod: Method
 }

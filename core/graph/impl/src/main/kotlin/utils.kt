@@ -18,6 +18,7 @@ package com.yandex.yatagan.core.graph.impl
 
 import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.WithParents
+import com.yandex.yatagan.core.model.ComponentFactoryModel
 
 internal fun <K, V> mergeMultiMapsForDuplicateCheck(
     fromParent: Map<K, List<V>>?,
@@ -51,4 +52,12 @@ internal fun <C, P> hierarchyExtension(
         override val parent: C?
             get() = delegate.parent?.let { it[key] }
     }
+}
+
+internal interface ComponentFactoryVisitor<R> : ComponentFactoryModel.Visitor<R> {
+    fun visitNull(): R
+}
+
+internal fun <R> ComponentFactoryModel?.accept(visitor: ComponentFactoryVisitor<R>): R {
+    return this?.accept(visitor) ?: visitor.visitNull()
 }

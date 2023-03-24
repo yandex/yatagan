@@ -69,6 +69,8 @@ class CoreBindingsKotlinTest(
                 fun getExplicit(): test.ExplicitImpl
                 fun getProviderExplicit(): Provider<test.ExplicitImpl>
                 fun getLazyExplicit(): Lazy<test.ExplicitImpl>
+                
+                fun someNonAbstractMethod() { /*method body*/ }
             }
         """.trimIndent()
         )

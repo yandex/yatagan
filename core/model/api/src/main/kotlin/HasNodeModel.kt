@@ -36,7 +36,7 @@ public interface HasNodeModel : ClassBackedModel {
     public interface Visitor<R> {
         public fun visitDefault(): R
         public fun visitComponent(model: ComponentModel): R = visitDefault()
-        public fun visitComponentFactory(model: ComponentFactoryModel): R = visitDefault()
+        public fun visitComponentFactory(model: ComponentFactoryWithBuilderModel): R = visitDefault()
         public fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): R = visitDefault()
         public fun visitInjectConstructor(model: InjectConstructorModel): R = visitDefault()
     }
