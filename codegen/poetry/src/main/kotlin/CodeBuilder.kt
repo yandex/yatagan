@@ -46,4 +46,29 @@ open class CodeBuilder {
         block()
         implCode.endControlFlow()
     }
+
+    inline fun <T> ifElseIfFlow(
+        args: Collection<T>,
+        condition: ExpressionBuilder.(arg: T) -> Unit,
+        block: CodeBuilder.(arg: T) -> Unit,
+        elseBlock: CodeBuilder.() -> Unit,
+    ) {
+        if (args.isEmpty()) {
+            elseBlock()
+            return
+        }
+
+        args.forEachIndexed { index, arg ->
+            val expression = buildExpression { condition(arg) }
+            if (index == 0) {
+                implCode.beginControlFlow("if (\$L)", expression)
+            } else {
+                implCode.nextControlFlow("else if (\$L)", expression)
+            }
+            block(arg)
+        }
+        implCode.nextControlFlow("else")
+        elseBlock()
+        implCode.endControlFlow()
+    }
 }

@@ -17,6 +17,7 @@
 @file:[JvmMultifileClass JvmName("Loader")]
 package com.yandex.yatagan.common
 
+import com.yandex.yatagan.AutoBuilder
 import com.yandex.yatagan.Component
 
 /**
@@ -27,21 +28,27 @@ fun <T : Any> loadImplementationByBuilderClass(builderClass: Class<T>): T {
     require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
         "$builderClass is not a builder for a Yatagan component"
     }
-    val componentClass = checkNotNull(builderClass.enclosingClass) {
+    val componentClass = requireNotNull(builderClass.enclosingClass) {
         "No enclosing component class found for $builderClass"
     }
-    require(componentClass.getAnnotation(Component::class.java)?.isRoot == true) {
-        "$componentClass is not a root Yatagan component"
-    }
-    val daggerComponentClass = loadImplementationClass(componentClass)
-    return builderClass.cast(daggerComponentClass.getDeclaredMethod("builder").invoke(null))
+    val yataganComponentClass = loadImplementationClass(componentClass)
+    return builderClass.cast(yataganComponentClass.getDeclaredMethod("builder").invoke(null))
 }
 
 /**
  * Must be used on root components with no builder.
  */
 @Throws(ClassNotFoundException::class)
-fun <T : Any> loadImplementationByComponentClass(componentClass: Class<T>): T {
-    val daggerComponentClass = loadImplementationClass(componentClass)
-    return componentClass.cast(daggerComponentClass.getDeclaredMethod("create").invoke(null))
+fun <T : Any> loadAutoBuilderImplementationByComponentClass(componentClass: Class<T>): AutoBuilder<T> {
+    val yataganComponentClass = loadImplementationClass(componentClass)
+    val autoBuilder = try {
+        yataganComponentClass.getDeclaredMethod("autoBuilder")
+    } catch (_: NoSuchMethodException) {
+        throw IllegalArgumentException(
+            "Auto-builder can't be used for $componentClass, because it declares an explicit builder. " +
+                    "Please use `Yatagan.builder()` instead"
+        )
+    }
+    @Suppress("UNCHECKED_CAST")
+    return autoBuilder.invoke(null) as AutoBuilder<T>
 }

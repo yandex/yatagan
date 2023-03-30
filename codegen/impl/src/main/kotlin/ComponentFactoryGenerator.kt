@@ -17,12 +17,14 @@
 package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
-import com.yandex.yatagan.codegen.poetry.MethodSpecBuilder
+import com.squareup.javapoet.TypeVariableName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildClass
 import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.codegen.poetry.invoke
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.Extensible
+import com.yandex.yatagan.core.model.ClassBackedModel
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload
@@ -40,32 +42,28 @@ internal class ComponentFactoryGenerator(
     private val componentImplName: ClassName,
     fieldsNs: Namespace,
 ) : ComponentGenerator.Contributor {
-    private val instanceFieldNames = hashMapOf<NodeModel, String>()
-    private val moduleInstanceFieldNames = hashMapOf<ModuleModel, String>()
-    private val componentInstanceFieldNames = hashMapOf<ComponentDependencyModel, String>()
-    private val inputFieldNames = mutableMapOf<ComponentFactoryModel.InputModel, String>()
-    private val triviallyConstructableModules: Collection<ModuleModel>
+    private val inputsWithFieldNames = mutableMapOf<ClassBackedModel, String>()
 
     init {
         thisGraph.creator?.let { creator ->
+            // Bound instances
             for (input in creator.allInputs) {
-                val fieldName = fieldsNs.name(input.name)
-                inputFieldNames[input] = fieldName
-                when (val payload = input.payload) {
-                    is InputPayload.Dependency -> componentInstanceFieldNames[payload.dependency] = fieldName
-                    is InputPayload.Instance -> instanceFieldNames[payload.node] = fieldName
-                    is InputPayload.Module -> moduleInstanceFieldNames[payload.module] = fieldName
-                }.let { /* exhaustive */ }
+                val payload = input.payload as? InputPayload.Instance ?: continue
+                inputsWithFieldNames[payload.model] = fieldsNs.name(input.name)
             }
         }
 
-        triviallyConstructableModules = thisGraph.modules.asSequence()
-            .filter { module -> module.requiresInstance && module !in moduleInstanceFieldNames }
-            .onEach { module ->
-                // Such module must be trivially constructable, it's validated.
-                val name = fieldsNs.name(module.name)
-                moduleInstanceFieldNames[module] = name
-            }.toList()
+        // Component dependencies
+        for (dependency in thisGraph.dependencies) {
+            inputsWithFieldNames[dependency] = fieldsNs.name(dependency.name)
+        }
+
+        // Module instances
+        for (module in thisGraph.modules) {
+            if (module.requiresInstance) {
+                inputsWithFieldNames[module] = fieldsNs.name(module.name)
+            }
+        }
     }
 
     private val superComponentFieldNames: Map<BindingGraph, String> =
@@ -78,18 +76,31 @@ internal class ComponentFactoryGenerator(
         if (thisGraph.model.factory != null) nestedClass("ComponentFactoryImpl") else this
     }
 
-    fun fieldNameFor(boundInstance: NodeModel) = checkNotNull(instanceFieldNames[boundInstance])
-    fun fieldNameFor(dependency: ComponentDependencyModel) = checkNotNull(componentInstanceFieldNames[dependency])
+    fun fieldNameFor(boundInstance: NodeModel) = checkNotNull(inputsWithFieldNames[boundInstance])
+    fun fieldNameFor(dependency: ComponentDependencyModel) = checkNotNull(inputsWithFieldNames[dependency])
+    fun fieldNameFor(module: ModuleModel) = checkNotNull(inputsWithFieldNames[module])
     fun fieldNameFor(graph: BindingGraph) = checkNotNull(superComponentFieldNames[graph])
-    fun fieldNameFor(module: ModuleModel) = checkNotNull(moduleInstanceFieldNames[module])
 
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
-        inputFieldNames.forEach { (input, name) ->
-            field(input.payload.typeName(), name) { modifiers(/*package-private*/ FINAL) }
+        inputsWithFieldNames.forEach { (inputModel, name) ->
+            field(inputModel.typeName(), name) { modifiers(/*package-private*/ FINAL) }
         }
         superComponentFieldNames.forEach { (input, name) ->
             field(input[ComponentImplClassName], name) { modifiers(/*package-private*/ FINAL) }
         }
+        generatePrimaryConstructor()
+
+        thisGraph.model.factory?.let { factory ->
+            generateBuilder(factory)
+        }
+
+        if (thisGraph.creator == null && thisGraph.isRoot) {
+            generateAutoBuilder()
+        }
+    }
+
+    private fun TypeSpecBuilder.generatePrimaryConstructor() {
+        // Constructor to be invoked by `builder()`/`autoBuilder()`/`create()` entry-points.
         constructor {
             val creator = thisGraph.creator
             if (creator != null) {
@@ -104,100 +115,169 @@ internal class ComponentFactoryGenerator(
                 parameter(graph[ComponentImplClassName], name)
                 +"this.${fieldNameFor(graph)} = $name"
             }
-            // Secondly and thirdly - factory inputs and builder inputs respectively.
-            creator?.allInputs?.forEach { input ->
-                val name = paramsNs.name(input.name)
-                parameter(input.payload.typeName(), name)
-                +"this.%N = %T.checkInputNotNull(%N)".formatCode(inputFieldNames[input]!!, Names.Checks, name)
-            }
-            generateTriviallyConstructableModules(constructorBuilder = this, builder = builder)
-        }
-
-        val isSubComponent = !thisGraph.isRoot
-        val factory: ComponentFactoryWithBuilderModel? = thisGraph.model.factory
-        if (factory != null) {
-            nestedType {
-                buildClass(implName) {
-                    modifiers(PRIVATE, FINAL, STATIC)
-                    implements(factory.typeName())
-
-                    val builderAccess = arrayListOf<String>()
-                    if (isSubComponent) {
-                        val paramsNs = Namespace(prefix = "f")
-                        constructor {
-                            thisGraph.usedParents.forEach { graph ->
-                                val name = paramsNs.name(graph.model.name)
-                                builderAccess += "this.$name"
-                                val typeName = graph[ComponentImplClassName]
-                                this@buildClass.field(typeName, name)
-                                parameter(typeName, name)
-                                +"this.$name = $name"
-                            }
-                        }
-                    }
-
-                    factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.InputModel::name)
-                    with(Namespace("m")) {
-                        factory.builderInputs.forEach { builderInput ->
-                            val fieldName = name(builderInput.name)
-                            builderAccess += "this.$fieldName"
-                            field(builderInput.payload.typeName(), fieldName) {
-                                modifiers(PRIVATE)
-                            }
-                            overrideMethod(builderInput.builderSetter) {
-                                modifiers(PUBLIC)
-                                +"this.$fieldName = %N".formatCode(builderInput.builderSetter.parameters.single().name)
-                                if (!builderInput.builderSetter.returnType.isVoid) {
-                                    +"return this"
-                                }
-                            }
-                        }
-                    }
-                    factory.factoryMethod?.let { factoryMethod ->
-                        overrideMethod(factoryMethod) {
-                            modifiers(PUBLIC)
-                            +buildExpression {
-                                +"return new %T(".formatCode(componentImplName)
-                                join(builderAccess) { +it }
-                                +")"
-                            }
-                        }
+            if (creator != null) {
+                // If creator is present, add parameters in order.
+                val allInputs = creator.allInputs
+                for (input in allInputs) {
+                    val name = paramsNs.name(input.name)
+                    val model = input.payload.model
+                    parameter(model.typeName(), name)
+                    val fieldName = inputsWithFieldNames[model] ?: continue  // Invalid - UB.
+                    +"this.%N = %T.checkInputNotNull(%N)".formatCode(fieldName, Names.Checks, name)
+                }
+                for ((model, fieldName) in inputsWithFieldNames) {
+                    // Generate all trivially constructable modules requiring instance that are not provided.
+                    if (model is ModuleModel && model.isTriviallyConstructable &&
+                        allInputs.none { it.payload.model == model }
+                    ) {
+                        +"this.%N = new %T()".formatCode(fieldName, model.typeName())
                     }
                 }
-            }
-            if (!isSubComponent) {
-                method("builder") {
-                    modifiers(PUBLIC, STATIC)
-                    returnType(factory.typeName())
-                    +"return new %T()".formatCode(implName)
+            } else {
+                // Add parameters for auto-creator (if non-root - UB)
+                for ((inputModel, fieldName) in inputsWithFieldNames) {
+                    val name = paramsNs.name(inputModel.name)
+                    parameter(inputModel.typeName(), name)
+                    if (inputModel is ModuleModel && inputModel.isTriviallyConstructable) {
+                        // Trivially constructable modules are optional is auto-creator, check here
+                        +"this.%N = %N != null ? %N : new %T()".formatCode(fieldName, name, name, inputModel.typeName())
+                    } else {
+                        +"this.%N = %N".formatCode(fieldName, name)
+                    }
                 }
-            }
-        }
-
-        if (factory == null && thisGraph.isRoot) {
-            method("create") {
-                modifiers(PUBLIC, STATIC)
-                returnType(thisGraph.model.typeName())
-                +"return new %T()".formatCode(componentImplName)
             }
         }
     }
 
-    private fun generateTriviallyConstructableModules(
-        constructorBuilder: MethodSpecBuilder,
-        builder: TypeSpecBuilder,
-    ) {
-        triviallyConstructableModules.forEach { module ->
-            val fieldName = moduleInstanceFieldNames[module]!!
-            with(builder) {
-                field(module.typeName(), fieldName) {
-                    modifiers(/*package-private*/ FINAL)
+    private fun TypeSpecBuilder.generateBuilder(factory: ComponentFactoryWithBuilderModel) {
+        nestedType {
+            buildClass(implName) {
+                modifiers(PRIVATE, FINAL, STATIC)
+                implements(factory.typeName())
+
+                val builderAccess = arrayListOf<String>()
+                if (!thisGraph.isRoot) {
+                    val paramsNs = Namespace(prefix = "f")
+                    constructor {
+                        thisGraph.usedParents.forEach { graph ->
+                            val name = paramsNs.name(graph.model.name)
+                            builderAccess += "this.$name"
+                            val typeName = graph[ComponentImplClassName]
+                            this@buildClass.field(typeName, name)
+                            parameter(typeName, name)
+                            +"this.$name = $name"
+                        }
+                    }
+                }
+
+                factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.InputModel::name)
+                with(Namespace("m")) {
+                    factory.builderInputs.forEach { builderInput ->
+                        val fieldName = name(builderInput.name)
+                        builderAccess += "this.$fieldName"
+                        field(builderInput.payload.model.typeName(), fieldName) {
+                            modifiers(PRIVATE)
+                        }
+                        overrideMethod(builderInput.builderSetter) {
+                            modifiers(PUBLIC)
+                            +"this.$fieldName = %N".formatCode(builderInput.builderSetter.parameters.single().name)
+                            if (!builderInput.builderSetter.returnType.isVoid) {
+                                +"return this"
+                            }
+                        }
+                    }
+                }
+                factory.factoryMethod?.let { factoryMethod ->
+                    overrideMethod(factoryMethod) {
+                        modifiers(PUBLIC)
+                        +buildExpression {
+                            +"return new %T(".formatCode(componentImplName)
+                            join(builderAccess) { +it }
+                            +")"
+                        }
+                    }
                 }
             }
-            with(constructorBuilder) {
-                // MAYBE: Make this lazy?
-                +"this.%N = new %T()".formatCode(fieldName, module.typeName())
+        }
+        if (thisGraph.isRoot) {
+            // ENTRY-POINT: See `Yatagan.builder()`
+            method("builder") {
+                modifiers(PUBLIC, STATIC)
+                returnType(factory.typeName())
+                +"return new %T()".formatCode(implName)
             }
+        }
+    }
+
+    private fun TypeSpecBuilder.generateAutoBuilder() {
+        val autoBuilderImplName = componentImplName.nestedClass("AutoBuilderImpl")
+        nestedType {
+            buildClass(autoBuilderImplName) {
+                modifiers(PRIVATE, FINAL, STATIC)
+                implements(Names.AutoBuilder(componentImplName))
+                for ((input, fieldName) in inputsWithFieldNames) {
+                    field(input.typeName(), fieldName) {
+                        modifiers(PRIVATE)
+                    }
+                }
+
+                method("provideInput") {
+                    val i = TypeVariableName.get("I")
+                    modifiers(PUBLIC, FINAL)
+                    parameter(i, "input")
+                    generic(i)
+                    parameter(Names.Class(i), "inputClass")
+                    returnType(Names.AutoBuilder(componentImplName))
+                    annotation<Override>()
+                    if (inputsWithFieldNames.isNotEmpty()) {
+                        ifElseIfFlow(
+                            args = inputsWithFieldNames.entries,
+                            condition = { (input, _) -> +"inputClass == %T.class".formatCode(input.typeName()) },
+                            block = { (input, fieldName) ->
+                                +"this.%N = (%T) input".formatCode(fieldName, input.typeName())
+                            },
+                            elseBlock = {
+                                +buildExpression {
+                                    +"%T.reportUnexpectedAutoBuilderInput(inputClass, %T.asList("
+                                        .formatCode(Names.Checks, Names.Arrays)
+                                    join(inputsWithFieldNames.keys) { +"%T.class".formatCode(it.typeName()) }
+                                    +"))"
+                                }
+                            },
+                        )
+                    } else {
+                        +"%T.reportUnexpectedAutoBuilderInput(input.getClass(), %T.emptyList())"
+                            .formatCode(Names.Checks, Names.Collections)
+                    }
+                    +"return this"
+                }
+
+                method("create") {
+                    modifiers(PUBLIC, FINAL)
+                    annotation<Override>()
+                    returnType(componentImplName)
+                    for ((input, fieldName) in inputsWithFieldNames) {
+                        if (input is ModuleModel && input.isTriviallyConstructable)
+                            continue  // Trivially constructable modules are optional
+
+                        controlFlow("if (this.%N == null)".formatCode(fieldName)) {
+                            +"%T.reportMissingAutoBuilderInput(%T.class)".formatCode(Names.Checks, input.typeName())
+                        }
+                    }
+                    +buildExpression {
+                        +"return new %T(".formatCode(componentImplName)
+                        join(inputsWithFieldNames.values) { +"this.%N".formatCode(it) }
+                        +")"
+                    }
+                }
+            }
+        }
+
+        // ENTRY-POINT: See `Yatagan.autoBuilder()`
+        method("autoBuilder") {
+            modifiers(PUBLIC, STATIC)
+            returnType(Names.AutoBuilder(componentImplName))
+            +"return new %T()".formatCode(autoBuilderImplName)
         }
     }
 

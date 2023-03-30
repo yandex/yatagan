@@ -19,8 +19,8 @@ package com.yandex.yatagan
 import com.yandex.yatagan.Yatagan.builder
 import com.yandex.yatagan.Yatagan.create
 import com.yandex.yatagan.base.singleInitWithFallback
+import com.yandex.yatagan.common.loadAutoBuilderImplementationByComponentClass
 import com.yandex.yatagan.common.loadImplementationByBuilderClass
-import com.yandex.yatagan.common.loadImplementationByComponentClass
 import com.yandex.yatagan.internal.ThreadAssertions
 import com.yandex.yatagan.rt.engine.RuntimeEngine
 import com.yandex.yatagan.rt.support.DynamicValidationDelegate
@@ -164,24 +164,35 @@ public object Yatagan {
     }
 
     /**
-     * Use this to directly create component instance for components,
-     * that do not declare an explicit builder interface.
+     * Use this to create an "auto"-builder for components, that do not declare an explicit [Component.Builder].
      *
-     * @param componentClass component class
-     * @return ready component instance of the given class
+     * @see AutoBuilder
      */
     @JvmStatic
-    public fun <T : Any> create(componentClass: Class<T>): T {
+    public fun <T : Any> autoBuilder(componentClass: Class<T>): AutoBuilder<T> {
         if (engine.params.useCompiledImplementationIfAvailable) {
             try {
-                return loadImplementationByComponentClass(componentClass).also {
+                return loadAutoBuilderImplementationByComponentClass(componentClass).also {
                     engine.params.logger?.log("Found generated implementation for `$componentClass`, using it")
                 }
             } catch (_: ClassNotFoundException) {
                 // Fallback to full reflection
             }
         }
-        return engine.create(componentClass)
+        return engine.autoBuilder(componentClass)
+    }
+
+    /**
+     * Use this to directly create component instance for components,
+     * that do not declare an explicit builder interface and do not declare any [Component.dependencies] or
+     * [Component.modules] that require instance.
+     *
+     * @param componentClass component class
+     * @return ready component instance of the given class
+     */
+    @JvmStatic
+    public fun <T : Any> create(componentClass: Class<T>): T {
+        return autoBuilder(componentClass).create()
     }
 
     private data class Params (

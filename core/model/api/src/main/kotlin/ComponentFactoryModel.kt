@@ -53,12 +53,14 @@ public interface ComponentFactoryModel : MayBeInvalid {
      *
      * @see InputModel
      */
-    public sealed interface InputPayload : ClassBackedModel {
+    public sealed interface InputPayload : MayBeInvalid {
+        public val model: ClassBackedModel
+
         /**
          * Represent an externally given instance via [com.yandex.yatagan.BindsInstance].
          */
         public interface Instance : InputPayload {
-            public val node: NodeModel
+            override val model: NodeModel
         }
 
         /**
@@ -66,7 +68,7 @@ public interface ComponentFactoryModel : MayBeInvalid {
          * supplied as a factory input.
          */
         public interface Module : InputPayload {
-            public val module: ModuleModel
+            override val model: ModuleModel
         }
 
         /**
@@ -75,7 +77,7 @@ public interface ComponentFactoryModel : MayBeInvalid {
          * @see ComponentDependencyModel
          */
         public interface Dependency : InputPayload {
-            public val dependency: ComponentDependencyModel
+            override val model: ComponentDependencyModel
         }
     }
 

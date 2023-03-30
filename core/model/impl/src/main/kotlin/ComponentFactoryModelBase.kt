@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.core.model.ClassBackedModel
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel.FactoryInputModel
@@ -76,12 +75,12 @@ internal abstract class ComponentFactoryModelBase : ComponentFactoryModel {
         val declaration = param.type.declaration
         return when {
             ModuleModelImpl.canRepresent(declaration) ->
-                InputPayloadModuleImpl(module = ModuleModelImpl(declaration))
+                InputPayloadModuleImpl(model = ModuleModelImpl(declaration))
 
             hasBindsInstance() ->
-                InputPayloadInstanceImpl(node = NodeModelImpl(param.type, forQualifier = param))
+                InputPayloadInstanceImpl(model = NodeModelImpl(param.type, forQualifier = param))
 
-            else -> InputPayloadDependencyImpl(dependency = ComponentDependencyModelImpl(declaration.asType()))
+            else -> InputPayloadDependencyImpl(model = ComponentDependencyModelImpl(declaration.asType()))
         }
     }
 
@@ -101,7 +100,7 @@ internal abstract class ComponentFactoryModelBase : ComponentFactoryModel {
         val providedDependencies = allInputs
             .map { it.payload }
             .filterIsInstance<InputPayload.Dependency>()
-            .map { it.dependency }
+            .map { it.model }
             .toSet()
         for (missingDependency in createdComponent.dependencies - providedDependencies) {
             validator.reportError(Strings.Errors.missingComponentDependency(missing = missingDependency))
@@ -111,7 +110,7 @@ internal abstract class ComponentFactoryModelBase : ComponentFactoryModel {
         val providedModules = allInputs
             .map { it.payload }
             .filterIsInstance<InputPayload.Module>()
-            .map { it.module }
+            .map { it.model }
             .toSet()
         val allModulesRequiresInstance = createdComponent.modules.asSequence()
             .filter(ModuleModel::requiresInstance).toMutableSet()
@@ -127,18 +126,18 @@ internal abstract class ComponentFactoryModelBase : ComponentFactoryModel {
     }
 
     protected inner class InputPayloadModuleImpl(
-        override val module: ModuleModel,
-    ) : InputPayload.Module, ClassBackedModel by module {
+        override val model: ModuleModel,
+    ) : InputPayload.Module {
         override fun validate(validator: Validator) {
-            if (!module.requiresInstance ||
-                module !in createdComponent.modules
+            if (!model.requiresInstance ||
+                model !in createdComponent.modules
             ) {
                 validator.reportError(Strings.Errors.extraModule()) {
-                    if (module !in createdComponent.modules) {
+                    if (model !in createdComponent.modules) {
                         addNote(Strings.Notes.undeclaredModulePresent())
                     } else {
-                        assert(!module.requiresInstance)
-                        if (module.type.declaration.isKotlinObject) {
+                        assert(!model.requiresInstance)
+                        if (model.type.declaration.isKotlinObject) {
                             addNote(Strings.Notes.objectModuleInBuilder())
                         } else {
                             addNote(Strings.Notes.moduleDoesNotRequireInstance())
@@ -150,25 +149,29 @@ internal abstract class ComponentFactoryModelBase : ComponentFactoryModel {
 
         override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
             modelClassName = "input",
-            representation = module,
+            representation = model,
         )
     }
 
     protected class InputPayloadInstanceImpl(
-        override val node: NodeModel,
-    ) : InputPayload.Instance, ClassBackedModel by node {
+        override val model: NodeModel,
+    ) : InputPayload.Instance {
+        override fun validate(validator: Validator) {
+            validator.inline(model)
+        }
+
         override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
             modelClassName = "input",
-            representation = node,
+            representation = model,
         )
     }
 
     protected inner class InputPayloadDependencyImpl(
-        override val dependency: ComponentDependencyModel,
-    ) : InputPayload.Dependency, ClassBackedModel by dependency {
+        override val model: ComponentDependencyModel,
+    ) : InputPayload.Dependency {
         override fun validate(validator: Validator) {
             // dependency itself is not validated here; it's validated as a ComponentModel's child (if present there).
-            if (dependency !in createdComponent.dependencies) {
+            if (model !in createdComponent.dependencies) {
                 validator.reportError(Strings.Errors.extraComponentDependency()) {
                     addNote(Strings.Notes.adviceBindInstanceForUnknownInput())
                     addNote(Strings.Notes.adviceComponentDependencyForUnknownInput())
@@ -178,7 +181,7 @@ internal abstract class ComponentFactoryModelBase : ComponentFactoryModel {
 
         override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
             modelClassName = "input",
-            representation = dependency,
+            representation = model,
         )
     }
 }

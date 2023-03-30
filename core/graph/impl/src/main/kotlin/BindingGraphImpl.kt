@@ -293,7 +293,7 @@ internal class BindingGraphImpl(
             validator.reportError(Strings.Errors.conflictingExplicitCreatorAndFactoryMethod()) {
                 addNote(Strings.Notes.factoryMethodDeclaredHere(factory = factoryMethodInParent))
             }
-        } else if (creator == null) {
+        } else if (creator == null && !isRoot) {
             if (dependencies.isNotEmpty()) {
                 validator.reportError(Strings.Errors.missingCreatorForDependencies())
             }

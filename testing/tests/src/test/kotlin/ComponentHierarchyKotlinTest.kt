@@ -505,4 +505,109 @@ class ComponentHierarchyKotlinTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `create, builder & auto-builder usage`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Module class MyModule {
+                @get:Provides val i: Int = 2
+            }
+
+            @Component(modules = [MyModule::class])
+            interface ComponentFoo {
+                val i: Int
+            }
+
+            interface MyDependency1
+            interface MyDependency2
+            @Module class MyModule2(@get:Provides val i: Int)
+
+            @Component(modules = [
+                MyModule2::class,
+            ], dependencies = [
+                MyDependency1::class,
+                MyDependency2::class,
+            ])
+            interface ComponentBar {
+                val i: Int
+            }
+
+            @Component interface ComponentBaz {
+                @Component.Builder interface Builder { fun create(): ComponentBaz }
+            }
+            @Component.Builder interface Builder { fun create(): ComponentBaz }
+            @Component(isRoot = false) interface ComponentQu {
+                @Component.Builder interface Builder { fun create(): ComponentQu }
+            }
+            abstract class Quu {
+                @Component.Builder interface Builder
+            }
+
+            inline fun <reified E : Throwable> throws(message: String, block: () -> Unit) {
+                try {
+                    block()
+                    throw AssertionError("Not reached")
+                } catch (e: Throwable) {
+                    if (e is E) {
+                        if(e.message.toString() != message) throw AssertionError("Wrong error", e)
+                    } else throw e
+                }
+            }
+
+            fun test() {
+                Yatagan.create(ComponentFoo::class.java)
+                Yatagan.autoBuilder(ComponentFoo::class.java).create()
+                Yatagan.autoBuilder(ComponentFoo::class.java)
+                    .provideInput(MyModule())
+                    .provideInput(MyModule())  // overwriting is allowed
+                    .create()
+
+                throws<IllegalArgumentException>("Argument of class java.lang.Object is not expected. Should be one of: test.MyModule") {
+                    Yatagan.autoBuilder(ComponentFoo::class.java).provideInput(Any())
+                }
+
+                val builder = Yatagan.autoBuilder(ComponentBar::class.java)
+                throws<IllegalStateException>("Can not create component instance as (at least) the following required input is missing: test.MyDependency2") {
+                    builder
+                        .provideInput(MyModule2(228))
+                        .provideInput(MyModule2(740))
+                        .provideInput(object : MyDependency1 {}, MyDependency1::class.java)
+                        .create()
+                }
+
+                val bar = builder.provideInput(object : MyDependency2 {}, MyDependency2::class.java).create()
+                assert(bar.i == 740)
+
+                throws<IllegalStateException>("Can not create component instance as (at least) the following required input is missing: test.MyDependency1") {
+                    Yatagan.create(ComponentBar::class.java)
+                }
+            
+                throws<IllegalArgumentException>("Auto-builder can't be used for interface test.ComponentBaz, " +
+                        "because it declares an explicit builder. Please use `Yatagan.builder()` instead") {
+                    Yatagan.autoBuilder(ComponentBaz::class.java)
+                }
+            
+                throws<IllegalArgumentException>("interface test.ComponentFoo is not a builder for a Yatagan component") {
+                    Yatagan.builder(ComponentFoo::class.java)
+                }
+            
+                throws<IllegalArgumentException>("No enclosing component class found for interface test.Builder") {
+                    Yatagan.builder(Builder::class.java)
+                }
+            
+                throws<IllegalArgumentException>("interface test.ComponentQu is not a root Yatagan component") {
+                    Yatagan.builder(ComponentQu.Builder::class.java)
+                }
+    
+                throws<IllegalArgumentException>("class test.Quu is not a root Yatagan component") {
+                    Yatagan.builder(Quu.Builder::class.java)
+                }
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

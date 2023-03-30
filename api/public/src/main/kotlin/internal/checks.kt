@@ -20,8 +20,12 @@ package com.yandex.yatagan.internal
 
 import kotlin.contracts.contract
 
-@PublishedApi
-internal fun assertNotNull(instance: Any?, message: String) {
+@RequiresOptIn
+@Retention(AnnotationRetention.BINARY)
+public annotation class YataganInternal
+
+@YataganInternal
+public fun assertNotNull(instance: Any?, message: String) {
     contract {
         returns() implies (instance != null)
     }
@@ -30,14 +34,33 @@ internal fun assertNotNull(instance: Any?, message: String) {
     }
 }
 
-@PublishedApi
-internal fun <T : Any> checkInputNotNull(input: T?): T {
+@YataganInternal
+public fun <T : Any> checkInputNotNull(input: T?): T {
     assertNotNull(input, "Component input is null or unspecified")
     return input
 }
 
-@PublishedApi
-internal fun <T : Any> checkProvisionNotNull(instance: T?): T {
+@YataganInternal
+public fun <T : Any> checkProvisionNotNull(instance: T?): T {
     assertNotNull(instance, "Provision result is null")
     return instance
 }
+
+@YataganInternal
+public fun reportUnexpectedAutoBuilderInput(inputClass: Class<*>, expectedClasses: Iterable<Class<*>>): Nothing {
+    if (expectedClasses.none()) {
+        throw IllegalArgumentException("No inputs are expected, got ${inputClass.canonicalName}")
+    }
+    throw IllegalArgumentException(buildString {
+        append("Argument of ").append(inputClass).append(" is not expected. Should be one of: ")
+        expectedClasses.joinTo(this) { it.canonicalName }
+    })
+}
+
+@YataganInternal
+public fun reportMissingAutoBuilderInput(missingInputClass: Class<*>): Nothing {
+    throw IllegalStateException(
+        "Can not create component instance as (at least) the following required input is missing: " +
+                missingInputClass.canonicalName)
+}
+

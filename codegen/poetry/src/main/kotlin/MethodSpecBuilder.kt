@@ -20,6 +20,7 @@ import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeVariableName
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.Name
@@ -75,5 +76,9 @@ abstract class MethodSpecBuilder : CodeBuilder(), AnnotatibleBuilder {
 
     inline fun defaultValue(block: ExpressionBuilder.() -> Unit) {
         impl.defaultValue(buildExpression(block))
+    }
+
+    fun generic(vararg typeVars: TypeVariableName) {
+        typeVars.forEach(impl::addTypeVariable)
     }
 }
