@@ -112,12 +112,13 @@ internal class BindingGraphImpl(
     override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
 
+    private val aliasResolveVisitor = object : BaseBinding.Visitor<Binding> {
+        override fun visitAlias(alias: AliasBinding) = resolveBindingRaw(alias.source).accept(this)
+        override fun visitBinding(binding: Binding) = binding
+    }
+
     override fun resolveBinding(node: NodeModel): Binding {
-        class AliasResolveVisitor : BaseBinding.Visitor<Binding> {
-            override fun visitAlias(alias: AliasBinding) = resolveBindingRaw(alias.source).accept(this)
-            override fun visitBinding(binding: Binding) = binding
-        }
-        return resolveBindingRaw(node).accept(AliasResolveVisitor())
+        return resolveBindingRaw(node).accept(aliasResolveVisitor)
     }
 
     override fun resolveBindingRaw(node: NodeModel): BaseBinding {
