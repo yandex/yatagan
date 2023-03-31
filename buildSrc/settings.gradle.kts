@@ -4,8 +4,8 @@
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            val kotlinVersion = "1.7.20"
-            val kspVersion = "1.0.8"
+            val kotlinVersion = "1.8.10"
+            val kspVersion = "1.0.9"
             version("kotlin", kotlinVersion)
             version("ksp", "$kotlinVersion-$kspVersion")
 
