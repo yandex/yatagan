@@ -21,7 +21,6 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.DependencyKind
-import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
@@ -43,15 +42,14 @@ internal class AccessStrategyManager(
      */
     private val singleLocalDependentBindingCache: Map<Binding, Binding?> =
         buildMap(thisGraph.localBindings.size) {
-            val allLocalNodes: Map<NodeModel, Binding> = thisGraph.localBindings.keys.associateBy(Binding::target)
             for (binding in thisGraph.localBindings.keys) {
-
                 val dependencies = if (binding.nonStaticConditionProviders.isNotEmpty()) {
                     binding.dependencies + binding.nonStaticConditionProviders
                 } else binding.dependencies
 
                 for ((node, _) in dependencies) {
-                    val dependencyBinding = allLocalNodes[node] ?: continue
+                    val dependencyBinding = thisGraph.resolveBinding(node)
+                        .takeIf { it.owner == thisGraph } ?: continue
                     if (dependencyBinding in this) {
                         // Not the first dependent binding, explicitly put `null` there,
                         //  as it is no longer single
