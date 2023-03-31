@@ -164,7 +164,7 @@ class DynamicCompileTestDriver(
                 val bootstrapInvocation = if (builderName != null) {
                     "builder($builderName.class)"
                 } else {
-                    "create(${componentName.simpleNames().joinToString(".")}.class)"
+                    "autoBuilder(${componentName.simpleNames().joinToString(".")}.class)"
                 }
 
                 @Language("Java")

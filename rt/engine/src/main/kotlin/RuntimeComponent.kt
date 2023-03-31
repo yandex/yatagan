@@ -389,11 +389,11 @@ internal class RuntimeComponent(
             fun consumePayload(payload: ComponentFactoryModel.InputPayload, arg: Any) {
                 when (payload) {
                     is ComponentFactoryModel.InputPayload.Dependency ->
-                        givenDependencies[payload.dependency] = arg
+                        givenDependencies[payload.model] = arg
                     is ComponentFactoryModel.InputPayload.Instance ->
-                        givenInstances[payload.node] = arg
+                        givenInstances[payload.model] = arg
                     is ComponentFactoryModel.InputPayload.Module ->
-                        givenModuleInstances[payload.module] = arg
+                        givenModuleInstances[payload.model] = arg
                 }
             }
 

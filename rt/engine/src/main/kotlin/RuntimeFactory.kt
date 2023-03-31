@@ -54,11 +54,11 @@ internal class RuntimeFactory(
     private fun consumePayload(payload: ComponentFactoryModel.InputPayload, arg: Any) {
         when (payload) {
             is ComponentFactoryModel.InputPayload.Dependency ->
-                givenDependencies[payload.dependency] = arg
+                givenDependencies[payload.model] = arg
             is ComponentFactoryModel.InputPayload.Instance ->
-                givenInstances[payload.node] = arg
+                givenInstances[payload.model] = arg
             is ComponentFactoryModel.InputPayload.Module ->
-                givenModuleInstances[payload.module] = arg
+                givenModuleInstances[payload.model] = arg
         }
     }
 
@@ -74,13 +74,13 @@ internal class RuntimeFactory(
             }
             for (input in creator.allInputs) {
                 when (val payload = input.payload) {
-                    is ComponentFactoryModel.InputPayload.Dependency -> check(payload.dependency in givenDependencies) {
+                    is ComponentFactoryModel.InputPayload.Dependency -> check(payload.model in givenDependencies) {
                         "No value for $payload was provided"
                     }
-                    is ComponentFactoryModel.InputPayload.Instance -> check(payload.node in givenInstances) {
+                    is ComponentFactoryModel.InputPayload.Instance -> check(payload.model in givenInstances) {
                         "No value for $payload was provided"
                     }
-                    is ComponentFactoryModel.InputPayload.Module -> check(payload.module in givenModuleInstances) {
+                    is ComponentFactoryModel.InputPayload.Module -> check(payload.model in givenModuleInstances) {
                         "No value for $payload was provided"
                     }
                 }

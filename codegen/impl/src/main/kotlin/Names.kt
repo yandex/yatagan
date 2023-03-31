@@ -24,8 +24,12 @@ internal object Names {
     val Optional: ClassName = ClassName.get(com.yandex.yatagan.Optional::class.java)
     val ThreadAssertions: ClassName = ClassName.get(com.yandex.yatagan.internal.ThreadAssertions::class.java)
     val AssertionError: ClassName = ClassName.get(java.lang.AssertionError::class.java)
+    val Class: ClassName = ClassName.get(java.lang.Class::class.java)
+    val Collections: ClassName = ClassName.get(java.util.Collections::class.java)
+    val Arrays: ClassName = ClassName.get(java.util.Arrays::class.java)
     val ArrayList: ClassName = ClassName.get(java.util.ArrayList::class.java)
     val HashMap: ClassName = ClassName.get(java.util.HashMap::class.java)
     val HashSet: ClassName = ClassName.get(java.util.HashSet::class.java)
+    val AutoBuilder: ClassName = ClassName.get("com.yandex.yatagan", "AutoBuilder")
     val Checks: ClassName = ClassName.get("com.yandex.yatagan.internal", "Checks")
 }

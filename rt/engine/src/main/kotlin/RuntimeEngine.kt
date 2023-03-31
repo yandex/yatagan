@@ -16,12 +16,12 @@
 
 package com.yandex.yatagan.rt.engine
 
+import com.yandex.yatagan.AutoBuilder
 import com.yandex.yatagan.Component
 import com.yandex.yatagan.base.ObjectCacheRegistry
 import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
-import com.yandex.yatagan.core.model.impl.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.impl.ComponentModel
 import com.yandex.yatagan.lang.InternalLangApi
 import com.yandex.yatagan.lang.LangModelFactory
@@ -67,11 +67,19 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
         val builder: T
         val time = measureTimeMillis {
             require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
-                "$builderClass is not a component builder"
+                "$builderClass is not a builder for a Yatagan component"
             }
 
+            val builderDeclaration = TypeDeclaration(builderClass)
+            val componentClass = requireNotNull(builderDeclaration.enclosingType) {
+                "No enclosing component class found for $builderClass"
+            }
+            val componentModel = ComponentModel(componentClass)
+            require(componentModel.isRoot) {
+                "$componentClass is not a root Yatagan component"
+            }
             val graph = BindingGraph(
-                root = ComponentFactoryWithBuilderModel(TypeDeclaration(builderClass)).createdComponent
+                root = componentModel
             )
             val promise = doValidate(graph)
             val factory = promise.awaitOnError {
@@ -89,36 +97,32 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
         return builder
     }
 
-    fun <T : Any> create(componentClass: Class<T>): T {
-        val componentInstance: T
+    fun <T : Any> autoBuilder(componentClass: Class<T>): AutoBuilder<T> {
+        val builder: AutoBuilder<T>
         val time = measureTimeMillis {
-            require(componentClass.isAnnotationPresent(Component::class.java)) {
-                "$componentClass is not a component"
+            require(componentClass.getAnnotation(Component::class.java)?.isRoot == true) {
+                "$componentClass is not a root Yatagan component"
             }
 
-            val graph = BindingGraph(ComponentModel(TypeDeclaration(componentClass)))
-            val promise = doValidate(graph)
-            val component = promise.awaitOnError {
-                RuntimeComponent(
-                    logger = params.logger,
-                    graph = graph,
-                    parent = null,
-                    givenDependencies = emptyMap(),
-                    givenInstances = emptyMap(),
-                    givenModuleInstances = emptyMap(),
-                    validationPromise = promise,
+            val componentModel = ComponentModel(TypeDeclaration(componentClass))
+            if (componentModel.factory != null) {
+                throw IllegalArgumentException(
+                    "Auto-builder can't be used for $componentClass, because it declares an explicit builder. " +
+                            "Please use `Yatagan.builder()` instead"
                 )
             }
-            require(graph.creator == null) {
-                "$componentClass has explicit creator interface declared, use `Yatagan.builder()` instead"
-            }
 
-            val proxy = Proxy.newProxyInstance(componentClass.classLoader, arrayOf(componentClass), component)
-            component.thisProxy = proxy
-            componentInstance = componentClass.cast(proxy)
+            val graph = BindingGraph(componentModel)
+            val promise = doValidate(graph)
+            builder = RuntimeAutoBuilder(
+                componentClass = componentClass,
+                graph = graph,
+                validationPromise = promise,
+                logger = params.logger,
+            )
         }
-        params.logger?.log("Dynamic component creation for `$componentClass` took $time ms")
-        return componentInstance
+        params.logger?.log("Dynamic auto-builder creation for `$componentClass` took $time ms")
+        return builder
     }
 
     private fun reportMessages(

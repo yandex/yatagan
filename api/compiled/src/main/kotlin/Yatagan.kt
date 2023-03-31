@@ -18,8 +18,8 @@ package com.yandex.yatagan
 
 import com.yandex.yatagan.Yatagan.builder
 import com.yandex.yatagan.Yatagan.create
+import com.yandex.yatagan.common.loadAutoBuilderImplementationByComponentClass
 import com.yandex.yatagan.common.loadImplementationByBuilderClass
-import com.yandex.yatagan.common.loadImplementationByComponentClass
 import com.yandex.yatagan.internal.ThreadAssertions
 
 /**
@@ -52,14 +52,25 @@ public object Yatagan {
     }
 
     /**
+     * Use this to create an "auto"-builder for components, that do not declare an explicit [Component.Builder].
+     *
+     * @see AutoBuilder
+     */
+    @JvmStatic
+    public fun <T : Any> autoBuilder(componentClass: Class<T>): AutoBuilder<T> {
+        return loadAutoBuilderImplementationByComponentClass(componentClass)
+    }
+
+    /**
      * Use this to directly create component instance for components,
-     * that do not declare an explicit builder interface.
+     * that do not declare an explicit builder interface and do not declare any [Component.dependencies] or
+     * [Component.modules] that require instance.
      *
      * @param componentClass component class
      * @return ready component instance of the given class
      */
     @JvmStatic
     public fun<T : Any> create(componentClass: Class<T>): T {
-        return loadImplementationByComponentClass(componentClass)
+        return autoBuilder(componentClass).create()
     }
 }

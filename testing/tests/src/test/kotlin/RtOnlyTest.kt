@@ -42,7 +42,10 @@ class RtOnlyTest : CompileTestDriver by DynamicCompileTestDriver() {
             class `Yatagan${'$'}MyComponent` : MyComponent {
                 override fun getInt(): Int = ID1
                 companion object {
-                    @JvmStatic fun create() = `Yatagan${'$'}MyComponent`()
+                    @JvmStatic fun autoBuilder() = object : AutoBuilder<MyComponent> {
+                        override fun <I : Any> provideInput(i: I, c: Class<I>) = throw AssertionError()
+                        override fun create() = `Yatagan${'$'}MyComponent`()
+                    }
                 }
             }
 
@@ -57,8 +60,10 @@ class RtOnlyTest : CompileTestDriver by DynamicCompileTestDriver() {
 
             fun test() {
                 val c1: MyComponent = Yatagan.create(MyComponent::class.java)
+                val c12: MyComponent = Yatagan.autoBuilder(MyComponent::class.java).create()
                 val c2: MyComponentWithBuilder = Yatagan.builder(MyComponentWithBuilder.Builder::class.java).create()
                 assert(c1.getInt() == ID1)
+                assert(c12.getInt() == ID1)
                 assert(c2.getInt() == ID2)
             }
         """.trimIndent())

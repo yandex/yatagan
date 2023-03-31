@@ -162,7 +162,7 @@ internal class GraphBindingsManager(
         if (creator != null) {
             for (input: ComponentFactoryModel.InputModel in creator.allInputs) when (val payload = input.payload) {
                 is InputPayload.Instance -> add(InstanceBindingImpl(
-                    target = payload.node,
+                    target = payload.model,
                     owner = graph,
                     origin = input,
                 ))
