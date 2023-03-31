@@ -153,11 +153,12 @@ class ComponentCreatorFailureTest(
                     fun setModule3(m: NoBindings)
                     fun create()
                 }
+            }
             
-                @Component.Builder
-                interface Builder {
-                    fun create(): MyComponent
-                }
+            @Component
+            interface WithTwoBuilder {
+                @Component.Builder interface Builder1 { fun create(): WithTwoBuilder }
+                @Component.Builder interface Builder2 { fun create(): WithTwoBuilder }
             }
         """.trimIndent())
 
