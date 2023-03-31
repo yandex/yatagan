@@ -2,7 +2,6 @@
 // Only version catalog declaration is allowed here, don't do other things here
 
 dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
     versionCatalogs {
         create("libs") {
             val kotlinVersion = "1.7.20"
