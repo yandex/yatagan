@@ -46,6 +46,15 @@ Encountered:
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+error: Multiple factory methods declared in a component creator
+NOTE: Duplicate factory: `test.BuilderWithTwoCreate.Builder::create2(): test.Base`
+NOTE: Duplicate factory: `test.BuilderWithTwoCreate.Builder::create1(): test.BuilderWithTwoCreate`
+Encountered:
+  in graph for root-component test.BuilderWithTwoCreate
+  here: component-creator test.BuilderWithTwoCreate.Builder
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 error: Setter method in component creator must return either `void` or creator type itself (`test.MyComponent.Foo`)
 Encountered:
   in graph for root-component test.MyComponent

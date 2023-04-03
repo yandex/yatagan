@@ -100,7 +100,9 @@ internal class ComponentModelImpl private constructor(
 
     override val factory: ComponentFactoryWithBuilderModel? by lazy {
         declaration.nestedClasses
-            .find { ComponentFactoryWithBuilderModelImpl.canRepresent(it) }?.let {
+            .filter { ComponentFactoryWithBuilderModelImpl.canRepresent(it) }
+            .maxOrNull()
+            ?.let {
                 ComponentFactoryWithBuilderModelImpl(factoryDeclaration = it)
             }
     }

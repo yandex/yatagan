@@ -220,6 +220,10 @@ object Strings {
             "Multiple component factories detected declared".toError()
 
         @Covered
+        fun duplicateFactoryMethodsInACreator() =
+            "Multiple factory methods declared in a component creator".toError()
+
+        @Covered
         fun unknownMethodInComponent(method: Method) = buildRichString {
             color = TextColor.Inherit
             appendLine("Unexpected method")
@@ -676,12 +680,19 @@ object Strings {
 
         @Covered
         fun factoryMethodDeclaredHere(factory: ComponentFactoryModel) = buildRichString {
+            color = TextColor.Inherit
             append("Factory method declared here: ").append(factory)
         }.toNote()
 
         @Covered
         fun duplicateChildComponentFactory(factory: ComponentFactoryModel) = buildRichString {
+            color = TextColor.Inherit
             append("Duplicate declared as `").append(factory).append('`')
+        }.toNote()
+
+        fun conflictingFactory(factoryMethod: Method) = buildRichString {
+            color = TextColor.Inherit
+            append("Duplicate factory: `").append(factoryMethod).append('`')
         }.toNote()
     }
 }
