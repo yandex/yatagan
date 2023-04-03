@@ -1,8 +1,8 @@
 error: A class for members injection must be public/internal.
 Encountered:
   in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  here: injector-function inject(a: <unresolved: error.NonExistentClass>)
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: injector-function inject(a: <unresolved: UnresolvedInjectee>)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Invalid/unresolved type: <unresolved-type-var: T>
@@ -15,36 +15,19 @@ Encountered:
              ^~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Invalid/unresolved type: <unresolved: error.NonExistentClass>
+error: Invalid/unresolved type: <unresolved: UnresolvedDep>
 NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
 Encountered:
   in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  here: injector-function inject(a: <unresolved: error.NonExistentClass>)
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Encountered:
-  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  in entry-point getEp(): <unresolved: error.NonExistentClass>
-                          ^-[*1]------------------------------
-  here: [1*] <unresolved: error.NonExistentClass>
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Encountered:
-  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
   in module test.TestModule
-  in @provides test.TestModule::provide(): <unresolved: error.NonExistentClass>
-                                           ^-[*1]------------------------------
-  here: [1*] <unresolved: error.NonExistentClass>
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  in @provides test.TestModule::provide(.., foo: <unresolved: UnresolvedDep>, ..)
+                                            ^-[*1]--------------------------
+  here: [1*] <unresolved: UnresolvedDep>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Encountered:
-  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  in module test.TestModule
-  in @provides test.TestModule::provide(.., foo: <unresolved: error.NonExistentClass>, ..)
-                                            ^-[*1]-----------------------------------
-  here: [1*] <unresolved: error.NonExistentClass>
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+error: Invalid/unresolved type: <unresolved: UnresolvedEee>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
 Encountered:
   in graph for root-component test.TestComponent<<unresolved-type-var: T>>
   in entry-point getFoo: test.Foo
@@ -52,18 +35,47 @@ Encountered:
   in [1*] inject-constructor test.Foo(test.Goo)
                                       ^-[*2]--
   in [2*] inject-constructor test.Goo(.. 1 dependency)
-  here: <unresolved: error.NonExistentClass>
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: <unresolved: UnresolvedEee>
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Invalid/unresolved type: java.util.List<error.NonExistentClass>
+error: Invalid/unresolved type: <unresolved: UnresolvedEp>
 NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
 Encountered:
   in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  in entry-point getEpList(): java.util.List<error.NonExistentClass>
-                              ^-[*1]--------------------------------
-  here: [1*] java.util.List<error.NonExistentClass>
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  in entry-point getEp(): <unresolved: UnresolvedEp>
+                          ^-[*1]--------------------
+  here: [1*] <unresolved: UnresolvedEp>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved: UnresolvedInjectee>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  here: injector-function inject(a: <unresolved: UnresolvedInjectee>)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: <unresolved: UnresolvedProvision>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in module test.TestModule
+  in @provides test.TestModule::provide(): <unresolved: UnresolvedProvision>
+                                           ^-[*1]---------------------------
+  here: [1*] <unresolved: UnresolvedProvision>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid/unresolved type: java.util.List<<unresolved: UnresolvedEp>>
+NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEpList(): java.util.List<<unresolved: UnresolvedEp>>
+                              ^-[*1]------------------------------------
+  here: [1*] java.util.List<<unresolved: UnresolvedEp>>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Invalid/unresolved type: test.TestComponent<<unresolved-type-var: T>>
@@ -83,32 +95,35 @@ Encountered:
              ^~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Missing binding for <unresolved: error.NonExistentClass>
+error: Missing binding for <unresolved: UnresolvedEee>
 NOTE: The type is unresolved, no binding could be matched for such type.
-Encountered:
-  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  in entry-point getEp: <unresolved: error.NonExistentClass>
-                        ^-[*1]------------------------------
-  here: [1*] <missing>
-             ^~~~~~~~~
-
 Encountered:
   in graph for root-component test.TestComponent<<unresolved-type-var: T>>
   in entry-point getFoo: test.Foo
                          ^-[*1]--
   in [1*] inject-constructor test.Foo(test.Goo)
                                       ^-[*2]--
-  in [2*] inject-constructor test.Goo(<unresolved: error.NonExistentClass>)
-                                      ^-[*3]------------------------------
+  in [2*] inject-constructor test.Goo(<unresolved: UnresolvedEee>)
+                                      ^-[*3]---------------------
   here: [3*] <missing>
              ^~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Missing binding for java.util.List<error.NonExistentClass>
+error: Missing binding for <unresolved: UnresolvedEp>
+NOTE: The type is unresolved, no binding could be matched for such type.
+Encountered:
+  in graph for root-component test.TestComponent<<unresolved-type-var: T>>
+  in entry-point getEp: <unresolved: UnresolvedEp>
+                        ^-[*1]--------------------
+  here: [1*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for java.util.List<<unresolved: UnresolvedEp>>
 NOTE: No known way to infer the binding
 Encountered:
   in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  in entry-point getEpList: java.util.List<error.NonExistentClass>
-                            ^-[*1]--------------------------------
+  in entry-point getEpList: java.util.List<<unresolved: UnresolvedEp>>
+                            ^-[*1]------------------------------------
   here: [1*] <missing>
              ^~~~~~~~~

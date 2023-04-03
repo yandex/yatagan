@@ -39,11 +39,11 @@ Encountered:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Multiple component factories detected declared
-NOTE: Declared `test.MyComponent.Foo`
-NOTE: Declared `test.MyComponent.Builder`
+NOTE: Declared `test.WithTwoBuilder.Builder1`
+NOTE: Declared `test.WithTwoBuilder.Builder2`
 Encountered:
-  here: graph for root-component test.MyComponent
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: graph for root-component test.WithTwoBuilder
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Setter method in component creator must return either `void` or creator type itself (`test.MyComponent.Foo`)

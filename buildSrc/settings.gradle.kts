@@ -2,17 +2,16 @@
 // Only version catalog declaration is allowed here, don't do other things here
 
 dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
     versionCatalogs {
         create("libs") {
-            val kotlinVersion = "1.7.20"
-            val kspVersion = "1.0.8"
+            val kotlinVersion = "1.8.10"
+            val kspVersion = "1.0.9"
             version("kotlin", kotlinVersion)
             version("ksp", "$kotlinVersion-$kspVersion")
 
             library("kotlin-gradle", "org.jetbrains.kotlin", "kotlin-gradle-plugin").versionRef("kotlin")
             library("dokka-gradle", "org.jetbrains.dokka", "dokka-gradle-plugin").versionRef("kotlin")
-            library("nexusPublish-gradle", "io.github.gradle-nexus:publish-plugin:1.1.0")
+            library("nexusPublish-gradle", "io.github.gradle-nexus:publish-plugin:1.3.0")
 
             library("ksp-api", "com.google.devtools.ksp", "symbol-processing-api").versionRef("ksp")
 
@@ -23,7 +22,7 @@ dependencyResolutionManagement {
         }
 
         create("testingLibs") {
-            library("roomCompileTesting", "androidx.room:room-compiler-processing-testing:2.5.0-beta02")
+            library("roomCompileTesting", "androidx.room:room-compiler-processing-testing:2.6.0-alpha01")
             library("junit4", "junit:junit:4.13.2")
             library("mockito-kotlin", "org.mockito.kotlin:mockito-kotlin:4.0.0")
             library("assertj", "org.assertj:assertj-core:3.23.1")
