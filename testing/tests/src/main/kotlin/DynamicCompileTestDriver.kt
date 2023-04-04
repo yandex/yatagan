@@ -46,20 +46,19 @@ class DynamicCompileTestDriver(
     )
 
     private val runnerSource = SourceFile.java("RuntimeTestRunner", """
-        import com.yandex.yatagan.Yatagan;
+        import com.yandex.yatagan.dynamic.YataganReflection;
         import java.util.function.*;
         import java.util.*;
         
         public class RuntimeTestRunner implements Consumer<Runnable> {
             @Override
             public void accept(Runnable block) {
-                Yatagan.setupReflectionBackend()
-                    .useCompiledImplementationIfAvailable(true)
-                    .apply();
+                YataganReflection
+                    .complete();
                 try {
                     block.run();
                 } finally {
-                    Yatagan.resetReflectionBackend();
+                    YataganReflection.reset();
                 }
             }
         }
@@ -193,6 +192,7 @@ class DynamicCompileTestDriver(
                 val code = """
                     package ${componentName.packageName()};
                     import com.yandex.yatagan.Yatagan;
+                    import com.yandex.yatagan.dynamic.YataganReflection;
                     import com.yandex.yatagan.validation.RichString;
                     import com.yandex.yatagan.rt.support.*;
                     import java.util.function.*;
@@ -216,19 +216,20 @@ class DynamicCompileTestDriver(
                                 reporting, logger, /*throwOnError*/ true, /*usePlugins*/ true
                             );
                             
-                            Yatagan.setupReflectionBackend()
+                            YataganReflection
                                 .validation(delegate)
-                                .useCompiledImplementationIfAvailable(true)
+                                .maxIssueEncounterPaths(100)
+                                .strictMode(true)
                                 .logger(logger)
                                 ${formatOptions()}
-                                .apply();
+                                .complete();
                             
                             try {
                                 Yatagan.$bootstrapInvocation;
                             } catch (SimpleDynamicValidationDelegate.InvalidGraphException e) {
                                 // nothing here
                             } finally {
-                                Yatagan.resetReflectionBackend();
+                                YataganReflection.reset();
                             }
                             return log;
                         }

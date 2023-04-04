@@ -49,6 +49,15 @@ Encountered:
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+error: Conflicting bindings for `test.Api`
+NOTE: Conflicting binding: `provision test.MyModule::provideApi()`
+NOTE: Conflicting binding: `alias test.MyBindsModule::api1(test.Impl1)`
+NOTE: Conflicting binding: `alias test.MyBindsModule::api2(test.Impl2)`
+Encountered:
+  here: graph for root-component test.MyComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 error: Conflicting bindings for `test.Dependency`
 NOTE: Conflicting binding: `provision test.MyModule::dep()`
 NOTE: Conflicting binding: `component-dependency-instance component-dependency test.Dependency`
@@ -68,15 +77,6 @@ Encountered:
 error: Conflicting bindings for `test.SubComponent.Builder`
 NOTE: Conflicting binding: `provision test.MyModule2::builder()`
 NOTE: Conflicting binding: `child-component-factory component-creator test.SubComponent.Builder`
-Encountered:
-  here: graph for root-component test.MyComponent2
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-warning: Conflicting bindings for `test.Api`
-NOTE: Conflicting binding: `provision test.MyModule::provideApi()`
-NOTE: Conflicting binding: `alias test.MyBindsModule::api1(test.Impl1)`
-NOTE: Conflicting binding: `alias test.MyBindsModule::api2(test.Impl2)`
 Encountered:
   here: graph for root-component test.MyComponent2
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

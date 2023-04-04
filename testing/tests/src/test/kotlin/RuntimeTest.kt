@@ -203,11 +203,11 @@ class RuntimeTest(
             fun test() {
                 val c: MySTComponent = Yatagan.create(MySTComponent::class.java)
                 val mainTid = Thread.currentThread().id
-                Yatagan.setThreadAsserter(ThreadAsserter {
+                Yatagan.threadAsserter = ThreadAsserter {
                     if (Thread.currentThread().id != mainTid) {
                         throw AssertionError("Access on non-main thread")
                     }
-                })
+                }
                 try {
                     c.getC()  // Create ClassC ahead of time
                     val d1 = c.getD()
@@ -242,7 +242,7 @@ class RuntimeTest(
                     c.getA().get()
                     c.getB()
                 } finally {
-                    Yatagan.setThreadAsserter(null)
+                    Yatagan.threadAsserter = null
                 }
             }
         """.trimIndent())

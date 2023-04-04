@@ -72,10 +72,8 @@ import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.RichString
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
-import com.yandex.yatagan.validation.format.demoteToWarning
 import com.yandex.yatagan.validation.format.modelRepresentation
 import com.yandex.yatagan.validation.format.reportError
-import com.yandex.yatagan.validation.format.reportWarning
 
 internal class GraphBindingsManager(
     private val graph: BindingGraphImpl,
@@ -349,18 +347,6 @@ internal class GraphBindingsManager(
                     if (distinct.all { it is IntrinsicBindingMarker }) {
                         assert(distinct.distinctBy { it.owner }.size == distinct.size) {
                             "Not reached: duplicate intrinsic bindings in one graph"
-                        }
-                        continue
-                    }
-
-                    if (!graph.options.reportDuplicateAliasesAsErrors
-                        // All duplicates are aliases, except at most one (that was valid before the fix)
-                        && distinct.count { it is AliasBinding } >= (distinct.size - 1)
-                    ) {
-                        validator.reportWarning(Strings.Errors.conflictingBindings(`for` = node).demoteToWarning()) {
-                            distinct.forEach { binding ->
-                                addNote(Strings.Notes.duplicateBinding(binding))
-                            }
                         }
                         continue
                     }
