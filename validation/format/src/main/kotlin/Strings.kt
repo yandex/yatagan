@@ -423,7 +423,7 @@ object Strings {
 
         @Covered
         fun missingMapKeyValue(annotationClass: AnnotationDeclaration) =
-            "Map key `$annotationClass` is missing a `value` attribute to be used as a key value".toError()
+            "Map key `$annotationClass` is missing a single attribute to be used as a key value".toError()
 
         @Covered
         fun unsupportedAnnotationValueAsMapKey(annotationClass: AnnotationDeclaration) =

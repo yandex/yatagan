@@ -67,7 +67,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
                 method.getAnnotation(BuiltinAnnotation.IntoMap) != null -> {
                     val key = method.annotations.find { it.isMapKey() }
                     val annotationClass = key?.annotationClass
-                    val valueAttribute = annotationClass?.attributes?.find { it.name == "value" }
+                    val valueAttribute = annotationClass?.attributes?.singleOrNull()
                     val keyValue = valueAttribute?.let { key.getValue(valueAttribute) }
                     BindingTargetModel.MappingContribution(
                         node = target,
@@ -105,7 +105,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
                 }
                 val key = keys.first()
                 val clazz = key.annotationClass
-                val valueAttribute = clazz.attributes.find { it.name == "value" }
+                val valueAttribute = clazz.attributes.singleOrNull()
                 if (valueAttribute == null) {
                     validator.reportError(Errors.missingMapKeyValue(annotationClass = clazz))
                     return@run

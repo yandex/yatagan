@@ -725,7 +725,7 @@ class CoreBindingsFailureTest(
             import javax.inject.*
             import kotlin.reflect.KClass
 
-            @IntoMap.Key annotation class InvalidMapKey1(val foo: Int)
+            @IntoMap.Key annotation class InvalidMapKey1
             @IntoMap.Key annotation class InvalidMapKey2(val value: InvalidMapKey1)
             @IntoMap.Key annotation class InvalidMapKey3(val value: IntArray)
             @IntoMap.Key annotation class ClassKey2(val value: KClass<*>)
@@ -735,10 +735,10 @@ class CoreBindingsFailureTest(
                 @[Binds IntoMap]
                 fun binding1(): Int
                 
-                @[Binds IntoMap InvalidMapKey1(foo = 1)]
+                @[Binds IntoMap InvalidMapKey1]
                 fun binding2(): Int
                 
-                @[Binds IntoMap InvalidMapKey2(InvalidMapKey1(foo = 1))]
+                @[Binds IntoMap InvalidMapKey2(InvalidMapKey1())]
                 fun binding3(): Int
                 
                 @[Binds IntoMap InvalidMapKey3([1, 2, 3])]

@@ -406,7 +406,7 @@ class MultibindingsTest(
             import com.yandex.yatagan.*
             @IntoMap.Key
             @Retention(AnnotationRetention.RUNTIME)
-            annotation class CustomEnumKey(val value: MyEnum = MyEnum.ONE)
+            annotation class CustomEnumKey(val en: MyEnum = MyEnum.ONE)
         """.trimIndent())
         givenJavaSource("test.CustomEnumKeyJava", """
             import com.yandex.yatagan.IntoMap;
@@ -460,7 +460,7 @@ class MultibindingsTest(
                 fun one(): MyApi = Impl1()
                 @[Provides IntoMap CustomEnumKeyJava(MyEnum.TWO)]
                 fun two(): MyApi = Impl2()
-                @[Provides IntoMap CustomEnumKey(MyEnum.THREE)]
+                @[Provides IntoMap CustomEnumKey(en = MyEnum.THREE)]
                 fun three(): MyApi = Impl3()
             }
             

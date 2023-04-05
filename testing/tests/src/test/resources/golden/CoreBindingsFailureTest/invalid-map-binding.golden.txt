@@ -6,7 +6,7 @@ Encountered:
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Map key `test.InvalidMapKey1` is missing a `value` attribute to be used as a key value
+error: Map key `test.InvalidMapKey1` is missing a single attribute to be used as a key value
 Encountered:
   in graph for root-component test.TestComponent
   in module test.TestModule
