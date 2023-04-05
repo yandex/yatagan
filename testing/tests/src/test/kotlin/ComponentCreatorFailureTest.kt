@@ -160,6 +160,16 @@ class ComponentCreatorFailureTest(
                 @Component.Builder interface Builder1 { fun create(): WithTwoBuilder }
                 @Component.Builder interface Builder2 { fun create(): WithTwoBuilder }
             }
+
+            interface Base
+
+            @Component
+            interface BuilderWithTwoCreate : Base {
+                @Component.Builder interface Builder { 
+                    fun create1(): BuilderWithTwoCreate
+                    fun create2(): Base
+                }
+            }
         """.trimIndent())
 
         compileRunAndValidate()

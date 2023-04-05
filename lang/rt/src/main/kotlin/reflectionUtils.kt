@@ -288,6 +288,7 @@ fun Class<*>.boxed(): Class<*> {
         java.lang.Long.TYPE -> java.lang.Long::class.java
         java.lang.Float.TYPE -> java.lang.Float::class.java
         java.lang.Double.TYPE -> java.lang.Double::class.java
+        java.lang.Void.TYPE -> java.lang.Void::class.java
         else -> throw AssertionError("Not reached")
     }
 }

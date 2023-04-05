@@ -512,6 +512,12 @@ class ComponentHierarchyKotlinTest(
             import com.yandex.yatagan.*
             import javax.inject.*
 
+            interface ComponentBase {
+                interface Builder {
+                    fun create(): ComponentBase
+                }
+            }
+
             @Module class MyModule {
                 @get:Provides val i: Int = 2
             }
@@ -535,8 +541,8 @@ class ComponentHierarchyKotlinTest(
                 val i: Int
             }
 
-            @Component interface ComponentBaz {
-                @Component.Builder interface Builder { fun create(): ComponentBaz }
+            @Component interface ComponentBaz : ComponentBase {
+                @Component.Builder interface Builder : ComponentBase.Builder
             }
             @Component.Builder interface Builder { fun create(): ComponentBaz }
             @Component(isRoot = false) interface ComponentQu {
