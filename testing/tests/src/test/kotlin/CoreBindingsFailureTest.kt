@@ -521,6 +521,7 @@ class CoreBindingsFailureTest(
                 @Provides fun c1() : MyComponent1 = throw AssertionError()
                 @Named("flag") @Provides fun bool() = true
                 @Provides fun dep(): Dependency = throw AssertionError()
+                @Provides fun provideApi(): Api = throw AssertionError()
             }
             
             @Module interface MyBindsModule {
