@@ -20,8 +20,10 @@ import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.Component
 import com.yandex.yatagan.lang.jap.asTypeElement
 import com.yandex.yatagan.lang.jap.isAnnotatedWith
+import com.yandex.yatagan.processor.common.IntOption
 import com.yandex.yatagan.processor.common.Logger
 import com.yandex.yatagan.processor.common.LoggerDecorator
+import com.yandex.yatagan.processor.common.Option
 import com.yandex.yatagan.testing.source_set.SourceFile
 import org.intellij.lang.annotations.Language
 import java.io.File
@@ -39,6 +41,9 @@ class DynamicCompileTestDriver(
     apiType: ApiType = ApiType.Dynamic,
 ) : CompileTestDriverBase(apiType) {
     private val accumulator = ComponentBootstrapperGenerator()
+    private val options = mutableMapOf<Option<*>, Any>(
+        IntOption.MaxIssueEncounterPaths to 100,
+    )
 
     private val runnerSource = SourceFile.java("RuntimeTestRunner", """
         import com.yandex.yatagan.Yatagan;
@@ -60,7 +65,24 @@ class DynamicCompileTestDriver(
         }
     """.trimIndent())
 
+    private fun formatOptions() = buildString {
+        for ((option, value) in options) {
+            val argument = when(value) {
+                is Boolean -> value.toString()
+                is Int -> value.toString()
+                else -> throw AssertionError("Unexpected option value type, please, support it explicitly")
+            }
+            append('.')
+            append(option.key.substringAfterLast('.'))
+            append('(').append(argument).append(')')
+        }
+    }
+
     override fun generatedFilesSubDir(): String? = null
+
+    override fun <V : Any> givenOption(option: Option<V>, value: V) {
+        options[option] = value
+    }
 
     override fun doCompile(): TestCompilationResult {
         val testCompilationResult = super.doCompile()
@@ -136,7 +158,7 @@ class DynamicCompileTestDriver(
         return success
     }
 
-    private class ComponentBootstrapperGenerator : AbstractProcessor() {
+    private inner class ComponentBootstrapperGenerator : AbstractProcessor() {
         private val _bootstrapperNames: MutableSet<ClassName> = TreeSet()
         val bootstrapperNames: Set<ClassName> get() = _bootstrapperNames
 
@@ -196,10 +218,9 @@ class DynamicCompileTestDriver(
                             
                             Yatagan.setupReflectionBackend()
                                 .validation(delegate)
-                                .maxIssueEncounterPaths(100)
-                                .strictMode(true)
                                 .useCompiledImplementationIfAvailable(true)
                                 .logger(logger)
+                                ${formatOptions()}
                                 .apply();
                             
                             try {

@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.testing.tests
 
+import com.yandex.yatagan.processor.common.Option
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Rule
 import org.junit.rules.TestWatcher
@@ -28,6 +29,8 @@ interface CompileTestDriver : SourceSet {
     fun givenPrecompiledModule(
         sources: SourceSet,
     )
+
+    fun <V : Any> givenOption(option: Option<V>, value: V)
 
     /**
      * Runs the test and validates the output against the golden output file.

@@ -22,6 +22,7 @@ import com.yandex.yatagan.codegen.impl.ComponentGeneratorFacade
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.childrenSequence
 import com.yandex.yatagan.core.graph.impl.BindingGraph
+import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Error
 import com.yandex.yatagan.validation.ValidationMessage.Kind.MandatoryWarning
@@ -48,7 +49,12 @@ fun <Source> process(
         val logger = LoggerDecorator(delegate.logger)
         val plugins = loadServices<ValidationPluginProvider>()
         for (rootModel in rootModels) {
-            val graphRoot = BindingGraph(root = rootModel)
+            val graphRoot = BindingGraph(
+                root = rootModel,
+                options = Options(
+                    reportDuplicateAliasesAsErrors = delegate.options[BooleanOption.ReportDuplicateAliasesAsErrors]
+                )
+            )
             val allMessages = buildList {
                 addAll(validate(graphRoot))
                 if (plugins.isNotEmpty()) {

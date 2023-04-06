@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2023 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,12 @@
 
 package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.model.ComponentModel
-
 /**
- * Creates [BindingGraph] instance given the root component.
+ * Options, customizing graph building behavior in various ways.
  */
-fun BindingGraph(
-    root: ComponentModel,
-    options: Options,
-): BindingGraph {
-    require(root.isRoot) { "Not reached: can't use non-root component as a root of a binding graph" }
-    return BindingGraphImpl(
-        component = root,
-        options = options,
-    )
-}
+data class Options(
+    /**
+     * Whether to report duplicate aliases as errors instead of warnings.
+     */
+    val reportDuplicateAliasesAsErrors: Boolean,
+)

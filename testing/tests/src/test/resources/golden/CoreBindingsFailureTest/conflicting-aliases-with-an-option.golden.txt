@@ -1,0 +1,6 @@
+error: Conflicting bindings for `test.Api`
+NOTE: Conflicting binding: `alias test.MyModule::bind1(test.Impl1)`
+NOTE: Conflicting binding: `alias test.MyModule::bind2(test.Impl2)`
+Encountered:
+  here: graph for root-component test.MyComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

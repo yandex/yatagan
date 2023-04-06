@@ -22,6 +22,7 @@ import com.yandex.yatagan.generated.CompiledApiClasspath
 import com.yandex.yatagan.generated.DynamicApiClasspath
 import com.yandex.yatagan.processor.common.IntOption
 import com.yandex.yatagan.processor.common.LoggerDecorator
+import com.yandex.yatagan.processor.common.Option
 import com.yandex.yatagan.testing.source_set.SourceFile
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assert
@@ -39,6 +40,10 @@ abstract class CompileTestDriverBase private constructor(
     private val mainSourceSet: SourceSet,
 ) : CompileTestDriver, SourceSet by mainSourceSet {
     private var precompiledModuleOutputDirs: List<File>? = null
+    private val options = mutableMapOf(
+        IntOption.MaxIssueEncounterPaths.key to "100",
+        IntOption.MaxSlotsPerSwitch.key to "100",
+    )
 
     protected constructor(
         apiType: ApiType = ApiType.Compiled,
@@ -94,6 +99,10 @@ abstract class CompileTestDriverBase private constructor(
     }
 
     abstract fun generatedFilesSubDir(): String?
+
+    override fun <V : Any> givenOption(option: Option<V>, value: V) {
+        options[option.key] = value.toString()
+    }
 
     override fun compileRunAndValidate() {
         val goldenResourcePath = "golden/${testNameRule.testClassSimpleName}/${testNameRule.testMethodName}.golden.txt"
@@ -162,10 +171,7 @@ abstract class CompileTestDriverBase private constructor(
             "-opt-in=com.yandex.yatagan.VariantApi",
             "-P", "plugin:org.jetbrains.kotlin.kapt3:correctErrorTypes=true",
         ),
-        processorOptions = mapOf(
-            IntOption.MaxIssueEncounterPaths.key to "100",
-            IntOption.MaxSlotsPerSwitch.key to "100",
-        ),
+        processorOptions = options,
     )
 
     protected open fun createCompilationArguments() = createBaseCompilationArguments()

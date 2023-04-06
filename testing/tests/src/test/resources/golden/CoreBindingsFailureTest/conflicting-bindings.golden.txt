@@ -71,3 +71,11 @@ NOTE: Conflicting binding: `child-component-factory component-creator test.SubCo
 Encountered:
   here: graph for root-component test.MyComponent2
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: Conflicting bindings for `test.Api`
+NOTE: Conflicting binding: `alias test.MyBindsModule::api1(test.Impl1)`
+NOTE: Conflicting binding: `alias test.MyBindsModule::api2(test.Impl2)`
+Encountered:
+  here: graph for root-component test.MyComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
