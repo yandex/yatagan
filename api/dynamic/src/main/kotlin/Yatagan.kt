@@ -72,6 +72,21 @@ public object Yatagan {
         }
 
         /**
+         * Whether to report duplicate `@Binds` as errors instead of warnings.
+         *
+         * `false` by default.
+         *
+         * @see <a href="https://github.com/yandex/yatagan/issues/48">issue #48</a>
+         */
+        @Deprecated(
+            "Will be unconditionally enabled, and the switch will be removed in the next major release",
+            level = DeprecationLevel.WARNING,
+        )
+        public fun reportDuplicateAliasesAsErrors(enabled: Boolean): Initializer = apply {
+            params.reportDuplicateAliasesAsErrors = enabled
+        }
+
+        /**
          * If `true`, then Yatagan will try to locate and load compiled implementation in the classpath first.
          * Then, if no required classes found, Yatagan will proceed to utilizing reflection backend.
          * If `false` then Yatagan will just use the reflection backend.
@@ -200,6 +215,7 @@ public object Yatagan {
         override var maxIssueEncounterPaths: Int = 5,
         override var isStrictMode: Boolean = true,
         override var logger: Logger? = null,
+        override var reportDuplicateAliasesAsErrors: Boolean = false,
         var useCompiledImplementationIfAvailable: Boolean = false,
     ) : RuntimeEngine.Params
 }

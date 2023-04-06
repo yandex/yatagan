@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.WithParents
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
@@ -73,11 +72,13 @@ import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.RichString
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
+import com.yandex.yatagan.validation.format.demoteToWarning
 import com.yandex.yatagan.validation.format.modelRepresentation
 import com.yandex.yatagan.validation.format.reportError
+import com.yandex.yatagan.validation.format.reportWarning
 
 internal class GraphBindingsManager(
-    private val graph: BindingGraph,
+    private val graph: BindingGraphImpl,
     subcomponents: Map<ComponentModel, ComponentFactoryModel?>,
 ) : MayBeInvalid, WithParents<GraphBindingsManager> by hierarchyExtension(graph, GraphBindingsManager) {
     init {
@@ -328,9 +329,8 @@ internal class GraphBindingsManager(
     }
 
     override fun validate(validator: Validator) {
-        val locallyRequestedNodes = graph.localBindings.map { (binding, _) -> binding.target }.toHashSet()
         for ((node, bindings) in localAndParentExplicitBindings) {
-            if (node !in locallyRequestedNodes) {
+            if (node !in graph.localNodes) {
                 // Check duplicates only for locally requested bindings - no need to report parent duplicates.
                 // As a side effect, if duplicates are present for an unused binding - we don't care.
                 continue
@@ -349,6 +349,15 @@ internal class GraphBindingsManager(
                     if (distinct.all { it is IntrinsicBindingMarker }) {
                         assert(distinct.distinctBy { it.owner }.size == distinct.size) {
                             "Not reached: duplicate intrinsic bindings in one graph"
+                        }
+                        continue
+                    }
+
+                    if (!graph.options.reportDuplicateAliasesAsErrors && distinct.all { it is AliasBinding }) {
+                        validator.reportWarning(Strings.Errors.conflictingBindings(`for` = node).demoteToWarning()) {
+                            distinct.forEach { binding ->
+                                addNote(Strings.Notes.duplicateBinding(binding))
+                            }
                         }
                         continue
                     }

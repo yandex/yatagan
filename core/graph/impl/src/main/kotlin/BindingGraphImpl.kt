@@ -50,6 +50,7 @@ import com.yandex.yatagan.validation.format.reportError
 
 internal class BindingGraphImpl(
     private val component: ComponentModel,
+    internal val options: Options,
     override val parent: BindingGraphImpl? = null,
     override val conditionScope: ConditionScope = ConditionScope.Unscoped,
     private val factoryMethodInParent: ComponentFactoryModel? = null,
@@ -119,6 +120,7 @@ internal class BindingGraphImpl(
         },
     )
 
+    internal val localNodes = mutableSetOf<NodeModel>()
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableMapOf<ConditionModel, LiteralUsage>()
     override val localAssistedInjectFactories = mutableSetOf<AssistedInjectFactoryModel>()
@@ -152,6 +154,7 @@ internal class BindingGraphImpl(
             .map { (childComponent, childConditionScope) ->
                 BindingGraphImpl(
                     component = childComponent,
+                    options = options,
                     parent = this,
                     conditionScope = conditionScope and childConditionScope,
                     factoryMethodInParent = component.subComponentFactoryMethods.find {
@@ -186,6 +189,7 @@ internal class BindingGraphImpl(
                 }
                 override fun visitBinding(binding: Binding) = binding
             }
+            localNodes.add(dependency.node)
             // MAYBE: employ local alias resolution cache
             val nonAlias = binding.accept(AliasMaterializeVisitor())
             if (nonAlias.owner == this) {

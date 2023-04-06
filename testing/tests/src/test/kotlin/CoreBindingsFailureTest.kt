@@ -505,6 +505,10 @@ class CoreBindingsFailureTest(
                 val myString: String
             }
             
+            interface Api
+            class Impl1 @Inject constructor(): Api
+            class Impl2 @Inject constructor(): Api
+            
             @Module
             class MyModule {
                 @MyQualifier(Named("hello"))
@@ -518,7 +522,12 @@ class CoreBindingsFailureTest(
                 @Provides fun dep(): Dependency = throw AssertionError()
             }
             
-            @Module(includes = [MyModule::class], subcomponents = [SubComponent::class])
+            @Module interface MyBindsModule {
+                @Binds fun api1(i: Impl1): Api
+                @Binds fun api2(i: Impl2): Api
+            }
+            
+            @Module(includes = [MyModule::class, MyBindsModule::class], subcomponents = [SubComponent::class])
             class MyModule2 {
                 @Provides @IntoList fun one(): Number = 1L
                 @Provides @IntoList fun three(): Number = 3f
@@ -545,6 +554,7 @@ class CoreBindingsFailureTest(
                 val numbers: List<Number>
                 val sub: SubComponent.Builder
                 val string: String
+                val api: Api
 
                 @Component.Builder
                 interface Builder {

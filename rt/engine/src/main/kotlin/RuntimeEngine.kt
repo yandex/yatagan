@@ -22,6 +22,7 @@ import com.yandex.yatagan.base.ObjectCacheRegistry
 import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
+import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
 import com.yandex.yatagan.lang.InternalLangApi
 import com.yandex.yatagan.lang.LangModelFactory
@@ -55,6 +56,7 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
         val maxIssueEncounterPaths: Int
         val isStrictMode: Boolean
         val logger: Logger?
+        val reportDuplicateAliasesAsErrors: Boolean
     }
 
     fun destroy() {
@@ -79,7 +81,8 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
                 "$componentClass is not a root Yatagan component"
             }
             val graph = BindingGraph(
-                root = componentModel
+                root = componentModel,
+                options = createGraphOptions(),
             )
             val promise = doValidate(graph)
             val factory = promise.awaitOnError {
@@ -112,7 +115,10 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
                 )
             }
 
-            val graph = BindingGraph(componentModel)
+            val graph = BindingGraph(
+                root = componentModel,
+                options = createGraphOptions(),
+            )
             val promise = doValidate(graph)
             builder = RuntimeAutoBuilder(
                 componentClass = componentClass,
@@ -157,6 +163,10 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
             }
         }
     }
+
+    private fun createGraphOptions() = Options(
+        reportDuplicateAliasesAsErrors = params.reportDuplicateAliasesAsErrors,
+    )
 
     private companion object {
         val pluginProviders: List<ValidationPluginProvider> = loadServices()

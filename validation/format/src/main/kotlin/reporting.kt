@@ -68,6 +68,8 @@ inline fun Validator.reportMandatoryWarning(message: WarningMessage, block: Vali
     report(buildMandatoryWarning(message = message, block = block))
 }
 
+fun ErrorMessage.demoteToWarning(): WarningMessage = WarningMessage(text)
+
 @PublishedApi
 internal class ValidationMessageBuilderImpl(
     private val kind: ValidationMessage.Kind,
