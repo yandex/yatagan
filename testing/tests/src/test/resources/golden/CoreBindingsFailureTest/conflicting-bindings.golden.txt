@@ -74,6 +74,7 @@ Encountered:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 warning: Conflicting bindings for `test.Api`
+NOTE: Conflicting binding: `provision test.MyModule::provideApi()`
 NOTE: Conflicting binding: `alias test.MyBindsModule::api1(test.Impl1)`
 NOTE: Conflicting binding: `alias test.MyBindsModule::api2(test.Impl2)`
 Encountered:

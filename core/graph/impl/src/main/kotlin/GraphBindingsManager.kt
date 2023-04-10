@@ -353,7 +353,10 @@ internal class GraphBindingsManager(
                         continue
                     }
 
-                    if (!graph.options.reportDuplicateAliasesAsErrors && distinct.all { it is AliasBinding }) {
+                    if (!graph.options.reportDuplicateAliasesAsErrors
+                        // All duplicates are aliases, except at most one (that was valid before the fix)
+                        && distinct.count { it is AliasBinding } >= (distinct.size - 1)
+                    ) {
                         validator.reportWarning(Strings.Errors.conflictingBindings(`for` = node).demoteToWarning()) {
                             distinct.forEach { binding ->
                                 addNote(Strings.Notes.duplicateBinding(binding))
