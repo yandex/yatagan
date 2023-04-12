@@ -4,12 +4,22 @@ plugins {
     id("yatagan.base-module")
 }
 
+val versionsToCheckLoaderCompatibility = listOf(
+    "1.0.0",
+    "1.1.0",
+    "1.2.0",
+)
+
 val baseTestRuntime: Configuration by configurations.creating
 val dynamicTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
 val compiledTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
+}
+
+versionsToCheckLoaderCompatibility.forEach { version ->
+    configurations.register("kaptForCompatCheck$version")
 }
 
 kotlin {
@@ -52,23 +62,37 @@ dependencies {
 
     baseTestRuntime(testingLibs.mockito.kotlin.get())  // required for heavy tests
     dynamicTestRuntime(project(":api:dynamic"))
-    compiledTestRuntime(project(":api:compiled"))
+    compiledTestRuntime(project(":api:public"))
+
+    versionsToCheckLoaderCompatibility.forEach { version ->
+        add("kaptForCompatCheck$version", "com.yandex.yatagan:processor-jap:$version")
+    }
+}
+
+val genKaptClasspathForCompatCheckTasks = versionsToCheckLoaderCompatibility.map { version ->
+    val versionId = version.replace("[.-]".toRegex(), "_")
+    tasks.register<ClasspathSourceGeneratorTask>("generateKaptClasspathForCompatCheck_$versionId") {
+        propertyName.set("KaptClasspathForCompatCheck$versionId")
+        classpath.set(configurations.named("kaptForCompatCheck$version"))
+    }
 }
 
 val generateDynamicApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    packageName.set("com.yandex.yatagan.generated")
     propertyName.set("DynamicApiClasspath")
     classpath.set(dynamicTestRuntime)
 }
 
 val generateCompiledApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    packageName.set("com.yandex.yatagan.generated")
     propertyName.set("CompiledApiClasspath")
     classpath.set(compiledTestRuntime)
 }
 
+tasks.withType<ClasspathSourceGeneratorTask>().configureEach {
+    packageName.set("com.yandex.yatagan.generated")
+}
+
 tasks.named("compileKotlin") {
-    dependsOn(generateDynamicApiClasspath, generateCompiledApiClasspath)
+    dependsOn(generateDynamicApiClasspath, generateCompiledApiClasspath, genKaptClasspathForCompatCheckTasks)
 }
 
 val updateGoldenFiles by tasks.registering(Test::class) {
@@ -96,6 +120,9 @@ kotlin {
         main {
             kotlin.srcDir(generateDynamicApiClasspath.map { it.generatedSourceDir })
             kotlin.srcDir(generateCompiledApiClasspath.map { it.generatedSourceDir })
+            genKaptClasspathForCompatCheckTasks.forEach { taskProvider ->
+                kotlin.srcDir(taskProvider.map { it.generatedSourceDir })
+            }
         }
     }
 }

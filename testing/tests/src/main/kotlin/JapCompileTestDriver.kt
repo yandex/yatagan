@@ -17,10 +17,15 @@
 package com.yandex.yatagan.testing.tests
 
 import com.yandex.yatagan.processor.jap.JapYataganProcessor
+import java.io.File
+import java.net.URLClassLoader
+import javax.annotation.processing.Processor
 
-class JapCompileTestDriver : CompileTestDriverBase() {
+class JapCompileTestDriver(
+    private val customProcessorClasspath: String? = null,
+): CompileTestDriverBase() {
     override fun createCompilationArguments() = super.createCompilationArguments().copy(
-        kaptProcessors = listOf(JapYataganProcessor()),
+        kaptProcessors = listOf(loadProcessorFromCustomClasspath() ?: JapYataganProcessor()),
     )
 
     override fun generatedFilesSubDir(): String {
@@ -29,4 +34,12 @@ class JapCompileTestDriver : CompileTestDriverBase() {
 
     override val backendUnderTest: Backend
         get() = Backend.Kapt
+
+    private fun loadProcessorFromCustomClasspath(): Processor? {
+        customProcessorClasspath ?: return null
+        val kaptClassloader = URLClassLoader(customProcessorClasspath.split(":")
+            .map { File(it).toURI().toURL() }.toTypedArray(), ClassLoader.getPlatformClassLoader())
+        val clazz = kaptClassloader.loadClass("com.yandex.yatagan.processor.jap.JapYataganProcessor")
+        return clazz.getConstructor().newInstance() as Processor
+    }
 }

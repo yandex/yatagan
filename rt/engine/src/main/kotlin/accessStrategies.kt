@@ -21,6 +21,7 @@ import com.yandex.yatagan.Optional
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.internal.ThreadAssertions
+import com.yandex.yatagan.internal.YataganInternal
 import javax.inject.Provider
 
 internal abstract class AccessStrategy : Provider<Any> {
@@ -54,6 +55,7 @@ internal class CachingAccessStrategy(
 ) : AccessStrategy(), Lazy<Any> {
     private var value: Any? = null
 
+    @OptIn(YataganInternal::class)
     override fun get(): Any {
         value?.let { local -> return local }
         ThreadAssertions.assertThreadAccess()

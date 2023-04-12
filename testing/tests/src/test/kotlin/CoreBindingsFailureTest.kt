@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.processor.common.BooleanOption
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Before
 import org.junit.Test
@@ -572,31 +571,6 @@ class CoreBindingsFailureTest(
             interface SubComponent {
                 val numbers: List<Number>
                 @Component.Builder interface Builder { fun create(): SubComponent }
-            }
-        """.trimIndent())
-
-        compileRunAndValidate()
-    }
-
-    @Test
-    fun `conflicting aliases with an option`() {
-        givenOption(BooleanOption.ReportDuplicateAliasesAsErrors, true)
-        givenKotlinSource("test.TestCase", """
-            import com.yandex.yatagan.*
-            import javax.inject.*
-
-            interface Api
-            class Impl1 @Inject constructor(): Api
-            class Impl2 @Inject constructor(): Api
-
-            @Module interface MyModule {
-              @Binds fun bind1(i: Impl1): Api
-              @Binds fun bind2(i: Impl2): Api
-            }
-
-            @Component(modules = [MyModule::class])
-            interface MyComponent {
-              val api: Api
             }
         """.trimIndent())
 

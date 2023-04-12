@@ -5,8 +5,7 @@ apply(from = "buildSrc/settings.gradle.kts")
 include(":base")
 
 include(":api:public")
-include(":api:common")
-include(":api:compiled")
+include(":api:compiled")  // DEPRECATED, WILL BE REMOVED IN THE FUTURE RELEASE
 include(":api:dynamic")
 
 include(":validation:api")

@@ -52,7 +52,6 @@ fun <Source> process(
             val graphRoot = BindingGraph(
                 root = rootModel,
                 options = Options(
-                    reportDuplicateAliasesAsErrors = delegate.options[BooleanOption.ReportDuplicateAliasesAsErrors]
                 )
             )
             val allMessages = buildList {

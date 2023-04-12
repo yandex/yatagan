@@ -51,7 +51,6 @@ enum class BooleanOption(
 
     StrictMode("yatagan.enableStrictMode", default = true),
     UsePlainOutput("yatagan.usePlainOutput", default = false),
-    ReportDuplicateAliasesAsErrors("yatagan.experimental.reportDuplicateAliasesAsErrors", default = false),
 
     ;
 

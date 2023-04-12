@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2023 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package com.yandex.yatagan.internal
 
-import com.yandex.yatagan.Yatagan
+import com.yandex.yatagan.AutoBuilder
 
 @YataganInternal
-public object ThreadAssertions {
-    @JvmStatic
-    public fun assertThreadAccess() {
-        // TODO(#44): Remove this and use `Yatagan.threadAsserter` directly.
-        Yatagan.threadAsserter?.assertThreadAccess()
-    }
+public interface ImplementationLoader {
+    public fun <T : Any> builder(builderClass: Class<T>): Result<T>
+    public fun <T : Any> autoBuilder(componentClass: Class<T>): Result<AutoBuilder<T>>
 }

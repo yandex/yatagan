@@ -20,8 +20,6 @@ package com.yandex.yatagan.core.graph.impl
  * Options, customizing graph building behavior in various ways.
  */
 data class Options(
-    /**
-     * Whether to report duplicate aliases as errors instead of warnings.
-     */
-    val reportDuplicateAliasesAsErrors: Boolean,
+    // Yet
+    val nothing: Nothing? = null,
 )
