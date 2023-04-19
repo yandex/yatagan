@@ -32,7 +32,7 @@ internal class RuntimeFactory(
     private val graph: BindingGraph,
     private val parent: RuntimeComponent?,
     validationPromise: DynamicValidationDelegate.Promise?,
-    private val logger: Logger?,
+    private val logger: () -> Logger?,
 ) : InvocationHandlerBase(validationPromise), InvocationHandlerBase.MethodHandler {
     private val creator = checkNotNull(graph.model.factory) {
         "Component $graph has no explicit creator (builder/factory)"
@@ -103,7 +103,7 @@ internal class RuntimeFactory(
                 runtimeComponent.thisProxy = it
             }
         }
-        logger?.log("Dynamic component creation via ${creator.toString(childContext = null)} took $time ms")
+        logger()?.log("Dynamic component creation via ${creator.toString(childContext = null)} took $time ms")
         return componentProxy
     }
 

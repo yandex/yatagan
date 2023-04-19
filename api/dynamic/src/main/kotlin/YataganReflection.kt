@@ -16,72 +16,12 @@
 
 package com.yandex.yatagan.dynamic
 
-import com.yandex.yatagan.dynamic.YataganReflection.complete
-import com.yandex.yatagan.rt.support.DynamicValidationDelegate
-import com.yandex.yatagan.rt.support.Logger
+import com.yandex.yatagan.YataganDelicateApi
 
 /**
- * Clients may (optionally) use this to supply reflection backend with additional parameters, customizing its work.
- * If a client decides to do so, then the setup must be made before any graphs are created.
- *
- * Supply necessary parameters in builder-like fashion, then call [complete] in order to apply the parameters.
+ * Contains utility methods to control Yatagan reflection backend.
  */
 public object YataganReflection {
-    private var params = ReflectionLoader.Params()
-
-    /**
-     * Sets [DynamicValidationDelegate] to be used with all following Yatagan graph creations.
-     *
-     * `null` by default - no explicit validation is performed.
-     */
-    @JvmStatic
-    public fun validation(delegate: DynamicValidationDelegate?): YataganReflection = apply {
-        params.validationDelegate = delegate
-    }
-
-    /**
-     * Sets max issue encounter path count. No more than [count] paths will be reported for the single message.
-     *
-     * `5` by default.
-     */
-    @JvmStatic
-    public fun maxIssueEncounterPaths(count: Int): YataganReflection = apply {
-        require(count >= 1) {
-            "Max issue encounter paths can't be less then 1"
-        }
-        params.maxIssueEncounterPaths = count
-    }
-
-    /**
-     * Whether all *mandatory warnings* should be promoted to errors.
-     *
-     * `true` by default.
-     */
-    @JvmStatic
-    public fun strictMode(enabled: Boolean): YataganReflection = apply {
-        params.isStrictMode = enabled
-    }
-
-    /**
-     * Sets logger instance to use.
-     *
-     * `null` by default.
-     */
-    @JvmStatic
-    public fun logger(logger: Logger?): YataganReflection = apply  {
-        params.logger = logger
-    }
-
-    /**
-     * Invoke this to apply configured parameters to the global Yatagan state.
-     * This call can only be made once per `Yatagan` session and before any graphs are created.
-     * If not used, the defaults will be automatically applied for every parameter upon first graph creation.
-     */
-    @JvmStatic
-    public fun complete() {
-        ReflectionLoader.complete(params)
-    }
-
     /**
      * Clients may optionally call this method after all the work with Yatagan graphs is done.
      * This call clears all internal global states and caches, freeing memory.
@@ -92,8 +32,8 @@ public object YataganReflection {
      * the very application termination, and it doesn't make much sense to call `reset()` right before that.
      */
     @JvmStatic
-    public fun reset() {
+    @YataganDelicateApi
+    public fun resetGlobalState() {
         ReflectionLoader.reset()
-        params = ReflectionLoader.Params()
     }
 }

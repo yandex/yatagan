@@ -16,8 +16,6 @@
 
 package com.yandex.yatagan.rt.support
 
-import com.yandex.yatagan.validation.RichString
-
 /**
  * A delegate interface, that provides API for clients, that wish to enable full Yatagan validation
  * routine for reflection backend.
@@ -30,6 +28,11 @@ import com.yandex.yatagan.validation.RichString
  * @see AsyncDynamicValidationDelegate
  */
 interface DynamicValidationDelegate {
+    /**
+     * Logger to use for Yatagan logging.
+     */
+    val logger: Logger?
+
     /**
      * Whether to load and use [com.yandex.yatagan.validation.spi.ValidationPluginProvider]s.
      */
@@ -59,12 +62,12 @@ interface DynamicValidationDelegate {
          * Invoked by the framework to report an error.
          * If this gets invoked at least once for graph, then the graph is invalid.
          */
-        fun reportError(message: RichString)
+        fun reportError(message: String)
 
         /**
          * Invoked by the framework to report a warning.
          */
-        fun reportWarning(message: RichString)
+        fun reportWarning(message: String)
     }
 
     /**

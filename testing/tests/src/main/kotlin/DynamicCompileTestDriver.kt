@@ -28,14 +28,17 @@ import com.yandex.yatagan.testing.source_set.SourceFile
 import org.intellij.lang.annotations.Language
 import java.io.File
 import java.lang.reflect.Method
+import java.util.Properties
 import java.util.TreeSet
 import java.util.function.Consumer
-import java.util.function.Supplier
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
+
+private const val TEST_DELEGATE = "test.TestValidationDelegate"
+private const val TEST_RUNNER = "test.RuntimeTestRunner"
 
 class DynamicCompileTestDriver(
     apiType: ApiType = ApiType.Dynamic,
@@ -45,37 +48,46 @@ class DynamicCompileTestDriver(
         IntOption.MaxIssueEncounterPaths to 100,
     )
 
-    private val runnerSource = SourceFile.java("RuntimeTestRunner", """
+    private val runnerSource = SourceFile.java(TEST_RUNNER, """
+        package test;
         import com.yandex.yatagan.dynamic.YataganReflection;
-        import java.util.function.*;
-        import java.util.*;
+        import java.util.function.Consumer;
         
         public class RuntimeTestRunner implements Consumer<Runnable> {
             @Override
             public void accept(Runnable block) {
-                YataganReflection
-                    .complete();
                 try {
                     block.run();
                 } finally {
-                    YataganReflection.reset();
+                    YataganReflection.resetGlobalState();
                 }
             }
         }
     """.trimIndent())
 
-    private fun formatOptions() = buildString {
-        for ((option, value) in options) {
-            val argument = when(value) {
-                is Boolean -> value.toString()
-                is Int -> value.toString()
-                else -> throw AssertionError("Unexpected option value type, please, support it explicitly")
+    private val validationDelegateSource = SourceFile.java(TEST_DELEGATE, """
+        package test;
+        import com.yandex.yatagan.rt.support.ConsoleLogger;
+        import com.yandex.yatagan.rt.support.DynamicValidationDelegate;
+        import com.yandex.yatagan.rt.support.SimpleDynamicValidationDelegate;
+        import com.yandex.yatagan.validation.RichString;
+        import java.util.List;
+        import java.util.ArrayList;
+
+        public class TestValidationDelegate extends SimpleDynamicValidationDelegate {
+            public static final List<String[]> sLog = new ArrayList<>();
+            public TestValidationDelegate() {
+                super(new DynamicValidationDelegate.ReportingDelegate() {
+                    @Override public void reportError(String message) {
+                        sLog.add(new String[]{"e", message});
+                    }
+                    @Override public void reportWarning(String message) {
+                        sLog.add(new String[]{"w", message});
+                    }
+                }, new ConsoleLogger("[YataganForTests]"), true, true);
             }
-            append('.')
-            append(option.key.substringAfterLast('.'))
-            append('(').append(argument).append(')')
         }
-    }
+    """.trimIndent())
 
     override fun generatedFilesSubDir(): String? = null
 
@@ -90,6 +102,7 @@ class DynamicCompileTestDriver(
         }
         val log = StringBuilder()
         val runtimeValidationSuccess = validateRuntimeComponents(
+            workingDir = testCompilationResult.workingDir,
             componentBootstrapperNames = accumulator.bootstrapperNames,
             runtimeClasspath = testCompilationResult.runtimeClasspath,
             log = log,
@@ -102,7 +115,7 @@ class DynamicCompileTestDriver(
 
     override fun runRuntimeTest(test: Method) {
         @Suppress("UNCHECKED_CAST")
-        val runner = test.declaringClass.classLoader.loadClass("RuntimeTestRunner")
+        val runner = test.declaringClass.classLoader.loadClass(TEST_RUNNER)
             .getDeclaredConstructor()
             .newInstance() as Consumer<Runnable>
         runner.accept {
@@ -112,7 +125,7 @@ class DynamicCompileTestDriver(
 
     override fun createCompilationArguments() = super.createCompilationArguments().let {
         it.copy(
-            sources = it.sources + runnerSource,
+            sources = it.sources + arrayOf(runnerSource, validationDelegateSource),
             javacArguments = it.javacArguments + "-parameters",
             kotlincArguments = it.kotlincArguments + "-java-parameters",
             kaptProcessors = listOf(accumulator),
@@ -123,11 +136,24 @@ class DynamicCompileTestDriver(
         get() = Backend.Rt
 
     private fun validateRuntimeComponents(
+        workingDir: File,
         componentBootstrapperNames: Set<ClassName>,
         runtimeClasspath: List<File>,
         log: StringBuilder,
     ): Boolean {
-        val classLoader = makeClassLoader(runtimeClasspath)
+        val resourcesDir = workingDir.resolve("resources")
+        val propertiesFile = resourcesDir.resolve("META-INF/com.yandex.yatagan.reflection/parameters.properties")
+        propertiesFile.parentFile.mkdirs()
+        propertiesFile.bufferedWriter().use {
+            Properties().apply {
+                put("validationDelegateClass", TEST_DELEGATE)
+                for ((option, value) in options) {
+                    put(option.key.substringAfterLast('.'), value.toString())
+                }
+            }.store(it, "Generated test properties")
+        }
+
+        val classLoader = makeClassLoader(runtimeClasspath + resourcesDir)
         var success = true
         val logger = LoggerDecorator(object : Logger {
             override fun error(message: String) {
@@ -142,16 +168,23 @@ class DynamicCompileTestDriver(
             }
         })
         for (bootstrapperName in componentBootstrapperNames) {
-            @Suppress("UNCHECKED_CAST")
             val bootstrapper = classLoader.loadClass(bootstrapperName.reflectionName())
                 .getDeclaredConstructor()
-                .newInstance() as Supplier<List<Array<String>>>
-            for ((kind, message) in bootstrapper.get()) {
-                when (kind) {
-                    "error" -> logger.error(message)
-                    "warning" -> logger.warning(message)
-                    else -> throw AssertionError("not reached")
-                }
+                .newInstance() as Runnable
+
+            bootstrapper.run()
+        }
+
+        val delegateLog = classLoader.loadClass(TEST_DELEGATE)
+            .getDeclaredField("sLog")
+            .get(null)
+
+        @Suppress("UNCHECKED_CAST")
+        for ((kind, message) in delegateLog as List<Array<String>>) {
+            when (kind) {
+                "e" -> logger.error(message)
+                "w" -> logger.warning(message)
+                else -> throw AssertionError("not reached")
             }
         }
         return success
@@ -195,43 +228,17 @@ class DynamicCompileTestDriver(
                     import com.yandex.yatagan.dynamic.YataganReflection;
                     import com.yandex.yatagan.validation.RichString;
                     import com.yandex.yatagan.rt.support.*;
-                    import java.util.function.*;
                     import java.util.*;
-                    public final class ${bootstrapperName.simpleName()} implements Supplier<List<String[]>> {
-                        public List<String[]> get() {
-                            class InvalidGraph extends RuntimeException {}
-
-                            final List<String[]> log = new ArrayList<>();
-                            final DynamicValidationDelegate.ReportingDelegate reporting = 
-                                new DynamicValidationDelegate.ReportingDelegate() {
-                                    @Override public void reportError(RichString message) {
-                                        log.add(new String[]{"error", message.toString()});
-                                    }
-                                    @Override public void reportWarning(RichString message) {
-                                        log.add(new String[]{"warning", message.toString()});
-                                    }
-                                };
-                            final Logger logger = new ConsoleLogger("[YataganForTests]");
-                            final DynamicValidationDelegate delegate = new SimpleDynamicValidationDelegate(
-                                reporting, logger, /*throwOnError*/ true, /*usePlugins*/ true
-                            );
-                            
-                            YataganReflection
-                                .validation(delegate)
-                                .maxIssueEncounterPaths(100)
-                                .strictMode(true)
-                                .logger(logger)
-                                ${formatOptions()}
-                                .complete();
-                            
+                    
+                    public final class ${bootstrapperName.simpleName()} implements Runnable {
+                        public void run() {
                             try {
                                 Yatagan.$bootstrapInvocation;
                             } catch (SimpleDynamicValidationDelegate.InvalidGraphException e) {
                                 // nothing here
                             } finally {
-                                YataganReflection.reset();
+                                YataganReflection.resetGlobalState();
                             }
-                            return log;
                         }
                     }
                 """.trimIndent()

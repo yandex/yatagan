@@ -17,12 +17,22 @@
 package com.yandex.yatagan.dynamic
 
 import com.yandex.yatagan.AutoBuilder
-import com.yandex.yatagan.base.singleInitWithFallback
 import com.yandex.yatagan.internal.ImplementationLoader
 import com.yandex.yatagan.internal.YataganInternal
 import com.yandex.yatagan.rt.engine.RuntimeEngine
 import com.yandex.yatagan.rt.support.DynamicValidationDelegate
-import com.yandex.yatagan.rt.support.Logger
+import java.io.InputStream
+import java.util.Properties
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
+
+private const val REFLECTION_PROPERTIES_RESOURCE_PATH =
+    "META-INF/com.yandex.yatagan.reflection/parameters.properties"
+
+private const val VALIDATION_DELEGATE_CLASS_PROPERTY = "validationDelegateClass"
+private const val MAX_ISSUE_ENCOUNTER_PATHS_PROPERTY = "maxIssueEncounterPaths"
+private const val IS_STRICT_MODE_PROPERTY = "enableStrictMode"
+private const val USE_PLAIN_OUTPUT_PROPERTY = "usePlainOutput"
 
 /**
  * Instantiated reflectively.
@@ -32,8 +42,60 @@ import com.yandex.yatagan.rt.support.Logger
 @OptIn(YataganInternal::class)
 internal class ReflectionLoader : ImplementationLoader by ReflectionLoader {
     internal companion object : ImplementationLoader {
-        private val engineHolder = singleInitWithFallback { RuntimeEngine(Params()) }
-        private var engine: RuntimeEngine<Params> by engineHolder
+        private val engine: RuntimeEngine
+
+        init {
+            val threadFactory = ThreadFactory {
+                Thread(it, "yatagan-params-loader").apply {
+                    if (!isDaemon) isDaemon = true
+                    if (priority != Thread.NORM_PRIORITY) priority = Thread.NORM_PRIORITY
+                }
+            }
+            val executor = Executors.newSingleThreadExecutor(threadFactory)
+            val params = executor.submit<RuntimeEngine.Params> {
+                val paramsStream: InputStream? =
+                    ReflectionLoader::class.java.classLoader.getResourceAsStream(REFLECTION_PROPERTIES_RESOURCE_PATH)
+
+                val properties = paramsStream?.let { input ->
+                    Properties().apply {
+                        input.use { load(it) }
+                    }
+                }
+
+                val params = RuntimeEngine.Params()
+                properties?.entries?.forEach { (property, value) ->
+                    when(property) {
+                        VALIDATION_DELEGATE_CLASS_PROPERTY -> {
+                            try {
+                                params.validationDelegate = Class.forName(value.toString())
+                                    .getConstructor()
+                                    .newInstance() as DynamicValidationDelegate
+                            } catch (e: ClassNotFoundException) {
+                                throw IllegalStateException("Invalid `$property` value", e)
+                            }
+                        }
+                        MAX_ISSUE_ENCOUNTER_PATHS_PROPERTY -> {
+                            params.maxIssueEncounterPaths = value.toString().toIntOrNull()
+                                ?: throw IllegalStateException("Expected integer for `$property`, got `$value`")
+                        }
+                        IS_STRICT_MODE_PROPERTY -> {
+                            params.isStrictMode = value.toString().toBooleanStrictOrNull()
+                                ?: throw IllegalStateException("Expected boolean for `$property`, got `$value`")
+                        }
+                        USE_PLAIN_OUTPUT_PROPERTY -> {
+                            params.usePlainOutput = value.toString().toBooleanStrictOrNull()
+                                ?: throw IllegalStateException("Expected boolean for `$property`, got `$value`")
+                        }
+                        else -> {
+                            throw IllegalStateException("Unknown property `$property`")
+                        }
+                    }
+                }
+                params
+            }
+            executor.shutdown()
+            engine = RuntimeEngine(params)
+        }
 
         override fun <T : Any> builder(builderClass: Class<T>): Result<T> {
             return Result.success(engine.builder(builderClass))
@@ -43,23 +105,8 @@ internal class ReflectionLoader : ImplementationLoader by ReflectionLoader {
             return Result.success(engine.autoBuilder(componentClass))
         }
 
-        internal fun complete(params: Params) {
-            engine = RuntimeEngine(params.copy())
-        }
-
         internal fun reset() {
-            if (engineHolder.isInitialized()) {
-                engine.destroy()
-                engineHolder.deinitialize()
-            }
+            engine.reset()
         }
     }
-
-    internal data class Params (
-        override var validationDelegate: DynamicValidationDelegate? = null,
-        override var maxIssueEncounterPaths: Int = 5,
-        override var isStrictMode: Boolean = true,
-        override var logger: Logger? = null,
-    ) : RuntimeEngine.Params
 }
-

@@ -30,6 +30,7 @@ import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
 import com.yandex.yatagan.lang.rt.TypeDeclaration
 import com.yandex.yatagan.rt.support.DynamicValidationDelegate
 import com.yandex.yatagan.rt.support.Logger
+import com.yandex.yatagan.rt.support.SimpleDynamicValidationDelegate
 import com.yandex.yatagan.validation.LocatedMessage
 import com.yandex.yatagan.validation.RichString
 import com.yandex.yatagan.validation.ValidationMessage
@@ -38,33 +39,50 @@ import com.yandex.yatagan.validation.impl.GraphValidationExtension
 import com.yandex.yatagan.validation.impl.validate
 import com.yandex.yatagan.validation.spi.ValidationPluginProvider
 import java.lang.reflect.Proxy
+import java.util.concurrent.Future
 import kotlin.system.measureTimeMillis
 
 /**
  * Main entrypoint class for reflection backend implementation.
  */
-class RuntimeEngine<P : RuntimeEngine.Params>(
-    val params: P,
+class RuntimeEngine(
+    private val paramsFuture: Future<Params>,
 ) {
+    private val params: Params
+        get() = paramsFuture.get()
+
+    private val logger: Logger?
+        get() = paramsFuture.get().validationDelegate.logger
+
+    data class Params(
+        var validationDelegate: DynamicValidationDelegate = SimpleDynamicValidationDelegate(),
+        var maxIssueEncounterPaths: Int = 5,
+        var isStrictMode: Boolean = true,
+        var usePlainOutput: Boolean = false,
+    )
+
     init {
-        @OptIn(InternalLangApi::class)
-        LangModelFactory.delegate = RtModelFactoryImpl(javaClass.classLoader)
+        initIfNeeded()
     }
 
-    interface Params {
-        val validationDelegate: DynamicValidationDelegate?
-        val maxIssueEncounterPaths: Int
-        val isStrictMode: Boolean
-        val logger: Logger?
+    private fun initIfNeeded() {
+        @OptIn(InternalLangApi::class)
+        with(LangModelFactory) {
+            if (delegate.get() == null) {
+                // RtModelFactoryImpl may be created multiple times, but only single value is published
+                delegate.compareAndSet(null, RtModelFactoryImpl(this@RuntimeEngine.javaClass.classLoader))
+            }
+        }
     }
 
-    fun destroy() {
+    fun reset() {
         @OptIn(InternalLangApi::class)
-        LangModelFactory.delegate = null
+        LangModelFactory.delegate.set(null)
         ObjectCacheRegistry.close()
     }
 
     fun <T : Any> builder(builderClass: Class<T>): T {
+        initIfNeeded()
         val builder: T
         val time = measureTimeMillis {
             require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
@@ -89,17 +107,18 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
                     graph = graph,
                     parent = null,
                     validationPromise = promise,
-                    logger = params.logger,
+                    logger = this::logger,
                 )
             }
             val proxy = Proxy.newProxyInstance(builderClass.classLoader, arrayOf(builderClass), factory)
             builder = builderClass.cast(proxy)
         }
-        params.logger?.log("Dynamic builder creation for `$builderClass` took $time ms")
+        logger?.log("Dynamic builder creation for `$builderClass` took $time ms")
         return builder
     }
 
     fun <T : Any> autoBuilder(componentClass: Class<T>): AutoBuilder<T> {
+        initIfNeeded()
         val builder: AutoBuilder<T>
         val time = measureTimeMillis {
             require(componentClass.getAnnotation(Component::class.java)?.isRoot == true) {
@@ -123,10 +142,10 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
                 componentClass = componentClass,
                 graph = graph,
                 validationPromise = promise,
-                logger = params.logger,
+                logger = this::logger,
             )
         }
-        params.logger?.log("Dynamic auto-builder creation for `$componentClass` took $time ms")
+        logger?.log("Dynamic auto-builder creation for `$componentClass` took $time ms")
         return builder
     }
 
@@ -134,23 +153,25 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
         messages: Collection<LocatedMessage>,
         reporting: DynamicValidationDelegate.ReportingDelegate,
     ) {
+        fun toString(rich: RichString) = if (params.usePlainOutput) rich.toString() else rich.toAnsiEscapedString()
+
         messages.forEach { locatedMessage ->
             val text: RichString = locatedMessage.format(
                 maxEncounterPaths = params.maxIssueEncounterPaths,
             )
             when (locatedMessage.message.kind) {
-                ValidationMessage.Kind.Error -> reporting.reportError(text)
-                ValidationMessage.Kind.Warning -> reporting.reportWarning(text)
+                ValidationMessage.Kind.Error -> reporting.reportError(toString(text))
+                ValidationMessage.Kind.Warning -> reporting.reportWarning(toString(text))
                 ValidationMessage.Kind.MandatoryWarning -> if (params.isStrictMode) {
-                    reporting.reportError(text)
+                    reporting.reportError(toString(text))
                 } else {
-                    reporting.reportWarning(text)
+                    reporting.reportWarning(toString(text))
                 }
             }
         }
     }
 
-    private fun doValidate(graph: BindingGraph) = params.validationDelegate?.let { delegate ->
+    private fun doValidate(graph: BindingGraph) = params.validationDelegate.let { delegate ->
         delegate.dispatchValidation(title = graph.model.type.toString()) { reporting ->
             reportMessages(messages = validate(graph), reporting = reporting)
             if (delegate.usePlugins) {

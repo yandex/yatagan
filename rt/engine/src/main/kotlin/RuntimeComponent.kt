@@ -63,7 +63,7 @@ import com.yandex.yatagan.rt.support.Logger
 import java.lang.reflect.Proxy
 
 internal class RuntimeComponent(
-    private val logger: Logger?,
+    private val logger: () -> Logger?,
     override val parent: RuntimeComponent?,
     private val graph: BindingGraph,
     private val givenInstances: Map<NodeModel, Any>,

@@ -28,10 +28,13 @@ import java.util.concurrent.Future
  *   Asynchronous scheduling will call its [dispatchValidation][DynamicValidationDelegate.dispatchValidation].
  *   If that is also asynchronous, its promise will be awaited, blocking the executor thread.
  */
-class AsyncDynamicValidationDelegate @JvmOverloads constructor(
+open class AsyncDynamicValidationDelegate @JvmOverloads constructor(
     private val executorService: ExecutorService,
     private val base: DynamicValidationDelegate = SimpleDynamicValidationDelegate(),
 ) : DynamicValidationDelegate {
+
+    override val logger: Logger?
+        get() = base.logger
 
     override val usePlugins: Boolean
         get() = base.usePlugins
