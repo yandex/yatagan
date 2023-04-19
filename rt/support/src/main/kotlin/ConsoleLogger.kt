@@ -25,6 +25,6 @@ class ConsoleLogger(
     private val tag: String = "[YataganRt]",
 ) : Logger {
     override fun log(message: String) {
-        println("$tag $message")
+        System.err.println("$tag $message")
     }
 }

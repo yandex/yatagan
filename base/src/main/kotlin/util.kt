@@ -19,7 +19,6 @@ package com.yandex.yatagan.base
 import java.util.ServiceLoader
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.reflect.KProperty
 
 inline fun <R> ifOrElseNull(condition: Boolean, block: () -> R): R? {
     contract { callsInPlace(block, InvocationKind.AT_MOST_ONCE) }
@@ -126,31 +125,3 @@ inline fun <T : Any> traverseDepthFirstWithPath(
         }
     }
 }
-
-class SingleInitPropertyWithFallbackDelegate<T : Any>(
-    private val fallbackValue: () -> T,
-) {
-    @Volatile private var valueHolder: Lazy<T> = lazy(fallbackValue)
-
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T = valueHolder.value
-
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        check(!valueHolder.isInitialized()) {
-            "$property was already initialized, can't initialize after usage or twice"
-        }
-        valueHolder = object : Lazy<T> {
-            override val value: T get() = value
-            override fun isInitialized() = true
-        }
-    }
-
-    fun deinitialize() {
-        valueHolder = lazy(fallbackValue)
-    }
-
-    fun isInitialized(): Boolean {
-        return valueHolder.isInitialized()
-    }
-}
-
-fun <T : Any> singleInitWithFallback(fallback: () -> T) = SingleInitPropertyWithFallbackDelegate(fallback)

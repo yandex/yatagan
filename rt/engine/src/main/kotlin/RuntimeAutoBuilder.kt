@@ -33,7 +33,7 @@ internal class RuntimeAutoBuilder<T>(
     private val componentClass: Class<T>,
     private val graph: BindingGraph,
     private val validationPromise: DynamicValidationDelegate.Promise?,
-    private val logger: Logger?,
+    private val logger: () -> Logger?,
 ) : AutoBuilder<T> {
     init {
         assert(componentClass == graph.model.type.declaration.rt)
@@ -104,7 +104,7 @@ internal class RuntimeAutoBuilder<T>(
                 runtimeComponent.thisProxy = it
             }
         }
-        logger?.log(
+        logger()?.log(
             "Dynamic component creation via auto-builder of ${graph.toString(childContext = null)} took $time ms")
         return componentProxy
     }

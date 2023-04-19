@@ -17,7 +17,6 @@
 package com.yandex.yatagan.rt.support
 
 import com.yandex.yatagan.rt.support.SimpleDynamicValidationDelegate.InvalidGraphException
-import com.yandex.yatagan.validation.RichString
 import kotlin.system.measureTimeMillis
 
 /**
@@ -32,9 +31,9 @@ import kotlin.system.measureTimeMillis
  *   Bear in mind, that loading plugins can be costly for large classpaths, and may impact startup performance if
  *   used synchronously.
  */
-class SimpleDynamicValidationDelegate @JvmOverloads constructor(
+open class SimpleDynamicValidationDelegate @JvmOverloads constructor(
     private val reporting: DynamicValidationDelegate.ReportingDelegate,
-    private val logger: Logger? = null,
+    override val logger: Logger? = null,
     private val throwOnError: Boolean = true,
     override val usePlugins: Boolean = false,
 ) : DynamicValidationDelegate {
@@ -82,12 +81,12 @@ class SimpleDynamicValidationDelegate @JvmOverloads constructor(
         var errorCount = 0
         var warningCount = 0
 
-        override fun reportError(message: RichString) {
+        override fun reportError(message: String) {
             errorCount += 1
             delegate.reportError(message)
         }
 
-        override fun reportWarning(message: RichString) {
+        override fun reportWarning(message: String) {
             warningCount += 1
             delegate.reportWarning(message)
         }
