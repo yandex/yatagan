@@ -1,0 +1,19 @@
+error: Missing binding for test.Api2
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.MyRootComponent
+  in graph for component test.MySubComponent
+  in entry-point getObjects: java.util.List<java.lang.Object>
+                             ^-[*1]--------------------------
+  in [1*] list-binding List  { multi-binding-contributor java.lang.Object,  } assembled in graph for component test.MySubComponent
+                               ^-[*2]------------------------------------
+  in [2*] alias test.MySubModule::objects2(test.Api1Consumer)
+                                           ^-[*3]-----------
+  in [3*] inject-constructor test.Api1Consumer(test.Api1)
+                                               ^-[*4]---
+  in [4*] alias test.MyRootModule::api(test.Api1Impl)
+                                       ^-[*5]-------
+  in [5*] inject-constructor test.Api1Impl(test.Api2)
+                                           ^-[*6]---
+  here: [6*] <missing>
+             ^~~~~~~~~
