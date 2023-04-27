@@ -636,6 +636,44 @@ class CoreBindingsFailureTest(
     }
 
     @Test
+    fun `alias in super - alias in sub (bug #54)`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Scope annotation class SubScope
+
+            interface Api1
+            interface Api2
+
+            @SubScope class Api2Impl @Inject constructor() : Api2
+            @SubScope class Api1Consumer @Inject constructor(api: Api1)
+            class Api1Impl @Inject constructor(foo: Api2): Api1
+
+            @Module interface MyRootModule {
+                @Binds fun api(i: Api1Impl): Api1  // Alias in super
+            }
+            @Module interface MySubModule {
+                @Binds fun api2(i: Api2Impl): Api2  // Alias in sub
+                
+                @Binds @IntoList fun objects1(i: Api1Consumer): Any
+                @Binds @IntoList fun objects2(i: Api1Consumer): Any  // add twice
+            }
+            @Singleton @Component(modules = [MyRootModule::class]) 
+            interface MyRootComponent {
+                val sub: MySubComponent
+            }
+            @SubScope @Component(isRoot = false, modules = [MySubModule::class])
+            interface MySubComponent {
+                val objects: List<Any>
+            }
+        """.trimIndent())
+
+        // Should report missing binding for `Api2`, no crashes.
+        compileRunAndValidate()
+    }
+
+    @Test
     fun `manual framework type usage`() {
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*
