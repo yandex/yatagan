@@ -139,7 +139,7 @@ internal class BindingGraphImpl(
     override fun resolveBindingRaw(node: NodeModel): BaseBinding {
         return bindings.getBindingFor(node)
             ?: parent?.resolveBindingRaw(node)
-            ?: throw IllegalStateException("Not reached: missing binding for $node")
+            ?: throw IllegalStateException("Not reached: missing binding for ${node.toString(null)}")
     }
 
     // MAYBE: write algorithm in such a way that this is local variable.
@@ -194,8 +194,7 @@ internal class BindingGraphImpl(
             val nonAlias = binding.accept(AliasMaterializeVisitor())
             if (nonAlias.owner == this) {
                 localBindings.getOrPut(nonAlias, ::BindingUsageImpl).accept(dependency.kind)
-            }
-            if (binding.owner == this) {
+
                 if (!seenBindings.add(nonAlias)) {
                     continue
                 }
