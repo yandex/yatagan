@@ -576,10 +576,14 @@ class MultibindingsTest(
                 }
             }
 
+            class Consumer @Inject constructor(val numbers: List<Number>)
+
             @Component(isRoot = false, modules = [SubModule2::class])
             interface SubComponent2 {
                 val numbers: List<Number>
                 @get:Named("qualified") val qInts: List<Int>
+                
+                val consumer: Consumer
                 
                 @Component.Builder interface Builder {
                     fun create(): SubComponent2
