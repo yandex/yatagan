@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.base.intersects
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
+import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ExtensibleBinding
 import com.yandex.yatagan.core.graph.impl.and
@@ -53,4 +54,9 @@ internal fun BindingGraph.canHost(bindingScopes: Set<ScopeModel>): Boolean {
     }
 
     return bindingScopes intersects scopes
+}
+
+internal fun BaseBinding.maybeUnwrapSyntheticAlias(): BaseBinding = when (this) {
+    is SyntheticAliasBindingImpl -> sourceBinding.maybeUnwrapSyntheticAlias()
+    else -> this
 }
