@@ -40,7 +40,7 @@ dependencies {
     implementation(project(":core:model:impl"))
     implementation(project(":core:graph:impl"))
     implementation(project(":api:public"))
-    implementation(project(":base"))
+    implementation(project(":base:impl"))
 
     // KSP dependencies
     implementation(project(":lang:ksp"))

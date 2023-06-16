@@ -5,5 +5,5 @@ plugins {
 dependencies {
     api(project(":lang:api"))
 
-    implementation(project(":base"))
+    implementation(project(":base:impl"))
 }

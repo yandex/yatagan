@@ -59,36 +59,3 @@ public abstract class BindingVisitorAdapter<R> : Binding.Visitor<R> {
     override fun visitMap(binding: MapBinding): R = visitDefault()
     override fun visitEmpty(binding: EmptyBinding): R = visitDefault()
 }
-
-public fun <P : WithParents<P>> P.parentsSequence(
-    includeThis: Boolean = false,
-): Sequence<P> {
-    return object : Sequence<P> {
-        val initial = if (includeThis) this@parentsSequence else parent
-        override fun iterator() = object : Iterator<P> {
-            var next: P? = initial
-            override fun hasNext() = next != null
-            override fun next() = (next ?: throw NoSuchElementException()).also { next = it.parent }
-        }
-    }
-}
-
-public fun <C : WithChildren<C>> C.childrenSequence(
-    includeThis: Boolean = true,
-): Sequence<C> {
-    return object : Sequence<C> {
-        val initial: Collection<C> = if (includeThis) listOf(this@childrenSequence) else children
-
-        override fun iterator() = object : Iterator<C> {
-            val queue = ArrayDeque(initial)
-
-            override fun hasNext(): Boolean = queue.isNotEmpty()
-
-            override fun next(): C {
-                val next = queue.removeFirst()
-                queue.addAll(next.children)
-                return next
-            }
-        }
-    }
-}

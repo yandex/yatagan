@@ -16,8 +16,9 @@
 
 package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.yatagan.core.graph.Extensible
-import com.yandex.yatagan.core.graph.WithParents
+import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.base.api.WithParents
+import com.yandex.yatagan.base.api.parentsSequence
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -45,7 +46,6 @@ import com.yandex.yatagan.core.graph.impl.bindings.SubComponentFactoryBindingImp
 import com.yandex.yatagan.core.graph.impl.bindings.SyntheticAliasBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.canHost
 import com.yandex.yatagan.core.graph.impl.bindings.maybeUnwrapSyntheticAlias
-import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.BindsBindingModel
 import com.yandex.yatagan.core.model.CollectionTargetKind

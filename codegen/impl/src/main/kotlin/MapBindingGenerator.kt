@@ -16,11 +16,11 @@
 
 package com.yandex.yatagan.codegen.impl
 
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2

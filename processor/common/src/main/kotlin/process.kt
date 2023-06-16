@@ -17,10 +17,10 @@
 package com.yandex.yatagan.processor.common
 
 import com.yandex.yatagan.base.ObjectCacheRegistry
+import com.yandex.yatagan.base.api.childrenSequence
 import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.codegen.impl.ComponentGeneratorFacade
 import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.childrenSequence
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel

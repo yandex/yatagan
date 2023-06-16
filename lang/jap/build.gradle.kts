@@ -5,6 +5,6 @@ plugins {
 dependencies {
     api(project(":lang:compiled"))
 
-    implementation(project(":base"))
+    implementation(project(":base:impl"))
     implementation(libs.autoCommon)
 }

@@ -16,6 +16,9 @@
 
 package com.yandex.yatagan.core.graph
 
+import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.base.api.WithChildren
+import com.yandex.yatagan.base.api.WithParents
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage.Eager
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage.Lazy
 import com.yandex.yatagan.core.graph.bindings.BaseBinding

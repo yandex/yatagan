@@ -16,17 +16,17 @@
 
 package com.yandex.yatagan.core.graph.impl
 
+import com.yandex.yatagan.base.ExtensibleImpl
+import com.yandex.yatagan.base.api.childrenSequence
+import com.yandex.yatagan.base.api.parentsSequence
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage
-import com.yandex.yatagan.core.graph.BindingVisitorAdapter
 import com.yandex.yatagan.core.graph.GraphSubComponentFactoryMethod
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
-import com.yandex.yatagan.core.graph.childrenSequence
 import com.yandex.yatagan.core.graph.normalized
-import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel

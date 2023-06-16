@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2023 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.core.graph
+package com.yandex.yatagan.base.api
 
 /**
- * A hierarchy trait, that allows accessing child nodes.
+ * A hierarchy trait, that allows accessing optional parent nodes.
+ *
+ * @see parentsSequence
  */
-public interface WithChildren<C> where C : WithChildren<C> {
+public interface WithParents<P> where P : WithParents<P> {
     /**
-     * Children nodes.
+     * Parent node. `null` if root is reached.
      */
-    public val children: Collection<C>
+    public val parent: P?
 }

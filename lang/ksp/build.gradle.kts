@@ -14,6 +14,6 @@ dependencies {
     api(project(":lang:api"))
     api(project(":lang:compiled"))
 
-    implementation(project(":base"))
+    implementation(project(":base:impl"))
     implementation(libs.ksp.api)
 }

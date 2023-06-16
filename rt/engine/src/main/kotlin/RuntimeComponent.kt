@@ -16,11 +16,12 @@
 
 package com.yandex.yatagan.rt.engine
 
+import com.yandex.yatagan.base.api.WithParents
+import com.yandex.yatagan.base.api.parentsSequence
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.GraphMemberInjector
 import com.yandex.yatagan.core.graph.GraphSubComponentFactoryMethod
-import com.yandex.yatagan.core.graph.WithParents
 import com.yandex.yatagan.core.graph.bindings.AlternativesBinding
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -36,7 +37,6 @@ import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
 import com.yandex.yatagan.core.graph.component1
 import com.yandex.yatagan.core.graph.component2
 import com.yandex.yatagan.core.graph.normalized
-import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel

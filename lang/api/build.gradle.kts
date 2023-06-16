@@ -7,7 +7,9 @@ plugins {
 val stdLib: Configuration by configurations.creating
 
 dependencies {
-    testImplementation(project(":base"))
+    api(project(":base:api"))
+
+    testImplementation(project(":base:impl"))
     testImplementation(project(":lang:jap"))
     testImplementation(project(":lang:ksp"))
     testImplementation(project(":lang:rt"))

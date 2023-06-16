@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api(project(":rt:support"))
 
-    implementation(project(":base"))
+    implementation(project(":base:impl"))
     implementation(project(":api:public"))
     implementation(project(":validation:impl"))
     implementation(project(":validation:format"))
