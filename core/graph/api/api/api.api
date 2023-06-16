@@ -1,0 +1,167 @@
+public abstract interface class com/yandex/yatagan/core/graph/BindingGraph : com/yandex/yatagan/base/api/Extensible, com/yandex/yatagan/base/api/WithChildren, com/yandex/yatagan/base/api/WithParents, com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getConditionScope-s2kRxq8 ()Ljava/util/Set;
+	public abstract fun getCreator ()Lcom/yandex/yatagan/core/model/ComponentFactoryModel;
+	public abstract fun getDependencies ()Ljava/util/Collection;
+	public abstract fun getEntryPoints ()Ljava/util/Collection;
+	public abstract fun getLocalAssistedInjectFactories ()Ljava/util/Collection;
+	public abstract fun getLocalBindings ()Ljava/util/Map;
+	public abstract fun getLocalConditionLiterals ()Ljava/util/Map;
+	public abstract fun getMemberInjectors ()Ljava/util/Collection;
+	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/ComponentModel;
+	public abstract fun getModules ()Ljava/util/Collection;
+	public abstract fun getRequiresSynchronizedAccess ()Z
+	public abstract fun getScopes ()Ljava/util/Set;
+	public abstract fun getSubComponentFactoryMethods ()Ljava/util/Collection;
+	public abstract fun getUsedParents ()Ljava/util/Set;
+	public abstract fun getVariant ()Lcom/yandex/yatagan/core/model/Variant;
+	public abstract fun isRoot ()Z
+	public abstract fun resolveBinding (Lcom/yandex/yatagan/core/model/NodeModel;)Lcom/yandex/yatagan/core/graph/bindings/Binding;
+	public abstract fun resolveBindingRaw (Lcom/yandex/yatagan/core/model/NodeModel;)Lcom/yandex/yatagan/core/graph/bindings/BaseBinding;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/BindingGraph$BindingUsage {
+	public abstract fun getDirect ()I
+	public abstract fun getLazy ()I
+	public abstract fun getOptional ()I
+	public abstract fun getOptionalLazy ()I
+	public abstract fun getOptionalProvider ()I
+	public abstract fun getProvider ()I
+}
+
+public final class com/yandex/yatagan/core/graph/ExtensionsKt {
+	public static final fun component1 (Lcom/yandex/yatagan/core/graph/GraphEntryPoint;)Lcom/yandex/yatagan/lang/Method;
+	public static final fun component2 (Lcom/yandex/yatagan/core/graph/GraphEntryPoint;)Lcom/yandex/yatagan/core/model/NodeDependency;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/GraphEntryPoint : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getDependency ()Lcom/yandex/yatagan/core/model/NodeDependency;
+	public abstract fun getGetter ()Lcom/yandex/yatagan/lang/Method;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/GraphMemberInjector : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getInjector ()Lcom/yandex/yatagan/lang/Method;
+	public abstract fun getMembersToInject ()Ljava/util/Map;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/GraphSubComponentFactoryMethod : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getCreatedGraph ()Lcom/yandex/yatagan/core/graph/BindingGraph;
+	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/SubComponentFactoryMethodModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/AliasBinding : com/yandex/yatagan/core/graph/bindings/BaseBinding {
+	public abstract fun getSource ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/AssistedInjectFactoryBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/BaseBinding : com/yandex/yatagan/validation/MayBeInvalid, java/lang/Comparable {
+	public abstract fun accept (Lcom/yandex/yatagan/core/graph/bindings/BaseBinding$Visitor;)Ljava/lang/Object;
+	public abstract fun getOriginModule ()Lcom/yandex/yatagan/core/model/ModuleModel;
+	public abstract fun getOwner ()Lcom/yandex/yatagan/core/graph/BindingGraph;
+	public abstract fun getTarget ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/BaseBinding$Visitor {
+	public fun visitAlias (Lcom/yandex/yatagan/core/graph/bindings/AliasBinding;)Ljava/lang/Object;
+	public fun visitBinding (Lcom/yandex/yatagan/core/graph/bindings/Binding;)Ljava/lang/Object;
+	public abstract fun visitOther (Lcom/yandex/yatagan/core/graph/bindings/BaseBinding;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/core/graph/bindings/BaseBinding$Visitor$DefaultImpls {
+	public static fun visitAlias (Lcom/yandex/yatagan/core/graph/bindings/BaseBinding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/AliasBinding;)Ljava/lang/Object;
+	public static fun visitBinding (Lcom/yandex/yatagan/core/graph/bindings/BaseBinding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/Binding;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/Binding : com/yandex/yatagan/core/graph/bindings/BaseBinding {
+	public abstract fun accept (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;)Ljava/lang/Object;
+	public abstract fun getConditionScope-s2kRxq8 ()Ljava/util/Set;
+	public abstract fun getDependencies ()Lkotlin/sequences/Sequence;
+	public abstract fun getNonStaticConditionProviders ()Ljava/util/Set;
+	public abstract fun getScopes ()Ljava/util/Set;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/Binding$Visitor {
+	public fun visitAssistedInjectFactory (Lcom/yandex/yatagan/core/graph/bindings/AssistedInjectFactoryBinding;)Ljava/lang/Object;
+	public fun visitComponentDependency (Lcom/yandex/yatagan/core/graph/bindings/ComponentDependencyBinding;)Ljava/lang/Object;
+	public fun visitComponentDependencyEntryPoint (Lcom/yandex/yatagan/core/graph/bindings/ComponentDependencyEntryPointBinding;)Ljava/lang/Object;
+	public fun visitComponentInstance (Lcom/yandex/yatagan/core/graph/bindings/ComponentInstanceBinding;)Ljava/lang/Object;
+	public fun visitEmpty (Lcom/yandex/yatagan/core/graph/bindings/EmptyBinding;)Ljava/lang/Object;
+	public fun visitInstance (Lcom/yandex/yatagan/core/graph/bindings/InstanceBinding;)Ljava/lang/Object;
+	public fun visitMap (Lcom/yandex/yatagan/core/graph/bindings/MapBinding;)Ljava/lang/Object;
+	public fun visitMulti (Lcom/yandex/yatagan/core/graph/bindings/MultiBinding;)Ljava/lang/Object;
+	public abstract fun visitOther (Lcom/yandex/yatagan/core/graph/bindings/Binding;)Ljava/lang/Object;
+	public fun visitProvision (Lcom/yandex/yatagan/core/graph/bindings/ProvisionBinding;)Ljava/lang/Object;
+	public fun visitSubComponent (Lcom/yandex/yatagan/core/graph/bindings/SubComponentBinding;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/core/graph/bindings/Binding$Visitor$DefaultImpls {
+	public static fun visitAssistedInjectFactory (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/AssistedInjectFactoryBinding;)Ljava/lang/Object;
+	public static fun visitComponentDependency (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/ComponentDependencyBinding;)Ljava/lang/Object;
+	public static fun visitComponentDependencyEntryPoint (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/ComponentDependencyEntryPointBinding;)Ljava/lang/Object;
+	public static fun visitComponentInstance (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/ComponentInstanceBinding;)Ljava/lang/Object;
+	public static fun visitEmpty (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/EmptyBinding;)Ljava/lang/Object;
+	public static fun visitInstance (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/InstanceBinding;)Ljava/lang/Object;
+	public static fun visitMap (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/MapBinding;)Ljava/lang/Object;
+	public static fun visitMulti (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/MultiBinding;)Ljava/lang/Object;
+	public static fun visitProvision (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/ProvisionBinding;)Ljava/lang/Object;
+	public static fun visitSubComponent (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;Lcom/yandex/yatagan/core/graph/bindings/SubComponentBinding;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/ComponentDependencyBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+	public abstract fun getDependency ()Lcom/yandex/yatagan/core/model/ComponentDependencyModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/ComponentDependencyEntryPointBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+	public abstract fun getDependency ()Lcom/yandex/yatagan/core/model/ComponentDependencyModel;
+	public abstract fun getGetter ()Lcom/yandex/yatagan/lang/Method;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/ComponentInstanceBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/EmptyBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/ExtensibleBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+	public abstract fun getTargetForDownstream ()Lcom/yandex/yatagan/core/model/NodeModel;
+	public abstract fun getUpstream ()Lcom/yandex/yatagan/core/graph/bindings/ExtensibleBinding;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/InstanceBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/MapBinding : com/yandex/yatagan/core/graph/bindings/ExtensibleBinding {
+	public abstract fun getContents ()Ljava/util/Collection;
+	public abstract fun getMapKey ()Lcom/yandex/yatagan/lang/Type;
+	public abstract fun getMapValue ()Lcom/yandex/yatagan/lang/Type;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/MapBinding$Contribution {
+	public abstract fun getDependency ()Lcom/yandex/yatagan/core/model/NodeDependency;
+	public abstract fun getKeyValue ()Lcom/yandex/yatagan/lang/Annotation$Value;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/MultiBinding : com/yandex/yatagan/core/graph/bindings/ExtensibleBinding {
+	public abstract fun getContributions ()Ljava/util/Map;
+	public abstract fun getKind ()Lcom/yandex/yatagan/core/model/CollectionTargetKind;
+}
+
+public final class com/yandex/yatagan/core/graph/bindings/MultiBinding$ContributionType : java/lang/Enum {
+	public static final field Collection Lcom/yandex/yatagan/core/graph/bindings/MultiBinding$ContributionType;
+	public static final field Element Lcom/yandex/yatagan/core/graph/bindings/MultiBinding$ContributionType;
+	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/core/graph/bindings/MultiBinding$ContributionType;
+	public static fun values ()[Lcom/yandex/yatagan/core/graph/bindings/MultiBinding$ContributionType;
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/ProvisionBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+	public abstract fun getInputs ()Ljava/util/List;
+	public abstract fun getProvision ()Lcom/yandex/yatagan/lang/Callable;
+	public abstract fun getRequiresModuleInstance ()Z
+}
+
+public abstract interface class com/yandex/yatagan/core/graph/bindings/SubComponentBinding : com/yandex/yatagan/core/graph/bindings/Binding {
+	public abstract fun getTargetGraph ()Lcom/yandex/yatagan/core/graph/BindingGraph;
+}
+

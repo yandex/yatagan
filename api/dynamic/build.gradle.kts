@@ -1,5 +1,5 @@
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.stable-api-artifact")
 }
 
 dependencies {
@@ -8,8 +8,4 @@ dependencies {
 
     implementation(project(":base:impl"))
     implementation(project(":rt:engine"))
-}
-
-kotlin {
-    explicitApi()
 }

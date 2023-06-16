@@ -1,5 +1,5 @@
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.implementation-artifact")
 }
 
 dependencies {

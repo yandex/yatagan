@@ -1,0 +1,11 @@
+public final class com/yandex/yatagan/dynamic/ReflectionLoader : com/yandex/yatagan/internal/ImplementationLoader {
+	public fun <init> ()V
+	public fun autoBuilder-IoAF18A (Ljava/lang/Class;)Ljava/lang/Object;
+	public fun builder-IoAF18A (Ljava/lang/Class;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/dynamic/YataganReflection {
+	public static final field INSTANCE Lcom/yandex/yatagan/dynamic/YataganReflection;
+	public static final fun resetGlobalState ()V
+}
+

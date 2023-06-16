@@ -1,7 +1,7 @@
 import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
 
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.stable-api-artifact")
 }
 
 val stdLib: Configuration by configurations.creating
@@ -21,10 +21,6 @@ dependencies {
     testImplementation(testingLibs.assertj)
 
     stdLib(kotlin("stdlib"))
-}
-
-kotlin {
-    explicitApi()
 }
 
 val generateStdLibClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {

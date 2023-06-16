@@ -1,7 +1,3 @@
 plugins {
-    id("yatagan.artifact")
-}
-
-kotlin {
-    explicitApi()
+    id("yatagan.stable-api-artifact")
 }

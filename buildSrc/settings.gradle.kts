@@ -10,6 +10,8 @@ dependencyResolutionManagement {
             version("ksp", "$kotlinVersion-$kspVersion")
 
             library("kotlin-gradle", "org.jetbrains.kotlin", "kotlin-gradle-plugin").versionRef("kotlin")
+            library("kotlin-binaryCompatibilityGradle", "org.jetbrains.kotlinx.binary-compatibility-validator",
+                "org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin").version("0.13.2")
             library("dokka-gradle", "org.jetbrains.dokka", "dokka-gradle-plugin").versionRef("kotlin")
             library("nexusPublish-gradle", "io.github.gradle-nexus:publish-plugin:1.3.0")
 

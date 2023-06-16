@@ -1,3 +1,3 @@
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.stable-api-artifact")
 }

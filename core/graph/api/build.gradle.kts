@@ -1,11 +1,7 @@
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.stable-api-artifact")
 }
 
 dependencies {
     api(project(":core:model:api"))
-}
-
-kotlin {
-    explicitApi()
 }

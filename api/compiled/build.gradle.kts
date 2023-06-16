@@ -3,14 +3,10 @@
  */
 
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.stable-api-artifact")
 }
 
 dependencies {
     // Just an alias for `api-public`
     api(project(":api:public"))
-}
-
-kotlin {
-    explicitApi()
 }
