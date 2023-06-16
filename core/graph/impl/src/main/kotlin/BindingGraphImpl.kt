@@ -70,7 +70,7 @@ internal class BindingGraphImpl(
         get() = factoryMethodInParent ?: component.factory
 
     override val modules: Collection<ModuleModel>
-        get() = component.modules
+        get() = component.allModules
 
     override val dependencies: Collection<ComponentDependencyModel>
         get() = component.dependencies

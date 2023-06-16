@@ -71,10 +71,13 @@ internal class ComponentModelImpl private constructor(
         buildScopeModels(declaration)
     }
 
-    override val modules: Set<ModuleModel> by lazy {
+    override val modules: List<ModuleModel> by lazy {
+        impl?.modules?.map(Type::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList()
+    }
+
+    override val allModules: Set<ModuleModel> by lazy {
         val allModules = mutableSetOf<ModuleModel>()
-        val moduleQueue: ArrayDeque<ModuleModel> = ArrayDeque(
-            impl?.modules?.map(Type::declaration)?.map { ModuleModelImpl(it) }?.toList() ?: emptyList())
+        val moduleQueue: ArrayDeque<ModuleModel> = ArrayDeque(modules)
         while (moduleQueue.isNotEmpty()) {
             val module = moduleQueue.removeFirst()
             if (!allModules.add(module)) {

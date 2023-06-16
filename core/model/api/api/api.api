@@ -108,11 +108,12 @@ public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryWi
 }
 
 public abstract interface class com/yandex/yatagan/core/model/ComponentModel : com/yandex/yatagan/core/model/ConditionalHoldingModel, com/yandex/yatagan/core/model/HasNodeModel {
+	public abstract fun getAllModules ()Ljava/util/Set;
 	public abstract fun getDependencies ()Ljava/util/Set;
 	public abstract fun getEntryPoints ()Ljava/util/List;
 	public abstract fun getFactory ()Lcom/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel;
 	public abstract fun getMemberInjectors ()Ljava/util/List;
-	public abstract fun getModules ()Ljava/util/Set;
+	public abstract fun getModules ()Ljava/util/List;
 	public abstract fun getRequiresSynchronizedAccess ()Z
 	public abstract fun getScopes ()Ljava/util/Set;
 	public abstract fun getSubComponentFactoryMethods ()Ljava/util/List;

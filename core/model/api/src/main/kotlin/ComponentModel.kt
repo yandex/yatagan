@@ -24,8 +24,14 @@ import com.yandex.yatagan.base.api.Incubating
 public interface ComponentModel : ConditionalHoldingModel, HasNodeModel {
     /**
      * A set of *all* modules that are included into the component (transitively).
+     * To get just the directly included modules, use [modules].
      */
-    public val modules: Set<ModuleModel>
+    public val allModules: Set<ModuleModel>
+
+    /**
+     * A list of modules directly included into the component. To get all the modules in the component use [allModules].
+     */
+    public val modules: List<ModuleModel>
 
     /**
      * All supported scopes for bindings, that component can cache.

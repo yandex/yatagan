@@ -112,7 +112,7 @@ internal abstract class ComponentFactoryModelBase : ComponentFactoryModel {
             .filterIsInstance<InputPayload.Module>()
             .map { it.model }
             .toSet()
-        val allModulesRequiresInstance = createdComponent.modules.asSequence()
+        val allModulesRequiresInstance = createdComponent.allModules.asSequence()
             .filter(ModuleModel::requiresInstance).toMutableSet()
         for (missingModule in (allModulesRequiresInstance - providedModules).filter { !it.isTriviallyConstructable }) {
             validator.reportError(Strings.Errors.missingModule(missing = missingModule)) {
@@ -130,10 +130,10 @@ internal abstract class ComponentFactoryModelBase : ComponentFactoryModel {
     ) : InputPayload.Module {
         override fun validate(validator: Validator) {
             if (!model.requiresInstance ||
-                model !in createdComponent.modules
+                model !in createdComponent.allModules
             ) {
                 validator.reportError(Strings.Errors.extraModule()) {
-                    if (model !in createdComponent.modules) {
+                    if (model !in createdComponent.allModules) {
                         addNote(Strings.Notes.undeclaredModulePresent())
                     } else {
                         assert(!model.requiresInstance)

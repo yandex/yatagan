@@ -96,7 +96,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     /**
      * Modules of the underlying model.
      *
-     * @see ComponentModel.modules
+     * @see ComponentModel.allModules
      */
     public val modules: Collection<ModuleModel>
 
