@@ -44,6 +44,7 @@ import com.yandex.yatagan.core.graph.impl.bindings.SubComponentBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SubComponentFactoryBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SyntheticAliasBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.canHost
+import com.yandex.yatagan.core.graph.impl.bindings.maybeUnwrapSyntheticAlias
 import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.BindsBindingModel
@@ -278,14 +279,12 @@ internal class GraphBindingsManager(
         val iterator = nodes.iterator()
         require(iterator.hasNext())
         var current = iterator.next()
-        add(block(current))
+        val theBinding = block(current).also { add(it) }
         while (iterator.hasNext()) {
-            val old = current
             current = iterator.next()
             add(SyntheticAliasBindingImpl(
-                owner = graph,
                 target = current,
-                source = old,
+                sourceBinding = theBinding,
             ))
         }
     }
@@ -341,10 +340,10 @@ internal class GraphBindingsManager(
                     // We tolerate multibinding duplicates, because of the "extends" behavior.
                     // There can be no two+ different multi-bindings for the same node in the same graph,
                     //  so here we definitely have bindings from different graphs - no need to check that.
-                    if (distinct.all { it is ExtensibleBinding<*> }) continue
+                    if (distinct.all { it.maybeUnwrapSyntheticAlias() is ExtensibleBinding<*> }) continue
 
                     // Intrinsic bindings are allowed to override each other in child graphs.
-                    if (distinct.all { it is IntrinsicBindingMarker }) {
+                    if (distinct.all { it.maybeUnwrapSyntheticAlias() is IntrinsicBindingMarker }) {
                         assert(distinct.distinctBy { it.owner }.size == distinct.size) {
                             "Not reached: duplicate intrinsic bindings in one graph"
                         }

@@ -19,17 +19,21 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 
 internal class SyntheticAliasBindingImpl(
-    override val source: NodeModel,
+    val sourceBinding: Binding,
     override val target: NodeModel,
-    override val owner: BindingGraph,
 ) : AliasBinding {
-    private val sourceBinding by lazy(LazyThreadSafetyMode.PUBLICATION) { owner.resolveBindingRaw(source) }
+    override val source: NodeModel
+        get() = sourceBinding.target
+
+    override val owner: BindingGraph
+        get() = sourceBinding.owner
 
     override val originModule: ModuleModel? get() = null
     override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
