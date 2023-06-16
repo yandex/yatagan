@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.StableForImplementation
+
 /**
  * Models a type declaration member.
  */
@@ -35,9 +37,11 @@ public interface Member : Annotated, HasPlatformModel, Accessible {
      */
     public val name: String
 
+    @StableForImplementation
     public interface Visitor<R> {
-        public fun visitMethod(model: Method): R
-        public fun visitField(model: Field): R
+        public fun visitOther(model: Member): R
+        public fun visitMethod(model: Method): R = visitOther(model)
+        public fun visitField(model: Field): R = visitOther(model)
     }
 
     public fun <R> accept(visitor: Visitor<R>): R

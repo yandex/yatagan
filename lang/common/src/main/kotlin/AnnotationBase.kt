@@ -39,6 +39,7 @@ abstract class AnnotationBase : Annotation {
 }
 
 private object ToString : Annotation.Value.Visitor<String> {
+    override fun visitDefault(value: Any?) = throw AssertionError()
     override fun visitBoolean(value: Boolean) = value.toString()
     override fun visitByte(value: Byte) = value.toString()
     override fun visitShort(value: Short) = value.toString()

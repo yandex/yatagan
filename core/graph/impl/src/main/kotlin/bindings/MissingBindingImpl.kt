@@ -68,7 +68,7 @@ internal data class MissingBindingImpl(
             }
         }
 
-        override fun visitDefault() = reportMissingBinding {
+        override fun visitOther() = reportMissingBinding {
             if (target.type.isUnresolved) {
                 addNote(Strings.Notes.missingBecauseUnresolved())
             } else {

@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.bindings
 
+import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
@@ -44,8 +45,10 @@ public interface BaseBinding : MayBeInvalid, Comparable<BaseBinding> {
 
     public fun <R> accept(visitor: Visitor<R>): R
 
+    @StableForImplementation
     public interface Visitor<R> {
-        public fun visitAlias(alias: AliasBinding): R
-        public fun visitBinding(binding: Binding): R
+        public fun visitOther(other: BaseBinding): R
+        public fun visitAlias(alias: AliasBinding): R = visitOther(alias)
+        public fun visitBinding(binding: Binding): R = visitOther(binding)
     }
 }

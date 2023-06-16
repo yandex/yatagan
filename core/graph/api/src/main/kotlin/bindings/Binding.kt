@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.bindings
 
+import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
@@ -62,17 +63,19 @@ public interface Binding : BaseBinding {
 
     public fun <R> accept(visitor: Visitor<R>): R
 
+    @StableForImplementation
     public interface Visitor<R> {
-        public fun visitProvision(binding: ProvisionBinding): R
-        public fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R
-        public fun visitInstance(binding: InstanceBinding): R
-        public fun visitAlternatives(binding: AlternativesBinding): R
-        public fun visitSubComponent(binding: SubComponentBinding): R
-        public fun visitComponentDependency(binding: ComponentDependencyBinding): R
-        public fun visitComponentInstance(binding: ComponentInstanceBinding): R
-        public fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R
-        public fun visitMulti(binding: MultiBinding): R
-        public fun visitMap(binding: MapBinding): R
-        public fun visitEmpty(binding: EmptyBinding): R
+        public fun visitOther(binding: Binding): R
+        public fun visitProvision(binding: ProvisionBinding): R = visitOther(binding)
+        public fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R = visitOther(binding)
+        public fun visitInstance(binding: InstanceBinding): R = visitOther(binding)
+        public fun visitAlternatives(binding: AlternativesBinding): R = visitOther(binding)
+        public fun visitSubComponent(binding: SubComponentBinding): R = visitOther(binding)
+        public fun visitComponentDependency(binding: ComponentDependencyBinding): R = visitOther(binding)
+        public fun visitComponentInstance(binding: ComponentInstanceBinding): R = visitOther(binding)
+        public fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R = visitOther(binding)
+        public fun visitMulti(binding: MultiBinding): R = visitOther(binding)
+        public fun visitMap(binding: MapBinding): R = visitOther(binding)
+        public fun visitEmpty(binding: EmptyBinding): R = visitOther(binding)
     }
 }

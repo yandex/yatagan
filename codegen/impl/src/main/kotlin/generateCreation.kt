@@ -47,6 +47,8 @@ private class CreationGeneratorVisitor(
     private val inside: BindingGraph,
     private val isInsideInnerClass: Boolean,
 ) : Binding.Visitor<Unit> {
+    override fun visitOther(binding: Binding) = throw AssertionError()
+
     override fun visitProvision(binding: ProvisionBinding) {
         with(builder) {
             val instance = if (binding.requiresModuleInstance) {
@@ -87,6 +89,8 @@ private class CreationGeneratorVisitor(
                     genArgs()
                     +")"
                 }
+
+                override fun visitOther(callable: Callable) = throw AssertionError()
             })
         }
     }

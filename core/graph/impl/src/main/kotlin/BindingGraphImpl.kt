@@ -96,7 +96,7 @@ internal class BindingGraphImpl(
             .mapTo(hashSetOf()) { it.model }
         // Detect subcomponents (directly or via factories) and add them as children.
         val detector = object : HasNodeModel.Visitor<ComponentModel?> {
-            override fun visitDefault() = null
+            override fun visitOther() = null
             override fun visitComponent(model: ComponentModel) = model
             override fun visitComponentFactory(model: ComponentFactoryWithBuilderModel) = model.createdComponent
         }
@@ -130,6 +130,7 @@ internal class BindingGraphImpl(
     private val aliasResolveVisitor = object : BaseBinding.Visitor<Binding> {
         override fun visitAlias(alias: AliasBinding) = resolveBindingRaw(alias.source).accept(this)
         override fun visitBinding(binding: Binding) = binding
+        override fun visitOther(other: BaseBinding) = throw AssertionError()
     }
 
     override fun resolveBinding(node: NodeModel): Binding {
@@ -188,6 +189,7 @@ internal class BindingGraphImpl(
                     return materialize(carryDependency).accept(this)
                 }
                 override fun visitBinding(binding: Binding) = binding
+                override fun visitOther(other: BaseBinding) = throw AssertionError()
             }
             localNodes.add(dependency.node)
             // MAYBE: employ local alias resolution cache
@@ -207,8 +209,8 @@ internal class BindingGraphImpl(
 
         // Add all local assisted binding factories.
         for (binding in localBindings.keys) {
-            binding.accept(object : BindingVisitorAdapter<Unit>() {
-                override fun visitDefault() = Unit
+            binding.accept(object : Binding.Visitor<Unit> {
+                override fun visitOther(binding: Binding) = Unit
                 override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
                     localAssistedInjectFactories += binding.model
                 }

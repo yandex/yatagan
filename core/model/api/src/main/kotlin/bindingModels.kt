@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.AnnotationDeclaration
 import com.yandex.yatagan.lang.Method
@@ -116,9 +117,11 @@ public interface ModuleHostedBindingModel : MayBeInvalid {
         ) : BindingTargetModel()
     }
 
+    @StableForImplementation
     public interface Visitor<R> {
-        public fun visitBinds(model: BindsBindingModel): R
-        public fun visitProvides(model: ProvidesBindingModel): R
+        public fun visitOther(model: ModuleHostedBindingModel): R
+        public fun visitBinds(model: BindsBindingModel): R = visitOther(model)
+        public fun visitProvides(model: ProvidesBindingModel): R = visitOther(model)
     }
 
     public fun <R> accept(visitor: Visitor<R>): R

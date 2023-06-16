@@ -325,6 +325,7 @@ internal class RuntimeComponent(
     }
 
     private class MemberEvaluator(private val instance: Any?) : Member.Visitor<Any?> {
+        override fun visitOther(model: Member) = throw AssertionError()
         override fun visitMethod(model: Method): Any? = model.rt.invoke(instance)
         override fun visitField(model: Field): Any? = model.rt.get(instance)
     }
@@ -350,12 +351,16 @@ internal class RuntimeComponent(
         }, /* method arguments*/ *args())
 
         override fun visitConstructor(constructor: Constructor): Any? = constructor.rt.newInstance(*args())
+
+        override fun visitOther(callable: Callable) = throw AssertionError()
     }
 
     override fun visitEmpty(binding: EmptyBinding): Any {
         throw IllegalStateException(
             "Missing binding encountered in `${graph.toString(null)}`: ${binding.toString(null)}")
     }
+
+    override fun visitOther(binding: Binding) = throw AssertionError()
 
     private inner class EntryPointHandler(val dependency: NodeDependency) : MethodHandler {
         override fun invoke(proxy: Any, args: Array<Any?>?): Any {
@@ -369,6 +374,7 @@ internal class RuntimeComponent(
             for ((member, dependency) in memberInject.membersToInject) {
                 val value = resolveAndAccess(dependency)
                 member.accept(object : Member.Visitor<Unit> {
+                    override fun visitOther(model: Member) = throw AssertionError()
                     override fun visitField(model: Field) = model.rt.set(injectee, value)
                     override fun visitMethod(model: Method) {
                         model.rt.invoke(injectee, value)

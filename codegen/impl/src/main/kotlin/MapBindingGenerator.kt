@@ -77,6 +77,7 @@ internal class MapBindingGenerator(
     private class AnnotationValueFormatter(
         val builder: ExpressionBuilder,
     ) : Annotation.Value.Visitor<Unit> {
+        override fun visitDefault(value: Any?) = throw AssertionError()
         override fun visitBoolean(value: Boolean) = with(builder) { +value.toString() }
         override fun visitByte(value: Byte) = with(builder) { +value.toString() }
         override fun visitShort(value: Short) = with(builder) { +value.toString() }

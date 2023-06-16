@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.StableForImplementation
+
 /**
  * Trait for models, that can provide appropriate [NodeModel].
  * NOTE: The main requirement is that the model can be uniquely parsed from a node using
@@ -33,11 +35,12 @@ public interface HasNodeModel : ClassBackedModel {
 
     public fun <R> accept(visitor: Visitor<R>): R
 
+    @StableForImplementation
     public interface Visitor<R> {
-        public fun visitDefault(): R
-        public fun visitComponent(model: ComponentModel): R = visitDefault()
-        public fun visitComponentFactory(model: ComponentFactoryWithBuilderModel): R = visitDefault()
-        public fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): R = visitDefault()
-        public fun visitInjectConstructor(model: InjectConstructorModel): R = visitDefault()
+        public fun visitOther(): R
+        public fun visitComponent(model: ComponentModel): R = visitOther()
+        public fun visitComponentFactory(model: ComponentFactoryWithBuilderModel): R = visitOther()
+        public fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): R = visitOther()
+        public fun visitInjectConstructor(model: InjectConstructorModel): R = visitOther()
     }
 }

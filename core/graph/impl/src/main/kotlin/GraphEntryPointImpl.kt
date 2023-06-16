@@ -48,7 +48,7 @@ internal class GraphEntryPointImpl(
 
     private fun validateChildComponentInclusion(validator: Validator) {
         val detector = object : HasNodeModel.Visitor<ComponentModel?> {
-            override fun visitDefault() = null
+            override fun visitOther() = null
             override fun visitComponent(model: ComponentModel) = model
         }
         val component = dependency.node.getSpecificModel().accept(detector)

@@ -28,6 +28,7 @@ import com.yandex.yatagan.core.model.DependencyKind.Provider
 
 public val ComponentFactoryModel.allInputs: Sequence<InputModel>
     get() = this.accept(object : ComponentFactoryModel.Visitor<Sequence<InputModel>> {
+        override fun visitOther(model: ComponentFactoryModel) = throw AssertionError()
         override fun visitSubComponentFactoryMethod(model: SubComponentFactoryMethodModel) = model.factoryInputs.asSequence()
         override fun visitWithBuilder(model: ComponentFactoryWithBuilderModel) = model.allInputs
     })
@@ -49,7 +50,7 @@ public val DependencyKind.isEager: Boolean
 
 public inline fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
     return if (this == null) {
-        visitor.visitDefault()
+        visitor.visitOther()
     } else {
         accept(visitor)
     }

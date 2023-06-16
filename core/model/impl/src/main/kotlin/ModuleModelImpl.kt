@@ -112,6 +112,7 @@ internal class ModuleModelImpl private constructor(
     }
 
     private object AsProvides : ModuleHostedBindingModel.Visitor<ProvidesBindingModel?> {
+        override fun visitOther(model: ModuleHostedBindingModel) = throw AssertionError()
         override fun visitBinds(model: BindsBindingModel) = null
         override fun visitProvides(model: ProvidesBindingModel) = model
     }
