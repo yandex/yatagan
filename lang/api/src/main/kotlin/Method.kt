@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
+
 /**
  * Represents a function/method associated with a class from **the Java point of view**.
  * - Constructor is modeled separately by [Constructor].
@@ -38,6 +40,7 @@ public interface Method : Member, Callable, Comparable<Method> {
      *
      * @return the annotation model or `null` if no such annotation is present.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.OnMethod> getAnnotation(
         which: BuiltinAnnotation.Target.OnMethod<T>
     ): T?
@@ -47,6 +50,7 @@ public interface Method : Member, Callable, Comparable<Method> {
      *
      * @return the list of repeatable annotations or an empty list if no such annotations are present.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.OnMethodRepeatable> getAnnotations(
         which: BuiltinAnnotation.Target.OnMethodRepeatable<T>
     ): List<T>

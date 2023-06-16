@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
+
 /**
  * Models a [Callable] parameter.
  */
@@ -39,6 +41,7 @@ public interface Parameter : Annotated {
      *
      * @return the annotation model or `null` if no such annotation is present.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.OnParameter> getAnnotation(
         which: BuiltinAnnotation.Target.OnParameter<T>
     ): T?

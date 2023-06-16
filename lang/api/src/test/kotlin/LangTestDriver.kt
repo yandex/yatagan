@@ -23,6 +23,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.yandex.yatagan.base.ObjectCacheRegistry
+import com.yandex.yatagan.base.api.Internal
 import com.yandex.yatagan.base.mapToArray
 import com.yandex.yatagan.lang.jap.JavaxModelFactoryImpl
 import com.yandex.yatagan.lang.ksp.KspModelFactoryImpl
@@ -136,6 +137,7 @@ interface LangTestDriver : SourceSet {
                         (arguments.classpath + result.outputClasspath)
                             .mapToArray { it.toURI().toURL() }
                     )
+                    @OptIn(Internal::class)
                     LangModelFactory.use(RtModelFactoryImpl(classLoader)) {
                         block(LangModelFactory)
                     }
@@ -156,6 +158,7 @@ interface LangTestDriver : SourceSet {
             ) : SymbolProcessor {
                 override fun process(resolver: Resolver): List<KSAnnotated> {
                     KspProcessingUtils(resolver).use {
+                        @OptIn(Internal::class)
                         LangModelFactory.use(KspModelFactoryImpl()) {
                             inspectBlock(LangModelFactory)
                         }
@@ -190,6 +193,7 @@ interface LangTestDriver : SourceSet {
 
                 override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
                     JapProcessingUtils(types, elements).use {
+                        @OptIn(Internal::class)
                         LangModelFactory.use(JavaxModelFactoryImpl()) {
                             inspectBlock(LangModelFactory)
                         }

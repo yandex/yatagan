@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
+
 /**
  * Models a type declaration. Can represent class/primitive/array/... types.
  *
@@ -101,6 +103,7 @@ public interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comp
      *
      * @return the annotation model or `null` if no such annotation is present.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.OnClass> getAnnotation(
         which: BuiltinAnnotation.Target.OnClass<T>
     ): T?
@@ -110,6 +113,7 @@ public interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comp
      *
      * @return the list of repeatable annotations or an empty list if no such annotations are present.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.OnClassRepeatable> getAnnotations(
         which: BuiltinAnnotation.Target.OnClassRepeatable<T>
     ): List<T>

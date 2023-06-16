@@ -18,6 +18,7 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
@@ -33,7 +34,7 @@ public val TypeDeclaration.functionsWithCompanion: Sequence<Method>
         else -> methods + companion.methods
     }
 
-@OptIn(InternalLangApi::class)
+@Internal
 public inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -> Unit) {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
     check(delegate.compareAndSet(null, factory))

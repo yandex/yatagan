@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
+
 /**
  * Models a type constructor.
  */
@@ -30,6 +32,7 @@ public interface Constructor : Callable, Annotated, Accessible {
      *
      * @return the annotation model or `null` if no such annotation is present.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.OnConstructor> getAnnotation(
         which: BuiltinAnnotation.Target.OnConstructor<T>
     ): T?

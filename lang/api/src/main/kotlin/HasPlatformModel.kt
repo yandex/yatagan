@@ -16,11 +16,12 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
+
 public interface HasPlatformModel {
     /**
      * Underlying implementation-specific model, if any.
-     *
-     * External clients should not rely on this property yielding a specific type.
      */
+    @Internal
     public val platformModel: Any?
 }
