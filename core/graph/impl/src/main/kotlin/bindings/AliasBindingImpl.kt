@@ -41,14 +41,12 @@ internal class AliasBindingImpl(
 
     override fun equals(other: Any?): Boolean {
         return this === other || (other is AliasBinding &&
-                source == other.source && target == other.target &&
-                owner == other.owner)
+                source == other.source && target == other.target)
     }
 
     override fun hashCode(): Int {
         var result = target.hashCode()
         result = 31 * result + source.hashCode()
-        result = 31 * result + owner.hashCode()
         return result
     }
 
