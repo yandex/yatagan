@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.NullIfInvalid
 import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.AnnotationDeclaration
@@ -101,18 +102,21 @@ public interface ModuleHostedBindingModel : MayBeInvalid {
             override val node: NodeModel,
 
             /**
-             * Mapping key type. `null` when not-found/unresolved.
+             * Mapping key type.
              */
+            @NullIfInvalid
             public val keyType: Type?,
 
             /**
-             * Mapping key value. `null` when not-found/unresolved.
+             * Mapping key value.
              */
+            @NullIfInvalid
             public val keyValue: Annotation.Value?,
 
             /**
-             * Annotation class of the Map-key annotation. `null` when not-found/unresolved.
+             * Annotation class of the Map-key annotation.
              */
+            @NullIfInvalid
             public val mapKeyClass: AnnotationDeclaration?,
         ) : BindingTargetModel()
     }

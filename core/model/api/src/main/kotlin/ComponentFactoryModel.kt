@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.NullIfInvalid
 import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload.Dependency
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload.Instance
@@ -44,8 +45,8 @@ public interface ComponentFactoryModel : MayBeInvalid {
 
     /**
      * The component creating method to implement.
-     * `null` if no appropriate method is found.
      */
+    @NullIfInvalid
     public val factoryMethod: Method?
 
     /**

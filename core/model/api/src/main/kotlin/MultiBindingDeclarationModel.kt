@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.NullIfInvalid
 import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
@@ -43,6 +44,7 @@ public interface MultiBindingDeclarationModel : MayBeInvalid {
         /**
          * An element's type for a multi-bound list.
          */
+        @NullIfInvalid
         public val elementType: NodeModel?
 
         /**
@@ -55,7 +57,9 @@ public interface MultiBindingDeclarationModel : MayBeInvalid {
      * Declares empty map binding
      */
     public interface MapDeclarationModel : MultiBindingDeclarationModel {
+        @NullIfInvalid
         public val keyType: Type?
+        @NullIfInvalid
         public val valueType: NodeModel?
     }
 

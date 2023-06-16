@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph
 
+import com.yandex.yatagan.base.api.NullIfInvalid
 import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.SubComponentFactoryMethodModel
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -32,7 +33,7 @@ public interface GraphSubComponentFactoryMethod : MayBeInvalid {
 
     /**
      * Graph object build from [model.createdComponent][ComponentFactoryModel.createdComponent].
-     * Yields `null` if the [model] is **invalid** in context of the owning graph an no child was actually built from it.
      */
+    @NullIfInvalid
     public val createdGraph: BindingGraph?
 }
