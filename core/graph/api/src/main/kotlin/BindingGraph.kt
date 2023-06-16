@@ -17,6 +17,7 @@
 package com.yandex.yatagan.core.graph
 
 import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.base.api.WithChildren
 import com.yandex.yatagan.base.api.WithParents
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage.Eager
@@ -65,6 +66,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      *
      * The associated info is [LiteralUsage].
      */
+    @Incubating
     public val localConditionLiterals: Map<ConditionModel, LiteralUsage>
 
     /**
@@ -88,6 +90,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      *
      * @see ComponentModel.variant
      */
+    @Incubating
     public val variant: Variant
 
     /**
@@ -147,6 +150,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      * Equals [Always][com.yandex.yatagan.core.ConditionExpression.Unscoped] for [root][BindingGraph.isRoot] components.
      * Arbitrary for non-root components.
      */
+    @Incubating
     public val conditionScope: ConditionScope
 
     /**
@@ -192,6 +196,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      * In expression `A && B || C`, `A` is [Eager], while `B`, `C` are [Lazy].
      * In other words, a literal is [Eager] iff it is present in eager position at in at least one expression.
      */
+    @Incubating
     public enum class LiteralUsage {
         /**
          * When a literal is certainly going to be evaluated.

@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.bindings
 
+import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.CollectionTargetKind
@@ -41,6 +42,7 @@ public interface AliasBinding : BaseBinding {
 /**
  * A specific case of [com.yandex.yatagan.Binds] binding with multiple alternatives.
  */
+@Incubating
 public interface AlternativesBinding : Binding {
     public val alternatives: Sequence<NodeModel>
 }

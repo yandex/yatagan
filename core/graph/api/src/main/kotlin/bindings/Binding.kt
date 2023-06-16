@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.bindings
 
+import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeDependency
@@ -32,6 +33,7 @@ public interface Binding : BaseBinding {
      * If this is [never-scoped][com.yandex.yatagan.core.model.ConditionExpression.NeverScoped],
      * then [dependencies] **must** yield an empty sequence.
      */
+    @Incubating
     public val conditionScope: ConditionScope
 
     /**
@@ -59,6 +61,7 @@ public interface Binding : BaseBinding {
      * NOTE: the set may be empty if the binding doesn't _own_ the condition models, e.g. an alternatives binding whose
      * condition scope is inferred from its dependencies and require resolution to be computed.
      */
+    @Incubating
     public val nonStaticConditionProviders: Set<NodeModel>
 
     public fun <R> accept(visitor: Visitor<R>): R
@@ -69,7 +72,7 @@ public interface Binding : BaseBinding {
         public fun visitProvision(binding: ProvisionBinding): R = visitOther(binding)
         public fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R = visitOther(binding)
         public fun visitInstance(binding: InstanceBinding): R = visitOther(binding)
-        public fun visitAlternatives(binding: AlternativesBinding): R = visitOther(binding)
+        @Incubating public fun visitAlternatives(binding: AlternativesBinding): R = visitOther(binding)
         public fun visitSubComponent(binding: SubComponentBinding): R = visitOther(binding)
         public fun visitComponentDependency(binding: ComponentDependencyBinding): R = visitOther(binding)
         public fun visitComponentInstance(binding: ComponentInstanceBinding): R = visitOther(binding)

@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
+
 /**
  * Represents @[com.yandex.yatagan.Component] annotated class - Component.
  */
@@ -64,6 +66,7 @@ public interface ComponentModel : ConditionalHoldingModel, HasNodeModel {
     /**
      * TODO: doc.
      */
+    @Incubating
     public val variant: Variant
 
     /**

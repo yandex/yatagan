@@ -16,11 +16,13 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * TODO: doc.
  */
+@Incubating
 public interface Variant : MayBeInvalid {
     public interface DimensionModel : ClassBackedModel {
         public val isInvalid: Boolean

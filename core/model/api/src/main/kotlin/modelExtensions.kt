@@ -18,6 +18,7 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputModel
 import com.yandex.yatagan.core.model.DependencyKind.Direct
 import com.yandex.yatagan.core.model.DependencyKind.Lazy
@@ -61,8 +62,10 @@ public inline operator fun NodeDependency.component1(): NodeModel = node
 public inline operator fun NodeDependency.component2(): DependencyKind = kind
 
 
+@Incubating
 public val ConditionScope.isAlways: Boolean
     get() = this == ConditionScope.Unscoped
 
+@Incubating
 public val ConditionScope.isNever: Boolean
     get() = this == ConditionScope.NeverScoped

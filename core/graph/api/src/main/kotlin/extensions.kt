@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph
 
+import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.lang.Method
@@ -25,6 +26,7 @@ import com.yandex.yatagan.lang.Method
  *
  * @return `!this` if negated, `this` otherwise.
  */
+@Incubating
 public fun ConditionModel.normalized(): ConditionModel {
     return if (negated) !this else this
 }

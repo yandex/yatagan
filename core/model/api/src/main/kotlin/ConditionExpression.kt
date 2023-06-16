@@ -16,11 +16,15 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
+import com.yandex.yatagan.core.model.ConditionExpression.Literal
+
 /**
  * Represents a boolean expression in Conjunctive Normal Form.
  *
  * @param L a [Literal] compatible type.
  */
+@Incubating
 @JvmInline
 public value class ConditionExpression<out L : ConditionExpression.Literal>(
     /**
