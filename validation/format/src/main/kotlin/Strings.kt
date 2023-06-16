@@ -288,13 +288,16 @@ object Strings {
             append("No flavor is declared for `").append(dimension).append("` in a variant")
         }.toError()
 
+        @Covered
         fun variantMatchingAmbiguity(
             one: ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel,
             two: ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel,
         ) = buildRichString {
             color = TextColor.Inherit
-            append("Variant matching ambiguity: `").append(one).append("` vs `")
-                .append(two).append("` could not be resolved")
+            appendLine("Variant matching ambiguity. Variant filters (onlyIn)")
+            append(Indent).append(one.onlyIn).appendLine(" and")
+            append(Indent).append(two.onlyIn).appendLine()
+            append("may both match at the same time.")
         }.toError()
 
 
@@ -690,6 +693,7 @@ object Strings {
             append("Duplicate declared as `").append(factory).append('`')
         }.toNote()
 
+        @Covered
         fun conflictingFactory(factoryMethod: Method) = buildRichString {
             color = TextColor.Inherit
             append("Duplicate factory: `").append(factoryMethod).append('`')

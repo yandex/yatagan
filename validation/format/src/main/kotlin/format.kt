@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-@file:[JvmMultifileClass JvmName("Format") ]
+@file:[JvmMultifileClass JvmName("Format")]
+
 package com.yandex.yatagan.validation.format
 
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
@@ -105,7 +106,7 @@ inline fun BaseBinding.bindingModelRepresentation(
 }
 
 fun BaseBinding.findChildContextNode(childContext: MayBeInvalid?): NodeDependency? {
-    return when(childContext) {
+    return when (childContext) {
         is BaseBinding -> accept(object : BaseBinding.Visitor<NodeDependency?> {
             override fun visitAlias(alias: AliasBinding) = alias.source.takeIf { it == childContext.target }
             override fun visitBinding(binding: Binding) = binding.dependencies.find { it.node == childContext.target }
@@ -126,13 +127,23 @@ fun RichStringBuilder.appendChildContextReference(
 }
 
 fun RichStringBuilder.append(any: Any?): RichStringBuilder = apply {
-    when(any) {
+    when (any) {
         is MayBeInvalid -> append(any.toString(childContext = null))
         is CharSequence -> append(any)
         is ConditionExpression<*> -> append(any.toString(childContext = null))
         null -> append(Unresolved)
         else -> append(any.toString())
     }
+}
+
+fun RichStringBuilder.append(collection: Collection<Any?>): RichStringBuilder = apply {
+    append('[')
+    val lastIndex = collection.size - 1
+    collection.forEachIndexed { index, any ->
+        append(any)
+        if (index != lastIndex) append(", ")
+    }
+    append(']')
 }
 
 fun ConditionExpression<*>.toString(childContext: MayBeInvalid?): RichString = buildRichString {
