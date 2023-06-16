@@ -1041,5 +1041,33 @@ class CoreBindingsTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `@Binds alias is allowed to be duplicated`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            class TestClass @Inject constructor()
+
+            @Module interface MyModule {
+                @Binds fun binds(i: TestClass): Any
+                @Binds fun binds2(i: TestClass): Any
+            }
+
+            @Component(modules = [MyModule::class])
+            interface TestComponent {
+                val obj: Any
+                fun createSub(): SubComponent
+            }
+
+            @Component(isRoot = false, modules = [MyModule::class])
+            interface SubComponent {
+                val obj: Any
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }
 
