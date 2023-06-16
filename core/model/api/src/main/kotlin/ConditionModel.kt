@@ -44,5 +44,10 @@ public interface ConditionModel : ConditionExpression.Literal, MayBeInvalid {
      */
     public val requiresInstance: Boolean
 
+    /**
+     * Negates the literal and returns the result.
+     *
+     * @return the same condition model yet with [negated] flipped.
+     */
     override fun not(): ConditionModel
 }

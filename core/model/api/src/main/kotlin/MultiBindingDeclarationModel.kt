@@ -54,11 +54,18 @@ public interface MultiBindingDeclarationModel : MayBeInvalid {
     }
 
     /**
-     * Declares empty map binding
+     * Declares (empty by default) map binding.
      */
     public interface MapDeclarationModel : MultiBindingDeclarationModel {
+        /**
+         * @see ModuleHostedBindingModel.BindingTargetModel.MappingContribution.keyType
+         */
         @NullIfInvalid
         public val keyType: Type?
+
+        /**
+         * @see ModuleHostedBindingModel.BindingTargetModel.MappingContribution.node
+         */
         @NullIfInvalid
         public val valueType: NodeModel?
     }

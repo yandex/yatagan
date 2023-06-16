@@ -64,7 +64,9 @@ public interface ComponentModel : ConditionalHoldingModel, HasNodeModel {
     public val isRoot: Boolean
 
     /**
-     * TODO: doc.
+     * A variant, built for this component.
+     *
+     * @see Variant
      */
     @Incubating
     public val variant: Variant

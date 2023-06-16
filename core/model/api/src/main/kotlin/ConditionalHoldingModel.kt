@@ -43,7 +43,16 @@ public interface ConditionalHoldingModel : MayBeInvalid {
      */
     @Incubating
     public interface ConditionalWithFlavorConstraintsModel : MayBeInvalid {
+        /**
+         * list of features.
+         */
         public val featureTypes: List<FeatureModel>
+
+        /**
+         * Variant filter. May specify multiple flavors for a dimension.
+         *
+         * @see Variant
+         */
         public val onlyIn: List<Variant.FlavorModel>
     }
 }

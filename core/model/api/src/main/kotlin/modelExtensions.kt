@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:Suppress("NOTHING_TO_INLINE")
-
 package com.yandex.yatagan.core.model
 
 import com.yandex.yatagan.base.api.Incubating
@@ -27,6 +25,9 @@ import com.yandex.yatagan.core.model.DependencyKind.OptionalLazy
 import com.yandex.yatagan.core.model.DependencyKind.OptionalProvider
 import com.yandex.yatagan.core.model.DependencyKind.Provider
 
+/**
+ * All the inputs from the [ComponentFactoryModel].
+ */
 public val ComponentFactoryModel.allInputs: Sequence<InputModel>
     get() = this.accept(object : ComponentFactoryModel.Visitor<Sequence<InputModel>> {
         override fun visitOther(model: ComponentFactoryModel) = throw AssertionError()
@@ -34,22 +35,31 @@ public val ComponentFactoryModel.allInputs: Sequence<InputModel>
         override fun visitWithBuilder(model: ComponentFactoryWithBuilderModel) = model.allInputs
     })
 
+/**
+ * All the inputs from the [ComponentFactoryWithBuilderModel].
+ */
 public val ComponentFactoryWithBuilderModel.allInputs: Sequence<InputModel>
     get() = factoryInputs.asSequence() + builderInputs.asSequence()
 
+/**
+ * Whether the dependency is [optional][com.yandex.yatagan.Optional].
+ */
 public val DependencyKind.isOptional: Boolean
     get() = when (this) {
         Direct, Lazy, Provider -> false
         Optional, OptionalLazy, OptionalProvider -> true
     }
 
+/**
+ * Whether the dependency is eager (not `Lazy` or `Provider`).
+ */
 public val DependencyKind.isEager: Boolean
     get() = when (this) {
         Direct, Optional -> true
         Lazy, Provider, OptionalLazy, OptionalProvider -> false
     }
 
-public inline fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
+public fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R {
     return if (this == null) {
         visitor.visitOther()
     } else {
@@ -57,9 +67,9 @@ public inline fun <R> HasNodeModel?.accept(visitor: HasNodeModel.Visitor<R>): R 
     }
 }
 
-public inline operator fun NodeDependency.component1(): NodeModel = node
+public operator fun NodeDependency.component1(): NodeModel = node
 
-public inline operator fun NodeDependency.component2(): DependencyKind = kind
+public operator fun NodeDependency.component2(): DependencyKind = kind
 
 
 @Incubating

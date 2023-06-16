@@ -20,7 +20,8 @@ import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.lang.Method
 
 /**
- * TODO: doc.
+ * Represents a method declared inside the [component's][ComponentModel] interface, that is intended to perform members
+ * injection for the class [type].
  */
 public interface MembersInjectorModel : ClassBackedModel {
     /**

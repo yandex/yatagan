@@ -47,25 +47,47 @@ public interface AlternativesBinding : Binding {
     public val alternatives: Sequence<NodeModel>
 }
 
+/**
+ * A binding for an [com.yandex.yatagan.AssistedFactory] instance.
+ */
 public interface AssistedInjectFactoryBinding : Binding {
     public val model: AssistedInjectFactoryModel
 }
 
+/**
+ * A binding for a given component dependency instance.
+ *
+ * @see com.yandex.yatagan.core.model.ComponentModel.dependencies
+ */
 public interface ComponentDependencyBinding : Binding {
+    /**
+     * Component dependency model this binding is bound to.
+     */
     public val dependency: ComponentDependencyModel
 }
 
+/**
+ * A binding for a given "entry-point" from a component dependency.
+ */
 public interface ComponentDependencyEntryPointBinding : Binding {
+    /**
+     * Component dependency the [getter] belong to.
+     */
     public val dependency: ComponentDependencyModel
+
+    /**
+     * A method from the [dependency] to obtain the instance.
+     */
     public val getter: Method
 }
 
 public interface ComponentInstanceBinding : Binding
 
 /**
- * Binding that can not be satisfied - it's codegen or runtime evaluation is *unreached*.
+ * Missing (unresolved) binding is modeled with this.
  *
- * Empty [com.yandex.yatagan.Binds] binding is an example of such binding.
+ * Also, binding that can not be satisfied - it's codegen or runtime evaluation is *unreached*.
+ * Empty [com.yandex.yatagan.Binds] binding is an example of such a binding.
  */
 public interface EmptyBinding : Binding
 
@@ -75,6 +97,9 @@ public interface EmptyBinding : Binding
  */
 public interface InstanceBinding : Binding
 
+/**
+ * Map multi-binding [com.yandex.yatagan.IntoMap].
+ */
 public interface MapBinding : ExtensibleBinding<MapBinding> {
     public val mapKey: Type
     public val mapValue: Type

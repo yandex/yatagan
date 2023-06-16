@@ -99,6 +99,9 @@ public interface ModuleHostedBindingModel : MayBeInvalid {
          * Contribution of a single [node] as a value to a map with the [keyType] under [keyValue].
          */
         public class MappingContribution(
+            /**
+             * Mapping value type as a node.
+             */
             override val node: NodeModel,
 
             /**
