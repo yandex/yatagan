@@ -1,0 +1,10 @@
+error: Variant matching ambiguity. Variant filters (onlyIn)
+    [component-flavor test.ProductType.Browser] and
+    [component-flavor test.ProductType.Browser, component-flavor test.ProductType.SearchApp]
+may both match at the same time.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getTc: [Optional] test.TestClass
+                        ^-[*1]-------------------
+  here: [1*] inject-constructor test.TestClass()
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

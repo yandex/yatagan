@@ -333,6 +333,29 @@ class ConditionsTest(
     }
 
     @Test
+    fun `invalid variant filter declaration`() {
+        includeFromSourceSet(flavors)
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Conditionals(
+                Conditional(onlyIn = [ProductType.Browser::class], value = [Conditions.FeatureA::class]),
+                Conditional(onlyIn = [ProductType.Browser::class, ProductType.SearchApp::class], value = [Conditions.FeatureA::class]),
+            )
+            class TestClass @Inject constructor()
+
+            @Component(variant = [ProductType.Browser::class]) interface TestComponent {
+                val tc: Optional<TestClass>
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
     fun `@Binds with multiple alternatives`() {
         includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
