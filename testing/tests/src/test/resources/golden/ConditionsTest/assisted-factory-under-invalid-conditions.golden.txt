@@ -1,0 +1,32 @@
+error: @Conditional annotations should be specified on the class with the @AssistedInject, not on its factory
+Encountered:
+  in graph for root-component test.MyComponent
+  in entry-point getF: [Provider] test.MyClassBFactory
+                       ^-[*1]-------------------------
+  here: [1*] assisted-factory test.MyClassBFactory::create(): test.MyClassB(.. 1 dependency)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid dependency of `test.MyClassBFactory` on `test.MyClassA`:
+`inject-constructor test.MyClassA()` with a condition:
+    (1) [test.Features.isEnabledB]
+cannot be injected into `assisted-factory test.MyClassBFactory::create(): test.MyClassB(.. 1 dependency)` with a condition:
+    (2) [test.Features.fooBar]
+without Optional<..> wrapper, because condition (2) does not imply condition (1)
+Encountered:
+  in graph for root-component test.MyComponent
+  in entry-point getF: [Provider] test.MyClassBFactory
+                       ^-[*1]-------------------------
+  here: [1*] assisted-factory test.MyClassBFactory::create(): test.MyClassB(.. 1 dependency)
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: `assisted-factory test.MyClassBFactory::create(): test.MyClassB(.. 1 dependency)` with a condition:
+    (1) [test.Features.fooBar]
+cannot be directly exposed from an entry-point of `graph for root-component test.MyComponent` under condition:
+    (2) [always-present]
+without Optional<..> wrapper, because component condition (2) does not imply condition (1)
+Encountered:
+  in graph for root-component test.MyComponent
+  here: entry-point getF: [Provider] test.MyClassBFactory
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
