@@ -23,7 +23,6 @@ import com.yandex.yatagan.codegen.poetry.buildClass
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.codegen.poetry.invoke
 import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.model.ClassBackedModel
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
@@ -32,15 +31,18 @@ import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.allInputs
+import javax.inject.Inject
+import javax.inject.Singleton
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.Modifier.STATIC
 
-internal class ComponentFactoryGenerator(
+@Singleton
+internal class ComponentFactoryGenerator @Inject constructor(
     private val thisGraph: BindingGraph,
     private val componentImplName: ClassName,
-    fieldsNs: Namespace,
+    @FieldsNamespace fieldsNs: Namespace,
 ) : ComponentGenerator.Contributor {
     private val inputsWithFieldNames = mutableMapOf<ClassBackedModel, String>()
 
@@ -86,7 +88,7 @@ internal class ComponentFactoryGenerator(
             field(inputModel.typeName(), name) { modifiers(/*package-private*/ FINAL) }
         }
         superComponentFieldNames.forEach { (input, name) ->
-            field(input[ComponentImplClassName], name) { modifiers(/*package-private*/ FINAL) }
+            field(input[GeneratorComponent].implementationClassName, name) { modifiers(/*package-private*/ FINAL) }
         }
         generatePrimaryConstructor()
 
@@ -112,7 +114,7 @@ internal class ComponentFactoryGenerator(
             // Firstly - used parents
             thisGraph.usedParents.forEach { graph ->
                 val name = paramsNs.name(graph.model.name)
-                parameter(graph[ComponentImplClassName], name)
+                parameter(graph[GeneratorComponent].implementationClassName, name)
                 +"this.${fieldNameFor(graph)} = $name"
             }
             if (creator != null) {
@@ -162,7 +164,7 @@ internal class ComponentFactoryGenerator(
                         thisGraph.usedParents.forEach { graph ->
                             val name = paramsNs.name(graph.model.name)
                             builderAccess += "this.$name"
-                            val typeName = graph[ComponentImplClassName]
+                            val typeName = graph[GeneratorComponent].implementationClassName
                             this@buildClass.field(typeName, name)
                             parameter(typeName, name)
                             +"this.$name = $name"
@@ -279,9 +281,5 @@ internal class ComponentFactoryGenerator(
             returnType(Names.AutoBuilder(componentImplName))
             +"return new %T()".formatCode(autoBuilderImplName)
         }
-    }
-
-    companion object Key : Extensible.Key<ComponentFactoryGenerator> {
-        override val keyType get() = ComponentFactoryGenerator::class.java
     }
 }

@@ -19,14 +19,16 @@ package com.yandex.yatagan.codegen.impl
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding.ContributionType
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.NodeModel
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class CollectionBindingGenerator(
-    methodsNs: Namespace,
+@Singleton
+internal class CollectionBindingGenerator @Inject constructor (
+    @MethodsNamespace methodsNs: Namespace,
     private val thisGraph: BindingGraph,
 ) : MultiBindingGeneratorBase<MultiBinding>(
     methodsNs = methodsNs,
@@ -78,9 +80,5 @@ internal class CollectionBindingGenerator(
             }
         }
         +"return c"
-    }
-
-    companion object Key : Extensible.Key<CollectionBindingGenerator> {
-        override val keyType get() = CollectionBindingGenerator::class.java
     }
 }

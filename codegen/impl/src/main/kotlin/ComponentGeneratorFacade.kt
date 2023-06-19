@@ -17,25 +17,28 @@
 package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.JavaFile
+import com.yandex.yatagan.Yatagan
 import com.yandex.yatagan.core.graph.BindingGraph
 
 class ComponentGeneratorFacade(
     graph: BindingGraph,
     maxSlotsPerSwitch: Int,
 ) {
-    private val generator = ComponentGenerator(
+    private val component = Yatagan.builder(GeneratorComponent.Factory::class.java).create(
         graph = graph,
-        maxSlotsPerSwitch = maxSlotsPerSwitch,
+        options = ComponentGenerator.Options(
+            maxSlotsPerSwitch = maxSlotsPerSwitch,
+        ),
     )
 
     val targetPackageName: String
-        get() = generator.generatedClassName.packageName()
+        get() = component.implementationClassName.packageName()
 
     val targetClassName: String
-        get() = generator.generatedClassName.simpleName()
+        get() = component.implementationClassName.simpleName()
 
     fun generateTo(out: Appendable) {
-        JavaFile.builder(targetPackageName, generator.generate())
+        JavaFile.builder(targetPackageName, component.generator.generate())
             .build()
             .writeTo(out)
     }

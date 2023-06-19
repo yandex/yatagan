@@ -20,15 +20,17 @@ import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.Type
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class MapBindingGenerator(
-    methodsNs: Namespace,
+@Singleton
+internal class MapBindingGenerator @Inject constructor(
+    @MethodsNamespace methodsNs: Namespace,
     private val thisGraph: BindingGraph,
 ) : MultiBindingGeneratorBase<MapBinding>(
     methodsNs = methodsNs,
@@ -93,9 +95,5 @@ internal class MapBindingGenerator(
         override fun visitEnumConstant(enum: Type, constant: String) = with(builder) {
             +"%T.%N".formatCode(enum.typeName(), constant)
         }
-    }
-
-    companion object Key : Extensible.Key<MapBindingGenerator> {
-        override val keyType get() = MapBindingGenerator::class.java
     }
 }

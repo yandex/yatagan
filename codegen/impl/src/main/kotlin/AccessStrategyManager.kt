@@ -16,25 +16,68 @@
 
 package com.yandex.yatagan.codegen.impl
 
+import com.yandex.yatagan.AssistedFactory
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import com.yandex.yatagan.core.model.isNever
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class AccessStrategyManager(
+@Singleton
+internal class AccessStrategyManager @Inject constructor(
     private val thisGraph: BindingGraph,
-    fieldsNs: Namespace,
-    methodsNs: Namespace,
-    multiFactory: Provider<SlotSwitchingGenerator>,
-    unscopedProviderGenerator: Provider<UnscopedProviderGenerator>,
-    scopedProviderGenerator: Provider<ScopedProviderGenerator>,
-    lockGenerator: Provider<LockGenerator>,
+    private val cachingStrategySingleThreadFactory: CachingStrategySingleThreadFactory,
+    private val cachingStrategyMultiThreadFactory: CachingStrategyMultiThreadFactory,
+    private val slotProviderStrategyFactory: SlotProviderStrategyFactory,
+    private val wrappingAccessorStrategyFactory: WrappingAccessorStrategyFactory,
+    private val onTheFlyScopedProviderCreationStrategyFactory: OnTheFlyScopedProviderCreationStrategyFactory,
+    private val onTheFlyUnscopedProviderCreationStrategyFactory: OnTheFlyUnscopedProviderCreationStrategyFactory,
+    private val conditionalAccessStrategyFactory: ConditionalAccessStrategyFactory,
 ) : ComponentGenerator.Contributor {
+
+    @AssistedFactory
+    interface CachingStrategySingleThreadFactory {
+        fun create(binding: Binding): CachingStrategySingleThread
+    }
+
+    @AssistedFactory
+    interface CachingStrategyMultiThreadFactory {
+        fun create(binding: Binding): CachingStrategyMultiThread
+    }
+
+    @AssistedFactory
+    interface SlotProviderStrategyFactory {
+        fun create(binding: Binding): SlotProviderStrategy
+    }
+
+    @AssistedFactory
+    interface OnTheFlyScopedProviderCreationStrategyFactory {
+        fun create(binding: Binding): OnTheFlyScopedProviderCreationStrategy
+    }
+
+    @AssistedFactory
+    interface OnTheFlyUnscopedProviderCreationStrategyFactory {
+        fun create(binding: Binding): OnTheFlyUnscopedProviderCreationStrategy
+    }
+
+    @AssistedFactory
+    interface WrappingAccessorStrategyFactory {
+        fun create(binding: Binding, underlying: AccessStrategy): WrappingAccessorStrategy
+    }
+
+    @AssistedFactory
+    interface ConditionalAccessStrategyFactory {
+        fun create(
+            binding: Binding,
+            underlying: AccessStrategy,
+            dependencyKind: DependencyKind,
+        ): ConditionalAccessStrategy
+    }
 
     /**
      * A mapping between a local binding and its single dependent binding, if any.
@@ -74,23 +117,16 @@ internal class AccessStrategyManager(
                         inlineStrategy(
                             binding = binding,
                             usage = usage,
-                            methodsNs = methodsNs,
                         )
                     }
                     DegenerateBindingUsage.SingleLocalProvider,
                     DegenerateBindingUsage.SingleLocalLazy -> {
-                        val slot = multiFactory.get().requestSlot(binding)
                         CompositeStrategy(
                             directStrategy = inlineStrategy(
                                 binding = binding,
                                 usage = usage,
-                                methodsNs = methodsNs,
                             ),
-                            lazyStrategy = OnTheFlyScopedProviderCreationStrategy(
-                                cachingProvider = scopedProviderGenerator.get(),
-                                binding = binding,
-                                slot = slot,
-                            ),
+                            lazyStrategy = onTheFlyScopedProviderCreationStrategyFactory.create(binding),
                         )
                     }
                     null -> {
@@ -98,25 +134,12 @@ internal class AccessStrategyManager(
                             thisGraph.requiresSynchronizedAccess && ScopeModel.Reusable !in binding.scopes
                         CompositeStrategy(
                             directStrategy = if (useMultiThreadCaching) {
-                                CachingStrategyMultiThread(
-                                    binding = binding,
-                                    fieldsNs = fieldsNs,
-                                    methodsNs = methodsNs,
-                                    lock = lockGenerator.get(),
-                                )
+                                cachingStrategyMultiThreadFactory.create(binding)
                             } else {
-                                CachingStrategySingleThread(
-                                    binding = binding,
-                                    fieldsNs = fieldsNs,
-                                    methodsNs = methodsNs,
-                                )
+                                cachingStrategySingleThreadFactory.create(binding)
                             },
                             lazyStrategy = if (usage.lazy + usage.provider > 0) {
-                                SlotProviderStrategy(
-                                    binding = binding,
-                                    slot = multiFactory.get().requestSlot(binding),
-                                    cachingProvider = unscopedProviderGenerator.get(),
-                                )
+                                slotProviderStrategyFactory.create(binding)
                             } else null
                         )
                     }
@@ -127,35 +150,27 @@ internal class AccessStrategyManager(
                     inlineStrategy(
                         binding = binding,
                         usage = usage,
-                        methodsNs = methodsNs,
                     )
                 } else {
-                    val slot = multiFactory.get().requestSlot(binding)
                     CompositeStrategy(
                         directStrategy = inlineStrategy(
                             binding = binding,
                             usage = usage,
-                            methodsNs = methodsNs,
                         ),
-                        lazyStrategy = if (usage.lazy > 0) OnTheFlyScopedProviderCreationStrategy(
-                            cachingProvider = scopedProviderGenerator.get(),
-                            binding = binding,
-                            slot = slot,
-                        ) else null,
-                        providerStrategy = if (usage.provider > 0) OnTheFlyUnscopedProviderCreationStrategy(
-                            unscopedProviderGenerator = unscopedProviderGenerator.get(),
-                            binding = binding,
-                            slot = slot,
-                        ) else null,
+                        lazyStrategy = if (usage.lazy > 0) {
+                            onTheFlyScopedProviderCreationStrategyFactory.create(binding)
+                        } else null,
+                        providerStrategy = if (usage.provider > 0) {
+                            onTheFlyUnscopedProviderCreationStrategyFactory.create(binding)
+                        } else null,
                     )
                 }
             }
             return if (usage.optional > 0) {
                 fun conditionalStrategy(kind: DependencyKind): ConditionalAccessStrategy {
-                    return ConditionalAccessStrategy(
+                    return conditionalAccessStrategyFactory.create(
                         underlying = strategy,
                         binding = binding,
-                        methodsNs = methodsNs,
                         dependencyKind = kind,
                     )
                 }
@@ -247,7 +262,6 @@ internal class AccessStrategyManager(
     private fun inlineStrategy(
         binding: Binding,
         usage: BindingGraph.BindingUsage,
-        methodsNs: Namespace,
     ): AccessStrategy {
         val inline = InlineCreationStrategy(
             binding = binding,
@@ -265,14 +279,9 @@ internal class AccessStrategyManager(
             }
         }
 
-        return WrappingAccessorStrategy(
+        return wrappingAccessorStrategyFactory.create(
             underlying = inline,
             binding = binding,
-            methodsNs = methodsNs,
         )
-    }
-
-    companion object Key : Extensible.Key<AccessStrategyManager> {
-        override val keyType get() = AccessStrategyManager::class.java
     }
 }

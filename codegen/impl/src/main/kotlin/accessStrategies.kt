@@ -17,6 +17,8 @@
 package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
+import com.yandex.yatagan.Assisted
+import com.yandex.yatagan.AssistedInject
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
@@ -64,10 +66,10 @@ internal abstract class CachingStrategyBase(
     }
 }
 
-internal class CachingStrategySingleThread(
-    binding: Binding,
-    fieldsNs: Namespace,
-    methodsNs: Namespace,
+internal class CachingStrategySingleThread @AssistedInject constructor(
+    @Assisted binding: Binding,
+    @FieldsNamespace fieldsNs: Namespace,
+    @MethodsNamespace methodsNs: Namespace,
 ) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
@@ -91,10 +93,10 @@ internal class CachingStrategySingleThread(
     }
 }
 
-internal class CachingStrategyMultiThread(
-    binding: Binding,
-    fieldsNs: Namespace,
-    methodsNs: Namespace,
+internal class CachingStrategyMultiThread @AssistedInject constructor(
+    @Assisted binding: Binding,
+    @FieldsNamespace fieldsNs: Namespace,
+    @MethodsNamespace methodsNs: Namespace,
     lock: LockGenerator,
 ) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
     private val lockName = lock.name
@@ -128,12 +130,12 @@ internal class CachingStrategyMultiThread(
     }
 }
 
-internal class SlotProviderStrategy(
-    private val binding: Binding,
-    private val slot: Int,
+internal class SlotProviderStrategy @AssistedInject constructor(
+    @Assisted private val binding: Binding,
     cachingProvider: UnscopedProviderGenerator,
+    slotSwitchingGenerator: SlotSwitchingGenerator,
 ) : AccessStrategy {
-
+    private val slot = slotSwitchingGenerator.requestSlot(binding)
     private val providerName = cachingProvider.name
 
     override fun generateAccess(
@@ -171,10 +173,10 @@ internal class InlineCreationStrategy(
     }
 }
 
-internal class WrappingAccessorStrategy(
-    private val binding: Binding,
-    private val underlying: AccessStrategy,
-    methodsNs: Namespace,
+internal class WrappingAccessorStrategy @AssistedInject constructor(
+    @Assisted private val binding: Binding,
+    @Assisted private val underlying: AccessStrategy,
+    @MethodsNamespace methodsNs: Namespace,
 ) : AccessStrategy {
     private val accessorName: String
 
@@ -255,11 +257,12 @@ internal class CompositeStrategy(
     }
 }
 
-internal class OnTheFlyScopedProviderCreationStrategy(
+internal class OnTheFlyScopedProviderCreationStrategy @AssistedInject constructor(
     cachingProvider: ScopedProviderGenerator,
-    private val binding: Binding,
-    private val slot: Int,
+    slotSwitchingGenerator: SlotSwitchingGenerator,
+    @Assisted private val binding: Binding,
 ) : AccessStrategy {
+    private val slot = slotSwitchingGenerator.requestSlot(binding)
     private val providerName = cachingProvider.name
 
     override fun generateAccess(
@@ -276,11 +279,12 @@ internal class OnTheFlyScopedProviderCreationStrategy(
     }
 }
 
-internal class OnTheFlyUnscopedProviderCreationStrategy(
+internal class OnTheFlyUnscopedProviderCreationStrategy @AssistedInject constructor(
     unscopedProviderGenerator: UnscopedProviderGenerator,
-    private val binding: Binding,
-    private val slot: Int,
+    slotSwitchingGenerator: SlotSwitchingGenerator,
+    @Assisted private val binding: Binding,
 ) : AccessStrategy {
+    private val slot = slotSwitchingGenerator.requestSlot(binding)
     private val providerName = unscopedProviderGenerator.name
 
     override fun generateAccess(
@@ -297,11 +301,11 @@ internal class OnTheFlyUnscopedProviderCreationStrategy(
     }
 }
 
-internal class ConditionalAccessStrategy(
-    private val underlying: AccessStrategy,
-    private val binding: Binding,
-    methodsNs: Namespace,
-    private val dependencyKind: DependencyKind,
+internal class ConditionalAccessStrategy @AssistedInject constructor(
+    @Assisted private val underlying: AccessStrategy,
+    @Assisted private val binding: Binding,
+    @MethodsNamespace methodsNs: Namespace,
+    @Assisted private val dependencyKind: DependencyKind,
 ) : AccessStrategy {
     private val accessorName: String
 
@@ -317,7 +321,7 @@ internal class ConditionalAccessStrategy(
             when {
                 !binding.conditionScope.isAlways -> {
                     val expression = buildExpression {
-                        binding.owner[ConditionGenerator].expression(
+                        binding.owner[GeneratorComponent].conditionGenerator.expression(
                             builder = this,
                             conditionScope = binding.conditionScope,
                             inside = binding.owner,

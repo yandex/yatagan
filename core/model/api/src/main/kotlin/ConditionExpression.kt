@@ -21,8 +21,7 @@ package com.yandex.yatagan.core.model
  *
  * @param L a [Literal] compatible type.
  */
-@JvmInline
-public value class ConditionExpression<out L : ConditionExpression.Literal>(
+public data class ConditionExpression<out L : ConditionExpression.Literal>(
     /**
      * CNF - inner sets are `OR`-ed together into outer set; literals in inner sets (clauses) are `AND`-ed together.
      */
@@ -49,11 +48,11 @@ public value class ConditionExpression<out L : ConditionExpression.Literal>(
         /**
          * Boolean function is a tautology.
          */
-        public val Unscoped: ConditionExpression<Nothing> = ConditionExpression<Nothing>(emptySet())
+        public val Unscoped: ConditionExpression<Nothing> = ConditionExpression(emptySet())
 
         /**
          * Boolean function is never-satisfiable.
          */
-        public val NeverScoped: ConditionExpression<Nothing> = ConditionExpression<Nothing>(setOf(emptySet()))
+        public val NeverScoped: ConditionExpression<Nothing> = ConditionExpression(setOf(emptySet()))
     }
 }

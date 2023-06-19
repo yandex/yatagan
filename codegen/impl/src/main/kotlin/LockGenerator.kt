@@ -19,16 +19,22 @@ package com.yandex.yatagan.codegen.impl
 import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildClass
+import javax.inject.Inject
+import javax.inject.Singleton
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.STATIC
 
-internal class LockGenerator(
+@Singleton
+internal class LockGenerator @Inject constructor(
     componentImplName: ClassName,
 ) : ComponentGenerator.Contributor {
+    private var isUsed = false
     val name: ClassName = componentImplName.nestedClass("UninitializedLock")
+        get() = field.also { isUsed = true }
 
     override fun generate(builder: TypeSpecBuilder) {
+        if (!isUsed) return
         builder.nestedType {
             buildClass(name) {
                 modifiers(PRIVATE, STATIC, FINAL)
