@@ -20,6 +20,8 @@ import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
+import com.yandex.yatagan.core.graph.impl.VariantMatch
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -32,12 +34,18 @@ import com.yandex.yatagan.validation.format.bindingModelRepresentation
 internal class AssistedInjectFactoryBindingImpl(
     override val owner: BindingGraph,
     override val model: AssistedInjectFactoryModel,
-) : AssistedInjectFactoryBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin {
+) : AssistedInjectFactoryBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin {
     override val target: NodeModel
         get() = model.asNode()
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitAssistedInjectFactory(this)
+    }
+
+    override val variantMatch: VariantMatch by lazy { VariantMatch(model, owner.variant) }
+
+    override val nonStaticConditionDependencies: NonStaticConditionDependencies by lazy {
+        NonStaticConditionDependencies(this@AssistedInjectFactoryBindingImpl)
     }
 
     override val dependencies by lazy(LazyThreadSafetyMode.PUBLICATION) {

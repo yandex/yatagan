@@ -903,4 +903,60 @@ class ConditionsTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `assisted-factory under conditions`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Conditional(Conditions.FeatureA::class)
+            class MyClassA @Inject constructor()
+
+            @Conditional(Conditions.FeatureA::class) 
+            class MyClassB @AssistedInject constructor(@Assisted val i: Int, a: MyClassA)
+            
+            @AssistedFactory interface MyClassBFactory { fun create(i: Int): MyClassB }
+
+            @Component interface MyComponent {
+                val f: Optional<MyClassBFactory>
+            }
+
+            fun test() {
+                Features.enabledA = true
+                Yatagan.create(MyComponent::class.java).f.get().create(1)
+                Features.enabledA = false
+                assert(Yatagan.create(MyComponent::class.java).f.isPresent == false)
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `assisted-factory under invalid conditions`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Conditional(Conditions.FeatureB::class)
+            class MyClassA @Inject constructor()
+
+            @Conditional(Conditions.FeatureA::class) 
+            class MyClassB @AssistedInject constructor(@Assisted val i: Int, a: MyClassA)
+            
+            @Conditional(Conditions.FeatureB::class)  // illegal conditionals placement
+            @AssistedFactory interface MyClassBFactory { fun create(i: Int): MyClassB }
+
+            @Component interface MyComponent {
+                val f: Provider<MyClassBFactory>
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

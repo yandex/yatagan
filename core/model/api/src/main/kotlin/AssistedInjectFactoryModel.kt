@@ -23,7 +23,7 @@ import com.yandex.yatagan.lang.Type
 /**
  * Represents [com.yandex.yatagan.AssistedFactory].
  */
-public interface AssistedInjectFactoryModel : HasNodeModel {
+public interface AssistedInjectFactoryModel : HasNodeModel, ConditionalHoldingModel {
     /**
      * Factory method that takes assisted parameters and creates the instance via [assistedInjectConstructor],
      * passing "assisted" parameters as is, providing non-assisted (injected) dependencies from a graph.
