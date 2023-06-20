@@ -42,6 +42,7 @@ import javax.lang.model.element.Modifier.STATIC
 internal class ComponentFactoryGenerator @Inject constructor(
     private val thisGraph: BindingGraph,
     private val componentImplName: ClassName,
+    private val options: ComponentGenerator.Options,
     @FieldsNamespace fieldsNs: Namespace,
 ) : ComponentGenerator.Contributor {
     private val inputsWithFieldNames = mutableMapOf<ClassBackedModel, String>()
@@ -125,7 +126,11 @@ internal class ComponentFactoryGenerator @Inject constructor(
                     val model = input.payload.model
                     parameter(model.typeName(), name)
                     val fieldName = inputsWithFieldNames[model] ?: continue  // Invalid - UB.
-                    +"this.%N = %T.checkInputNotNull(%N)".formatCode(fieldName, Names.Checks, name)
+                    if (options.enableProvisionNullChecks) {
+                        +"this.%N = %T.checkInputNotNull(%N)".formatCode(fieldName, Names.Checks, name)
+                    } else {
+                        +"this.%N = %N".formatCode(fieldName, name)
+                    }
                 }
                 for ((model, fieldName) in inputsWithFieldNames) {
                     // Generate all trivially constructable modules requiring instance that are not provided.

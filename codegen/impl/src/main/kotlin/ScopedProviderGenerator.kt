@@ -31,6 +31,7 @@ import javax.lang.model.element.Modifier.VOLATILE
 @Singleton
 internal class ScopedProviderGenerator @Inject constructor(
     private val componentImplName: ClassName,
+    private val options: ComponentGenerator.Options,
     graph: BindingGraph,
 ) : ComponentGenerator.Contributor {
     private var isUsed = false
@@ -74,7 +75,9 @@ internal class ScopedProviderGenerator @Inject constructor(
                                 }
                             }
                         } else {
-                            +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+                            if (options.enableThreadChecks) {
+                                +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+                            }
                             +"local = mDelegate.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                             +"mValue = local"
                         }

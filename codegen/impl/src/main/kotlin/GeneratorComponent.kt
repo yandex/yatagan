@@ -44,6 +44,8 @@ internal interface GeneratorComponent {
 
     val componentFactoryGenerator: ComponentFactoryGenerator
 
+    val options: ComponentGenerator.Options
+
     @get:SubcomponentsNamespace
     val subcomponentsNamespace: Namespace
 

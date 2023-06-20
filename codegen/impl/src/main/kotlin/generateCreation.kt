@@ -68,7 +68,10 @@ private class CreationGeneratorVisitor(
                 }
 
                 override fun visitMethod(method: Method) {
-                    +"%T.checkProvisionNotNull(".formatCode(Names.Checks)
+                    val enableNullChecks = inside[GeneratorComponent].options.enableProvisionNullChecks
+                    if (enableNullChecks) {
+                        +"%T.checkProvisionNotNull(".formatCode(Names.Checks)
+                    }
                     if (instance != null) {
                         +"%L.%N(".formatCode(instance, method.name)
                     } else {
@@ -79,7 +82,10 @@ private class CreationGeneratorVisitor(
                         +"%T%L.%L(".formatCode(method.ownerName.asTypeName(), ownerObject, method.name)
                     }
                     genArgs()
-                    +"))"
+                    +")"
+                    if (enableNullChecks) {
+                        +")"
+                    }
                 }
 
                 override fun visitConstructor(constructor: Constructor) {

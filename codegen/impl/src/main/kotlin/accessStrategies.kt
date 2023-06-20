@@ -70,6 +70,7 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
     @Assisted binding: Binding,
     @FieldsNamespace fieldsNs: Namespace,
     @MethodsNamespace methodsNs: Namespace,
+    private val options: ComponentGenerator.Options,
 ) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
@@ -81,7 +82,9 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
             returnType(targetType)
             +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
             controlFlow("if (local == null)") {
-                +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+                if (options.enableThreadChecks) {
+                    +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+                }
                 +buildExpression {
                     +"local = "
                     binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)

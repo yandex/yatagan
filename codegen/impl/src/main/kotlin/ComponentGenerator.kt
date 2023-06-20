@@ -48,6 +48,8 @@ internal class ComponentGenerator @Inject constructor(
 
     data class Options(
         val maxSlotsPerSwitch: Int,
+        val enableProvisionNullChecks: Boolean,
+        val enableThreadChecks: Boolean,
     )
 
     init {

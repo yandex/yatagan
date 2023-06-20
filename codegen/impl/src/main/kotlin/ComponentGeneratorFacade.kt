@@ -23,11 +23,15 @@ import com.yandex.yatagan.core.graph.BindingGraph
 class ComponentGeneratorFacade(
     graph: BindingGraph,
     maxSlotsPerSwitch: Int,
+    enableThreadChecks: Boolean,
+    enableProvisionNullChecks: Boolean,
 ) {
     private val component = Yatagan.builder(GeneratorComponent.Factory::class.java).create(
         graph = graph,
         options = ComponentGenerator.Options(
             maxSlotsPerSwitch = maxSlotsPerSwitch,
+            enableProvisionNullChecks = enableProvisionNullChecks,
+            enableThreadChecks = enableThreadChecks,
         ),
     )
 
