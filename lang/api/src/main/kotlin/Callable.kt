@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.StableForImplementation
+
 /**
  * A sealed marker interface for an entity that can be called.
  */
@@ -28,8 +30,10 @@ public interface Callable : HasPlatformModel {
 
     public fun <T> accept(visitor: Visitor<T>): T
 
+    @StableForImplementation
     public interface Visitor<T> {
-        public fun visitMethod(method: Method): T
-        public fun visitConstructor(constructor: Constructor): T
+        public fun visitOther(callable: Callable): T
+        public fun visitMethod(method: Method): T = visitOther(method)
+        public fun visitConstructor(constructor: Constructor): T = visitOther(constructor)
     }
 }

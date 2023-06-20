@@ -1,5 +1,5 @@
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.stable-api-artifact")
 }
 
 dependencies {
@@ -10,8 +10,4 @@ dependencies {
 
     // Validation API
     api(project(":validation:api"))
-}
-
-kotlin {
-    explicitApi()
 }

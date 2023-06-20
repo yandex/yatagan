@@ -24,7 +24,6 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
-import com.yandex.yatagan.lang.InternalLangApi
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
 import com.yandex.yatagan.lang.rt.TypeDeclaration
@@ -66,7 +65,6 @@ class RuntimeEngine(
     }
 
     private fun initIfNeeded() {
-        @OptIn(InternalLangApi::class)
         with(LangModelFactory) {
             if (delegate.get() == null) {
                 // RtModelFactoryImpl may be created multiple times, but only single value is published
@@ -76,7 +74,6 @@ class RuntimeEngine(
     }
 
     fun reset() {
-        @OptIn(InternalLangApi::class)
         LangModelFactory.delegate.set(null)
         ObjectCacheRegistry.close()
     }

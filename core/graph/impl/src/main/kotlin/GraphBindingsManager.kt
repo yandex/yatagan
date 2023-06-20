@@ -16,8 +16,9 @@
 
 package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.yatagan.core.graph.Extensible
-import com.yandex.yatagan.core.graph.WithParents
+import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.base.api.WithParents
+import com.yandex.yatagan.base.api.parentsSequence
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -45,7 +46,6 @@ import com.yandex.yatagan.core.graph.impl.bindings.SubComponentFactoryBindingImp
 import com.yandex.yatagan.core.graph.impl.bindings.SyntheticAliasBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.canHost
 import com.yandex.yatagan.core.graph.impl.bindings.maybeUnwrapSyntheticAlias
-import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.BindsBindingModel
 import com.yandex.yatagan.core.model.CollectionTargetKind
@@ -172,6 +172,8 @@ internal class GraphBindingsManager(
 
         for (module in graph.modules) for (declaration in module.multiBindingDeclarations) {
             declaration.accept(object : MultiBindingDeclarationModel.Visitor<Unit> {
+                override fun visitOther(model: MultiBindingDeclarationModel) = throw AssertionError()
+
                 override fun visitInvalid(model: MultiBindingDeclarationModel.InvalidDeclarationModel) = Unit
 
                 override fun visitCollectionDeclaration(model: MultiBindingDeclarationModel.CollectionDeclarationModel) {
@@ -361,6 +363,8 @@ internal class GraphBindingsManager(
     }
 
     private inner class ModuleHostedBindingsCreator : ModuleHostedBindingModel.Visitor<BaseBinding> {
+        override fun visitOther(model: ModuleHostedBindingModel) = throw AssertionError()
+
         override fun visitBinds(model: BindsBindingModel): BaseBinding {
             return if (model.target.node in model.sources) {
                 SelfDependentInvalidBinding(
@@ -395,7 +399,7 @@ internal class GraphBindingsManager(
     }
 
     private inner class ImplicitBindingCreator : HasNodeModel.Visitor<Binding?> {
-        override fun visitDefault(): Binding? = null
+        override fun visitOther(): Binding? = null
 
         override fun visitInjectConstructor(model: InjectConstructorModel): Binding? {
             if (!graph.canHost(model.scopes)) {
@@ -439,6 +443,8 @@ internal class GraphBindingsManager(
                 factory = model,
             )
         }
+
+        override fun visitOther(model: ComponentFactoryModel) = throw AssertionError()
     }
 
     private class MultibindingDownstreamHandle(

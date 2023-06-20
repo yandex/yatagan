@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2023 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.core.graph
+package com.yandex.yatagan.base.api
 
 /**
- * A hierarchy trait, that allows accessing child nodes.
+ * Marks the function/property that has nullable type but can actually be null only if
+ * the underlying model is invalid.
+ *
+ * @see com.yandex.yatagan.validation.MayBeInvalid.validate
  */
-public interface WithChildren<C> where C : WithChildren<C> {
-    /**
-     * Children nodes.
-     */
-    public val children: Collection<C>
-}
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.BINARY)
+public annotation class NullIfInvalid

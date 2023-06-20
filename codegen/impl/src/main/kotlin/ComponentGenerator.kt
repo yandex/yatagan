@@ -173,6 +173,8 @@ internal class ComponentGenerator private constructor(
                     val binding = graph.resolveBinding(dependency.node)
                     +buildExpression {
                         member.accept(object : Member.Visitor<Unit> {
+                            override fun visitOther(model: Member) = throw AssertionError()
+
                             override fun visitMethod(model: Method) {
                                 +"%N.%N(".formatCode(instanceName, member.name)
                                 binding.generateAccess(

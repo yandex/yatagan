@@ -1,0 +1,232 @@
+public abstract interface class com/yandex/yatagan/lang/Accessible {
+	public abstract fun isEffectivelyPublic ()Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/Annotated {
+	public abstract fun getAnnotations ()Lkotlin/sequences/Sequence;
+	public fun isAnnotatedWith (Ljava/lang/Class;)Z
+}
+
+public final class com/yandex/yatagan/lang/Annotated$DefaultImpls {
+	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/Annotated;Ljava/lang/Class;)Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/Annotation : com/yandex/yatagan/lang/HasPlatformModel {
+	public abstract fun getAnnotationClass ()Lcom/yandex/yatagan/lang/AnnotationDeclaration;
+	public abstract fun getValue (Lcom/yandex/yatagan/lang/AnnotationDeclaration$Attribute;)Lcom/yandex/yatagan/lang/Annotation$Value;
+}
+
+public abstract interface class com/yandex/yatagan/lang/Annotation$Value : com/yandex/yatagan/lang/HasPlatformModel {
+	public abstract fun accept (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/lang/Annotation$Value$Visitor {
+	public fun visitAnnotation (Lcom/yandex/yatagan/lang/Annotation;)Ljava/lang/Object;
+	public fun visitArray (Ljava/util/List;)Ljava/lang/Object;
+	public fun visitBoolean (Z)Ljava/lang/Object;
+	public fun visitByte (B)Ljava/lang/Object;
+	public fun visitChar (C)Ljava/lang/Object;
+	public abstract fun visitDefault (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun visitDouble (D)Ljava/lang/Object;
+	public fun visitEnumConstant (Lcom/yandex/yatagan/lang/Type;Ljava/lang/String;)Ljava/lang/Object;
+	public fun visitFloat (F)Ljava/lang/Object;
+	public fun visitInt (I)Ljava/lang/Object;
+	public fun visitLong (J)Ljava/lang/Object;
+	public fun visitShort (S)Ljava/lang/Object;
+	public fun visitString (Ljava/lang/String;)Ljava/lang/Object;
+	public fun visitType (Lcom/yandex/yatagan/lang/Type;)Ljava/lang/Object;
+	public fun visitUnresolved ()Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/lang/Annotation$Value$Visitor$DefaultImpls {
+	public static fun visitAnnotation (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;Lcom/yandex/yatagan/lang/Annotation;)Ljava/lang/Object;
+	public static fun visitArray (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;Ljava/util/List;)Ljava/lang/Object;
+	public static fun visitBoolean (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;Z)Ljava/lang/Object;
+	public static fun visitByte (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;B)Ljava/lang/Object;
+	public static fun visitChar (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;C)Ljava/lang/Object;
+	public static fun visitDouble (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;D)Ljava/lang/Object;
+	public static fun visitEnumConstant (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;Lcom/yandex/yatagan/lang/Type;Ljava/lang/String;)Ljava/lang/Object;
+	public static fun visitFloat (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;F)Ljava/lang/Object;
+	public static fun visitInt (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;I)Ljava/lang/Object;
+	public static fun visitLong (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;J)Ljava/lang/Object;
+	public static fun visitShort (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;S)Ljava/lang/Object;
+	public static fun visitString (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;Ljava/lang/String;)Ljava/lang/Object;
+	public static fun visitType (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;Lcom/yandex/yatagan/lang/Type;)Ljava/lang/Object;
+	public static fun visitUnresolved (Lcom/yandex/yatagan/lang/Annotation$Value$Visitor;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/lang/AnnotationDeclaration : com/yandex/yatagan/lang/Annotated {
+	public abstract fun getAttributes ()Lkotlin/sequences/Sequence;
+	public abstract fun getQualifiedName ()Ljava/lang/String;
+	public abstract fun getRetention ()Lkotlin/annotation/AnnotationRetention;
+	public fun isClass (Ljava/lang/Class;)Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/AnnotationDeclaration$Attribute {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getType ()Lcom/yandex/yatagan/lang/Type;
+}
+
+public final class com/yandex/yatagan/lang/AnnotationDeclaration$DefaultImpls {
+	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/AnnotationDeclaration;Ljava/lang/Class;)Z
+	public static fun isClass (Lcom/yandex/yatagan/lang/AnnotationDeclaration;Ljava/lang/Class;)Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/Callable : com/yandex/yatagan/lang/HasPlatformModel {
+	public abstract fun accept (Lcom/yandex/yatagan/lang/Callable$Visitor;)Ljava/lang/Object;
+	public abstract fun getParameters ()Lkotlin/sequences/Sequence;
+}
+
+public abstract interface class com/yandex/yatagan/lang/Callable$Visitor {
+	public fun visitConstructor (Lcom/yandex/yatagan/lang/Constructor;)Ljava/lang/Object;
+	public fun visitMethod (Lcom/yandex/yatagan/lang/Method;)Ljava/lang/Object;
+	public abstract fun visitOther (Lcom/yandex/yatagan/lang/Callable;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/lang/Callable$Visitor$DefaultImpls {
+	public static fun visitConstructor (Lcom/yandex/yatagan/lang/Callable$Visitor;Lcom/yandex/yatagan/lang/Constructor;)Ljava/lang/Object;
+	public static fun visitMethod (Lcom/yandex/yatagan/lang/Callable$Visitor;Lcom/yandex/yatagan/lang/Method;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/lang/Constructor : com/yandex/yatagan/lang/Accessible, com/yandex/yatagan/lang/Annotated, com/yandex/yatagan/lang/Callable {
+	public abstract fun getConstructee ()Lcom/yandex/yatagan/lang/TypeDeclaration;
+}
+
+public final class com/yandex/yatagan/lang/Constructor$DefaultImpls {
+	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/Constructor;Ljava/lang/Class;)Z
+}
+
+public final class com/yandex/yatagan/lang/ExtensionsKt {
+	public static final fun getCollectionType (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
+	public static synthetic fun getCollectionType$default (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;ZILjava/lang/Object;)Lcom/yandex/yatagan/lang/Type;
+	public static final fun getFunctionsWithCompanion (Lcom/yandex/yatagan/lang/TypeDeclaration;)Lkotlin/sequences/Sequence;
+	public static final fun getListType (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
+	public static synthetic fun getListType$default (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;ZILjava/lang/Object;)Lcom/yandex/yatagan/lang/Type;
+	public static final fun getProviderType (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
+	public static synthetic fun getProviderType$default (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;ZILjava/lang/Object;)Lcom/yandex/yatagan/lang/Type;
+	public static final fun getSetType (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
+	public static synthetic fun getSetType$default (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;ZILjava/lang/Object;)Lcom/yandex/yatagan/lang/Type;
+	public static final fun isKotlinObject (Lcom/yandex/yatagan/lang/TypeDeclaration;)Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/Field : com/yandex/yatagan/lang/Member {
+	public abstract fun getType ()Lcom/yandex/yatagan/lang/Type;
+}
+
+public final class com/yandex/yatagan/lang/Field$DefaultImpls {
+	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/Field;Ljava/lang/Class;)Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/HasPlatformModel {
+	public abstract fun getPlatformModel ()Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/lang/LangModelFactory {
+	public static final field Companion Lcom/yandex/yatagan/lang/LangModelFactory$Companion;
+	public abstract fun getMapType (Lcom/yandex/yatagan/lang/Type;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
+	public static synthetic fun getMapType$default (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;Lcom/yandex/yatagan/lang/Type;ZILjava/lang/Object;)Lcom/yandex/yatagan/lang/Type;
+	public abstract fun getParameterizedType (Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
+	public abstract fun getTypeDeclaration (Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)Lcom/yandex/yatagan/lang/TypeDeclaration;
+	public abstract fun isInRuntimeEnvironment ()Z
+}
+
+public final class com/yandex/yatagan/lang/LangModelFactory$Companion : com/yandex/yatagan/lang/LangModelFactory {
+	public fun getMapType (Lcom/yandex/yatagan/lang/Type;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
+	public fun getParameterizedType (Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
+	public fun getTypeDeclaration (Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)Lcom/yandex/yatagan/lang/TypeDeclaration;
+	public fun isInRuntimeEnvironment ()Z
+}
+
+public final class com/yandex/yatagan/lang/LangModelFactory$DefaultImpls {
+	public static synthetic fun getMapType$default (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;Lcom/yandex/yatagan/lang/Type;ZILjava/lang/Object;)Lcom/yandex/yatagan/lang/Type;
+}
+
+public final class com/yandex/yatagan/lang/LangModelFactory$ParameterizedType : java/lang/Enum {
+	public static final field Collection Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
+	public static final field List Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
+	public static final field Provider Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
+	public static final field Set Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
+	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
+	public static fun values ()[Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
+}
+
+public abstract interface class com/yandex/yatagan/lang/Member : com/yandex/yatagan/lang/Accessible, com/yandex/yatagan/lang/Annotated, com/yandex/yatagan/lang/HasPlatformModel {
+	public abstract fun accept (Lcom/yandex/yatagan/lang/Member$Visitor;)Ljava/lang/Object;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getOwner ()Lcom/yandex/yatagan/lang/TypeDeclaration;
+	public abstract fun isStatic ()Z
+}
+
+public final class com/yandex/yatagan/lang/Member$DefaultImpls {
+	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/Member;Ljava/lang/Class;)Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/Member$Visitor {
+	public fun visitField (Lcom/yandex/yatagan/lang/Field;)Ljava/lang/Object;
+	public fun visitMethod (Lcom/yandex/yatagan/lang/Method;)Ljava/lang/Object;
+	public abstract fun visitOther (Lcom/yandex/yatagan/lang/Member;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/lang/Member$Visitor$DefaultImpls {
+	public static fun visitField (Lcom/yandex/yatagan/lang/Member$Visitor;Lcom/yandex/yatagan/lang/Field;)Ljava/lang/Object;
+	public static fun visitMethod (Lcom/yandex/yatagan/lang/Member$Visitor;Lcom/yandex/yatagan/lang/Method;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/lang/Method : com/yandex/yatagan/lang/Callable, com/yandex/yatagan/lang/Member, java/lang/Comparable {
+	public abstract fun getReturnType ()Lcom/yandex/yatagan/lang/Type;
+	public abstract fun isAbstract ()Z
+}
+
+public final class com/yandex/yatagan/lang/Method$DefaultImpls {
+	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/Method;Ljava/lang/Class;)Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/Parameter : com/yandex/yatagan/lang/Annotated {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getType ()Lcom/yandex/yatagan/lang/Type;
+}
+
+public final class com/yandex/yatagan/lang/Parameter$DefaultImpls {
+	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/Parameter;Ljava/lang/Class;)Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/Type : java/lang/Comparable {
+	public abstract fun asBoxed ()Lcom/yandex/yatagan/lang/Type;
+	public abstract fun getDeclaration ()Lcom/yandex/yatagan/lang/TypeDeclaration;
+	public abstract fun getTypeArguments ()Ljava/util/List;
+	public abstract fun isAssignableFrom (Lcom/yandex/yatagan/lang/Type;)Z
+	public abstract fun isUnresolved ()Z
+	public abstract fun isVoid ()Z
+}
+
+public abstract interface class com/yandex/yatagan/lang/TypeDeclaration : com/yandex/yatagan/lang/Accessible, com/yandex/yatagan/lang/Annotated, com/yandex/yatagan/lang/HasPlatformModel, java/lang/Comparable {
+	public abstract fun asType ()Lcom/yandex/yatagan/lang/Type;
+	public abstract fun getConstructors ()Lkotlin/sequences/Sequence;
+	public abstract fun getDefaultCompanionObjectDeclaration ()Lcom/yandex/yatagan/lang/TypeDeclaration;
+	public abstract fun getEnclosingType ()Lcom/yandex/yatagan/lang/TypeDeclaration;
+	public abstract fun getFields ()Lkotlin/sequences/Sequence;
+	public abstract fun getInterfaces ()Lkotlin/sequences/Sequence;
+	public abstract fun getKind ()Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public abstract fun getMethods ()Lkotlin/sequences/Sequence;
+	public abstract fun getNestedClasses ()Lkotlin/sequences/Sequence;
+	public abstract fun getQualifiedName ()Ljava/lang/String;
+	public abstract fun getSuperType ()Lcom/yandex/yatagan/lang/Type;
+	public abstract fun isAbstract ()Z
+}
+
+public final class com/yandex/yatagan/lang/TypeDeclaration$DefaultImpls {
+	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/TypeDeclaration;Ljava/lang/Class;)Z
+}
+
+public final class com/yandex/yatagan/lang/TypeDeclarationKind : java/lang/Enum {
+	public static final field Annotation Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static final field Class Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static final field Enum Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static final field Interface Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static final field KotlinCompanion Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static final field KotlinObject Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static final field None Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static fun values ()[Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+}
+

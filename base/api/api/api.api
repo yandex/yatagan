@@ -1,0 +1,36 @@
+public abstract interface class com/yandex/yatagan/base/api/Extensible {
+	public abstract fun get (Lcom/yandex/yatagan/base/api/Extensible$Key;)Ljava/lang/Object;
+	public abstract fun set (Lcom/yandex/yatagan/base/api/Extensible$Key;Ljava/lang/Object;)V
+}
+
+public abstract interface class com/yandex/yatagan/base/api/Extensible$Key {
+	public abstract fun getKeyType ()Ljava/lang/Class;
+}
+
+public final class com/yandex/yatagan/base/api/ExtensionsKt {
+	public static final fun childrenSequence (Lcom/yandex/yatagan/base/api/WithChildren;Z)Lkotlin/sequences/Sequence;
+	public static synthetic fun childrenSequence$default (Lcom/yandex/yatagan/base/api/WithChildren;ZILjava/lang/Object;)Lkotlin/sequences/Sequence;
+	public static final fun parentsSequence (Lcom/yandex/yatagan/base/api/WithParents;Z)Lkotlin/sequences/Sequence;
+	public static synthetic fun parentsSequence$default (Lcom/yandex/yatagan/base/api/WithParents;ZILjava/lang/Object;)Lkotlin/sequences/Sequence;
+}
+
+public abstract interface annotation class com/yandex/yatagan/base/api/Incubating : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/base/api/Internal : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/base/api/NullIfInvalid : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/base/api/StableForImplementation : java/lang/annotation/Annotation {
+}
+
+public abstract interface class com/yandex/yatagan/base/api/WithChildren {
+	public abstract fun getChildren ()Ljava/util/Collection;
+}
+
+public abstract interface class com/yandex/yatagan/base/api/WithParents {
+	public abstract fun getParent ()Lcom/yandex/yatagan/base/api/WithParents;
+}
+

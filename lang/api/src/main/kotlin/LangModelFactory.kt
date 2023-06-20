@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -92,6 +93,7 @@ public interface LangModelFactory {
     /**
      * Creates a synthetic "no"-type which can be used when type object is required but no actual type is present.
      */
+    @Internal
     public fun createNoType(name: String): Type
 
     /**
@@ -99,9 +101,9 @@ public interface LangModelFactory {
      */
     public val isInRuntimeEnvironment: Boolean
 
-    @OptIn(InternalLangApi::class)
+    @OptIn(Internal::class)
     public companion object : LangModelFactory {
-        @InternalLangApi
+        @Internal
         public val delegate: AtomicReference<LangModelFactory> = AtomicReference()
 
         override fun getParameterizedType(
@@ -122,6 +124,7 @@ public interface LangModelFactory {
             vararg simpleNames: String
         ): TypeDeclaration? = checkNotNull(delegate.get()).getTypeDeclaration(packageName, simpleName, *simpleNames)
 
+        @Internal
         override fun createNoType(name: String): Type = checkNotNull(delegate.get()).createNoType(name)
 
         override val isInRuntimeEnvironment: Boolean get() = checkNotNull(delegate.get()).isInRuntimeEnvironment

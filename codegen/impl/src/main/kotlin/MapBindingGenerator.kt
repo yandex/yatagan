@@ -16,11 +16,11 @@
 
 package com.yandex.yatagan.codegen.impl
 
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
@@ -77,6 +77,7 @@ internal class MapBindingGenerator(
     private class AnnotationValueFormatter(
         val builder: ExpressionBuilder,
     ) : Annotation.Value.Visitor<Unit> {
+        override fun visitDefault(value: Any?) = throw AssertionError()
         override fun visitBoolean(value: Boolean) = with(builder) { +value.toString() }
         override fun visitByte(value: Byte) = with(builder) { +value.toString() }
         override fun visitShort(value: Short) = with(builder) { +value.toString() }

@@ -16,17 +16,17 @@
 
 package com.yandex.yatagan.core.graph.impl
 
+import com.yandex.yatagan.base.ExtensibleImpl
+import com.yandex.yatagan.base.api.childrenSequence
+import com.yandex.yatagan.base.api.parentsSequence
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage
-import com.yandex.yatagan.core.graph.BindingVisitorAdapter
 import com.yandex.yatagan.core.graph.GraphSubComponentFactoryMethod
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
-import com.yandex.yatagan.core.graph.childrenSequence
 import com.yandex.yatagan.core.graph.normalized
-import com.yandex.yatagan.core.graph.parentsSequence
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
@@ -70,7 +70,7 @@ internal class BindingGraphImpl(
         get() = factoryMethodInParent ?: component.factory
 
     override val modules: Collection<ModuleModel>
-        get() = component.modules
+        get() = component.allModules
 
     override val dependencies: Collection<ComponentDependencyModel>
         get() = component.dependencies
@@ -96,7 +96,7 @@ internal class BindingGraphImpl(
             .mapTo(hashSetOf()) { it.model }
         // Detect subcomponents (directly or via factories) and add them as children.
         val detector = object : HasNodeModel.Visitor<ComponentModel?> {
-            override fun visitDefault() = null
+            override fun visitOther() = null
             override fun visitComponent(model: ComponentModel) = model
             override fun visitComponentFactory(model: ComponentFactoryWithBuilderModel) = model.createdComponent
         }
@@ -130,6 +130,7 @@ internal class BindingGraphImpl(
     private val aliasResolveVisitor = object : BaseBinding.Visitor<Binding> {
         override fun visitAlias(alias: AliasBinding) = resolveBindingRaw(alias.source).accept(this)
         override fun visitBinding(binding: Binding) = binding
+        override fun visitOther(other: BaseBinding) = throw AssertionError()
     }
 
     override fun resolveBinding(node: NodeModel): Binding {
@@ -188,6 +189,7 @@ internal class BindingGraphImpl(
                     return materialize(carryDependency).accept(this)
                 }
                 override fun visitBinding(binding: Binding) = binding
+                override fun visitOther(other: BaseBinding) = throw AssertionError()
             }
             localNodes.add(dependency.node)
             // MAYBE: employ local alias resolution cache
@@ -207,8 +209,8 @@ internal class BindingGraphImpl(
 
         // Add all local assisted binding factories.
         for (binding in localBindings.keys) {
-            binding.accept(object : BindingVisitorAdapter<Unit>() {
-                override fun visitDefault() = Unit
+            binding.accept(object : Binding.Visitor<Unit> {
+                override fun visitOther(binding: Binding) = Unit
                 override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
                     localAssistedInjectFactories += binding.model
                 }

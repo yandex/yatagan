@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.StableForImplementation
+
 /**
  * Models annotation instance of any class.
  */
@@ -42,21 +44,23 @@ public interface Annotation : HasPlatformModel {
      * Models annotation attribute value.
      */
     public interface Value : HasPlatformModel {
+        @StableForImplementation
         public interface Visitor<R> {
-            public fun visitBoolean(value: Boolean): R
-            public fun visitByte(value: Byte): R
-            public fun visitShort(value: Short): R
-            public fun visitInt(value: Int): R
-            public fun visitLong(value: Long): R
-            public fun visitChar(value: Char): R
-            public fun visitFloat(value: Float): R
-            public fun visitDouble(value: Double): R
-            public fun visitString(value: String): R
-            public fun visitType(value: Type): R
-            public fun visitAnnotation(value: Annotation): R
-            public fun visitEnumConstant(enum: Type, constant: String): R
-            public fun visitArray(value: List<Value>): R
-            public fun visitUnresolved(): R
+            public fun visitDefault(value: Any?): R
+            public fun visitBoolean(value: Boolean): R = visitDefault(value)
+            public fun visitByte(value: Byte): R = visitDefault(value)
+            public fun visitShort(value: Short): R = visitDefault(value)
+            public fun visitInt(value: Int): R = visitDefault(value)
+            public fun visitLong(value: Long): R = visitDefault(value)
+            public fun visitChar(value: Char): R = visitDefault(value)
+            public fun visitFloat(value: Float): R = visitDefault(value)
+            public fun visitDouble(value: Double): R = visitDefault(value)
+            public fun visitString(value: String): R = visitDefault(value)
+            public fun visitType(value: Type): R = visitDefault(value)
+            public fun visitAnnotation(value: Annotation): R = visitDefault(value)
+            public fun visitEnumConstant(enum: Type, constant: String): R = visitDefault(enum to constant)
+            public fun visitArray(value: List<Value>): R = visitDefault(value)
+            public fun visitUnresolved(): R = visitDefault(null)
         }
 
         public fun <R> accept(visitor: Visitor<R>): R

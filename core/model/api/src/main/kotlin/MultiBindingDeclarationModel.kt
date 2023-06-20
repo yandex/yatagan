@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.NullIfInvalid
+import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -27,10 +29,12 @@ public interface MultiBindingDeclarationModel : MayBeInvalid {
 
     public fun <R> accept(visitor: Visitor<R>): R
 
+    @StableForImplementation
     public interface Visitor<R> {
-        public fun visitCollectionDeclaration(model: CollectionDeclarationModel): R
-        public fun visitMapDeclaration(model: MapDeclarationModel): R
-        public fun visitInvalid(model: InvalidDeclarationModel): R
+        public fun visitOther(model: MultiBindingDeclarationModel): R
+        public fun visitCollectionDeclaration(model: CollectionDeclarationModel): R = visitOther(model)
+        public fun visitMapDeclaration(model: MapDeclarationModel): R = visitOther(model)
+        public fun visitInvalid(model: InvalidDeclarationModel): R = visitOther(model)
     }
 
     /**
@@ -40,6 +44,7 @@ public interface MultiBindingDeclarationModel : MayBeInvalid {
         /**
          * An element's type for a multi-bound list.
          */
+        @NullIfInvalid
         public val elementType: NodeModel?
 
         /**
@@ -49,10 +54,19 @@ public interface MultiBindingDeclarationModel : MayBeInvalid {
     }
 
     /**
-     * Declares empty map binding
+     * Declares (empty by default) map binding.
      */
     public interface MapDeclarationModel : MultiBindingDeclarationModel {
+        /**
+         * @see ModuleHostedBindingModel.BindingTargetModel.MappingContribution.keyType
+         */
+        @NullIfInvalid
         public val keyType: Type?
+
+        /**
+         * @see ModuleHostedBindingModel.BindingTargetModel.MappingContribution.node
+         */
+        @NullIfInvalid
         public val valueType: NodeModel?
     }
 

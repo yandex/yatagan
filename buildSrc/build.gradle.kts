@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
     implementation(libs.kotlin.gradle)
+    implementation(libs.kotlin.binaryCompatibilityGradle)
     implementation(libs.dokka.gradle)
     implementation(libs.nexusPublish.gradle)
 

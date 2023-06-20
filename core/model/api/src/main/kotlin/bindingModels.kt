@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.NullIfInvalid
+import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.AnnotationDeclaration
 import com.yandex.yatagan.lang.Method
@@ -97,28 +99,36 @@ public interface ModuleHostedBindingModel : MayBeInvalid {
          * Contribution of a single [node] as a value to a map with the [keyType] under [keyValue].
          */
         public class MappingContribution(
+            /**
+             * Mapping value type as a node.
+             */
             override val node: NodeModel,
 
             /**
-             * Mapping key type. `null` when not-found/unresolved.
+             * Mapping key type.
              */
+            @NullIfInvalid
             public val keyType: Type?,
 
             /**
-             * Mapping key value. `null` when not-found/unresolved.
+             * Mapping key value.
              */
+            @NullIfInvalid
             public val keyValue: Annotation.Value?,
 
             /**
-             * Annotation class of the Map-key annotation. `null` when not-found/unresolved.
+             * Annotation class of the Map-key annotation.
              */
+            @NullIfInvalid
             public val mapKeyClass: AnnotationDeclaration?,
         ) : BindingTargetModel()
     }
 
+    @StableForImplementation
     public interface Visitor<R> {
-        public fun visitBinds(model: BindsBindingModel): R
-        public fun visitProvides(model: ProvidesBindingModel): R
+        public fun visitOther(model: ModuleHostedBindingModel): R
+        public fun visitBinds(model: BindsBindingModel): R = visitOther(model)
+        public fun visitProvides(model: ProvidesBindingModel): R = visitOther(model)
     }
 
     public fun <R> accept(visitor: Visitor<R>): R

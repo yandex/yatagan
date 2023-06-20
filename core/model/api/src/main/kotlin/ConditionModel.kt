@@ -16,12 +16,14 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.validation.MayBeInvalid
 
 /**
  * Represents a parsed runtime condition model.
  */
+@Incubating
 public interface ConditionModel : ConditionExpression.Literal, MayBeInvalid {
     /**
      * A class/object/companion that contains the first member from [path].
@@ -42,5 +44,10 @@ public interface ConditionModel : ConditionExpression.Literal, MayBeInvalid {
      */
     public val requiresInstance: Boolean
 
+    /**
+     * Negates the literal and returns the result.
+     *
+     * @return the same condition model yet with [negated] flipped.
+     */
     override fun not(): ConditionModel
 }

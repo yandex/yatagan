@@ -16,13 +16,17 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
+import com.yandex.yatagan.core.model.ConditionExpression.Literal
+
 /**
  * Represents a boolean expression in Conjunctive Normal Form.
  *
  * @param L a [Literal] compatible type.
  */
+@Incubating
 @JvmInline
-public value class ConditionExpression<out L : ConditionExpression.Literal>(
+public value class ConditionExpression<out L : Literal>(
     /**
      * CNF - inner sets are `OR`-ed together into outer set; literals in inner sets (clauses) are `AND`-ed together.
      */
@@ -49,11 +53,11 @@ public value class ConditionExpression<out L : ConditionExpression.Literal>(
         /**
          * Boolean function is a tautology.
          */
-        public val Unscoped: ConditionExpression<Nothing> = ConditionExpression<Nothing>(emptySet())
+        public val Unscoped: ConditionExpression<Nothing> = ConditionExpression(emptySet())
 
         /**
          * Boolean function is never-satisfiable.
          */
-        public val NeverScoped: ConditionExpression<Nothing> = ConditionExpression<Nothing>(setOf(emptySet()))
+        public val NeverScoped: ConditionExpression<Nothing> = ConditionExpression(setOf(emptySet()))
     }
 }

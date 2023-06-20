@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.NullIfInvalid
 import com.yandex.yatagan.lang.Constructor
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
@@ -28,12 +29,14 @@ public interface AssistedInjectFactoryModel : HasNodeModel {
      * Factory method that takes assisted parameters and creates the instance via [assistedInjectConstructor],
      * passing "assisted" parameters as is, providing non-assisted (injected) dependencies from a graph.
      */
+    @NullIfInvalid
     public val factoryMethod: Method?
 
     /**
      * an [@AssistedInject][com.yandex.yatagan.AssistedInject]-annotated constructor from the
      * factory's target type.
      */
+    @NullIfInvalid
     public val assistedInjectConstructor: Constructor?
 
     /**

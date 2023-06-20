@@ -12,8 +12,8 @@ repositories {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + listOf(
-            "-Xjvm-default=all",
-            "-Werror"
+            "-Xjvm-default=all-compatibility",
+            "-Werror",
         )
     }
 }

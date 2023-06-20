@@ -48,6 +48,7 @@ internal fun validateNoLoops(graph: BindingGraph, validator: Validator) {
         },
         childrenOf = { binding ->
             class DependenciesVisitor : BaseBinding.Visitor<Sequence<NodeDependency>> {
+                override fun visitOther(other: BaseBinding) = throw AssertionError()
                 override fun visitAlias(alias: AliasBinding) = sequenceOf(alias.source)
                 override fun visitBinding(binding: Binding) =
                     binding.dependencies + binding.nonStaticConditionProviders

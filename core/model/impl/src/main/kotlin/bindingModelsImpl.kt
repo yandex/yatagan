@@ -28,7 +28,6 @@ import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ProvidesBindingModel
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.lang.Annotation
-import com.yandex.yatagan.lang.AnnotationValueVisitorAdapter
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Method
@@ -110,10 +109,10 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
                     validator.reportError(Errors.missingMapKeyValue(annotationClass = clazz))
                     return@run
                 }
-                key.getValue(valueAttribute).accept(object : AnnotationValueVisitorAdapter<Unit>() {
+                key.getValue(valueAttribute).accept(object : Annotation.Value.Visitor<Unit> {
                     // Unresolved is not reported here, as it's [:lang]'s problem and will be reported by the
                     //  compiler anyway.
-                    override fun visitDefault() = Unit
+                    override fun visitDefault(value: Any?) = Unit
                     override fun visitAnnotation(value: Annotation) {
                         validator.reportError(Errors.unsupportedAnnotationValueAsMapKey(annotationClass = clazz))
                     }

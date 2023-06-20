@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2023 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.core.graph
+package com.yandex.yatagan.base.api
 
 /**
- * A hierarchy trait, that allows accessing optional parent nodes.
+ * Marks an interface that is stable for implementation.
+ * Means that no other abstract methods may be added in this or the next one major version.
+ *
+ * All the public interfaces, that are not marked with this, are not stable for implementation and may add new
+ *  abstract methods.
  */
-public interface WithParents<P> where P : WithParents<P> {
-    /**
-     * Parent node. `null` if root is reached.
-     */
-    public val parent: P?
-}
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.BINARY)
+public annotation class StableForImplementation

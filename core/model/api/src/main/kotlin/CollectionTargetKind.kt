@@ -16,6 +16,10 @@
 
 package com.yandex.yatagan.core.model
 
+/**
+ * @see ModuleHostedBindingModel.BindingTargetModel.DirectMultiContribution
+ * @see ModuleHostedBindingModel.BindingTargetModel.FlattenMultiContribution
+ */
 public enum class CollectionTargetKind {
     /**
      * For a list multi-binding

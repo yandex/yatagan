@@ -1,10 +1,10 @@
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.implementation-artifact")
 }
 
 dependencies {
     api(project(":lang:common"))
 
     implementation(project(":api:public"))
-    implementation(project(":base"))
+    implementation(project(":base:impl"))
 }

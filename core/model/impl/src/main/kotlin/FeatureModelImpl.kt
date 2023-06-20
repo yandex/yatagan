@@ -176,6 +176,7 @@ private interface LiteralPayload : ClassBackedModel {
 }
 
 private object MemberTypeVisitor : Member.Visitor<Type> {
+    override fun visitOther(model: Member) = throw AssertionError()
     override fun visitMethod(model: Method) = model.returnType
     override fun visitField(model: Field) = model.type
 }

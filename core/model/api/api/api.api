@@ -1,0 +1,329 @@
+public abstract interface class com/yandex/yatagan/core/model/AssistedInjectFactoryModel : com/yandex/yatagan/core/model/HasNodeModel {
+	public abstract fun getAssistedConstructorParameters ()Ljava/util/List;
+	public abstract fun getAssistedFactoryParameters ()Ljava/util/List;
+	public abstract fun getAssistedInjectConstructor ()Lcom/yandex/yatagan/lang/Constructor;
+	public abstract fun getFactoryMethod ()Lcom/yandex/yatagan/lang/Method;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter {
+}
+
+public final class com/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter$Assisted : com/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter {
+	public fun <init> (Ljava/lang/String;Lcom/yandex/yatagan/lang/Type;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/yandex/yatagan/lang/Type;
+	public final fun copy (Ljava/lang/String;Lcom/yandex/yatagan/lang/Type;)Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter$Assisted;
+	public static synthetic fun copy$default (Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter$Assisted;Ljava/lang/String;Lcom/yandex/yatagan/lang/Type;ILjava/lang/Object;)Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter$Assisted;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIdentifier ()Ljava/lang/String;
+	public final fun getType ()Lcom/yandex/yatagan/lang/Type;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter$Injected : com/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter {
+	public fun <init> (Lcom/yandex/yatagan/core/model/NodeDependency;)V
+	public final fun component1 ()Lcom/yandex/yatagan/core/model/NodeDependency;
+	public final fun copy (Lcom/yandex/yatagan/core/model/NodeDependency;)Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter$Injected;
+	public static synthetic fun copy$default (Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter$Injected;Lcom/yandex/yatagan/core/model/NodeDependency;ILjava/lang/Object;)Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel$Parameter$Injected;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDependency ()Lcom/yandex/yatagan/core/model/NodeDependency;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/BindsBindingModel : com/yandex/yatagan/core/model/ModuleHostedBindingModel {
+	public abstract fun getSources ()Lkotlin/sequences/Sequence;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ClassBackedModel : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getType ()Lcom/yandex/yatagan/lang/Type;
+}
+
+public final class com/yandex/yatagan/core/model/CollectionTargetKind : java/lang/Enum {
+	public static final field List Lcom/yandex/yatagan/core/model/CollectionTargetKind;
+	public static final field Set Lcom/yandex/yatagan/core/model/CollectionTargetKind;
+	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/core/model/CollectionTargetKind;
+	public static fun values ()[Lcom/yandex/yatagan/core/model/CollectionTargetKind;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentDependencyModel : com/yandex/yatagan/core/model/ClassBackedModel {
+	public abstract fun asNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+	public abstract fun getExposedDependencies ()Ljava/util/Map;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentEntryPoint : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getDependency ()Lcom/yandex/yatagan/core/model/NodeDependency;
+	public abstract fun getGetter ()Lcom/yandex/yatagan/lang/Method;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun accept (Lcom/yandex/yatagan/core/model/ComponentFactoryModel$Visitor;)Ljava/lang/Object;
+	public abstract fun getCreatedComponent ()Lcom/yandex/yatagan/core/model/ComponentModel;
+	public abstract fun getFactoryInputs ()Ljava/util/Collection;
+	public abstract fun getFactoryMethod ()Lcom/yandex/yatagan/lang/Method;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$FactoryInputModel : com/yandex/yatagan/core/model/ComponentFactoryModel$InputModel {
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$InputModel : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getPayload ()Lcom/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/ClassBackedModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload$Dependency : com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload {
+	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/ComponentDependencyModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload$Instance : com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload {
+	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload$Module : com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload {
+	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/ModuleModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$Visitor {
+	public abstract fun visitOther (Lcom/yandex/yatagan/core/model/ComponentFactoryModel;)Ljava/lang/Object;
+	public fun visitSubComponentFactoryMethod (Lcom/yandex/yatagan/core/model/SubComponentFactoryMethodModel;)Ljava/lang/Object;
+	public fun visitWithBuilder (Lcom/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/core/model/ComponentFactoryModel$Visitor$DefaultImpls {
+	public static fun visitSubComponentFactoryMethod (Lcom/yandex/yatagan/core/model/ComponentFactoryModel$Visitor;Lcom/yandex/yatagan/core/model/SubComponentFactoryMethodModel;)Ljava/lang/Object;
+	public static fun visitWithBuilder (Lcom/yandex/yatagan/core/model/ComponentFactoryModel$Visitor;Lcom/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel : com/yandex/yatagan/core/model/ComponentFactoryModel, com/yandex/yatagan/core/model/HasNodeModel {
+	public abstract fun getBuilderInputs ()Ljava/util/Collection;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel$BuilderInputModel : com/yandex/yatagan/core/model/ComponentFactoryModel$InputModel {
+	public abstract fun getBuilderSetter ()Lcom/yandex/yatagan/lang/Method;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ComponentModel : com/yandex/yatagan/core/model/ConditionalHoldingModel, com/yandex/yatagan/core/model/HasNodeModel {
+	public abstract fun getAllModules ()Ljava/util/Set;
+	public abstract fun getDependencies ()Ljava/util/Set;
+	public abstract fun getEntryPoints ()Ljava/util/List;
+	public abstract fun getFactory ()Lcom/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel;
+	public abstract fun getMemberInjectors ()Ljava/util/List;
+	public abstract fun getModules ()Ljava/util/List;
+	public abstract fun getRequiresSynchronizedAccess ()Z
+	public abstract fun getScopes ()Ljava/util/Set;
+	public abstract fun getSubComponentFactoryMethods ()Ljava/util/List;
+	public abstract fun getVariant ()Lcom/yandex/yatagan/core/model/Variant;
+	public abstract fun isRoot ()Z
+}
+
+public final class com/yandex/yatagan/core/model/ConditionExpression$Companion {
+	public final fun getNeverScoped-s2kRxq8 ()Ljava/util/Set;
+	public final fun getUnscoped-s2kRxq8 ()Ljava/util/Set;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ConditionExpression$Literal {
+	public abstract fun getNegated ()Z
+	public abstract fun not ()Lcom/yandex/yatagan/core/model/ConditionExpression$Literal;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ConditionalHoldingModel : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getConditionals ()Ljava/util/List;
+}
+
+public final class com/yandex/yatagan/core/model/DependencyKind : java/lang/Enum {
+	public static final field Direct Lcom/yandex/yatagan/core/model/DependencyKind;
+	public static final field Lazy Lcom/yandex/yatagan/core/model/DependencyKind;
+	public static final field Optional Lcom/yandex/yatagan/core/model/DependencyKind;
+	public static final field OptionalLazy Lcom/yandex/yatagan/core/model/DependencyKind;
+	public static final field OptionalProvider Lcom/yandex/yatagan/core/model/DependencyKind;
+	public static final field Provider Lcom/yandex/yatagan/core/model/DependencyKind;
+	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/core/model/DependencyKind;
+	public static fun values ()[Lcom/yandex/yatagan/core/model/DependencyKind;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/HasNodeModel : com/yandex/yatagan/core/model/ClassBackedModel {
+	public abstract fun accept (Lcom/yandex/yatagan/core/model/HasNodeModel$Visitor;)Ljava/lang/Object;
+	public abstract fun asNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/HasNodeModel$Visitor {
+	public fun visitAssistedInjectFactory (Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel;)Ljava/lang/Object;
+	public fun visitComponent (Lcom/yandex/yatagan/core/model/ComponentModel;)Ljava/lang/Object;
+	public fun visitComponentFactory (Lcom/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel;)Ljava/lang/Object;
+	public fun visitInjectConstructor (Lcom/yandex/yatagan/core/model/InjectConstructorModel;)Ljava/lang/Object;
+	public abstract fun visitOther ()Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/core/model/HasNodeModel$Visitor$DefaultImpls {
+	public static fun visitAssistedInjectFactory (Lcom/yandex/yatagan/core/model/HasNodeModel$Visitor;Lcom/yandex/yatagan/core/model/AssistedInjectFactoryModel;)Ljava/lang/Object;
+	public static fun visitComponent (Lcom/yandex/yatagan/core/model/HasNodeModel$Visitor;Lcom/yandex/yatagan/core/model/ComponentModel;)Ljava/lang/Object;
+	public static fun visitComponentFactory (Lcom/yandex/yatagan/core/model/HasNodeModel$Visitor;Lcom/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel;)Ljava/lang/Object;
+	public static fun visitInjectConstructor (Lcom/yandex/yatagan/core/model/HasNodeModel$Visitor;Lcom/yandex/yatagan/core/model/InjectConstructorModel;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/InjectConstructorModel : com/yandex/yatagan/core/model/ConditionalHoldingModel, com/yandex/yatagan/core/model/HasNodeModel {
+	public abstract fun getConstructor ()Lcom/yandex/yatagan/lang/Constructor;
+	public abstract fun getInputs ()Ljava/util/List;
+	public abstract fun getScopes ()Ljava/util/Set;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/MembersInjectorModel : com/yandex/yatagan/core/model/ClassBackedModel {
+	public abstract fun getInjector ()Lcom/yandex/yatagan/lang/Method;
+	public abstract fun getMembersToInject ()Ljava/util/Map;
+}
+
+public final class com/yandex/yatagan/core/model/ModelExtensionsKt {
+	public static final fun accept (Lcom/yandex/yatagan/core/model/HasNodeModel;Lcom/yandex/yatagan/core/model/HasNodeModel$Visitor;)Ljava/lang/Object;
+	public static final fun component1 (Lcom/yandex/yatagan/core/model/NodeDependency;)Lcom/yandex/yatagan/core/model/NodeModel;
+	public static final fun component2 (Lcom/yandex/yatagan/core/model/NodeDependency;)Lcom/yandex/yatagan/core/model/DependencyKind;
+	public static final fun getAllInputs (Lcom/yandex/yatagan/core/model/ComponentFactoryModel;)Lkotlin/sequences/Sequence;
+	public static final fun getAllInputs (Lcom/yandex/yatagan/core/model/ComponentFactoryWithBuilderModel;)Lkotlin/sequences/Sequence;
+	public static final fun isEager (Lcom/yandex/yatagan/core/model/DependencyKind;)Z
+	public static final fun isOptional (Lcom/yandex/yatagan/core/model/DependencyKind;)Z
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ModuleHostedBindingModel : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun accept (Lcom/yandex/yatagan/core/model/ModuleHostedBindingModel$Visitor;)Ljava/lang/Object;
+	public abstract fun getMethod ()Lcom/yandex/yatagan/lang/Method;
+	public abstract fun getOriginModule ()Lcom/yandex/yatagan/core/model/ModuleModel;
+	public abstract fun getScopes ()Ljava/util/Set;
+	public abstract fun getTarget ()Lcom/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel;
+}
+
+public abstract class com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel {
+	public abstract fun getNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel$DirectMultiContribution : com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel {
+	public fun <init> (Lcom/yandex/yatagan/core/model/NodeModel;Lcom/yandex/yatagan/core/model/CollectionTargetKind;)V
+	public final fun getKind ()Lcom/yandex/yatagan/core/model/CollectionTargetKind;
+	public fun getNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public final class com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel$FlattenMultiContribution : com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel {
+	public fun <init> (Lcom/yandex/yatagan/core/model/NodeModel;Lcom/yandex/yatagan/core/model/NodeModel;Lcom/yandex/yatagan/core/model/CollectionTargetKind;)V
+	public final fun getFlattened ()Lcom/yandex/yatagan/core/model/NodeModel;
+	public final fun getKind ()Lcom/yandex/yatagan/core/model/CollectionTargetKind;
+	public fun getNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public final class com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel$MappingContribution : com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel {
+	public fun <init> (Lcom/yandex/yatagan/core/model/NodeModel;Lcom/yandex/yatagan/lang/Type;Lcom/yandex/yatagan/lang/Annotation$Value;Lcom/yandex/yatagan/lang/AnnotationDeclaration;)V
+	public final fun getKeyType ()Lcom/yandex/yatagan/lang/Type;
+	public final fun getKeyValue ()Lcom/yandex/yatagan/lang/Annotation$Value;
+	public final fun getMapKeyClass ()Lcom/yandex/yatagan/lang/AnnotationDeclaration;
+	public fun getNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public final class com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel$Plain : com/yandex/yatagan/core/model/ModuleHostedBindingModel$BindingTargetModel {
+	public fun <init> (Lcom/yandex/yatagan/core/model/NodeModel;)V
+	public fun getNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ModuleHostedBindingModel$Visitor {
+	public fun visitBinds (Lcom/yandex/yatagan/core/model/BindsBindingModel;)Ljava/lang/Object;
+	public abstract fun visitOther (Lcom/yandex/yatagan/core/model/ModuleHostedBindingModel;)Ljava/lang/Object;
+	public fun visitProvides (Lcom/yandex/yatagan/core/model/ProvidesBindingModel;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/core/model/ModuleHostedBindingModel$Visitor$DefaultImpls {
+	public static fun visitBinds (Lcom/yandex/yatagan/core/model/ModuleHostedBindingModel$Visitor;Lcom/yandex/yatagan/core/model/BindsBindingModel;)Ljava/lang/Object;
+	public static fun visitProvides (Lcom/yandex/yatagan/core/model/ModuleHostedBindingModel$Visitor;Lcom/yandex/yatagan/core/model/ProvidesBindingModel;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ModuleModel : com/yandex/yatagan/core/model/ClassBackedModel {
+	public abstract fun getBindings ()Lkotlin/sequences/Sequence;
+	public abstract fun getIncludes ()Ljava/util/Collection;
+	public abstract fun getMultiBindingDeclarations ()Lkotlin/sequences/Sequence;
+	public abstract fun getRequiresInstance ()Z
+	public abstract fun getSubcomponents ()Ljava/util/Collection;
+	public abstract fun isTriviallyConstructable ()Z
+}
+
+public abstract interface class com/yandex/yatagan/core/model/MultiBindingDeclarationModel : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun accept (Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$Visitor;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/MultiBindingDeclarationModel$CollectionDeclarationModel : com/yandex/yatagan/core/model/MultiBindingDeclarationModel {
+	public abstract fun getElementType ()Lcom/yandex/yatagan/core/model/NodeModel;
+	public abstract fun getKind ()Lcom/yandex/yatagan/core/model/CollectionTargetKind;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/MultiBindingDeclarationModel$InvalidDeclarationModel : com/yandex/yatagan/core/model/MultiBindingDeclarationModel {
+	public abstract fun getInvalidMethod ()Lcom/yandex/yatagan/lang/Method;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/MultiBindingDeclarationModel$MapDeclarationModel : com/yandex/yatagan/core/model/MultiBindingDeclarationModel {
+	public abstract fun getKeyType ()Lcom/yandex/yatagan/lang/Type;
+	public abstract fun getValueType ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/MultiBindingDeclarationModel$Visitor {
+	public fun visitCollectionDeclaration (Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$CollectionDeclarationModel;)Ljava/lang/Object;
+	public fun visitInvalid (Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$InvalidDeclarationModel;)Ljava/lang/Object;
+	public fun visitMapDeclaration (Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$MapDeclarationModel;)Ljava/lang/Object;
+	public abstract fun visitOther (Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/core/model/MultiBindingDeclarationModel$Visitor$DefaultImpls {
+	public static fun visitCollectionDeclaration (Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$Visitor;Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$CollectionDeclarationModel;)Ljava/lang/Object;
+	public static fun visitInvalid (Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$Visitor;Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$InvalidDeclarationModel;)Ljava/lang/Object;
+	public static fun visitMapDeclaration (Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$Visitor;Lcom/yandex/yatagan/core/model/MultiBindingDeclarationModel$MapDeclarationModel;)Ljava/lang/Object;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/NodeDependency : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun copyDependency (Lcom/yandex/yatagan/core/model/NodeModel;Lcom/yandex/yatagan/core/model/DependencyKind;)Lcom/yandex/yatagan/core/model/NodeDependency;
+	public static synthetic fun copyDependency$default (Lcom/yandex/yatagan/core/model/NodeDependency;Lcom/yandex/yatagan/core/model/NodeModel;Lcom/yandex/yatagan/core/model/DependencyKind;ILjava/lang/Object;)Lcom/yandex/yatagan/core/model/NodeDependency;
+	public abstract fun getKind ()Lcom/yandex/yatagan/core/model/DependencyKind;
+	public abstract fun getNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public final class com/yandex/yatagan/core/model/NodeDependency$DefaultImpls {
+	public static synthetic fun copyDependency$default (Lcom/yandex/yatagan/core/model/NodeDependency;Lcom/yandex/yatagan/core/model/NodeModel;Lcom/yandex/yatagan/core/model/DependencyKind;ILjava/lang/Object;)Lcom/yandex/yatagan/core/model/NodeDependency;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/NodeModel : com/yandex/yatagan/core/model/ClassBackedModel, com/yandex/yatagan/core/model/NodeDependency, java/lang/Comparable {
+	public abstract fun copyDependency (Lcom/yandex/yatagan/core/model/NodeModel;Lcom/yandex/yatagan/core/model/DependencyKind;)Lcom/yandex/yatagan/core/model/NodeDependency;
+	public abstract fun dropQualifier ()Lcom/yandex/yatagan/core/model/NodeModel;
+	public abstract fun getHintIsFrameworkType ()Z
+	public abstract fun getKind ()Lcom/yandex/yatagan/core/model/DependencyKind;
+	public abstract fun getNode ()Lcom/yandex/yatagan/core/model/NodeModel;
+	public abstract fun getQualifier ()Lcom/yandex/yatagan/lang/Annotation;
+	public abstract fun getSpecificModel ()Lcom/yandex/yatagan/core/model/HasNodeModel;
+	public abstract fun multiBoundListNodes ()[Lcom/yandex/yatagan/core/model/NodeModel;
+	public abstract fun multiBoundMapNodes (Lcom/yandex/yatagan/lang/Type;Z)[Lcom/yandex/yatagan/core/model/NodeModel;
+	public abstract fun multiBoundSetNodes ()[Lcom/yandex/yatagan/core/model/NodeModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ProvidesBindingModel : com/yandex/yatagan/core/model/ConditionalHoldingModel, com/yandex/yatagan/core/model/ModuleHostedBindingModel {
+	public abstract fun getInputs ()Ljava/util/List;
+	public abstract fun getRequiresModuleInstance ()Z
+}
+
+public abstract interface class com/yandex/yatagan/core/model/ScopeModel {
+	public static final field Companion Lcom/yandex/yatagan/core/model/ScopeModel$Companion;
+	public abstract fun getCustomAnnotationClass ()Lcom/yandex/yatagan/lang/AnnotationDeclaration;
+}
+
+public final class com/yandex/yatagan/core/model/ScopeModel$Companion {
+	public final fun getReusable ()Lcom/yandex/yatagan/core/model/ScopeModel;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/SubComponentFactoryMethodModel : com/yandex/yatagan/core/model/ComponentFactoryModel {
+	public abstract fun getFactoryMethod ()Lcom/yandex/yatagan/lang/Method;
+}
+
+public abstract interface class com/yandex/yatagan/core/model/Variant$DimensionModel : com/yandex/yatagan/core/model/ClassBackedModel {
+	public abstract fun isInvalid ()Z
+}
+
+public abstract interface class com/yandex/yatagan/core/model/Variant$FlavorModel : com/yandex/yatagan/core/model/ClassBackedModel {
+	public abstract fun getDimension ()Lcom/yandex/yatagan/core/model/Variant$DimensionModel;
+}
+

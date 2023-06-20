@@ -69,6 +69,7 @@ internal class KspAnnotationImpl(
     ) : ValueBase() {
         private val identity by lazy(PUBLICATION) {
             accept(object : Value.Visitor<Any?> {
+                override fun visitDefault(value: Any?) = throw AssertionError()
                 override fun visitBoolean(value: Boolean) = value
                 override fun visitByte(value: Byte) = value
                 override fun visitShort(value: Short) = value

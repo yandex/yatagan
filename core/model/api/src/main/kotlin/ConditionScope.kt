@@ -16,7 +16,10 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
+
 /**
  * A [ConditionExpression] with [ConditionModel] as its [literals][ConditionExpression.Literal].
  */
+@Incubating
 public typealias ConditionScope = ConditionExpression<ConditionModel>

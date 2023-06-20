@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
+
 /**
  * Models a field from a JVM point of view.
  * Properties are not modeled by this.
@@ -32,6 +34,7 @@ public interface Field : Member {
      *
      * @return the annotation model or `null` if no such annotation is present.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.OnField> getAnnotation(
         which: BuiltinAnnotation.Target.OnField<T>
     ): T?

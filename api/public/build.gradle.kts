@@ -1,12 +1,8 @@
 plugins {
-    id("yatagan.artifact")
+    id("yatagan.stable-api-artifact")
 }
 
 dependencies {
     // Include javax.inject API
     api("javax.inject:javax.inject:1")
-}
-
-kotlin {
-    explicitApi()
 }

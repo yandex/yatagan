@@ -1,0 +1,169 @@
+public abstract interface annotation class com/yandex/yatagan/AllConditions : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/yandex/yatagan/Condition;
+}
+
+public abstract interface annotation class com/yandex/yatagan/AnyCondition : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/yandex/yatagan/Condition;
+}
+
+public abstract interface annotation class com/yandex/yatagan/AnyConditions : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/yandex/yatagan/AnyCondition;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Assisted : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class com/yandex/yatagan/AssistedFactory : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/AssistedInject : java/lang/annotation/Annotation {
+}
+
+public abstract interface class com/yandex/yatagan/AutoBuilder {
+	public abstract fun create ()Ljava/lang/Object;
+	public fun provideInput (Ljava/lang/Object;)Lcom/yandex/yatagan/AutoBuilder;
+	public abstract fun provideInput (Ljava/lang/Object;Ljava/lang/Class;)Lcom/yandex/yatagan/AutoBuilder;
+}
+
+public final class com/yandex/yatagan/AutoBuilder$DefaultImpls {
+	public static fun provideInput (Lcom/yandex/yatagan/AutoBuilder;Ljava/lang/Object;)Lcom/yandex/yatagan/AutoBuilder;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Binds : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/BindsInstance : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/ClassKey : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Component : java/lang/annotation/Annotation {
+	public abstract fun dependencies ()[Ljava/lang/Class;
+	public abstract fun isRoot ()Z
+	public abstract fun modules ()[Ljava/lang/Class;
+	public abstract fun multiThreadAccess ()Z
+	public abstract fun variant ()[Ljava/lang/Class;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Component$Builder : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/ComponentFlavor : java/lang/annotation/Annotation {
+	public abstract fun dimension ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class com/yandex/yatagan/ComponentVariantDimension : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/Condition : java/lang/annotation/Annotation {
+	public abstract fun condition ()Ljava/lang/String;
+	public abstract fun value ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Conditional : java/lang/annotation/Annotation {
+	public abstract fun onlyIn ()[Ljava/lang/Class;
+	public abstract fun value ()[Ljava/lang/Class;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Conditionals : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/yandex/yatagan/Conditional;
+}
+
+public abstract interface annotation class com/yandex/yatagan/ConditionsApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/IntKey : java/lang/annotation/Annotation {
+	public abstract fun value ()I
+}
+
+public abstract interface annotation class com/yandex/yatagan/IntoList : java/lang/annotation/Annotation {
+	public abstract fun flatten ()Z
+}
+
+public abstract interface annotation class com/yandex/yatagan/IntoMap : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/IntoMap$Key : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/IntoSet : java/lang/annotation/Annotation {
+	public abstract fun flatten ()Z
+}
+
+public abstract interface class com/yandex/yatagan/Lazy : javax/inject/Provider {
+}
+
+public abstract interface annotation class com/yandex/yatagan/Module : java/lang/annotation/Annotation {
+	public abstract fun includes ()[Ljava/lang/Class;
+	public abstract fun subcomponents ()[Ljava/lang/Class;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Multibinds : java/lang/annotation/Annotation {
+}
+
+public final class com/yandex/yatagan/Optional {
+	public static final field Companion Lcom/yandex/yatagan/Optional$Companion;
+	public synthetic fun <init> (Ljava/lang/Object;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun empty ()Lcom/yandex/yatagan/Optional;
+	public final fun get ()Ljava/lang/Object;
+	public final fun getValue ()Ljava/lang/Object;
+	public final fun ifPresent (Lcom/yandex/yatagan/Optional$Consumer;)V
+	public final synthetic fun ifPresent (Lkotlin/jvm/functions/Function1;)V
+	public final fun ifPresentOrElse (Lcom/yandex/yatagan/Optional$Consumer;Ljava/lang/Runnable;)V
+	public final synthetic fun ifPresentOrElse (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)V
+	public final fun isPresent ()Z
+	public final fun map (Lcom/yandex/yatagan/Optional$Function;)Lcom/yandex/yatagan/Optional;
+	public final synthetic fun map (Lkotlin/jvm/functions/Function1;)Lcom/yandex/yatagan/Optional;
+	public static final fun of (Ljava/lang/Object;)Lcom/yandex/yatagan/Optional;
+	public static final fun ofNullable (Ljava/lang/Object;)Lcom/yandex/yatagan/Optional;
+	public final fun orElse (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun orNull ()Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/Optional$Companion {
+	public final fun empty ()Lcom/yandex/yatagan/Optional;
+	public final fun of (Ljava/lang/Object;)Lcom/yandex/yatagan/Optional;
+	public final fun ofNullable (Ljava/lang/Object;)Lcom/yandex/yatagan/Optional;
+}
+
+public abstract interface class com/yandex/yatagan/Optional$Consumer {
+	public abstract fun accept (Ljava/lang/Object;)V
+}
+
+public abstract interface class com/yandex/yatagan/Optional$Function {
+	public abstract fun apply (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Provides : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/yandex/yatagan/Conditional;
+}
+
+public abstract interface annotation class com/yandex/yatagan/Reusable : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/yandex/yatagan/StringKey : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface class com/yandex/yatagan/ThreadAsserter {
+	public abstract fun assertThreadAccess ()V
+}
+
+public abstract interface annotation class com/yandex/yatagan/VariantApi : java/lang/annotation/Annotation {
+}
+
+public final class com/yandex/yatagan/Yatagan {
+	public static final field INSTANCE Lcom/yandex/yatagan/Yatagan;
+	public static final fun autoBuilder (Ljava/lang/Class;)Lcom/yandex/yatagan/AutoBuilder;
+	public static final fun builder (Ljava/lang/Class;)Ljava/lang/Object;
+	public static final fun create (Ljava/lang/Class;)Ljava/lang/Object;
+	public static final fun getThreadAsserter ()Lcom/yandex/yatagan/ThreadAsserter;
+	public static final fun setThreadAsserter (Lcom/yandex/yatagan/ThreadAsserter;)V
+}
+
+public abstract interface annotation class com/yandex/yatagan/YataganDelicateApi : java/lang/annotation/Annotation {
+}
+

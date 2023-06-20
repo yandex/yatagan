@@ -16,8 +16,8 @@
 
 package com.yandex.yatagan.core.graph.impl
 
-import com.yandex.yatagan.core.graph.Extensible
-import com.yandex.yatagan.core.graph.WithParents
+import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.base.api.WithParents
 import com.yandex.yatagan.core.model.ComponentFactoryModel
 
 internal fun <K, V> mergeMultiMapsForDuplicateCheck(

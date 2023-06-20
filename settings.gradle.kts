@@ -2,7 +2,8 @@ rootProject.name = "yatagan"
 
 apply(from = "buildSrc/settings.gradle.kts")
 
-include(":base")
+include(":base:api")
+include(":base:impl")
 
 include(":api:public")
 include(":api:compiled")  // DEPRECATED, WILL BE REMOVED IN THE FUTURE RELEASE

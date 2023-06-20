@@ -1,0 +1,43 @@
+public final class com/yandex/yatagan/validation/LocatedMessage {
+	public fun <init> (Lcom/yandex/yatagan/validation/ValidationMessage;Ljava/util/List;)V
+	public final fun component1 ()Lcom/yandex/yatagan/validation/ValidationMessage;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Lcom/yandex/yatagan/validation/ValidationMessage;Ljava/util/List;)Lcom/yandex/yatagan/validation/LocatedMessage;
+	public static synthetic fun copy$default (Lcom/yandex/yatagan/validation/LocatedMessage;Lcom/yandex/yatagan/validation/ValidationMessage;Ljava/util/List;ILjava/lang/Object;)Lcom/yandex/yatagan/validation/LocatedMessage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEncounterPaths ()Ljava/util/List;
+	public final fun getMessage ()Lcom/yandex/yatagan/validation/ValidationMessage;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun toString (Lcom/yandex/yatagan/validation/MayBeInvalid;)Ljava/lang/CharSequence;
+	public abstract fun validate (Lcom/yandex/yatagan/validation/Validator;)V
+}
+
+public abstract interface class com/yandex/yatagan/validation/RichString : java/lang/CharSequence {
+	public abstract fun toAnsiEscapedString ()Ljava/lang/String;
+	public abstract fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/yandex/yatagan/validation/ValidationMessage {
+	public abstract fun getContents ()Ljava/lang/CharSequence;
+	public abstract fun getKind ()Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
+	public abstract fun getNotes ()Ljava/util/Collection;
+}
+
+public final class com/yandex/yatagan/validation/ValidationMessage$Kind : java/lang/Enum {
+	public static final field Error Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
+	public static final field MandatoryWarning Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
+	public static final field Warning Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
+	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
+	public static fun values ()[Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
+}
+
+public abstract interface class com/yandex/yatagan/validation/Validator {
+	public abstract fun child (Lcom/yandex/yatagan/validation/MayBeInvalid;)V
+	public abstract fun inline (Lcom/yandex/yatagan/validation/MayBeInvalid;)V
+	public abstract fun report (Lcom/yandex/yatagan/validation/ValidationMessage;)V
+}
+

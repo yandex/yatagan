@@ -17,12 +17,12 @@
 package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildClass
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
-import com.yandex.yatagan.core.graph.Extensible
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.component1

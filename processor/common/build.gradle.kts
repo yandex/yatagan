@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":base"))
+    implementation(project(":base:impl"))
     implementation(project(":validation:impl"))
     implementation(project(":validation:format"))
     implementation(project(":core:graph:impl"))

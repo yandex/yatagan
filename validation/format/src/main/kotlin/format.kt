@@ -87,6 +87,7 @@ inline fun BaseBinding.bindingModelRepresentation(
     val context = findChildContextNode(childContext)
 
     val dependencies = accept(object : BaseBinding.Visitor<List<NodeDependency>> {
+        override fun visitOther(other: BaseBinding) = throw AssertionError()
         override fun visitAlias(alias: AliasBinding) = listOf(alias.source)
         override fun visitBinding(binding: Binding) = binding.dependencies.toList()
     })
@@ -108,6 +109,7 @@ inline fun BaseBinding.bindingModelRepresentation(
 fun BaseBinding.findChildContextNode(childContext: MayBeInvalid?): NodeDependency? {
     return when (childContext) {
         is BaseBinding -> accept(object : BaseBinding.Visitor<NodeDependency?> {
+            override fun visitOther(other: BaseBinding) = throw AssertionError()
             override fun visitAlias(alias: AliasBinding) = alias.source.takeIf { it == childContext.target }
             override fun visitBinding(binding: Binding) = binding.dependencies.find { it.node == childContext.target }
         })

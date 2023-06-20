@@ -111,7 +111,7 @@ internal class MembersInjectorModelImpl private constructor(
         }
 
         private object IsField : Member.Visitor<Boolean> {
-            override fun visitMethod(model: Method) = false
+            override fun visitOther(model: Member) = false
             override fun visitField(model: Field) = true
         }
     }

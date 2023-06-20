@@ -22,7 +22,7 @@ import com.yandex.yatagan.lang.Method
  * Component dependency.
  * Every "getter" is exposed as a graph-level binding.
  *
- * @see com.yandex.yatagan.Component.dependencies
+ * @see ComponentModel.dependencies
  */
 public interface ComponentDependencyModel : ClassBackedModel {
     public val exposedDependencies: Map<NodeModel, Method>

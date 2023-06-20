@@ -16,6 +16,10 @@
 
 package com.yandex.yatagan.core.graph
 
+import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.base.api.Incubating
+import com.yandex.yatagan.base.api.WithChildren
+import com.yandex.yatagan.base.api.WithParents
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage.Eager
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage.Lazy
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
@@ -55,13 +59,14 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     public val localBindings: Map<Binding, BindingUsage>
 
     /**
-     * All [condition literals][ConditionScope.Literal]s that are **hosted** in this component.
-     * Consists of literals directly used by bindings in this and children graphs.
+     * All [condition literals][com.yandex.yatagan.core.model.ConditionExpression.Literal]s that are **hosted** in this
+     * component. Consists of literals directly used by bindings in this and children graphs.
      *
-     * All literals are [normalized][ConditionScope.Literal.normalized].
+     * All literals are [normalized][normalized].
      *
      * The associated info is [LiteralUsage].
      */
+    @Incubating
     public val localConditionLiterals: Map<ConditionModel, LiteralUsage>
 
     /**
@@ -85,12 +90,13 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      *
      * @see ComponentModel.variant
      */
+    @Incubating
     public val variant: Variant
 
     /**
      * Modules of the underlying model.
      *
-     * @see ComponentModel.modules
+     * @see ComponentModel.allModules
      */
     public val modules: Collection<ModuleModel>
 
@@ -141,9 +147,10 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     /**
      * A condition for this graph.
      *
-     * Equals [Always][com.yandex.yatagan.core.ConditionExpression.Unscoped] for [root][BindingGraph.isRoot] components.
+     * Equals [Always][com.yandex.yatagan.core.model.ConditionExpression.Unscoped] for [root][BindingGraph.isRoot] components.
      * Arbitrary for non-root components.
      */
+    @Incubating
     public val conditionScope: ConditionScope
 
     /**
@@ -157,7 +164,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *
      * @return resolved binding (it may be [EmptyBinding] due to
-     * [NeverScoped][com.yandex.yatagan.core.ConditionExpression.NeverScoped] or because it was requested and
+     * [NeverScoped][com.yandex.yatagan.core.model.ConditionExpression.NeverScoped] or because it was requested and
      * could not be satisfied)
      *
      * @throws IllegalStateException if no such binding is found at all (requested but missing bindings are still safe
@@ -171,7 +178,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     public fun resolveBindingRaw(node: NodeModel): BaseBinding
 
     /**
-     * Provides counts of each dependency [kind][com.yandex.yatagan.core.DependencyKind] requests for the
+     * Provides counts of each dependency [kind][com.yandex.yatagan.core.model.DependencyKind] requests for the
      * [target][Binding.target].
      */
     public interface BindingUsage {
@@ -189,6 +196,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
      * In expression `A && B || C`, `A` is [Eager], while `B`, `C` are [Lazy].
      * In other words, a literal is [Eager] iff it is present in eager position at in at least one expression.
      */
+    @Incubating
     public enum class LiteralUsage {
         /**
          * When a literal is certainly going to be evaluated.

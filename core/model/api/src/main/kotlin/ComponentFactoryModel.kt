@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.NullIfInvalid
+import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload.Dependency
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload.Instance
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload.Module
@@ -43,8 +45,8 @@ public interface ComponentFactoryModel : MayBeInvalid {
 
     /**
      * The component creating method to implement.
-     * `null` if no appropriate method is found.
      */
+    @NullIfInvalid
     public val factoryMethod: Method?
 
     /**
@@ -105,8 +107,10 @@ public interface ComponentFactoryModel : MayBeInvalid {
 
     public fun <R> accept(visitor: Visitor<R>): R
 
+    @StableForImplementation
     public interface Visitor<R> {
-        public fun visitSubComponentFactoryMethod(model: SubComponentFactoryMethodModel): R
-        public fun visitWithBuilder(model: ComponentFactoryWithBuilderModel): R
+        public fun visitOther(model: ComponentFactoryModel): R
+        public fun visitSubComponentFactoryMethod(model: SubComponentFactoryMethodModel): R = visitOther(model)
+        public fun visitWithBuilder(model: ComponentFactoryWithBuilderModel): R = visitOther(model)
     }
 }

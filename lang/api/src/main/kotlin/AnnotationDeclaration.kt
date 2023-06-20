@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
+
 /**
  * An annotation class declaration.
  */
@@ -59,6 +61,7 @@ public interface AnnotationDeclaration : Annotated {
      *
      * @return the annotation model or `null` if no such annotation is present.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.OnAnnotationClass> getAnnotation(
         builtinAnnotation: BuiltinAnnotation.Target.OnAnnotationClass<T>
     ): T?

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2023 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.lang
+package com.yandex.yatagan.base.api
 
 /**
- * Marker for a lang API that may be used for Yatagan implementation and is restricted from client (SPI) usage.
+ * A hierarchy trait, that allows accessing optional parent nodes.
+ *
+ * @see parentsSequence
  */
-@RequiresOptIn(message = "This API is intended to be used only in yatagan implementation and " +
-        "is not designed for client (SPI) usage.")
-public annotation class InternalLangApi
+public interface WithParents<P> where P : WithParents<P> {
+    /**
+     * Parent node. `null` if root is reached.
+     */
+    public val parent: P?
+}

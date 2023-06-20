@@ -70,7 +70,6 @@ class UnresolvedTypeTest {
     fun `unresolved types (JAP)`() = with(JapCompileTestDriver()) {
         testNameRule.assignFrom(this@UnresolvedTypeTest.testNameRule)
 
-        // FIXME: Use correctErrorTypes in tests to allow KAPT to use normal error types.
         includeFromSourceSet(sources)
         compileRunAndValidate()
     }
