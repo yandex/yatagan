@@ -1,4 +1,4 @@
-public abstract interface class com/yandex/yatagan/core/model/AssistedInjectFactoryModel : com/yandex/yatagan/core/model/HasNodeModel {
+public abstract interface class com/yandex/yatagan/core/model/AssistedInjectFactoryModel : com/yandex/yatagan/core/model/ConditionalHoldingModel, com/yandex/yatagan/core/model/HasNodeModel {
 	public abstract fun getAssistedConstructorParameters ()Ljava/util/List;
 	public abstract fun getAssistedFactoryParameters ()Ljava/util/List;
 	public abstract fun getAssistedInjectConstructor ()Lcom/yandex/yatagan/lang/Constructor;
@@ -122,8 +122,8 @@ public abstract interface class com/yandex/yatagan/core/model/ComponentModel : c
 }
 
 public final class com/yandex/yatagan/core/model/ConditionExpression$Companion {
-	public final fun getNeverScoped-s2kRxq8 ()Ljava/util/Set;
-	public final fun getUnscoped-s2kRxq8 ()Ljava/util/Set;
+	public final fun getNeverScoped ()Lcom/yandex/yatagan/core/model/ConditionExpression;
+	public final fun getUnscoped ()Lcom/yandex/yatagan/core/model/ConditionExpression;
 }
 
 public abstract interface class com/yandex/yatagan/core/model/ConditionExpression$Literal {

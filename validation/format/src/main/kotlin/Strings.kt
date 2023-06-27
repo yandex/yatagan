@@ -382,6 +382,11 @@ object Strings {
             ("@AssistedInject constructor @Assisted parameters and " +
                     "factory function @Assisted parameters do not match.").toError()
 
+        @Covered
+        fun assistedInjectConditionalsOnFactory() = (
+                "@Conditional annotations should be specified on the class with the @AssistedInject, " +
+                        "not on its factory").toError()
+
         private const val AccessMessage = "public/internal"
 
         @Covered

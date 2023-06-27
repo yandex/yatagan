@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.codegen.impl
 
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
@@ -25,6 +26,8 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.isAlways
 import com.yandex.yatagan.core.model.isNever
+import com.yandex.yatagan.lang.compiled.ClassNameModel
+import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 
 internal fun componentInstance(
     inside: BindingGraph,
@@ -33,13 +36,13 @@ internal fun componentInstance(
 ): CodeBlock {
     return buildExpression {
         if (isInsideInnerClass) {
-            +"%T.this".formatCode(inside[ComponentImplClassName])
+            +"%T.this".formatCode(inside[GeneratorComponent].implementationClassName)
         } else {
             +"this"
         }
         if (inside != graph) {
             +".%N".formatCode(
-                inside[ComponentFactoryGenerator].fieldNameFor(graph = graph)
+                inside[GeneratorComponent].componentFactoryGenerator.fieldNameFor(graph = graph)
             )
         }
     }
@@ -63,7 +66,7 @@ internal fun Binding.generateAccess(
     isInsideInnerClass: Boolean,
     kind: DependencyKind = DependencyKind.Direct,
 ) {
-    owner[AccessStrategyManager].strategyFor(this).generateAccess(
+    owner[GeneratorComponent].accessStrategyManager.strategyFor(this).generateAccess(
         builder = builder,
         inside = inside,
         isInsideInnerClass = isInsideInnerClass,
@@ -80,7 +83,7 @@ internal inline fun CodeBuilder.generateUnderCondition(
     if (!binding.conditionScope.isAlways) {
         if (!binding.conditionScope.isNever) {
             val expression = buildExpression {
-                val gen = binding.owner[ConditionGenerator]
+                val gen = binding.owner[GeneratorComponent].conditionGenerator
                 gen.expression(
                     builder = this,
                     conditionScope = binding.conditionScope,
@@ -94,5 +97,24 @@ internal inline fun CodeBuilder.generateUnderCondition(
         }
     } else {
         underConditionBlock()
+    }
+}
+
+internal fun formatImplementationClassName(graph: BindingGraph): ClassName {
+    return when(val parent = graph.parent) {
+        null -> graph.model.name.let {
+            val name = when (it) {
+                is ClassNameModel -> it
+                is ParameterizedNameModel -> it.raw
+                else -> throw AssertionError("Unexpected component name: $it")
+            }
+            // Keep name mangling in sync with loader!
+            ClassName.get(name.packageName, "Yatagan$" + name.simpleNames.joinToString(separator = "$"))
+        }
+        else -> with(parent[GeneratorComponent]) {
+            implementationClassName.nestedClass(
+                subcomponentsNamespace.name(graph.model.name, suffix = "Impl", firstCapital = true)
+            )
+        }
     }
 }

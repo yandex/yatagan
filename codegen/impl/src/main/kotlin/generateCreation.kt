@@ -54,7 +54,7 @@ private class CreationGeneratorVisitor(
             val instance = if (binding.requiresModuleInstance) {
                 "%L.%N".formatCode(
                     componentForBinding(binding),
-                    binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.originModule!!),
+                    binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.originModule!!),
                 )
             } else null
             binding.provision.accept(object : Callable.Visitor<Unit> {
@@ -70,7 +70,10 @@ private class CreationGeneratorVisitor(
                 }
 
                 override fun visitMethod(method: Method) {
-                    +"%T.checkProvisionNotNull(".formatCode(Names.Checks)
+                    val enableNullChecks = inside[GeneratorComponent].options.enableProvisionNullChecks
+                    if (enableNullChecks) {
+                        +"%T.checkProvisionNotNull(".formatCode(Names.Checks)
+                    }
                     if (instance != null) {
                         +"%L.%N(".formatCode(instance, method.name)
                     } else {
@@ -81,7 +84,10 @@ private class CreationGeneratorVisitor(
                         +"%T%L.%L(".formatCode(method.ownerName.asTypeName(), ownerObject, method.name)
                     }
                     genArgs()
-                    +"))"
+                    +")"
+                    if (enableNullChecks) {
+                        +")"
+                    }
                 }
 
                 override fun visitConstructor(constructor: Constructor) {
@@ -96,7 +102,7 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
-        binding.owner[AssistedInjectFactoryGenerator].generateCreation(
+        binding.owner[GeneratorComponent].assistedInjectFactoryGenerator.generateCreation(
             builder = builder,
             binding = binding,
             inside = inside,
@@ -108,7 +114,7 @@ private class CreationGeneratorVisitor(
         with(builder) {
             +"%L.%N".formatCode(
                 componentForBinding(binding),
-                binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.target),
+                binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.target),
             )
         }
     }
@@ -124,7 +130,7 @@ private class CreationGeneratorVisitor(
                         continue
                     }
                     val expression = buildExpression {
-                        val gen = inside[ConditionGenerator]
+                        val gen = inside[GeneratorComponent].conditionGenerator
                         gen.expression(
                             builder = this,
                             conditionScope = altBinding.conditionScope,
@@ -157,7 +163,7 @@ private class CreationGeneratorVisitor(
 
     override fun visitSubComponent(binding: SubComponentBinding) {
         with(builder) {
-            +"new %T(".formatCode(binding.targetGraph[ComponentFactoryGenerator].implName)
+            +"new %T(".formatCode(binding.targetGraph[GeneratorComponent].componentFactoryGenerator.implName)
             join(binding.targetGraph.usedParents) { parentGraph ->
                 +buildExpression {
                     +"%L".formatCode(componentInstance(
@@ -175,7 +181,7 @@ private class CreationGeneratorVisitor(
         with(builder) {
             +"%L.%N".formatCode(
                 componentForBinding(binding),
-                binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.dependency),
+                binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.dependency),
             )
         }
     }
@@ -190,14 +196,14 @@ private class CreationGeneratorVisitor(
         with(builder) {
             +"%L.%N.%N()".formatCode(
                 componentForBinding(binding),
-                binding.owner[ComponentFactoryGenerator].fieldNameFor(binding.dependency),
+                binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.dependency),
                 binding.getter.name,
             )
         }
     }
 
     override fun visitMulti(binding: MultiBinding) {
-        binding.owner[CollectionBindingGenerator].generateCreation(
+        binding.owner[GeneratorComponent].collectionBindingGenerator.generateCreation(
             builder = builder,
             binding = binding,
             inside = inside,
@@ -206,7 +212,7 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitMap(binding: MapBinding) {
-        binding.owner[MapBindingGenerator].generateCreation(
+        binding.owner[GeneratorComponent].mapBindingGenerator.generateCreation(
             builder = builder,
             binding = binding,
             inside = inside,

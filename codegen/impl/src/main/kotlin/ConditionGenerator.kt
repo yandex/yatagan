@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
 import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
@@ -28,12 +27,15 @@ import com.yandex.yatagan.core.graph.normalized
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.lang.Method
+import javax.inject.Inject
+import javax.inject.Singleton
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 
-internal class ConditionGenerator(
-    private val fieldsNs: Namespace,
-    private val methodsNs: Namespace,
+@Singleton
+internal class ConditionGenerator @Inject constructor(
+    @FieldsNamespace private val fieldsNs: Namespace,
+    @MethodsNamespace private val methodsNs: Namespace,
     private val thisGraph: BindingGraph,
 ) : ComponentGenerator.Contributor {
     private val literalAccess: Map<ConditionModel, ConditionAccessStrategy> = run {
@@ -61,7 +63,7 @@ internal class ConditionGenerator(
                 isInsideInnerClass = isInsideInnerClass,
             )
         } else {
-            thisGraph.parent!![ConditionGenerator].access(
+            thisGraph.parent!![GeneratorComponent].conditionGenerator.access(
                 literal = literal,
                 builder = builder,
                 inside = inside,
@@ -218,12 +220,4 @@ internal class ConditionGenerator(
             }
         }
     }
-
-    companion object Key : Extensible.Key<ConditionGenerator> {
-        override val keyType get() = ConditionGenerator::class.java
-    }
-}
-
-internal object ComponentImplClassName : Extensible.Key<ClassName> {
-    override val keyType get() = ClassName::class.java
 }

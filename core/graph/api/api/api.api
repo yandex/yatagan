@@ -1,5 +1,5 @@
 public abstract interface class com/yandex/yatagan/core/graph/BindingGraph : com/yandex/yatagan/base/api/Extensible, com/yandex/yatagan/base/api/WithChildren, com/yandex/yatagan/base/api/WithParents, com/yandex/yatagan/validation/MayBeInvalid {
-	public abstract fun getConditionScope-s2kRxq8 ()Ljava/util/Set;
+	public abstract fun getConditionScope ()Lcom/yandex/yatagan/core/model/ConditionExpression;
 	public abstract fun getCreator ()Lcom/yandex/yatagan/core/model/ComponentFactoryModel;
 	public abstract fun getDependencies ()Ljava/util/Collection;
 	public abstract fun getEntryPoints ()Ljava/util/Collection;
@@ -76,7 +76,7 @@ public final class com/yandex/yatagan/core/graph/bindings/BaseBinding$Visitor$De
 
 public abstract interface class com/yandex/yatagan/core/graph/bindings/Binding : com/yandex/yatagan/core/graph/bindings/BaseBinding {
 	public abstract fun accept (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;)Ljava/lang/Object;
-	public abstract fun getConditionScope-s2kRxq8 ()Ljava/util/Set;
+	public abstract fun getConditionScope ()Lcom/yandex/yatagan/core/model/ConditionExpression;
 	public abstract fun getDependencies ()Lkotlin/sequences/Sequence;
 	public abstract fun getNonStaticConditionProviders ()Ljava/util/Set;
 	public abstract fun getScopes ()Ljava/util/Set;

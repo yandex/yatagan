@@ -27,9 +27,12 @@ import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
+import javax.inject.Inject
+import javax.inject.Singleton
 import javax.lang.model.element.Modifier
 
-internal class AssistedInjectFactoryGenerator(
+@Singleton
+internal class AssistedInjectFactoryGenerator @Inject constructor(
     private val thisGraph: BindingGraph,
     private val componentImplName: ClassName,
 ) : ComponentGenerator.Contributor {
@@ -63,7 +66,7 @@ internal class AssistedInjectFactoryGenerator(
                 )
             }
         } else {
-            thisGraph.parent!![AssistedInjectFactoryGenerator]
+            thisGraph.parent!![GeneratorComponent].assistedInjectFactoryGenerator
                 .generateCreation(
                     builder = builder,
                     binding = binding,
@@ -112,9 +115,5 @@ internal class AssistedInjectFactoryGenerator(
                 }
             }
         }
-    }
-
-    companion object Key : Extensible.Key<AssistedInjectFactoryGenerator> {
-        override val keyType get() = AssistedInjectFactoryGenerator::class.java
     }
 }

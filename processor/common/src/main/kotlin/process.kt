@@ -91,6 +91,8 @@ fun <Source> process(
                 val generator = ComponentGeneratorFacade(
                     graph = graphRoot,
                     maxSlotsPerSwitch = delegate.options[IntOption.MaxSlotsPerSwitch],
+                    enableThreadChecks = !delegate.options[BooleanOption.OmitThreadChecks],
+                    enableProvisionNullChecks = !delegate.options[BooleanOption.OmitProvisionNullChecks],
                 )
                 delegate.openFileForGenerating(
                     sources = allSourcesSequence(delegate, graphRoot),

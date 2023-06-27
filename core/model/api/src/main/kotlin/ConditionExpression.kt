@@ -25,8 +25,7 @@ import com.yandex.yatagan.core.model.ConditionExpression.Literal
  * @param L a [Literal] compatible type.
  */
 @Incubating
-@JvmInline
-public value class ConditionExpression<out L : Literal>(
+public data class ConditionExpression<out L : ConditionExpression.Literal>(
     /**
      * CNF - inner sets are `OR`-ed together into outer set; literals in inner sets (clauses) are `AND`-ed together.
      */

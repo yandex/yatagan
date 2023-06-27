@@ -19,19 +19,28 @@ package com.yandex.yatagan.codegen.impl
 import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildClass
+import com.yandex.yatagan.core.graph.BindingGraph
+import javax.inject.Inject
+import javax.inject.Singleton
 import javax.lang.model.element.Modifier.FINAL
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.Modifier.STATIC
 import javax.lang.model.element.Modifier.VOLATILE
 
-internal class ScopedProviderGenerator(
+@Singleton
+internal class ScopedProviderGenerator @Inject constructor(
     private val componentImplName: ClassName,
-    private val useDoubleChecking: Boolean,
+    private val options: ComponentGenerator.Options,
+    graph: BindingGraph,
 ) : ComponentGenerator.Contributor {
+    private var isUsed = false
+    private val useDoubleChecking = graph.requiresSynchronizedAccess
     val name: ClassName = componentImplName.nestedClass(if (useDoubleChecking) "DoubleCheck" else "CachingProviderImpl")
+        get() = field.also { isUsed = true }
 
     override fun generate(builder: TypeSpecBuilder) {
+        if (!isUsed) return
         builder.nestedType {
             buildClass(name) {
                 implements(Names.Lazy)
@@ -66,7 +75,9 @@ internal class ScopedProviderGenerator(
                                 }
                             }
                         } else {
-                            +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+                            if (options.enableThreadChecks) {
+                                +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+                            }
                             +"local = mDelegate.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                             +"mValue = local"
                         }

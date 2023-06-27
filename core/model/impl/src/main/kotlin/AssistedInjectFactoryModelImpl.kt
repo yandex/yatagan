@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.model.impl
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel.Parameter
+import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.lang.BuiltinAnnotation
@@ -38,6 +39,19 @@ internal class AssistedInjectFactoryModelImpl private constructor(
     init {
         assert(canRepresent(impl))
     }
+
+    private val assistedInjectClassConditionalModel by lazy {
+        assistedInjectType?.let {
+            ConditionalHoldingModelImpl(it.declaration.getAnnotations(BuiltinAnnotation.Conditional))
+        }
+    }
+
+    private val unexpectedFactoryConditionalModel by lazy {
+        ConditionalHoldingModelImpl(impl.getAnnotations(BuiltinAnnotation.Conditional))
+    }
+
+    override val conditionals: List<ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel>
+        get() = assistedInjectClassConditionalModel?.conditionals ?: emptyList()
 
     override val factoryMethod: Method? by lazy {
         impl.methods.singleOrNull { it.isAbstract }
@@ -88,6 +102,7 @@ internal class AssistedInjectFactoryModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         validator.child(asNode())
+        assistedInjectClassConditionalModel?.let(validator::child)
 
         if (impl.kind != TypeDeclarationKind.Interface) {
             validator.reportError(Strings.Errors.assistedInjectFactoryNotInterface())
@@ -126,6 +141,10 @@ internal class AssistedInjectFactoryModelImpl private constructor(
                 addNote(Strings.Notes.assistedInjectMismatchFromConstructor(params = allConstructorAssistedParameters))
                 addNote(Strings.Notes.assistedInjectMismatchFromFactory(params = allFactoryAssistedParameters))
             }
+        }
+
+        if (unexpectedFactoryConditionalModel.conditionals.isNotEmpty()) {
+            validator.reportError(Strings.Errors.assistedInjectConditionalsOnFactory())
         }
     }
 

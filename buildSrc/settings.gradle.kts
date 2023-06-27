@@ -16,11 +16,16 @@ dependencyResolutionManagement {
             library("nexusPublish-gradle", "io.github.gradle-nexus:publish-plugin:1.3.0")
 
             library("ksp-api", "com.google.devtools.ksp", "symbol-processing-api").versionRef("ksp")
+            library("ksp-gradle", "com.google.devtools.ksp", "com.google.devtools.ksp.gradle.plugin").versionRef("ksp")
 
             library("autoCommon", "com.google.auto:auto-common:1.2.1")
 
             library("poets-java", "com.squareup:javapoet:1.13.0")
             library("poets-kotlin", "com.squareup:kotlinpoet:1.11.0")
+
+            val yataganDogFood = "1.2.1"
+            library("yataganDogFood-api", "com.yandex.yatagan", "api-compiled").version(yataganDogFood)
+            library("yataganDogFood-ksp", "com.yandex.yatagan", "processor-ksp").version(yataganDogFood)
         }
 
         create("testingLibs") {

@@ -21,26 +21,39 @@ import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
+import javax.inject.Inject
+import javax.inject.Singleton
 import javax.lang.model.element.Modifier
 
-internal class SlotSwitchingGenerator(
+@Singleton
+internal class SlotSwitchingGenerator @Inject constructor(
     private val thisGraph: BindingGraph,
-    private val maxSlotsPerSwitch: Int,
+    options: ComponentGenerator.Options,
 ) : ComponentGenerator.Contributor {
+    private val maxSlotsPerSwitch = options.maxSlotsPerSwitch
+
     init {
         require(maxSlotsPerSwitch > 1 || maxSlotsPerSwitch == -1) {
             "maxSlotsPerSwitch should be at least 2 or -1 (infinity)"
         }
     }
 
+    private var isUsed = false
     private val bindings = arrayListOf<Binding>()
+    private val seen = hashSetOf<Binding>()
 
     fun requestSlot(forBinding: Binding): Int {
+        isUsed = true
+        if (forBinding in seen) {
+            return bindings.indexOf(forBinding)
+        }
         bindings += forBinding
+        seen += forBinding
         return bindings.lastIndex
     }
 
     override fun generate(builder: TypeSpecBuilder) {
+        if (!isUsed) return
         builder.method(FactoryMethodName) {
             modifiers(/*package-private*/)
             returnType(ClassName.OBJECT)
