@@ -22,7 +22,7 @@ import com.yandex.yatagan.validation.MayBeInvalid
 /**
  * Represents a parsed runtime condition model.
  */
-public interface ConditionModel : ConditionExpression.Literal, MayBeInvalid {
+public interface ConditionModel : MayBeInvalid {
     /**
      * A class/object/companion that contains the first member from [path].
      * [NodeModel] type is used to be able to resolve the instance of a graph in case of
@@ -41,6 +41,4 @@ public interface ConditionModel : ConditionExpression.Literal, MayBeInvalid {
      * `false` if condition can be evaluated from the static context (plain/static condition).
      */
     public val requiresInstance: Boolean
-
-    override fun not(): ConditionModel
 }

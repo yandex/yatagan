@@ -23,9 +23,8 @@ import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.DependencyKind
-import com.yandex.yatagan.core.model.isAlways
-import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.lang.compiled.ClassNameModel
 import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 
@@ -80,13 +79,15 @@ internal inline fun CodeBuilder.generateUnderCondition(
     isInsideInnerClass: Boolean,
     underConditionBlock: CodeBuilder.() -> Unit,
 ) {
-    if (!binding.conditionScope.isAlways) {
-        if (!binding.conditionScope.isNever) {
+    when(val conditionScope = binding.conditionScope) {
+        ConditionScope.Always -> underConditionBlock()
+        ConditionScope.Never -> {}
+        is ConditionScope.ExpressionScope -> {
             val expression = buildExpression {
                 val gen = binding.owner[GeneratorComponent].conditionGenerator
                 gen.expression(
                     builder = this,
-                    conditionScope = binding.conditionScope,
+                    conditionScope = conditionScope,
                     inside = inside,
                     isInsideInnerClass = isInsideInnerClass,
                 )
@@ -95,8 +96,6 @@ internal inline fun CodeBuilder.generateUnderCondition(
                 underConditionBlock()
             }
         }
-    } else {
-        underConditionBlock()
     }
 }
 

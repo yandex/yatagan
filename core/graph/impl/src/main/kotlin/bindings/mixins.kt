@@ -20,7 +20,6 @@ import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
-import com.yandex.yatagan.core.graph.impl.contains
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel
 import com.yandex.yatagan.core.model.ModuleModel
@@ -30,6 +29,7 @@ import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import com.yandex.yatagan.core.model.isOptional
+import com.yandex.yatagan.core.model.notImplies
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -48,7 +48,7 @@ internal interface BaseBindingDefaultsMixin : BaseBinding {
 
 internal interface BindingDefaultsMixin : Binding, BaseBindingDefaultsMixin {
     override val conditionScope: ConditionScope
-        get() = ConditionScope.Unscoped
+        get() = ConditionScope.Always
 
     override val nonStaticConditionProviders: Set<NodeModel>
         get() = emptySet()
@@ -80,7 +80,7 @@ internal interface BindingDefaultsMixin : Binding, BaseBindingDefaultsMixin {
                 if (kind.isOptional) continue
                 val resolved = owner.resolveBinding(node)
                 val resolvedScope = resolved.graphConditionScope()
-                if (resolvedScope !in conditionScope) {
+                if (conditionScope notImplies resolvedScope) {
                     // Incompatible condition!
                     validator.reportError(Strings.Errors.incompatibleCondition(
                         aCondition = resolvedScope,

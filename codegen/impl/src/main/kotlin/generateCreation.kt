@@ -32,11 +32,10 @@ import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
 import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
-import com.yandex.yatagan.core.model.isAlways
-import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.lang.Callable
 import com.yandex.yatagan.lang.Constructor
 import com.yandex.yatagan.lang.Method
@@ -120,35 +119,38 @@ private class CreationGeneratorVisitor(
             var exhaustive = false
             for (alternative: NodeModel in binding.alternatives) {
                 val altBinding = inside.resolveBinding(alternative)
-                if (!altBinding.conditionScope.isAlways) {
-                    if (altBinding.conditionScope.isNever) {
-                        // Never scoped is, by definition, unreached, so just skip it.
-                        continue
-                    }
-                    val expression = buildExpression {
-                        val gen = inside[GeneratorComponent].conditionGenerator
-                        gen.expression(
-                            builder = this,
-                            conditionScope = altBinding.conditionScope,
+                when(val conditionScope = altBinding.conditionScope) {
+                    ConditionScope.Always -> {
+                        altBinding.generateAccess(
+                            builder = builder,
                             inside = inside,
                             isInsideInnerClass = isInsideInnerClass,
                         )
+                        exhaustive = true
+                        break  // no further generation, the rest are (if any) unreachable.
                     }
-                    +"%L ? ".formatCode(expression)
-                    altBinding.generateAccess(
-                        builder = builder,
-                        inside = inside,
-                        isInsideInnerClass = isInsideInnerClass,
-                    )
-                    +" : "
-                } else {
-                    altBinding.generateAccess(
-                        builder = builder,
-                        inside = inside,
-                        isInsideInnerClass = isInsideInnerClass,
-                    )
-                    exhaustive = true
-                    break  // no further generation, the rest are (if any) unreachable.
+                    ConditionScope.Never -> {
+                        // Never scoped is, by definition, unreached, so just skip it.
+                        continue
+                    }
+                    is ConditionScope.ExpressionScope -> {
+                        val expression = buildExpression {
+                            val gen = inside[GeneratorComponent].conditionGenerator
+                            gen.expression(
+                                builder = this,
+                                conditionScope = conditionScope,
+                                inside = inside,
+                                isInsideInnerClass = isInsideInnerClass,
+                            )
+                        }
+                        +"%L ? ".formatCode(expression)
+                        altBinding.generateAccess(
+                            builder = builder,
+                            inside = inside,
+                            isInsideInnerClass = isInsideInnerClass,
+                        )
+                        +" : "
+                    }
                 }
             }
             if (!exhaustive) {

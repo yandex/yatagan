@@ -28,7 +28,7 @@ public interface Binding : BaseBinding {
     /**
      * A condition scope of this binding. Part of the *Conditions API*.
      *
-     * If this is [never-scoped][com.yandex.yatagan.core.model.ConditionExpression.NeverScoped],
+     * If this is [never-scoped][com.yandex.yatagan.core.model.ConditionScope.Never],
      * then [dependencies] **must** yield an empty sequence.
      */
     public val conditionScope: ConditionScope
@@ -42,7 +42,7 @@ public interface Binding : BaseBinding {
     /**
      * The binding's dependencies on other bindings.
      *
-     * If [conditionScope] is ["never"][com.yandex.yatagan.core.model.ConditionExpression.NeverScoped],
+     * If [conditionScope] is ["never"][com.yandex.yatagan.core.model.ConditionScope.Never],
      * then the sequence **must** be empty.
      *
      * Backends can only use bindings that are reported here for codegen/runtime, as the use of any undeclared

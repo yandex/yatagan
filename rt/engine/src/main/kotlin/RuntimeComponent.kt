@@ -35,8 +35,8 @@ import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
 import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
 import com.yandex.yatagan.core.graph.component1
 import com.yandex.yatagan.core.graph.component2
-import com.yandex.yatagan.core.graph.normalized
 import com.yandex.yatagan.core.graph.parentsSequence
+import com.yandex.yatagan.core.model.BooleanExpression
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
@@ -139,6 +139,27 @@ internal class RuntimeComponent(
         }
     }
 
+    private val booleanExpressionEvaluator = object : BooleanExpression.Visitor<Boolean> {
+        override fun visitVariable(variable: BooleanExpression.Variable): Boolean {
+            val model = variable.model
+            return parentsSequence
+                .first { model in it.graph.localConditionLiterals }
+                .conditionLiterals.getOrPut(model) {
+                    doEvaluateLiteral(model)
+                }
+        }
+
+        override fun visitAnd(and: BooleanExpression.And): Boolean {
+            return and.lhs.accept(this) && and.rhs.accept(this)
+        }
+
+        override fun visitOr(or: BooleanExpression.Or): Boolean {
+            return or.lhs.accept(this) || or.rhs.accept(this)
+        }
+
+        override fun visitNot(not: BooleanExpression.Not): Boolean = !not.underlying.accept(this)
+    }
+
     init {
         for ((getter, dependency) in graph.entryPoints) {
             implementMethod(getter.rt, EntryPointHandler(dependency))
@@ -193,27 +214,12 @@ internal class RuntimeComponent(
         return instance as Boolean
     }
 
-    private fun evaluateLiteral(literal: ConditionModel): Boolean {
-        val normalized = literal.normalized()
-        return parentsSequence
-            .first { normalized in it.graph.localConditionLiterals }
-            .conditionLiterals.getOrPut(normalized) {
-                doEvaluateLiteral(normalized)
-            } xor literal.negated
-    }
-
     override fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {
-        for (clause in conditionScope.expression) {
-            var clauseValue = false
-            for (literal in clause) {
-                if (evaluateLiteral(literal)) {
-                    clauseValue = true
-                    break
-                }
-            }
-            if (!clauseValue) return false
+        return when (conditionScope) {
+            ConditionScope.Always -> true
+            ConditionScope.Never -> false
+            is ConditionScope.ExpressionScope -> conditionScope.expression.accept(booleanExpressionEvaluator)
         }
-        return true
     }
 
     override fun toString(): String = graph.toString(childContext = null).toString()

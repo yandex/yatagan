@@ -59,9 +59,4 @@ public inline operator fun NodeDependency.component1(): NodeModel = node
 
 public inline operator fun NodeDependency.component2(): DependencyKind = kind
 
-
-public val ConditionScope.isAlways: Boolean
-    get() = this == ConditionScope.Unscoped
-
-public val ConditionScope.isNever: Boolean
-    get() = this == ConditionScope.NeverScoped
+public inline infix fun ConditionScope.notImplies(another: ConditionScope): Boolean = !implies(another)

@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.GraphSubComponentFactoryMethod
 import com.yandex.yatagan.core.model.SubComponentFactoryMethodModel
+import com.yandex.yatagan.core.model.notImplies
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -38,7 +39,7 @@ internal class GraphSubComponentFactoryMethodImpl(
             return
         }
 
-        if (createdGraph.conditionScope !in owner.conditionScope) {
+        if (owner.conditionScope notImplies createdGraph.conditionScope) {
             validator.reportError(Strings.Errors.incompatibleConditionChildComponentFactory(
                 aCondition = createdGraph.conditionScope,
                 bCondition = owner.conditionScope,

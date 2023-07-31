@@ -24,8 +24,8 @@ import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.DependencyKind
-import com.yandex.yatagan.core.model.isAlways
 import com.yandex.yatagan.core.model.isOptional
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.VOLATILE
@@ -321,12 +321,20 @@ internal class ConditionalAccessStrategy @AssistedInject constructor(
         method(accessorName) {
             modifiers(/*package-private*/)
             returnType(Names.Optional)
-            when {
-                !binding.conditionScope.isAlways -> {
+            when (val conditionScope = binding.conditionScope) {
+                ConditionScope.Always -> +buildExpression {
+                    +"return %T.of(".formatCode(Names.Optional)
+                    underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
+                    +")"
+                }
+                ConditionScope.Never -> +buildExpression {
+                    +"return %T.empty()".formatCode(Names.Optional)
+                }
+                is ConditionScope.ExpressionScope -> {
                     val expression = buildExpression {
                         binding.owner[GeneratorComponent].conditionGenerator.expression(
                             builder = this,
-                            conditionScope = binding.conditionScope,
+                            conditionScope = conditionScope,
                             inside = binding.owner,
                             isInsideInnerClass = false,
                         )
@@ -336,11 +344,6 @@ internal class ConditionalAccessStrategy @AssistedInject constructor(
                         underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
                         +") : %T.empty()".formatCode(Names.Optional)
                     }
-                }
-                else -> +buildExpression {
-                    +"return %T.of(".formatCode(Names.Optional)
-                    underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
-                    +")"
                 }
             }
         }

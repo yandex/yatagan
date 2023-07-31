@@ -20,11 +20,11 @@ import com.yandex.yatagan.AssistedFactory
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
-import com.yandex.yatagan.core.model.isNever
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -108,7 +108,7 @@ internal class AccessStrategyManager @Inject constructor(
         keySelector = { (binding, _) -> binding },
         valueTransform = fun(entry: Map.Entry<Binding, BindingGraph.BindingUsage>): AccessStrategy {
             val (binding, usage) = entry
-            if (binding.conditionScope.isNever) {
+            if (binding.conditionScope == ConditionScope.Never) {
                 return EmptyAccessStrategy
             }
             val strategy = if (binding.scopes.isNotEmpty()) {

@@ -21,7 +21,7 @@ package com.yandex.yatagan.validation.format
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
-import com.yandex.yatagan.core.model.ConditionExpression
+import com.yandex.yatagan.core.model.BooleanExpression
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -130,7 +130,7 @@ fun RichStringBuilder.append(any: Any?): RichStringBuilder = apply {
     when (any) {
         is MayBeInvalid -> append(any.toString(childContext = null))
         is CharSequence -> append(any)
-        is ConditionExpression<*> -> append(any.toString(childContext = null))
+        is ConditionScope -> append(any.toString(childContext = null))
         null -> append(Unresolved)
         else -> append(any.toString())
     }
@@ -146,57 +146,85 @@ fun RichStringBuilder.append(collection: Collection<Any?>): RichStringBuilder = 
     append(']')
 }
 
-fun ConditionExpression<*>.toString(childContext: MayBeInvalid?): RichString = buildRichString {
+fun ConditionScope.toString(childContext: MayBeInvalid?): RichString = buildRichString {
     when (this@toString) {
-        ConditionScope.Unscoped -> {
+        ConditionScope.Always -> {
             color = TextColor.Green
             append(OpenBracket)
             append("always-present")
             append(CloseBracket)
         }
 
-        ConditionScope.NeverScoped -> {
+        ConditionScope.Never -> {
             color = TextColor.Magenta
             append(OpenBracket)
             append("never-present")
             append(CloseBracket)
         }
 
-        else -> {
-            fun RichStringBuilder.appendLiteral(literal: ConditionExpression.Literal) {
-                if (literal == childContext) {
-                    appendChildContextReference(reference = literal)
-                } else {
-                    append(literal)
+        is ConditionScope.ExpressionScope -> {
+            append(OpenBracket)
+            expression.accept(object : BooleanExpression.Visitor<Unit> {
+                override fun visitVariable(variable: BooleanExpression.Variable) {
+                    val model = variable.model
+                    if (model == childContext) {
+                        appendChildContextReference(reference = model)
+                    } else {
+                        append(model)
+                    }
                 }
-            }
 
-            expression.joinTo(
-                buffer = this,
-                prefix = OpenBracket,
-                separator = LogicalAnd,
-                postfix = CloseBracket,
-            ) { clause ->
-                if (clause.size == 1) {
-                    buildRichString {
-                        appendLiteral(clause.first())
+                override fun visitNot(not: BooleanExpression.Not) {
+                    append(Negation)
+                    val shouldUseParentheses = not.underlying.accept(object : BooleanExpression.Visitor<Boolean> {
+                        override fun visitVariable(variable: BooleanExpression.Variable) = false
+                        override fun visitNot(not: BooleanExpression.Not) = false
+                        override fun visitAnd(and: BooleanExpression.And) = true
+                        override fun visitOr(or: BooleanExpression.Or) = true
+                    })
+                    if (shouldUseParentheses) {
+                        append(OpenParenthesis)
                     }
-                } else {
-                    buildRichString {
-                        clause.joinTo(
-                            buffer = this,
-                            prefix = OpenParenthesis,
-                            separator = LogicalOr,
-                            postfix = CloseParenthesis,
-                            transform = {
-                                buildRichString {
-                                    appendLiteral(it)
-                                }
-                            },
-                        )
+                    not.underlying.accept(this)
+                    if (shouldUseParentheses) {
+                        append(CloseParenthesis)
                     }
                 }
-            }
+
+                override fun visitAnd(and: BooleanExpression.And) {
+                    val parenthesesUsageDetector = object : BooleanExpression.Visitor<Boolean> {
+                        override fun visitVariable(variable: BooleanExpression.Variable) = false
+                        override fun visitNot(not: BooleanExpression.Not) = false
+                        override fun visitAnd(and: BooleanExpression.And) = false
+                        override fun visitOr(or: BooleanExpression.Or) = true
+                    }
+
+                    if (and.lhs.accept(parenthesesUsageDetector)) {
+                        append(OpenParenthesis)
+                        and.lhs.accept(this)
+                        append(CloseParenthesis)
+                    } else {
+                        and.lhs.accept(this)
+                    }
+
+                    append(LogicalAnd)
+
+                    if (and.rhs.accept(parenthesesUsageDetector)) {
+                        append(OpenParenthesis)
+                        and.rhs.accept(this)
+                        append(CloseParenthesis)
+                    } else {
+                        and.rhs.accept(this)
+                    }
+                }
+
+                override fun visitOr(or: BooleanExpression.Or) {
+                    or.lhs.accept(this)
+                    append(LogicalOr)
+                    or.rhs.accept(this)
+                }
+            })
+            append(CloseBracket)
         }
     }
 }

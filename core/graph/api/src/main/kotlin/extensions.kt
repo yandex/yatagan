@@ -28,18 +28,8 @@ import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
 import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
-import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.lang.Method
-
-/**
- * Discards negation from the literal.
- *
- * @return `!this` if negated, `this` otherwise.
- */
-public fun ConditionModel.normalized(): ConditionModel {
-    return if (negated) !this else this
-}
 
 public operator fun GraphEntryPoint.component1(): Method = getter
 
