@@ -55,3 +55,43 @@ Encountered:
                                                            ^-[*3]-----
   here: [3*] component-variant-dimension test.NotADimension
              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: Specified condition [always-present] is always true (tautology), and can be removed entirely.
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  here: its conditions declaration { ... }
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: Specified condition [never-present] can never be true (contradiction). Please, use `onlyOn` or empty `@Binds` to express 'absent' binding.
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getB: [Optional] test.ClassB
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassB()
+  here: its conditions declaration { ... }
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: Specified condition [test.Foo.INSTANCE.isEnabledA && !test.Foo.INSTANCE.isEnabledA] can never be true (contradiction). Please, use `onlyOn` or empty `@Binds` to express 'absent' binding.
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  here: its conditions declaration { ... }
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: Specified condition [test.Foo.INSTANCE.isEnabledA || !test.Foo.INSTANCE.isEnabledA] is always true (tautology), and can be removed entirely.
+Encountered:
+  in graph for root-component test.RootComponent
+  in entry-point getD: [Optional] test.ClassD
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassD()
+  here: its conditions declaration { ... }
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

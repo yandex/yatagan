@@ -79,7 +79,5 @@ internal fun VariantMatch(
             bestMatch = conditional
         }
     }
-    return bestMatch?.featureTypes?.fold(ConditionScope.Always as ConditionScope) { acc, featureType ->
-        acc and featureType.conditionScope
-    }?.let(VariantMatch::Matched) ?: MatchedNeverScoped
+    return bestMatch?.conditionScope?.let(VariantMatch::Matched) ?: MatchedNeverScoped
 }

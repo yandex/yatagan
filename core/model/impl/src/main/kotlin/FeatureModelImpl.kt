@@ -92,7 +92,6 @@ internal class FeatureModelImpl private constructor(
 
     override fun validate(validator: Validator) {
         if (impl.getAnnotations(BuiltinAnnotation.ConditionFamily).none()) {
-            // TODO: Forbid Never-scope/Always-scope.
             validator.reportError(Strings.Errors.noConditionsOnFeature())
         }
         for (model in conditionScope.allConditionModels().toSet()) {
