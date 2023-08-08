@@ -54,3 +54,17 @@ Encountered:
   in module test.TestModule
   here: @provides test.TestModule::bindThree(...)
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Non-static @Provides method inside an interface is not allowed.
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.JavaModule
+  here: @provides test.JavaModule::number(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule2
+  here: @provides test.TestModule2::provides2(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

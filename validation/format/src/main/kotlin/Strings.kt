@@ -479,6 +479,10 @@ object Strings {
             color = TextColor.Inherit
             append("Multiple factory methods detected for a `").append(component).append('`')
         }.toError()
+
+        @Covered
+        fun nonStaticProvidesInAbstractModule() = (
+                "Non-static @Provides method inside an interface is not allowed.").toError()
     }
 
     object Warnings {

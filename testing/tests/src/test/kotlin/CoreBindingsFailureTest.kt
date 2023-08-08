@@ -179,6 +179,14 @@ class CoreBindingsFailureTest(
 
     @Test
     fun `invalid bindings`() {
+        givenJavaSource("test.JavaModule", """
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Provides;
+            @Module
+            public interface JavaModule {
+                @Provides default Number number() { return 0.0; }
+            }
+        """.trimIndent())
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*
             import javax.inject.*
@@ -199,11 +207,13 @@ class CoreBindingsFailureTest(
             @Module
             interface TestModule2 {
                 @Provides fun provides(): Long
+                @Provides fun provides2(): Long { return 99L }
                 @Binds fun bindListToString(list: List<Int>): String
             }
-            @Component(modules = [TestModule::class, TestModule2::class])
+            @Component(modules = [TestModule::class, TestModule2::class, JavaModule::class])
             interface TestComponent {
                 fun getInts(): List<Int>
+                fun number(): Number
             }
         """.trimIndent())
 
