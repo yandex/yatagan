@@ -68,8 +68,8 @@ internal class MapBindingImpl(
         )
     }
 
-    override val dependencies: Sequence<NodeDependency>
-        get() = extensibleAwareDependencies(contents.asSequence().map { (_, dependency) -> dependency })
+    override val dependencies
+        get() = extensibleAwareDependencies(contents.map { (_, dependency) -> dependency })
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitMap(this)

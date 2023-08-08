@@ -267,7 +267,7 @@ internal class AccessStrategyManager @Inject constructor(
             binding = binding,
         )
 
-        if (binding.dependencies.none())
+        if (binding.dependencies.isEmpty())
             return inline
         if (usage.provider + usage.lazy == 0) {
             if (usage.direct == 1) {

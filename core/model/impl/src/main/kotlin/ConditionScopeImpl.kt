@@ -88,6 +88,10 @@ internal class ConditionScopeImpl(
         }
     }
 
+    override fun not(): ConditionScope {
+        return ConditionScopeImpl(NotExpressionImpl(expression))
+    }
+
     override fun equals(other: Any?): Boolean {
         return this === other || other is ConditionScopeImpl && expression == other.expression
     }

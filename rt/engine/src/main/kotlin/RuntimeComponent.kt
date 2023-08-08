@@ -250,12 +250,16 @@ internal class RuntimeComponent(
     }
 
     override fun visitAlternatives(binding: AlternativesBinding): Any {
-        for (alternative: NodeModel in binding.alternatives) {
-            resolveAndAccessIfCondition(alternative)?.let {
-                return it
+        binding.alternatives.forEachIndexed { index, alternative: NodeModel ->
+            if (index == binding.alternatives.lastIndex) {
+                // No need to check condition for the last alternative.
+                // If its condition doesn't hold, then the graph is invalid. So we're in the area of UB.
+                return resolveAndAccess(alternative)
+            } else {
+                resolveAndAccessIfCondition(alternative)?.let { return it }
             }
         }
-        throw AssertionError("Not reached: inconsistent condition")
+        throw AssertionError("Not reached")
     }
 
     override fun visitSubComponent(binding: SubComponentBinding): Any {

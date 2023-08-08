@@ -45,7 +45,7 @@ internal class InjectConstructorProvisionBindingImpl(
         get() = true
 
     override val dependencies by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        if (conditionScope == ConditionScope.Never) emptySequence() else impl.inputs.asSequence()
+        if (conditionScope == ConditionScope.Never) emptyList() else impl.inputs
     }
 
     override val nonStaticConditionDependencies by lazy {

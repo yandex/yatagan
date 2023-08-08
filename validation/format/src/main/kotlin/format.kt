@@ -88,7 +88,7 @@ inline fun BaseBinding.bindingModelRepresentation(
 
     val dependencies = accept(object : BaseBinding.Visitor<List<NodeDependency>> {
         override fun visitAlias(alias: AliasBinding) = listOf(alias.source)
-        override fun visitBinding(binding: Binding) = binding.dependencies.toList()
+        override fun visitBinding(binding: Binding) = binding.dependencies
     })
 
     append(openBracket)

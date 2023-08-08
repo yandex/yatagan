@@ -106,8 +106,8 @@ internal interface BindingDefaultsMixin : Binding, BaseBindingDefaultsMixin {
         }
     }
 
-    override val dependencies: Sequence<NodeDependency>
-        get() = emptySequence()
+    override val dependencies: List<NodeDependency>
+        get() = emptyList()
 
     override fun <R> accept(visitor: BaseBinding.Visitor<R>): R {
         return visitor.visitBinding(this)

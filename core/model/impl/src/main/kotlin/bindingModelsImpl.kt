@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.core.model.BindsBindingModel
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
@@ -156,9 +155,11 @@ internal class BindsImpl(
         assert(canRepresent(method))
     }
 
-    override val sources = method.parameters.map { parameter ->
-        NodeModelImpl(type = parameter.type, forQualifier = parameter)
-    }.memoize()
+    override val sources by lazy {
+        method.parameters.mapTo(mutableListOf()) { parameter ->
+            NodeModelImpl(type = parameter.type, forQualifier = parameter)
+        }
+    }
 
     override fun validate(validator: Validator) {
         super.validate(validator)

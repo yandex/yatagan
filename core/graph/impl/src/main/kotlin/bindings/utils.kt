@@ -38,8 +38,8 @@ internal fun BindingGraph.resolveAliasChain(node: NodeModel): List<AliasBinding>
 }
 
 internal fun ExtensibleBinding<*>.extensibleAwareDependencies(
-    baseDependencies: Sequence<NodeDependency>,
-): Sequence<NodeDependency> {
+    baseDependencies: List<NodeDependency>,
+): List<NodeDependency> {
     return upstream?.let { baseDependencies + it.targetForDownstream } ?: baseDependencies
 }
 

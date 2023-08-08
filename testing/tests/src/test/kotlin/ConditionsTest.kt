@@ -376,9 +376,13 @@ class ConditionsTest(
             class ImplB @Inject constructor() : SomeApi
             
             class Stub @Inject constructor() : SomeApi
+
+            interface Absent : SomeApi
             
             @Module
             interface MyModule {
+                @Binds fun absent(): Absent
+            
                 @Binds @Named("v1")
                 fun alias(i: ImplA): SomeApi
                 
@@ -394,6 +398,9 @@ class ConditionsTest(
                 
                 @Binds
                 fun base(@Named("v4") i: SomeApi, i2: BaseImpl): SomeApiBase
+                
+                @Binds @Named("v5")
+                fun base(@Named("v4") i: SomeApi, i2: Absent): SomeApi
             }
             
             @Singleton
@@ -413,6 +420,7 @@ class ConditionsTest(
                 @get:Named("v2") val apiV2Provider: Optional<Provider<SomeApi>>
                 @get:Named("v3") val apiV3Provider: Optional<Provider<SomeApi>>
                 @get:Named("v4") val apiV4Provider: Optional<Provider<SomeApi>>
+                @get:Named("v5") val apiV5Provider: Optional<Provider<SomeApi>>
                 
                 val base: Optional<SomeApiBase>
             }
@@ -434,6 +442,7 @@ class ConditionsTest(
                 assert(c.apiV2Provider.get().get() is Stub)
                 assert(c.apiV3Provider.get().get() is ImplB)
                 assert(c.apiV4Provider.get().get() is ImplB)
+                assert(c.apiV5Provider.get().get() is ImplB)
             }
         """.trimIndent())
 

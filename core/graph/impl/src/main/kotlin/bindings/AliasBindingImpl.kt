@@ -32,7 +32,7 @@ internal class AliasBindingImpl(
     override val owner: BindingGraph,
 ) : AliasBinding, ModuleHostedBindingMixin() {
     init {
-        assert(impl.sources.count() == 1) {
+        assert(impl.sources.size == 1) {
             "Not reached: sources count must be equal to 1"
         }
     }

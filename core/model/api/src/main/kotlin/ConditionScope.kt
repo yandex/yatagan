@@ -53,6 +53,12 @@ public sealed interface ConditionScope {
     public infix fun or(another: ConditionScope): ConditionScope
 
     /**
+     * Performs a "NOT" operation on this scope.
+     * @return `!this` scope.
+     */
+    public operator fun not(): ConditionScope
+
+    /**
      * Enumerates all condition models, contained in the scope in order of their appearance in the expression.
      */
     public fun allConditionModels(): List<ConditionModel>
@@ -67,6 +73,7 @@ public sealed interface ConditionScope {
         override fun implies(another: ConditionScope): Boolean = another.isTautology()
         override fun and(another: ConditionScope): ConditionScope = another
         override fun or(another: ConditionScope): ConditionScope = Always
+        override fun not(): ConditionScope = Never
         override fun allConditionModels(): List<Nothing> = emptyList()
     }
 
@@ -80,6 +87,7 @@ public sealed interface ConditionScope {
         override fun implies(another: ConditionScope): Boolean = true
         override fun and(another: ConditionScope): ConditionScope = Never
         override fun or(another: ConditionScope): ConditionScope = another
+        override fun not(): ConditionScope = Always
         override fun allConditionModels(): List<Nothing> = emptyList()
     }
 

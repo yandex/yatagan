@@ -42,7 +42,11 @@ public interface AliasBinding : BaseBinding {
  * A specific case of [com.yandex.yatagan.Binds] binding with multiple alternatives.
  */
 public interface AlternativesBinding : Binding {
-    public val alternatives: Sequence<NodeModel>
+    /**
+     * The list of alternative implementations for the [target], in order of condition checking.
+     * Always has size >= 1.
+     */
+    public val alternatives: List<NodeModel>
 }
 
 public interface AssistedInjectFactoryBinding : Binding {

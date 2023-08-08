@@ -39,7 +39,7 @@ internal class ProvisionBindingImpl(
     override val variantMatch: VariantMatch by lazy { VariantMatch(impl, owner.variant) }
 
     override val dependencies by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        if (conditionScope == ConditionScope.Never) emptySequence() else inputs.asSequence()
+        if (conditionScope == ConditionScope.Never) emptyList() else inputs
     }
 
     override val nonStaticConditionDependencies by lazy {

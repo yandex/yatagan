@@ -42,8 +42,8 @@ internal class SubComponentFactoryBindingImpl(
     }
 
     override val dependencies by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        if (conditionScope == ConditionScope.Never) emptySequence()
-        else targetGraph.usedParents.map { it.model.asNode() }.asSequence()
+        if (conditionScope == ConditionScope.Never) emptyList()
+        else targetGraph.usedParents.map { it.model.asNode() }
     }
 
     override val variantMatch: VariantMatch by lazy {

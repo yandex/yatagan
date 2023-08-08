@@ -49,7 +49,7 @@ public interface Binding : BaseBinding {
      *  dependencies will result in incorrect [BindingUsage][com.yandex.yatagan.core.graph.BindingGraph.BindingUsage]
      *  computation, internal errors, etc.
      */
-    public val dependencies: Sequence<NodeDependency>
+    public val dependencies: List<NodeDependency>
 
     /**
      * A set of selected [condition model's roots][com.yandex.yatagan.core.model.ConditionModel.root] from
