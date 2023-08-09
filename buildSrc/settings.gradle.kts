@@ -21,6 +21,8 @@ dependencyResolutionManagement {
             library("poets-java", "com.squareup:javapoet:1.13.0")
             library("poets-kotlin", "com.squareup:kotlinpoet:1.11.0")
 
+            library("logicng", "org.logicng:logicng-j11:2.4.2")
+
             val yataganDogFood = "1.2.1"
             library("yataganDogFood-api", "com.yandex.yatagan", "api-compiled").version(yataganDogFood)
             library("yataganDogFood-ksp", "com.yandex.yatagan", "processor-ksp").version(yataganDogFood)

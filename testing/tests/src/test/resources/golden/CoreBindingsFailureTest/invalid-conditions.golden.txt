@@ -7,9 +7,9 @@ Encountered:
   in its conditions declaration { runtime-conditions: [.., test.Invalid1, ..] }
                                                            ^-[*2]-------
   in [2*] feature test.Invalid1 [!test.Foo.hello]
-                                 ^-[*3]---------
-  here: [3*] !test.Foo.hello
-             ^~~~~~~~~~~~~~~
+                                  ^-[*3]--------
+  here: [3*] test.Foo.hello
+             ^~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Invalid condition expression '#invalid'

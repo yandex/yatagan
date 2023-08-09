@@ -19,7 +19,6 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AlternativesBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
-import com.yandex.yatagan.core.graph.impl.or
 import com.yandex.yatagan.core.model.BindsBindingModel
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -34,7 +33,7 @@ internal class AlternativesBindingImpl(
     override val alternatives get() = impl.sources
 
     override val conditionScope: ConditionScope by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        alternatives.fold(ConditionScope.NeverScoped as ConditionScope) { acc, alternative ->
+        alternatives.fold(ConditionScope.Never as ConditionScope) { acc, alternative ->
             val binding = owner.resolveBinding(alternative)
             acc or binding.conditionScope
         }

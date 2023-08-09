@@ -529,6 +529,20 @@ object Strings {
             append("Changing the entry-point type to the `${creator.type}` would fix the problem " +
                     "and allow the component to be recognized as a child (if not included explicitly).")
         }.toWarning()
+
+        @Covered
+        fun contradictionCondition(conditionScope: ConditionScope) = buildRichString {
+            color = TextColor.Inherit
+            append("Specified condition ").append(conditionScope).append(" can never be true (contradiction). ")
+            append("Please, use `onlyOn` or empty `@Binds` to express 'absent' binding.")
+        }.toWarning()
+
+        @Covered
+        fun tautologyCondition(conditionScope: ConditionScope) = buildRichString {
+            color = TextColor.Inherit
+            append("Specified condition ").append(conditionScope).append(" is always true (tautology), " +
+                    "and can be removed entirely.")
+        }.toWarning()
     }
 
     object Notes {

@@ -380,9 +380,13 @@ class CoreBindingsFailureTest(
 
     @Test
     fun `invalid features & variants`() {
+        includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*
             import javax.inject.*
+
+            @Condition(Foo::class, "!INSTANCE.isEnabledA")
+            annotation class NotA
             
             annotation class NotAFeature
             annotation class NotAFeature2
@@ -392,14 +396,29 @@ class CoreBindingsFailureTest(
             annotation class NotAFlavor
             @ComponentFlavor(dimension = NotADimension::class)
             annotation class InvalidFlavor2
+
+            @AnyCondition /*nothing here*/
+            annotation class Never
+
+            @AnyCondition(
+                Condition(Foo::class, "INSTANCE.isEnabledA"),
+                Condition(Foo::class, "!INSTANCE.isEnabledA"),
+            )
+            annotation class ComplexAlways
             
             @Conditional(NotAFeature::class, NotAFeature2::class,
                          onlyIn = [InvalidFlavor::class, NotAFlavor::class])
             class ClassA @Inject constructor()
+            @Conditional(Never::class) class ClassB @Inject constructor()
+            @Conditional(A::class, NotA::class) class ClassC @Inject constructor()
+            @Conditional(ComplexAlways::class) class ClassD @Inject constructor()
             @Module(subcomponents = [AnotherComponent::class]) interface RootModule
             @Component(variant = [InvalidFlavor::class], modules = [RootModule::class])
             interface RootComponent {
                 val a: Optional<ClassA>
+                val b: Optional<ClassB>
+                val c: Optional<ClassC>
+                val d: Optional<ClassD>
             }
             @Component(variant = [InvalidFlavor::class, InvalidFlavor2::class, NotAFlavor::class], isRoot = false)
             interface AnotherComponent { @Component.Builder interface C { fun c(): AnotherComponent } }

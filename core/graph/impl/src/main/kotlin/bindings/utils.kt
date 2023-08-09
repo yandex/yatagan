@@ -22,7 +22,6 @@ import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ExtensibleBinding
-import com.yandex.yatagan.core.graph.impl.and
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
@@ -39,8 +38,8 @@ internal fun BindingGraph.resolveAliasChain(node: NodeModel): List<AliasBinding>
 }
 
 internal fun ExtensibleBinding<*>.extensibleAwareDependencies(
-    baseDependencies: Sequence<NodeDependency>,
-): Sequence<NodeDependency> {
+    baseDependencies: List<NodeDependency>,
+): List<NodeDependency> {
     return upstream?.let { baseDependencies + it.targetForDownstream } ?: baseDependencies
 }
 

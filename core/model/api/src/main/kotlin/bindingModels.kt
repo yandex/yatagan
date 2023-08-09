@@ -128,7 +128,7 @@ public interface ModuleHostedBindingModel : MayBeInvalid {
  * [com.yandex.yatagan.Binds] binding model.
  */
 public interface BindsBindingModel : ModuleHostedBindingModel {
-    public val sources: Sequence<NodeModel>
+    public val sources: List<NodeModel>
 }
 
 /**

@@ -7,4 +7,6 @@ dependencies {
 
     implementation(project(":validation:format"))
     implementation(project(":base"))
+
+    implementation(libs.logicng)
 }

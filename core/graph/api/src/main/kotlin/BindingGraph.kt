@@ -55,10 +55,8 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     public val localBindings: Map<Binding, BindingUsage>
 
     /**
-     * All [condition literals][ConditionScope.Literal]s that are **hosted** in this component.
-     * Consists of literals directly used by bindings in this and children graphs.
-     *
-     * All literals are [normalized][ConditionScope.Literal.normalized].
+     * All [condition variables][com.yandex.yatagan.core.model.BooleanExpression.Variable]s that are **hosted** in this
+     * component. Consists of literals directly used by bindings in this and children graphs.
      *
      * The associated info is [LiteralUsage].
      */
@@ -141,7 +139,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     /**
      * A condition for this graph.
      *
-     * Equals [Always][com.yandex.yatagan.core.ConditionExpression.Unscoped] for [root][BindingGraph.isRoot] components.
+     * Equals [Always][com.yandex.yatagan.core.model.ConditionScope.Always] for [root][BindingGraph.isRoot] components.
      * Arbitrary for non-root components.
      */
     public val conditionScope: ConditionScope
@@ -156,8 +154,8 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     /**
      * Resolves binding for the given node. Resulting binding may belong to this graph or any parent one.
      *
-     * @return resolved binding (it may be [EmptyBinding] due to
-     * [NeverScoped][com.yandex.yatagan.core.ConditionExpression.NeverScoped] or because it was requested and
+     * @return resolved binding (it may be [com.yandex.yatagan.core.graph.bindings.EmptyBinding] due to
+     * [NeverScoped][com.yandex.yatagan.core.model.ConditionScope.Never] or because it was requested and
      * could not be satisfied)
      *
      * @throws IllegalStateException if no such binding is found at all (requested but missing bindings are still safe

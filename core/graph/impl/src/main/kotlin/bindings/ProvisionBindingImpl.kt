@@ -21,8 +21,8 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ProvidesBindingModel
-import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.format.append
 import com.yandex.yatagan.validation.format.bindingModelRepresentation
@@ -39,7 +39,7 @@ internal class ProvisionBindingImpl(
     override val variantMatch: VariantMatch by lazy { VariantMatch(impl, owner.variant) }
 
     override val dependencies by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        if (conditionScope.isNever) emptySequence() else inputs.asSequence()
+        if (conditionScope == ConditionScope.Never) emptyList() else inputs
     }
 
     override val nonStaticConditionDependencies by lazy {

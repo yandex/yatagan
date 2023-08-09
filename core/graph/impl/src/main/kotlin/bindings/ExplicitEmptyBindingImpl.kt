@@ -28,7 +28,7 @@ internal class ExplicitEmptyBindingImpl(
     override val impl: ModuleHostedBindingModel,
     override val owner: BindingGraph,
 ) : EmptyBinding, BindingDefaultsMixin, ModuleHostedBindingMixin() {
-    override val conditionScope get() = ConditionScope.NeverScoped
+    override val conditionScope get() = ConditionScope.Never
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)

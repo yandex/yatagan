@@ -21,9 +21,9 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.InjectConstructorModel
 import com.yandex.yatagan.core.model.NodeDependency
-import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.append
@@ -45,7 +45,7 @@ internal class InjectConstructorProvisionBindingImpl(
         get() = true
 
     override val dependencies by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        if (conditionScope.isNever) emptySequence() else impl.inputs.asSequence()
+        if (conditionScope == ConditionScope.Never) emptyList() else impl.inputs
     }
 
     override val nonStaticConditionDependencies by lazy {

@@ -40,6 +40,17 @@ public interface ConditionalHoldingModel : MayBeInvalid {
      */
     public interface ConditionalWithFlavorConstraintsModel : MayBeInvalid {
         public val featureTypes: List<FeatureModel>
+
+        /**
+         * Complete [ConditionScope] for the conditional.
+         */
+        public val conditionScope: ConditionScope
+
+        /**
+         * Variant filter. May specify multiple flavors for a dimension.
+         *
+         * @see Variant
+         */
         public val onlyIn: List<Variant.FlavorModel>
     }
 }

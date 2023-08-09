@@ -70,7 +70,7 @@ internal class MultiBindingImpl(
     }
 
     override val dependencies get() = extensibleAwareDependencies(
-        _contributions.keys.asSequence().map { it.contributionDependency })
+        _contributions.keys.map { it.contributionDependency })
 
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = when(kind) {
