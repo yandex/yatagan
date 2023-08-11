@@ -255,10 +255,14 @@ internal class ProvidesImpl(
         if (!method.isEffectivelyPublic) {
             validator.reportError(Errors.invalidAccessForProvides())
         }
+
+        if (requiresModuleInstance && !originModule.mayRequireInstance) {
+            validator.reportError(Errors.nonStaticProvidesInAbstractModule())
+        }
     }
 
     override val requiresModuleInstance: Boolean
-        get() = originModule.mayRequireInstance && !method.isStatic && !method.owner.isKotlinObject
+        get() = !method.isAbstract && !method.isStatic && !method.owner.isKotlinObject
 
     override fun <R> accept(visitor: ModuleHostedBindingModel.Visitor<R>): R {
         return visitor.visitProvides(this)
