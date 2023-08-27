@@ -80,7 +80,7 @@ interface LangTestDriver : SourceSet {
                 return TestCompilationArguments(
                     sources = sourceFiles,
                     inheritClasspath = false,
-                    classpath = StdLibClasspath.split(':').map(::File),
+                    classpath = StdLibClasspath.split(File.pathSeparatorChar).map(::File),
                     javacArguments = listOf("-Xdiags:verbose"),
                 )
             }

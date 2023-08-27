@@ -37,7 +37,7 @@ class JapCompileTestDriver(
 
     private fun loadProcessorFromCustomClasspath(): Processor? {
         customProcessorClasspath ?: return null
-        val kaptClassloader = URLClassLoader(customProcessorClasspath.split(":")
+        val kaptClassloader = URLClassLoader(customProcessorClasspath.split(File.pathSeparatorChar)
             .map { File(it).toURI().toURL() }.toTypedArray(), ClassLoader.getPlatformClassLoader())
         val clazz = kaptClassloader.loadClass("com.yandex.yatagan.processor.jap.JapYataganProcessor")
         return clazz.getConstructor().newInstance() as Processor
