@@ -32,3 +32,12 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: check --no-configuration-cache --stacktrace
+
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports-${{ matrix.os }}
+          path: |
+            testing/tests/build/reports
+            lang/api/build/reports
