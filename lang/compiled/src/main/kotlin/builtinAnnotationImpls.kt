@@ -17,6 +17,7 @@
 package com.yandex.yatagan.lang.compiled
 
 import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Type
 
 internal abstract class CtBuiltinAnnotationBase(
     protected val impl: CtAnnotationBase
@@ -54,6 +55,25 @@ internal class CtAnyConditionAnnotationImpl(
     impl: CtAnnotationBase,
 ) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.ConditionFamily.Any {
     override val conditions get() = impl.getAnnotations("value").map { CtConditionAnnotationImpl(it) }
+}
+
+internal class CtConditionExpressionAnnotationImpl(
+    impl: CtAnnotationBase,
+) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.ConditionExpression {
+    override val value: String
+        get() = impl.getString("value")
+    override val imports: List<Type>
+        get() = impl.getTypes("imports")
+    override val importAs: List<BuiltinAnnotation.ConditionExpression.ImportAs> by lazy {
+        impl.getAnnotations("importAs").map { ImportAsImpl(it) }
+    }
+
+    private data class ImportAsImpl(
+        private val impl: CtAnnotationBase,
+    ) : BuiltinAnnotation.ConditionExpression.ImportAs {
+        override val value: Type = impl.getType("value")
+        override val alias: String = impl.getString("alias")
+    }
 }
 
 internal class CtConditionalAnnotationImpl(

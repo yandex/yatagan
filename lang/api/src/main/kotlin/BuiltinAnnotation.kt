@@ -166,6 +166,24 @@ public sealed interface BuiltinAnnotation{
     }
 
     /**
+     * Represents `com.yandex.yatagan.ConditionExpression` annotation.
+     */
+    public interface ConditionExpression : OnClass {
+        public val value: String
+        public val imports: List<Type>
+        public val importAs: List<ImportAs>
+
+        public interface ImportAs {
+            public val value: Type
+            public val alias: String
+        }
+
+        public companion object : Target.OnClass<ConditionExpression> {
+            override val modelClass: Class<out ConditionExpression> get() = ConditionExpression::class.java
+        }
+    }
+
+    /**
      * Represents `com.yandex.yatagan.Conditional` annotation.
      */
     public interface Conditional : OnClassRepeatable {

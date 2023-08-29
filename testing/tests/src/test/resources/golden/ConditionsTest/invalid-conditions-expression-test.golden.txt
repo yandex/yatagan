@@ -1,0 +1,248 @@
+error: Can not find accessible `fooBar` member in test.Helper
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.C12, ..] }
+                                                           ^-[*2]--
+  in [2*] feature test.C12 [test.Helper.fooBar]
+                            ^-[*3]------------
+  here: [3*] test.Helper.fooBar
+             ^~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Can not find accessible `getA` member in test.C1
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.C15, ..] }
+                                                           ^-[*2]--
+  in [2*] feature test.C15 [test.C1.getA]
+                            ^-[*3]------
+  here: [3*] test.C1.getA
+             ^~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting imports: types `test.Helper`, `test.C1` are imported under the same name 'Helper'.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.C15, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C15 [test.C1.getA]
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Conflicting imports: types `test.Helper`, `test.Helper` are imported under the same name 'Helper'.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.C14, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C14 [test.Helper.getA]
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Feature declaration has both `@Condition`-family annotations and `@ConditionExpression` present. Mixing these is not supported. Please, use either one way or the other to define a feature.`
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getB: [Optional] test.ClassB
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassB()
+  in its conditions declaration { runtime-conditions: [.., test.A3, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.A3 [test.Helper.getA]
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Import alias 'Sh&t' contains forbidden characters.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.C16, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C16 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid condition expression ''
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getB: [Optional] test.ClassB
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassB()
+  in its conditions declaration { runtime-conditions: [.., test.A4, ..] }
+                                                           ^-[*2]-
+  in [2*] feature test.A4 [test.Helper.getA && <invalid-condition>]
+                                               ^-[*3]-------------
+  here: [3*] <invalid-condition>
+             ^~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+""
+ ^~~~ Unexpected <end-of-expression>. Expected one of: '(', '!', <variable>
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getB: [Optional] test.ClassB
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassB()
+  in its conditions declaration { runtime-conditions: [.., test.A0, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.A0 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"(@FeatureA|@FeatureB)&Helper::b"
+            ^~~~~~~~^~~~ Variable: missing import for `FeatureB`
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  in its conditions declaration { runtime-conditions: [.., test.C24, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C24 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"(Features::fooBar|Baz::bar)&Helper::b"
+                   ^~~~~~~^~~~ Variable: missing import for `Baz`
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  in its conditions declaration { runtime-conditions: [.., test.C23, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C23 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"(Features::fooBar|bar)&Helper::b"
+                   ^~^~~~ Variable: unqualified reference is only allowed when a single import is present
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  in its conditions declaration { runtime-conditions: [.., test.C22, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C22 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"@FeatureA|@Helper"
+           ^~~~~~^~~~ Variable: invalid feature reference: `test.Helper` is not a feature declaration
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  in its conditions declaration { runtime-conditions: [.., test.C25, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C25 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"fooBar"
+ ^~~~~^~~~ Variable: unqualified reference is only allowed when a single import is present
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.C1, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.C1 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.C13, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C13 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"foo|bar  |baz"
+ ^~^~~~ Variable: unqualified reference is only allowed when a single import is present
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  in its conditions declaration { runtime-conditions: [.., test.C21, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C21 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"getA"
+ ^~~^~~~ Variable: unqualified reference is only allowed when a single import is present
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.C16, ..] }
+                                                           ^-[*2]--
+  here: [2*] feature test.C16 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"we(h2!347&32) 89|32"
+   ^~~~ Unexpected '('. Expected one of: ')', '&', '|', <end-of-expression>
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getB: [Optional] test.ClassB
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassB()
+  in its conditions declaration { runtime-conditions: [.., test.A2, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.A2 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"|!f"
+ ^~~~ Unexpected '|'. Expected one of: '(', '!', <variable>
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getB: [Optional] test.ClassB
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassB()
+  in its conditions declaration { runtime-conditions: [.., test.A1, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.A1 <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

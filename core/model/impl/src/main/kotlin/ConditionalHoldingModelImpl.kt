@@ -70,7 +70,7 @@ internal open class ConditionalHoldingModelImpl(
 
         override val conditionScope: ConditionScope by lazy {
             featureTypes.fold(ConditionScope.Always as ConditionScope) { acc, featureType ->
-                acc and featureType.conditionScope
+                acc and (featureType.conditionScope ?: ConditionScope.Always)
             }
         }
 
@@ -78,12 +78,16 @@ internal open class ConditionalHoldingModelImpl(
             onlyIn.forEach(validator::child)
             featureTypes.forEach(validator::child)
 
-            when {
-                conditionScope.isContradiction() -> {
-                    validator.reportWarning(Strings.Warnings.contradictionCondition(conditionScope))
-                }
-                featureTypes.isNotEmpty() && conditionScope.isTautology() -> {
-                    validator.reportWarning(Strings.Warnings.tautologyCondition(conditionScope))
+            // If some feature is not valid, no need to report induced errors
+            if (featureTypes.none { it.conditionScope == null }) {
+                when {
+                    conditionScope.isContradiction() -> {
+                        validator.reportWarning(Strings.Warnings.contradictionCondition(conditionScope))
+                    }
+
+                    featureTypes.isNotEmpty() && conditionScope.isTautology() -> {
+                        validator.reportWarning(Strings.Warnings.tautologyCondition(conditionScope))
+                    }
                 }
             }
         }

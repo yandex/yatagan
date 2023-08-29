@@ -455,12 +455,15 @@ class CoreBindingsFailureTest(
             annotation class Invalid3
             @Condition(Foo::class, "getFoo")
             annotation class Invalid4
+            @Condition(Foo::class, "")
+            annotation class Invalid5
 
             @Conditional(
                 Invalid1::class,
                 Invalid2::class,
                 Invalid3::class,
                 Invalid4::class,
+                Invalid5::class,
             )
             class ClassA @Inject constructor()
             

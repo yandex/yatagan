@@ -57,16 +57,6 @@ Encountered:
              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-warning: Specified condition [always-present] is always true (tautology), and can be removed entirely.
-Encountered:
-  in graph for root-component test.RootComponent
-  in entry-point getA: [Optional] test.ClassA
-                       ^-[*1]----------------
-  in [1*] inject-constructor test.ClassA()
-  here: its conditions declaration { ... }
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 warning: Specified condition [never-present] can never be true (contradiction). Please, use `onlyOn` or empty `@Binds` to express 'absent' binding.
 Encountered:
   in graph for root-component test.RootComponent

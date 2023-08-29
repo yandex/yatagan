@@ -253,6 +253,12 @@ object Strings {
         fun noConditionsOnFeature() =
             "Feature declaration has no `@Condition`-family annotations on it.".toError()
 
+        @Covered
+        fun conflictingConditionsOnFeature() =
+            ("Feature declaration has both `@Condition`-family annotations and `@ConditionExpression` present. " +
+                    "Mixing these is not supported. Please, use either one way or the other to define a feature.`"
+                    ).toError()
+
 
         @Covered
         fun nonComponentVariantDimension() =
@@ -483,6 +489,24 @@ object Strings {
         @Covered
         fun nonStaticProvidesInAbstractModule() = (
                 "Non-static @Provides method inside an interface is not allowed.").toError()
+
+        @Covered
+        fun conditionExpressionParseErrors(error: CharSequence) = buildRichString {
+            color = TextColor.Inherit
+            appendLine("Unable to parse condition expression:")
+            appendLine(error)
+        }.toError()
+
+        @Covered
+        fun conflictingConditionExpressionImport(name: String, types: List<Type>) = buildRichString {
+            color = TextColor.Inherit
+            append("Conflicting imports: types ")
+            types.joinTo(this) { "`$it`" }
+            append(" are imported under the same name '").append(name).append("'.")
+        }.toError()
+
+        @Covered
+        fun invalidAliasedImport(name: String) = ("Import alias '$name' contains forbidden characters.").toError()
     }
 
     object Warnings {

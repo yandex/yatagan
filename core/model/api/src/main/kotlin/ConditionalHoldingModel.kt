@@ -32,7 +32,10 @@ public interface ConditionalHoldingModel : MayBeInvalid {
      * Represents a "feature" - a named [ConditionScope].
      */
     public interface FeatureModel : ClassBackedModel {
-        public val conditionScope: ConditionScope
+        /**
+         * Parsed condition scope for this feature. `null` only if invalid.
+         */
+        public val conditionScope: ConditionScope?
     }
 
     /**
