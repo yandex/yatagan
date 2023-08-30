@@ -8,7 +8,14 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Setup Java
@@ -25,3 +32,12 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: check --no-configuration-cache --stacktrace
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-reports-${{ matrix.os }}
+          path: |
+            testing/tests/build/reports
+            lang/api/build/reports

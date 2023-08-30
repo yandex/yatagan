@@ -108,7 +108,7 @@ abstract class CompileTestDriverBase private constructor(
         val goldenResourcePath = "golden/${testNameRule.testClassSimpleName}/${testNameRule.testMethodName}.golden.txt"
 
         val (workingDir, runtimeClasspath, messageLog, success, generatedFiles) = doCompile()
-        val strippedLog = normalizeMessages(messageLog)
+        val strippedLog = normalizeMessages(messageLog.ensureLineEndings())
 
         if (goldenSourceDirForUpdate != null) {
             val goldenSourcePath = Path(goldenSourceDirForUpdate).resolve(goldenResourcePath)
@@ -123,7 +123,8 @@ abstract class CompileTestDriverBase private constructor(
         }
 
         try {
-            val goldenOutput = javaClass.getResourceAsStream("/$goldenResourcePath")?.bufferedReader()?.readText() ?: ""
+            val goldenOutput = javaClass.getResourceAsStream("/$goldenResourcePath")
+                ?.bufferedReader()?.readText()?.ensureLineEndings() ?: ""
             Assert.assertEquals(goldenOutput, strippedLog)
 
             if (success) {
@@ -159,7 +160,7 @@ abstract class CompileTestDriverBase private constructor(
             when (apiType) {
                 ApiType.Compiled -> CompiledApiClasspath
                 ApiType.Dynamic -> DynamicApiClasspath
-            }.split(':').forEach { add(File(it)) }
+            }.split(File.pathSeparatorChar).forEach { add(File(it)) }
             precompiledModuleOutputDirs?.let { addAll(it) }
         },
         inheritClasspath = false,
@@ -202,6 +203,13 @@ abstract class CompileTestDriverBase private constructor(
     }
 
     companion object {
+        private fun String.ensureLineEndings(): String {
+            if (System.lineSeparator() == "\n") {
+                return this
+            }
+            return replace(System.lineSeparator(), "\n")
+        }
+
         private fun String.stripColor(): String {
             return replace(AnsiColorSequenceRegex, "")
         }
