@@ -174,13 +174,15 @@ internal class ConditionModelImpl private constructor(
 
         override fun toString(childContext: MayBeInvalid?) = buildRichString {
             color = TextColor.Red
-            // TODO: Maybe use `invalidExpression` here?
             append("<invalid-condition>")
         }
     }
 
     companion object Factory : BiObjectCache<Type, String, ConditionModelImpl>() {
-        operator fun invoke(type: Type, pathSource: String): ConditionModelImpl {
+        operator fun invoke(type: Type, pathSource: String): VariableBaseImpl {
+            if (!pathSource.matches(ConditionRegex)) {
+                return Invalid(type, pathSource)
+            }
             return createCached(type, pathSource) { ConditionModelImpl(type, pathSource) }
         }
 
@@ -198,5 +200,7 @@ internal class ConditionModelImpl private constructor(
             }
             return null
         }
+
+        private val ConditionRegex = "^(?:[A-Za-z_][A-Za-z0-9_]*\\.)*[A-Za-z_][A-Za-z0-9_]*\$".toRegex()
     }
 }

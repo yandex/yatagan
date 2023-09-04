@@ -19,6 +19,9 @@ package com.yandex.yatagan.core.model.impl
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
+import com.yandex.yatagan.core.model.impl.parsing.BooleanExpressionParser
+import com.yandex.yatagan.core.model.impl.parsing.ExpressionFactoryForParsing
+import com.yandex.yatagan.core.model.impl.parsing.ParseException
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
@@ -35,10 +38,13 @@ import com.yandex.yatagan.validation.format.toString
 internal class FeatureModelImpl private constructor(
     private val impl: TypeDeclaration,
 ) : ConditionalHoldingModel.FeatureModel {
-    override val conditionScope: ConditionScope by lazy {
+    override val conditionScope: ConditionScope?
+        get() = conditionExpressionHolder?.conditionScope ?: legacyConditionScope
+
+    private val legacyConditionScope: ConditionScope? by lazy {
         val annotations = impl.getAnnotations(BuiltinAnnotation.ConditionFamily)
         if (annotations.isEmpty()) {
-            ConditionScope.Always
+            null
         } else {
             ConditionScopeImpl(annotations.map { conditionModel ->
                 when (conditionModel) {
@@ -71,32 +77,34 @@ internal class FeatureModelImpl private constructor(
         }
     }
 
+    private val conditionExpressionHolder: ConditionExpressionHolder? by lazy {
+        impl.getAnnotation(BuiltinAnnotation.ConditionExpression)?.let { ConditionExpressionHolder(it) }
+    }
+
     private fun parseOneCondition(one: BuiltinAnnotation.ConditionFamily.One): BooleanExpressionInternal {
-        val match = ConditionRegex.matchEntire(one.condition)
-        return if (match != null) {
-            val (negate, names) = match.destructured
-            val variable = ConditionModelImpl(
-                type = one.target,
-                pathSource = names,
-            )
-            if (negate.isNotEmpty()) {
-                NotExpressionImpl(variable)
-            } else variable
+        val condition = one.condition
+        return if (condition.firstOrNull() == '!') {
+            ConditionModelImpl(one.target, condition.substring(1)).negate()
         } else {
-            ConditionModelImpl.Invalid(
-                type = one.target,
-                invalidExpression = one.condition,
-            )
+            ConditionModelImpl(one.target, condition)
         }
     }
 
     override fun validate(validator: Validator) {
-        if (impl.getAnnotations(BuiltinAnnotation.ConditionFamily).none()) {
+        val hasLegacyConditions = hasLegacyConditions()
+        val hasNewConditions = hasConditionExpression()
+        if (!hasLegacyConditions && !hasNewConditions) {
             validator.reportError(Strings.Errors.noConditionsOnFeature())
         }
-        for (model in conditionScope.allConditionModels().toSet()) {
-            validator.child(model)
+        if (hasLegacyConditions && hasNewConditions) {
+            validator.reportError(Strings.Errors.conflictingConditionsOnFeature())
         }
+        conditionScope?.let { conditionScope ->
+            for (model in conditionScope.allConditionModels().toSet()) {
+                validator.child(model)
+            }
+        }
+        conditionExpressionHolder?.validate(validator)
     }
 
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(
@@ -104,10 +112,18 @@ internal class FeatureModelImpl private constructor(
         representation = {
             append(impl)
             append(' ')
-            when(conditionScope) {
+            when(val conditionScope = conditionScope) {
+                null -> appendRichString {
+                    color = TextColor.Red
+                    if (!hasLegacyConditions() && !hasConditionExpression()) {
+                        append("<no-conditions-declared>")
+                    } else {
+                        append("<invalid-condition-expression>")
+                    }
+                }
                 ConditionScope.Always -> appendRichString {
                     color = TextColor.Red
-                    append("<no-conditions-declared>")
+                    append("<illegal-always>")
                 }
                 ConditionScope.Never -> appendRichString {
                     color = TextColor.Red
@@ -121,9 +137,83 @@ internal class FeatureModelImpl private constructor(
     override val type: Type
         get() = impl.asType()
 
+    private fun hasLegacyConditions(): Boolean =
+        impl.getAnnotations(BuiltinAnnotation.ConditionFamily).isNotEmpty()
+
+    private fun hasConditionExpression(): Boolean =
+        conditionExpressionHolder != null
+
+    private class ConditionExpressionHolder(
+        val impl: BuiltinAnnotation.ConditionExpression,
+    ) {
+        private val parseError: CharSequence?
+        val conditionScope: ConditionScope?
+
+        init {
+            var parseError: CharSequence? = null
+
+            val conditionScope = try {
+                val expression = BooleanExpressionParser(
+                    expressionSource = impl.value,
+                    factory = ExpressionFactoryForParsing(
+                        imports = buildMap {
+                            for (import in impl.imports) {
+                                put(import.declaration.qualifiedName.substringAfterLast('.'), import)
+                            }
+                            for (importAs in impl.importAs) {
+                                if (!importAs.alias.matches(AliasedImportRegex)) {
+                                    // Skip invalid imports
+                                    continue
+                                }
+                                put(importAs.alias, importAs.value)
+                            }
+                        }
+                    ),
+                ).parse()
+                ConditionScopeImpl(expression)
+            } catch (e: ParseException) {
+                parseError = e.formattedMessage
+                null
+            }
+
+            this.parseError = parseError
+            this.conditionScope = conditionScope
+        }
+
+        fun validate(validator: Validator) {
+            parseError?.let { parseError ->
+                validator.reportError(Strings.Errors.conditionExpressionParseErrors(parseError))
+            }
+
+            listOf(
+                impl.imports.map { it.declaration.qualifiedName.substringAfterLast('.') to it },
+                impl.importAs.map { it.alias to it.value },
+            ).flatten().groupBy(
+                keySelector = { it.first },
+                valueTransform = { it.second },
+            ).entries.forEach { (name, types) ->
+                if (types.size > 1) {
+                    validator.reportError(Strings.Errors.conflictingConditionExpressionImport(
+                        name = name,
+                        types = types,
+                    ))
+                }
+            }
+
+            for (importAs in impl.importAs) {
+                val alias = importAs.alias
+                if (!alias.matches(AliasedImportRegex)) {
+                    validator.reportError(Strings.Errors.invalidAliasedImport(alias))
+                }
+            }
+        }
+
+        companion object {
+            private val AliasedImportRegex = """[a-zA-Z0-9_]+""".toRegex()
+        }
+    }
+
     companion object Factory : ObjectCache<TypeDeclaration, FeatureModelImpl>() {
         operator fun invoke(impl: TypeDeclaration) = createCached(impl, ::FeatureModelImpl)
-
-        private val ConditionRegex = "^(!?)((?:[A-Za-z][A-Za-z0-9_]*\\.)*[A-Za-z][A-Za-z0-9_]*)\$".toRegex()
     }
 }

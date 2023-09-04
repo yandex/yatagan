@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
 
 /**
  * A boolean literal in terms of [Conditional] system.
- * Denotes a single boolean condition, accessible from a static scope, which can be evaluated at runtime.
+ * Denotes a single boolean condition, which can be evaluated at runtime.
  *
  * This condition is fully opaque in terms of the framework and its correctness checks.
  * Conditions are considered equal by the [value] and parsed [condition].

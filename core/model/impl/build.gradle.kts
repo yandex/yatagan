@@ -9,4 +9,6 @@ dependencies {
     implementation(project(":base"))
 
     implementation(libs.logicng)
+
+    testImplementation(kotlin("test"))
 }

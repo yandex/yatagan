@@ -26,6 +26,7 @@ import com.yandex.yatagan.Component
 import com.yandex.yatagan.ComponentFlavor
 import com.yandex.yatagan.ComponentVariantDimension
 import com.yandex.yatagan.Condition
+import com.yandex.yatagan.ConditionExpression
 import com.yandex.yatagan.Conditional
 import com.yandex.yatagan.Conditionals
 import com.yandex.yatagan.ConditionsApi
@@ -60,6 +61,8 @@ abstract class CtTypeDeclarationBase : TypeDeclarationBase() {
             BuiltinAnnotation.Component.Builder -> (which as BuiltinAnnotation.Component.Builder).takeIf {
                 annotations.any { it.hasType<Component.Builder>() }
             }
+            BuiltinAnnotation.ConditionExpression ->
+                annotations.find { it.hasType<ConditionExpression>() }?.let { CtConditionExpressionAnnotationImpl(it) }
         }
         return which.modelClass.cast(value)
     }
