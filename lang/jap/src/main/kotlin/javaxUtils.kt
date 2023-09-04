@@ -103,6 +103,7 @@ internal val Element.isType
 private val StaticFinal = setOf(Modifier.STATIC, Modifier.FINAL)
 
 private object AsTypeElementOptional : SimpleElementVisitor8<TypeElement?, Unit>() {
+    override fun visitUnknown(e: Element?, p: Unit?) = null
     override fun defaultAction(e: Element?, p: Unit?) = null
     override fun visitType(e: TypeElement?, p: Unit?) = e
 }
@@ -147,6 +148,14 @@ internal fun TypeElement.isFromKotlin(): Boolean {
 internal tailrec fun Element.isFromKotlin(): Boolean {
     // For a random element need to find a type element it belongs to first.
     return asTypeElementOrNull()?.isFromKotlin() ?: (enclosingElement ?: return false).isFromKotlin()
+}
+
+internal fun TypeElement.kotlinMetadataVersion(): IntArray? {
+    return getAnnotation(Metadata::class.java)?.metadataVersion
+}
+
+internal tailrec fun Element.kotlinMetadataVersion(): IntArray? {
+    return asTypeElementOrNull()?.kotlinMetadataVersion() ?: (enclosingElement ?: return null).kotlinMetadataVersion()
 }
 
 internal fun TypeElement.allNonPrivateFields(): Sequence<VariableElement> = sequence {

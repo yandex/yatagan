@@ -21,14 +21,16 @@ import com.yandex.yatagan.lang.compiled.CtAnnotationBase
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
 
+// See https://youtrack.jetbrains.com/issue/KT-51087, which was fixed in [1, 9, 0] metadata version.
+private const val KT_51087_FIXED_METADATA_VERSION = 10_90_00
+
 internal class JavaxAnnotatedImpl(
     private val impl: Element,
 ) : CtAnnotated {
 
     override val annotations: Sequence<CtAnnotationBase> by lazy {
         val annotations = impl.annotationMirrors.map { JavaxAnnotationImpl(it) }
-        if (impl.isFromKotlin()) {
-            // Means this is from KAPT, and it's known to be reversing annotations order.
+        if (shouldReverseAnnotations()) {
             annotations.asReversed()
         } else {
             annotations
@@ -48,5 +50,13 @@ internal class JavaxAnnotatedImpl(
             }
         }
         return null
+    }
+
+    private fun shouldReverseAnnotations(): Boolean {
+        val rawMetadataVersion: IntArray = impl.kotlinMetadataVersion() ?: return false
+        // Means this is from KAPT, and it's known to be reversing annotations order.
+        val (major, minor, patch) = rawMetadataVersion
+        val metadataVersion = major * 10_00_00 + minor * 10_00 + patch
+        return metadataVersion < KT_51087_FIXED_METADATA_VERSION
     }
 }

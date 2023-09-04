@@ -170,6 +170,7 @@ abstract class CompileTestDriverBase private constructor(
             "-opt-in=com.yandex.yatagan.ConditionsApi",
             "-opt-in=com.yandex.yatagan.VariantApi",
             "-P", "plugin:org.jetbrains.kotlin.kapt3:correctErrorTypes=true",
+            "-jvm-target=11",
         ),
         processorOptions = options,
     )
