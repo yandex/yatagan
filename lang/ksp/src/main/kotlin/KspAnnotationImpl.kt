@@ -170,7 +170,7 @@ internal class KspAnnotationImpl(
     ) : CtAnnotationDeclarationBase() {
         private val annotated = KspAnnotatedImpl(declaration)
 
-        override val annotations: Sequence<Annotation>
+        override val annotations: Sequence<CtAnnotationBase>
             get() = annotated.annotations
 
         override fun <A : kotlin.Annotation> isAnnotatedWith(type: Class<A>): Boolean {

@@ -178,6 +178,14 @@ class CoreBindingsFailureTest(
 
     @Test
     fun `invalid bindings`() {
+        givenJavaSource("test.JavaModule", """
+            import com.yandex.yatagan.Module;
+            import com.yandex.yatagan.Provides;
+            @Module
+            public interface JavaModule {
+                @Provides default Number number() { return 0.0; }
+            }
+        """.trimIndent())
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*
             import javax.inject.*
@@ -198,11 +206,13 @@ class CoreBindingsFailureTest(
             @Module
             interface TestModule2 {
                 @Provides fun provides(): Long
+                @Provides fun provides2(): Long { return 99L }
                 @Binds fun bindListToString(list: List<Int>): String
             }
-            @Component(modules = [TestModule::class, TestModule2::class])
+            @Component(modules = [TestModule::class, TestModule2::class, JavaModule::class])
             interface TestComponent {
                 fun getInts(): List<Int>
+                fun number(): Number
             }
         """.trimIndent())
 
@@ -379,9 +389,13 @@ class CoreBindingsFailureTest(
 
     @Test
     fun `invalid features & variants`() {
+        includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*
             import javax.inject.*
+
+            @Condition(Foo::class, "!INSTANCE.isEnabledA")
+            annotation class NotA
             
             annotation class NotAFeature
             annotation class NotAFeature2
@@ -391,14 +405,29 @@ class CoreBindingsFailureTest(
             annotation class NotAFlavor
             @ComponentFlavor(dimension = NotADimension::class)
             annotation class InvalidFlavor2
+
+            @AnyCondition /*nothing here*/
+            annotation class Never
+
+            @AnyCondition(
+                Condition(Foo::class, "INSTANCE.isEnabledA"),
+                Condition(Foo::class, "!INSTANCE.isEnabledA"),
+            )
+            annotation class ComplexAlways
             
             @Conditional(NotAFeature::class, NotAFeature2::class,
                          onlyIn = [InvalidFlavor::class, NotAFlavor::class])
             class ClassA @Inject constructor()
+            @Conditional(Never::class) class ClassB @Inject constructor()
+            @Conditional(A::class, NotA::class) class ClassC @Inject constructor()
+            @Conditional(ComplexAlways::class) class ClassD @Inject constructor()
             @Module(subcomponents = [AnotherComponent::class]) interface RootModule
             @Component(variant = [InvalidFlavor::class], modules = [RootModule::class])
             interface RootComponent {
                 val a: Optional<ClassA>
+                val b: Optional<ClassB>
+                val c: Optional<ClassC>
+                val d: Optional<ClassD>
             }
             @Component(variant = [InvalidFlavor::class, InvalidFlavor2::class, NotAFlavor::class], isRoot = false)
             interface AnotherComponent { @Component.Builder interface C { fun c(): AnotherComponent } }
@@ -425,12 +454,15 @@ class CoreBindingsFailureTest(
             annotation class Invalid3
             @Condition(Foo::class, "getFoo")
             annotation class Invalid4
+            @Condition(Foo::class, "")
+            annotation class Invalid5
 
             @Conditional(
                 Invalid1::class,
                 Invalid2::class,
                 Invalid3::class,
                 Invalid4::class,
+                Invalid5::class,
             )
             class ClassA @Inject constructor()
             

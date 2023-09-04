@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.yandex.yatagan.core.model
 
 import com.yandex.yatagan.base.api.Incubating
@@ -71,11 +73,5 @@ public operator fun NodeDependency.component1(): NodeModel = node
 
 public operator fun NodeDependency.component2(): DependencyKind = kind
 
-
 @Incubating
-public val ConditionScope.isAlways: Boolean
-    get() = this == ConditionScope.Unscoped
-
-@Incubating
-public val ConditionScope.isNever: Boolean
-    get() = this == ConditionScope.NeverScoped
+public inline infix fun ConditionScope.notImplies(another: ConditionScope): Boolean = !implies(another)

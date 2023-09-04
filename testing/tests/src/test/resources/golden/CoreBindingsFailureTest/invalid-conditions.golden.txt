@@ -7,9 +7,9 @@ Encountered:
   in its conditions declaration { runtime-conditions: [.., test.Invalid1, ..] }
                                                            ^-[*2]-------
   in [2*] feature test.Invalid1 [!test.Foo.hello]
-                                 ^-[*3]---------
-  here: [3*] !test.Foo.hello
-             ^~~~~~~~~~~~~~~
+                                  ^-[*3]--------
+  here: [3*] test.Foo.hello
+             ^~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Invalid condition expression '#invalid'
@@ -21,6 +21,20 @@ Encountered:
   in its conditions declaration { runtime-conditions: [.., test.Invalid2, ..] }
                                                            ^-[*2]-------
   in [2*] feature test.Invalid2 [<invalid-condition>]
+                                 ^-[*3]-------------
+  here: [3*] <invalid-condition>
+             ^~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid condition expression ''
+Encountered:
+  in graph for root-component test.MyComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.Invalid5, ..] }
+                                                           ^-[*2]-------
+  in [2*] feature test.Invalid5 [<invalid-condition>]
                                  ^-[*3]-------------
   here: [3*] <invalid-condition>
              ^~~~~~~~~~~~~~~~~~~

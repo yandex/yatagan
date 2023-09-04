@@ -78,6 +78,16 @@ inline fun <T, R> Iterable<T>.zipWithNextOrNull(block: (T, T?) -> R): List<R> {
     return list
 }
 
+inline fun <K, V> Iterable<Pair<K, V>>.forEachBi(block: (K, V) -> Unit) {
+    contract { callsInPlace(block) }
+    forEach { (k, v) -> block(k, v) }
+}
+
+inline fun <K, V> Array<out Pair<K, V>>.forEachBi(block: (K, V) -> Unit) {
+    contract { callsInPlace(block) }
+    forEach { (k, v) -> block(k, v) }
+}
+
 inline fun <T : Any> traverseDepthFirstWithPath(
     roots: Iterable<T>,
     childrenOf: (T) -> Iterable<T>,

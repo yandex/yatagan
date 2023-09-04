@@ -18,10 +18,10 @@ package com.yandex.yatagan.lang.jap
 
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.memoize
-import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation.Value
 import com.yandex.yatagan.lang.AnnotationDeclaration
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtAnnotationBase
 import com.yandex.yatagan.lang.compiled.CtAnnotationDeclarationBase
 import javax.lang.model.element.AnnotationMirror
@@ -120,7 +120,7 @@ internal class JavaxAnnotationImpl private constructor(
 
     private class AnnotationClassImpl private constructor(
         private val impl: TypeElement,
-    ) : CtAnnotationDeclarationBase(), Annotated by JavaxAnnotatedImpl(impl) {
+    ) : CtAnnotationDeclarationBase(), CtAnnotated by JavaxAnnotatedImpl(impl) {
 
         override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             ElementFilter.methodsIn(impl.enclosedElements)

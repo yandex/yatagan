@@ -32,12 +32,12 @@ internal sealed interface VariantMatch {
     class Matched(override val conditionScope: ConditionScope) : VariantMatch
     class Error(val message: ValidationMessage?) : VariantMatch {
         override val conditionScope: ConditionScope
-            get() = ConditionScope.NeverScoped
+            get() = ConditionScope.Never
     }
 }
 
-private val MatchedUnscoped = VariantMatch.Matched(ConditionScope.Unscoped)
-private val MatchedNeverScoped = VariantMatch.Matched(ConditionScope.NeverScoped)
+private val MatchedUnscoped = VariantMatch.Matched(ConditionScope.Always)
+private val MatchedNeverScoped = VariantMatch.Matched(ConditionScope.Never)
 
 internal fun VariantMatch(
     conditionalHoldingModel: ConditionalHoldingModel,
@@ -79,7 +79,5 @@ internal fun VariantMatch(
             bestMatch = conditional
         }
     }
-    return bestMatch?.featureTypes?.fold(ConditionScope.Unscoped as ConditionScope) { acc, featureType ->
-        acc and featureType.conditionScope
-    }?.let(VariantMatch::Matched) ?: MatchedNeverScoped
+    return bestMatch?.conditionScope?.let(VariantMatch::Matched) ?: MatchedNeverScoped
 }

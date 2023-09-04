@@ -17,19 +17,8 @@
 package com.yandex.yatagan.core.graph
 
 import com.yandex.yatagan.base.api.Incubating
-import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.lang.Method
-
-/**
- * Discards negation from the literal.
- *
- * @return `!this` if negated, `this` otherwise.
- */
-@Incubating
-public fun ConditionModel.normalized(): ConditionModel {
-    return if (negated) !this else this
-}
 
 public operator fun GraphEntryPoint.component1(): Method = getter
 

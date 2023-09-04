@@ -23,7 +23,7 @@ import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage
-import com.yandex.yatagan.core.graph.normalized
+import com.yandex.yatagan.core.model.BooleanExpression
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.lang.Method
@@ -53,8 +53,6 @@ internal class ConditionGenerator @Inject constructor(
         inside: BindingGraph,
         isInsideInnerClass: Boolean,
     ) {
-        require(!literal.negated) { "Not reached: must be normalized" }
-
         val localLiteralAccess = literalAccess[literal]
         if (localLiteralAccess != null) {
             localLiteralAccess.access(
@@ -80,25 +78,15 @@ internal class ConditionGenerator @Inject constructor(
 
     fun expression(
         builder: ExpressionBuilder,
-        conditionScope: ConditionScope,
+        conditionScope: ConditionScope.ExpressionScope,
         inside: BindingGraph,
         isInsideInnerClass: Boolean,
-    ) = with(builder) {
-        join(conditionScope.expression, separator = " && ") { clause ->
-            +"("
-            join(clause, separator = " || ") { literal ->
-                if (literal.negated) {
-                    +"!"
-                }
-                access(
-                    literal = literal.normalized(),
-                    builder = this,
-                    inside = inside,
-                    isInsideInnerClass = isInsideInnerClass,
-                )
-            }
-            +")"
-        }
+    ) {
+        conditionScope.expression.accept(BooleanExpressionGenerator(
+            builder = builder,
+            inside = inside,
+            isInsideInnerClass = isInsideInnerClass,
+        ))
     }
 
     private interface ConditionAccessStrategy {
@@ -200,7 +188,6 @@ internal class ConditionGenerator @Inject constructor(
     }
 
     private fun genEvaluateLiteral(literal: ConditionModel, builder: ExpressionBuilder) {
-        require(!literal.negated) { "Not reached: must be normalized" }
         with(builder) {
             val rootType = literal.root.type
             literal.path.asSequence().forEachIndexed { index, member ->
@@ -218,6 +205,75 @@ internal class ConditionGenerator @Inject constructor(
                 +".%N".formatCode(member.name)
                 if (member is Method) +"()"
             }
+        }
+    }
+
+    private inner class BooleanExpressionGenerator(
+        val builder: ExpressionBuilder,
+        val inside: BindingGraph,
+        val isInsideInnerClass: Boolean,
+    ) : BooleanExpression.Visitor<Unit> {
+        override fun visitVariable(variable: BooleanExpression.Variable) {
+            access(
+                literal = variable.model,
+                builder = builder,
+                inside = inside,
+                isInsideInnerClass = isInsideInnerClass,
+            )
+        }
+
+        override fun visitNot(not: BooleanExpression.Not) = with(builder) {
+            +"!"
+            val shouldUseParentheses = not.underlying.accept(object : BooleanExpression.Visitor<Boolean> {
+                override fun visitVariable(variable: BooleanExpression.Variable) = false
+                override fun visitNot(not: BooleanExpression.Not) = false
+                override fun visitAnd(and: BooleanExpression.And) = true
+                override fun visitOr(or: BooleanExpression.Or) = true
+            })
+            if (shouldUseParentheses) {
+                +"("
+            }
+            not.underlying.accept(this@BooleanExpressionGenerator)
+            if (shouldUseParentheses) {
+                +")"
+            }
+        }
+
+        override fun visitAnd(and: BooleanExpression.And) = with(builder) {
+            val parenthesesUsageDetector = object : BooleanExpression.Visitor<Boolean> {
+                override fun visitVariable(variable: BooleanExpression.Variable) = false
+                override fun visitNot(not: BooleanExpression.Not) = false
+                override fun visitAnd(and: BooleanExpression.And) = false
+                override fun visitOr(or: BooleanExpression.Or) = true
+            }
+            val shouldUseParansForLhs = and.lhs.accept(parenthesesUsageDetector)
+            val shouldUseParansForRhs = and.rhs.accept(parenthesesUsageDetector)
+
+            if (shouldUseParansForLhs) {
+                +"("
+            }
+            and.lhs.accept(this@BooleanExpressionGenerator)
+            if (shouldUseParansForLhs) {
+                +")"
+            }
+
+            +" && "
+
+            if (shouldUseParansForRhs) {
+                +"("
+            }
+            and.rhs.accept(this@BooleanExpressionGenerator)
+            if (shouldUseParansForRhs) {
+                +")"
+            }
+        }
+
+        override fun visitOr(or: BooleanExpression.Or) {
+            or.lhs.accept(this)
+            with(builder) {
+                +" || "
+            }
+            or.rhs.accept(this)
         }
     }
 }

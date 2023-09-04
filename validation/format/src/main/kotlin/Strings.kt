@@ -253,6 +253,12 @@ object Strings {
         fun noConditionsOnFeature() =
             "Feature declaration has no `@Condition`-family annotations on it.".toError()
 
+        @Covered
+        fun conflictingConditionsOnFeature() =
+            ("Feature declaration has both `@Condition`-family annotations and `@ConditionExpression` present. " +
+                    "Mixing these is not supported. Please, use either one way or the other to define a feature.`"
+                    ).toError()
+
 
         @Covered
         fun nonComponentVariantDimension() =
@@ -479,6 +485,28 @@ object Strings {
             color = TextColor.Inherit
             append("Multiple factory methods detected for a `").append(component).append('`')
         }.toError()
+
+        @Covered
+        fun nonStaticProvidesInAbstractModule() = (
+                "Non-static @Provides method inside an interface is not allowed.").toError()
+
+        @Covered
+        fun conditionExpressionParseErrors(error: CharSequence) = buildRichString {
+            color = TextColor.Inherit
+            appendLine("Unable to parse condition expression:")
+            appendLine(error)
+        }.toError()
+
+        @Covered
+        fun conflictingConditionExpressionImport(name: String, types: List<Type>) = buildRichString {
+            color = TextColor.Inherit
+            append("Conflicting imports: types ")
+            types.joinTo(this) { "`$it`" }
+            append(" are imported under the same name '").append(name).append("'.")
+        }.toError()
+
+        @Covered
+        fun invalidAliasedImport(name: String) = ("Import alias '$name' contains forbidden characters.").toError()
     }
 
     object Warnings {
@@ -528,6 +556,20 @@ object Strings {
             append(creator).appendLine("` so it can't be created directly.")
             append("Changing the entry-point type to the `${creator.type}` would fix the problem " +
                     "and allow the component to be recognized as a child (if not included explicitly).")
+        }.toWarning()
+
+        @Covered
+        fun contradictionCondition(conditionScope: ConditionScope) = buildRichString {
+            color = TextColor.Inherit
+            append("Specified condition ").append(conditionScope).append(" can never be true (contradiction). ")
+            append("Please, use `onlyOn` or empty `@Binds` to express 'absent' binding.")
+        }.toWarning()
+
+        @Covered
+        fun tautologyCondition(conditionScope: ConditionScope) = buildRichString {
+            color = TextColor.Inherit
+            append("Specified condition ").append(conditionScope).append(" is always true (tautology), " +
+                    "and can be removed entirely.")
         }.toWarning()
     }
 

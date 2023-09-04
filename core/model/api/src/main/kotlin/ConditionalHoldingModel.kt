@@ -17,6 +17,7 @@
 package com.yandex.yatagan.core.model
 
 import com.yandex.yatagan.base.api.Incubating
+import com.yandex.yatagan.base.api.NullIfInvalid
 import com.yandex.yatagan.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.yatagan.core.model.ConditionalHoldingModel.FeatureModel
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -35,7 +36,11 @@ public interface ConditionalHoldingModel : MayBeInvalid {
      */
     @Incubating
     public interface FeatureModel : ClassBackedModel {
-        public val conditionScope: ConditionScope
+        /**
+         * Parsed condition scope for this feature.
+         */
+        @NullIfInvalid
+        public val conditionScope: ConditionScope?
     }
 
     /**
@@ -47,6 +52,11 @@ public interface ConditionalHoldingModel : MayBeInvalid {
          * list of features.
          */
         public val featureTypes: List<FeatureModel>
+
+        /**
+         * Complete [ConditionScope] for the conditional.
+         */
+        public val conditionScope: ConditionScope
 
         /**
          * Variant filter. May specify multiple flavors for a dimension.

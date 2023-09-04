@@ -23,6 +23,7 @@ import com.yandex.yatagan.Assisted
 import com.yandex.yatagan.Component
 import com.yandex.yatagan.ComponentFlavor
 import com.yandex.yatagan.Condition
+import com.yandex.yatagan.ConditionExpression
 import com.yandex.yatagan.Conditional
 import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.IntoList
@@ -103,6 +104,25 @@ internal class RtAnyConditionAnnotationImpl(
 ) : RtAnnotationImplBase<AnyCondition>(impl), BuiltinAnnotation.ConditionFamily.Any {
     override val conditions get() = impl.value.map {
         RtConditionAnnotationImpl(it)
+    }
+}
+
+internal class RtConditionExpressionAnnotationImpl(
+    impl: ConditionExpression,
+) : RtAnnotationImplBase<ConditionExpression>(impl), BuiltinAnnotation.ConditionExpression {
+    override val value: String
+        get() = impl.value
+    override val imports: List<Type>
+        get() = impl.imports.map { RtTypeImpl(it.java) }
+    override val importAs: List<BuiltinAnnotation.ConditionExpression.ImportAs> by lazy {
+        impl.importAs.map { ImportAsImpl(it) }
+    }
+
+    private data class ImportAsImpl(
+        private val impl: ConditionExpression.ImportAs,
+    ) : BuiltinAnnotation.ConditionExpression.ImportAs {
+        override val value: Type = RtTypeImpl(impl.value.java)
+        override val alias: String = impl.alias
     }
 }
 

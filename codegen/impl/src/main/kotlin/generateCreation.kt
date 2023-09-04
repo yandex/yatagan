@@ -32,11 +32,9 @@ import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
 import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
-import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
-import com.yandex.yatagan.core.model.isAlways
-import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.lang.Callable
 import com.yandex.yatagan.lang.Constructor
 import com.yandex.yatagan.lang.Method
@@ -120,44 +118,79 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitAlternatives(binding: AlternativesBinding) {
-        with(builder) {
-            var exhaustive = false
-            for (alternative: NodeModel in binding.alternatives) {
-                val altBinding = inside.resolveBinding(alternative)
-                if (!altBinding.conditionScope.isAlways) {
-                    if (altBinding.conditionScope.isNever) {
-                        // Never scoped is, by definition, unreached, so just skip it.
-                        continue
-                    }
-                    val expression = buildExpression {
-                        val gen = inside[GeneratorComponent].conditionGenerator
-                        gen.expression(
-                            builder = this,
-                            conditionScope = altBinding.conditionScope,
-                            inside = inside,
-                            isInsideInnerClass = isInsideInnerClass,
-                        )
-                    }
-                    +"%L ? ".formatCode(expression)
-                    altBinding.generateAccess(
-                        builder = builder,
-                        inside = inside,
-                        isInsideInnerClass = isInsideInnerClass,
+        data class AlternativesGenerationEntry(
+            val access: CodeBlock,
+            val condition: CodeBlock?,
+        )
+
+        var scopeOfPreviousAlternatives: ConditionScope = ConditionScope.Never
+        val alternatives = binding.alternatives
+        val entriesToGenerate = mutableListOf<AlternativesGenerationEntry>()
+        for (index in alternatives.indices) {
+            val alternative = alternatives[index]
+            val altBinding = inside.resolveBinding(alternative)
+            val altBindingScope = altBinding.conditionScope
+
+            // Condition: "the alternative is present" AND "none of the previous alternatives are present".
+            val actualAltBindingScope = !scopeOfPreviousAlternatives and altBindingScope
+
+            scopeOfPreviousAlternatives = scopeOfPreviousAlternatives or altBindingScope
+            when {
+                // non-never last-index - no need to check condition, because it's guaranteed to be present,
+                // if queried - that is validated at build time.
+                (index == alternatives.lastIndex && altBindingScope != ConditionScope.Never) ||
+                        altBindingScope == ConditionScope.Always -> {
+                    entriesToGenerate += AlternativesGenerationEntry(
+                        access = buildExpression {
+                            altBinding.generateAccess(
+                                builder = this,
+                                inside = inside,
+                                isInsideInnerClass = isInsideInnerClass,
+                            )
+                        },
+                        condition = null,
                     )
-                    +" : "
-                } else {
-                    altBinding.generateAccess(
-                        builder = builder,
-                        inside = inside,
-                        isInsideInnerClass = isInsideInnerClass,
-                    )
-                    exhaustive = true
                     break  // no further generation, the rest are (if any) unreachable.
                 }
+
+                altBindingScope == ConditionScope.Never || actualAltBindingScope.isContradiction() -> {
+                    // Never scoped is, by definition, unreached, so just skip it.
+                    continue
+                }
+
+                altBindingScope is ConditionScope.ExpressionScope -> {
+                    entriesToGenerate += AlternativesGenerationEntry(
+                        access = buildExpression {
+                            altBinding.generateAccess(
+                                builder = this,
+                                inside = inside,
+                                isInsideInnerClass = isInsideInnerClass,
+                            )
+                        },
+                        condition = buildExpression {
+                            val gen = inside[GeneratorComponent].conditionGenerator
+                            gen.expression(
+                                builder = this,
+                                conditionScope = altBindingScope,
+                                inside = inside,
+                                isInsideInnerClass = isInsideInnerClass,
+                            )
+                        },
+                    )
+                }
+
+                else -> throw AssertionError("Not reached!")
             }
-            if (!exhaustive) {
-                +"null /*empty*/"
+        }
+
+        with(builder) {
+            for ((access, condition) in entriesToGenerate) {
+                +(condition ?: break)
+                +" ? "
+                +access
+                +" : "
             }
+            +entriesToGenerate.last().access
         }
     }
 

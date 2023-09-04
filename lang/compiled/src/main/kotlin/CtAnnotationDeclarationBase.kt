@@ -23,6 +23,8 @@ import javax.inject.Qualifier
 import javax.inject.Scope
 
 abstract class CtAnnotationDeclarationBase : AnnotationDeclarationBase() {
+    abstract override val annotations: Sequence<CtAnnotationBase>
+
     override fun <T : BuiltinAnnotation.OnAnnotationClass> getAnnotation(
         builtinAnnotation: BuiltinAnnotation.Target.OnAnnotationClass<T>,
     ): T? {

@@ -44,7 +44,11 @@ public interface AliasBinding : BaseBinding {
  */
 @Incubating
 public interface AlternativesBinding : Binding {
-    public val alternatives: Sequence<NodeModel>
+    /**
+     * The list of alternative implementations for the [target], in order of condition checking.
+     * Always has size >= 1.
+     */
+    public val alternatives: List<NodeModel>
 }
 
 /**

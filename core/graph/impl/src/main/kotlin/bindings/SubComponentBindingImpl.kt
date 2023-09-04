@@ -22,8 +22,8 @@ import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
 import com.yandex.yatagan.core.model.ComponentModel
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeModel
-import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.format.modelRepresentation
 
@@ -45,8 +45,8 @@ internal class SubComponentBindingImpl(
     }
 
     override val dependencies by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        if (conditionScope.isNever) emptySequence()
-        else targetGraph.usedParents.map { it.model.asNode() }.asSequence()
+        if (conditionScope == ConditionScope.Never) emptyList()
+        else targetGraph.usedParents.map { it.model.asNode() }
     }
 
     override val variantMatch: VariantMatch by lazy {

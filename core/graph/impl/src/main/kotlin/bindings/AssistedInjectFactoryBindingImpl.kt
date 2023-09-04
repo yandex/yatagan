@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.graph.impl.bindings
 
-import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -50,10 +49,8 @@ internal class AssistedInjectFactoryBindingImpl(
 
     override val dependencies by lazy(LazyThreadSafetyMode.PUBLICATION) {
         model.assistedConstructorParameters
-            .asSequence()
             .filterIsInstance<AssistedInjectFactoryModel.Parameter.Injected>()
             .map { it.dependency }
-            .memoize()
     }
 
     override fun validate(validator: Validator) {

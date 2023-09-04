@@ -63,6 +63,17 @@ public abstract interface annotation class com/yandex/yatagan/Condition : java/l
 	public abstract fun value ()Ljava/lang/Class;
 }
 
+public abstract interface annotation class com/yandex/yatagan/ConditionExpression : java/lang/annotation/Annotation {
+	public abstract fun importAs ()[Lcom/yandex/yatagan/ConditionExpression$ImportAs;
+	public abstract fun imports ()[Ljava/lang/Class;
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class com/yandex/yatagan/ConditionExpression$ImportAs : java/lang/annotation/Annotation {
+	public abstract fun alias ()Ljava/lang/String;
+	public abstract fun value ()Ljava/lang/Class;
+}
+
 public abstract interface annotation class com/yandex/yatagan/Conditional : java/lang/annotation/Annotation {
 	public abstract fun onlyIn ()[Ljava/lang/Class;
 	public abstract fun value ()[Ljava/lang/Class;

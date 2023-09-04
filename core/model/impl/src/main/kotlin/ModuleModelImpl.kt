@@ -28,7 +28,6 @@ import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.functionsWithCompanion
-import com.yandex.yatagan.lang.isKotlinObject
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -90,7 +89,7 @@ internal class ModuleModelImpl private constructor(
     )
 
     internal val mayRequireInstance by lazy(PUBLICATION) {
-        !declaration.isAbstract && !declaration.isKotlinObject
+        !declaration.isAbstract
     }
 
     override fun validate(validator: Validator) {

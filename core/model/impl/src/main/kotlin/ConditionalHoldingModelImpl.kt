@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model.impl
 
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.core.model.ConditionalHoldingModel.ConditionalWithFlavorConstraintsModel
 import com.yandex.yatagan.core.model.ConditionalHoldingModel.FeatureModel
@@ -23,8 +24,10 @@ import com.yandex.yatagan.core.model.Variant.FlavorModel
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.appendChildContextReference
 import com.yandex.yatagan.validation.format.modelRepresentation
+import com.yandex.yatagan.validation.format.reportWarning
 
 internal open class ConditionalHoldingModelImpl(
     sources: List<BuiltinAnnotation.Conditional>,
@@ -57,14 +60,36 @@ internal open class ConditionalHoldingModelImpl(
     private class ConditionalWithFlavorConstraintsModelImpl(
         annotation: BuiltinAnnotation.Conditional,
     ) : ConditionalWithFlavorConstraintsModel {
-        override val onlyIn: List<FlavorModel> =
+        override val onlyIn: List<FlavorModel> by lazy {
             annotation.onlyIn.map { FlavorImpl(it) }
-        override val featureTypes: List<FeatureModel> =
+        }
+
+        override val featureTypes: List<FeatureModel> by lazy {
             annotation.featureTypes.map { FeatureModelImpl(it.declaration) }
+        }
+
+        override val conditionScope: ConditionScope by lazy {
+            featureTypes.fold(ConditionScope.Always as ConditionScope) { acc, featureType ->
+                acc and (featureType.conditionScope ?: ConditionScope.Always)
+            }
+        }
 
         override fun validate(validator: Validator) {
             onlyIn.forEach(validator::child)
             featureTypes.forEach(validator::child)
+
+            // If some feature is not valid, no need to report induced errors
+            if (featureTypes.none { it.conditionScope == null }) {
+                when {
+                    conditionScope.isContradiction() -> {
+                        validator.reportWarning(Strings.Warnings.contradictionCondition(conditionScope))
+                    }
+
+                    featureTypes.isNotEmpty() && conditionScope.isTautology() -> {
+                        validator.reportWarning(Strings.Warnings.tautologyCondition(conditionScope))
+                    }
+                }
+            }
         }
 
         override fun toString(childContext: MayBeInvalid?) = throw AssertionError("not reached")
@@ -73,5 +98,4 @@ internal open class ConditionalHoldingModelImpl(
     override fun validate(validator: Validator) {
         conditionals.forEach(validator::inline)
     }
-
 }

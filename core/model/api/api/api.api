@@ -33,7 +33,7 @@ public final class com/yandex/yatagan/core/model/AssistedInjectFactoryModel$Para
 }
 
 public abstract interface class com/yandex/yatagan/core/model/BindsBindingModel : com/yandex/yatagan/core/model/ModuleHostedBindingModel {
-	public abstract fun getSources ()Lkotlin/sequences/Sequence;
+	public abstract fun getSources ()Ljava/util/List;
 }
 
 public abstract interface class com/yandex/yatagan/core/model/ClassBackedModel : com/yandex/yatagan/validation/MayBeInvalid {
@@ -119,16 +119,6 @@ public abstract interface class com/yandex/yatagan/core/model/ComponentModel : c
 	public abstract fun getSubComponentFactoryMethods ()Ljava/util/List;
 	public abstract fun getVariant ()Lcom/yandex/yatagan/core/model/Variant;
 	public abstract fun isRoot ()Z
-}
-
-public final class com/yandex/yatagan/core/model/ConditionExpression$Companion {
-	public final fun getNeverScoped ()Lcom/yandex/yatagan/core/model/ConditionExpression;
-	public final fun getUnscoped ()Lcom/yandex/yatagan/core/model/ConditionExpression;
-}
-
-public abstract interface class com/yandex/yatagan/core/model/ConditionExpression$Literal {
-	public abstract fun getNegated ()Z
-	public abstract fun not ()Lcom/yandex/yatagan/core/model/ConditionExpression$Literal;
 }
 
 public abstract interface class com/yandex/yatagan/core/model/ConditionalHoldingModel : com/yandex/yatagan/validation/MayBeInvalid {

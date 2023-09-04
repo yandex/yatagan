@@ -20,8 +20,8 @@ import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.impl.bindings.ConditionalBindingMixin
 import com.yandex.yatagan.core.graph.impl.bindings.graphConditionScope
 import com.yandex.yatagan.core.graph.impl.bindings.resolveAliasChain
-import com.yandex.yatagan.core.model.ConditionExpression
 import com.yandex.yatagan.core.model.NodeModel
+import com.yandex.yatagan.core.model.notImplies
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -41,24 +41,21 @@ internal interface NonStaticConditionDependencies : MayBeInvalid {
  * Constructor function for [NonStaticConditionDependencies].
  */
 internal fun NonStaticConditionDependencies(binding: ConditionalBindingMixin): NonStaticConditionDependencies {
-    return when (binding.variantMatch.conditionScope) {
-        ConditionExpression.Unscoped, ConditionExpression.NeverScoped -> EmptyNonStaticConditionDependencies
-        else -> {
-            val conditionProviders = buildSet {
-                for (clause in binding.variantMatch.conditionScope.expression) for (condition in clause) {
-                    if (condition.requiresInstance)
-                        add(condition.root)
-                }
-            }
-            if (conditionProviders.isEmpty()) {
-                EmptyNonStaticConditionDependencies
-            } else {
-                NonStaticConditionDependenciesImpl(
-                    conditionProviders = conditionProviders,
-                    host = binding,
-                )
-            }
-        }
+    val allConditionModels = binding.conditionScope.allConditionModels()
+    if (allConditionModels.isEmpty()) {
+        return EmptyNonStaticConditionDependencies
+    }
+
+    val conditionProviders = allConditionModels
+        .mapNotNullTo(mutableSetOf()) { model -> model.root.takeIf { model.requiresInstance } }
+
+    return if (conditionProviders.isEmpty()) {
+        EmptyNonStaticConditionDependencies
+    } else {
+        NonStaticConditionDependenciesImpl(
+            conditionProviders = conditionProviders,
+            host = binding,
+        )
     }
 }
 
@@ -82,7 +79,7 @@ private class NonStaticConditionDependenciesImpl(
         for (node in conditionProviders) {
             val resolved = host.owner.resolveBinding(node)
             val resolvedScope = resolved.graphConditionScope()
-            if (resolvedScope !in conditionScope) {
+            if (conditionScope notImplies resolvedScope) {
                 // Incompatible condition!
                 validator.reportError(Strings.Errors.incompatibleConditionForConditionProvider(
                     aCondition = resolvedScope,
@@ -106,11 +103,11 @@ private class NonStaticConditionDependenciesImpl(
             if (childContext is BaseBinding) {
                 append("{ ")
                 var count = 0
-                for (clause in host.variantMatch.conditionScope.expression) for (literal in clause) {
-                    if (literal.requiresInstance) {
+                for (model in host.variantMatch.conditionScope.allConditionModels()) {
+                    if (model.requiresInstance) {
                         ++count
-                        if (literal.root == childContext.target) {
-                            appendChildContextReference(literal)
+                        if (model.root == childContext.target) {
+                            appendChildContextReference(model)
                         }
                     }
                 }

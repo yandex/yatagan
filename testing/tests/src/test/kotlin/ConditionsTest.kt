@@ -376,9 +376,13 @@ class ConditionsTest(
             class ImplB @Inject constructor() : SomeApi
             
             class Stub @Inject constructor() : SomeApi
+
+            interface Absent : SomeApi
             
             @Module
             interface MyModule {
+                @Binds fun absent(): Absent
+            
                 @Binds @Named("v1")
                 fun alias(i: ImplA): SomeApi
                 
@@ -394,6 +398,9 @@ class ConditionsTest(
                 
                 @Binds
                 fun base(@Named("v4") i: SomeApi, i2: BaseImpl): SomeApiBase
+                
+                @Binds @Named("v5")
+                fun base(@Named("v4") i: SomeApi, i2: Absent): SomeApi
             }
             
             @Singleton
@@ -413,6 +420,7 @@ class ConditionsTest(
                 @get:Named("v2") val apiV2Provider: Optional<Provider<SomeApi>>
                 @get:Named("v3") val apiV3Provider: Optional<Provider<SomeApi>>
                 @get:Named("v4") val apiV4Provider: Optional<Provider<SomeApi>>
+                @get:Named("v5") val apiV5Provider: Optional<Provider<SomeApi>>
                 
                 val base: Optional<SomeApiBase>
             }
@@ -434,6 +442,7 @@ class ConditionsTest(
                 assert(c.apiV2Provider.get().get() is Stub)
                 assert(c.apiV3Provider.get().get() is ImplB)
                 assert(c.apiV4Provider.get().get() is ImplB)
+                assert(c.apiV5Provider.get().get() is ImplB)
             }
         """.trimIndent())
 
@@ -954,6 +963,146 @@ class ConditionsTest(
 
             @Component interface MyComponent {
                 val f: Provider<MyClassBFactory>
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `condition expressions test`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import com.yandex.yatagan.ConditionExpression.ImportAs
+            import javax.inject.*
+            
+            class Helper @Inject constructor() {
+                val a: Boolean get() = true
+                val b: Boolean get() = true
+                val c: Boolean get() = true
+            }
+            
+            @ConditionExpression("fooBar", Features::class)
+            annotation class C1
+            
+            //        unqualified -----v   v--- qualified ----v   v--- unqualified ---v 
+            @ConditionExpression("fooBar & Features::isEnabledB | getFeatureC.isEnabled", Features::class)
+            annotation class C2
+            
+            // Complex expression.
+            @ConditionExpression("fooBar & !((isEnabledB) | !getFeatureC.isEnabled)", Features::class)
+            annotation class C3 {
+                companion object {
+                    fun c1CompanionEnabled() = false
+                }
+            }
+            
+            // Multiple imports.
+            @ConditionExpression("Features::fooBar | !Helper::getA", Features::class, Helper::class)
+            annotation class C4
+            
+            // Feature references.       C3 as feature-reference -----vv     vv------- C3 as condition receiver
+            @ConditionExpression("(Features::isEnabledB & !@C4) | !(!@C3) & C3::Companion.c1CompanionEnabled",
+                C4::class, Features::class, C3::class)
+            annotation class C5
+            
+            @ConditionExpression("@C5", C5::class)
+            annotation class C5Alias
+            
+            @ConditionExpression("0::isEnabledB | @MyFeature_4 & !0::fooBar & @C1", C1::class,
+                importAs = [ImportAs(Features::class, "0"), ImportAs(C4::class, "MyFeature_4")])
+            annotation class C6
+            
+            @Conditional(C2::class, C1::class)
+            class ClassA @Inject constructor()
+            
+            @Conditional(C3::class)
+            class ClassB @Inject constructor()
+            
+            @Conditional(C4::class)
+            class ClassC @Inject constructor()
+            
+            @Conditional(C5::class)
+            class ClassD @Inject constructor()
+            
+            @Conditional(C5Alias::class)
+            class ClassE @Inject constructor()
+            
+            @Conditional(C6::class)
+            class ClassF @Inject constructor()
+            
+            @Component interface TestComponent {
+                val a: Optional<ClassA>
+                val b: Optional<ClassB>
+                val c: Optional<ClassC>
+                val d: Optional<ClassD>
+                val e: Optional<ClassE>
+                val f: Optional<ClassF>
+            }
+            
+            fun test() {
+                Yatagan.create(TestComponent::class.java).apply {
+                    a; b; c; d; e; f
+                }
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `invalid conditions expression test`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import com.yandex.yatagan.ConditionExpression.ImportAs
+            import javax.inject.*
+
+            class Helper @Inject constructor() {
+                val a: Boolean get() = true
+                val b: Boolean get() = true
+                val c: Boolean get() = true
+            }
+
+            @ConditionExpression("fooBar") annotation class C1
+            @ConditionExpression("fooBar", Helper::class) annotation class C12
+            @ConditionExpression("fooBar", Helper::class, Features::class) annotation class C13
+            @ConditionExpression("getA", Helper::class, Helper::class) annotation class C14
+            @ConditionExpression("getA", Helper::class, importAs = [ImportAs(C1::class, "Helper")]) annotation class C15
+            @ConditionExpression("getA", importAs = [ImportAs(Helper::class, "Sh&t")]) annotation class C16
+
+            @ConditionExpression("foo|bar\n\n|baz") annotation class C21
+            @ConditionExpression("(Features::fooBar|bar)&Helper::b", Features::class, Helper::class) annotation class C22
+            @ConditionExpression("(Features::fooBar|Baz::bar)&Helper::b", Features::class, Helper::class) annotation class C23
+            @ConditionExpression("(@FeatureA|@FeatureB)&Helper::b", Conditions.FeatureA::class, Helper::class) annotation class C24
+            @ConditionExpression("@FeatureA|@Helper", Conditions.FeatureA::class, Helper::class) annotation class C25
+
+            @ConditionExpression("") annotation class A0
+            @ConditionExpression("|!f") annotation class A1
+            @ConditionExpression("we(h2!347&32)\n89|32") annotation class A2
+            
+            @ConditionExpression("getA", Helper::class)
+            @Condition(Helper::class, "getA")
+            annotation class A3
+
+            @ConditionExpression("Helper::getA & Helper::", Helper::class) annotation class A4
+
+            @Conditional(C1::class, C12::class, C13::class, C14::class, C15::class, C16::class)
+            class ClassA @Inject constructor()
+
+            @Conditional(A0::class, A1::class, A2::class, A3::class, A4::class)
+            class ClassB @Inject constructor()
+
+            @Conditional(C21::class, C22::class, C23::class, C24::class, C25::class)
+            class ClassC @Inject constructor()
+
+            @Component interface TestComponent {
+                val a: Optional<ClassA>
+                val b: Optional<ClassB>
+                val c: Optional<ClassC>
             }
         """.trimIndent())
 

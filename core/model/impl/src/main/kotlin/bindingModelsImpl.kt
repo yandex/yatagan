@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.core.model.BindsBindingModel
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
@@ -155,9 +154,11 @@ internal class BindsImpl(
         assert(canRepresent(method))
     }
 
-    override val sources = method.parameters.map { parameter ->
-        NodeModelImpl(type = parameter.type, forQualifier = parameter)
-    }.memoize()
+    override val sources by lazy {
+        method.parameters.mapTo(mutableListOf()) { parameter ->
+            NodeModelImpl(type = parameter.type, forQualifier = parameter)
+        }
+    }
 
     override fun validate(validator: Validator) {
         super.validate(validator)
@@ -253,10 +254,14 @@ internal class ProvidesImpl(
         if (!method.isEffectivelyPublic) {
             validator.reportError(Errors.invalidAccessForProvides())
         }
+
+        if (requiresModuleInstance && !originModule.mayRequireInstance) {
+            validator.reportError(Errors.nonStaticProvidesInAbstractModule())
+        }
     }
 
     override val requiresModuleInstance: Boolean
-        get() = originModule.mayRequireInstance && !method.isStatic && !method.owner.isKotlinObject
+        get() = !method.isAbstract && !method.isStatic && !method.owner.isKotlinObject
 
     override fun <R> accept(visitor: ModuleHostedBindingModel.Visitor<R>): R {
         return visitor.visitProvides(this)

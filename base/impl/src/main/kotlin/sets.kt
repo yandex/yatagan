@@ -18,6 +18,9 @@
 
 package com.yandex.yatagan.base
 
+import java.util.EnumMap
+import java.util.EnumSet
+
 private class PairSet<out T>(
     private val one: T,
     private val two: T,
@@ -54,3 +57,52 @@ infix fun <T> Set<T>.intersects(another: Set<T>): Boolean {
 }
 
 inline infix fun <T> Set<T>.notIntersects(another: Set<T>) = !(this intersects another)
+
+// region enumSetOf
+
+inline fun <reified E : Enum<E>> enumSetOf(): EnumSet<E> = EnumSet.noneOf(E::class.java)
+
+fun <E : Enum<E>> enumSetOf(value: E): EnumSet<E> = EnumSet.of(value)
+
+fun <E : Enum<E>> enumSetOf(v1: E, v2: E): EnumSet<E> = EnumSet.of(v1, v2)
+
+fun <E : Enum<E>> enumSetOf(v1: E, v2: E, v3: E): EnumSet<E> = EnumSet.of(v1, v2, v3)
+
+fun <E : Enum<E>> enumSetOf(v1: E, v2: E, v3: E, v4: E): EnumSet<E> = EnumSet.of(v1, v2, v3, v4)
+
+fun <E : Enum<E>> enumSetOf(v1: E, vararg rest: E): EnumSet<E> = EnumSet.of(v1, *rest)
+
+// endregion
+
+// region enumMapOf
+
+inline fun <reified K : Enum<K>, V> enumMapOf(): EnumMap<K, V> = EnumMap<K, V>(K::class.java)
+
+inline fun <reified K : Enum<K>, V> enumMapOf(key: K, value: V): EnumMap<K, V> =
+    enumMapOf<K, V>().apply { put(key, value) }
+
+inline fun <reified K : Enum<K>, V> enumMapOf(kv1: Pair<K, V>, kv2: Pair<K, V>): EnumMap<K, V> =
+    enumMapOf<K, V>().apply {
+        put(kv1.first, kv1.second)
+        put(kv2.first, kv2.second)
+    }
+
+inline fun <reified K : Enum<K>, V> enumMapOf(kv1: Pair<K, V>, kv2: Pair<K, V>, kv3: Pair<K, V>): EnumMap<K, V> =
+    enumMapOf<K, V>().apply {
+        put(kv1.first, kv1.second)
+        put(kv2.first, kv2.second)
+        put(kv3.first, kv3.second)
+    }
+
+inline fun <reified K : Enum<K>, V> enumMapOf(kv1: Pair<K, V>, kv2: Pair<K, V>, kv3: Pair<K, V>, kv4: Pair<K, V>): EnumMap<K, V> =
+    enumMapOf<K, V>().apply {
+        put(kv1.first, kv1.second)
+        put(kv2.first, kv2.second)
+        put(kv3.first, kv3.second)
+        put(kv4.first, kv4.second)
+    }
+
+inline fun <reified K : Enum<K>, V> enumMapOf(vararg pairs: Pair<K, V>): EnumMap<K, V> =
+    enumMapOf<K, V>().apply { pairs.forEachBi(::put) }
+
+// endregion

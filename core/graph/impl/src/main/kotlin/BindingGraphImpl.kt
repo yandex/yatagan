@@ -26,7 +26,6 @@ import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
-import com.yandex.yatagan.core.graph.normalized
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
@@ -41,7 +40,6 @@ import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.core.model.accept
-import com.yandex.yatagan.core.model.isNever
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -52,7 +50,7 @@ internal class BindingGraphImpl(
     private val component: ComponentModel,
     internal val options: Options,
     override val parent: BindingGraphImpl? = null,
-    override val conditionScope: ConditionScope = ConditionScope.Unscoped,
+    override val conditionScope: ConditionScope = ConditionScope.Always,
     private val factoryMethodInParent: ComponentFactoryModel? = null,
 ) : BindingGraph, ExtensibleImpl() {
     override val model: ComponentModel
@@ -151,7 +149,7 @@ internal class BindingGraphImpl(
         children = childrenModels
             .asSequence()
             .map { it to VariantMatch(it, variant).conditionScope }
-            .filter { (_, conditionScope) -> !conditionScope.isNever }
+            .filter { (_, conditionScope) -> !conditionScope.isContradiction() }
             .map { (childComponent, childConditionScope) ->
                 BindingGraphImpl(
                     component = childComponent,
@@ -220,17 +218,16 @@ internal class BindingGraphImpl(
         // Add all condition literals from all local bindings.
         for (binding in localBindings.keys) {
             var isEager = true
-            for (clause in binding.conditionScope.expression) for (literal in clause) {
-                val normalized = literal.normalized()
+            for (condition in binding.conditionScope.allConditionModels()) {
                 if (isEager) {
-                    localConditionLiterals[normalized] = when {
-                        normalized.requiresInstance -> LiteralUsage.Lazy  // Always lazy
+                    localConditionLiterals[condition] = when {
+                        condition.requiresInstance -> LiteralUsage.Lazy  // Always lazy
                         else -> LiteralUsage.Eager
                     }
                     isEager = false
                 } else {
-                    if (normalized !in localConditionLiterals) {
-                        localConditionLiterals[normalized] = LiteralUsage.Lazy
+                    if (condition !in localConditionLiterals) {
+                        localConditionLiterals[condition] = LiteralUsage.Lazy
                     }
                 }
             }

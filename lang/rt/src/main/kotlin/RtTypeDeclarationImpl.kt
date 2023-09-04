@@ -27,6 +27,7 @@ import com.yandex.yatagan.Component
 import com.yandex.yatagan.ComponentFlavor
 import com.yandex.yatagan.ComponentVariantDimension
 import com.yandex.yatagan.Condition
+import com.yandex.yatagan.ConditionExpression
 import com.yandex.yatagan.Conditional
 import com.yandex.yatagan.Conditionals
 import com.yandex.yatagan.ConditionsApi
@@ -184,6 +185,8 @@ internal class RtTypeDeclarationImpl private constructor(
                 }
             BuiltinAnnotation.Component.Builder -> (which as BuiltinAnnotation.Component.Builder)
                 .takeIf { impl.isAnnotationPresent(Component.Builder::class.java) }
+            BuiltinAnnotation.ConditionExpression ->
+                impl.getAnnotation(ConditionExpression::class.java)?.let { RtConditionExpressionAnnotationImpl(it) }
         }
         return which.modelClass.cast(value)
     }
