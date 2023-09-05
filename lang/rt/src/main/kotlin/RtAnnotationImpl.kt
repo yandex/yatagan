@@ -90,8 +90,7 @@ internal class RtAnnotationImpl(
                 is Class<*> -> visitor.visitType(RtTypeImpl(value))
                 is Annotation -> visitor.visitAnnotation(RtAnnotationImpl(value))
                 is Enum<*> -> visitor.visitEnumConstant(
-                    // Suppress before https://youtrack.jetbrains.com/issue/KT-54005 gets rolled out.
-                    enum = @Suppress("ENUM_DECLARING_CLASS_DEPRECATED_WARNING") RtTypeImpl(value.declaringClass),
+                    enum = RtTypeImpl(value.declaringJavaClass),
                     constant = value.name,
                 )
                 null -> visitor.visitUnresolved()  // Should not be normally reachable

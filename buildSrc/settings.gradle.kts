@@ -4,13 +4,13 @@
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            val kotlinVersion = "1.8.10"
-            val kspVersion = "1.0.9"
+            val kotlinVersion = "1.9.24"
+            val kspVersion = "1.0.20"
             version("kotlin", kotlinVersion)
             version("ksp", "$kotlinVersion-$kspVersion")
 
             library("kotlin-gradle", "org.jetbrains.kotlin", "kotlin-gradle-plugin").versionRef("kotlin")
-            library("dokka-gradle", "org.jetbrains.dokka", "dokka-gradle-plugin").versionRef("kotlin")
+            library("dokka-gradle", "org.jetbrains.dokka", "dokka-gradle-plugin").version("1.9.20")
             library("nexusPublish-gradle", "io.github.gradle-nexus:publish-plugin:1.3.0")
 
             library("ksp-api", "com.google.devtools.ksp", "symbol-processing-api").versionRef("ksp")
