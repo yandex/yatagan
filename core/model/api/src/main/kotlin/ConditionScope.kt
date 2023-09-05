@@ -17,6 +17,9 @@
 package com.yandex.yatagan.core.model
 
 import com.yandex.yatagan.base.api.Incubating
+import com.yandex.yatagan.core.model.ConditionScope.Always
+import com.yandex.yatagan.core.model.ConditionScope.ExpressionScope
+import com.yandex.yatagan.core.model.ConditionScope.Never
 
 /**
  * A condition "scope" of the binding - contains knowledge on whether the binding is present or absent from the graph
@@ -71,7 +74,7 @@ public sealed interface ConditionScope {
      * E.g. every binding without any specified condition has this condition scope.
      */
     @Incubating
-    public object Always : ConditionScope {
+    public data object Always : ConditionScope {
         override fun isTautology(): Boolean = true
         override fun isContradiction(): Boolean = false
         override fun implies(another: ConditionScope): Boolean = another.isTautology()
@@ -86,7 +89,7 @@ public sealed interface ConditionScope {
      * E.g. explicitly
      */
     @Incubating
-    public object Never : ConditionScope {
+    public data object Never : ConditionScope {
         override fun isTautology(): Boolean = false
         override fun isContradiction(): Boolean = true
         override fun implies(another: ConditionScope): Boolean = true

@@ -117,10 +117,8 @@ internal class KspAnnotationImpl(
                 is List<*> -> visitor.visitArray(value.map { ValueImpl(it ?: "<error>") })
                 is Enum<*> -> {
                     // Sometimes KSP yields enums (of platform types?) literally.
-                    // Suppress before https://youtrack.jetbrains.com/issue/KT-54005 gets rolled out.
-                    @Suppress("ENUM_DECLARING_CLASS_DEPRECATED_WARNING")
                     val enumClass = KspTypeImpl(
-                        checkNotNull(Utils.resolver.getClassDeclarationByName(value.declaringClass.canonicalName)) {
+                        checkNotNull(Utils.resolver.getClassDeclarationByName(value.declaringJavaClass.canonicalName)) {
                             "enum constant $value has unresolved class (?)"
                         }.asStarProjectedType()
                     )
