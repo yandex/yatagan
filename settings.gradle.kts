@@ -4,8 +4,6 @@ plugins {
 
 rootProject.name = "yatagan"
 
-apply(from = "buildSrc/settings.gradle.kts")
-
 include(":base:api")
 include(":base:impl")
 

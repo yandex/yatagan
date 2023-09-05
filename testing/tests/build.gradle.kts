@@ -32,8 +32,8 @@ dependencies {
     api(project(":testing:source-set"))
 
     // Third-party test dependencies
-    implementation(testingLibs.junit4)
-    implementation(testingLibs.roomCompileTesting)
+    implementation(libs.testing.junit4)
+    implementation(libs.testing.roomCompileTesting)
 
     // Base test dependencies
     implementation(project(":processor:common"))
@@ -60,7 +60,7 @@ dependencies {
     // For strings
     testImplementation(project(":validation:format"))
 
-    baseTestRuntime(testingLibs.mockito.kotlin.get())  // required for heavy tests
+    baseTestRuntime(libs.testing.mockito.kotlin.get())  // required for heavy tests
     dynamicTestRuntime(project(":api:dynamic"))
     compiledTestRuntime(project(":api:public"))
 

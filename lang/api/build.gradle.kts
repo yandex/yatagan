@@ -16,9 +16,9 @@ dependencies {
     testImplementation(project(":testing:source-set"))
 
     testImplementation(libs.ksp.api)
-    testImplementation(testingLibs.junit4)
-    testImplementation(testingLibs.roomCompileTesting)
-    testImplementation(testingLibs.assertj)
+    testImplementation(libs.testing.junit4)
+    testImplementation(libs.testing.roomCompileTesting)
+    testImplementation(libs.testing.assertj)
 
     stdLib(kotlin("stdlib"))
 }
