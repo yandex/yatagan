@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "Versions"
+    groups:
+      kotlin:
+        patterns:
+          - "dokka*"
+          - "kotlin*"
+          - "ksp*"
+      testing:
+        patterns:
+          - "testing*"
+      libs:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "dokka*"
+          - "kotlin*"
+          - "ksp*"
+          - "testing*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "CI"
