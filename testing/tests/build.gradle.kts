@@ -113,7 +113,7 @@ tasks.test {
 
     // Increasing this will likely get a negative effect on tests performance as kotlin-compilation seems to be shared
     // between compilation invocations and I still haven't found a way to make it in-process.
-    maxParallelForks = 2
+    maxParallelForks = 1
 }
 
 kotlin {
