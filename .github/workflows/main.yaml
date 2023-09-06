@@ -22,8 +22,7 @@ jobs:
         uses: actions/setup-java@v3.12.0
         with:
           java-version: '11'
-          java-package: jdk
-          architecture: x64
+          distribution: 'temurin'
 
       - name: Checkout
         uses: actions/checkout@v3
