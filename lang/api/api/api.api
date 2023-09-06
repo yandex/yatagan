@@ -146,6 +146,7 @@ public final class com/yandex/yatagan/lang/LangModelFactory$ParameterizedType : 
 	public static final field List Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
 	public static final field Provider Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
 	public static final field Set Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
 	public static fun values ()[Lcom/yandex/yatagan/lang/LangModelFactory$ParameterizedType;
 }
@@ -226,6 +227,7 @@ public final class com/yandex/yatagan/lang/TypeDeclarationKind : java/lang/Enum 
 	public static final field KotlinCompanion Lcom/yandex/yatagan/lang/TypeDeclarationKind;
 	public static final field KotlinObject Lcom/yandex/yatagan/lang/TypeDeclarationKind;
 	public static final field None Lcom/yandex/yatagan/lang/TypeDeclarationKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/lang/TypeDeclarationKind;
 	public static fun values ()[Lcom/yandex/yatagan/lang/TypeDeclarationKind;
 }

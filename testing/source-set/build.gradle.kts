@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    api(testingLibs.roomCompileTesting)
+    api(libs.testing.roomCompileTesting)
 }

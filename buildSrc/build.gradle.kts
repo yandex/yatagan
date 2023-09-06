@@ -8,6 +8,10 @@ repositories {
 }
 
 dependencies {
+    check(libs.versions.ksp.get().startsWith(libs.versions.kotlin.get())) {
+        "KSP and Kotlin versions mismatch"
+    }
+
     implementation(libs.kotlin.gradle)
     implementation(libs.kotlin.binaryCompatibilityGradle)
     implementation(libs.dokka.gradle)

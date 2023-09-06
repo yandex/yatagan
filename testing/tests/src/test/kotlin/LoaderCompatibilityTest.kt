@@ -19,6 +19,7 @@ package com.yandex.yatagan.testing.tests
 import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_0_0
 import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_1_0
 import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_2_0
+import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_3_0
 import org.junit.Assume
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +39,7 @@ class LoaderCompatibilityTest(
             arrayOf("1.0.0", KaptClasspathForCompatCheck1_0_0),
             arrayOf("1.1.0", KaptClasspathForCompatCheck1_1_0),
             arrayOf("1.2.0", KaptClasspathForCompatCheck1_2_0),
+            arrayOf("1.3.0", KaptClasspathForCompatCheck1_3_0),
         )
     }
 

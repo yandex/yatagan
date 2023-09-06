@@ -8,6 +8,7 @@ val versionsToCheckLoaderCompatibility = listOf(
     "1.0.0",
     "1.1.0",
     "1.2.0",
+    "1.3.0",
 )
 
 val baseTestRuntime: Configuration by configurations.creating
@@ -32,8 +33,8 @@ dependencies {
     api(project(":testing:source-set"))
 
     // Third-party test dependencies
-    implementation(testingLibs.junit4)
-    implementation(testingLibs.roomCompileTesting)
+    implementation(libs.testing.junit4)
+    implementation(libs.testing.roomCompileTesting)
 
     // Base test dependencies
     implementation(project(":processor:common"))
@@ -60,7 +61,7 @@ dependencies {
     // For strings
     testImplementation(project(":validation:format"))
 
-    baseTestRuntime(testingLibs.mockito.kotlin.get())  // required for heavy tests
+    baseTestRuntime(libs.testing.mockito.kotlin.get())  // required for heavy tests
     dynamicTestRuntime(project(":api:dynamic"))
     compiledTestRuntime(project(":api:public"))
 
@@ -112,7 +113,7 @@ tasks.test {
 
     // Increasing this will likely get a negative effect on tests performance as kotlin-compilation seems to be shared
     // between compilation invocations and I still haven't found a way to make it in-process.
-    maxParallelForks = 2
+    maxParallelForks = 1
 }
 
 kotlin {

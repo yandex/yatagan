@@ -31,6 +31,7 @@ public final class com/yandex/yatagan/validation/ValidationMessage$Kind : java/l
 	public static final field Error Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
 	public static final field MandatoryWarning Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
 	public static final field Warning Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
 	public static fun values ()[Lcom/yandex/yatagan/validation/ValidationMessage$Kind;
 }
