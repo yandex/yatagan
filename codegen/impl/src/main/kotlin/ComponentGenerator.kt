@@ -19,6 +19,7 @@ package com.yandex.yatagan.codegen.impl
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
 import com.yandex.yatagan.Yatagan
+import com.yandex.yatagan.base.sortedWithBy
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildClass
 import com.yandex.yatagan.codegen.poetry.buildExpression
@@ -27,6 +28,7 @@ import com.yandex.yatagan.core.graph.component1
 import com.yandex.yatagan.core.graph.component2
 import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Member
+import com.yandex.yatagan.lang.MemberComparator
 import com.yandex.yatagan.lang.Method
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,7 +39,7 @@ import javax.lang.model.element.Modifier.STATIC
 @Singleton
 internal class ComponentGenerator @Inject constructor(
     component: GeneratorComponent,
-    options: Options,
+    private val options: Options,
     private val graph: BindingGraph,
     private val contributors: List<Contributor>,
     private val generatedClassName: ClassName,
@@ -50,6 +52,7 @@ internal class ComponentGenerator @Inject constructor(
         val maxSlotsPerSwitch: Int,
         val enableProvisionNullChecks: Boolean,
         val enableThreadChecks: Boolean,
+        val sortMethodsForTesting: Boolean,
     )
 
     init {
@@ -75,7 +78,9 @@ internal class ComponentGenerator @Inject constructor(
         }
         implements(componentInterface)
 
-        graph.entryPoints.forEach { (getter, dependency) ->
+        graph.entryPoints.let { entryPoints ->
+            if (options.sortMethodsForTesting) entryPoints.sortedBy { it.getter } else entryPoints
+        }.forEach { (getter, dependency) ->
             // TODO: reuse entry-points as accessors to reduce method count.
             overrideMethod(getter) {
                 modifiers(PUBLIC)
@@ -90,11 +95,17 @@ internal class ComponentGenerator @Inject constructor(
                 }
             }
         }
-        graph.memberInjectors.forEach { membersInjector ->
+        graph.memberInjectors.let { memberInjectors ->
+            if (options.sortMethodsForTesting) memberInjectors.sortedBy { it.injector } else memberInjectors
+        }.forEach { membersInjector ->
             overrideMethod(membersInjector.injector) {
                 val instanceName = membersInjector.injector.parameters.first().name
                 modifiers(PUBLIC)
-                membersInjector.membersToInject.forEach { (member, dependency) ->
+                membersInjector.membersToInject.entries.let { membersToInject ->
+                    if (options.sortMethodsForTesting)
+                        membersToInject.sortedWithBy(MemberComparator) { it.key }
+                    else membersToInject
+                }.forEach { (member, dependency) ->
                     val binding = graph.resolveBinding(dependency.node)
                     +buildExpression {
                         member.accept(object : Member.Visitor<Unit> {
@@ -124,7 +135,9 @@ internal class ComponentGenerator @Inject constructor(
             }
         }
 
-        graph.subComponentFactoryMethods.forEach { factory ->
+        graph.subComponentFactoryMethods.let { factoryMethods ->
+            if (options.sortMethodsForTesting) factoryMethods.sortedBy { it.model.factoryMethod } else factoryMethods
+        }.forEach { factory ->
             val createdGraph = factory.createdGraph ?: return@forEach
             overrideMethod(factory.model.factoryMethod) {
                 modifiers(PUBLIC)

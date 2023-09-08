@@ -30,7 +30,7 @@ import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload
 import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
-import com.yandex.yatagan.core.model.allInputs
+import com.yandex.yatagan.core.model.SubComponentFactoryMethodModel
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.lang.model.element.Modifier.FINAL
@@ -50,7 +50,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
     init {
         thisGraph.creator?.let { creator ->
             // Bound instances
-            for (input in creator.allInputs) {
+            for (input in allInputsSortedForTestingIfNeeded(creator)) {
                 val payload = input.payload as? InputPayload.Instance ?: continue
                 inputsWithFieldNames[payload.model] = fieldsNs.name(input.name)
             }
@@ -120,7 +120,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
             }
             if (creator != null) {
                 // If creator is present, add parameters in order.
-                val allInputs = creator.allInputs
+                val allInputs = allInputsSortedForTestingIfNeeded(creator)
                 for (input in allInputs) {
                     val name = paramsNs.name(input.name)
                     val model = input.payload.model
@@ -179,7 +179,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
 
                 factory.factoryInputs.mapTo(builderAccess, ComponentFactoryModel.InputModel::name)
                 with(Namespace("m")) {
-                    factory.builderInputs.forEach { builderInput ->
+                    sortForTestingIfNeeded(factory.builderInputs).forEach { builderInput ->
                         val fieldName = name(builderInput.name)
                         builderAccess += "this.$fieldName"
                         field(builderInput.payload.model.typeName(), fieldName) {
@@ -287,4 +287,14 @@ internal class ComponentFactoryGenerator @Inject constructor(
             +"return new %T()".formatCode(autoBuilderImplName)
         }
     }
+
+    private fun sortForTestingIfNeeded(inputs: Collection<ComponentFactoryWithBuilderModel.BuilderInputModel>) =
+        if (options.sortMethodsForTesting) inputs.sortedBy { it.builderSetter } else inputs
+
+    private fun allInputsSortedForTestingIfNeeded(factoryModel: ComponentFactoryModel) =
+        factoryModel.accept(object : ComponentFactoryModel.Visitor<Collection<ComponentFactoryModel.InputModel>> {
+            override fun visitSubComponentFactoryMethod(model: SubComponentFactoryMethodModel) = model.factoryInputs
+            override fun visitWithBuilder(model: ComponentFactoryWithBuilderModel) =
+                model.factoryInputs + this@ComponentFactoryGenerator.sortForTestingIfNeeded(model.builderInputs)
+        })
 }
