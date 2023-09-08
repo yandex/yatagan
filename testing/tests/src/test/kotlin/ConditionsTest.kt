@@ -594,8 +594,10 @@ class ConditionsTest(
                 }
             }
             
-            @Condition(Features::class, "fooBar")
-            @Condition(Features::class, "isEnabledB")
+            @AllConditions(
+                Condition(Features::class, "fooBar"),
+                Condition(Features::class, "isEnabledB"),
+            )
             @AnyCondition(
                 Condition(Features::class, "getFeatureC.isEnabled"),                                
                 Condition(Features::class, "isEnabledB"),
@@ -609,20 +611,22 @@ class ConditionsTest(
             )
             annotation class ComplexFeature1
             
-            @AnyCondition(
-                Condition(Features::class, "fooBar"),
+            @AnyConditions(
+                AnyCondition(
+                    Condition(Features::class, "fooBar"),
+                ),
+                AnyCondition(
+                    Condition(Features::class, EnabledB),
+                ),
+                AnyCondition(
+                    Condition(Features::class, "getFeatureC.isEnabled"),                                
+                    Condition(Features::class, condition = EnabledB),                                
+                ),
+                AnyCondition(
+                    Condition(Features::class, "getFeatureC.isEnabled"),                                
+                    Condition(value = Features::class, condition = "isEnabledB"),                                
+                ),
             )
-            @AnyCondition(
-                Condition(Features::class, EnabledB),
-            )
-            @AnyCondition(
-                Condition(Features::class, "getFeatureC.isEnabled"),                                
-                Condition(Features::class, condition = EnabledB),                                
-            )
-            @AnyCondition(
-                Condition(Features::class, "getFeatureC.isEnabled"),                                
-                Condition(value = Features::class, condition = "isEnabledB"),                                
-            )            
             annotation class ComplexFeature2
             
             @Conditional(ComplexFeature1::class)               
@@ -630,7 +634,7 @@ class ConditionsTest(
             @Conditional(ComplexFeature2::class)
             class ClassB @Inject constructor(a: Provider<ClassA>)
             
-            @Component            
+            @Component
             interface MyComponent {
                 val a: Optional<ClassA>                        
             }
