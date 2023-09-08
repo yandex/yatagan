@@ -1,0 +1,84 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Arrays;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent implements MyComponent {
+  final MyModule mMyModule;
+
+  private Yatagan$MyComponent(MyModule pMyModule) {
+    this.mMyModule = pMyModule != null ? pMyModule : new MyModule();
+  }
+
+  @Override
+  public Object get() {
+    return Checks.checkProvisionNotNull(this.mMyModule.provides());
+  }
+
+  public static AutoBuilder<Yatagan$MyComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent> {
+    private MyModule mMyModule;
+
+    @Override
+    public final <I> AutoBuilder<Yatagan$MyComponent> provideInput(I input, Class<I> inputClass) {
+      if (inputClass == MyModule.class) {
+        this.mMyModule = (MyModule) input;
+      } else {
+        Checks.reportUnexpectedAutoBuilderInput(inputClass, Arrays.asList(MyModule.class));
+      }
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MyComponent create() {
+      return new Yatagan$MyComponent(this.mMyModule);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent2.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent2 implements MyComponent2 {
+  final MyModule mMyModule;
+
+  Yatagan$MyComponent2() {
+    this.mMyModule = new MyModule();
+  }
+
+  @Override
+  public Object get() {
+    return Checks.checkProvisionNotNull(this.mMyModule.provides());
+  }
+
+  public static MyComponent2.Factory builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class ComponentFactoryImpl implements MyComponent2.Factory {
+    @Override
+    public MyComponent2 build() {
+      return new Yatagan$MyComponent2();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

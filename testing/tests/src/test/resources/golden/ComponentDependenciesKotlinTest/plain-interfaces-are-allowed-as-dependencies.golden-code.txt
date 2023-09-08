@@ -1,0 +1,34 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent implements MyComponent {
+  final Dependencies mDependencies;
+
+  Yatagan$MyComponent(Dependencies pDep) {
+    this.mDependencies = Checks.checkInputNotNull(pDep);
+  }
+
+  @Override
+  public MyClass getMyClass() {
+    return this.mDependencies.getMyClass();
+  }
+
+  public static MyComponent.Builder builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class ComponentFactoryImpl implements MyComponent.Builder {
+    @Override
+    public MyComponent create(Dependencies dep) {
+      return new Yatagan$MyComponent(dep);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

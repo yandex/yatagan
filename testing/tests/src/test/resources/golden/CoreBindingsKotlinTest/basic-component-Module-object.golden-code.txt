@@ -1,0 +1,118 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public Api get() {
+    return Checks.checkProvisionNotNull(MyModule.INSTANCE.provides());
+  }
+
+  @Override
+  public ExplicitImpl getExplicit() {
+    return Checks.checkProvisionNotNull(MyModule.INSTANCE.providesExplicit());
+  }
+
+  @Override
+  public Lazy<Api> getLazy() {
+    return new CachingProviderImpl(this, 0);
+  }
+
+  @Override
+  public Lazy<ExplicitImpl> getLazyExplicit() {
+    return new CachingProviderImpl(this, 1);
+  }
+
+  @Override
+  public Provider<Api> getProvider() {
+    return new ProviderImpl(this, 0);
+  }
+
+  @Override
+  public Provider<ExplicitImpl> getProviderExplicit() {
+    return new ProviderImpl(this, 1);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return Checks.checkProvisionNotNull(MyModule.INSTANCE.provides());
+      case 1: return Checks.checkProvisionNotNull(MyModule.INSTANCE.providesExplicit());
+      default: throw new AssertionError();
+    }
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$TestComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

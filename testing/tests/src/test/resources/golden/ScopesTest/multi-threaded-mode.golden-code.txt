@@ -1,0 +1,169 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private volatile Object mClassAInstance = new UninitializedLock();
+
+  private volatile Object mClassBInstance = new UninitializedLock();
+
+  private volatile Object mClassCInstance = new UninitializedLock();
+
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public ClassA getA() {
+    return this.cacheClassA();
+  }
+
+  @Override
+  public Lazy<ClassB> getB() {
+    return new ProviderImpl(this, 0);
+  }
+
+  @Override
+  public Provider<ClassC> getC() {
+    return new ProviderImpl(this, 1);
+  }
+
+  @Override
+  public Provider<ClassD> getD() {
+    return new ProviderImpl(this, 2);
+  }
+
+  @Override
+  public Lazy<ClassE> getE() {
+    return new DoubleCheck(this, 3);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.cacheClassB();
+      case 1: return this.cacheClassC();
+      case 2: return new ClassD(this.cacheClassB());
+      case 3: return new ClassE(this.cacheClassB());
+      default: throw new AssertionError();
+    }
+  }
+
+  ClassA cacheClassA() {
+    Object local = this.mClassAInstance;
+    if (local instanceof UninitializedLock) {
+      synchronized (local) {
+        local = this.mClassAInstance;
+        if (local instanceof UninitializedLock) {
+          local = new ClassA();
+          this.mClassAInstance = local;
+        }
+      }
+    }
+    return (ClassA) local;
+  }
+
+  ClassB cacheClassB() {
+    Object local = this.mClassBInstance;
+    if (local instanceof UninitializedLock) {
+      synchronized (local) {
+        local = this.mClassBInstance;
+        if (local instanceof UninitializedLock) {
+          local = new ClassB(this.cacheClassA());
+          this.mClassBInstance = local;
+        }
+      }
+    }
+    return (ClassB) local;
+  }
+
+  ClassC cacheClassC() {
+    Object local = this.mClassCInstance;
+    if (local instanceof UninitializedLock) {
+      synchronized (local) {
+        local = this.mClassCInstance;
+        if (local instanceof UninitializedLock) {
+          local = new ClassC(this.cacheClassA());
+          this.mClassCInstance = local;
+        }
+      }
+    }
+    return (ClassC) local;
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class UninitializedLock {
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class DoubleCheck implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    private volatile Object mValue;
+
+    DoubleCheck(Yatagan$TestComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        synchronized (this) {
+          local = mValue;
+          if (local == null) {
+            local = mDelegate.switch$$access(mIndex);
+            mValue = local;
+          }
+        }
+      }
+      return local;
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

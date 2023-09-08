@@ -1,0 +1,89 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final boolean mFeaturesFooBar = Features.fooBar();
+
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public Optional<ClassA> getA() {
+    return this.optOfClassA();
+  }
+
+  @Override
+  public TestSubComponent.Factory getSub() {
+    return new TestSubComponentImpl.ComponentFactoryImpl(this);
+  }
+
+  Optional optOfClassA() {
+    return this.mFeaturesFooBar ? Optional.of(new ClassA()) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class TestSubComponentImpl implements TestSubComponent {
+    final Yatagan$TestComponent mTestComponent;
+
+    final boolean mFeaturesIsEnabledB = Features.isEnabledB();
+
+    TestSubComponentImpl(Yatagan$TestComponent pTestComponent) {
+      this.mTestComponent = pTestComponent;
+    }
+
+    @Override
+    public Optional<ClassB> getB() {
+      return this.optOfClassB();
+    }
+
+    Optional optOfClassA() {
+      return this.mTestComponent.mFeaturesFooBar ? Optional.of(new ClassA()) : Optional.empty();
+    }
+
+    Optional optOfClassB() {
+      return this.mFeaturesIsEnabledB ? Optional.of(new ClassB(this.optOfClassA())) : Optional.empty();
+    }
+
+    private static final class ComponentFactoryImpl implements TestSubComponent.Factory {
+      Yatagan$TestComponent fTestComponent;
+
+      ComponentFactoryImpl(Yatagan$TestComponent fTestComponent) {
+        this.fTestComponent = fTestComponent;
+      }
+
+      @Override
+      public TestSubComponent create() {
+        return new TestSubComponentImpl(this.fTestComponent);
+      }
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

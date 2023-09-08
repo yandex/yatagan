@@ -1,0 +1,121 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Set;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final Consumer<? super Foo> mFooConsumer;
+
+  final Consumer<? super Baz> mBazConsumer;
+
+  final Object mObj;
+
+  final Object mSetBar;
+
+  final Set<Baz> mSetBazs;
+
+  final Object mSetFoo;
+
+  final Set<Bar> mSetSetOfBar;
+
+  final Set<? extends Foo> mSetSetOfFoo;
+
+  final Dependency mDependency;
+
+  Yatagan$TestComponent(Dependency pDep, Consumer<? super Foo> pFooConsumer,
+      Consumer<? super Baz> pBazConsumer, Object pObj, Object pSetBar, Set<Baz> pSetBazs,
+      Object pSetFoo, Set<Bar> pSetSetOfBar, Set<? extends Foo> pSetSetOfFoo) {
+    this.mDependency = Checks.checkInputNotNull(pDep);
+    this.mFooConsumer = Checks.checkInputNotNull(pFooConsumer);
+    this.mBazConsumer = Checks.checkInputNotNull(pBazConsumer);
+    this.mObj = Checks.checkInputNotNull(pObj);
+    this.mSetBar = Checks.checkInputNotNull(pSetBar);
+    this.mSetBazs = Checks.checkInputNotNull(pSetBazs);
+    this.mSetFoo = Checks.checkInputNotNull(pSetFoo);
+    this.mSetSetOfBar = Checks.checkInputNotNull(pSetSetOfBar);
+    this.mSetSetOfFoo = Checks.checkInputNotNull(pSetSetOfFoo);
+  }
+
+  @Override
+  public MyClass get() {
+    return new MyClass(this.mSetFoo, this.mSetBar, this.mObj, this.mSetSetOfFoo, this.mSetBazs, this.mSetSetOfBar, this.mFooConsumer, this.mBazConsumer, this.mDependency.getWrapper());
+  }
+
+  @Override
+  public Set<Bar> getBars() {
+    return this.mSetSetOfBar;
+  }
+
+  @Override
+  public Set<Bar> getBars2() {
+    return this.mSetSetOfBar;
+  }
+
+  @Override
+  public Set<Baz> getBazs() {
+    return this.mSetBazs;
+  }
+
+  @Override
+  public Set<? extends Foo> getFoos() {
+    return this.mSetSetOfFoo;
+  }
+
+  public static TestComponent.Creator builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class ComponentFactoryImpl implements TestComponent.Creator {
+    private Object mSetBar;
+
+    private Set<Baz> mSetBazs;
+
+    private Object mSetFoo;
+
+    private Set<Bar> mSetSetOfBar;
+
+    private Set<? extends Foo> mSetSetOfFoo;
+
+    @Override
+    public TestComponent.Creator setBar(Object obj) {
+      this.mSetBar = obj;
+      return this;
+    }
+
+    @Override
+    public void setBazs(Set<Baz> bazs) {
+      this.mSetBazs = bazs;
+    }
+
+    @Override
+    public CreatorBase setFoo(Object obj) {
+      this.mSetFoo = obj;
+      return this;
+    }
+
+    @Override
+    public TestComponent.Creator setSetOfBar(Set<Bar> bars) {
+      this.mSetSetOfBar = bars;
+      return this;
+    }
+
+    @Override
+    public void setSetOfFoo(Set<? extends Foo> foos) {
+      this.mSetSetOfFoo = foos;
+    }
+
+    @Override
+    public TestComponent create(Dependency dep, Consumer<? super Foo> fooConsumer,
+        Consumer<? super Baz> bazConsumer, Object obj) {
+      return new Yatagan$TestComponent(dep, fooConsumer, bazConsumer, obj, this.mSetBar, this.mSetBazs, this.mSetFoo, this.mSetSetOfBar, this.mSetSetOfFoo);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

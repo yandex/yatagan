@@ -1,0 +1,70 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final TestModule mTestModule;
+
+  final TestModuleKotlin mTestModuleKotlin;
+
+  private Yatagan$TestComponent(TestModule pTestModule, TestModuleKotlin pTestModuleKotlin) {
+    this.mTestModule = pTestModule != null ? pTestModule : new TestModule();
+    this.mTestModuleKotlin = pTestModuleKotlin != null ? pTestModuleKotlin : new TestModuleKotlin();
+  }
+
+  @Override
+  public List<Integer> getInts() {
+    return this.manyOfListInteger();
+  }
+
+  List<Integer> manyOfListInteger() {
+    final List<Integer> c = new ArrayList<>(6);
+    c.addAll(Checks.checkProvisionNotNull(this.mTestModule.collectionOfInts()));
+    c.addAll(Checks.checkProvisionNotNull(this.mTestModuleKotlin.collectionOfInts()));
+    c.addAll(Checks.checkProvisionNotNull(this.mTestModule.listOfInts()));
+    c.addAll(Checks.checkProvisionNotNull(this.mTestModuleKotlin.listOfInts()));
+    c.addAll(Checks.checkProvisionNotNull(TestModule.setOfInts()));
+    c.addAll(Checks.checkProvisionNotNull(this.mTestModuleKotlin.setOfInts()));
+    return c;
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    private TestModule mTestModule;
+
+    private TestModuleKotlin mTestModuleKotlin;
+
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      if (inputClass == TestModule.class) {
+        this.mTestModule = (TestModule) input;
+      } else if (inputClass == TestModuleKotlin.class) {
+        this.mTestModuleKotlin = (TestModuleKotlin) input;
+      } else {
+        Checks.reportUnexpectedAutoBuilderInput(inputClass, Arrays.asList(TestModule.class, TestModuleKotlin.class));
+      }
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent(this.mTestModule, this.mTestModuleKotlin);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

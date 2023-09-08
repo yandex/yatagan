@@ -1,0 +1,121 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final boolean mFeaturesFooBar = Features.fooBar();
+
+  final boolean mFeaturesIsEnabledB = Features.isEnabledB();
+
+  private byte mFeaturesGetFeatureC_isEnabled;
+
+  private byte mHelperGetA;
+
+  private byte mC3Companion_c1CompanionEnabled;
+
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public Optional<ClassA> getA() {
+    return this.optOfClassA();
+  }
+
+  @Override
+  public Optional<ClassB> getB() {
+    return this.optOfClassB();
+  }
+
+  @Override
+  public Optional<ClassC> getC() {
+    return this.optOfClassC();
+  }
+
+  @Override
+  public Optional<ClassD> getD() {
+    return this.optOfClassD();
+  }
+
+  @Override
+  public Optional<ClassE> getE() {
+    return this.optOfClassE();
+  }
+
+  @Override
+  public Optional<ClassF> getF() {
+    return this.optOfClassF();
+  }
+
+  Optional optOfClassA() {
+    return (this.mFeaturesFooBar && this.mFeaturesIsEnabledB || this.featuresGetFeatureC_isEnabled()) && this.mFeaturesFooBar ? Optional.of(new ClassA()) : Optional.empty();
+  }
+
+  Optional optOfClassB() {
+    return this.mFeaturesFooBar && !(this.mFeaturesIsEnabledB || !this.featuresGetFeatureC_isEnabled()) ? Optional.of(new ClassB()) : Optional.empty();
+  }
+
+  Optional optOfClassC() {
+    return this.mFeaturesFooBar || !this.helperGetA() ? Optional.of(new ClassC()) : Optional.empty();
+  }
+
+  Optional optOfClassD() {
+    return this.mFeaturesIsEnabledB && !(this.mFeaturesFooBar || !this.helperGetA()) || this.mFeaturesFooBar && !(this.mFeaturesIsEnabledB || !this.featuresGetFeatureC_isEnabled()) && this.c3Companion_c1CompanionEnabled() ? Optional.of(new ClassD()) : Optional.empty();
+  }
+
+  Optional optOfClassE() {
+    return this.mFeaturesIsEnabledB && !(this.mFeaturesFooBar || !this.helperGetA()) || this.mFeaturesFooBar && !(this.mFeaturesIsEnabledB || !this.featuresGetFeatureC_isEnabled()) && this.c3Companion_c1CompanionEnabled() ? Optional.of(new ClassE()) : Optional.empty();
+  }
+
+  Optional optOfClassF() {
+    return this.mFeaturesIsEnabledB || (this.mFeaturesFooBar || !this.helperGetA()) && !this.mFeaturesFooBar && this.mFeaturesFooBar ? Optional.of(new ClassF()) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  boolean featuresGetFeatureC_isEnabled() {
+    if (this.mFeaturesGetFeatureC_isEnabled == 0x0) {
+      this.mFeaturesGetFeatureC_isEnabled = (byte) ((Features.getFeatureC().isEnabled()) ? 0x1 : 0x2);
+    }
+    return this.mFeaturesGetFeatureC_isEnabled == 0x1;
+  }
+
+  boolean helperGetA() {
+    if (this.mHelperGetA == 0x0) {
+      this.mHelperGetA = (byte) ((new Helper().getA()) ? 0x1 : 0x2);
+    }
+    return this.mHelperGetA == 0x1;
+  }
+
+  boolean c3Companion_c1CompanionEnabled() {
+    if (this.mC3Companion_c1CompanionEnabled == 0x0) {
+      this.mC3Companion_c1CompanionEnabled = (byte) ((C3.Companion.c1CompanionEnabled()) ? 0x1 : 0x2);
+    }
+    return this.mC3Companion_c1CompanionEnabled == 0x1;
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

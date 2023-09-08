@@ -1,0 +1,76 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Character;
+import java.lang.Double;
+import java.lang.Integer;
+import java.lang.Long;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent implements MyComponent {
+  final Integer mI1;
+
+  final Long mI2;
+
+  final Character mSetChar;
+
+  final Double mSetDouble;
+
+  Yatagan$MyComponent(Integer pI1, Long pI2, Character pSetChar, Double pSetDouble) {
+    this.mI1 = Checks.checkInputNotNull(pI1);
+    this.mI2 = Checks.checkInputNotNull(pI2);
+    this.mSetChar = Checks.checkInputNotNull(pSetChar);
+    this.mSetDouble = Checks.checkInputNotNull(pSetDouble);
+  }
+
+  @Override
+  public char getChar() {
+    return this.mSetChar;
+  }
+
+  @Override
+  public double getDouble() {
+    return this.mSetDouble;
+  }
+
+  @Override
+  public int getInt() {
+    return this.mI1;
+  }
+
+  @Override
+  public long getLong() {
+    return this.mI2;
+  }
+
+  public static MyComponent.Builder builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class ComponentFactoryImpl implements MyComponent.Builder {
+    private Character mSetChar;
+
+    private Double mSetDouble;
+
+    @Override
+    public void setChar(char c) {
+      this.mSetChar = c;
+    }
+
+    @Override
+    public void setDouble(Double d) {
+      this.mSetDouble = d;
+    }
+
+    @Override
+    public MyComponent create(int i1, long i2) {
+      return new Yatagan$MyComponent(i1, i2, this.mSetChar, this.mSetDouble);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

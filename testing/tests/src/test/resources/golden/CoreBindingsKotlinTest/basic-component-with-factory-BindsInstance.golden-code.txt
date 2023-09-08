@@ -1,0 +1,96 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final MyClass mInstance;
+
+  Yatagan$TestComponent(MyClass pInstance) {
+    this.mInstance = Checks.checkInputNotNull(pInstance);
+  }
+
+  @Override
+  public MyClass get() {
+    return this.mInstance;
+  }
+
+  @Override
+  public Lazy<MyClass> getLazy() {
+    return new CachingProviderImpl(this, 0);
+  }
+
+  @Override
+  public Provider<MyClass> getProvider() {
+    return new ProviderImpl(this, 0);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.mInstance;
+      default: throw new AssertionError();
+    }
+  }
+
+  public static TestComponent.Factory builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$TestComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements TestComponent.Factory {
+    @Override
+    public TestComponent create(MyClass instance) {
+      return new Yatagan$TestComponent(instance);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

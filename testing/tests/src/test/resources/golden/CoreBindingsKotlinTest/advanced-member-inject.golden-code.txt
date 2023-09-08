@@ -1,0 +1,70 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.AssertionError;
+import java.lang.Integer;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final Integer mArg;
+
+  final MyModule mMyModule;
+
+  Yatagan$TestComponent(MyModule pModule, Integer pArg) {
+    this.mMyModule = Checks.checkInputNotNull(pModule);
+    this.mArg = Checks.checkInputNotNull(pArg);
+  }
+
+  @Override
+  public void inject(Derived d) {
+    d.apiProp = Checks.checkProvisionNotNull(this.mMyModule.a());
+    d.baseLateInitProp = Checks.checkProvisionNotNull(this.mMyModule.a());
+    d.baseLateInitPropK = Checks.checkProvisionNotNull(this.mMyModule.b());
+    d.javaBaseField = new ProviderImpl(this, 0);
+    d.javaBaseField2 = this.mArg;
+    d.setLateInitProp(Checks.checkProvisionNotNull(this.mMyModule.a()));
+    d.setLateInitPropK(Checks.checkProvisionNotNull(this.mMyModule.c()));
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.mArg;
+      default: throw new AssertionError();
+    }
+  }
+
+  public static TestComponent.Creator builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements TestComponent.Creator {
+    @Override
+    public TestComponent create(MyModule module, int arg) {
+      return new Yatagan$TestComponent(module, arg);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

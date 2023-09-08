@@ -1,0 +1,129 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.Class;
+import java.lang.Number;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private Object mClassAInstance;
+
+  private Object mClassBInstance;
+
+  private Object mClassCInstance;
+
+  final boolean mFeaturesCompanion_isEnabled = Features.Companion.isEnabled();
+
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public ClassA getA() {
+    return this.cacheClassA();
+  }
+
+  @Override
+  public ClassC getC() {
+    return this.cacheClassC();
+  }
+
+  @Override
+  public Consumer getConsumer() {
+    return new Consumer(this.accessSetHandler());
+  }
+
+  @Override
+  public Set<Number> getNumbers() {
+    return this.manyOfSetNumber();
+  }
+
+  @Override
+  public Set<Handler> handlers() {
+    return this.accessSetHandler();
+  }
+
+  ClassA cacheClassA() {
+    Object local = this.mClassAInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ClassA(this.optOfClassB());
+      this.mClassAInstance = local;
+    }
+    return (ClassA) local;
+  }
+
+  ClassB cacheClassB() {
+    Object local = this.mClassBInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ClassB();
+      this.mClassBInstance = local;
+    }
+    return (ClassB) local;
+  }
+
+  Optional optOfClassB() {
+    return this.mFeaturesCompanion_isEnabled ? Optional.of(this.cacheClassB()) : Optional.empty();
+  }
+
+  ClassC cacheClassC() {
+    Object local = this.mClassCInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ClassC(this.cacheClassA());
+      this.mClassCInstance = local;
+    }
+    return (ClassC) local;
+  }
+
+  Set<Handler> accessSetHandler() {
+    return this.manyOfSetHandler();
+  }
+
+  Set<Number> manyOfSetNumber() {
+    final Set<Number> c = new HashSet<>(0);
+    return c;
+  }
+
+  Set<Handler> manyOfSetHandler() {
+    final Set<Handler> c = new HashSet<>(5);
+    c.add(this.cacheClassA());
+    if (this.mFeaturesCompanion_isEnabled)  {
+      c.add(this.cacheClassB());
+    }
+    c.add(this.cacheClassC());
+    c.addAll(Checks.checkProvisionNotNull(MyModule.Companion.collection1()));
+    c.addAll(Checks.checkProvisionNotNull(MyModule.Companion.collection2()));
+    return c;
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

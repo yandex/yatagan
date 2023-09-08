@@ -1,0 +1,175 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$RootComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$RootComponent implements RootComponent {
+  private Yatagan$RootComponent() {
+  }
+
+  @Override
+  public Map<Integer, Integer> getQInts() {
+    return this.accessJavaxInjectNamedValueQualifiedMapIntegerInteger();
+  }
+
+  @Override
+  public SubComponent.Builder getSub() {
+    return new SubComponentImpl.ComponentFactoryImpl(this);
+  }
+
+  @Override
+  public SubComponent2.Builder getSub2() {
+    return new SubComponent2Impl.ComponentFactoryImpl(this);
+  }
+
+  Map<Integer, String> accessMapIntegerString() {
+    return this.mapOfMapIntegerString();
+  }
+
+  Map<Integer, Integer> accessJavaxInjectNamedValueQualifiedMapIntegerInteger() {
+    return this.mapOfMapIntegerInteger();
+  }
+
+  public static AutoBuilder<Yatagan$RootComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  Map<Integer, String> mapOfMapIntegerString() {
+    final Map<Integer, String> map = new HashMap<>(2);
+    map.put(1, Checks.checkProvisionNotNull(RootModule.INSTANCE.one()));
+    map.put(2, Checks.checkProvisionNotNull(RootModule.INSTANCE.two()));
+    return map;
+  }
+
+  Map<Integer, Integer> mapOfMapIntegerInteger() {
+    final Map<Integer, Integer> map = new HashMap<>(2);
+    map.put(1, Checks.checkProvisionNotNull(RootModule.INSTANCE.qInt1()));
+    map.put(2, Checks.checkProvisionNotNull(RootModule.INSTANCE.qInt2()));
+    return map;
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponentImpl implements SubComponent {
+    final Yatagan$RootComponent mRootComponent;
+
+    SubComponentImpl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public Map<Integer, String> getMap() {
+      return this.accessMapIntegerString();
+    }
+
+    @Override
+    public Map<Integer, Integer> getQInts() {
+      return this.mRootComponent.accessJavaxInjectNamedValueQualifiedMapIntegerInteger();
+    }
+
+    Map<Integer, String> accessMapIntegerString() {
+      return this.mapOfMapIntegerString();
+    }
+
+    Map<Integer, String> mapOfMapIntegerString() {
+      final Map<Integer, String> map = new HashMap<>(2);
+      map.putAll(this.mRootComponent.accessMapIntegerString());
+      map.put(3, Checks.checkProvisionNotNull(SubModule.INSTANCE.three()));
+      map.put(4, Checks.checkProvisionNotNull(SubModule.INSTANCE.four()));
+      return map;
+    }
+
+    private static final class ComponentFactoryImpl implements SubComponent.Builder {
+      Yatagan$RootComponent fRootComponent;
+
+      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+        this.fRootComponent = fRootComponent;
+      }
+
+      @Override
+      public SubComponent create() {
+        return new SubComponentImpl(this.fRootComponent);
+      }
+    }
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponent2Impl implements SubComponent2 {
+    final Yatagan$RootComponent mRootComponent;
+
+    SubComponent2Impl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public Map<Integer, String> getMap() {
+      return this.accessMapIntegerString();
+    }
+
+    @Override
+    public Map<Integer, Integer> getQInts() {
+      return this.accessJavaxInjectNamedValueQualifiedMapIntegerInteger();
+    }
+
+    Map<Integer, Integer> accessJavaxInjectNamedValueQualifiedMapIntegerInteger() {
+      return this.mapOfMapIntegerInteger();
+    }
+
+    Map<Integer, String> accessMapIntegerString() {
+      return this.mapOfMapIntegerString();
+    }
+
+    Map<Integer, Integer> mapOfMapIntegerInteger() {
+      final Map<Integer, Integer> map = new HashMap<>(1);
+      map.putAll(this.mRootComponent.accessJavaxInjectNamedValueQualifiedMapIntegerInteger());
+      map.put(3, Checks.checkProvisionNotNull(SubModule2.INSTANCE.qInt1()));
+      return map;
+    }
+
+    Map<Integer, String> mapOfMapIntegerString() {
+      final Map<Integer, String> map = new HashMap<>(2);
+      map.putAll(this.mRootComponent.accessMapIntegerString());
+      map.put(3, Checks.checkProvisionNotNull(SubModule2.INSTANCE.p0()));
+      map.put(20, Checks.checkProvisionNotNull(SubModule2.INSTANCE.p1()));
+      return map;
+    }
+
+    private static final class ComponentFactoryImpl implements SubComponent2.Builder {
+      Yatagan$RootComponent fRootComponent;
+
+      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+        this.fRootComponent = fRootComponent;
+      }
+
+      @Override
+      public SubComponent2 create() {
+        return new SubComponent2Impl(this.fRootComponent);
+      }
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$RootComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$RootComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$RootComponent create() {
+      return new Yatagan$RootComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

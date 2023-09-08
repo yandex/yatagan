@@ -1,0 +1,78 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent implements MyComponent {
+  private Yatagan$MyComponent() {
+  }
+
+  @Override
+  public Optional<Object> getAny() {
+    return Optional.empty();
+  }
+
+  @Override
+  public SomeClass<DependencyA> getClazz() {
+    return new SomeClass(new DependencyA());
+  }
+
+  @Override
+  public Provider<SomeClass<DependencyB<DependencyA>>> getProvider() {
+    return new ProviderImpl(this, 0);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return new SomeClass(new DependencyB(new DependencyA()));
+      default: throw new AssertionError();
+    }
+  }
+
+  public static AutoBuilder<Yatagan$MyComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$MyComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$MyComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$MyComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MyComponent create() {
+      return new Yatagan$MyComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,0 +1,145 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$ComponentFoo.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Arrays;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$ComponentFoo implements ComponentFoo {
+  final MyModule mMyModule;
+
+  private Yatagan$ComponentFoo(MyModule pMyModule) {
+    this.mMyModule = pMyModule != null ? pMyModule : new MyModule();
+  }
+
+  @Override
+  public int getI() {
+    return Checks.checkProvisionNotNull(this.mMyModule.getI());
+  }
+
+  public static AutoBuilder<Yatagan$ComponentFoo> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$ComponentFoo> {
+    private MyModule mMyModule;
+
+    @Override
+    public final <I> AutoBuilder<Yatagan$ComponentFoo> provideInput(I input, Class<I> inputClass) {
+      if (inputClass == MyModule.class) {
+        this.mMyModule = (MyModule) input;
+      } else {
+        Checks.reportUnexpectedAutoBuilderInput(inputClass, Arrays.asList(MyModule.class));
+      }
+      return this;
+    }
+
+    @Override
+    public final Yatagan$ComponentFoo create() {
+      return new Yatagan$ComponentFoo(this.mMyModule);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$ComponentBar.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Arrays;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$ComponentBar implements ComponentBar {
+  final MyDependency1 mMyDependency1;
+
+  final MyDependency2 mMyDependency2;
+
+  final MyModule2 mMyModule2;
+
+  private Yatagan$ComponentBar(MyDependency1 pMyDependency1, MyDependency2 pMyDependency2,
+      MyModule2 pMyModule2) {
+    this.mMyDependency1 = pMyDependency1;
+    this.mMyDependency2 = pMyDependency2;
+    this.mMyModule2 = pMyModule2;
+  }
+
+  @Override
+  public int getI() {
+    return Checks.checkProvisionNotNull(this.mMyModule2.getI());
+  }
+
+  public static AutoBuilder<Yatagan$ComponentBar> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$ComponentBar> {
+    private MyDependency1 mMyDependency1;
+
+    private MyDependency2 mMyDependency2;
+
+    private MyModule2 mMyModule2;
+
+    @Override
+    public final <I> AutoBuilder<Yatagan$ComponentBar> provideInput(I input, Class<I> inputClass) {
+      if (inputClass == MyDependency1.class) {
+        this.mMyDependency1 = (MyDependency1) input;
+      } else if (inputClass == MyDependency2.class) {
+        this.mMyDependency2 = (MyDependency2) input;
+      } else if (inputClass == MyModule2.class) {
+        this.mMyModule2 = (MyModule2) input;
+      } else {
+        Checks.reportUnexpectedAutoBuilderInput(inputClass, Arrays.asList(MyDependency1.class, MyDependency2.class, MyModule2.class));
+      }
+      return this;
+    }
+
+    @Override
+    public final Yatagan$ComponentBar create() {
+      if (this.mMyDependency1 == null) {
+        Checks.reportMissingAutoBuilderInput(MyDependency1.class);
+      }
+      if (this.mMyDependency2 == null) {
+        Checks.reportMissingAutoBuilderInput(MyDependency2.class);
+      }
+      if (this.mMyModule2 == null) {
+        Checks.reportMissingAutoBuilderInput(MyModule2.class);
+      }
+      return new Yatagan$ComponentBar(this.mMyDependency1, this.mMyDependency2, this.mMyModule2);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$ComponentBaz.java
+package test;
+
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$ComponentBaz implements ComponentBaz {
+  Yatagan$ComponentBaz() {
+  }
+
+  public static ComponentBaz.Builder builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class ComponentFactoryImpl implements ComponentBaz.Builder {
+    @Override
+    public ComponentBase create() {
+      return new Yatagan$ComponentBaz();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
