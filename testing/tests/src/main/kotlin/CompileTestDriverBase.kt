@@ -165,11 +165,13 @@ abstract class CompileTestDriverBase private constructor(
         inheritClasspath = false,
         javacArguments = listOf(
             "-Xdiags:verbose",
+            "-parameters",
         ),
         kotlincArguments = listOf(
             "-opt-in=com.yandex.yatagan.ConditionsApi",
             "-opt-in=com.yandex.yatagan.VariantApi",
             "-P", "plugin:org.jetbrains.kotlin.kapt3:correctErrorTypes=true",
+            "-java-parameters",
         ),
         processorOptions = options,
     )

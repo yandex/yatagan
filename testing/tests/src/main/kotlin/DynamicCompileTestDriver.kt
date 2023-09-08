@@ -114,8 +114,6 @@ class DynamicCompileTestDriver(
     override fun createCompilationArguments() = super.createCompilationArguments().let {
         it.copy(
             sources = it.sources + runnerSource,
-            javacArguments = it.javacArguments + "-parameters",
-            kotlincArguments = it.kotlincArguments + "-java-parameters",
             kaptProcessors = listOf(accumulator),
         )
     }
