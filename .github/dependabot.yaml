@@ -1,28 +1,35 @@
 version: 2
+
+registries:
+  maven-google:
+    type: maven-repository
+    url: https://dl.google.com/dl/android/maven2/
+    username: ""
+    password: ""
+
 updates:
   - package-ecosystem: "gradle"
     directory: "/"
+    registries:
+      - maven-google
     schedule:
       interval: "weekly"
     commit-message:
       prefix: "Versions"
+    reviewers:
+      - "Jeffset"
     groups:
       kotlin:
         patterns:
-          - "dokka*"
-          - "kotlin*"
-          - "ksp*"
-      testing:
-        patterns:
-          - "testing*"
+          - "org.jetbrains.dokka:*"
+          - "org.jetbrains.kotlin:*"
+          - "com.google.devtools.ksp:*"
       libs:
-        patterns:
-          - "*"
+        patterns: [ "*" ]
         exclude-patterns:
-          - "dokka*"
-          - "kotlin*"
-          - "ksp*"
-          - "testing*"
+          - "org.jetbrains.dokka:*"
+          - "org.jetbrains.kotlin:*"
+          - "com.google.devtools.ksp:*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -30,3 +37,8 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "CI"
+    reviewers:
+      - "Jeffset"
+    groups:
+      actions:
+        patterns: [ "*" ]
