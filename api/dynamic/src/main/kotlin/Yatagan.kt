@@ -103,6 +103,15 @@ public object Yatagan {
         }
 
         /**
+         * If `true`, all conditions in a component are lazily evaluated.
+         * If `false` (default), some conditions may be evaluated in the component's constructor - this mode is soon
+         *  to be deprecated.
+         */
+        public fun allConditionsLazy(enabled: Boolean): Initializer = apply {
+            params.allConditionsLazy = enabled
+        }
+
+        /**
          * Sets logger instance to use.
          *
          * `null` by default.
@@ -216,6 +225,7 @@ public object Yatagan {
         override var isStrictMode: Boolean = true,
         override var logger: Logger? = null,
         override var reportDuplicateAliasesAsErrors: Boolean = false,
+        override var allConditionsLazy: Boolean = false,
         var useCompiledImplementationIfAvailable: Boolean = false,
     ) : RuntimeEngine.Params
 }

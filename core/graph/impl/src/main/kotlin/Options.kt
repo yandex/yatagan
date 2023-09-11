@@ -24,4 +24,9 @@ data class Options(
      * Whether to report duplicate aliases as errors instead of warnings.
      */
     val reportDuplicateAliasesAsErrors: Boolean,
+
+    /**
+     * Whether to generate all conditions with lazy evaluation.
+     */
+    val allConditionsLazy: Boolean,
 )
