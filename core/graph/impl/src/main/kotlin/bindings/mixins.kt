@@ -20,6 +20,7 @@ import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
+import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel
 import com.yandex.yatagan.core.model.ModuleModel
@@ -49,6 +50,9 @@ internal interface BaseBindingDefaultsMixin : BaseBinding {
 internal interface BindingDefaultsMixin : Binding, BaseBindingDefaultsMixin {
     override val conditionScope: ConditionScope
         get() = ConditionScope.Always
+
+    override val dependenciesOnConditions: List<ConditionModel>
+        get() = conditionScope.allConditionModels()
 
     override val nonStaticConditionProviders: Set<NodeModel>
         get() = emptySet()
@@ -163,6 +167,7 @@ internal sealed interface ComparableBindingMixin<B : ComparableBindingMixin<B>> 
             is InstanceBindingImpl -> 90
             is MapBindingImpl -> 100
             is MultiBindingImpl -> 110
+            is ConditionExpressionValueBindingImpl -> 120
             // Invalid bindings, don't really care for their order - it's UB to use them anyway.
             is MissingBindingImpl -> Int.MAX_VALUE - 1
             is AliasLoopStubBinding -> Int.MAX_VALUE - 2

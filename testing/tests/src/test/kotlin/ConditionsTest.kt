@@ -1139,4 +1139,69 @@ class ConditionsTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `injecting condition values`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            class What @Inject constructor() { val hello: Boolean = true }
+
+            class ClassA @Inject constructor(
+                @ValueOf(ConditionExpression("@FeatureA", Conditions.FeatureA::class)) val flag1: Boolean,
+                @ValueOf(ConditionExpression("getFeatureC.isEnabled", Features::class)) val flag2: Provider<Boolean>,
+                @ValueOf(ConditionExpression("isEnabledB | fooBar", Features::class)) val flag3: Lazy<Boolean>,
+                @ValueOf(ConditionExpression("getHello", What::class)) val flag4: Boolean,
+            )
+
+            @Component interface TestComponent {
+                val classA: ClassA
+            }
+
+            fun test() {
+                val c = Yatagan.create(TestComponent::class.java)
+                c.classA; c.classA.flag2.get()
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `injecting condition values - misuse`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            interface What { val hello: Boolean }
+
+            class ClassA @Inject constructor(
+                @ValueOf(ConditionExpression("@FeatureA", Conditions.FeatureA::class)) val flag1: Int,
+                @ValueOf(ConditionExpression("getFeatureC.isEnabled", Features::class)) val flag2: Provider<Double>,
+                @ValueOf(ConditionExpression("isEnabledB | fooBar", Features::class)) val flag3: Lazy<Any>,
+
+                @ValueOf(ConditionExpression(" | fooBar", Features::class)) val flag4: Boolean,
+                @ValueOf(ConditionExpression("!getHello", What::class)) val flag5: Boolean,
+            )
+
+            @Module class MyModule {
+                @Provides
+                @ValueOf(ConditionExpression("@FeatureA", Conditions.FeatureA::class))
+                fun provideValue(): Boolean {
+                    return true
+                }
+            }
+
+            @Component(modules = [MyModule::class]) interface TestComponent {
+                val classA: ClassA
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }

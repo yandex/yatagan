@@ -31,6 +31,7 @@ import com.yandex.yatagan.core.graph.impl.bindings.AssistedInjectFactoryBindingI
 import com.yandex.yatagan.core.graph.impl.bindings.ComponentDependencyBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ComponentDependencyEntryPointBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ComponentInstanceBindingImpl
+import com.yandex.yatagan.core.graph.impl.bindings.ConditionExpressionValueBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ExplicitEmptyBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.InjectConstructorProvisionBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.InstanceBindingImpl
@@ -57,6 +58,7 @@ import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.InjectConstructorModel
+import com.yandex.yatagan.core.model.InjectedConditionExpressionModel
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.yatagan.core.model.ModuleModel
@@ -268,9 +270,7 @@ internal class GraphBindingsManager(
 
     fun materializeImplicitBindingFor(node: NodeModel): Binding? {
         return implicitBindings.getOrPut(node) {
-            if (node.qualifier == null) {
-                node.getSpecificModel().accept(implicitBindingCreator)
-            } else null
+            node.getSpecificModel().accept(implicitBindingCreator)
         }
     }
 
@@ -424,6 +424,13 @@ internal class GraphBindingsManager(
 
         override fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): Binding {
             return AssistedInjectFactoryBindingImpl(
+                model = model,
+                owner = graph,
+            )
+        }
+
+        override fun visitConditionExpression(model: InjectedConditionExpressionModel): Binding {
+            return ConditionExpressionValueBindingImpl(
                 model = model,
                 owner = graph,
             )

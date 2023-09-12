@@ -217,14 +217,14 @@ internal class BindingGraphImpl(
         // Add all condition literals from all local bindings.
         for (binding in localBindings.keys) {
             if (options.allConditionsLazy) {
-                for (condition in binding.conditionScope.allConditionModels()) {
+                for (condition in binding.dependenciesOnConditions) {
                     localConditionLiterals[condition] = LiteralUsage.Lazy
                 }
                 continue
             }
 
             var isEager = true
-            for (condition in binding.conditionScope.allConditionModels()) {
+            for (condition in binding.dependenciesOnConditions) {
                 if (isEager) {
                     localConditionLiterals[condition] = when {
                         condition.requiresInstance -> LiteralUsage.Lazy  // Always lazy

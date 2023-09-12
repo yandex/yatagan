@@ -17,9 +17,11 @@
 package com.yandex.yatagan.core.graph.impl
 
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
+import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.impl.bindings.ConditionalBindingMixin
 import com.yandex.yatagan.core.graph.impl.bindings.graphConditionScope
 import com.yandex.yatagan.core.graph.impl.bindings.resolveAliasChain
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.notImplies
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -38,10 +40,23 @@ internal interface NonStaticConditionDependencies : MayBeInvalid {
 }
 
 /**
+ * Constructor function for [NonStaticConditionDependencies] based on [ConditionalBindingMixin].
+ */
+internal fun NonStaticConditionDependencies(binding: ConditionalBindingMixin) : NonStaticConditionDependencies {
+    return NonStaticConditionDependencies(
+        conditionScope = binding.conditionScope,
+        host = binding,
+    )
+}
+
+/**
  * Constructor function for [NonStaticConditionDependencies].
  */
-internal fun NonStaticConditionDependencies(binding: ConditionalBindingMixin): NonStaticConditionDependencies {
-    val allConditionModels = binding.conditionScope.allConditionModels()
+internal fun NonStaticConditionDependencies(
+    conditionScope: ConditionScope,
+    host: Binding,
+): NonStaticConditionDependencies {
+    val allConditionModels = conditionScope.allConditionModels()
     if (allConditionModels.isEmpty()) {
         return EmptyNonStaticConditionDependencies
     }
@@ -54,7 +69,8 @@ internal fun NonStaticConditionDependencies(binding: ConditionalBindingMixin): N
     } else {
         NonStaticConditionDependenciesImpl(
             conditionProviders = conditionProviders,
-            host = binding,
+            conditionScope = conditionScope,
+            host = host,
         )
     }
 }
@@ -67,7 +83,8 @@ private object EmptyNonStaticConditionDependencies : NonStaticConditionDependenc
 
 private class NonStaticConditionDependenciesImpl(
     override val conditionProviders: Set<NodeModel>,
-    private val host: ConditionalBindingMixin,
+    private val host: Binding,
+    private val conditionScope: ConditionScope,
 ) : NonStaticConditionDependencies {
 
     override fun validate(validator: Validator) {
@@ -103,7 +120,7 @@ private class NonStaticConditionDependenciesImpl(
             if (childContext is BaseBinding) {
                 append("{ ")
                 var count = 0
-                for (model in host.variantMatch.conditionScope.allConditionModels()) {
+                for (model in conditionScope.allConditionModels()) {
                     if (model.requiresInstance) {
                         ++count
                         if (model.root == childContext.target) {

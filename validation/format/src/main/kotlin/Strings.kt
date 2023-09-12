@@ -507,6 +507,13 @@ object Strings {
 
         @Covered
         fun invalidAliasedImport(name: String) = ("Import alias '$name' contains forbidden characters.").toError()
+
+        @Covered
+        fun injectedConditionExpectedBoolean(got: Type) = ("Qualifier `@ValueOf` is only applicable to " +
+                "boolean dependencies. Got `$got` instead.").toError()
+
+        @Covered
+        fun manualBindingForConditionValue() = ("Manual bindings with `@ValueOf` qualifier are not allowed.").toError()
     }
 
     object Warnings {

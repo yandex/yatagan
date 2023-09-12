@@ -19,9 +19,6 @@ package com.yandex.yatagan.core.model.impl
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
-import com.yandex.yatagan.core.model.impl.parsing.BooleanExpressionParser
-import com.yandex.yatagan.core.model.impl.parsing.ExpressionFactoryForParsing
-import com.yandex.yatagan.core.model.impl.parsing.ParseException
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
@@ -142,76 +139,6 @@ internal class FeatureModelImpl private constructor(
 
     private fun hasConditionExpression(): Boolean =
         conditionExpressionHolder != null
-
-    private class ConditionExpressionHolder(
-        val impl: BuiltinAnnotation.ConditionExpression,
-    ) {
-        private val parseError: CharSequence?
-        val conditionScope: ConditionScope?
-
-        init {
-            var parseError: CharSequence? = null
-
-            val conditionScope = try {
-                val expression = BooleanExpressionParser(
-                    expressionSource = impl.value,
-                    factory = ExpressionFactoryForParsing(
-                        imports = buildMap {
-                            for (import in impl.imports) {
-                                put(import.declaration.qualifiedName.substringAfterLast('.'), import)
-                            }
-                            for (importAs in impl.importAs) {
-                                if (!importAs.alias.matches(AliasedImportRegex)) {
-                                    // Skip invalid imports
-                                    continue
-                                }
-                                put(importAs.alias, importAs.value)
-                            }
-                        }
-                    ),
-                ).parse()
-                ConditionScopeImpl(expression)
-            } catch (e: ParseException) {
-                parseError = e.formattedMessage
-                null
-            }
-
-            this.parseError = parseError
-            this.conditionScope = conditionScope
-        }
-
-        fun validate(validator: Validator) {
-            parseError?.let { parseError ->
-                validator.reportError(Strings.Errors.conditionExpressionParseErrors(parseError))
-            }
-
-            listOf(
-                impl.imports.map { it.declaration.qualifiedName.substringAfterLast('.') to it },
-                impl.importAs.map { it.alias to it.value },
-            ).flatten().groupBy(
-                keySelector = { it.first },
-                valueTransform = { it.second },
-            ).entries.forEach { (name, types) ->
-                if (types.size > 1) {
-                    validator.reportError(Strings.Errors.conflictingConditionExpressionImport(
-                        name = name,
-                        types = types,
-                    ))
-                }
-            }
-
-            for (importAs in impl.importAs) {
-                val alias = importAs.alias
-                if (!alias.matches(AliasedImportRegex)) {
-                    validator.reportError(Strings.Errors.invalidAliasedImport(alias))
-                }
-            }
-        }
-
-        companion object {
-            private val AliasedImportRegex = """[a-zA-Z0-9_]+""".toRegex()
-        }
-    }
 
     companion object Factory : ObjectCache<TypeDeclaration, FeatureModelImpl>() {
         operator fun invoke(impl: TypeDeclaration) = createCached(impl, ::FeatureModelImpl)

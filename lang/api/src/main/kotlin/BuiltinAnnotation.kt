@@ -43,6 +43,8 @@ public sealed interface BuiltinAnnotation{
         public sealed interface OnParameter<T : BuiltinAnnotation.OnParameter> : Target<T>
 
         public sealed interface OnField<T : BuiltinAnnotation.OnField> : Target<T>
+
+        public sealed interface CanBeCastedOut<T : BuiltinAnnotation.CanBeCastedOut> : Target<T>
     }
 
     public sealed interface OnMethod : BuiltinAnnotation
@@ -58,6 +60,8 @@ public sealed interface BuiltinAnnotation{
     public sealed interface OnParameter : BuiltinAnnotation
 
     public sealed interface OnField : BuiltinAnnotation
+
+    public sealed interface CanBeCastedOut : BuiltinAnnotation
 
     /**
      * Represents `javax.inject.Inject`.
@@ -274,6 +278,14 @@ public sealed interface BuiltinAnnotation{
          */
         public object Key : OnAnnotationClass, Target.OnAnnotationClass<Key> {
             override val modelClass: Class<Key> get() = Key::class.java
+        }
+    }
+
+    public interface ValueOf : CanBeCastedOut {
+        public val value: ConditionExpression
+
+        public companion object : Target.CanBeCastedOut<ValueOf> {
+            override val modelClass: Class<ValueOf> get() = ValueOf::class.java
         }
     }
 }

@@ -39,5 +39,6 @@ public interface HasNodeModel : ClassBackedModel {
         public fun visitComponentFactory(model: ComponentFactoryWithBuilderModel): R = visitDefault()
         public fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): R = visitDefault()
         public fun visitInjectConstructor(model: InjectConstructorModel): R = visitDefault()
+        public fun visitConditionExpression(model: InjectedConditionExpressionModel): R = visitDefault()
     }
 }

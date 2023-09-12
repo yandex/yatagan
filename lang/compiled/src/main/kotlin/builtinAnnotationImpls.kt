@@ -76,6 +76,13 @@ internal class CtConditionExpressionAnnotationImpl(
     }
 }
 
+internal class CtValueOfAnnotationImpl(
+    impl: CtAnnotationBase,
+) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.ValueOf {
+    override val value: BuiltinAnnotation.ConditionExpression
+        get() = CtConditionExpressionAnnotationImpl(impl.getAnnotation("value"))
+}
+
 internal class CtConditionalAnnotationImpl(
     impl: CtAnnotationBase,
 ) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.Conditional {
