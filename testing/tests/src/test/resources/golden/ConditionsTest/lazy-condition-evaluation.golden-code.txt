@@ -1,0 +1,76 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent implements MyComponent {
+  final boolean mFeaturesINSTANCE_getDisabled = Features.INSTANCE.getDisabled();
+
+  private byte mFeaturesINSTANCE_getNotReached;
+
+  final boolean mFeaturesINSTANCE_getDisabled2 = Features.INSTANCE.getDisabled2();
+
+  private byte mFeaturesINSTANCE_getNotReached2;
+
+  private Yatagan$MyComponent() {
+  }
+
+  @Override
+  public Optional<ClassA> getA() {
+    return this.optOfClassA();
+  }
+
+  @Override
+  public Optional<ClassB> getB() {
+    return this.optOfClassB();
+  }
+
+  Optional optOfClassA() {
+    return this.mFeaturesINSTANCE_getDisabled && this.featuresINSTANCE_getNotReached() ? Optional.of(new ClassA()) : Optional.empty();
+  }
+
+  Optional optOfClassB() {
+    return this.mFeaturesINSTANCE_getDisabled2 && this.featuresINSTANCE_getNotReached2() ? Optional.of(new ClassB()) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$MyComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  boolean featuresINSTANCE_getNotReached() {
+    if (this.mFeaturesINSTANCE_getNotReached == 0x0) {
+      this.mFeaturesINSTANCE_getNotReached = (byte) ((Features.INSTANCE.getNotReached()) ? 0x1 : 0x2);
+    }
+    return this.mFeaturesINSTANCE_getNotReached == 0x1;
+  }
+
+  boolean featuresINSTANCE_getNotReached2() {
+    if (this.mFeaturesINSTANCE_getNotReached2 == 0x0) {
+      this.mFeaturesINSTANCE_getNotReached2 = (byte) ((Features.INSTANCE.getNotReached2()) ? 0x1 : 0x2);
+    }
+    return this.mFeaturesINSTANCE_getNotReached2 == 0x1;
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$MyComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MyComponent create() {
+      return new Yatagan$MyComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

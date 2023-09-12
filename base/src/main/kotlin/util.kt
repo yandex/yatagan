@@ -89,6 +89,10 @@ inline fun <K, V> Array<out Pair<K, V>>.forEachBi(block: (K, V) -> Unit) {
     forEach { (k, v) -> block(k, v) }
 }
 
+fun <T, R> Iterable<T>.sortedWithBy(comparator: Comparator<R>, selector: (T) -> R): List<T> {
+    return sortedWith(Comparator.comparing(selector, comparator))
+}
+
 inline fun <T : Any> traverseDepthFirstWithPath(
     roots: Iterable<T>,
     childrenOf: (T) -> Iterable<T>,

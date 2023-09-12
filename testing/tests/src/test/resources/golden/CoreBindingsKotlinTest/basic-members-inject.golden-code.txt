@@ -1,0 +1,96 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private Object mClassAInstance;
+
+  private Object mClassBInstance;
+
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public void injectFoo(Foo foo) {
+    foo.bye = new ProviderImpl(this, 0);
+    foo.setA(this.cacheClassA());
+    foo.setB(this.cacheClassB());
+    foo.setBye2(new ProviderImpl(this, 0));
+    foo.setHelloA(new ProviderImpl(this, 1));
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.cacheClassB();
+      case 1: return this.cacheClassA();
+      default: throw new AssertionError();
+    }
+  }
+
+  ClassA cacheClassA() {
+    Object local = this.mClassAInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ClassA();
+      this.mClassAInstance = local;
+    }
+    return (ClassA) local;
+  }
+
+  ClassB cacheClassB() {
+    Object local = this.mClassBInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ClassB();
+      this.mClassBInstance = local;
+    }
+    return (ClassB) local;
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

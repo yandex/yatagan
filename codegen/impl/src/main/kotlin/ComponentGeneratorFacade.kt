@@ -25,6 +25,7 @@ class ComponentGeneratorFacade(
     maxSlotsPerSwitch: Int,
     enableThreadChecks: Boolean,
     enableProvisionNullChecks: Boolean,
+    sortMethodsForTesting: Boolean,
 ) {
     private val component = Yatagan.builder(GeneratorComponent.Factory::class.java).create(
         graph = graph,
@@ -32,6 +33,7 @@ class ComponentGeneratorFacade(
             maxSlotsPerSwitch = maxSlotsPerSwitch,
             enableProvisionNullChecks = enableProvisionNullChecks,
             enableThreadChecks = enableThreadChecks,
+            sortMethodsForTesting = sortMethodsForTesting,
         ),
     )
 

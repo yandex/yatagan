@@ -1,0 +1,105 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestPhoneComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestPhoneComponent implements TestPhoneComponent {
+  private Yatagan$TestPhoneComponent() {
+  }
+
+  @Override
+  public Optional<MyFeatureActivityComponent.Factory> getMyFeatureActivity() {
+    return Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$TestPhoneComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestPhoneComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestPhoneComponent> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestPhoneComponent create() {
+      return new Yatagan$TestPhoneComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestTabletComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestTabletComponent implements TestTabletComponent {
+  final boolean mFeaturesIsEnabledB = Features.isEnabledB();
+
+  private Yatagan$TestTabletComponent() {
+  }
+
+  @Override
+  public Optional<MyFeatureActivityComponent.Factory> getMyFeatureActivity() {
+    return this.optOfMyFeatureActivityComponentFactory();
+  }
+
+  Optional optOfMyFeatureActivityComponentFactory() {
+    return this.mFeaturesIsEnabledB ? Optional.of(new MyFeatureActivityComponentImpl.ComponentFactoryImpl()) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$TestTabletComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class MyFeatureActivityComponentImpl implements MyFeatureActivityComponent {
+    MyFeatureActivityComponentImpl() {
+    }
+
+    private static final class ComponentFactoryImpl implements MyFeatureActivityComponent.Factory {
+      ComponentFactoryImpl() {
+      }
+
+      @Override
+      public MyFeatureActivityComponent create() {
+        return new MyFeatureActivityComponentImpl();
+      }
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestTabletComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestTabletComponent> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestTabletComponent create() {
+      return new Yatagan$TestTabletComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

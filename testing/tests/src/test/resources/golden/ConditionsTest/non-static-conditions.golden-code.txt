@@ -1,0 +1,125 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private Object mFeatureProvider3Instance;
+
+  final FeatureProvider mFeatures;
+
+  private byte mFeatureProviderIsEnabledA;
+
+  private byte mFeatureProviderIsEnabledB;
+
+  private byte mFeatureProviderIsEnabledC;
+
+  private byte mFeatureProvider2IsEnabledD;
+
+  private byte mF3IsEnabledE;
+
+  Yatagan$TestComponent(FeatureProvider pFeatures) {
+    this.mFeatures = Checks.checkInputNotNull(pFeatures);
+  }
+
+  @Override
+  public Optional<ClassA> getA() {
+    return this.optOfClassA();
+  }
+
+  @Override
+  public Optional<ClassB> getB() {
+    return this.optOfClassB();
+  }
+
+  @Override
+  public Optional<ClassC> getC() {
+    return this.optOfClassC();
+  }
+
+  @Override
+  public Optional<FeatureProvider3> getF3() {
+    return this.optOfFeatureProvider3();
+  }
+
+  Optional optOfClassA() {
+    return this.featureProviderIsEnabledA() ? Optional.of(new ClassA()) : Optional.empty();
+  }
+
+  Optional optOfClassB() {
+    return this.featureProviderIsEnabledA() && this.featureProviderIsEnabledB() ? Optional.of(new ClassB(this.optOfClassC(), new ClassA())) : Optional.empty();
+  }
+
+  Optional optOfClassC() {
+    return this.featureProviderIsEnabledC() && this.featureProvider2IsEnabledD() && this.f3IsEnabledE() ? Optional.of(new ClassC()) : Optional.empty();
+  }
+
+  FeatureProvider3 cacheFeatureProvider3() {
+    Object local = this.mFeatureProvider3Instance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new FeatureProvider3();
+      this.mFeatureProvider3Instance = local;
+    }
+    return (FeatureProvider3) local;
+  }
+
+  Optional optOfFeatureProvider3() {
+    return this.featureProviderIsEnabledC() ? Optional.of(this.cacheFeatureProvider3()) : Optional.empty();
+  }
+
+  public static TestComponent.Builder builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  boolean featureProviderIsEnabledA() {
+    if (this.mFeatureProviderIsEnabledA == 0x0) {
+      this.mFeatureProviderIsEnabledA = (byte) ((this.mFeatures.isEnabledA()) ? 0x1 : 0x2);
+    }
+    return this.mFeatureProviderIsEnabledA == 0x1;
+  }
+
+  boolean featureProviderIsEnabledB() {
+    if (this.mFeatureProviderIsEnabledB == 0x0) {
+      this.mFeatureProviderIsEnabledB = (byte) ((this.mFeatures.isEnabledB()) ? 0x1 : 0x2);
+    }
+    return this.mFeatureProviderIsEnabledB == 0x1;
+  }
+
+  boolean featureProviderIsEnabledC() {
+    if (this.mFeatureProviderIsEnabledC == 0x0) {
+      this.mFeatureProviderIsEnabledC = (byte) ((this.mFeatures.isEnabledC()) ? 0x1 : 0x2);
+    }
+    return this.mFeatureProviderIsEnabledC == 0x1;
+  }
+
+  boolean featureProvider2IsEnabledD() {
+    if (this.mFeatureProvider2IsEnabledD == 0x0) {
+      this.mFeatureProvider2IsEnabledD = (byte) ((new FeatureProvider2().isEnabledD()) ? 0x1 : 0x2);
+    }
+    return this.mFeatureProvider2IsEnabledD == 0x1;
+  }
+
+  boolean f3IsEnabledE() {
+    if (this.mF3IsEnabledE == 0x0) {
+      this.mF3IsEnabledE = (byte) ((this.cacheFeatureProvider3().isEnabledE()) ? 0x1 : 0x2);
+    }
+    return this.mF3IsEnabledE == 0x1;
+  }
+
+  private static final class ComponentFactoryImpl implements TestComponent.Builder {
+    @Override
+    public TestComponent create(FeatureProvider features) {
+      return new Yatagan$TestComponent(features);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

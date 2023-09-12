@@ -1,0 +1,60 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TopLevelClass$Component2.java
+package test;
+
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TopLevelClass$Component2 implements TopLevelClass.Component2 {
+  Yatagan$TopLevelClass$Component2() {
+  }
+
+  public static TopLevelClass.Component2.Builder builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class ComponentFactoryImpl implements TopLevelClass.Component2.Builder {
+    @Override
+    public TopLevelClass.Component2 c() {
+      return new Yatagan$TopLevelClass$Component2();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TopLevelClass$NestedClass$Component1.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TopLevelClass$NestedClass$Component1 implements TopLevelClass.NestedClass.Component1 {
+  private Yatagan$TopLevelClass$NestedClass$Component1() {
+  }
+
+  public static AutoBuilder<Yatagan$TopLevelClass$NestedClass$Component1> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TopLevelClass$NestedClass$Component1> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TopLevelClass$NestedClass$Component1> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TopLevelClass$NestedClass$Component1 create() {
+      return new Yatagan$TopLevelClass$NestedClass$Component1();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,0 +1,73 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.SuppressWarnings;
+import java.util.Arrays;
+import java.util.List;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final TestModule mTestModule;
+
+  private Yatagan$TestComponent(TestModule pTestModule) {
+    this.mTestModule = pTestModule != null ? pTestModule : new TestModule();
+  }
+
+  @Override
+  public List<List<Api>> getApis() {
+    return Checks.checkProvisionNotNull(this.mTestModule.someListOfApi());
+  }
+
+  @Override
+  public Consumer getConsumer() {
+    return new Consumer(Checks.checkProvisionNotNull(this.mTestModule.someListOfApi()), Checks.checkProvisionNotNull(this.mTestModule.someListOfApi()), Checks.checkProvisionNotNull(this.mTestModule.someListOfImpl()), Checks.checkProvisionNotNull(this.mTestModule.someListOfImpl()), Checks.checkProvisionNotNull(this.mTestModule.handler()), Checks.checkProvisionNotNull(this.mTestModule.handler2()));
+  }
+
+  @Override
+  public Function1<String, Unit> getHandler() {
+    return Checks.checkProvisionNotNull(this.mTestModule.handler());
+  }
+
+  @Override
+  public Function1<Api, Unit> getHandler2() {
+    return Checks.checkProvisionNotNull(this.mTestModule.handler2());
+  }
+
+  @Override
+  public List<List<Impl>> getImpls() {
+    return Checks.checkProvisionNotNull(this.mTestModule.someListOfImpl());
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    private TestModule mTestModule;
+
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      if (inputClass == TestModule.class) {
+        this.mTestModule = (TestModule) input;
+      } else {
+        Checks.reportUnexpectedAutoBuilderInput(inputClass, Arrays.asList(TestModule.class));
+      }
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent(this.mTestModule);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

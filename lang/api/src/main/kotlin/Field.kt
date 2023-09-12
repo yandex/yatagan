@@ -20,7 +20,7 @@ package com.yandex.yatagan.lang
  * Models a field from a JVM point of view.
  * Properties are not modeled by this.
  */
-public interface Field : Member {
+public interface Field : Member, Comparable<Field> {
 
     /**
      * Type of the field.

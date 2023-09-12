@@ -1,0 +1,84 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public MyClass<MySecondClass<Object>> getObj() {
+    return Checks.checkProvisionNotNull(MyModule.getMyClassObj());
+  }
+
+  @Override
+  public Provider<MyClass<MySecondClass<String>>> getProviderBool() {
+    return new ProviderImpl(this, 1);
+  }
+
+  @Override
+  public Provider<MyClass<MySecondClass<Object>>> getProviderInt() {
+    return new ProviderImpl(this, 0);
+  }
+
+  @Override
+  public MyClass<MySecondClass<String>> getStr() {
+    return Checks.checkProvisionNotNull(MyModule.getMyClassStr());
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return Checks.checkProvisionNotNull(MyModule.getMyClassObj());
+      case 1: return Checks.checkProvisionNotNull(MyModule.getMyClassStr());
+      default: throw new AssertionError();
+    }
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

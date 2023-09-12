@@ -1,0 +1,316 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$RootComponent.java
+package test;
+
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Double;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$RootComponent implements RootComponent {
+  private Object mFooInstance;
+
+  final Features mFeatures;
+
+  Yatagan$RootComponent(Features pFeatures) {
+    this.mFeatures = Checks.checkInputNotNull(pFeatures);
+  }
+
+  @Override
+  public SubComponent1.Builder getSub1() {
+    return new SubComponent1Impl.ComponentFactoryImpl(this);
+  }
+
+  @Override
+  public Provider<SubComponent2> getSub2() {
+    return new ProviderImpl(this, 1);
+  }
+
+  @Override
+  public Lazy<SubComponent2> getSub2lazy() {
+    return new CachingProviderImpl(this, 1);
+  }
+
+  @Override
+  public SubComponent3 createSubComponent3(MyDep dep, MyModule mod, double d) {
+    return new SubComponent3Impl(this, dep, mod, d);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.cacheFoo();
+      case 1: return new SubComponent2Impl(this);
+      default: throw new AssertionError();
+    }
+  }
+
+  Foo cacheFoo() {
+    Object local = this.mFooInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new Foo();
+      this.mFooInstance = local;
+    }
+    return (Foo) local;
+  }
+
+  public static RootComponent.Factory builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponent1Impl implements SubComponent1 {
+    final Yatagan$RootComponent mRootComponent;
+
+    private byte mFeaturesIsEnabled;
+
+    SubComponent1Impl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public Optional<FeatureComponent> getOpt() {
+      return this.optOfFeatureComponent();
+    }
+
+    Optional optOfFeatureComponent() {
+      return this.featuresIsEnabled() ? Optional.of(new FeatureComponentImpl(this.mRootComponent)) : Optional.empty();
+    }
+
+    boolean featuresIsEnabled() {
+      if (this.mFeaturesIsEnabled == 0x0) {
+        this.mFeaturesIsEnabled = (byte) ((this.mRootComponent.mFeatures.isEnabled()) ? 0x1 : 0x2);
+      }
+      return this.mFeaturesIsEnabled == 0x1;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class FeatureComponentImpl implements FeatureComponent {
+      final Yatagan$RootComponent mRootComponent;
+
+      private FeatureComponentImpl(Yatagan$RootComponent pRootComponent) {
+        this.mRootComponent = pRootComponent;
+      }
+
+      @Override
+      public Provider<Foo> getFoo() {
+        return new ProviderImpl(this.mRootComponent, 0);
+      }
+
+      @Override
+      public FeatureComponent2 createFeatureComponent2(MyDep dep) {
+        return new FeatureComponent2Impl(dep);
+      }
+
+      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+      static final class FeatureComponent2Impl implements FeatureComponent2 {
+        final MyDep mMyDep;
+
+        FeatureComponent2Impl(MyDep pDep) {
+          this.mMyDep = Checks.checkInputNotNull(pDep);
+        }
+
+        @Override
+        public MyDep getDep() {
+          return this.mMyDep;
+        }
+      }
+    }
+
+    private static final class ComponentFactoryImpl implements SubComponent1.Builder {
+      Yatagan$RootComponent fRootComponent;
+
+      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+        this.fRootComponent = fRootComponent;
+      }
+
+      @Override
+      public SubComponent1 create() {
+        return new SubComponent1Impl(this.fRootComponent);
+      }
+    }
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponent2Impl implements SubComponent2 {
+    final Yatagan$RootComponent mRootComponent;
+
+    private SubComponent2Impl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public Foo getFoo() {
+      return this.mRootComponent.cacheFoo();
+    }
+
+    @Override
+    public Sub2Component getSub2() {
+      return new Sub2ComponentImpl(this.mRootComponent);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class Sub2ComponentImpl implements Sub2Component {
+      final Yatagan$RootComponent mRootComponent;
+
+      private byte mFeaturesIsEnabled;
+
+      private Sub2ComponentImpl(Yatagan$RootComponent pRootComponent) {
+        this.mRootComponent = pRootComponent;
+      }
+
+      @Override
+      public Foo getFoo() {
+        return this.mRootComponent.cacheFoo();
+      }
+
+      @Override
+      public Optional<FeatureComponent> getOpt() {
+        return this.optOfFeatureComponent();
+      }
+
+      @Override
+      public Sub2Component getS() {
+        return this;
+      }
+
+      Optional optOfFeatureComponent() {
+        return this.featuresIsEnabled() ? Optional.of(new FeatureComponentImpl(this.mRootComponent)) : Optional.empty();
+      }
+
+      boolean featuresIsEnabled() {
+        if (this.mFeaturesIsEnabled == 0x0) {
+          this.mFeaturesIsEnabled = (byte) ((this.mRootComponent.mFeatures.isEnabled()) ? 0x1 : 0x2);
+        }
+        return this.mFeaturesIsEnabled == 0x1;
+      }
+
+      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+      static final class FeatureComponentImpl implements FeatureComponent {
+        final Yatagan$RootComponent mRootComponent;
+
+        private FeatureComponentImpl(Yatagan$RootComponent pRootComponent) {
+          this.mRootComponent = pRootComponent;
+        }
+
+        @Override
+        public Provider<Foo> getFoo() {
+          return new ProviderImpl(this.mRootComponent, 0);
+        }
+
+        @Override
+        public FeatureComponent2 createFeatureComponent2(MyDep dep) {
+          return new FeatureComponent2Impl(dep);
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+        static final class FeatureComponent2Impl implements FeatureComponent2 {
+          final MyDep mMyDep;
+
+          FeatureComponent2Impl(MyDep pDep) {
+            this.mMyDep = Checks.checkInputNotNull(pDep);
+          }
+
+          @Override
+          public MyDep getDep() {
+            return this.mMyDep;
+          }
+        }
+      }
+    }
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponent3Impl implements SubComponent3 {
+    final Double mD;
+
+    final MyDep mMyDep;
+
+    final MyModule mMyModule;
+
+    final Yatagan$RootComponent mRootComponent;
+
+    SubComponent3Impl(Yatagan$RootComponent pRootComponent, MyDep pDep, MyModule pMod, Double pD) {
+      this.mRootComponent = pRootComponent;
+      this.mMyDep = Checks.checkInputNotNull(pDep);
+      this.mMyModule = Checks.checkInputNotNull(pMod);
+      this.mD = Checks.checkInputNotNull(pD);
+    }
+
+    @Override
+    public MyDep getD() {
+      return this.mMyDep;
+    }
+
+    @Override
+    public double getD2() {
+      return this.mD;
+    }
+
+    @Override
+    public Foo getFoo() {
+      return this.mRootComponent.cacheFoo();
+    }
+
+    @Override
+    public int getI() {
+      return Checks.checkProvisionNotNull(this.mMyModule.getI());
+    }
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$RootComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$RootComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$RootComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$RootComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements RootComponent.Factory {
+    @Override
+    public RootComponent create(Features features) {
+      return new Yatagan$RootComponent(features);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

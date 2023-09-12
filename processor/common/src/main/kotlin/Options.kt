@@ -54,6 +54,7 @@ enum class BooleanOption(
     ReportDuplicateAliasesAsErrors("yatagan.experimental.reportDuplicateAliasesAsErrors", default = false),
     OmitThreadChecks("yatagan.experimental.omitThreadChecks", default = false),
     OmitProvisionNullChecks("yatagan.experimental.omitProvisionNullChecks", default = false),
+    SortMethodsForTesting("yatagan.internal.testing.sortMethods", default = false),
 
     ;
 

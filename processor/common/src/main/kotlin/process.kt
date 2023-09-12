@@ -94,6 +94,7 @@ fun <Source> process(
                     maxSlotsPerSwitch = delegate.options[IntOption.MaxSlotsPerSwitch],
                     enableThreadChecks = !delegate.options[BooleanOption.OmitThreadChecks],
                     enableProvisionNullChecks = !delegate.options[BooleanOption.OmitProvisionNullChecks],
+                    sortMethodsForTesting = delegate.options[BooleanOption.SortMethodsForTesting],
                 )
                 delegate.openFileForGenerating(
                     sources = allSourcesSequence(delegate, graphRoot),

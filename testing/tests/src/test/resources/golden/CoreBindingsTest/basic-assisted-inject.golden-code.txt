@@ -1,0 +1,90 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private Object mScopedDepInstance;
+
+  final String mString;
+
+  Yatagan$TestComponent(String pString) {
+    this.mString = Checks.checkInputNotNull(pString);
+  }
+
+  @Override
+  public FooFactory fooFactory() {
+    return this.new FooFactoryImpl();
+  }
+
+  ScopedDep cacheScopedDep() {
+    Object local = this.mScopedDepInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ScopedDep();
+      this.mScopedDepInstance = local;
+    }
+    return (ScopedDep) local;
+  }
+
+  public static TestComponent.Factory builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponentImpl implements SubComponent {
+    final Yatagan$TestComponent mTestComponent;
+
+    SubComponentImpl(Yatagan$TestComponent pTestComponent) {
+      this.mTestComponent = pTestComponent;
+    }
+
+    @Override
+    public FooFactory fooFactory() {
+      return this.mTestComponent.new FooFactoryImpl();
+    }
+
+    private static final class ComponentFactoryImpl implements SubComponent.Builder {
+      Yatagan$TestComponent fTestComponent;
+
+      ComponentFactoryImpl(Yatagan$TestComponent fTestComponent) {
+        this.fTestComponent = fTestComponent;
+      }
+
+      @Override
+      public SubComponent create() {
+        return new SubComponentImpl(this.fTestComponent);
+      }
+    }
+  }
+
+  private final class FooFactoryImpl implements FooFactory {
+    @Override
+    public Foo createFoo(int count1, int count2, String value) {
+      return new Foo(Yatagan$TestComponent.this.cacheScopedDep(), new UnscopedDep(), Yatagan$TestComponent.this.mString, count2, Yatagan$TestComponent.this.new BarFactoryImpl(), count1, value);
+    }
+  }
+
+  private final class BarFactoryImpl implements BarFactory {
+    @Override
+    public Bar buildBar(int count2, int count1, String value) {
+      return new Bar(count1, count2, value);
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements TestComponent.Factory {
+    @Override
+    public TestComponent create(String string) {
+      return new Yatagan$TestComponent(string);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

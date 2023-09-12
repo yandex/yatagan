@@ -1,0 +1,261 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Integer;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public JavaConsumer getConsumer() {
+    return new JavaConsumer(this.accessMapIntegerString(), this.accessJavaxInjectNamedValueNameMapClassAnyInteger(), this.accessMapClassAnyInteger(), this.accessMapClassMyApiMyApi(), this.accessMapMyEnumMyApi(), new ProviderImpl(this, 0), new ProviderImpl(this, 1), new ProviderImpl(this, 2), new CachingProviderImpl(this, 3), new CachingProviderImpl(this, 4), this.accessMapClassMyApiProviderMyApi());
+  }
+
+  @Override
+  public Map<String, Object> getEmptyMap() {
+    return this.mapOfMapStringObject();
+  }
+
+  @Override
+  public Map<String, Object> getEmptyMap2() {
+    return this.mapOfJavaUtilMapStringObject();
+  }
+
+  @Override
+  public KotlinConsumer getKotlinConsumer() {
+    return new KotlinConsumer(this.accessMapIntegerString(), this.accessJavaxInjectNamedValueNameMapClassAnyInteger(), this.accessMapClassAnyInteger(), this.accessMapClassMyApiMyApi(), this.accessMapMyEnumMyApi(), new ProviderImpl(this, 0), new ProviderImpl(this, 1), new ProviderImpl(this, 2), new CachingProviderImpl(this, 3), new CachingProviderImpl(this, 4), this.accessMapClassMyApiProviderMyApi(), new ProviderImpl(this, 10));
+  }
+
+  @Override
+  public Map<Integer, String> getMap() {
+    return this.accessMapIntegerString();
+  }
+
+  @Override
+  public Map<Integer, String> getMap1Java() {
+    return this.accessMapIntegerString();
+  }
+
+  @Override
+  public Map<Class<?>, Integer> getMap2() {
+    return this.accessJavaxInjectNamedValueNameMapClassAnyInteger();
+  }
+
+  @Override
+  public Map<Class<?>, Integer> getMap2Java() {
+    return this.accessJavaxInjectNamedValueNameMapClassAnyInteger();
+  }
+
+  @Override
+  public Map<Class<?>, Integer> getMap3() {
+    return this.accessMapClassAnyInteger();
+  }
+
+  @Override
+  public Map<Class<?>, Integer> getMap3Java() {
+    return this.accessMapClassAnyInteger();
+  }
+
+  @Override
+  public Map<Class<? extends MyApi>, MyApi> getMap4() {
+    return this.accessMapClassMyApiMyApi();
+  }
+
+  @Override
+  public Map<Class<? extends MyApi>, MyApi> getMap4Java() {
+    return this.accessMapClassMyApiMyApi();
+  }
+
+  @Override
+  public Map<MyEnum, MyApi> getMap5() {
+    return this.accessMapMyEnumMyApi();
+  }
+
+  @Override
+  public Map<MyEnum, MyApi> getMap5Java() {
+    return this.accessMapMyEnumMyApi();
+  }
+
+  @Override
+  public Map<Class<? extends MyApi>, Provider<MyApi>> getMapOfProviders() {
+    return this.accessMapClassMyApiProviderMyApi();
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.accessMapIntegerString();
+      case 1: return this.accessJavaxInjectNamedValueNameMapClassAnyInteger();
+      case 2: return this.accessMapClassAnyInteger();
+      case 3: return this.accessMapClassMyApiMyApi();
+      case 4: return this.accessMapMyEnumMyApi();
+      case 5: return Checks.checkProvisionNotNull(TestModule.INSTANCE.int1());
+      case 6: return Checks.checkProvisionNotNull(TestModule.INSTANCE.int2());
+      case 7: return Checks.checkProvisionNotNull(TestModule.INSTANCE.apiImpl1());
+      case 8: return new Impl2();
+      case 9: return new Impl3();
+      case 10: return this.mapOfMapClassAnyProviderInteger();
+      default: throw new AssertionError();
+    }
+  }
+
+  Map<Class<?>, Integer> accessMapClassAnyInteger() {
+    return this.mapOfJavaUtilMapClassAnyInteger();
+  }
+
+  Map<Class<?>, Integer> accessJavaxInjectNamedValueNameMapClassAnyInteger() {
+    return this.mapOfMapClassAnyInteger();
+  }
+
+  Map<Integer, String> accessMapIntegerString() {
+    return this.mapOfMapIntegerString();
+  }
+
+  Map<Class<? extends MyApi>, MyApi> accessMapClassMyApiMyApi() {
+    return this.mapOfMapClassMyApiMyApi();
+  }
+
+  Map<Class<? extends MyApi>, Provider<MyApi>> accessMapClassMyApiProviderMyApi() {
+    return this.mapOfMapClassMyApiProviderMyApi();
+  }
+
+  Map<MyEnum, MyApi> accessMapMyEnumMyApi() {
+    return this.mapOfMapMyEnumMyApi();
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  Map<String, Object> mapOfMapStringObject() {
+    final Map<String, Object> map = new HashMap<>(0);
+    return map;
+  }
+
+  Map<String, Object> mapOfJavaUtilMapStringObject() {
+    final Map<String, Object> map = new HashMap<>(0);
+    return map;
+  }
+
+  Map<Class<?>, Integer> mapOfJavaUtilMapClassAnyInteger() {
+    final Map<Class<?>, Integer> map = new HashMap<>(1);
+    map.put(TestModule.class, Checks.checkProvisionNotNull(TestModule.INSTANCE.int3()));
+    return map;
+  }
+
+  Map<Class<?>, Integer> mapOfMapClassAnyInteger() {
+    final Map<Class<?>, Integer> map = new HashMap<>(2);
+    map.put(Object.class, Checks.checkProvisionNotNull(TestModule.INSTANCE.int1()));
+    map.put(String.class, Checks.checkProvisionNotNull(TestModule.INSTANCE.int2()));
+    return map;
+  }
+
+  Map<Class<?>, Provider<Integer>> mapOfMapClassAnyProviderInteger() {
+    final Map<Class<?>, Provider<Integer>> map = new HashMap<>(2);
+    map.put(Object.class, new ProviderImpl(this, 5));
+    map.put(String.class, new ProviderImpl(this, 6));
+    return map;
+  }
+
+  Map<Integer, String> mapOfMapIntegerString() {
+    final Map<Integer, String> map = new HashMap<>(2);
+    map.put(1, Checks.checkProvisionNotNull(TestModule.INSTANCE.string1()));
+    map.put(2, Checks.checkProvisionNotNull(TestModule.INSTANCE.string2()));
+    return map;
+  }
+
+  Map<Class<? extends MyApi>, MyApi> mapOfMapClassMyApiMyApi() {
+    final Map<Class<? extends MyApi>, MyApi> map = new HashMap<>(3);
+    map.put(Impl1.class, Checks.checkProvisionNotNull(TestModule.INSTANCE.apiImpl1()));
+    map.put(Impl2.class, new Impl2());
+    map.put(Impl3.class, new Impl3());
+    return map;
+  }
+
+  Map<Class<? extends MyApi>, Provider<MyApi>> mapOfMapClassMyApiProviderMyApi() {
+    final Map<Class<? extends MyApi>, Provider<MyApi>> map = new HashMap<>(3);
+    map.put(Impl1.class, new ProviderImpl(this, 7));
+    map.put(Impl2.class, new ProviderImpl(this, 8));
+    map.put(Impl3.class, new ProviderImpl(this, 9));
+    return map;
+  }
+
+  Map<MyEnum, MyApi> mapOfMapMyEnumMyApi() {
+    final Map<MyEnum, MyApi> map = new HashMap<>(3);
+    map.put(MyEnum.ONE, Checks.checkProvisionNotNull(TestModule.INSTANCE.one()));
+    map.put(MyEnum.TWO, Checks.checkProvisionNotNull(TestModule.INSTANCE.two()));
+    map.put(MyEnum.THREE, Checks.checkProvisionNotNull(TestModule.INSTANCE.three()));
+    return map;
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$TestComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

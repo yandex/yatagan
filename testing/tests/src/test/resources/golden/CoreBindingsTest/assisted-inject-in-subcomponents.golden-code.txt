@@ -1,0 +1,170 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$RootComponent.java
+package test;
+
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$RootComponent implements RootComponent {
+  private Object mClassBInstance;
+
+  final Dep mDep;
+
+  final RootModule mRootModule;
+
+  Yatagan$RootComponent(Dep pDep) {
+    this.mDep = Checks.checkInputNotNull(pDep);
+    this.mRootModule = new RootModule();
+  }
+
+  @Override
+  public SubComponent.Creator getSub() {
+    return new SubComponentImpl.ComponentFactoryImpl(this);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.cacheClassB();
+      default: throw new AssertionError();
+    }
+  }
+
+  ClassB cacheClassB() {
+    Object local = this.mClassBInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ClassB();
+      this.mClassBInstance = local;
+    }
+    return (ClassB) local;
+  }
+
+  public static RootComponent.Creator builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponentImpl implements SubComponent {
+    private Object mClassAInstance;
+
+    final Yatagan$RootComponent mRootComponent;
+
+    SubComponentImpl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public FooFactory getFactory() {
+      return this.new FooFactoryImpl();
+    }
+
+    Object switch$$access(int slot) {
+      switch(slot) {
+        case 0: return this.cacheClassA();
+        case 1: return new ClassC();
+        default: throw new AssertionError();
+      }
+    }
+
+    ClassA cacheClassA() {
+      Object local = this.mClassAInstance;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = new ClassA(new Yatagan$RootComponent.ProviderImpl(this.mRootComponent, 0), new CachingProviderImpl(this, 1));
+        this.mClassAInstance = local;
+      }
+      return (ClassA) local;
+    }
+
+    static final class ProviderImpl implements Lazy {
+      private final SubComponentImpl mDelegate;
+
+      private final int mIndex;
+
+      ProviderImpl(SubComponentImpl delegate, int index) {
+        this.mDelegate = delegate;
+        this.mIndex = index;
+      }
+
+      @Override
+      public Object get() {
+        return this.mDelegate.switch$$access(this.mIndex);
+      }
+    }
+
+    private static final class CachingProviderImpl implements Lazy {
+      private final SubComponentImpl mDelegate;
+
+      private final int mIndex;
+
+      private Object mValue;
+
+      CachingProviderImpl(SubComponentImpl factory, int index) {
+        mDelegate = factory;
+        mIndex = index;
+      }
+
+      @Override
+      public Object get() {
+        Object local = mValue;
+        if (local == null) {
+          ThreadAssertions.assertThreadAccess();
+          local = mDelegate.switch$$access(mIndex);
+          mValue = local;
+        }
+        return local;
+      }
+    }
+
+    private final class FooFactoryImpl implements FooFactory {
+      @Override
+      public Foo create(int number) {
+        return new Foo(new ProviderImpl(SubComponentImpl.this, 0), SubComponentImpl.this.mRootComponent.mDep, SubComponentImpl.this.mRootComponent.mDep.getInput(), Checks.checkProvisionNotNull(SubComponentImpl.this.mRootComponent.mRootModule.provide(SubComponentImpl.this.mRootComponent.mDep)), number);
+      }
+    }
+
+    private static final class ComponentFactoryImpl implements SubComponent.Creator {
+      Yatagan$RootComponent fRootComponent;
+
+      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+        this.fRootComponent = fRootComponent;
+      }
+
+      @Override
+      public SubComponent create() {
+        return new SubComponentImpl(this.fRootComponent);
+      }
+    }
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$RootComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$RootComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements RootComponent.Creator {
+    @Override
+    public RootComponent create(Dep dep) {
+      return new Yatagan$RootComponent(dep);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

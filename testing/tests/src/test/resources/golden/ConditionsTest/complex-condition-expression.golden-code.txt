@@ -1,0 +1,158 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent implements MyComponent {
+  final boolean mFeaturesFooBar = Features.fooBar();
+
+  private byte mFeaturesIsEnabledB;
+
+  private byte mFeaturesGetFeatureC_isEnabled;
+
+  private byte mSomeClassConditions_getSomeCondition1;
+
+  private byte mSomeClassSomeCondition2;
+
+  private byte mSomeClassGetSomeCondition3;
+
+  private byte mSomeClassGetSomeCondition4;
+
+  private byte mSomeClassSomeCondition5;
+
+  private byte mSomeClassSomeCondition6;
+
+  private byte mSomeClassConditions_getSomeCondition6;
+
+  private Yatagan$MyComponent() {
+  }
+
+  @Override
+  public Optional<ClassA> getA() {
+    return this.optOfClassA();
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.accessClassA();
+      default: throw new AssertionError();
+    }
+  }
+
+  ClassA accessClassA() {
+    return new ClassA(new ClassB(new ProviderImpl(this, 0)));
+  }
+
+  Optional optOfClassA() {
+    return this.mFeaturesFooBar && this.featuresIsEnabledB() && (this.featuresGetFeatureC_isEnabled() || this.featuresIsEnabledB() || this.someClassConditions_getSomeCondition1() || this.someClassSomeCondition2() || this.someClassGetSomeCondition3() || this.someClassGetSomeCondition4() || this.someClassSomeCondition5() || this.someClassSomeCondition6() || this.someClassConditions_getSomeCondition6()) ? Optional.of(this.accessClassA()) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$MyComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  boolean featuresIsEnabledB() {
+    if (this.mFeaturesIsEnabledB == 0x0) {
+      this.mFeaturesIsEnabledB = (byte) ((Features.isEnabledB()) ? 0x1 : 0x2);
+    }
+    return this.mFeaturesIsEnabledB == 0x1;
+  }
+
+  boolean featuresGetFeatureC_isEnabled() {
+    if (this.mFeaturesGetFeatureC_isEnabled == 0x0) {
+      this.mFeaturesGetFeatureC_isEnabled = (byte) ((Features.getFeatureC().isEnabled()) ? 0x1 : 0x2);
+    }
+    return this.mFeaturesGetFeatureC_isEnabled == 0x1;
+  }
+
+  boolean someClassConditions_getSomeCondition1() {
+    if (this.mSomeClassConditions_getSomeCondition1 == 0x0) {
+      this.mSomeClassConditions_getSomeCondition1 = (byte) ((SomeClass.Conditions.getSomeCondition1()) ? 0x1 : 0x2);
+    }
+    return this.mSomeClassConditions_getSomeCondition1 == 0x1;
+  }
+
+  boolean someClassSomeCondition2() {
+    if (this.mSomeClassSomeCondition2 == 0x0) {
+      this.mSomeClassSomeCondition2 = (byte) ((SomeClass.someCondition2) ? 0x1 : 0x2);
+    }
+    return this.mSomeClassSomeCondition2 == 0x1;
+  }
+
+  boolean someClassGetSomeCondition3() {
+    if (this.mSomeClassGetSomeCondition3 == 0x0) {
+      this.mSomeClassGetSomeCondition3 = (byte) ((SomeClass.getSomeCondition3()) ? 0x1 : 0x2);
+    }
+    return this.mSomeClassGetSomeCondition3 == 0x1;
+  }
+
+  boolean someClassGetSomeCondition4() {
+    if (this.mSomeClassGetSomeCondition4 == 0x0) {
+      this.mSomeClassGetSomeCondition4 = (byte) ((SomeClass.getSomeCondition4()) ? 0x1 : 0x2);
+    }
+    return this.mSomeClassGetSomeCondition4 == 0x1;
+  }
+
+  boolean someClassSomeCondition5() {
+    if (this.mSomeClassSomeCondition5 == 0x0) {
+      this.mSomeClassSomeCondition5 = (byte) ((SomeClass.someCondition5()) ? 0x1 : 0x2);
+    }
+    return this.mSomeClassSomeCondition5 == 0x1;
+  }
+
+  boolean someClassSomeCondition6() {
+    if (this.mSomeClassSomeCondition6 == 0x0) {
+      this.mSomeClassSomeCondition6 = (byte) ((SomeClass.someCondition6) ? 0x1 : 0x2);
+    }
+    return this.mSomeClassSomeCondition6 == 0x1;
+  }
+
+  boolean someClassConditions_getSomeCondition6() {
+    if (this.mSomeClassConditions_getSomeCondition6 == 0x0) {
+      this.mSomeClassConditions_getSomeCondition6 = (byte) ((SomeClass.Conditions.getSomeCondition6()) ? 0x1 : 0x2);
+    }
+    return this.mSomeClassConditions_getSomeCondition6 == 0x1;
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$MyComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$MyComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$MyComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MyComponent create() {
+      return new Yatagan$MyComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

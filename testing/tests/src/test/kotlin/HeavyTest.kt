@@ -29,8 +29,6 @@ import javax.inject.Provider
 @OptIn(ExperimentalGenerationApi::class)
 class HeavyTest(
     driverProvider: Provider<CompileTestDriverBase>,
-    private val params: GenerationParams,
-    private val name: String,
 ) : CompileTestDriver by driverProvider.get() {
     companion object {
         private val baseParams = GenerationParams(
@@ -59,25 +57,30 @@ class HeavyTest(
         )
 
         @JvmStatic
-        @Parameterized.Parameters(name = "{0} - {2}")
-        fun parameters() = compileTestDrivers().flatMap {
-            listOf(
-                arrayOf(it, baseParams, "Tall & Thin"),
-                arrayOf(it, baseParams.copy(
-                    componentTreeMaxDepth = 1,
-                    totalGraphNodesCount = 600,
-                    totalRootCount = 2,
-                    maxEntryPointsPerComponent = 60,
-                ), "Fat & Flat"),
-            )
-        }
+        @Parameterized.Parameters(name = "{0}")
+        fun parameters() = compileTestDrivers()
     }
 
     @Test
-    fun procedural() {
-        println("Running '$name' heavy test")
+    fun `procedural - Tall & Thin`() {
         generate(
-            params = params,
+            params = baseParams,
+            testMethodName = "test",
+            output = this,
+        )
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `procedural - Fat & Flat`() {
+        generate(
+            params = baseParams.copy(
+                componentTreeMaxDepth = 1,
+                totalGraphNodesCount = 600,
+                totalRootCount = 2,
+                maxEntryPointsPerComponent = 60,
+            ),
             testMethodName = "test",
             output = this,
         )
