@@ -450,6 +450,33 @@ class ConditionsTest(
     }
 
     @Test
+    fun `issue #85 - conditions in component hierarchy with usage gaps`() {
+        includeFromSourceSet(features)
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Conditional(Conditions.FeatureA::class) class ClassA @Inject constructor()
+            @Conditional(Conditions.FeatureA::class) class ClassB @Inject constructor()
+
+            @Component interface RootComponent {
+                val dummy: Optional<ClassA>
+                fun createSub(): SubComponent
+            }
+
+            @Component(isRoot = false) interface SubComponent {
+                fun createSub2(): Sub2Component
+            }
+
+            @Component(isRoot = false) interface Sub2Component {
+                val dummy: Optional<ClassB>
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
     fun `conditional provide - basic case`() {
         includeFromSourceSet(features)
         includeFromSourceSet(flavors)

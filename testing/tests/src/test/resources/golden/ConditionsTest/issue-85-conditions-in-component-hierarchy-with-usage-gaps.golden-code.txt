@@ -1,0 +1,84 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$RootComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$RootComponent implements RootComponent {
+  final boolean mFeaturesFooBar = Features.fooBar();
+
+  private Yatagan$RootComponent() {
+  }
+
+  @Override
+  public SubComponent createSub() {
+    return new SubComponentImpl(this);
+  }
+
+  @Override
+  public Optional<ClassA> getDummy() {
+    return this.optOfClassA();
+  }
+
+  Optional optOfClassA() {
+    return this.mFeaturesFooBar ? Optional.of(new ClassA()) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$RootComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponentImpl implements SubComponent {
+    final Yatagan$RootComponent mRootComponent;
+
+    private SubComponentImpl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public Sub2Component createSub2() {
+      return new Sub2ComponentImpl(this.mRootComponent);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class Sub2ComponentImpl implements Sub2Component {
+      final Yatagan$RootComponent mRootComponent;
+
+      private Sub2ComponentImpl(Yatagan$RootComponent pRootComponent) {
+        this.mRootComponent = pRootComponent;
+      }
+
+      @Override
+      public Optional<ClassB> getDummy() {
+        return this.optOfClassB();
+      }
+
+      Optional optOfClassB() {
+        return this.mRootComponent.mFeaturesFooBar ? Optional.of(new ClassB()) : Optional.empty();
+      }
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$RootComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$RootComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$RootComponent create() {
+      return new Yatagan$RootComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

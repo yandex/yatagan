@@ -238,7 +238,12 @@ internal class BindingGraphImpl(
             val usesAssistedInjectFactories = child.localAssistedInjectFactories.removeAll(localAssistedInjectFactories)
             if (usesConditions || usesAssistedInjectFactories) {
                 // This will never be seen by materialization and that's okay, because no bindings are required here.
-                child.usedParents += this
+
+                // Walk up until `this` adding `this` to used parents.
+                for (graph in child.parentsSequence(includeThis = true)) {
+                    if (graph === this) break
+                    (graph as BindingGraphImpl).usedParents += this
+                }
             }
         }
     }
