@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.bindings
 
+import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
@@ -52,6 +53,11 @@ public interface Binding : BaseBinding {
     public val dependencies: List<NodeDependency>
 
     /**
+     * Binding dependencies on condition models (not all are necessarily from its [conditionScope]).
+     */
+    public val dependenciesOnConditions: List<ConditionModel>
+
+    /**
      * A set of selected [condition model's roots][com.yandex.yatagan.core.model.ConditionModel.root] from
      * [conditionScope].
      *
@@ -73,6 +79,7 @@ public interface Binding : BaseBinding {
         public fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R
         public fun visitMulti(binding: MultiBinding): R
         public fun visitMap(binding: MapBinding): R
+        public fun visitConditionExpressionValue(binding: ConditionExpressionValueBinding): R
         public fun visitEmpty(binding: EmptyBinding): R
     }
 }

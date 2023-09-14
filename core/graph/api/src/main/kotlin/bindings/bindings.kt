@@ -20,6 +20,7 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.ComponentDependencyModel
+import com.yandex.yatagan.core.model.InjectedConditionExpressionModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.lang.Annotation
@@ -146,4 +147,8 @@ public interface ProvisionBinding : Binding {
  */
 public interface SubComponentBinding : Binding {
     public val targetGraph: BindingGraph
+}
+
+public interface ConditionExpressionValueBinding : Binding {
+    public val model: InjectedConditionExpressionModel
 }

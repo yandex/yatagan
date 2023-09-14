@@ -22,6 +22,7 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ComponentDependencyBinding
 import com.yandex.yatagan.core.graph.bindings.ComponentDependencyEntryPointBinding
 import com.yandex.yatagan.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.yatagan.core.graph.bindings.ConditionExpressionValueBinding
 import com.yandex.yatagan.core.graph.bindings.EmptyBinding
 import com.yandex.yatagan.core.graph.bindings.InstanceBinding
 import com.yandex.yatagan.core.graph.bindings.MapBinding
@@ -47,6 +48,7 @@ public abstract class BindingVisitorAdapter<R> : Binding.Visitor<R> {
     override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R = visitDefault()
     override fun visitMulti(binding: MultiBinding): R = visitDefault()
     override fun visitMap(binding: MapBinding): R = visitDefault()
+    override fun visitConditionExpressionValue(binding: ConditionExpressionValueBinding): R = visitDefault()
     override fun visitEmpty(binding: EmptyBinding): R = visitDefault()
 }
 

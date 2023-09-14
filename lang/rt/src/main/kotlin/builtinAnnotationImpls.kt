@@ -30,6 +30,7 @@ import com.yandex.yatagan.IntoList
 import com.yandex.yatagan.IntoSet
 import com.yandex.yatagan.Module
 import com.yandex.yatagan.Provides
+import com.yandex.yatagan.ValueOf
 import com.yandex.yatagan.VariantApi
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
@@ -124,6 +125,13 @@ internal class RtConditionExpressionAnnotationImpl(
         override val value: Type = RtTypeImpl(impl.value.java)
         override val alias: String = impl.alias
     }
+}
+
+internal class RtValueOfAnnotationImpl(
+    impl: ValueOf,
+) : RtAnnotationImplBase<ValueOf>(impl), BuiltinAnnotation.ValueOf {
+    override val value: BuiltinAnnotation.ConditionExpression
+        get() = RtConditionExpressionAnnotationImpl(impl.value)
 }
 
 internal class RtComponentFlavorAnnotationImpl(

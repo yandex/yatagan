@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.core.graph.impl
+package com.yandex.yatagan.core.model
 
 /**
- * Options, customizing graph building behavior in various ways.
+ * Models a `@ValueOf(...) flag: Boolean` kind of [NodeModel]s.
  */
-data class Options(
+public interface InjectedConditionExpressionModel : HasNodeModel {
     /**
-     * Whether to report duplicate aliases as errors instead of warnings.
+     * `null` if invalid.
      */
-    val reportDuplicateAliasesAsErrors: Boolean,
-
-    /**
-     * Whether to generate all conditions with lazy evaluation.
-     */
-    val allConditionsLazy: Boolean,
-)
+    public val expression: ConditionScope.ExpressionScope?
+}

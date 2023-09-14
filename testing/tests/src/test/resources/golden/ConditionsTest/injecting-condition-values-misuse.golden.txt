@@ -1,0 +1,68 @@
+error: Manual bindings with `@ValueOf` qualifier are not allowed.
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.MyModule
+  here: @provides test.MyModule::provideValue(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Missing binding for test.What
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getClassA: test.ClassA
+                            ^-[*1]-----
+  in [1*] inject-constructor test.ClassA(@com.yandex.yatagan.ValueOf(value=@com.yandex.yatagan.ConditionExpression(importAs={}, imports={test.What.class}, value="!getHello")) java.lang.Boolean, + 4 dependencies)
+                                         ^-[*2]-------------------------------------------------------------------------------------------------------------------------------------------------
+  in [2*] injectable condition expression value: java.lang.Boolean = [!test.What.getHello]
+  in its non-static conditions { test.What.getHello }
+                                 ^-[*3]------------
+  here: [3*] <missing>
+             ^~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Qualifier `@ValueOf` is only applicable to boolean dependencies. Got `java.lang.Double` instead.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getClassA: test.ClassA
+                            ^-[*1]-----
+  in [1*] inject-constructor test.ClassA([Provider] @com.yandex.yatagan.ValueOf(value=@com.yandex.yatagan.ConditionExpression(importAs={}, imports={test.Features.class}, value="getFeatureC.isEnabled")) java.lang.Double, + 4 dependencies)
+                                         ^-[*2]---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  here: [2*] injectable condition expression value: java.lang.Double = [test.Features.getFeatureC.isEnabled]
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Qualifier `@ValueOf` is only applicable to boolean dependencies. Got `java.lang.Integer` instead.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getClassA: test.ClassA
+                            ^-[*1]-----
+  in [1*] inject-constructor test.ClassA(@com.yandex.yatagan.ValueOf(value=@com.yandex.yatagan.ConditionExpression(importAs={}, imports={test.Conditions.FeatureA.class}, value="@FeatureA")) java.lang.Integer, + 4 dependencies)
+                                         ^-[*2]----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  here: [2*] injectable condition expression value: java.lang.Integer = [test.Features.fooBar]
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Qualifier `@ValueOf` is only applicable to boolean dependencies. Got `java.lang.Object` instead.
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getClassA: test.ClassA
+                            ^-[*1]-----
+  in [1*] inject-constructor test.ClassA([Lazy] @com.yandex.yatagan.ValueOf(value=@com.yandex.yatagan.ConditionExpression(importAs={}, imports={test.Features.class}, value="isEnabledB | fooBar")) java.lang.Object, + 4 dependencies)
+                                         ^-[*2]---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  here: [2*] injectable condition expression value: java.lang.Object = [test.Features.isEnabledB || test.Features.fooBar]
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+" | fooBar"
+  ^~~~ Unexpected '|'. Expected one of: '(', '!', <variable>
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getClassA: test.ClassA
+                            ^-[*1]-----
+  in [1*] inject-constructor test.ClassA(@com.yandex.yatagan.ValueOf(value=@com.yandex.yatagan.ConditionExpression(importAs={}, imports={test.Features.class}, value=" | fooBar")) java.lang.Boolean, + 4 dependencies)
+                                         ^-[*2]-----------------------------------------------------------------------------------------------------------------------------------------------------
+  here: [2*] injectable condition expression value: java.lang.Boolean = <invalid-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -27,6 +27,7 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ComponentDependencyBinding
 import com.yandex.yatagan.core.graph.bindings.ComponentDependencyEntryPointBinding
 import com.yandex.yatagan.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.yatagan.core.graph.bindings.ConditionExpressionValueBinding
 import com.yandex.yatagan.core.graph.bindings.EmptyBinding
 import com.yandex.yatagan.core.graph.bindings.InstanceBinding
 import com.yandex.yatagan.core.graph.bindings.MapBinding
@@ -332,6 +333,14 @@ internal class RuntimeComponent(
                 }
             }
         }
+    }
+
+    override fun visitConditionExpressionValue(binding: ConditionExpressionValueBinding): Any {
+        val expression = binding.model.expression ?: run {
+            // invalid model -> UB; we return `false` by default.
+            return false
+        }
+        return evaluateConditionScope(expression)
     }
 
     private class MemberEvaluator(private val instance: Any?) : Member.Visitor<Any?> {

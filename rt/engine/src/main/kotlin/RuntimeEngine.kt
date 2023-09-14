@@ -57,6 +57,7 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
         val isStrictMode: Boolean
         val logger: Logger?
         val reportDuplicateAliasesAsErrors: Boolean
+        val allConditionsLazy: Boolean
     }
 
     fun destroy() {
@@ -166,6 +167,7 @@ class RuntimeEngine<P : RuntimeEngine.Params>(
 
     private fun createGraphOptions() = Options(
         reportDuplicateAliasesAsErrors = params.reportDuplicateAliasesAsErrors,
+        allConditionsLazy = params.allConditionsLazy,
     )
 
     private companion object {
