@@ -1,0 +1,13 @@
+error: Missing binding for test.Api2
+NOTE: No known way to infer the binding
+Encountered:
+  in graph for root-component test.RootComponent
+  in graph for component test.SubComponent2
+  in entry-point getApi: test.Api
+                         ^-[*1]--
+  in [1*] alias test.MyModule2::api(test.Impl)
+                                    ^-[*2]---
+  in [2*] inject-constructor test.Impl(test.Api2)
+                                       ^-[*3]---
+  here: [3*] <missing>
+             ^~~~~~~~~

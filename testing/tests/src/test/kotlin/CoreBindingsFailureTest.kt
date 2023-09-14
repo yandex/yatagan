@@ -909,4 +909,38 @@ class CoreBindingsFailureTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `case for #88`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+            interface Api
+            interface Api2
+            class Impl @Inject constructor(api2: Api2): Api
+            class Impl2 @Inject constructor(): Api2
+
+            @Module interface MyModule1 {
+                @Binds fun api(i: Impl): Api
+                @Binds fun api2(i: Impl2): Api2
+            }
+            @Module interface MyModule2 {
+                @Binds fun api(i: Impl): Api
+            }
+
+            @Component interface RootComponent {
+                fun createSub2(): SubComponent2
+                fun createSub1(): SubComponent1
+            }
+
+            @Component(isRoot = false, modules = [MyModule1::class]) interface SubComponent1 {
+                val api: Api
+            }
+            @Component(isRoot = false, modules = [MyModule2::class]) interface SubComponent2 {
+                val api: Api
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }
