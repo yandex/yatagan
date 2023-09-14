@@ -39,17 +39,6 @@ internal class AliasBindingImpl(
 
     override val source get() = impl.sources.single()
 
-    override fun equals(other: Any?): Boolean {
-        return this === other || (other is AliasBinding &&
-                source == other.source && target == other.target)
-    }
-
-    override fun hashCode(): Int {
-        var result = target.hashCode()
-        result = 31 * result + source.hashCode()
-        return result
-    }
-
     override fun toString(childContext: MayBeInvalid?) = bindingModelRepresentation(
         modelClassName = "alias",
         childContext = childContext,

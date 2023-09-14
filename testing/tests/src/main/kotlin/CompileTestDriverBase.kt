@@ -163,24 +163,30 @@ abstract class CompileTestDriverBase private constructor(
                 System.err.println(messageLog)
                 Assert.assertTrue("Compilation failed, yet expected output is blank", goldenOutput.isNotBlank())
             }
+
+            generatedFilesSubDir()?.let {
+                val goldenFiles = GoldenSourceRegex.findAll(
+                        javaClass.getResourceAsStream("/$goldenCodeResourcePath")
+                                ?.bufferedReader()?.readText() ?: ""
+                ).associateByTo(
+                        destination = mutableMapOf(),
+                        keySelector = { it.groupValues[1] },
+                        valueTransform = { it.groupValues[2].trim() },
+                )
+
+                for (generatedFile in generatedFiles) {
+                    val goldenContents = goldenFiles.remove(generatedFile.relativePath) ?: "<unexpected file>"
+                    Assert.assertEquals("Generated file '${generatedFile.relativePath}' doesn't match the golden",
+                            goldenContents, generatedFile.contents.trim())
+                }
+            }
         } finally {
             generatedFilesSubDir()?.let { generatedFilesSubDir ->
-                val goldenFiles = GoldenSourceRegex.findAll(
-                    javaClass.getResourceAsStream("/$goldenCodeResourcePath")
-                        ?.bufferedReader()?.readText() ?: ""
-                ).associateByTo(
-                    destination = mutableMapOf(),
-                    keySelector = { it.groupValues[1] },
-                    valueTransform = { it.groupValues[2].trim() },
-                )
                 for (generatedFile in generatedFiles) {
                     val fileUrl = "file://" + workingDir
                         .resolve(generatedFilesSubDir)
                         .resolve(generatedFile.relativePath).absolutePath
                     println("Generated $fileUrl")
-                    val goldenContents = goldenFiles.remove(generatedFile.relativePath) ?: "<unexpected file>"
-                    Assert.assertEquals("Generated file '${generatedFile.relativePath}' doesn't match the golden",
-                        goldenContents, generatedFile.contents.trim())
                 }
             }
         }

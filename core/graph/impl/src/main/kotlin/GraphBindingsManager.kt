@@ -336,7 +336,9 @@ internal class GraphBindingsManager(
             }
 
             if (bindings.size > 1) {
-                val distinct = bindings.toSet()
+                val distinct = bindings
+                        .map { it.maybeUnwrapSyntheticAlias() }
+                        .distinctBy { it.accept(AliasEquivalenceSelector) }
                 if (distinct.size > 1) {
 
                     // We tolerate multibinding duplicates, because of the "extends" behavior.
@@ -478,6 +480,14 @@ internal class GraphBindingsManager(
         val keyType: Type,
         val valueType: NodeModel,
     )
+
+    private object AliasEquivalenceSelector : BaseBinding.Visitor<Any> {
+        override fun visitAlias(alias: AliasBinding): Pair<NodeModel, NodeModel> {
+            // We compare aliases only as a pair {source; target} in terms of duplicate check.
+            return alias.source to alias.target
+        }
+        override fun visitBinding(binding: Binding) = binding
+    }
 
     companion object Key : Extensible.Key<GraphBindingsManager> {
         override val keyType get() = GraphBindingsManager::class.java
