@@ -16,12 +16,12 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
-import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.codegen.poetry.Access
+import com.yandex.yatagan.codegen.poetry.ClassName
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
-import com.yandex.yatagan.codegen.poetry.buildClass
-import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.codegen.poetry.nestedClass
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
@@ -29,7 +29,6 @@ import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.lang.model.element.Modifier
 
 @Singleton
 internal class AssistedInjectFactoryGenerator @Inject constructor(
@@ -55,16 +54,17 @@ internal class AssistedInjectFactoryGenerator @Inject constructor(
     ) {
         val localImplName = modelToImpl[binding.model]
         if (localImplName != null) {
-            with(builder) {
-                +"%L.new %T()".formatCode(
-                    componentInstance(
+            builder.appendObjectCreation(
+                type = localImplName,
+                receiver = {
+                    appendComponentInstance(
+                        builder = this,
                         inside = inside,
                         graph = thisGraph,
                         isInsideInnerClass = isInsideInnerClass,
-                    ),
-                    localImplName,
-                )
-            }
+                    )
+                }
+            )
         } else {
             thisGraph.parent!![GeneratorComponent].assistedInjectFactoryGenerator
                 .generateCreation(
@@ -78,37 +78,41 @@ internal class AssistedInjectFactoryGenerator @Inject constructor(
 
     override fun generate(builder: TypeSpecBuilder) {
         for ((model, implName) in modelToImpl) {
-            builder.nestedType {
-                buildClass(implName) {
-                    modifiers(Modifier.PRIVATE, Modifier.FINAL)  // Non-static
-                    implements(model.typeName())
+            builder.nestedClass(
+                name = implName,
+                isInner = true,
+                access = Access.Private,
+            ) {
+                implements(TypeName.Inferred(model.type))
 
-                    model.factoryMethod?.let { factoryMethod ->
-                        overrideMethod(factoryMethod) {
-                            modifiers(Modifier.PUBLIC)
-                            +buildExpression {
-                                +"return new %T(".formatCode(
-                                    model.assistedInjectConstructor?.constructee?.asType()?.typeName() ?: "#error")
+                model.factoryMethod?.let { factoryMethod ->
+                    overrideMethod(factoryMethod) {
+                        code {
+                            appendReturnStatement {
                                 val factoryParameters = factoryMethod.parameters.toList()
-                                join(model.assistedConstructorParameters) { parameter ->
-                                    when (parameter) {
-                                        is AssistedInjectFactoryModel.Parameter.Assisted -> {
-                                            val index = model.assistedFactoryParameters.indexOf(parameter)
-                                            val name = if (index >= 0) factoryParameters[index].name else "#error"
-                                            +"%N".formatCode(name)
-                                        }
-                                        is AssistedInjectFactoryModel.Parameter.Injected -> {
-                                            val (node, kind) = parameter.dependency
-                                            thisGraph.resolveBinding(node).generateAccess(
-                                                isInsideInnerClass = true,
-                                                builder = this,
-                                                inside = thisGraph,
-                                                kind = kind,
-                                            )
+                                appendObjectCreation(
+                                    TypeName.Inferred(model.assistedInjectConstructor!!.constructee.asType()),
+                                    argumentCount = model.assistedConstructorParameters.size,
+                                    argument = {
+                                        when (val parameter = model.assistedConstructorParameters[it]) {
+                                            is AssistedInjectFactoryModel.Parameter.Assisted -> {
+                                                val index = model.assistedFactoryParameters.indexOf(parameter)
+                                                val name = if (index >= 0) factoryParameters[index].name else "#error"
+                                                appendName(name)
+                                            }
+
+                                            is AssistedInjectFactoryModel.Parameter.Injected -> {
+                                                val (node, kind) = parameter.dependency
+                                                thisGraph.resolveBinding(node).generateAccess(
+                                                    isInsideInnerClass = true,
+                                                    builder = this,
+                                                    inside = thisGraph,
+                                                    kind = kind,
+                                                )
+                                            }
                                         }
                                     }
-                                }
-                                +")"
+                                )
                             }
                         }
                     }

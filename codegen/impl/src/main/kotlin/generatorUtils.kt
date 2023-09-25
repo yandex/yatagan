@@ -16,11 +16,10 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.CodeBlock
+import com.yandex.yatagan.codegen.poetry.ClassName
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
-import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.codegen.poetry.nestedClass
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.ConditionScope
@@ -28,31 +27,32 @@ import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.lang.compiled.ClassNameModel
 import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 
-internal fun componentInstance(
+internal fun appendComponentInstance(
+    builder: ExpressionBuilder,
     inside: BindingGraph,
     graph: BindingGraph,
     isInsideInnerClass: Boolean,
-): CodeBlock {
-    return buildExpression {
-        if (isInsideInnerClass) {
-            +"%T.this".formatCode(inside[GeneratorComponent].implementationClassName)
-        } else {
-            +"this"
-        }
-        if (inside != graph) {
-            +".%N".formatCode(
-                inside[GeneratorComponent].componentFactoryGenerator.fieldNameFor(graph = graph)
-            )
-        }
+) {
+    if (isInsideInnerClass) {
+        builder.appendExplicitThis(inside[GeneratorComponent].implementationClassName)
+    } else {
+        builder.append("this")
+    }
+    if (inside != graph) {
+        builder.append(".").appendName(
+            inside[GeneratorComponent].componentFactoryGenerator.fieldNameFor(graph = graph)
+        )
     }
 }
 
-internal fun componentForBinding(
+internal fun appendComponentForBinding(
+    builder: ExpressionBuilder,
     inside: BindingGraph,
     binding: Binding,
     isInsideInnerClass: Boolean,
-): CodeBlock {
-    return componentInstance(
+) {
+    appendComponentInstance(
+        builder = builder,
         inside = inside,
         graph = binding.owner,
         isInsideInnerClass = isInsideInnerClass,
@@ -73,28 +73,29 @@ internal fun Binding.generateAccess(
     )
 }
 
-internal inline fun CodeBuilder.generateUnderCondition(
+internal fun generateUnderCondition(
+    builder: CodeBuilder,
     binding: Binding,
     inside: BindingGraph,
     isInsideInnerClass: Boolean,
     underConditionBlock: CodeBuilder.() -> Unit,
 ) {
     when(val conditionScope = binding.conditionScope) {
-        ConditionScope.Always -> underConditionBlock()
+        ConditionScope.Always -> builder.underConditionBlock()
         ConditionScope.Never -> {}
         is ConditionScope.ExpressionScope -> {
-            val expression = buildExpression {
-                val gen = binding.owner[GeneratorComponent].conditionGenerator
-                gen.expression(
-                    builder = this,
-                    conditionScope = conditionScope,
-                    inside = inside,
-                    isInsideInnerClass = isInsideInnerClass,
-                )
-            }
-            controlFlow("if (%L) ".formatCode(expression)) {
-                underConditionBlock()
-            }
+            builder.appendIfControlFlow(
+                condition = {
+                    val gen = binding.owner[GeneratorComponent].conditionGenerator
+                    gen.expression(
+                        builder = this,
+                        conditionScope = conditionScope,
+                        inside = inside,
+                        isInsideInnerClass = isInsideInnerClass,
+                    )
+                },
+                ifTrue = underConditionBlock,
+            )
         }
     }
 }
@@ -108,7 +109,10 @@ internal fun formatImplementationClassName(graph: BindingGraph): ClassName {
                 else -> throw AssertionError("Unexpected component name: $it")
             }
             // Keep name mangling in sync with loader!
-            ClassName.get(name.packageName, "Yatagan$" + name.simpleNames.joinToString(separator = "$"))
+            ClassName(
+                packageName = name.packageName,
+                simpleNames = listOf("Yatagan$" + name.simpleNames.joinToString(separator = "$")),
+            )
         }
         else -> with(parent[GeneratorComponent]) {
             implementationClassName.nestedClass(

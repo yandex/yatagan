@@ -16,14 +16,14 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
+import com.yandex.yatagan.codegen.poetry.Access
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
-import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.lang.model.element.Modifier
+import kotlin.math.min
 
 @Singleton
 internal class SlotSwitchingGenerator @Inject constructor(
@@ -54,60 +54,89 @@ internal class SlotSwitchingGenerator @Inject constructor(
 
     override fun generate(builder: TypeSpecBuilder) {
         if (!isUsed) return
-        builder.method(FactoryMethodName) {
-            modifiers(/*package-private*/)
-            returnType(ClassName.OBJECT)
-            parameter(ClassName.INT, "slot")
+        builder.method(
+            name = FactoryMethodName,
+            access = Access.Internal,
+        ) {
+            returnType(TypeName.AnyObject)
+            parameter(TypeName.Int, "slot")
             if (maxSlotsPerSwitch > 1 && bindings.size > maxSlotsPerSwitch) {
                 // Strategy with two-level-nested switches
 
                 val outerSlotsCount = bindings.size / maxSlotsPerSwitch
-                controlFlow("switch(slot / $maxSlotsPerSwitch)") {
-                    for(outerSlot in 0 .. outerSlotsCount) {
-                        val nestedFactoryName = "$FactoryMethodName\$$outerSlot"
-                        builder.method(nestedFactoryName) {
-                            modifiers(Modifier.PRIVATE)
-                            returnType(ClassName.OBJECT)
-                            parameter(ClassName.INT, "slot")
-                            controlFlow("switch(slot)") {
-                                val startIndex = outerSlot * maxSlotsPerSwitch
-                                var nestedSlot = 0
-                                while((startIndex + nestedSlot) < bindings.size && nestedSlot < maxSlotsPerSwitch) {
-                                    val binding = bindings[startIndex + nestedSlot]
-                                    +buildExpression {
-                                        +"case $nestedSlot: return "
+
+                for(outerSlot in 0 .. outerSlotsCount) {
+                    builder.method(
+                        name = "$FactoryMethodName\$$outerSlot",
+                        access = Access.Private,
+                    ) {
+                        returnType(TypeName.AnyObject)
+                        parameter(TypeName.Int, "slot")
+                        code {
+                            val startIndex = outerSlot * maxSlotsPerSwitch
+                            val nestedSlotsCount = min(bindings.size - startIndex, maxSlotsPerSwitch)
+                            appendSwitchingControlFlow(
+                                subject = { append("slot") },
+                                numberOfCases = nestedSlotsCount,
+                                caseValue = { append(it.toString()) },
+                                caseBlock = {
+                                    val binding = bindings[startIndex + it]
+                                    appendReturnStatement {
                                         binding.generateAccess(
                                             builder = this,
                                             inside = thisGraph,
                                             isInsideInnerClass = false,
                                         )
                                     }
-                                    ++nestedSlot
+                                },
+                                defaultCaseBlock = {
+                                    appendStatement { append("throw ").appendObjectCreation(TypeName.AssertionError) }
                                 }
-                                +"default: throw new %T()".formatCode(Names.AssertionError)
-                            }
-                        }
-                        +buildExpression {
-                            +"case $outerSlot: return %N(slot %L 100)".formatCode(nestedFactoryName, "%")
+                            )
                         }
                     }
-                    +"default: throw new %T()".formatCode(Names.AssertionError)
+                }
+
+                code {
+                    appendSwitchingControlFlow(
+                        subject = { append("slot / $maxSlotsPerSwitch") },
+                        numberOfCases = outerSlotsCount + 1,
+                        caseValue = { outerSlot ->
+                            append(outerSlot.toString())
+                        },
+                        caseBlock = { outerSlot ->
+                            appendReturnStatement {
+                                appendName("$FactoryMethodName\$$outerSlot")
+                                    .append("(slot % 100)")
+                            }
+                        },
+                        defaultCaseBlock = {
+                            appendStatement { append("throw ").appendObjectCreation(TypeName.AssertionError) }
+                        },
+                    )
                 }
             } else {
                 // Single switch statement
 
-                controlFlow("switch(slot)") {
-                    bindings.forEachIndexed { slot, binding ->
-                        +buildExpression {
-                            +"case $slot: return "
-                            binding.generateAccess(
-                                builder = this,
-                                inside = thisGraph,
-                                isInsideInnerClass = false,
-                            )
-                        }
-                    }
-                    +"default: throw new %T()".formatCode(Names.AssertionError)
+                code {
+                    appendSwitchingControlFlow(
+                        subject = { append("slot") },
+                        numberOfCases = bindings.size,
+                        caseValue = { append(it.toString()) },
+                        caseBlock = {
+                            val binding = bindings[it]
+                            appendReturnStatement {
+                                binding.generateAccess(
+                                    builder = this,
+                                    inside = thisGraph,
+                                    isInsideInnerClass = false,
+                                )
+                            }
+                        },
+                        defaultCaseBlock = {
+                            appendStatement { append("throw ").appendObjectCreation(TypeName.AssertionError) }
+                        },
+                    )
                 }
             }
         }

@@ -16,17 +16,14 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
+import com.yandex.yatagan.codegen.poetry.Access
+import com.yandex.yatagan.codegen.poetry.ClassName
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
-import com.yandex.yatagan.codegen.poetry.buildClass
+import com.yandex.yatagan.codegen.poetry.nestedClass
 import com.yandex.yatagan.core.graph.BindingGraph
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.lang.model.element.Modifier.FINAL
-import javax.lang.model.element.Modifier.PRIVATE
-import javax.lang.model.element.Modifier.PUBLIC
-import javax.lang.model.element.Modifier.STATIC
-import javax.lang.model.element.Modifier.VOLATILE
 
 @Singleton
 internal class ScopedProviderGenerator @Inject constructor(
@@ -41,48 +38,95 @@ internal class ScopedProviderGenerator @Inject constructor(
 
     override fun generate(builder: TypeSpecBuilder) {
         if (!isUsed) return
-        builder.nestedType {
-            buildClass(name) {
-                implements(Names.Lazy)
-                modifiers(PRIVATE, STATIC, FINAL)
-                field(componentImplName, "mDelegate") { modifiers(PRIVATE, FINAL) }
-                field(ClassName.INT, "mIndex") { modifiers(PRIVATE, FINAL) }
-                field(ClassName.OBJECT, "mValue") {
-                    modifiers(PRIVATE)
-                    if (useDoubleChecking) {
-                        modifiers(VOLATILE)
-                    }
+        builder.nestedClass(
+            name = name,
+            access = Access.Private,
+            isInner = false,
+        ) {
+            implements(TypeName.Lazy)
+            field(
+                type = componentImplName,
+                name = "mDelegate",
+                access = Access.Private,
+                isMutable = false,
+            ) {}
+            field(
+                type = TypeName.Int,
+                name = "mIndex",
+                access = Access.Private,
+                isMutable = false,
+            ) {}
+            field(
+                type = TypeName.Nullable(TypeName.AnyObject),
+                name = "mValue",
+                access = Access.Private,
+                isMutable = true,
+            ) {
+                if (useDoubleChecking) {
+                    volatile()
                 }
-                constructor {
-                    parameter(componentImplName, "factory")
-                    parameter(ClassName.INT, "index")
-                    +"mDelegate = factory"
-                    +"mIndex = index"
-                }
+            }
 
-                method("get") {
-                    modifiers(PUBLIC)
-                    annotation<Override>()
-                    returnType(ClassName.OBJECT)
-                    +"%T local = mValue".formatCode(ClassName.OBJECT)
-                    controlFlow("if (local == null)") {
-                        if (useDoubleChecking) {
-                            controlFlow("synchronized (this)") {
-                                +"local = mValue"
-                                controlFlow("if (local == null)") {
-                                    +"local = mDelegate.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
-                                    +"mValue = local"
+            primaryConstructor(
+                access = Access.Internal,
+            ) {
+                parameter(componentImplName, "factory")
+                parameter(TypeName.Int, "index")
+                code {
+                    appendStatement { append("mDelegate = factory") }
+                    appendStatement { append("mIndex = index") }
+                }
+            }
+
+            method(
+                name = "get",
+                access = Access.Public,
+            ) {
+                manualOverride()
+                returnType(TypeName.AnyObject)
+                code {
+                    appendVariableDeclaration(
+                        type = TypeName.Nullable(TypeName.AnyObject),
+                        name = "local",
+                        mutable = true,
+                        initializer = { append("mValue") }
+                    )
+                    appendIfControlFlow(
+                        condition = { append("local == null") },
+                        ifTrue = {
+                            if (useDoubleChecking) {
+                                appendSynchronizedBlock(
+                                    lock = { append("this") },
+                                ) {
+                                    appendStatement { append("local = mValue") }
+                                    appendIfControlFlow(
+                                        condition = { append("local == null") },
+                                        ifTrue = {
+                                            appendStatement {
+                                                append("local = mDelegate.")
+                                                    .appendName(SlotSwitchingGenerator.FactoryMethodName)
+                                                    .append("(mIndex)")
+                                            }
+                                            appendStatement { append("mValue = local") }
+                                        },
+                                    )
                                 }
+                            } else {
+                                if (options.enableThreadChecks) {
+                                    appendStatement {
+                                        appendType(TypeName.ThreadAssertions).append(".assertThreadAccess()")
+                                    }
+                                }
+                                appendStatement {
+                                    append("local = mDelegate.")
+                                        .appendName(SlotSwitchingGenerator.FactoryMethodName)
+                                        .append("(mIndex)")
+                                }
+                                appendStatement { append("mValue = local") }
                             }
-                        } else {
-                            if (options.enableThreadChecks) {
-                                +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
-                            }
-                            +"local = mDelegate.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
-                            +"mValue = local"
                         }
-                    }
-                    +"return local"
+                    )
+                    appendReturnStatement { append("local") }
                 }
             }
         }

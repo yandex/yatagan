@@ -16,21 +16,17 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.TypeName
-import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.codegen.poetry.Access
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
-import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.BindingGraph.LiteralUsage
 import com.yandex.yatagan.core.model.BooleanExpression
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
-import com.yandex.yatagan.lang.Method
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.lang.model.element.Modifier.FINAL
-import javax.lang.model.element.Modifier.PRIVATE
 
 @Singleton
 internal class ConditionGenerator @Inject constructor(
@@ -114,8 +110,12 @@ internal class ConditionGenerator @Inject constructor(
 
         override fun generateInComponent(builder: TypeSpecBuilder) {
             with(builder) {
-                field(TypeName.BOOLEAN, name) {
-                    modifiers(/*package-private*/ FINAL)
+                field(
+                    type = TypeName.Boolean,
+                    access = Access.Internal,
+                    isMutable = false,
+                    name = name,
+                ) {
                     initializer {
                         genEvaluateLiteral(literal = literal, builder = this)
                     }
@@ -124,12 +124,13 @@ internal class ConditionGenerator @Inject constructor(
         }
 
         override fun access(builder: ExpressionBuilder, inside: BindingGraph, isInsideInnerClass: Boolean) {
-            with(builder) {
-                +"%L.%N".formatCode(
-                    componentInstance(inside = inside, graph = thisGraph, isInsideInnerClass = isInsideInnerClass),
-                    name,
-                )
-            }
+            appendComponentInstance(
+                builder = builder,
+                inside = inside,
+                graph = thisGraph,
+                isInsideInnerClass = isInsideInnerClass,
+            )
+            builder.append(".").appendName(name)
         }
     }
 
@@ -150,61 +151,82 @@ internal class ConditionGenerator @Inject constructor(
 
         override fun generateInComponent(builder: TypeSpecBuilder) {
             with(builder) {
-                field(TypeName.BYTE, name) {
-                    modifiers(PRIVATE)  // PRIVATE: accessed only via its accessor.
-                }
-                method(accessorName) {
-                    modifiers(/*package-private*/)
-                    returnType(TypeName.BOOLEAN)
+                field(
+                    type = TypeName.Byte,
+                    access = Access.Internal,
+                    isMutable = true,
+                    name = name,
+                ) {}
+                method(
+                    name = accessorName,
+                    access = Access.Internal,
+                ) {
+                    returnType(TypeName.Boolean)
                     // NOTE: This implementation is not thread safe.
                     // In environments with multiple threads, this can lead to multiple condition computations,
                     //  which we can technically tolerate. The only "bad" case would be if these multiple computations
                     //  yield different results. While this seems pretty critical issue, we, as of now, choose not
                     //  to deal with it here, as code, that uses such overly dynamic conditions that may change value
                     //  in racy way, is presumed "incorrect".
-                    controlFlow("if (this.%N == 0x0)".formatCode(name)) {
-                        val expr = buildExpression {
-                            genEvaluateLiteral(literal = literal, builder = this)
+                    code {
+                        appendIfControlFlow(
+                            condition = { append("this.").append(name).append(" == 0x0") },
+                            ifTrue = {
+                                appendStatement {
+                                    append("this.").appendName(name).append(" = ").appendCast(
+                                        asType = TypeName.Byte,
+                                        expression = {
+                                            // 0x0 - uninitialized (default)
+                                            // 0x1 - true
+                                            // 0x2 - false.
+                                            append("(")
+                                            appendTernaryExpression(
+                                                condition = {
+                                                    genEvaluateLiteral(literal = literal, builder = this)
+                                                },
+                                                ifTrue = { append("0x1") },
+                                                ifFalse = { append("0x2") },
+                                            )
+                                            append(")")
+                                        }
+                                    )
+                                }
+                            },
+                        )
+                        appendReturnStatement {
+                            append("this.").append(name).append(" == 0x1")
                         }
-                        // 0x0 - uninitialized (default)
-                        // 0x1 - true
-                        // 0x2 - false.
-                        +"this.%N = (byte) ((%L) ? 0x1 : 0x2)".formatCode(name, expr)
                     }
-                    +"return this.%N == 0x1".formatCode(name)
                 }
             }
         }
 
         override fun access(builder: ExpressionBuilder, inside: BindingGraph, isInsideInnerClass: Boolean) {
-            with(builder) {
-                +"%L.%N()".formatCode(componentInstance(
-                    inside = inside,
-                    graph = thisGraph,
-                    isInsideInnerClass = isInsideInnerClass,
-                ), accessorName)
-            }
+            appendComponentInstance(
+                builder = builder,
+                inside = inside,
+                graph = thisGraph,
+                isInsideInnerClass = isInsideInnerClass,
+            )
+            builder.append(".").appendName(accessorName).append("()")
         }
     }
 
     private fun genEvaluateLiteral(literal: ConditionModel, builder: ExpressionBuilder) {
-        with(builder) {
-            val rootType = literal.root.type
-            literal.path.asSequence().forEachIndexed { index, member ->
-                if (index == 0) {
-                    if (literal.requiresInstance) {
-                        thisGraph.resolveBinding(literal.root).generateAccess(
-                            builder = this,
-                            inside = thisGraph,
-                            isInsideInnerClass = false,
-                        )
-                    } else {
-                        +"%T".formatCode(rootType.typeName())
-                    }
+        val rootType = literal.root.type
+        literal.path.asSequence().forEachIndexed { index, member ->
+            if (index == 0) {
+                if (literal.requiresInstance) {
+                    thisGraph.resolveBinding(literal.root).generateAccess(
+                        builder = builder,
+                        inside = thisGraph,
+                        isInsideInnerClass = false,
+                    )
+                } else {
+                    builder.appendType(TypeName.Inferred(rootType))
                 }
-                +".%N".formatCode(member.name)
-                if (member is Method) +"()"
             }
+            builder.append(".").appendAccess(member)
         }
     }
 
@@ -223,7 +245,7 @@ internal class ConditionGenerator @Inject constructor(
         }
 
         override fun visitNot(not: BooleanExpression.Not) = with(builder) {
-            +"!"
+            append("!")
             val shouldUseParentheses = not.underlying.accept(object : BooleanExpression.Visitor<Boolean> {
                 override fun visitVariable(variable: BooleanExpression.Variable) = false
                 override fun visitNot(not: BooleanExpression.Not) = false
@@ -231,11 +253,11 @@ internal class ConditionGenerator @Inject constructor(
                 override fun visitOr(or: BooleanExpression.Or) = true
             })
             if (shouldUseParentheses) {
-                +"("
+                append("(")
             }
             not.underlying.accept(this@BooleanExpressionGenerator)
             if (shouldUseParentheses) {
-                +")"
+                append(")")
             }
         }
 
@@ -250,29 +272,27 @@ internal class ConditionGenerator @Inject constructor(
             val shouldUseParansForRhs = and.rhs.accept(parenthesesUsageDetector)
 
             if (shouldUseParansForLhs) {
-                +"("
+                append("(")
             }
             and.lhs.accept(this@BooleanExpressionGenerator)
             if (shouldUseParansForLhs) {
-                +")"
+                append(")")
             }
 
-            +" && "
+            append(" && ")
 
             if (shouldUseParansForRhs) {
-                +"("
+                append("(")
             }
             and.rhs.accept(this@BooleanExpressionGenerator)
             if (shouldUseParansForRhs) {
-                +")"
+                append(")")
             }
         }
 
         override fun visitOr(or: BooleanExpression.Or) {
             or.lhs.accept(this)
-            with(builder) {
-                +" || "
-            }
+            builder.append(" || ")
             or.rhs.accept(this)
         }
     }

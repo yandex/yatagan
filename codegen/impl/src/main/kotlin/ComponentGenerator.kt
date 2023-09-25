@@ -16,12 +16,13 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.TypeSpec
 import com.yandex.yatagan.Yatagan
+import com.yandex.yatagan.codegen.poetry.Access
+import com.yandex.yatagan.codegen.poetry.ClassName
+import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.Poetry
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
-import com.yandex.yatagan.codegen.poetry.buildClass
-import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.component1
 import com.yandex.yatagan.core.graph.component2
@@ -30,14 +31,12 @@ import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.lang.Method
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.lang.model.element.Modifier.FINAL
-import javax.lang.model.element.Modifier.PUBLIC
-import javax.lang.model.element.Modifier.STATIC
 
 @Singleton
 internal class ComponentGenerator @Inject constructor(
     component: GeneratorComponent,
     options: Options,
+    private val poetry: Poetry,
     private val graph: BindingGraph,
     private val contributors: List<Contributor>,
     private val generatedClassName: ClassName,
@@ -58,67 +57,75 @@ internal class ComponentGenerator @Inject constructor(
 
     private val childGenerators: Collection<ComponentGenerator> = graph.children.map { childGraph ->
         Yatagan.builder(GeneratorComponent.Factory::class.java).create(
+            poetry = poetry,
             graph = childGraph,
             options = options,
         ).generator
     }
 
-    fun generate(): TypeSpec = buildClass(generatedClassName) {
-        val componentInterface = graph.model.typeName()
-
-        annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
-        modifiers(FINAL)
-        if (!graph.isRoot) {
-            modifiers(/*package-private*/ STATIC)
-        } else {
-            modifiers(PUBLIC)
+    fun generateRoot(into: Appendable) {
+        check(graph.isRoot)
+        poetry.buildClass(generatedClassName, into = into) {
+            generate()
         }
+    }
+
+    fun TypeSpecBuilder.generate() {
+        val componentInterface = TypeName.Inferred(graph.model.type)
+
+        addSuppressWarningsAnnotation("unchecked", "rawtypes", "NullableProblems")
         implements(componentInterface)
 
         graph.entryPoints.forEach { (getter, dependency) ->
             // TODO: reuse entry-points as accessors to reduce method count.
             overrideMethod(getter) {
-                modifiers(PUBLIC)
-                +buildExpression {
-                    +"return "
-                    graph.resolveBinding(dependency.node).generateAccess(
-                        builder = this,
-                        inside = graph,
-                        kind = dependency.kind,
-                        isInsideInnerClass = false,
-                    )
+                code {
+                    appendReturnStatement {
+                        graph.resolveBinding(dependency.node).generateAccess(
+                            builder = this,
+                            inside = graph,
+                            kind = dependency.kind,
+                            isInsideInnerClass = false,
+                        )
+                    }
                 }
             }
         }
         graph.memberInjectors.forEach { membersInjector ->
             overrideMethod(membersInjector.injector) {
                 val instanceName = membersInjector.injector.parameters.first().name
-                modifiers(PUBLIC)
                 membersInjector.membersToInject.forEach { (member, dependency) ->
                     val binding = graph.resolveBinding(dependency.node)
-                    +buildExpression {
+                    code {
                         member.accept(object : Member.Visitor<Unit> {
                             override fun visitOther(model: Member) = throw AssertionError()
 
                             override fun visitMethod(model: Method) {
-                                +"%N.%N(".formatCode(instanceName, member.name)
-                                binding.generateAccess(
-                                    builder = this@buildExpression,
-                                    inside = graph,
-                                    kind = dependency.kind,
-                                    isInsideInnerClass = false,
+                                appendAssignment(
+                                    receiver = { appendName(instanceName) },
+                                    setter = model,
+                                    value = {
+                                        binding.generateAccess(
+                                            builder = this,
+                                            inside = graph,
+                                            kind = dependency.kind,
+                                            isInsideInnerClass = false,
+                                        )
+                                    },
                                 )
-                                +")"
                             }
 
                             override fun visitField(model: Field) {
-                                +"%N.%N = ".formatCode(instanceName, member.name)
-                                binding.generateAccess(
-                                    builder = this@buildExpression,
-                                    inside = graph,
-                                    kind = dependency.kind,
-                                    isInsideInnerClass = false,
-                                )
+                                appendStatement {
+                                    appendName(instanceName).append(".")
+                                        .appendName(model.name).append(" = ")
+                                    binding.generateAccess(
+                                        builder = this,
+                                        inside = graph,
+                                        kind = dependency.kind,
+                                        isInsideInnerClass = false,
+                                    )
+                                }
                             }
                         })
                     }
@@ -129,30 +136,42 @@ internal class ComponentGenerator @Inject constructor(
         graph.subComponentFactoryMethods.forEach { factory ->
             val createdGraph = factory.createdGraph ?: return@forEach
             overrideMethod(factory.model.factoryMethod) {
-                modifiers(PUBLIC)
-                +buildExpression {
-                    +"return new %T(".formatCode(createdGraph[GeneratorComponent].implementationClassName)
-                    val arguments = buildList {
+                code {
+                    val arguments = buildList<ExpressionBuilder.() -> Unit> {
                         for (parentGraph in createdGraph.usedParents) {
-                            add(componentInstance(
-                                inside = graph,
-                                graph = parentGraph,
-                                isInsideInnerClass = false,
-                            ))
+                            add {
+                                appendComponentInstance(
+                                    builder = this,
+                                    inside = graph,
+                                    graph = parentGraph,
+                                    isInsideInnerClass = false,
+                                )
+                            }
                         }
                         for (input in factory.model.factoryInputs) {
-                            add(buildExpression { +input.name })
+                            add {
+                                appendName(input.name)
+                            }
                         }
                     }
-                    join(arguments) { +it }
-                    +")"
+                    appendReturnStatement {
+                        appendObjectCreation(
+                            type = createdGraph[GeneratorComponent].implementationClassName,
+                            argumentCount = arguments.size,
+                            argument = { arguments[it]() }
+                        )
+                    }
                 }
             }
         }
 
         childGenerators.forEach { childGenerator ->
-            nestedType {
-                childGenerator.generate()
+            nestedClass(
+                name = childGenerator.generatedClassName,
+                access = Access.Internal,
+                isInner = false,
+            ) {
+                with(childGenerator) { generate() }
             }
         }
 

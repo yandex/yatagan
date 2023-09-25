@@ -16,10 +16,9 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
-import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.model.component1
@@ -38,64 +37,79 @@ internal class MapBindingGenerator @Inject constructor(
     bindings = thisGraph.localBindings.keys.filterIsInstance<MapBinding>(),
     accessorPrefix = "mapOf",
 ) {
-    override fun buildAccessorCode(builder: CodeBuilder, binding: MapBinding) = with(builder) {
-        +"final %T map = new %T<>(${binding.contents.size})"
-            .formatCode(binding.target.typeName(), Names.HashMap)
+    override fun buildAccessorCode(builder: CodeBuilder, binding: MapBinding) {
+        val type = binding.target.type
+        val mapType = TypeName.HashMap(
+            keyType = TypeName.Inferred(type.typeArguments[0]),
+            valueType = TypeName.Inferred(type.typeArguments[1]),
+        )
+        builder.appendVariableDeclaration(
+            type = TypeName.Inferred(type),
+            name = "map",
+            mutable = false,
+            initializer = {
+                appendObjectCreation(
+                    type = mapType,
+                    argumentCount = 1,
+                    argument = { append(binding.contents.size.toString()) },
+                )
+            },
+        )
         binding.upstream?.let { upstream ->
-            +buildExpression {
-                +"map.putAll("
+            builder.appendStatement {
+                append("map.putAll(")
                 upstream.generateAccess(
                     builder = this,
                     inside = thisGraph,
                     isInsideInnerClass = false,
                 )
-                +")"
+                append(")")
             }
         }
         binding.contents.forEach { contribution ->
             val (node, kind) = contribution.dependency
             val nodeBinding = thisGraph.resolveBinding(node)
             generateUnderCondition(
+                builder = builder,
                 binding = nodeBinding,
                 inside = thisGraph,
                 isInsideInnerClass = false,
             ) {
-                +buildExpression {
-                    +"map.put("
+                appendStatement {
+                    append("map.put(")
                     contribution.keyValue.accept(AnnotationValueFormatter(this))
-                    +", "
+                    append(", ")
                     nodeBinding.generateAccess(
                         builder = this,
                         inside = thisGraph,
                         kind = kind,
                         isInsideInnerClass = false,
                     )
-                    +")"
+                    append(")")
                 }
             }
         }
-        +"return map"
+        builder.appendReturnStatement { append("map") }
     }
 
     private class AnnotationValueFormatter(
         val builder: ExpressionBuilder,
-    ) : Annotation.Value.Visitor<Unit> {
+    ) : Annotation.Value.Visitor<ExpressionBuilder> {
         override fun visitDefault(value: Any?) = throw AssertionError()
-        override fun visitBoolean(value: Boolean) = with(builder) { +value.toString() }
-        override fun visitByte(value: Byte) = with(builder) { +value.toString() }
-        override fun visitShort(value: Short) = with(builder) { +value.toString() }
-        override fun visitInt(value: Int) = with(builder) { +value.toString() }
-        override fun visitLong(value: Long) = with(builder) { +value.toString() }
-        override fun visitChar(value: Char) = with(builder) { +"'%L'".formatCode(value) }
-        override fun visitFloat(value: Float) = with(builder) { +value.toString() }
-        override fun visitDouble(value: Double) = with(builder) { +value.toString() }
-        override fun visitString(value: String) = with(builder) { +"%S".formatCode(value) }
-        override fun visitType(value: Type) = with(builder) { +"%T.class".formatCode(value.typeName()) }
-        override fun visitAnnotation(value: Annotation) = with(builder) { +"<unsupported>" }
-        override fun visitArray(value: List<Annotation.Value>) = with(builder) { +"<unsupported>" }
-        override fun visitUnresolved() = with(builder) { +"<unresolved>" }
-        override fun visitEnumConstant(enum: Type, constant: String) = with(builder) {
-            +"%T.%N".formatCode(enum.typeName(), constant)
-        }
+        override fun visitBoolean(value: Boolean) = builder.append(value.toString())
+        override fun visitByte(value: Byte) = builder.append(value.toString())
+        override fun visitShort(value: Short) = builder.append(value.toString())
+        override fun visitInt(value: Int) = builder.append(value.toString())
+        override fun visitLong(value: Long) = builder.append(value.toString())
+        override fun visitChar(value: Char) = builder.append("'").append(value.toString()).append("'")
+        override fun visitFloat(value: Float) = builder.append(value.toString())
+        override fun visitDouble(value: Double) = builder.append(value.toString())
+        override fun visitString(value: String) = builder.appendString(value)
+        override fun visitType(value: Type) = builder.appendClassLiteral(TypeName.Inferred(value))
+        override fun visitAnnotation(value: Annotation) = builder.append("<unsupported>")
+        override fun visitArray(value: List<Annotation.Value>) = builder.append("<unsupported>")
+        override fun visitUnresolved() = builder.append("<unresolved>")
+        override fun visitEnumConstant(enum: Type, constant: String) =
+            builder.appendType(TypeName.Inferred(enum)).append(".").append(constant)
     }
 }

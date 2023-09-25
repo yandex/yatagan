@@ -16,14 +16,12 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
+import com.yandex.yatagan.codegen.poetry.Access
+import com.yandex.yatagan.codegen.poetry.ClassName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
-import com.yandex.yatagan.codegen.poetry.buildClass
+import com.yandex.yatagan.codegen.poetry.nestedClass
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.lang.model.element.Modifier.FINAL
-import javax.lang.model.element.Modifier.PRIVATE
-import javax.lang.model.element.Modifier.STATIC
 
 @Singleton
 internal class LockGenerator @Inject constructor(
@@ -35,10 +33,10 @@ internal class LockGenerator @Inject constructor(
 
     override fun generate(builder: TypeSpecBuilder) {
         if (!isUsed) return
-        builder.nestedType {
-            buildClass(name) {
-                modifiers(PRIVATE, STATIC, FINAL)
-            }
-        }
+        builder.nestedClass(
+            name = name,
+            access = Access.Private,
+            isInner = false,
+        ) {}
     }
 }

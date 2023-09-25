@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    api(libs.poets.java)
+    api(project(":lang:api"))
 }

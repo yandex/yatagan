@@ -16,19 +16,17 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.Assisted
 import com.yandex.yatagan.AssistedInject
+import com.yandex.yatagan.codegen.poetry.Access
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
-import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.isOptional
-import javax.lang.model.element.Modifier.PRIVATE
-import javax.lang.model.element.Modifier.VOLATILE
 
 internal abstract class CachingStrategyBase(
     protected val binding: Binding,
@@ -50,19 +48,18 @@ internal abstract class CachingStrategyBase(
         inside: BindingGraph,
         isInsideInnerClass: Boolean
     ) {
-        builder.apply {
-            when (kind) {
-                DependencyKind.Direct -> {
-                    val component = componentForBinding(
-                        inside = inside,
-                        binding = binding,
-                        isInsideInnerClass = isInsideInnerClass,
-                    )
-                    +"%L.%N()".formatCode(component, instanceAccessorName)
-                }
-                else -> throw AssertionError()
-            }.let { /*exhaustive*/ }
-        }
+        when (kind) {
+            DependencyKind.Direct -> {
+                appendComponentForBinding(
+                    builder = builder,
+                    inside = inside,
+                    binding = binding,
+                    isInsideInnerClass = isInsideInnerClass,
+                )
+                builder.append(".").appendName(instanceAccessorName).append("()")
+            }
+            else -> throw AssertionError()
+        }.let { /*exhaustive*/ }
     }
 }
 
@@ -73,25 +70,46 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
     private val options: ComponentGenerator.Options,
 ) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
-        val targetType = binding.target.typeName()
-        field(ClassName.OBJECT, instanceFieldName) {
-            modifiers(PRIVATE)  // PRIVATE: only accessed via its accessor.
-        }
-        method(instanceAccessorName) {
-            modifiers(/*package-private*/)
+        val targetType = TypeName.Inferred(binding.target.type)
+        field(
+            type = TypeName.AnyObject,
+            name = instanceFieldName,
+            access = Access.Private,
+            isMutable = true,
+        ) {}
+        method(
+            name = instanceAccessorName,
+            access = Access.Internal,
+        ) {
             returnType(targetType)
-            +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
-            controlFlow("if (local == null)") {
-                if (options.enableThreadChecks) {
-                    +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
+            code {
+                appendVariableDeclaration(
+                    type = TypeName.AnyObject,
+                    name = "local",
+                    mutable = true,
+                    initializer = { append("this.").appendName(instanceFieldName) },
+                )
+                appendIfControlFlow(
+                    condition = { append("local == null") },
+                    ifTrue = {
+                        if (options.enableThreadChecks) {
+                            appendStatement { appendType(TypeName.ThreadAssertions).append(".assertThreadAccess()") }
+                        }
+                        appendStatement {
+                            append("local = ")
+                            binding.generateCreation(
+                                builder = this,
+                                inside = binding.owner,
+                                isInsideInnerClass = false,
+                            )
+                        }
+                        appendStatement { append("this.").appendName(instanceFieldName).appendName(" = local") }
+                    },
+                )
+                appendReturnStatement {
+                    appendCast(asType = targetType) { append("local") }
                 }
-                +buildExpression {
-                    +"local = "
-                    binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)
-                }
-                +"this.%N = local".formatCode(instanceFieldName)
             }
-            +"return (%T) local".formatCode(targetType)
         }
     }
 }
@@ -105,30 +123,69 @@ internal class CachingStrategyMultiThread @AssistedInject constructor(
     private val lockName = lock.name
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
-        val targetType = binding.target.typeName()
-        field(ClassName.OBJECT, instanceFieldName) {
-            modifiers(PRIVATE, VOLATILE)  // PRIVATE: only accessed via its accessor.
+        val targetType = TypeName.Inferred(binding.target.type)
+        field(
+            type = TypeName.AnyObject,
+            name = instanceFieldName,
+            access = Access.Private,
+            isMutable = true,
+        ) {
+            volatile()
             initializer {
-                +"new %T()".formatCode(lockName)
+                appendObjectCreation(lockName)
             }
         }
-        method(instanceAccessorName) {
-            modifiers(/*package-private*/)
+        method(
+            instanceAccessorName,
+            access = Access.Internal,
+        ) {
             returnType(targetType)
-            +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
-            controlFlow("if (local instanceof %T)".formatCode(lockName)) {
-                controlFlow("synchronized (local)") {
-                    +"local = this.%N".formatCode(instanceFieldName)
-                    controlFlow("if (local instanceof %T)".formatCode(lockName)) {
-                        +buildExpression {
-                            +"local = "
-                            binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)
+            code {
+                appendVariableDeclaration(
+                    type = TypeName.AnyObject,
+                    name = "local",
+                    mutable = true,
+                    initializer = { append("this.").appendName(instanceFieldName) },
+                )
+                appendIfControlFlow(
+                    condition = {
+                        appendTypeCheck(
+                            expression = { append("local") },
+                            type = lockName,
+                        )
+                    },
+                    ifTrue = {
+                        appendSynchronizedBlock(
+                            lock = { append("local") },
+                        ) {
+                            appendIfControlFlow(
+                                condition = {
+                                    appendTypeCheck(
+                                        expression = { append("local") },
+                                        type = lockName,
+                                    )
+                                },
+                                ifTrue = {
+                                    appendStatement {
+                                        append("local = ")
+                                        binding.generateCreation(
+                                            builder = this,
+                                            inside = binding.owner,
+                                            isInsideInnerClass = false,
+                                        )
+                                    }
+                                    appendStatement {
+                                        append("this.").appendName(instanceFieldName).appendName(" = local")
+                                    }
+                                },
+                            )
                         }
-                        +"this.%N = local".formatCode(instanceFieldName)
-                    }
+                    },
+                )
+                appendReturnStatement {
+                    appendCast(asType = targetType) { append("local") }
                 }
             }
-            +"return (%T) local".formatCode(targetType)
         }
     }
 }
@@ -145,17 +202,25 @@ internal class SlotProviderStrategy @AssistedInject constructor(
         builder: ExpressionBuilder,
         kind: DependencyKind,
         inside: BindingGraph,
-        isInsideInnerClass: Boolean
+        isInsideInnerClass: Boolean,
     ) {
         when (kind) {
-            DependencyKind.Lazy, DependencyKind.Provider -> builder.apply {
-                val component = componentForBinding(
-                    inside = inside,
-                    binding = binding,
-                    isInsideInnerClass = isInsideInnerClass,
+            DependencyKind.Lazy, DependencyKind.Provider -> {
+                builder.appendObjectCreation(
+                    type = providerName,
+                    argumentCount = 2,
+                    argument = {
+                        when(it) {
+                            0 -> appendComponentForBinding(
+                                builder = builder,
+                                inside = inside,
+                                binding = binding,
+                                isInsideInnerClass = isInsideInnerClass,
+                            )
+                            1 -> append("$slot")
+                        }
+                    }
                 )
-                // Provider class is chosen based on component (delegate) type - it will be the right one.
-                +"new %T(%L, $slot)".formatCode(providerName, component)
             }
             else -> throw AssertionError()
         }.let { /*exhaustive*/ }
@@ -189,17 +254,20 @@ internal class WrappingAccessorStrategy @AssistedInject constructor(
     }
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
-        method(accessorName) {
-            modifiers(/*package-private*/)
-            returnType(binding.target.typeName())
-            +buildExpression {
-                +"return "
-                underlying.generateAccess(
-                    builder = this,
-                    kind = DependencyKind.Direct,
-                    inside = binding.owner,
-                    isInsideInnerClass = false,
-                )
+        method(
+            name = accessorName,
+            access = Access.Internal,
+        ) {
+            returnType(TypeName.Inferred(binding.target.type))
+            code {
+                appendReturnStatement {
+                    underlying.generateAccess(
+                        builder = this,
+                        kind = DependencyKind.Direct,
+                        inside = binding.owner,
+                        isInsideInnerClass = false,
+                    )
+                }
             }
         }
     }
@@ -211,10 +279,13 @@ internal class WrappingAccessorStrategy @AssistedInject constructor(
         isInsideInnerClass: Boolean
     ) {
         assert(kind == DependencyKind.Direct)
-        val component = componentForBinding(inside = inside, binding = binding, isInsideInnerClass = isInsideInnerClass)
-        builder.apply {
-            +"%L.%N()".formatCode(component, accessorName)
-        }
+        appendComponentForBinding(
+            builder = builder,
+            inside = inside,
+            binding = binding,
+            isInsideInnerClass = isInsideInnerClass,
+        )
+        builder.append(".").appendName(accessorName).append("()")
     }
 }
 
@@ -275,10 +346,17 @@ internal class OnTheFlyScopedProviderCreationStrategy @AssistedInject constructo
         isInsideInnerClass: Boolean
     ) {
         require(kind == DependencyKind.Lazy || kind == DependencyKind.Provider)
-        builder.apply {
-            val component = componentForBinding(inside = inside, binding = binding, isInsideInnerClass = isInsideInnerClass)
-            +"new %T(%L, $slot)".formatCode(providerName, component)
-        }
+        builder.appendObjectCreation(
+            type = providerName,
+            argumentCount = 2,
+            argument = {
+                when(it) {
+                    0 -> appendComponentForBinding(builder = this, inside = inside,
+                        binding = binding, isInsideInnerClass = isInsideInnerClass)
+                    1 -> append(slot.toString())
+                }
+            },
+        )
     }
 }
 
@@ -297,10 +375,17 @@ internal class OnTheFlyUnscopedProviderCreationStrategy @AssistedInject construc
         isInsideInnerClass: Boolean
     ) {
         require(kind == DependencyKind.Provider)
-        builder.apply {
-            val component = componentForBinding(inside = inside, binding = binding, isInsideInnerClass = isInsideInnerClass)
-            +"new %T(%L, $slot)".formatCode(providerName, component)
-        }
+        builder.appendObjectCreation(
+            type = providerName,
+            argumentCount = 2,
+            argument = {
+                when(it) {
+                    0 -> appendComponentForBinding(builder = builder, inside = inside,
+                        binding = binding, isInsideInnerClass = isInsideInnerClass)
+                    1 -> append(slot.toString())
+                }
+            }
+        )
     }
 }
 
@@ -318,31 +403,45 @@ internal class ConditionalAccessStrategy @AssistedInject constructor(
     }
 
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
-        method(accessorName) {
-            modifiers(/*package-private*/)
-            returnType(Names.Optional)
+        method(
+            name = accessorName,
+            access = Access.Internal,
+        ) {
+            returnType(TypeName.Optional)
             when (val conditionScope = binding.conditionScope) {
-                ConditionScope.Always -> +buildExpression {
-                    +"return %T.of(".formatCode(Names.Optional)
-                    underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
-                    +")"
-                }
-                ConditionScope.Never -> +buildExpression {
-                    +"return %T.empty()".formatCode(Names.Optional)
-                }
-                is ConditionScope.ExpressionScope -> {
-                    val expression = buildExpression {
-                        binding.owner[GeneratorComponent].conditionGenerator.expression(
-                            builder = this,
-                            conditionScope = conditionScope,
-                            inside = binding.owner,
-                            isInsideInnerClass = false,
-                        )
-                    }
-                    +buildExpression {
-                        +"return %L ? %T.of(".formatCode(expression, Names.Optional)
+                ConditionScope.Always -> code {
+                    appendReturnStatement {
+                        appendType(TypeName.Optional)
+                        append(".of(")
                         underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
-                        +") : %T.empty()".formatCode(Names.Optional)
+                        append(")")
+                    }
+                }
+                ConditionScope.Never -> code {
+                    appendReturnStatement {
+                        appendType(TypeName.Optional).append(".empty()")
+                    }
+                }
+                is ConditionScope.ExpressionScope -> code {
+                    appendReturnStatement {
+                        appendTernaryExpression(
+                            condition = {
+                                binding.owner[GeneratorComponent].conditionGenerator.expression(
+                                    builder = this,
+                                    conditionScope = conditionScope,
+                                    inside = binding.owner,
+                                    isInsideInnerClass = false,
+                                )
+                            },
+                            ifTrue = {
+                                appendType(TypeName.Optional).append(".of(")
+                                underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
+                                append(")")
+                            },
+                            ifFalse = {
+                                appendType(TypeName.Optional).append(".empty()")
+                            },
+                        )
                     }
                 }
             }
@@ -356,10 +455,9 @@ internal class ConditionalAccessStrategy @AssistedInject constructor(
         isInsideInnerClass: Boolean
     ) {
         check(dependencyKind.asOptional() == kind)
-        val component = componentForBinding(inside = inside, binding = binding, isInsideInnerClass = isInsideInnerClass)
-        builder.apply {
-            +"%L.%N()".formatCode(component, accessorName)
-        }
+        appendComponentForBinding(builder = builder, inside = inside,
+            binding = binding, isInsideInnerClass = isInsideInnerClass)
+        builder.append(".").appendName(accessorName).append("()")
     }
 }
 
@@ -378,8 +476,7 @@ object EmptyAccessStrategy : AccessStrategy {
         isInsideInnerClass: Boolean
     ) {
         assert(kind.isOptional)
-        with(builder) {
-            +"%T.empty()".formatCode(Names.Optional)
-        }
+        builder.appendType(TypeName.Optional)
+            .append(".empty()")
     }
 }

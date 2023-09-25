@@ -1,6 +1,5 @@
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.Binds
 import com.yandex.yatagan.BindsInstance
 import com.yandex.yatagan.Component
@@ -9,6 +8,8 @@ import com.yandex.yatagan.IntoList
 import com.yandex.yatagan.Module
 import com.yandex.yatagan.Provides
 import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.codegen.poetry.ClassName
+import com.yandex.yatagan.codegen.poetry.Poetry
 import com.yandex.yatagan.core.graph.BindingGraph
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -52,6 +53,7 @@ internal interface GeneratorComponent {
     @Component.Builder
     interface Factory {
         fun create(
+            @BindsInstance poetry: Poetry,
             @BindsInstance graph: BindingGraph,
             @BindsInstance options: ComponentGenerator.Options,
         ): GeneratorComponent

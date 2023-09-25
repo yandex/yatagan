@@ -93,6 +93,7 @@ fun <Source> process(
                     maxSlotsPerSwitch = delegate.options[IntOption.MaxSlotsPerSwitch],
                     enableThreadChecks = !delegate.options[BooleanOption.OmitThreadChecks],
                     enableProvisionNullChecks = !delegate.options[BooleanOption.OmitProvisionNullChecks],
+                    generateKotlinCode = false,  // TODO: Make an option :)
                 )
                 delegate.openFileForGenerating(
                     sources = allSourcesSequence(delegate, graphRoot),

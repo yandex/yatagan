@@ -16,8 +16,8 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.JavaFile
 import com.yandex.yatagan.Yatagan
+import com.yandex.yatagan.codegen.poetry.java.PoetryJava
 import com.yandex.yatagan.core.graph.BindingGraph
 
 class ComponentGeneratorFacade(
@@ -25,8 +25,10 @@ class ComponentGeneratorFacade(
     maxSlotsPerSwitch: Int,
     enableThreadChecks: Boolean,
     enableProvisionNullChecks: Boolean,
+    generateKotlinCode: Boolean,
 ) {
     private val component = Yatagan.builder(GeneratorComponent.Factory::class.java).create(
+        poetry = if (generateKotlinCode) TODO() else PoetryJava(),
         graph = graph,
         options = ComponentGenerator.Options(
             maxSlotsPerSwitch = maxSlotsPerSwitch,
@@ -36,14 +38,12 @@ class ComponentGeneratorFacade(
     )
 
     val targetPackageName: String
-        get() = component.implementationClassName.packageName()
+        get() = component.implementationClassName.packageName
 
     val targetClassName: String
-        get() = component.implementationClassName.simpleName()
+        get() = component.implementationClassName.simpleNames.single()
 
     fun generateTo(out: Appendable) {
-        JavaFile.builder(targetPackageName, component.generator.generate())
-            .build()
-            .writeTo(out)
+        component.generator.generateRoot(out)
     }
 }

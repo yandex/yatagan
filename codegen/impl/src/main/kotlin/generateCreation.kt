@@ -16,9 +16,8 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.CodeBlock
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
-import com.yandex.yatagan.codegen.poetry.buildExpression
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AlternativesBinding
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
@@ -38,7 +37,6 @@ import com.yandex.yatagan.core.model.component2
 import com.yandex.yatagan.lang.Callable
 import com.yandex.yatagan.lang.Constructor
 import com.yandex.yatagan.lang.Method
-import com.yandex.yatagan.lang.TypeDeclarationKind
 
 private class CreationGeneratorVisitor(
     private val builder: ExpressionBuilder,
@@ -49,49 +47,55 @@ private class CreationGeneratorVisitor(
 
     override fun visitProvision(binding: ProvisionBinding) {
         with(builder) {
-            val instance = if (binding.requiresModuleInstance) {
-                "%L.%N".formatCode(
-                    componentForBinding(binding),
-                    binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.originModule!!),
-                )
-            } else null
             binding.provision.accept(object : Callable.Visitor<Unit> {
-                fun genArgs() {
-                    join(seq = binding.inputs.asIterable()) { (node, kind) ->
-                        inside.resolveBinding(node).generateAccess(
-                            builder = this,
-                            inside = inside,
-                            kind = kind,
-                            isInsideInnerClass = isInsideInnerClass,
-                        )
-                    }
-                }
-
                 override fun visitMethod(method: Method) {
                     val enableNullChecks = inside[GeneratorComponent].options.enableProvisionNullChecks
-                    if (enableNullChecks) {
-                        +"%T.checkProvisionNotNull(".formatCode(Names.Checks)
+                    val provision: ExpressionBuilder.() -> Unit = {
+                        appendCall(
+                            receiver = fun ExpressionBuilder.() {
+                                appendComponentForBinding(builder, binding)
+                                append(".").appendName(
+                                    binding.owner[GeneratorComponent]
+                                        .componentFactoryGenerator.fieldNameFor(binding.originModule!!)
+                                )
+                            }.takeIf { binding.requiresModuleInstance },
+                            method = method,
+                            argumentCount = binding.inputs.size,
+                            argument = {
+                                val (node, kind) = binding.inputs[it]
+                                inside.resolveBinding(node).generateAccess(
+                                    builder = this,
+                                    inside = inside,
+                                    kind = kind,
+                                    isInsideInnerClass = isInsideInnerClass,
+                                )
+                            },
+                        )
                     }
-                    if (instance != null) {
-                        +"%L.%N(".formatCode(instance, method.name)
-                    } else {
-                        val ownerObject = when (method.owner.kind) {
-                            TypeDeclarationKind.KotlinObject -> ".INSTANCE"
-                            else -> ""
+                    if (enableNullChecks) {
+                        appendCheckProvisionNotNull {
+                            provision()
                         }
-                        +"%T%L.%L(".formatCode(method.ownerName.asTypeName(), ownerObject, method.name)
-                    }
-                    genArgs()
-                    +")"
-                    if (enableNullChecks) {
-                        +")"
+                    } else {
+                        provision()
                     }
                 }
 
                 override fun visitConstructor(constructor: Constructor) {
-                    +"new %T(".formatCode(constructor.constructee.asType().typeName().asRawType())
-                    genArgs()
-                    +")"
+                    val parameters = constructor.parameters.toList()
+                    builder.appendObjectCreation(
+                        type = TypeName.Inferred(constructor.constructee.asType()),
+                        argumentCount = parameters.size,
+                        argument = {
+                            val (node, kind) = binding.inputs[it]
+                            inside.resolveBinding(node).generateAccess(
+                                builder = this,
+                                inside = inside,
+                                kind = kind,
+                                isInsideInnerClass = isInsideInnerClass,
+                            )
+                        },
+                    )
                 }
 
                 override fun visitOther(callable: Callable) = throw AssertionError()
@@ -109,18 +113,16 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitInstance(binding: InstanceBinding) {
-        with(builder) {
-            +"%L.%N".formatCode(
-                componentForBinding(binding),
-                binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.target),
-            )
-        }
+        appendComponentForBinding(builder, binding)
+        builder.append(".").appendName(
+            binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.target)
+        )
     }
 
     override fun visitAlternatives(binding: AlternativesBinding) {
         data class AlternativesGenerationEntry(
-            val access: CodeBlock,
-            val condition: CodeBlock?,
+            val access: ExpressionBuilder.() -> Unit,
+            val condition: (ExpressionBuilder.() -> Unit)?,
         )
 
         var scopeOfPreviousAlternatives: ConditionScope = ConditionScope.Never
@@ -141,7 +143,7 @@ private class CreationGeneratorVisitor(
                 (index == alternatives.lastIndex && altBindingScope != ConditionScope.Never) ||
                         altBindingScope == ConditionScope.Always -> {
                     entriesToGenerate += AlternativesGenerationEntry(
-                        access = buildExpression {
+                        access = {
                             altBinding.generateAccess(
                                 builder = this,
                                 inside = inside,
@@ -160,14 +162,14 @@ private class CreationGeneratorVisitor(
 
                 altBindingScope is ConditionScope.ExpressionScope -> {
                     entriesToGenerate += AlternativesGenerationEntry(
-                        access = buildExpression {
+                        access = {
                             altBinding.generateAccess(
                                 builder = this,
                                 inside = inside,
                                 isInsideInnerClass = isInsideInnerClass,
                             )
                         },
-                        condition = buildExpression {
+                        condition = {
                             val gen = inside[GeneratorComponent].conditionGenerator
                             gen.expression(
                                 builder = this,
@@ -183,56 +185,53 @@ private class CreationGeneratorVisitor(
             }
         }
 
-        with(builder) {
-            for ((access, condition) in entriesToGenerate) {
-                +(condition ?: break)
-                +" ? "
-                +access
-                +" : "
+        fun ExpressionBuilder.generateEntry(entryIndex: Int) {
+            val (access, condition) = entriesToGenerate[entryIndex]
+            if (condition != null && entryIndex != entriesToGenerate.lastIndex) {
+                appendTernaryExpression(
+                    condition = condition,
+                    ifTrue = access,
+                    ifFalse = { generateEntry(entryIndex + 1) },
+                )
+            } else {
+                access()
             }
-            +entriesToGenerate.last().access
         }
+        builder.generateEntry(0)
     }
 
     override fun visitSubComponent(binding: SubComponentBinding) {
-        with(builder) {
-            +"new %T(".formatCode(binding.targetGraph[GeneratorComponent].componentFactoryGenerator.implName)
-            join(binding.targetGraph.usedParents) { parentGraph ->
-                +buildExpression {
-                    +"%L".formatCode(componentInstance(
-                        inside = inside,
-                        graph = parentGraph,
-                        isInsideInnerClass = isInsideInnerClass,
-                    ))
-                }
-            }
-            +")"
-        }
+        val usedParents = binding.targetGraph.usedParents.toList()
+        builder.appendObjectCreation(
+            type = binding.targetGraph[GeneratorComponent].componentFactoryGenerator.implName,
+            argumentCount = usedParents.size,
+            argument = {
+                appendComponentInstance(
+                    builder = this,
+                    inside = inside,
+                    graph = usedParents[it],
+                    isInsideInnerClass = isInsideInnerClass,
+                )
+            },
+        )
     }
 
     override fun visitComponentDependency(binding: ComponentDependencyBinding) {
-        with(builder) {
-            +"%L.%N".formatCode(
-                componentForBinding(binding),
-                binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.dependency),
-            )
-        }
+        appendComponentForBinding(builder, binding)
+        builder.append(".").appendName(
+            binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.dependency)
+        )
     }
 
     override fun visitComponentInstance(binding: ComponentInstanceBinding) {
-        with(builder) {
-            +componentForBinding(binding)
-        }
+        appendComponentForBinding(builder, binding)
     }
 
     override fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding) {
-        with(builder) {
-            +"%L.%N.%N()".formatCode(
-                componentForBinding(binding),
-                binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.dependency),
-                binding.getter.name,
-            )
-        }
+        appendComponentForBinding(builder, binding)
+        builder.append(".").appendName(
+            binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.dependency)
+        ).append(".").appendAccess(binding.getter)
     }
 
     override fun visitMulti(binding: MultiBinding) {
@@ -257,8 +256,12 @@ private class CreationGeneratorVisitor(
         throw AssertionError("Not reached: unreported empty/missing binding: `$binding`")
     }
 
-    private fun componentForBinding(binding: Binding): CodeBlock {
-        return componentForBinding(
+    private fun appendComponentForBinding(
+        builder: ExpressionBuilder,
+        binding: Binding,
+   ) {
+        appendComponentForBinding(
+            builder = builder,
             inside = inside,
             binding = binding,
             isInsideInnerClass = isInsideInnerClass,

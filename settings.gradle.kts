@@ -37,7 +37,8 @@ include(":rt:engine")
 include(":rt:support")
 
 include(":codegen:impl")
-include(":codegen:poetry")
+include(":codegen:poetry:api")
+include(":codegen:poetry:java")
 
 include(":testing:tests")
 include(":testing:procedural")

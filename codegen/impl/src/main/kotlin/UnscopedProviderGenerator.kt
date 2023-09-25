@@ -16,15 +16,13 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.squareup.javapoet.ClassName
+import com.yandex.yatagan.codegen.poetry.Access
+import com.yandex.yatagan.codegen.poetry.ClassName
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
-import com.yandex.yatagan.codegen.poetry.buildClass
+import com.yandex.yatagan.codegen.poetry.nestedClass
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.lang.model.element.Modifier.FINAL
-import javax.lang.model.element.Modifier.PRIVATE
-import javax.lang.model.element.Modifier.PUBLIC
-import javax.lang.model.element.Modifier.STATIC
 
 @Singleton
 internal class UnscopedProviderGenerator @Inject constructor(
@@ -36,27 +34,45 @@ internal class UnscopedProviderGenerator @Inject constructor(
 
     override fun generate(builder: TypeSpecBuilder) {
         if (!isUsed) return
-        builder.nestedType {
-            buildClass(name) {
-                implements(Names.Lazy)
-                modifiers(/*package-private*/ STATIC, FINAL)
-                field(componentImplName, "mDelegate") {
-                    modifiers(PRIVATE, FINAL)
+        builder.nestedClass(
+            name = name,
+            isInner = false,
+            access = Access.Internal,
+        ) {
+            implements(TypeName.Lazy)
+            field(
+                type = componentImplName,
+                name = "mDelegate",
+                isMutable = false,
+                access = Access.Private,
+            ) {}
+            field(
+                type = TypeName.Int,
+                name = "mIndex",
+                isMutable = false,
+                access = Access.Private,
+            ) {}
+            primaryConstructor(
+                access = Access.Internal,
+            ) {
+                parameter(componentImplName, "delegate")
+                parameter(TypeName.Int, "index")
+                code {
+                    appendStatement { append("this.mDelegate = delegate") }
+                    appendStatement { append("this.mIndex = index") }
                 }
-                field(ClassName.INT, "mIndex") {
-                    modifiers(PRIVATE, FINAL)
-                }
-                constructor {
-                    parameter(componentImplName, "delegate")
-                    parameter(ClassName.INT, "index")
-                    +"this.mDelegate = delegate"
-                    +"this.mIndex = index"
-                }
-                method("get") {
-                    modifiers(PUBLIC)
-                    annotation<Override>()
-                    returnType(ClassName.OBJECT)
-                    +"return this.mDelegate.%N(this.mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
+            }
+            method(
+                name = "get",
+                access = Access.Public,
+            ) {
+                manualOverride()
+                returnType(TypeName.AnyObject)
+                code {
+                    appendReturnStatement {
+                        append("this.mDelegate.").appendName(SlotSwitchingGenerator.FactoryMethodName)
+                            .append("(this.mIndex)")
+                    }
                 }
             }
         }

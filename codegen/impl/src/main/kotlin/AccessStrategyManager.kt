@@ -17,7 +17,6 @@
 package com.yandex.yatagan.codegen.impl
 
 import com.yandex.yatagan.AssistedFactory
-import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
