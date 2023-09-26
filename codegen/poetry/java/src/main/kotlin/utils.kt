@@ -72,9 +72,20 @@ internal fun JavaTypeName(typeName: TypeName): JavaTypeName {
         )
         is TypeName.Inferred -> JavaTypeName((typeName.type as CtNamedType).nameModel)
         TypeName.Int -> JavaTypeName.INT
-        TypeName.Lazy -> JavaClassName.get("com.yandex.yatagan", "Lazy")
+        is TypeName.Lazy -> ParameterizedTypeName.get(
+            JavaClassName.get("com.yandex.yatagan", "Lazy"),
+            JavaTypeName(typeName.t),
+        )
+        is TypeName.Provider -> ParameterizedTypeName.get(
+            JavaClassName.get("javax.inject", "Provider"),
+            JavaTypeName(typeName.t),
+        )
         is TypeName.Nullable -> JavaTypeName(typeName.type)
-        TypeName.Optional -> JavaClassName.get("com.yandex.yatagan", "Optional")
+        is TypeName.Optional -> ParameterizedTypeName.get(
+            JavaClassName.get("com.yandex.yatagan", "Optional"),
+            JavaTypeName(typeName.t),
+        )
+        TypeName.OptionalRaw -> JavaClassName.get("com.yandex.yatagan", "Optional")
         TypeName.ThreadAssertions -> JavaClassName.get("com.yandex.yatagan.internal", "ThreadAssertions")
         is TypeName.TypeVariable -> TypeVariableName.get(typeName.name)
     }

@@ -73,7 +73,7 @@ interface ExpressionBuilder {
         ifFalse: ExpressionBuilder.() -> Unit,
     ) : ExpressionBuilder
 
-    fun appendAccess(
+    fun appendDotAndAccess(
         member: Member,
     ) : ExpressionBuilder
 
@@ -82,6 +82,10 @@ interface ExpressionBuilder {
         method: Method,
         argumentCount: Int,
         argument: ExpressionBuilder.(index: Int) -> Unit,
+    ) : ExpressionBuilder
+
+    fun coerceAsByte(
+        expression: ExpressionBuilder.() -> Unit,
     ) : ExpressionBuilder
 
     fun appendCheckProvisionNotNull(

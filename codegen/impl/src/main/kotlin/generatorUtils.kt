@@ -19,6 +19,7 @@ package com.yandex.yatagan.codegen.impl
 import com.yandex.yatagan.codegen.poetry.ClassName
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
+import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.nestedClass
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -119,5 +120,19 @@ internal fun formatImplementationClassName(graph: BindingGraph): ClassName {
                 subcomponentsNamespace.name(graph.model.name, suffix = "Impl", firstCapital = true)
             )
         }
+    }
+}
+
+internal fun typeByDependencyKind(
+    kind: DependencyKind,
+    type: TypeName,
+) : TypeName {
+    return when(kind) {
+        DependencyKind.Direct -> type
+        DependencyKind.Lazy -> TypeName.Lazy(type)
+        DependencyKind.Provider -> TypeName.Provider(type)
+        DependencyKind.Optional -> TypeName.Optional(type)
+        DependencyKind.OptionalLazy -> TypeName.Optional(TypeName.Lazy(type))
+        DependencyKind.OptionalProvider -> TypeName.Optional(TypeName.Provider(type))
     }
 }

@@ -38,12 +38,14 @@ internal class ScopedProviderGenerator @Inject constructor(
 
     override fun generate(builder: TypeSpecBuilder) {
         if (!isUsed) return
+        val typeVar = TypeName.TypeVariable("T")
         builder.nestedClass(
             name = name,
             access = Access.Private,
             isInner = false,
         ) {
-            implements(TypeName.Lazy)
+            generic(typeVar)
+            implements(TypeName.Lazy(typeVar))
             field(
                 type = componentImplName,
                 name = "mDelegate",
@@ -83,7 +85,7 @@ internal class ScopedProviderGenerator @Inject constructor(
                 access = Access.Public,
             ) {
                 manualOverride()
-                returnType(TypeName.AnyObject)
+                returnType(typeVar)
                 code {
                     appendVariableDeclaration(
                         type = TypeName.Nullable(TypeName.AnyObject),
@@ -126,7 +128,12 @@ internal class ScopedProviderGenerator @Inject constructor(
                             }
                         }
                     )
-                    appendReturnStatement { append("local") }
+                    appendReturnStatement {
+                        appendCast(
+                            asType = typeVar,
+                            expression = { append("local") },
+                        )
+                    }
                 }
             }
         }

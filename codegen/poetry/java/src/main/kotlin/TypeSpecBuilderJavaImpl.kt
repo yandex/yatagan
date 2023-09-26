@@ -4,7 +4,7 @@ import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
-import com.yandex.yatagan.base.api.Internal
+import com.squareup.javapoet.TypeVariableName
 import com.yandex.yatagan.codegen.poetry.Access
 import com.yandex.yatagan.codegen.poetry.ClassName
 import com.yandex.yatagan.codegen.poetry.FieldSpecBuilder
@@ -12,7 +12,6 @@ import com.yandex.yatagan.codegen.poetry.MethodSpecBuilder
 import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.lang.Method
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 
 internal class TypeSpecBuilderJavaImpl(
@@ -27,6 +26,10 @@ internal class TypeSpecBuilderJavaImpl(
                 .addMember("value", format, *warnings)
                 .build()
         )
+    }
+
+    override fun generic(typeVariable: TypeName.TypeVariable) {
+        builder.addTypeVariable(TypeVariableName.get(typeVariable.name))
     }
 
     override fun implements(name: TypeName) {

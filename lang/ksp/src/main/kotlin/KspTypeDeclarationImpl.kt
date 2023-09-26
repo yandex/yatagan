@@ -46,6 +46,7 @@ import com.yandex.yatagan.lang.compiled.CtAnnotationBase
 import com.yandex.yatagan.lang.compiled.CtConstructorBase
 import com.yandex.yatagan.lang.compiled.CtFieldBase
 import com.yandex.yatagan.lang.compiled.CtTypeDeclarationBase
+import com.yandex.yatagan.lang.compiled.SyntheticKotlinObjectInstanceFieldMarker
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeDeclarationImpl private constructor(
@@ -422,7 +423,7 @@ internal class KspTypeDeclarationImpl private constructor(
     ) : CtFieldBase() {
         override val isEffectivelyPublic: Boolean get() = true
         override val annotations: Sequence<Nothing> get() = emptySequence()
-        override val platformModel: Any? get() = null
+        override val platformModel get() = SyntheticKotlinObjectInstanceFieldMarker
         override val isStatic: Boolean get() = true
     }
 }

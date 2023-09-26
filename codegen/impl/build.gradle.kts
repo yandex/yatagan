@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":core:graph:api"))
     implementation(project(":base:impl"))
     implementation(project(":codegen:poetry:java"))
+    implementation(project(":codegen:poetry:kotlin"))
     implementation(project(":lang:compiled"))
 
     implementation(libs.yataganDogFood.api)

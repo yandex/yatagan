@@ -46,7 +46,4 @@ internal class KspPropertySetterImpl(
             jvmSignatureSupplier = { jvmSignature },
         ))
     }
-
-    override val platformModel: Any?
-        get() = null
 }

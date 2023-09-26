@@ -1,18 +1,17 @@
-package com.yandex.yatagan.codegen.poetry.java
+package com.yandex.yatagan.codegen.poetry.kotlin
 
-import com.squareup.javapoet.CodeBlock
+import com.squareup.kotlinpoet.CodeBlock
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.TypeName
-import com.yandex.yatagan.lang.Method
 
-internal class CodeBuilderJavaImpl(
+internal class CodeBuilderKotlinImpl(
     private val builder: CodeBlock.Builder = CodeBlock.builder(),
 ) : CodeBuilder {
     fun build(): CodeBlock = builder.build()
 
     override fun appendStatement(block: ExpressionBuilder.() -> Unit) = apply {
-        builder.addStatement(buildExpression(block))
+        builder.addStatement("%L", buildExpression(block))
     }
 
     override fun appendVariableDeclaration(
@@ -21,17 +20,19 @@ internal class CodeBuilderJavaImpl(
         mutable: Boolean,
         initializer: ExpressionBuilder.() -> Unit,
     ) = apply {
-        builder.addStatement(CodeBlock.builder().apply {
-            if (!mutable) {
-                add("final ")
+        builder.addStatement("%L", CodeBlock.builder().apply {
+            if (mutable) {
+                add("var ")
+            } else {
+                add("val ")
             }
-            add("\$T \$N = ", JavaTypeName(type), name)
-                .add(buildExpression(initializer))
+            add("%N: %T = ", name, KotlinTypeName(type))
+            ExpressionBuilderKotlinImpl(this).apply(initializer)
         }.build())
     }
 
     override fun appendReturnStatement(value: ExpressionBuilder.() -> Unit) = apply {
-        builder.addStatement("return \$L", buildExpression(value))
+        builder.addStatement("return %L", buildExpression(value))
     }
 
     override fun appendIfControlFlow(
@@ -39,7 +40,7 @@ internal class CodeBuilderJavaImpl(
         ifTrue: CodeBuilder.() -> Unit,
         ifFalse: (CodeBuilder.() -> Unit)?,
     ) = apply {
-        builder.beginControlFlow("if (\$L)", buildExpression(condition))
+        builder.beginControlFlow("if (%L)", buildExpression(condition))
         ifTrue()
         if (ifFalse != null) {
             builder.nextControlFlow("else")
@@ -56,11 +57,11 @@ internal class CodeBuilderJavaImpl(
     ) = apply {
         val iterator = args.iterator()
         iterator.next().let { firstArg ->
-            builder.beginControlFlow("if (\$L)", buildExpression { condition(firstArg) })
+            builder.beginControlFlow("if (%L)", buildExpression { condition(firstArg) })
             block(firstArg)
         }
         iterator.forEach { arg ->
-            builder.nextControlFlow("else if (\$L)", buildExpression { condition(arg) })
+            builder.nextControlFlow("else if (%L)", buildExpression { condition(arg) })
             block(arg)
         }
         builder.nextControlFlow("else")
@@ -75,15 +76,14 @@ internal class CodeBuilderJavaImpl(
         caseBlock: CodeBuilder.(index: Int) -> Unit,
         defaultCaseBlock: (CodeBuilder.() -> Unit)?,
     ) = apply {
-        builder.beginControlFlow("switch (\$L)", buildExpression(subject))
+        builder.beginControlFlow("when (%L)", buildExpression(subject))
         for (i in 0..<numberOfCases) {
-            builder.beginControlFlow("case \$L:", buildExpression { caseValue(i) })
+            builder.beginControlFlow("%L -> ", buildExpression { caseValue(i) })
             caseBlock(i)
-//            builder.addStatement("break")
             builder.endControlFlow()
         }
         if (defaultCaseBlock != null) {
-            builder.beginControlFlow("default:")
+            builder.beginControlFlow("else -> ")
             defaultCaseBlock()
             builder.endControlFlow()
         }
@@ -94,7 +94,7 @@ internal class CodeBuilderJavaImpl(
         lock: ExpressionBuilder.() -> Unit,
         block: CodeBuilder.() -> Unit,
     ) = apply {
-        builder.beginControlFlow("synchronized (\$L)", buildExpression(lock))
+        builder.beginControlFlow("synchronized (%L)", buildExpression(lock))
         block()
         builder.endControlFlow()
     }

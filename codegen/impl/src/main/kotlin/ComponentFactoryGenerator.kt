@@ -111,7 +111,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
         // Constructor to be invoked by `builder()`/`autoBuilder()`/`create()` entry-points.
         val creator = thisGraph.creator
         primaryConstructor(
-            access = if (creator != null) Access.Internal else Access.Private,
+            access = Access.Internal, // if (creator != null) Access.Internal else Access.Private,
         ) {
             val paramsNs = Namespace(prefix = "p")
             // Firstly - used parents
@@ -129,7 +129,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
                     val name = paramsNs.name(input.name)
                     val model = input.payload.model
                     parameter(
-                        type = TypeName.Inferred(model.type),
+                        type = TypeName.Nullable(TypeName.Inferred(model.type)),
                         name = name,
                     )
                     val fieldName = inputsWithFieldNames[model] ?: continue  // Invalid - UB.
@@ -160,15 +160,20 @@ internal class ComponentFactoryGenerator @Inject constructor(
             } else {
                 // Add parameters for auto-creator (if non-root - UB)
                 for ((inputModel, fieldName) in inputsWithFieldNames) {
+                    val triviallyConstructableModule = inputModel is ModuleModel && inputModel.isTriviallyConstructable
                     val name = paramsNs.name(inputModel.name)
+                    var type: TypeName = TypeName.Inferred(inputModel.type)
+                    if (triviallyConstructableModule) {
+                        type = TypeName.Nullable(type)
+                    }
                     parameter(
-                        type = TypeName.Inferred(inputModel.type),
+                        type = type,
                         name = name,
                     )
                     code {
                         appendStatement {
                             append("this.").appendName(fieldName).append(" = ")
-                            if (inputModel is ModuleModel && inputModel.isTriviallyConstructable) {
+                            if (triviallyConstructableModule) {
                                 // Trivially constructable modules are optional in auto-creator, check here
                                 appendTernaryExpression(
                                     condition = { appendName(name).append(" != null") },
@@ -188,7 +193,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
     private fun TypeSpecBuilder.generateBuilder(factory: ComponentFactoryWithBuilderModel) {
         nestedClass(
             name = implName,
-            access = Access.Private,
+            access = Access.Internal, // if(thisGraph.isRoot) Access.Private else Access.Internal,
             isInner = false,
         ) {
             implements(TypeName.Inferred(factory.type))
@@ -225,7 +230,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
                     val fieldName = name(builderInput.name)
                     builderAccess += { append("this.").appendName(fieldName) }
                     field(
-                        type = TypeName.Inferred(builderInput.payload.model.type),
+                        type = TypeName.Nullable(TypeName.Inferred(builderInput.payload.model.type)),
                         name = fieldName,
                         access = Access.Private,
                         isMutable = true,
@@ -238,7 +243,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
                                 )
                             }
                             if (!builderInput.builderSetter.returnType.isVoid) {
-                                appendReturnStatement { appendName("this") }
+                                appendReturnStatement { append("this") }
                             }
                         }
                     }
@@ -285,7 +290,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
             implements(TypeName.AutoBuilder(componentImplName))
             for ((input, fieldName) in inputsWithFieldNames) {
                 field(
-                    type = TypeName.Inferred(input.type),
+                    type = TypeName.Nullable(TypeName.Inferred(input.type)),
                     name = fieldName,
                     access = Access.Private,
                     isMutable = true,
@@ -298,8 +303,8 @@ internal class ComponentFactoryGenerator @Inject constructor(
             ) {
                 val i = TypeName.TypeVariable("I")
                 parameter(i, "input")
-                generic(i)
-                parameter(TypeName.Class(i), "inputClass")
+                generic(i.copy(extendsAnyWildcard = true))
+                parameter(TypeName.Class(i), "clazz")
                 returnType(TypeName.AutoBuilder(componentImplName))
                 manualOverride()
                 code {
@@ -307,7 +312,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
                         appendIfElseIfControlFlow(
                             args = inputsWithFieldNames.entries,
                             condition = { (input, _) -> 
-                                append("inputClass == ").appendClassLiteral(TypeName.Inferred(input.type))
+                                append("clazz == ").appendClassLiteral(TypeName.Inferred(input.type))
                             },
                             block = { (input, fieldName) ->
                                 appendStatement {
@@ -319,7 +324,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
                             fallback = {
                                 appendStatement {
                                     appendReportUnexpectedBuilderInput(
-                                        inputClassArgument = { append("inputClass") },
+                                        inputClassArgument = { append("clazz") },
                                         inputsWithFieldNames.keys.map { TypeName.Inferred(it.type) },
                                     )
                                 }

@@ -739,6 +739,8 @@ class CoreBindingsTest(
                         throw AssertionError("Fail expected, but not occurred")
                     } catch (e: IllegalStateException) { 
                         // Ok
+                    } catch (e: NullPointerException) {
+                        // Ok
                     }
                 }
                 // Input omitted

@@ -44,4 +44,7 @@ internal abstract class KspPropertyAccessorBase<T : KSPropertyAccessor>(
 
     final override val isAbstract: Boolean
         get() = property.isAbstract()
+
+    override val platformModel: Any?
+        get() = accessor
 }

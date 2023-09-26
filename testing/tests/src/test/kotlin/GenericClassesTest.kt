@@ -215,10 +215,12 @@ class GenericClassesTest(
             """.trimIndent())
         })
 
+        givenJavaSource("test.MyApi", """
+            public interface MyApi {}
+        """.trimIndent())
         givenJavaSource("test.MyGenericClass", """
             import javax.inject.Inject;
 
-            interface MyApi {}
             public class MyGenericClass<T extends MyApi> { @Inject public MyGenericClass() {} }
         """.trimIndent())
 

@@ -34,12 +34,14 @@ internal class UnscopedProviderGenerator @Inject constructor(
 
     override fun generate(builder: TypeSpecBuilder) {
         if (!isUsed) return
+        val typeVar = TypeName.TypeVariable("T")
         builder.nestedClass(
             name = name,
             isInner = false,
             access = Access.Internal,
         ) {
-            implements(TypeName.Lazy)
+            generic(typeVar)
+            implements(TypeName.Lazy(typeVar))
             field(
                 type = componentImplName,
                 name = "mDelegate",
@@ -67,11 +69,16 @@ internal class UnscopedProviderGenerator @Inject constructor(
                 access = Access.Public,
             ) {
                 manualOverride()
-                returnType(TypeName.AnyObject)
+                returnType(typeVar)
                 code {
                     appendReturnStatement {
-                        append("this.mDelegate.").appendName(SlotSwitchingGenerator.FactoryMethodName)
-                            .append("(this.mIndex)")
+                        appendCast(
+                            asType = typeVar,
+                            expression = {
+                                append("this.mDelegate.").appendName(SlotSwitchingGenerator.FactoryMethodName)
+                                    .append("(this.mIndex)")
+                            }
+                        )
                     }
                 }
             }

@@ -170,11 +170,10 @@ internal class ConditionGenerator @Inject constructor(
                     //  in racy way, is presumed "incorrect".
                     code {
                         appendIfControlFlow(
-                            condition = { append("this.").append(name).append(" == 0x0") },
+                            condition = { append("this.").append(name).append(" == ").coerceAsByte { append("0x0") } },
                             ifTrue = {
                                 appendStatement {
-                                    append("this.").appendName(name).append(" = ").appendCast(
-                                        asType = TypeName.Byte,
+                                    append("this.").appendName(name).append(" = ").coerceAsByte(
                                         expression = {
                                             // 0x0 - uninitialized (default)
                                             // 0x1 - true
@@ -194,7 +193,7 @@ internal class ConditionGenerator @Inject constructor(
                             },
                         )
                         appendReturnStatement {
-                            append("this.").append(name).append(" == 0x1")
+                            append("this.").append(name).append(" == ").coerceAsByte { append("0x1") }
                         }
                     }
                 }
@@ -226,7 +225,7 @@ internal class ConditionGenerator @Inject constructor(
                     builder.appendType(TypeName.Inferred(rootType))
                 }
             }
-            builder.append(".").appendAccess(member)
+            builder.appendDotAndAccess(member)
         }
     }
 

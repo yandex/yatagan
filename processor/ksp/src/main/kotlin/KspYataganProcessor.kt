@@ -71,15 +71,18 @@ internal class KspYataganProcessor(
             ),
             packageName = packageName,
             fileName = className,
-            extensionName = "java",
+            extensionName = "kt",
         )
         environment.codeGenerator.associateWithClasses(
             classes = sources.toList(),
             packageName = packageName,
             fileName = className,
-            extensionName = "java",
+            extensionName = "kt",
         )
         return newFile.bufferedWriter()
     }
+
+    override val generateKotlin: Boolean
+        get() = true
 }
 

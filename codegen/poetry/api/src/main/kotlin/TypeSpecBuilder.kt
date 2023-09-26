@@ -7,6 +7,8 @@ interface TypeSpecBuilder {
         vararg warnings: String,
     )
 
+    fun generic(typeVariable: TypeName.TypeVariable)
+
     fun implements(name: TypeName)
 
     fun primaryConstructor(

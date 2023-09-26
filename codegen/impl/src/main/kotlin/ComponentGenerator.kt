@@ -101,18 +101,21 @@ internal class ComponentGenerator @Inject constructor(
                             override fun visitOther(model: Member) = throw AssertionError()
 
                             override fun visitMethod(model: Method) {
-                                appendAssignment(
-                                    receiver = { appendName(instanceName) },
-                                    setter = model,
-                                    value = {
-                                        binding.generateAccess(
-                                            builder = this,
-                                            inside = graph,
-                                            kind = dependency.kind,
-                                            isInsideInnerClass = false,
-                                        )
-                                    },
-                                )
+                                appendStatement {
+                                    appendCall(
+                                        receiver = { appendName(instanceName) },
+                                        method = model,
+                                        argumentCount =  1,
+                                        argument = {
+                                            binding.generateAccess(
+                                                builder = this,
+                                                inside = graph,
+                                                kind = dependency.kind,
+                                                isInsideInnerClass = false,
+                                            )
+                                        },
+                                    )
+                                }
                             }
 
                             override fun visitField(model: Field) {

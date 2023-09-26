@@ -231,7 +231,7 @@ private class CreationGeneratorVisitor(
         appendComponentForBinding(builder, binding)
         builder.append(".").appendName(
             binding.owner[GeneratorComponent].componentFactoryGenerator.fieldNameFor(binding.dependency)
-        ).append(".").appendAccess(binding.getter)
+        ).appendDotAndAccess(binding.getter)
     }
 
     override fun visitMulti(binding: MultiBinding) {

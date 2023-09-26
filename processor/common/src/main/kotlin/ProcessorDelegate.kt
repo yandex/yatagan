@@ -59,4 +59,7 @@ interface ProcessorDelegate<Source> {
      * Constructed options container.
      */
     val options: Options
+
+    val generateKotlin: Boolean
+        get() = false
 }

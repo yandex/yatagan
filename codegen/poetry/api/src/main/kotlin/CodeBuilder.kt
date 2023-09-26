@@ -7,12 +7,6 @@ interface CodeBuilder {
         block: ExpressionBuilder.() -> Unit,
     ) : CodeBuilder
 
-    fun appendAssignment(
-        receiver: (ExpressionBuilder.() -> Unit)?,
-        setter: Method,
-        value: ExpressionBuilder.() -> Unit,
-    ) : CodeBuilder
-
     fun appendVariableDeclaration(
         type: TypeName,
         name: String,

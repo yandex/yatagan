@@ -906,8 +906,11 @@ class CoreBindingsKotlinTest(
                 )
                 Object any() { return new Object(); }
             }
+        """.trimIndent())
+        givenJavaSource("test.TestComponent", """
+            import com.yandex.yatagan.Component;
             @Component(modules = {MyModule.class})
-            interface TestComponent {
+            public interface TestComponent {
                 ClassA getA();
             }
         """.trimIndent())

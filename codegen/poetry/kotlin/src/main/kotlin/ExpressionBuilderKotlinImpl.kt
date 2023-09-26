@@ -1,42 +1,47 @@
-package com.yandex.yatagan.codegen.poetry.java
+package com.yandex.yatagan.codegen.poetry.kotlin
 
-import com.squareup.javapoet.CodeBlock
-import com.squareup.javapoet.CodeBlock.Builder
+import com.google.devtools.ksp.symbol.KSPropertyAccessor
+import com.google.devtools.ksp.symbol.KSPropertyGetter
+import com.google.devtools.ksp.symbol.KSPropertySetter
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.MemberName
+import com.yandex.yatagan.base.api.Internal
 import com.yandex.yatagan.codegen.poetry.ClassName
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.TypeName
 import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.lang.Method
-import com.yandex.yatagan.lang.TypeDeclarationKind
+import com.yandex.yatagan.lang.compiled.SyntheticKotlinObjectInstanceFieldMarker
 
-internal class ExpressionBuilderJavaImpl(
-    private val builder: Builder = CodeBlock.builder(),
+internal class ExpressionBuilderKotlinImpl(
+    private val builder: CodeBlock.Builder = CodeBlock.builder(),
 ) : ExpressionBuilder {
     fun build(): CodeBlock = builder.build()
 
     override fun appendExplicitThis(className: ClassName) = apply {
-        builder.add("\$T.this", JavaClassName(className))
+        builder.add("this@%T", KotlinClassName(className))
     }
 
     override fun append(literalCode: String) = apply {
-        builder.add("\$L", literalCode)
+        builder.add("%L", literalCode)
     }
 
     override fun appendString(string: String) = apply {
-        builder.add("\$S", string)
+        builder.add("%S", string)
     }
 
     override fun appendType(type: TypeName) = apply {
-        builder.add("\$T", JavaTypeName(type))
+        builder.add("%T", KotlinTypeName(type))
     }
 
     override fun appendClassLiteral(type: TypeName) = apply {
-        builder.add("\$T.class", JavaTypeName(type))
+        builder.add("%T::class.java", KotlinTypeName(type))
     }
 
     override fun appendCast(asType: TypeName, expression: ExpressionBuilder.() -> Unit) = apply {
-        builder.add("(\$T) \$L", JavaTypeName(asType), buildExpression(expression))
+        expression()
+        builder.add(" as %T", KotlinTypeName(asType))
     }
 
     override fun appendObjectCreation(
@@ -49,7 +54,7 @@ internal class ExpressionBuilderJavaImpl(
             receiver()
             builder.add(".")
         }
-        builder.add("new \$T(", removeWildcards(type))
+        builder.add("%T(", removeProjections(KotlinTypeName(type)))
         for (i in 0..<argumentCount) {
             argument(i)
             if (i != argumentCount - 1) {
@@ -60,12 +65,12 @@ internal class ExpressionBuilderJavaImpl(
     }
 
     override fun appendName(memberName: String) = apply {
-        builder.add("\$N", memberName)
+        builder.add("%N", memberName)
     }
 
     override fun appendTypeCheck(expression: ExpressionBuilder.() -> Unit, type: TypeName) = apply {
         expression()
-        builder.add(" instanceof \$T", JavaTypeName(type))
+        builder.add(" is %T", KotlinTypeName(type))
     }
 
     override fun appendTernaryExpression(
@@ -73,28 +78,42 @@ internal class ExpressionBuilderJavaImpl(
         ifTrue: ExpressionBuilder.() -> Unit,
         ifFalse: ExpressionBuilder.() -> Unit,
     ) = apply {
+        builder.add("if (")
         condition()
-        builder.add(" ? ")
+        builder.add(") ")
         ifTrue()
-        builder.add(" : ")
+        builder.add(" else ")
         ifFalse()
     }
 
+    @OptIn(Internal::class)
     override fun appendDotAndAccess(member: Member) = apply {
-        builder.add(".")
         member.accept(object : Member.Visitor<Unit> {
             override fun visitField(model: Field) {
-                builder.add(model.name)
+                if (model.platformModel == SyntheticKotlinObjectInstanceFieldMarker) {
+                    // Skip the synthetic field at all
+                    return
+                }
+                builder.add(".").add("%N", model.name)
             }
 
             override fun visitMethod(model: Method) {
                 check(model.parameters.none()) { "Can't treat method with parameters as accessor" }
-                builder.add(model.name).add("()")
+                builder.add(".")
+                when(val pModel = model.platformModel) {
+                    is KSPropertyAccessor -> {
+                        builder.add("%N", pModel.receiver.simpleName.asString())
+                    }
+                    else -> {
+                        builder.add("%N()", model.name)
+                    }
+                }
             }
             override fun visitOther(model: Member) = throw AssertionError()
         })
     }
 
+    @OptIn(Internal::class)
     override fun appendCall(
         receiver: (ExpressionBuilder.() -> Unit)?,
         method: Method,
@@ -106,36 +125,47 @@ internal class ExpressionBuilderJavaImpl(
             receiver()
             builder.add(".")
         } else {
-            val ownerObject = when (method.owner.kind) {
-                TypeDeclarationKind.KotlinObject -> ".INSTANCE"
-                else -> ""
-            }
-            builder.add("\$T", JavaTypeName(method.owner.asType()))
-                .add(ownerObject)
+            builder.add("%T", KotlinTypeName(method.owner.asType()))
                 .add(".")
         }
-        builder.add(method.name).add("(")
-        for (i in 0..<argumentCount) {
-            argument(i)
-            if (i != argumentCount - 1) {
-                append(", ")
+
+        when(val model = method.platformModel) {
+            is KSPropertyGetter -> {
+                require(argumentCount == 0) { "No arguments expected for property getter" }
+                builder.add("%N", model.receiver.simpleName.asString())
+            }
+            is KSPropertySetter -> {
+                require(argumentCount == 1) { "Single argument expected for property getter" }
+                builder.add("%N", model.receiver.simpleName.asString())
+                builder.add(" = ")
+                argument(0)
+            }
+            else -> {
+                builder.add("%N(", method.name)
+                for (i in 0..<argumentCount) {
+                    argument(i)
+                    if (i != argumentCount - 1) {
+                        append(", ")
+                    }
+                }
+                builder.add(")")
             }
         }
-        builder.add(")")
     }
 
     override fun coerceAsByte(expression: ExpressionBuilder.() -> Unit) = apply {
-        builder.add("(\$T) \$L", JavaClassName.BYTE, buildExpression(expression))
+        expression()
+        builder.add(".toByte()")
     }
 
     override fun appendCheckProvisionNotNull(expression: ExpressionBuilder.() -> Unit) = apply {
-        builder.add("\$T.checkProvisionNotNull(", JavaClassName.get("com.yandex.yatagan.internal", "Checks"))
+        builder.add("%M(", MemberName("com.yandex.yatagan.internal", "checkProvisionNotNull"))
         expression()
         builder.add(")")
     }
 
     override fun appendCheckInputNotNull(expression: ExpressionBuilder.() -> Unit) = apply {
-        builder.add("\$T.checkInputNotNull(", JavaClassName.get("com.yandex.yatagan.internal", "Checks"))
+        builder.add("%M(", MemberName("com.yandex.yatagan.internal", "checkInputNotNull"))
         expression()
         builder.add(")")
     }
@@ -144,20 +174,10 @@ internal class ExpressionBuilderJavaImpl(
         inputClassArgument: ExpressionBuilder.() -> Unit,
         expectedTypes: List<TypeName>,
     ) = apply {
-        builder.add("\$T.reportUnexpectedAutoBuilderInput(", JavaClassName.get("com.yandex.yatagan.internal", "Checks"))
-        inputClassArgument()
-        builder.add(", \$T.asList(", JavaClassName.get("java.util", "Arrays"))
-        expectedTypes.forEachIndexed { index, typeName ->
-            builder.add("\$T.class", JavaTypeName(typeName))
-            if (index != expectedTypes.lastIndex) {
-                builder.add(", ")
-            }
-        }
-        builder.add("))")
+        builder.add("TODO(\"appendReportUnexpectedBuilderInput\")")
     }
 
     override fun appendReportMissingBuilderInput(missingType: TypeName) = apply {
-        builder.add("\$T.reportMissingAutoBuilderInput(\$T.class)",
-            JavaClassName.get("com.yandex.yatagan.internal", "Checks"), JavaTypeName(missingType))
+        builder.add("TODO(\"appendReportMissingBuilderInput\")")
     }
 }

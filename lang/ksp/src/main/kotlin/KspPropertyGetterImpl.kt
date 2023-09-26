@@ -48,9 +48,6 @@ internal class KspPropertyGetterImpl(
 
     override val parameters: Sequence<Parameter> = emptySequence()
 
-    override val platformModel: Any?
-        get() = null
-
     companion object {
         private val PropNameIsRegex = "^is[^a-z].*$".toRegex()
     }

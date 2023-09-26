@@ -18,6 +18,7 @@ package com.yandex.yatagan.codegen.impl
 
 import com.yandex.yatagan.Yatagan
 import com.yandex.yatagan.codegen.poetry.java.PoetryJava
+import com.yandex.yatagan.codegen.poetry.kotlin.PoetryKotlin
 import com.yandex.yatagan.core.graph.BindingGraph
 
 class ComponentGeneratorFacade(
@@ -28,7 +29,7 @@ class ComponentGeneratorFacade(
     generateKotlinCode: Boolean,
 ) {
     private val component = Yatagan.builder(GeneratorComponent.Factory::class.java).create(
-        poetry = if (generateKotlinCode) TODO() else PoetryJava(),
+        poetry = if (generateKotlinCode) PoetryKotlin() else PoetryJava(),
         graph = graph,
         options = ComponentGenerator.Options(
             maxSlotsPerSwitch = maxSlotsPerSwitch,

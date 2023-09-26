@@ -7,6 +7,8 @@ ksp = "1.9.10-1.0.13"
 # Must be compatible with 'kotlin'
 dokka = "1.9.0"
 
+kotlinPoet = "1.14.2"
+
 # Yatagan version used to build Yatagan
 yataganDogFood = "1.3.0"
 
@@ -24,7 +26,8 @@ ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.
 
 autoCommon = "com.google.auto:auto-common:1.2.2"
 poets-java = "com.squareup:javapoet:1.13.0"
-poets-kotlin = "com.squareup:kotlinpoet:1.14.2"
+poets-kotlin = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
+poets-kotlinKsp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinPoet" }
 
 logicng = "org.logicng:logicng-j11:2.4.2"
 

@@ -44,7 +44,7 @@ internal class MapBindingGenerator @Inject constructor(
             valueType = TypeName.Inferred(type.typeArguments[1]),
         )
         builder.appendVariableDeclaration(
-            type = TypeName.Inferred(type),
+            type = mapType,
             name = "map",
             mutable = false,
             initializer = {

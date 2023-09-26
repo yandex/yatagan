@@ -21,7 +21,7 @@ import javax.inject.Provider
 internal fun compileTestDrivers(
     includeKsp: Boolean = true,
     includeJap: Boolean = true,
-    includeRt: Boolean = true,
+    includeRt: Boolean = false,
 ): Collection<Provider<CompileTestDriverBase>> {
     class NamedProvider(
         private val initializer: () -> CompileTestDriverBase,

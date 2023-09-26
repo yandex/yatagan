@@ -39,6 +39,7 @@ include(":rt:support")
 include(":codegen:impl")
 include(":codegen:poetry:api")
 include(":codegen:poetry:java")
+include(":codegen:poetry:kotlin")
 
 include(":testing:tests")
 include(":testing:procedural")

@@ -24,7 +24,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
     )
 
     override fun generatedFilesSubDir(): String {
-        return "ksp/generatedJava"
+        return "ksp/generatedKotlin"
     }
 
     override val backendUnderTest: Backend

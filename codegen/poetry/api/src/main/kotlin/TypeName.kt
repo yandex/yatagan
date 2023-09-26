@@ -9,7 +9,10 @@ sealed interface TypeName {
 
     data object AnyObject : TypeName
 
-    data class TypeVariable(val name: String) : TypeName
+    data class TypeVariable(
+        val name: String,
+        val extendsAnyWildcard: kotlin.Boolean = false,
+    ) : TypeName
 
     data class ArrayList(val elementType: TypeName) : TypeName
     data class HashSet(val elementType: TypeName) : TypeName
@@ -24,6 +27,14 @@ sealed interface TypeName {
     data object Int : TypeName
 
     data object ThreadAssertions : TypeName
-    data object Optional : TypeName
-    data object Lazy : TypeName
+    data class Optional(
+        val t: TypeName,
+    ) : TypeName
+    data object OptionalRaw : TypeName
+    data class Lazy(
+        val t: TypeName,
+    ) : TypeName
+    data class Provider(
+        val t: TypeName,
+    ) : TypeName
 }

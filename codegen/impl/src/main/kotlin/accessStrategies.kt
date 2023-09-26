@@ -72,7 +72,7 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = TypeName.Inferred(binding.target.type)
         field(
-            type = TypeName.AnyObject,
+            type = TypeName.Nullable(TypeName.AnyObject),
             name = instanceFieldName,
             access = Access.Private,
             isMutable = true,
@@ -84,7 +84,7 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
             returnType(targetType)
             code {
                 appendVariableDeclaration(
-                    type = TypeName.AnyObject,
+                    type = TypeName.Nullable(TypeName.AnyObject),
                     name = "local",
                     mutable = true,
                     initializer = { append("this.").appendName(instanceFieldName) },
@@ -103,7 +103,7 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
                                 isInsideInnerClass = false,
                             )
                         }
-                        appendStatement { append("this.").appendName(instanceFieldName).appendName(" = local") }
+                        appendStatement { append("this.").appendName(instanceFieldName).append(" = local") }
                     },
                 )
                 appendReturnStatement {
@@ -175,7 +175,7 @@ internal class CachingStrategyMultiThread @AssistedInject constructor(
                                         )
                                     }
                                     appendStatement {
-                                        append("this.").appendName(instanceFieldName).appendName(" = local")
+                                        append("this.").appendName(instanceFieldName).append(" = local")
                                     }
                                 },
                             )
@@ -407,11 +407,14 @@ internal class ConditionalAccessStrategy @AssistedInject constructor(
             name = accessorName,
             access = Access.Internal,
         ) {
-            returnType(TypeName.Optional)
+            returnType(TypeName.Optional(typeByDependencyKind(
+                kind = dependencyKind,
+                type = TypeName.Inferred(binding.target.type),
+            )))
             when (val conditionScope = binding.conditionScope) {
                 ConditionScope.Always -> code {
                     appendReturnStatement {
-                        appendType(TypeName.Optional)
+                        appendType(TypeName.OptionalRaw)
                         append(".of(")
                         underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
                         append(")")
@@ -419,7 +422,7 @@ internal class ConditionalAccessStrategy @AssistedInject constructor(
                 }
                 ConditionScope.Never -> code {
                     appendReturnStatement {
-                        appendType(TypeName.Optional).append(".empty()")
+                        appendType(TypeName.OptionalRaw).append(".empty()")
                     }
                 }
                 is ConditionScope.ExpressionScope -> code {
@@ -434,12 +437,12 @@ internal class ConditionalAccessStrategy @AssistedInject constructor(
                                 )
                             },
                             ifTrue = {
-                                appendType(TypeName.Optional).append(".of(")
+                                appendType(TypeName.OptionalRaw).append(".of(")
                                 underlying.generateAccess(this, dependencyKind, binding.owner, isInsideInnerClass = false)
                                 append(")")
                             },
                             ifFalse = {
-                                appendType(TypeName.Optional).append(".empty()")
+                                appendType(TypeName.OptionalRaw).append(".empty()")
                             },
                         )
                     }
@@ -476,7 +479,7 @@ object EmptyAccessStrategy : AccessStrategy {
         isInsideInnerClass: Boolean
     ) {
         assert(kind.isOptional)
-        builder.appendType(TypeName.Optional)
+        builder.appendType(TypeName.OptionalRaw)
             .append(".empty()")
     }
 }

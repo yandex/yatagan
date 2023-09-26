@@ -88,7 +88,14 @@ abstract class CompileTestDriverBase private constructor(
         return TestCompilationResult(
             workingDir = workingDir,
             runtimeClasspath = compilation.classpath + result.outputClasspath,
-            messageLog = result.diagnostics.values.flatten().joinToString(separator = "\n") { it.msg },
+            messageLog = result.diagnostics.values.flatten().joinToString(separator = "\n") {
+                buildString {
+                    append(it.msg)
+                    if (it.location != null) {
+                        append("\n\t-> at ${it.location}")
+                    }
+                }
+            },
             success = result.success,
             generatedFiles = result.generatedSources,
         )

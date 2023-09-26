@@ -43,7 +43,7 @@ internal class CollectionBindingGenerator @Inject constructor (
         }
 
         builder.appendVariableDeclaration(
-            type = TypeName.Inferred(binding.target.type),
+            type = collectionType,
             name = "c",
             mutable = false,
             initializer = {
