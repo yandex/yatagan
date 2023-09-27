@@ -30,7 +30,7 @@ class JapCompileTestDriver(
     )
 
     override fun generatedFilesSubDir(): String {
-        return "kapt/kapt-java-src-out"
+        return "kapt${File.separatorChar}kapt-java-src-out"
     }
 
     override val backendUnderTest: Backend

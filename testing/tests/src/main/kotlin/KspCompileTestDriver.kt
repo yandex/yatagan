@@ -17,6 +17,7 @@
 package com.yandex.yatagan.testing.tests
 
 import com.yandex.yatagan.processor.ksp.KspYataganProcessorProvider
+import java.io.File
 
 class KspCompileTestDriver : CompileTestDriverBase() {
     override fun createCompilationArguments() = super.createCompilationArguments().copy(
@@ -24,7 +25,7 @@ class KspCompileTestDriver : CompileTestDriverBase() {
     )
 
     override fun generatedFilesSubDir(): String {
-        return "ksp/generatedJava"
+        return "ksp${File.separatorChar}generatedJava"
     }
 
     override val backendUnderTest: Backend

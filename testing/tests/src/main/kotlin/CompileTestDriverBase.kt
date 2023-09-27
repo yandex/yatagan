@@ -136,7 +136,7 @@ abstract class CompileTestDriverBase private constructor(
                     goldenCodeSourcePath.writeText(buildString {
                         for (generatedFile in generatedFiles) {
                             appendLine(MessageSeparator)
-                            append("Name: ").appendLine(generatedFile.relativePath)
+                            append("Name: ").appendLine(generatedFile.relativePath.replace(File.separatorChar, '/'))
                             appendLine(generatedFile.contents)
                         }
                         appendLine(MessageSeparator)
@@ -171,7 +171,7 @@ abstract class CompileTestDriverBase private constructor(
             generatedFilesSubDir().takeIf { checkGoldenOutput }?.let {
                 val goldenFiles = GoldenSourceRegex.findAll(
                         javaClass.getResourceAsStream("/$goldenCodeResourcePath")
-                                ?.bufferedReader()?.readText() ?: ""
+                                ?.bufferedReader()?.readText()?.ensureLineEndings() ?: ""
                 ).associateByTo(
                         destination = mutableMapOf(),
                         keySelector = { it.groupValues[1] },
@@ -179,7 +179,8 @@ abstract class CompileTestDriverBase private constructor(
                 )
 
                 for (generatedFile in generatedFiles) {
-                    val goldenContents = goldenFiles.remove(generatedFile.relativePath) ?: "<unexpected file>"
+                    val filePath = generatedFile.relativePath.replace(File.separatorChar, '/')
+                    val goldenContents = goldenFiles.remove(filePath) ?: "<unexpected file>"
                     Assert.assertEquals("Generated file '${generatedFile.relativePath}' doesn't match the golden",
                             goldenContents, generatedFile.contents.trim())
                 }
