@@ -4,6 +4,8 @@ plugins {
     id("yatagan.base-module")
 }
 
+val enableCoverage: Boolean by extra
+
 val versionsToCheckLoaderCompatibility = listOf(
     "1.0.0",
     "1.1.0",
@@ -103,6 +105,9 @@ val updateGoldenFiles by tasks.registering(Test::class) {
     // Pass the resource directory absolute path
     systemProperty("com.yandex.yatagan.updateGoldenFiles",
         sourceSets.test.get().resources.sourceDirectories.singleFile.absolutePath)
+
+    // Kover runs all the `Test` tasks, but we don't need it to run this one, so explicitly disable it.
+    enabled = !enableCoverage
 }
 
 tasks.test {

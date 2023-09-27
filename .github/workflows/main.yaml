@@ -30,7 +30,7 @@ jobs:
       - name: Check
         uses: gradle/gradle-build-action@v2.8.0
         with:
-          arguments: check --no-configuration-cache --stacktrace
+          arguments: check -Penable_coverage=${{ matrix.os == 'ubuntu-latest' }} --no-configuration-cache --stacktrace
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
@@ -38,5 +38,14 @@ jobs:
         with:
           name: test-reports-${{ matrix.os }}
           path: |
-            testing/tests/build/reports
-            lang/api/build/reports
+            testing/tests/build/reports/tests
+            lang/api/build/reports/tests
+            core/model/impl/build/reports/tests
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3.1.4
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: build/reports/kover/report.xml
+          verbose: true

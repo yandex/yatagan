@@ -2,6 +2,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
 }
 
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+
 rootProject.name = "yatagan"
 
 include(":base:api")
