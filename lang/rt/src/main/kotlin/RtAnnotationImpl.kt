@@ -16,7 +16,9 @@
 
 package com.yandex.yatagan.lang.rt
 
+import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.IntoMap
+import com.yandex.yatagan.ValueOf
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation.Value
@@ -45,6 +47,13 @@ internal class RtAnnotationImpl(
         } catch (e: ReflectiveOperationException) {
             ValueImpl(null)
         }
+    }
+
+    @OptIn(ConditionsApi::class)
+    override fun <T : BuiltinAnnotation.CanBeCastedOut> asBuiltin(which: BuiltinAnnotation.Target.CanBeCastedOut<T>): T? {
+        return which.modelClass.cast(when(which) {
+            BuiltinAnnotation.ValueOf -> RtValueOfAnnotationImpl(impl as? ValueOf ?: return null)
+        })
     }
 
     override fun equals(other: Any?): Boolean {

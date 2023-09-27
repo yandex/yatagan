@@ -1,0 +1,183 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$RootComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Integer;
+import java.lang.Number;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$RootComponent implements RootComponent {
+  private Yatagan$RootComponent() {
+  }
+
+  @Override
+  public List<Integer> getQInts() {
+    return this.accessJavaxInjectNamedValueQualifiedListInteger();
+  }
+
+  @Override
+  public SubComponent.Builder getSub() {
+    return new SubComponentImpl.ComponentFactoryImpl(this);
+  }
+
+  @Override
+  public SubComponent2.Builder getSub2() {
+    return new SubComponent2Impl.ComponentFactoryImpl(this);
+  }
+
+  List<Integer> accessJavaxInjectNamedValueQualifiedListInteger() {
+    return this.manyOfListInteger();
+  }
+
+  List<Number> accessListNumber() {
+    return this.manyOfListNumber();
+  }
+
+  List<Integer> manyOfListInteger() {
+    final List<Integer> c = new ArrayList<>(3);
+    c.add(Checks.checkProvisionNotNull(RootModule.INSTANCE.qInt1()));
+    c.add(Checks.checkProvisionNotNull(RootModule.INSTANCE.qInt2()));
+    c.add(Checks.checkProvisionNotNull(RootModule.INSTANCE.qInt3()));
+    return c;
+  }
+
+  List<Number> manyOfListNumber() {
+    final List<Number> c = new ArrayList<>(3);
+    c.add(Checks.checkProvisionNotNull(RootModule.INSTANCE.three()));
+    c.add(Checks.checkProvisionNotNull(RootModule.INSTANCE.two()));
+    c.addAll(Checks.checkProvisionNotNull(RootModule.INSTANCE.zeroAndOne()));
+    return c;
+  }
+
+  public static AutoBuilder<Yatagan$RootComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponentImpl implements SubComponent {
+    final Yatagan$RootComponent mRootComponent;
+
+    SubComponentImpl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public List<Number> getNumbers() {
+      return this.accessListNumber();
+    }
+
+    @Override
+    public List<Integer> getQInts() {
+      return this.mRootComponent.accessJavaxInjectNamedValueQualifiedListInteger();
+    }
+
+    List<Number> accessListNumber() {
+      return this.manyOfListNumber();
+    }
+
+    List<Number> manyOfListNumber() {
+      final List<Number> c = new ArrayList<>(3);
+      c.addAll(this.mRootComponent.accessListNumber());
+      c.add(Checks.checkProvisionNotNull(SubModule.INSTANCE.five()));
+      c.add(Checks.checkProvisionNotNull(SubModule.INSTANCE.four()));
+      c.addAll(Checks.checkProvisionNotNull(SubModule.INSTANCE.sixAndSeven()));
+      return c;
+    }
+
+    private static final class ComponentFactoryImpl implements SubComponent.Builder {
+      Yatagan$RootComponent fRootComponent;
+
+      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+        this.fRootComponent = fRootComponent;
+      }
+
+      @Override
+      public SubComponent create() {
+        return new SubComponentImpl(this.fRootComponent);
+      }
+    }
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponent2Impl implements SubComponent2 {
+    final Yatagan$RootComponent mRootComponent;
+
+    SubComponent2Impl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public Consumer getConsumer() {
+      return new Consumer(this.accessListNumber());
+    }
+
+    @Override
+    public List<Number> getNumbers() {
+      return this.accessListNumber();
+    }
+
+    @Override
+    public List<Integer> getQInts() {
+      return this.accessJavaxInjectNamedValueQualifiedListInteger();
+    }
+
+    List<Integer> accessJavaxInjectNamedValueQualifiedListInteger() {
+      return this.manyOfListInteger();
+    }
+
+    List<Number> accessListNumber() {
+      return this.manyOfListNumber();
+    }
+
+    List<Integer> manyOfListInteger() {
+      final List<Integer> c = new ArrayList<>(1);
+      c.addAll(this.mRootComponent.accessJavaxInjectNamedValueQualifiedListInteger());
+      c.add(Checks.checkProvisionNotNull(SubModule2.INSTANCE.qInt1()));
+      return c;
+    }
+
+    List<Number> manyOfListNumber() {
+      final List<Number> c = new ArrayList<>(2);
+      c.addAll(this.mRootComponent.accessListNumber());
+      c.add(Checks.checkProvisionNotNull(SubModule2.INSTANCE.p0()));
+      c.add(Checks.checkProvisionNotNull(SubModule2.INSTANCE.p1()));
+      return c;
+    }
+
+    private static final class ComponentFactoryImpl implements SubComponent2.Builder {
+      Yatagan$RootComponent fRootComponent;
+
+      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+        this.fRootComponent = fRootComponent;
+      }
+
+      @Override
+      public SubComponent2 create() {
+        return new SubComponent2Impl(this.fRootComponent);
+      }
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$RootComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$RootComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$RootComponent create() {
+      return new Yatagan$RootComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

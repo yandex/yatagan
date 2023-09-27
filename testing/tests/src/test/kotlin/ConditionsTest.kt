@@ -450,6 +450,33 @@ class ConditionsTest(
     }
 
     @Test
+    fun `issue #85 - conditions in component hierarchy with usage gaps`() {
+        includeFromSourceSet(features)
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Conditional(Conditions.FeatureA::class) class ClassA @Inject constructor()
+            @Conditional(Conditions.FeatureA::class) class ClassB @Inject constructor()
+
+            @Component interface RootComponent {
+                val dummy: Optional<ClassA>
+                fun createSub(): SubComponent
+            }
+
+            @Component(isRoot = false) interface SubComponent {
+                fun createSub2(): Sub2Component
+            }
+
+            @Component(isRoot = false) interface Sub2Component {
+                val dummy: Optional<ClassB>
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
     fun `conditional provide - basic case`() {
         includeFromSourceSet(features)
         includeFromSourceSet(flavors)
@@ -594,8 +621,10 @@ class ConditionsTest(
                 }
             }
             
-            @Condition(Features::class, "fooBar")
-            @Condition(Features::class, "isEnabledB")
+            @AllConditions(
+                Condition(Features::class, "fooBar"),
+                Condition(Features::class, "isEnabledB"),
+            )
             @AnyCondition(
                 Condition(Features::class, "getFeatureC.isEnabled"),                                
                 Condition(Features::class, "isEnabledB"),
@@ -609,20 +638,22 @@ class ConditionsTest(
             )
             annotation class ComplexFeature1
             
-            @AnyCondition(
-                Condition(Features::class, "fooBar"),
+            @AnyConditions(
+                AnyCondition(
+                    Condition(Features::class, "fooBar"),
+                ),
+                AnyCondition(
+                    Condition(Features::class, EnabledB),
+                ),
+                AnyCondition(
+                    Condition(Features::class, "getFeatureC.isEnabled"),                                
+                    Condition(Features::class, condition = EnabledB),                                
+                ),
+                AnyCondition(
+                    Condition(Features::class, "getFeatureC.isEnabled"),                                
+                    Condition(value = Features::class, condition = "isEnabledB"),                                
+                ),
             )
-            @AnyCondition(
-                Condition(Features::class, EnabledB),
-            )
-            @AnyCondition(
-                Condition(Features::class, "getFeatureC.isEnabled"),                                
-                Condition(Features::class, condition = EnabledB),                                
-            )
-            @AnyCondition(
-                Condition(Features::class, "getFeatureC.isEnabled"),                                
-                Condition(value = Features::class, condition = "isEnabledB"),                                
-            )            
             annotation class ComplexFeature2
             
             @Conditional(ComplexFeature1::class)               
@@ -630,7 +661,7 @@ class ConditionsTest(
             @Conditional(ComplexFeature2::class)
             class ClassB @Inject constructor(a: Provider<ClassA>)
             
-            @Component            
+            @Component
             interface MyComponent {
                 val a: Optional<ClassA>                        
             }
@@ -1103,6 +1134,71 @@ class ConditionsTest(
                 val a: Optional<ClassA>
                 val b: Optional<ClassB>
                 val c: Optional<ClassC>
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `injecting condition values`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            class What @Inject constructor() { val hello: Boolean = true }
+
+            class ClassA @Inject constructor(
+                @ValueOf(ConditionExpression("@FeatureA", Conditions.FeatureA::class)) val flag1: Boolean,
+                @ValueOf(ConditionExpression("getFeatureC.isEnabled", Features::class)) val flag2: Provider<Boolean>,
+                @ValueOf(ConditionExpression("isEnabledB | fooBar", Features::class)) val flag3: Lazy<Boolean>,
+                @ValueOf(ConditionExpression("getHello", What::class)) val flag4: Boolean,
+            )
+
+            @Component interface TestComponent {
+                val classA: ClassA
+            }
+
+            fun test() {
+                val c = Yatagan.create(TestComponent::class.java)
+                c.classA; c.classA.flag2.get()
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `injecting condition values - misuse`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            interface What { val hello: Boolean }
+
+            class ClassA @Inject constructor(
+                @ValueOf(ConditionExpression("@FeatureA", Conditions.FeatureA::class)) val flag1: Int,
+                @ValueOf(ConditionExpression("getFeatureC.isEnabled", Features::class)) val flag2: Provider<Double>,
+                @ValueOf(ConditionExpression("isEnabledB | fooBar", Features::class)) val flag3: Lazy<Any>,
+
+                @ValueOf(ConditionExpression(" | fooBar", Features::class)) val flag4: Boolean,
+                @ValueOf(ConditionExpression("!getHello", What::class)) val flag5: Boolean,
+            )
+
+            @Module class MyModule {
+                @Provides
+                @ValueOf(ConditionExpression("@FeatureA", Conditions.FeatureA::class))
+                fun provideValue(): Boolean {
+                    return true
+                }
+            }
+
+            @Component(modules = [MyModule::class]) interface TestComponent {
+                val classA: ClassA
             }
         """.trimIndent())
 

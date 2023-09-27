@@ -118,7 +118,7 @@ internal class ConditionModelImpl private constructor(
                 add(member)
 
                 val type = member.accept(MemberTypeVisitor)
-                if (type.asBoxed().declaration.qualifiedName == "java.lang.Boolean") {
+                if (type.asBoxed().declaration.qualifiedName == Names.Boolean) {
                     finished = true
                 } else {
                     currentType = type

@@ -1,0 +1,119 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent implements MyComponent {
+  private Object mCollectionDeferredMySpecificDeferredEventInstance;
+
+  private Object mMyClass2Instance;
+
+  private Yatagan$MyComponent() {
+  }
+
+  @Override
+  public List<Deferred<? extends MySpecificDeferredEvent>> deferred() {
+    return this.accessListDeferredMySpecificDeferredEvent();
+  }
+
+  @Override
+  public Provider<List<Deferred<? extends MySpecificDeferredEvent>>> deferredProvider() {
+    return new ProviderImpl(this, 0);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.accessListDeferredMySpecificDeferredEvent();
+      case 1: return new MyClass1();
+      case 2: return this.cacheMyClass2();
+      case 3: return new MyClass3();
+      default: throw new AssertionError();
+    }
+  }
+
+  Collection<Deferred<? extends MySpecificDeferredEvent>> cacheCollectionDeferredMySpecificDeferredEvent(
+      ) {
+    Object local = this.mCollectionDeferredMySpecificDeferredEventInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = Checks.checkProvisionNotNull(MyModule.collection1());
+      this.mCollectionDeferredMySpecificDeferredEventInstance = local;
+    }
+    return (Collection<Deferred<? extends MySpecificDeferredEvent>>) local;
+  }
+
+  MyClass2 cacheMyClass2() {
+    Object local = this.mMyClass2Instance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new MyClass2();
+      this.mMyClass2Instance = local;
+    }
+    return (MyClass2) local;
+  }
+
+  List<Deferred<? extends MySpecificDeferredEvent>> accessListDeferredMySpecificDeferredEvent() {
+    return this.manyOfListDeferredMySpecificDeferredEvent();
+  }
+
+  List<Deferred<? extends MySpecificDeferredEvent>> manyOfListDeferredMySpecificDeferredEvent() {
+    final List<Deferred<? extends MySpecificDeferredEvent>> c = new ArrayList<>(7);
+    c.addAll(this.cacheCollectionDeferredMySpecificDeferredEvent());
+    c.addAll(Checks.checkProvisionNotNull(MyModule.collection2()));
+    c.add(Checks.checkProvisionNotNull(MyModule.foo5(new ProviderImpl(this, 3))));
+    c.add(new Deferred(new ProviderImpl(this, 1)));
+    c.add(new Deferred(new ProviderImpl(this, 2)));
+    c.add(new Deferred(new ProviderImpl(this, 3)));
+    return c;
+  }
+
+  public static AutoBuilder<Yatagan$MyComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$MyComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$MyComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$MyComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MyComponent create() {
+      return new Yatagan$MyComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

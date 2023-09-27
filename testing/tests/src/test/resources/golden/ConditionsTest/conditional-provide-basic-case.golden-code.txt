@@ -1,0 +1,197 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestMainComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestMainComponent implements TestMainComponent {
+  final boolean mFeaturesFooBar = Features.fooBar();
+
+  private Yatagan$TestMainComponent() {
+  }
+
+  @Override
+  public Optional<Api> getApi() {
+    return this.optOfApi();
+  }
+
+  @Override
+  public Optional<Lazy<Api>> getApiLazy() {
+    return this.optOfTestApi();
+  }
+
+  @Override
+  public Optional<Api> getNamedApi() {
+    return this.optOfJavaxInjectNamedValueApi();
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return Checks.checkProvisionNotNull(MyModule.INSTANCE.provideApi());
+      default: throw new AssertionError();
+    }
+  }
+
+  Optional optOfApi() {
+    return this.mFeaturesFooBar ? Optional.of(Checks.checkProvisionNotNull(MyModule.INSTANCE.provideApi())) : Optional.empty();
+  }
+
+  Optional optOfTestApi() {
+    return this.mFeaturesFooBar ? Optional.of(new CachingProviderImpl(this, 0)) : Optional.empty();
+  }
+
+  Optional optOfJavaxInjectNamedValueApi() {
+    return Optional.of(Checks.checkProvisionNotNull(MyModule.INSTANCE.provideNamedApi()));
+  }
+
+  public static AutoBuilder<Yatagan$TestMainComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$TestMainComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$TestMainComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestMainComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestMainComponent> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestMainComponent create() {
+      return new Yatagan$TestMainComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestCustomComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestCustomComponent implements TestCustomComponent {
+  final boolean mFeaturesIsEnabledB = Features.isEnabledB();
+
+  private Yatagan$TestCustomComponent() {
+  }
+
+  @Override
+  public Optional<Api> getApi() {
+    return this.optOfApi();
+  }
+
+  @Override
+  public Optional<Lazy<Api>> getApiLazy() {
+    return this.optOfTestApi();
+  }
+
+  @Override
+  public Optional<Api> getNamedApi() {
+    return Optional.empty();
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return Checks.checkProvisionNotNull(MyModule.INSTANCE.provideApi());
+      default: throw new AssertionError();
+    }
+  }
+
+  Optional optOfApi() {
+    return this.mFeaturesIsEnabledB ? Optional.of(Checks.checkProvisionNotNull(MyModule.INSTANCE.provideApi())) : Optional.empty();
+  }
+
+  Optional optOfTestApi() {
+    return this.mFeaturesIsEnabledB ? Optional.of(new CachingProviderImpl(this, 0)) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$TestCustomComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$TestCustomComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$TestCustomComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestCustomComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestCustomComponent> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestCustomComponent create() {
+      return new Yatagan$TestCustomComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,0 +1,65 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final boolean mCompiledConditionHELLO = CompiledCondition.HELLO;
+
+  private byte mConstantsIS_ENABLED;
+
+  private byte mCompiledConditionKtFOO;
+
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public Optional<TestClass> getTest() {
+    return this.optOfTestClass();
+  }
+
+  Optional optOfTestClass() {
+    return this.mCompiledConditionHELLO && this.constantsIS_ENABLED() && this.compiledConditionKtFOO() ? Optional.of(new TestClass()) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  boolean constantsIS_ENABLED() {
+    if (this.mConstantsIS_ENABLED == 0x0) {
+      this.mConstantsIS_ENABLED = (byte) ((Constants.IS_ENABLED) ? 0x1 : 0x2);
+    }
+    return this.mConstantsIS_ENABLED == 0x1;
+  }
+
+  boolean compiledConditionKtFOO() {
+    if (this.mCompiledConditionKtFOO == 0x0) {
+      this.mCompiledConditionKtFOO = (byte) ((CompiledConditionKt.FOO) ? 0x1 : 0x2);
+    }
+    return this.mCompiledConditionKtFOO == 0x1;
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

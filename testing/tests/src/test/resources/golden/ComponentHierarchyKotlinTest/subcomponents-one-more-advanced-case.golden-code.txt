@@ -1,0 +1,308 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$ApplicationComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$ApplicationComponent implements ApplicationComponent {
+  private Object mSingletonClassInstance;
+
+  private Yatagan$ApplicationComponent() {
+  }
+
+  @Override
+  public MainActivityComponent.Factory getMainActivity() {
+    return new MainActivityComponentImpl.ComponentFactoryImpl(this);
+  }
+
+  @Override
+  public SettingsActivityComponent.Factory getSettingsActivity() {
+    return new SettingsActivityComponentImpl.ComponentFactoryImpl(this);
+  }
+
+  SingletonClass cacheSingletonClass() {
+    Object local = this.mSingletonClassInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new SingletonClass();
+      this.mSingletonClassInstance = local;
+    }
+    return (SingletonClass) local;
+  }
+
+  public static AutoBuilder<Yatagan$ApplicationComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class MainActivityComponentImpl implements MainActivityComponent {
+    private Object mActivityScopedClassInstance;
+
+    final Yatagan$ApplicationComponent mApplicationComponent;
+
+    MainActivityComponentImpl(Yatagan$ApplicationComponent pApplicationComponent) {
+      this.mApplicationComponent = pApplicationComponent;
+    }
+
+    @Override
+    public CameraFragmentComponent.Factory getCameraFragmentComponent() {
+      return new CameraFragmentComponentImpl.ComponentFactoryImpl(this);
+    }
+
+    @Override
+    public ProfileFragmentComponent.Factory getProfileFragmentComponent() {
+      return new ProfileFragmentComponentImpl.ComponentFactoryImpl(this, this.mApplicationComponent);
+    }
+
+    @Override
+    public RootClass rootClass() {
+      return Checks.checkProvisionNotNull(ApplicationModule.Companion.rootClass());
+    }
+
+    ActivityScopedClass cacheActivityScopedClass() {
+      Object local = this.mActivityScopedClassInstance;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = new ActivityScopedClass();
+        this.mActivityScopedClassInstance = local;
+      }
+      return (ActivityScopedClass) local;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class CameraFragmentComponentImpl implements CameraFragmentComponent {
+      final MainActivityComponentImpl mMainActivityComponent;
+
+      CameraFragmentComponentImpl(MainActivityComponentImpl pMainActivityComponent) {
+        this.mMainActivityComponent = pMainActivityComponent;
+      }
+
+      @Override
+      public CameraSettings cameraSettings() {
+        return new CameraSettings(new DefaultTheme());
+      }
+
+      private static final class ComponentFactoryImpl implements CameraFragmentComponent.Factory {
+        MainActivityComponentImpl fMainActivityComponent;
+
+        ComponentFactoryImpl(MainActivityComponentImpl fMainActivityComponent) {
+          this.fMainActivityComponent = fMainActivityComponent;
+        }
+
+        @Override
+        public CameraFragmentComponent create() {
+          return new CameraFragmentComponentImpl(this.fMainActivityComponent);
+        }
+      }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class ProfileFragmentComponentImpl implements ProfileFragmentComponent {
+      final MainActivityComponentImpl mMainActivityComponent;
+
+      final Yatagan$ApplicationComponent mApplicationComponent;
+
+      ProfileFragmentComponentImpl(MainActivityComponentImpl pMainActivityComponent,
+          Yatagan$ApplicationComponent pApplicationComponent) {
+        this.mMainActivityComponent = pMainActivityComponent;
+        this.mApplicationComponent = pApplicationComponent;
+      }
+
+      @Override
+      public Activity activity() {
+        return Checks.checkProvisionNotNull(MainActivityModule.INSTANCE.activity());
+      }
+
+      @Override
+      public ActivityScopedClass activityScoped() {
+        return this.mMainActivityComponent.cacheActivityScopedClass();
+      }
+
+      @Override
+      public SingletonClass singleton() {
+        return this.mApplicationComponent.cacheSingletonClass();
+      }
+
+      private static final class ComponentFactoryImpl implements ProfileFragmentComponent.Factory {
+        MainActivityComponentImpl fMainActivityComponent;
+
+        Yatagan$ApplicationComponent fApplicationComponent;
+
+        ComponentFactoryImpl(MainActivityComponentImpl fMainActivityComponent,
+            Yatagan$ApplicationComponent fApplicationComponent) {
+          this.fMainActivityComponent = fMainActivityComponent;
+          this.fApplicationComponent = fApplicationComponent;
+        }
+
+        @Override
+        public ProfileFragmentComponent create() {
+          return new ProfileFragmentComponentImpl(this.fMainActivityComponent, this.fApplicationComponent);
+        }
+      }
+    }
+
+    private static final class ComponentFactoryImpl implements MainActivityComponent.Factory {
+      Yatagan$ApplicationComponent fApplicationComponent;
+
+      ComponentFactoryImpl(Yatagan$ApplicationComponent fApplicationComponent) {
+        this.fApplicationComponent = fApplicationComponent;
+      }
+
+      @Override
+      public MainActivityComponent create() {
+        return new MainActivityComponentImpl(this.fApplicationComponent);
+      }
+    }
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SettingsActivityComponentImpl implements SettingsActivityComponent {
+    private Object mActivityScopedClassInstance;
+
+    final SettingsActivityFragmentModule mSettingsActivityFragmentModule;
+
+    final Yatagan$ApplicationComponent mApplicationComponent;
+
+    SettingsActivityComponentImpl(Yatagan$ApplicationComponent pApplicationComponent,
+        SettingsActivityFragmentModule pSettingsActivityFragmentModule) {
+      this.mApplicationComponent = pApplicationComponent;
+      this.mSettingsActivityFragmentModule = Checks.checkInputNotNull(pSettingsActivityFragmentModule);
+    }
+
+    @Override
+    public ProfileFragmentComponent.Factory getProfileFragmentComponent() {
+      return new ProfileFragmentComponentImpl.ComponentFactoryImpl(this, this.mApplicationComponent);
+    }
+
+    @Override
+    public ProfileSettingsFragmentComponent.Factory getProfileSettingsFragmentComponent() {
+      return new ProfileSettingsFragmentComponentImpl.ComponentFactoryImpl(this);
+    }
+
+    @Override
+    public RootClass rootClass() {
+      return Checks.checkProvisionNotNull(ApplicationModule.Companion.rootClass());
+    }
+
+    ActivityScopedClass cacheActivityScopedClass() {
+      Object local = this.mActivityScopedClassInstance;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = new ActivityScopedClass();
+        this.mActivityScopedClassInstance = local;
+      }
+      return (ActivityScopedClass) local;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class ProfileSettingsFragmentComponentImpl implements ProfileSettingsFragmentComponent {
+      final SettingsActivityComponentImpl mSettingsActivityComponent;
+
+      ProfileSettingsFragmentComponentImpl(
+          SettingsActivityComponentImpl pSettingsActivityComponent) {
+        this.mSettingsActivityComponent = pSettingsActivityComponent;
+      }
+
+      @Override
+      public CameraSettings cameraSettings() {
+        return new CameraSettings(new DarkTheme());
+      }
+
+      private static final class ComponentFactoryImpl implements ProfileSettingsFragmentComponent.Factory {
+        SettingsActivityComponentImpl fSettingsActivityComponent;
+
+        ComponentFactoryImpl(SettingsActivityComponentImpl fSettingsActivityComponent) {
+          this.fSettingsActivityComponent = fSettingsActivityComponent;
+        }
+
+        @Override
+        public ProfileSettingsFragmentComponent create() {
+          return new ProfileSettingsFragmentComponentImpl(this.fSettingsActivityComponent);
+        }
+      }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class ProfileFragmentComponentImpl implements ProfileFragmentComponent {
+      final SettingsActivityComponentImpl mSettingsActivityComponent;
+
+      final Yatagan$ApplicationComponent mApplicationComponent;
+
+      ProfileFragmentComponentImpl(SettingsActivityComponentImpl pSettingsActivityComponent,
+          Yatagan$ApplicationComponent pApplicationComponent) {
+        this.mSettingsActivityComponent = pSettingsActivityComponent;
+        this.mApplicationComponent = pApplicationComponent;
+      }
+
+      @Override
+      public Activity activity() {
+        return Checks.checkProvisionNotNull(this.mSettingsActivityComponent.mSettingsActivityFragmentModule.activity());
+      }
+
+      @Override
+      public ActivityScopedClass activityScoped() {
+        return this.mSettingsActivityComponent.cacheActivityScopedClass();
+      }
+
+      @Override
+      public SingletonClass singleton() {
+        return this.mApplicationComponent.cacheSingletonClass();
+      }
+
+      private static final class ComponentFactoryImpl implements ProfileFragmentComponent.Factory {
+        SettingsActivityComponentImpl fSettingsActivityComponent;
+
+        Yatagan$ApplicationComponent fApplicationComponent;
+
+        ComponentFactoryImpl(SettingsActivityComponentImpl fSettingsActivityComponent,
+            Yatagan$ApplicationComponent fApplicationComponent) {
+          this.fSettingsActivityComponent = fSettingsActivityComponent;
+          this.fApplicationComponent = fApplicationComponent;
+        }
+
+        @Override
+        public ProfileFragmentComponent create() {
+          return new ProfileFragmentComponentImpl(this.fSettingsActivityComponent, this.fApplicationComponent);
+        }
+      }
+    }
+
+    private static final class ComponentFactoryImpl implements SettingsActivityComponent.Factory {
+      Yatagan$ApplicationComponent fApplicationComponent;
+
+      ComponentFactoryImpl(Yatagan$ApplicationComponent fApplicationComponent) {
+        this.fApplicationComponent = fApplicationComponent;
+      }
+
+      @Override
+      public SettingsActivityComponent create(
+          SettingsActivityFragmentModule settingsActivityFragmentModule) {
+        return new SettingsActivityComponentImpl(this.fApplicationComponent, settingsActivityFragmentModule);
+      }
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$ApplicationComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$ApplicationComponent> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$ApplicationComponent create() {
+      return new Yatagan$ApplicationComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

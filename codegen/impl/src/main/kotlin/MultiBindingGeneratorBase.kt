@@ -24,6 +24,7 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 
 internal abstract class MultiBindingGeneratorBase<B : Binding>(
     private val bindings: List<B>,
+    private val options: ComponentGenerator.Options,
     methodsNs: Namespace,
     accessorPrefix: String,
 ) : ComponentGenerator.Contributor {
@@ -50,6 +51,7 @@ internal abstract class MultiBindingGeneratorBase<B : Binding>(
     }
 
     override fun generate(builder: TypeSpecBuilder) = with(builder) {
+        val bindings = if (options.sortMethodsForTesting) bindings.sorted() else bindings
         for (binding in bindings) {
             method(accessorNames[binding]!!) {
                 modifiers(/*package-private*/)

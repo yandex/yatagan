@@ -1,0 +1,58 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final boolean mMyFeatureSEnabled = MyFeature.sEnabled;
+
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public Api getApi() {
+    return new MyClassA();
+  }
+
+  @Override
+  public Api getApi2() {
+    return this.mMyFeatureSEnabled ? new MyClassB() : new MyClassA();
+  }
+
+  @Override
+  public Optional<Api> getApi3() {
+    return Optional.empty();
+  }
+
+  @Override
+  public MyClassD getD() {
+    return new MyClassD();
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

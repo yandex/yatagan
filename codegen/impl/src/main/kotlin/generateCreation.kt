@@ -26,6 +26,7 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ComponentDependencyBinding
 import com.yandex.yatagan.core.graph.bindings.ComponentDependencyEntryPointBinding
 import com.yandex.yatagan.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.yatagan.core.graph.bindings.ConditionExpressionValueBinding
 import com.yandex.yatagan.core.graph.bindings.EmptyBinding
 import com.yandex.yatagan.core.graph.bindings.InstanceBinding
 import com.yandex.yatagan.core.graph.bindings.MapBinding
@@ -248,6 +249,20 @@ private class CreationGeneratorVisitor(
         binding.owner[GeneratorComponent].mapBindingGenerator.generateCreation(
             builder = builder,
             binding = binding,
+            inside = inside,
+            isInsideInnerClass = isInsideInnerClass,
+        )
+    }
+
+    override fun visitConditionExpressionValue(binding: ConditionExpressionValueBinding) {
+        val expression = binding.model.expression ?: run {
+            with(builder) { +"false" }
+            return
+        }
+
+        binding.owner[GeneratorComponent].conditionGenerator.expression(
+            builder = builder,
+            conditionScope = expression,
             inside = inside,
             isInsideInnerClass = isInsideInnerClass,
         )

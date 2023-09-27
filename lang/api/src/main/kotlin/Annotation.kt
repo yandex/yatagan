@@ -41,6 +41,16 @@ public interface Annotation : HasPlatformModel {
     public fun getValue(attribute: AnnotationDeclaration.Attribute): Value
 
     /**
+     * Tries to make a builtin representation for this annotation for supported builtins.
+     *
+     * @param which builtin annotation kind to try converting to.
+     *
+     * @return a builtin annotation model of requested kind,
+     * or `null` if the underlying annotation is not a requested builtin.
+     */
+    public fun <T : BuiltinAnnotation.CanBeCastedOut> asBuiltin(which: BuiltinAnnotation.Target.CanBeCastedOut<T>): T?
+
+    /**
      * Models annotation attribute value.
      */
     public interface Value : HasPlatformModel {

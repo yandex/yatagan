@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.graph
 
-import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.lang.Method
 

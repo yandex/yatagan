@@ -217,8 +217,15 @@ internal class BindingGraphImpl(
 
         // Add all condition literals from all local bindings.
         for (binding in localBindings.keys) {
+            if (options.allConditionsLazy) {
+                for (condition in binding.dependenciesOnConditions) {
+                    localConditionLiterals[condition] = LiteralUsage.Lazy
+                }
+                continue
+            }
+
             var isEager = true
-            for (condition in binding.conditionScope.allConditionModels()) {
+            for (condition in binding.dependenciesOnConditions) {
                 if (isEager) {
                     localConditionLiterals[condition] = when {
                         condition.requiresInstance -> LiteralUsage.Lazy  // Always lazy
@@ -239,7 +246,12 @@ internal class BindingGraphImpl(
             val usesAssistedInjectFactories = child.localAssistedInjectFactories.removeAll(localAssistedInjectFactories)
             if (usesConditions || usesAssistedInjectFactories) {
                 // This will never be seen by materialization and that's okay, because no bindings are required here.
-                child.usedParents += this
+
+                // Walk up until `this` adding `this` to used parents.
+                for (graph in child.parentsSequence(includeThis = true)) {
+                    if (graph === this) break
+                    (graph as BindingGraphImpl).usedParents += this
+                }
             }
         }
     }

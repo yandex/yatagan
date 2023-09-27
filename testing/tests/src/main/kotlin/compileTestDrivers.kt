@@ -32,11 +32,11 @@ internal fun compileTestDrivers(
     }
 
     val providers = buildList {
-        if (includeKsp) {
-            add(NamedProvider(::KspCompileTestDriver, name = "KSP"))
-        }
         if (includeJap) {
             add(NamedProvider(::JapCompileTestDriver, name = "JAP"))
+        }
+        if (includeKsp) {
+            add(NamedProvider(::KspCompileTestDriver, name = "KSP"))
         }
         if (includeRt) {
             add(NamedProvider(::DynamicCompileTestDriver, name = "RT"))

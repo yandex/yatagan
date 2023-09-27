@@ -19,6 +19,8 @@ package com.yandex.yatagan.core.model.impl
 import com.yandex.yatagan.core.model.BindsBindingModel
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
+import com.yandex.yatagan.core.model.HasNodeModel
+import com.yandex.yatagan.core.model.InjectedConditionExpressionModel
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.yatagan.core.model.ModuleModel
@@ -26,6 +28,7 @@ import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ProvidesBindingModel
 import com.yandex.yatagan.core.model.ScopeModel
+import com.yandex.yatagan.core.model.accept
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.LangModelFactory
@@ -85,6 +88,15 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
 
         if (method.getAnnotations(BuiltinAnnotation.IntoCollectionFamily).size > 1) {
             validator.reportError(Errors.conflictingCollectionBindingAnnotations())
+        }
+
+        if (target.node.qualifier != null) {
+            target.node.getSpecificModel().accept(object : HasNodeModel.Visitor<Unit> {
+                override fun visitDefault() = Unit
+                override fun visitConditionExpression(model: InjectedConditionExpressionModel) {
+                    validator.reportError(Errors.manualBindingForConditionValue())
+                }
+            })
         }
 
         when (target) {

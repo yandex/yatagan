@@ -51,8 +51,10 @@ enum class BooleanOption(
 
     StrictMode("yatagan.enableStrictMode", default = true),
     UsePlainOutput("yatagan.usePlainOutput", default = false),
+    AllConditionsLazy("yatagan.experimental.allConditionsLazy", default = false),
     OmitThreadChecks("yatagan.experimental.omitThreadChecks", default = false),
     OmitProvisionNullChecks("yatagan.experimental.omitProvisionNullChecks", default = false),
+    SortMethodsForTesting("yatagan.internal.testing.sortMethods", default = false),
 
     ;
 

@@ -1,0 +1,246 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  private Object mJavaxInjectNamedValueV4SomeApiInstance;
+
+  final boolean mFeaturesFooBar = Features.fooBar();
+
+  final boolean mFeaturesIsEnabledB = Features.isEnabledB();
+
+  private Yatagan$TestComponent() {
+  }
+
+  @Override
+  public Optional<SomeApi> getApiV1() {
+    return this.optOfImplA();
+  }
+
+  @Override
+  public Optional<Lazy<SomeApi>> getApiV1Lazy() {
+    return this.optOfTestImplA();
+  }
+
+  @Override
+  public Optional<Provider<SomeApi>> getApiV1Provider() {
+    return this.optOfTestImplA1();
+  }
+
+  @Override
+  public Optional<SomeApi> getApiV2() {
+    return this.optOfJavaxInjectNamedValueV2SomeApi();
+  }
+
+  @Override
+  public Optional<Lazy<SomeApi>> getApiV2Lazy() {
+    return this.optOfJavaxInjectNamedValueV2TestSomeApi();
+  }
+
+  @Override
+  public Optional<Provider<SomeApi>> getApiV2Provider() {
+    return this.optOfJavaxInjectNamedValueV2TestSomeApi1();
+  }
+
+  @Override
+  public Optional<SomeApi> getApiV3() {
+    return this.optOfJavaxInjectNamedValueV3SomeApi();
+  }
+
+  @Override
+  public Optional<Lazy<SomeApi>> getApiV3Lazy() {
+    return this.optOfJavaxInjectNamedValueV3TestSomeApi();
+  }
+
+  @Override
+  public Optional<Provider<SomeApi>> getApiV3Provider() {
+    return this.optOfJavaxInjectNamedValueV3TestSomeApi1();
+  }
+
+  @Override
+  public Optional<SomeApi> getApiV4() {
+    return this.optOfJavaxInjectNamedValueV4SomeApi();
+  }
+
+  @Override
+  public Optional<Lazy<SomeApi>> getApiV4Lazy() {
+    return this.optOfJavaxInjectNamedValueV4TestSomeApi();
+  }
+
+  @Override
+  public Optional<Provider<SomeApi>> getApiV4Provider() {
+    return this.optOfJavaxInjectNamedValueV4TestSomeApi1();
+  }
+
+  @Override
+  public Optional<Provider<SomeApi>> getApiV5Provider() {
+    return this.optOfJavaxInjectNamedValueV5TestSomeApi();
+  }
+
+  @Override
+  public Optional<SomeApiBase> getBase() {
+    return this.optOfSomeApiBase();
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return new ImplA();
+      case 1: return this.accessJavaxInjectNamedValueV2SomeApi();
+      case 2: return this.accessJavaxInjectNamedValueV3SomeApi();
+      case 3: return this.cacheJavaxInjectNamedValueV4SomeApi();
+      case 4: return this.mFeaturesFooBar || this.mFeaturesIsEnabledB ? this.cacheJavaxInjectNamedValueV4SomeApi() : this.cacheJavaxInjectNamedValueV4SomeApi();
+      default: throw new AssertionError();
+    }
+  }
+
+  Optional optOfJavaxInjectNamedValueV5SomeApi() {
+    return this.mFeaturesFooBar || this.mFeaturesIsEnabledB ? Optional.of(this.mFeaturesFooBar || this.mFeaturesIsEnabledB ? this.cacheJavaxInjectNamedValueV4SomeApi() : this.cacheJavaxInjectNamedValueV4SomeApi()) : Optional.empty();
+  }
+
+  Optional optOfJavaxInjectNamedValueV5TestSomeApi() {
+    return this.mFeaturesFooBar || this.mFeaturesIsEnabledB ? Optional.of(new ProviderImpl(this, 4)) : Optional.empty();
+  }
+
+  Optional optOfSomeApiBase() {
+    return this.mFeaturesFooBar || this.mFeaturesIsEnabledB || this.mFeaturesFooBar ? Optional.of(this.mFeaturesFooBar || this.mFeaturesIsEnabledB ? this.cacheJavaxInjectNamedValueV4SomeApi() : new BaseImpl()) : Optional.empty();
+  }
+
+  SomeApi accessJavaxInjectNamedValueV2SomeApi() {
+    return this.mFeaturesFooBar ? new ImplA() : new Stub();
+  }
+
+  Optional optOfJavaxInjectNamedValueV2SomeApi() {
+    return Optional.of(this.accessJavaxInjectNamedValueV2SomeApi());
+  }
+
+  Optional optOfJavaxInjectNamedValueV2TestSomeApi() {
+    return Optional.of(new CachingProviderImpl(this, 1));
+  }
+
+  Optional optOfJavaxInjectNamedValueV2TestSomeApi1() {
+    return Optional.of(new ProviderImpl(this, 1));
+  }
+
+  SomeApi accessJavaxInjectNamedValueV3SomeApi() {
+    return this.mFeaturesFooBar ? new ImplA() : this.mFeaturesIsEnabledB ? new ImplB() : new Stub();
+  }
+
+  Optional optOfJavaxInjectNamedValueV3SomeApi() {
+    return Optional.of(this.accessJavaxInjectNamedValueV3SomeApi());
+  }
+
+  Optional optOfJavaxInjectNamedValueV3TestSomeApi() {
+    return Optional.of(new CachingProviderImpl(this, 2));
+  }
+
+  Optional optOfJavaxInjectNamedValueV3TestSomeApi1() {
+    return Optional.of(new ProviderImpl(this, 2));
+  }
+
+  SomeApi cacheJavaxInjectNamedValueV4SomeApi() {
+    Object local = this.mJavaxInjectNamedValueV4SomeApiInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = this.mFeaturesFooBar ? new ImplA() : new ImplB();
+      this.mJavaxInjectNamedValueV4SomeApiInstance = local;
+    }
+    return (SomeApi) local;
+  }
+
+  Optional optOfJavaxInjectNamedValueV4SomeApi() {
+    return this.mFeaturesFooBar || this.mFeaturesIsEnabledB ? Optional.of(this.cacheJavaxInjectNamedValueV4SomeApi()) : Optional.empty();
+  }
+
+  Optional optOfJavaxInjectNamedValueV4TestSomeApi() {
+    return this.mFeaturesFooBar || this.mFeaturesIsEnabledB ? Optional.of(new ProviderImpl(this, 3)) : Optional.empty();
+  }
+
+  Optional optOfJavaxInjectNamedValueV4TestSomeApi1() {
+    return this.mFeaturesFooBar || this.mFeaturesIsEnabledB ? Optional.of(new ProviderImpl(this, 3)) : Optional.empty();
+  }
+
+  Optional optOfImplA() {
+    return this.mFeaturesFooBar ? Optional.of(new ImplA()) : Optional.empty();
+  }
+
+  Optional optOfTestImplA() {
+    return this.mFeaturesFooBar ? Optional.of(new CachingProviderImpl(this, 0)) : Optional.empty();
+  }
+
+  Optional optOfTestImplA1() {
+    return this.mFeaturesFooBar ? Optional.of(new ProviderImpl(this, 0)) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$TestComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$TestComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$TestComponent create() {
+      return new Yatagan$TestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

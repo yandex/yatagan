@@ -32,6 +32,7 @@ import com.yandex.yatagan.core.graph.impl.bindings.AssistedInjectFactoryBindingI
 import com.yandex.yatagan.core.graph.impl.bindings.ComponentDependencyBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ComponentDependencyEntryPointBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ComponentInstanceBindingImpl
+import com.yandex.yatagan.core.graph.impl.bindings.ConditionExpressionValueBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ExplicitEmptyBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.InjectConstructorProvisionBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.InstanceBindingImpl
@@ -57,6 +58,7 @@ import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.InjectConstructorModel
+import com.yandex.yatagan.core.model.InjectedConditionExpressionModel
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.yatagan.core.model.ModuleModel
@@ -268,9 +270,7 @@ internal class GraphBindingsManager(
 
     fun materializeImplicitBindingFor(node: NodeModel): Binding? {
         return implicitBindings.getOrPut(node) {
-            if (node.qualifier == null) {
-                node.getSpecificModel().accept(implicitBindingCreator)
-            } else null
+            node.getSpecificModel().accept(implicitBindingCreator)
         }
     }
 
@@ -336,7 +336,9 @@ internal class GraphBindingsManager(
             }
 
             if (bindings.size > 1) {
-                val distinct = bindings.toSet()
+                val distinct = bindings
+                        .map { it.maybeUnwrapSyntheticAlias() }
+                        .distinctBy { it.accept(AliasEquivalenceSelector) }
                 if (distinct.size > 1) {
 
                     // We tolerate multibinding duplicates, because of the "extends" behavior.
@@ -418,6 +420,13 @@ internal class GraphBindingsManager(
                 owner = graph,
             )
         }
+
+        override fun visitConditionExpression(model: InjectedConditionExpressionModel): Binding {
+            return ConditionExpressionValueBindingImpl(
+                model = model,
+                owner = graph,
+            )
+        }
     }
 
     private inner class SubComponentBindingCreator(
@@ -463,6 +472,14 @@ internal class GraphBindingsManager(
         val keyType: Type,
         val valueType: NodeModel,
     )
+
+    private object AliasEquivalenceSelector : BaseBinding.Visitor<Any> {
+        override fun visitAlias(alias: AliasBinding): Pair<NodeModel, NodeModel> {
+            // We compare aliases only as a pair {source; target} in terms of duplicate check.
+            return alias.source to alias.target
+        }
+        override fun visitBinding(binding: Binding) = binding
+    }
 
     companion object Key : Extensible.Key<GraphBindingsManager> {
         override val keyType get() = GraphBindingsManager::class.java

@@ -1,0 +1,314 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyApplicationComponent.java
+package test;
+
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.SuppressWarnings;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyApplicationComponent implements MyApplicationComponent {
+  private Object mMyApplicationControllerImplInstance;
+
+  final String mAppId;
+
+  Yatagan$MyApplicationComponent(String pAppId) {
+    this.mAppId = Checks.checkInputNotNull(pAppId);
+  }
+
+  @Override
+  public MyActivityComponent.Factory getActivityFactory() {
+    return new MyActivityComponentImpl.ComponentFactoryImpl(this);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.accessMyApplicationManagerImpl();
+      case 1: return this.mAppId;
+      default: throw new AssertionError();
+    }
+  }
+
+  MyApplicationControllerImpl cacheMyApplicationControllerImpl() {
+    Object local = this.mMyApplicationControllerImplInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new MyApplicationControllerImpl();
+      this.mMyApplicationControllerImplInstance = local;
+    }
+    return (MyApplicationControllerImpl) local;
+  }
+
+  MyApplicationManagerImpl accessMyApplicationManagerImpl() {
+    return new MyApplicationManagerImpl(this.cacheMyApplicationControllerImpl(), this.mAppId);
+  }
+
+  public static MyApplicationComponent.Factory builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class MyActivityComponentImpl implements MyActivityComponent {
+    final String mId;
+
+    final Yatagan$MyApplicationComponent mMyApplicationComponent;
+
+    MyActivityComponentImpl(Yatagan$MyApplicationComponent pMyApplicationComponent, String pId) {
+      this.mMyApplicationComponent = pMyApplicationComponent;
+      this.mId = Checks.checkInputNotNull(pId);
+    }
+
+    @Override
+    public MyApplicationManager getAppManager() {
+      return this.accessMyApplicationManagerImpl();
+    }
+
+    @Override
+    public Lazy<MyApplicationManager> getAppManagerLazy() {
+      return new CachingProviderImpl(this, 1);
+    }
+
+    @Override
+    public Provider<MyApplicationManager> getAppManagerProvider() {
+      return new ProviderImpl(this, 1);
+    }
+
+    @Override
+    public MyFragmentComponent.Factory getFragmentFactory() {
+      return new MyFragmentComponentImpl.ComponentFactoryImpl(this.mMyApplicationComponent, this);
+    }
+
+    Object switch$$access(int slot) {
+      switch(slot) {
+        case 0: return this.mId;
+        case 1: return this.accessMyApplicationManagerImpl();
+        default: throw new AssertionError();
+      }
+    }
+
+    MyApplicationManagerImpl accessMyApplicationManagerImpl() {
+      return new MyApplicationManagerImpl(this.mMyApplicationComponent.cacheMyApplicationControllerImpl(), this.mMyApplicationComponent.mAppId);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class MyFragmentComponentImpl implements MyFragmentComponent {
+      private Object mFragmentControllerInstance;
+
+      final Yatagan$MyApplicationComponent mMyApplicationComponent;
+
+      final MyActivityComponentImpl mMyActivityComponent;
+
+      MyFragmentComponentImpl(Yatagan$MyApplicationComponent pMyApplicationComponent,
+          MyActivityComponentImpl pMyActivityComponent) {
+        this.mMyApplicationComponent = pMyApplicationComponent;
+        this.mMyActivityComponent = pMyActivityComponent;
+      }
+
+      @Override
+      public MyApplicationManager getAppManager() {
+        return this.accessMyApplicationManagerImpl();
+      }
+
+      @Override
+      public Lazy<MyApplicationManager> getAppManagerLazy() {
+        return new CachingProviderImpl(this, 0);
+      }
+
+      @Override
+      public Provider<MyApplicationManager> getAppManagerProvider() {
+        return new ProviderImpl(this, 0);
+      }
+
+      @Override
+      public FragmentController getFragment() {
+        return this.cacheFragmentController();
+      }
+
+      Object switch$$access(int slot) {
+        switch(slot) {
+          case 0: return this.accessMyApplicationManagerImpl();
+          default: throw new AssertionError();
+        }
+      }
+
+      FragmentController cacheFragmentController() {
+        Object local = this.mFragmentControllerInstance;
+        if (local == null) {
+          ThreadAssertions.assertThreadAccess();
+          local = new FragmentController(new MyActivityController(this.mMyApplicationComponent, new Yatagan$MyApplicationComponent.CachingProviderImpl(this.mMyApplicationComponent, 1), new MyActivityComponentImpl.ProviderImpl(this.mMyActivityComponent, 0)));
+          this.mFragmentControllerInstance = local;
+        }
+        return (FragmentController) local;
+      }
+
+      MyApplicationManagerImpl accessMyApplicationManagerImpl() {
+        return new MyApplicationManagerImpl(this.mMyApplicationComponent.cacheMyApplicationControllerImpl(), this.mMyApplicationComponent.mAppId);
+      }
+
+      static final class ProviderImpl implements Lazy {
+        private final MyFragmentComponentImpl mDelegate;
+
+        private final int mIndex;
+
+        ProviderImpl(MyFragmentComponentImpl delegate, int index) {
+          this.mDelegate = delegate;
+          this.mIndex = index;
+        }
+
+        @Override
+        public Object get() {
+          return this.mDelegate.switch$$access(this.mIndex);
+        }
+      }
+
+      private static final class CachingProviderImpl implements Lazy {
+        private final MyFragmentComponentImpl mDelegate;
+
+        private final int mIndex;
+
+        private Object mValue;
+
+        CachingProviderImpl(MyFragmentComponentImpl factory, int index) {
+          mDelegate = factory;
+          mIndex = index;
+        }
+
+        @Override
+        public Object get() {
+          Object local = mValue;
+          if (local == null) {
+            ThreadAssertions.assertThreadAccess();
+            local = mDelegate.switch$$access(mIndex);
+            mValue = local;
+          }
+          return local;
+        }
+      }
+
+      private static final class ComponentFactoryImpl implements MyFragmentComponent.Factory {
+        Yatagan$MyApplicationComponent fMyApplicationComponent;
+
+        MyActivityComponentImpl fMyActivityComponent;
+
+        ComponentFactoryImpl(Yatagan$MyApplicationComponent fMyApplicationComponent,
+            MyActivityComponentImpl fMyActivityComponent) {
+          this.fMyApplicationComponent = fMyApplicationComponent;
+          this.fMyActivityComponent = fMyActivityComponent;
+        }
+
+        @Override
+        public MyFragmentComponent create() {
+          return new MyFragmentComponentImpl(this.fMyApplicationComponent, this.fMyActivityComponent);
+        }
+      }
+    }
+
+    static final class ProviderImpl implements Lazy {
+      private final MyActivityComponentImpl mDelegate;
+
+      private final int mIndex;
+
+      ProviderImpl(MyActivityComponentImpl delegate, int index) {
+        this.mDelegate = delegate;
+        this.mIndex = index;
+      }
+
+      @Override
+      public Object get() {
+        return this.mDelegate.switch$$access(this.mIndex);
+      }
+    }
+
+    private static final class CachingProviderImpl implements Lazy {
+      private final MyActivityComponentImpl mDelegate;
+
+      private final int mIndex;
+
+      private Object mValue;
+
+      CachingProviderImpl(MyActivityComponentImpl factory, int index) {
+        mDelegate = factory;
+        mIndex = index;
+      }
+
+      @Override
+      public Object get() {
+        Object local = mValue;
+        if (local == null) {
+          ThreadAssertions.assertThreadAccess();
+          local = mDelegate.switch$$access(mIndex);
+          mValue = local;
+        }
+        return local;
+      }
+    }
+
+    private static final class ComponentFactoryImpl implements MyActivityComponent.Factory {
+      Yatagan$MyApplicationComponent fMyApplicationComponent;
+
+      ComponentFactoryImpl(Yatagan$MyApplicationComponent fMyApplicationComponent) {
+        this.fMyApplicationComponent = fMyApplicationComponent;
+      }
+
+      @Override
+      public MyActivityComponent create(String id) {
+        return new MyActivityComponentImpl(this.fMyApplicationComponent, id);
+      }
+    }
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$MyApplicationComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$MyApplicationComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$MyApplicationComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$MyApplicationComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements MyApplicationComponent.Factory {
+    @Override
+    public MyApplicationComponent create(String appId) {
+      return new Yatagan$MyApplicationComponent(appId);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

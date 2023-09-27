@@ -84,6 +84,8 @@ internal object Names {
     const val List: String = "java.util.List"
     const val Set: String = "java.util.Set"
     const val Map: String = "java.util.Map"
+
+    const val Boolean: String = "java.lang.Boolean"
 }
 
 internal data class NodeDependencyImpl(

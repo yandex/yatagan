@@ -1,0 +1,153 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.ArrayList;
+import java.util.List;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent implements MyComponent {
+  private Object mCreateBInstance;
+
+  private Object mCreateDestroyAInstance;
+
+  private Object mCreateDestroyBInstance;
+
+  private Object mCreateDestroyCInstance;
+
+  private Object mDestroyAInstance;
+
+  final CreateX mX;
+
+  final MyDependency mMyDependency;
+
+  Yatagan$MyComponent(CreateX pX, MyDependency pDep) {
+    this.mX = Checks.checkInputNotNull(pX);
+    this.mMyDependency = Checks.checkInputNotNull(pDep);
+  }
+
+  @Override
+  public List<List<?>> getAllLists() {
+    return this.manyOfListListObject();
+  }
+
+  @Override
+  public List<Create> getBootstrapCreate() {
+    return this.accessListCreate();
+  }
+
+  @Override
+  public List<Destroy> getBootstrapDestroy() {
+    return this.accessListDestroy();
+  }
+
+  CreateB cacheCreateB() {
+    Object local = this.mCreateBInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new CreateB(new CreateA());
+      this.mCreateBInstance = local;
+    }
+    return (CreateB) local;
+  }
+
+  CreateDestroyA cacheCreateDestroyA() {
+    Object local = this.mCreateDestroyAInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new CreateDestroyA();
+      this.mCreateDestroyAInstance = local;
+    }
+    return (CreateDestroyA) local;
+  }
+
+  CreateDestroyB cacheCreateDestroyB() {
+    Object local = this.mCreateDestroyBInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new CreateDestroyB();
+      this.mCreateDestroyBInstance = local;
+    }
+    return (CreateDestroyB) local;
+  }
+
+  CreateDestroyC cacheCreateDestroyC() {
+    Object local = this.mCreateDestroyCInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new CreateDestroyC();
+      this.mCreateDestroyCInstance = local;
+    }
+    return (CreateDestroyC) local;
+  }
+
+  DestroyA cacheDestroyA() {
+    Object local = this.mDestroyAInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new DestroyA();
+      this.mDestroyAInstance = local;
+    }
+    return (DestroyA) local;
+  }
+
+  List<Destroy> accessListDestroy() {
+    return this.manyOfListDestroy();
+  }
+
+  List<Create> accessListCreate() {
+    return this.manyOfListCreate();
+  }
+
+  List<List<?>> manyOfListListObject() {
+    final List<List<?>> c = new ArrayList<>(3);
+    c.add(Checks.checkProvisionNotNull(MyModule.Companion.myListOfNumbers()));
+    c.add(this.accessListDestroy());
+    c.add(this.accessListCreate());
+    return c;
+  }
+
+  List<Destroy> manyOfListDestroy() {
+    final List<Destroy> c = new ArrayList<>(5);
+    c.add(Checks.checkProvisionNotNull(MyModule.Companion.createDestroyD()));
+    c.add(this.cacheCreateDestroyA());
+    c.add(this.cacheCreateDestroyB());
+    c.add(this.cacheCreateDestroyC());
+    c.add(this.cacheDestroyA());
+    return c;
+  }
+
+  List<Create> manyOfListCreate() {
+    final List<Create> c = new ArrayList<>(11);
+    c.add(Checks.checkProvisionNotNull(MyModule.Companion.createDestroyD()));
+    c.add(new CreateA());
+    c.add(this.cacheCreateB());
+    c.add(this.cacheCreateDestroyA());
+    c.add(this.cacheCreateDestroyB());
+    c.add(this.cacheCreateDestroyC());
+    c.add(this.mMyDependency);
+    c.add(this.mMyDependency.getMyNewCreate1());
+    c.add(this.mMyDependency.getMyNewCreate2());
+    c.add(this);
+    c.add(this.mX);
+    return c;
+  }
+
+  public static MyComponent.Builder builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class ComponentFactoryImpl implements MyComponent.Builder {
+    @Override
+    public MyComponent create(CreateX x, MyDependency dep) {
+      return new Yatagan$MyComponent(x, dep);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

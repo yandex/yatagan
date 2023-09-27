@@ -1,0 +1,143 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MySTComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MySTComponent implements MySTComponent {
+  private Object mMyClassAInstance;
+
+  private Object mMyClassBInstance;
+
+  private Object mMyClassCInstance;
+
+  private Yatagan$MySTComponent() {
+  }
+
+  @Override
+  public Lazy<MyClassA> getA() {
+    return new ProviderImpl(this, 0);
+  }
+
+  @Override
+  public MyClassB getB() {
+    return this.cacheMyClassB();
+  }
+
+  @Override
+  public MyClassC getC() {
+    return this.cacheMyClassC();
+  }
+
+  @Override
+  public Lazy<MyClassD> getD() {
+    return new CachingProviderImpl(this, 1);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.cacheMyClassA();
+      case 1: return new MyClassD();
+      default: throw new AssertionError();
+    }
+  }
+
+  MyClassA cacheMyClassA() {
+    Object local = this.mMyClassAInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new MyClassA();
+      this.mMyClassAInstance = local;
+    }
+    return (MyClassA) local;
+  }
+
+  MyClassB cacheMyClassB() {
+    Object local = this.mMyClassBInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new MyClassB();
+      this.mMyClassBInstance = local;
+    }
+    return (MyClassB) local;
+  }
+
+  MyClassC cacheMyClassC() {
+    Object local = this.mMyClassCInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new MyClassC();
+      this.mMyClassCInstance = local;
+    }
+    return (MyClassC) local;
+  }
+
+  public static AutoBuilder<Yatagan$MySTComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final Yatagan$MySTComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(Yatagan$MySTComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$MySTComponent mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$MySTComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MySTComponent> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$MySTComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MySTComponent create() {
+      return new Yatagan$MySTComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

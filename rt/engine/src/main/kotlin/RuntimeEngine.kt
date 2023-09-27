@@ -58,6 +58,7 @@ class RuntimeEngine(
         var maxIssueEncounterPaths: Int = 5,
         var isStrictMode: Boolean = true,
         var usePlainOutput: Boolean = false,
+        var allConditionsLazy: Boolean = false,
     )
 
     init {
@@ -182,6 +183,7 @@ class RuntimeEngine(
     }
 
     private fun createGraphOptions() = Options(
+        allConditionsLazy = params.allConditionsLazy,
     )
 
     private companion object {

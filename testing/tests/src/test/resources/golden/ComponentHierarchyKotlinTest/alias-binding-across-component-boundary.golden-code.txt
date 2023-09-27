@@ -1,0 +1,61 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TestComponent.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$TestComponent implements TestComponent {
+  final MyImpl mImpl;
+
+  Yatagan$TestComponent(MyImpl pImpl) {
+    this.mImpl = Checks.checkInputNotNull(pImpl);
+  }
+
+  @Override
+  public TestSubComponent.Creator getSub() {
+    return new TestSubComponentImpl.ComponentFactoryImpl(this);
+  }
+
+  public static TestComponent.Creator builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class TestSubComponentImpl implements TestSubComponent {
+    final Yatagan$TestComponent mTestComponent;
+
+    TestSubComponentImpl(Yatagan$TestComponent pTestComponent) {
+      this.mTestComponent = pTestComponent;
+    }
+
+    @Override
+    public Consumer getConsumer() {
+      return new Consumer(this.mTestComponent.mImpl);
+    }
+
+    private static final class ComponentFactoryImpl implements TestSubComponent.Creator {
+      Yatagan$TestComponent fTestComponent;
+
+      ComponentFactoryImpl(Yatagan$TestComponent fTestComponent) {
+        this.fTestComponent = fTestComponent;
+      }
+
+      @Override
+      public TestSubComponent create() {
+        return new TestSubComponentImpl(this.fTestComponent);
+      }
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements TestComponent.Creator {
+    @Override
+    public TestComponent create(MyImpl impl) {
+      return new Yatagan$TestComponent(impl);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

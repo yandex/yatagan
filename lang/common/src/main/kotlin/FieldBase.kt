@@ -25,4 +25,14 @@ abstract class FieldBase : Field {
     }
 
     final override fun toString() = "$owner::$name: $type"
+
+    final override fun compareTo(other: Field): Int {
+        if (this === other) return 0
+
+        name.compareTo(other.name).let { if (it != 0) return it }
+        owner.compareTo(other.owner).let { if (it != 0) return it }
+        type.compareTo(other.type).let { if (it != 0) return it }
+
+        return 0
+    }
 }

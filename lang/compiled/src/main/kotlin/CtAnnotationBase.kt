@@ -16,8 +16,12 @@
 
 package com.yandex.yatagan.lang.compiled
 
+import com.yandex.yatagan.ConditionsApi
+import com.yandex.yatagan.ValueOf
+import com.yandex.yatagan.base.ifOrElseNull
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.Annotation.Value
+import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.common.AnnotationBase
 
@@ -41,8 +45,19 @@ abstract class CtAnnotationBase : AnnotationBase() {
         return attributeValue(attribute).accept(AsString)
     }
 
+    fun getAnnotation(attribute: String): CtAnnotationBase {
+        return attributeValue(attribute).accept(AsAnnotation)
+    }
+
     fun getAnnotations(attribute: String): List<CtAnnotationBase> {
         return attributeValue(attribute).accept(AsAnnotations)
+    }
+
+    @OptIn(ConditionsApi::class)
+    override fun <T : BuiltinAnnotation.CanBeCastedOut> asBuiltin(which: BuiltinAnnotation.Target.CanBeCastedOut<T>): T? {
+        return which.modelClass.cast(when(which) {
+            BuiltinAnnotation.ValueOf -> ifOrElseNull(hasType<ValueOf>()) { CtValueOfAnnotationImpl(this) }
+        })
     }
 
     private fun attributeValue(attribute: String): Value {

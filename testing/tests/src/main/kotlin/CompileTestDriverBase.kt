@@ -20,6 +20,7 @@ import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
 import androidx.room.compiler.processing.util.compiler.compile
 import com.yandex.yatagan.generated.CompiledApiClasspath
 import com.yandex.yatagan.generated.DynamicApiClasspath
+import com.yandex.yatagan.processor.common.BooleanOption
 import com.yandex.yatagan.processor.common.IntOption
 import com.yandex.yatagan.processor.common.LoggerDecorator
 import com.yandex.yatagan.processor.common.Option
@@ -43,6 +44,7 @@ abstract class CompileTestDriverBase private constructor(
     private val options = mutableMapOf(
         IntOption.MaxIssueEncounterPaths.key to "100",
         IntOption.MaxSlotsPerSwitch.key to "100",
+        BooleanOption.SortMethodsForTesting.key to "true",
     )
 
     protected constructor(
@@ -52,7 +54,7 @@ abstract class CompileTestDriverBase private constructor(
     override val testNameRule = TestNameRule()
 
     final override fun givenPrecompiledModule(sources: SourceSet) {
-        if(precompiledModuleOutputDirs != null) {
+        if (precompiledModuleOutputDirs != null) {
             throw UnsupportedOperationException("Multiple precompiled modules are not supported")
         }
 
@@ -105,7 +107,9 @@ abstract class CompileTestDriverBase private constructor(
     }
 
     override fun compileRunAndValidate() {
-        val goldenResourcePath = "golden/${testNameRule.testClassSimpleName}/${testNameRule.testMethodName}.golden.txt"
+        val goldenResourceBasePath = "golden/${testNameRule.testClassSimpleName}/${testNameRule.testMethodName}"
+        val goldenResourcePath = "$goldenResourceBasePath.golden.txt"
+        val goldenCodeResourcePath = "$goldenResourceBasePath.golden-code.txt"
 
         val (workingDir, runtimeClasspath, messageLog, success, generatedFiles) = doCompile()
         val strippedLog = normalizeMessages(messageLog.ensureLineEndings())
@@ -119,6 +123,24 @@ abstract class CompileTestDriverBase private constructor(
                 goldenSourcePath.writeText(strippedLog)
             }
             println("Updated $goldenSourcePath")
+
+            if (generatedFilesSubDir() != null) {
+                val goldenCodeSourcePath = Path(goldenSourceDirForUpdate).resolve(goldenCodeResourcePath)
+                if (generatedFiles.isEmpty()) {
+                    goldenCodeSourcePath.deleteIfExists()
+                } else {
+                    goldenCodeSourcePath.parent.createDirectories()
+                    goldenCodeSourcePath.writeText(buildString {
+                        for (generatedFile in generatedFiles) {
+                            appendLine(MessageSeparator)
+                            append("Name: ").appendLine(generatedFile.relativePath)
+                            appendLine(generatedFile.contents)
+                        }
+                        appendLine(MessageSeparator)
+                    })
+                }
+                println("Updated $goldenCodeResourcePath")
+            }
             return
         }
 
@@ -141,6 +163,23 @@ abstract class CompileTestDriverBase private constructor(
             } else {
                 System.err.println(messageLog)
                 Assert.assertTrue("Compilation failed, yet expected output is blank", goldenOutput.isNotBlank())
+            }
+
+            generatedFilesSubDir()?.let {
+                val goldenFiles = GoldenSourceRegex.findAll(
+                        javaClass.getResourceAsStream("/$goldenCodeResourcePath")
+                                ?.bufferedReader()?.readText() ?: ""
+                ).associateByTo(
+                        destination = mutableMapOf(),
+                        keySelector = { it.groupValues[1] },
+                        valueTransform = { it.groupValues[2].trim() },
+                )
+
+                for (generatedFile in generatedFiles) {
+                    val goldenContents = goldenFiles.remove(generatedFile.relativePath) ?: "<unexpected file>"
+                    Assert.assertEquals("Generated file '${generatedFile.relativePath}' doesn't match the golden",
+                            goldenContents, generatedFile.contents.trim())
+                }
             }
         } finally {
             generatedFilesSubDir()?.let { generatedFilesSubDir ->
@@ -166,12 +205,14 @@ abstract class CompileTestDriverBase private constructor(
         inheritClasspath = false,
         javacArguments = listOf(
             "-Xdiags:verbose",
+            "-parameters",
         ),
         kotlincArguments = listOf(
             "-opt-in=com.yandex.yatagan.ConditionsApi",
             "-opt-in=com.yandex.yatagan.VariantApi",
             "-P", "plugin:org.jetbrains.kotlin.kapt3:correctErrorTypes=true",
             "-jvm-target=11",
+            "-java-parameters",
         ),
         processorOptions = options,
     )
@@ -218,6 +259,9 @@ abstract class CompileTestDriverBase private constructor(
         private val AnsiColorSequenceRegex = "\u001b\\[.*?m".toRegex()
 
         private val MessageSeparator = "~".repeat(80)
+
+        private val GoldenSourceRegex = """$MessageSeparator\nName: (.*?)\n(.*?)(?=$MessageSeparator)"""
+            .toRegex(RegexOption.DOT_MATCHES_ALL)
 
         val goldenSourceDirForUpdate: String? = System.getProperty("com.yandex.yatagan.updateGoldenFiles")
 

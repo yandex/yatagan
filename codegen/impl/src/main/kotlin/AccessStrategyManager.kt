@@ -32,6 +32,7 @@ import javax.inject.Singleton
 @Singleton
 internal class AccessStrategyManager @Inject constructor(
     private val thisGraph: BindingGraph,
+    private val options: ComponentGenerator.Options,
     private val cachingStrategySingleThreadFactory: CachingStrategySingleThreadFactory,
     private val cachingStrategyMultiThreadFactory: CachingStrategyMultiThreadFactory,
     private val slotProviderStrategyFactory: SlotProviderStrategyFactory,
@@ -188,8 +189,10 @@ internal class AccessStrategyManager @Inject constructor(
     )
 
     override fun generate(builder: TypeSpecBuilder) {
-        strategies.values.forEach {
-            it.generateInComponent(builder)
+        strategies.entries.let { strategies ->
+            if (options.sortMethodsForTesting) strategies.sortedBy { it.key } else strategies
+        }.forEach { (_, strategy) ->
+            strategy.generateInComponent(builder)
         }
     }
 

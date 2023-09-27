@@ -20,6 +20,8 @@ package com.yandex.yatagan.core.graph.impl
  * Options, customizing graph building behavior in various ways.
  */
 data class Options(
-    // Yet
-    val nothing: Nothing? = null,
+    /**
+     * Whether to generate all conditions with lazy evaluation.
+     */
+    val allConditionsLazy: Boolean,
 )

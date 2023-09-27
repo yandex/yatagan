@@ -33,8 +33,10 @@ import javax.inject.Singleton
 internal class MapBindingGenerator @Inject constructor(
     @MethodsNamespace methodsNs: Namespace,
     private val thisGraph: BindingGraph,
+    options: ComponentGenerator.Options,
 ) : MultiBindingGeneratorBase<MapBinding>(
     methodsNs = methodsNs,
+    options = options,
     bindings = thisGraph.localBindings.keys.filterIsInstance<MapBinding>(),
     accessorPrefix = "mapOf",
 ) {

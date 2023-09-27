@@ -31,8 +31,10 @@ import javax.inject.Singleton
 internal class CollectionBindingGenerator @Inject constructor (
     @MethodsNamespace methodsNs: Namespace,
     private val thisGraph: BindingGraph,
+    options: ComponentGenerator.Options,
 ) : MultiBindingGeneratorBase<MultiBinding>(
     methodsNs = methodsNs,
+    options = options,
     bindings = thisGraph.localBindings.keys.filterIsInstance<MultiBinding>(),
     accessorPrefix = "manyOf",
 ) {

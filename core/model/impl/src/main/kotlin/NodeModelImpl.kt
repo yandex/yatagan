@@ -161,16 +161,24 @@ internal class NodeModelImpl private constructor(
     }
 
     override fun getSpecificModel(): HasNodeModel? {
-        val declaration = type.declaration
-        val inject = if (qualifier == null) {
-            declaration.constructors.find { it.getAnnotation(BuiltinAnnotation.Inject) != null }
-        } else null
-        return when {
-            inject != null -> InjectConstructorImpl(inject)
-            AssistedInjectFactoryModelImpl.canRepresent(declaration) -> AssistedInjectFactoryModelImpl(declaration)
-            ComponentFactoryWithBuilderModelImpl.canRepresent(declaration) -> ComponentFactoryWithBuilderModelImpl(declaration)
-            ComponentModelImpl.canRepresent(declaration) -> ComponentModelImpl(declaration)
-            else -> null
+        return if (qualifier != null) {
+            when {
+                InjectedConditionExpressionModelImpl.canRepresent(qualifier) ->
+                    InjectedConditionExpressionModelImpl(this)
+                else -> null
+            }
+        } else {
+            val declaration = type.declaration
+            val inject = declaration.constructors.find { it.getAnnotation(BuiltinAnnotation.Inject) != null }
+            when {
+                inject != null -> InjectConstructorImpl(inject)
+                AssistedInjectFactoryModelImpl.canRepresent(declaration) -> AssistedInjectFactoryModelImpl(declaration)
+                ComponentFactoryWithBuilderModelImpl.canRepresent(declaration) -> ComponentFactoryWithBuilderModelImpl(
+                    declaration)
+
+                ComponentModelImpl.canRepresent(declaration) -> ComponentModelImpl(declaration)
+                else -> null
+            }
         }
     }
 
