@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Internal
 import com.yandex.yatagan.base.api.StableForImplementation
 
 /**
@@ -48,6 +49,7 @@ public interface Annotation : HasPlatformModel {
      * @return a builtin annotation model of requested kind,
      * or `null` if the underlying annotation is not a requested builtin.
      */
+    @Internal
     public fun <T : BuiltinAnnotation.CanBeCastedOut> asBuiltin(which: BuiltinAnnotation.Target.CanBeCastedOut<T>): T?
 
     /**

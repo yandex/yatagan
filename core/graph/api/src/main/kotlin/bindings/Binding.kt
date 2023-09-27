@@ -58,6 +58,7 @@ public interface Binding : BaseBinding {
     /**
      * Binding dependencies on condition models (not all are necessarily from its [conditionScope]).
      */
+    @Incubating
     public val dependenciesOnConditions: List<ConditionModel>
 
     /**
@@ -85,7 +86,7 @@ public interface Binding : BaseBinding {
         public fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R = visitOther(binding)
         public fun visitMulti(binding: MultiBinding): R = visitOther(binding)
         public fun visitMap(binding: MapBinding): R = visitOther(binding)
-        public fun visitConditionExpressionValue(binding: ConditionExpressionValueBinding): R
+        @Incubating public fun visitConditionExpressionValue(binding: ConditionExpressionValueBinding): R = visitOther(binding)
         public fun visitEmpty(binding: EmptyBinding): R = visitOther(binding)
     }
 }

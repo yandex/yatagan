@@ -176,6 +176,7 @@ public interface SubComponentBinding : Binding {
     public val targetGraph: BindingGraph
 }
 
+@Incubating
 public interface ConditionExpressionValueBinding : Binding {
     public val model: InjectedConditionExpressionModel
 }

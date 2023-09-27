@@ -53,6 +53,9 @@ abstract class CompileTestDriverBase private constructor(
 
     override val testNameRule = TestNameRule()
 
+    protected open val checkGoldenOutput: Boolean
+        get() = true
+
     final override fun givenPrecompiledModule(sources: SourceSet) {
         if (precompiledModuleOutputDirs != null) {
             throw UnsupportedOperationException("Multiple precompiled modules are not supported")
@@ -124,7 +127,7 @@ abstract class CompileTestDriverBase private constructor(
             }
             println("Updated $goldenSourcePath")
 
-            if (generatedFilesSubDir() != null) {
+            if (checkGoldenOutput && generatedFilesSubDir() != null) {
                 val goldenCodeSourcePath = Path(goldenSourceDirForUpdate).resolve(goldenCodeResourcePath)
                 if (generatedFiles.isEmpty()) {
                     goldenCodeSourcePath.deleteIfExists()
@@ -165,7 +168,7 @@ abstract class CompileTestDriverBase private constructor(
                 Assert.assertTrue("Compilation failed, yet expected output is blank", goldenOutput.isNotBlank())
             }
 
-            generatedFilesSubDir()?.let {
+            generatedFilesSubDir().takeIf { checkGoldenOutput }?.let {
                 val goldenFiles = GoldenSourceRegex.findAll(
                         javaClass.getResourceAsStream("/$goldenCodeResourcePath")
                                 ?.bufferedReader()?.readText() ?: ""

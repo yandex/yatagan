@@ -16,12 +16,17 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
+import com.yandex.yatagan.base.api.NullIfInvalid
+
 /**
  * Models a `@ValueOf(...) flag: Boolean` kind of [NodeModel]s.
  */
+@Incubating
 public interface InjectedConditionExpressionModel : HasNodeModel {
     /**
-     * `null` if invalid.
+     * Boolean expression, value of which has to be evaluated to be injected.
      */
+    @NullIfInvalid
     public val expression: ConditionScope.ExpressionScope?
 }

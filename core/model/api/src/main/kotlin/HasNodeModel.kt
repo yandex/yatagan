@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model
 
+import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.base.api.StableForImplementation
 
 /**
@@ -42,6 +43,6 @@ public interface HasNodeModel : ClassBackedModel {
         public fun visitComponentFactory(model: ComponentFactoryWithBuilderModel): R = visitOther()
         public fun visitAssistedInjectFactory(model: AssistedInjectFactoryModel): R = visitOther()
         public fun visitInjectConstructor(model: InjectConstructorModel): R = visitOther()
-        public fun visitConditionExpression(model: InjectedConditionExpressionModel): R = visitDefault()
+        @Incubating public fun visitConditionExpression(model: InjectedConditionExpressionModel): R = visitOther()
     }
 }

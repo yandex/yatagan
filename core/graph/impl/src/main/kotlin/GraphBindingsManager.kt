@@ -474,6 +474,7 @@ internal class GraphBindingsManager(
     )
 
     private object AliasEquivalenceSelector : BaseBinding.Visitor<Any> {
+        override fun visitOther(other: BaseBinding) = throw AssertionError()
         override fun visitAlias(alias: AliasBinding): Pair<NodeModel, NodeModel> {
             // We compare aliases only as a pair {source; target} in terms of duplicate check.
             return alias.source to alias.target

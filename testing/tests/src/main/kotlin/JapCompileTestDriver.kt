@@ -23,6 +23,7 @@ import javax.annotation.processing.Processor
 
 class JapCompileTestDriver(
     private val customProcessorClasspath: String? = null,
+    override val checkGoldenOutput: Boolean = true,
 ): CompileTestDriverBase() {
     override fun createCompilationArguments() = super.createCompilationArguments().copy(
         kaptProcessors = listOf(loadProcessorFromCustomClasspath() ?: JapYataganProcessor()),

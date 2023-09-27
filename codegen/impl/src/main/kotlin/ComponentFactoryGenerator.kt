@@ -18,7 +18,6 @@ package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeVariableName
-import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildClass
 import com.yandex.yatagan.codegen.poetry.buildExpression
@@ -294,6 +293,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
 
     private fun allInputsSortedForTestingIfNeeded(factoryModel: ComponentFactoryModel) =
         factoryModel.accept(object : ComponentFactoryModel.Visitor<Collection<ComponentFactoryModel.InputModel>> {
+            override fun visitOther(model: ComponentFactoryModel) = throw AssertionError()
             override fun visitSubComponentFactoryMethod(model: SubComponentFactoryMethodModel) = model.factoryInputs
             override fun visitWithBuilder(model: ComponentFactoryWithBuilderModel) =
                 model.factoryInputs + this@ComponentFactoryGenerator.sortForTestingIfNeeded(model.builderInputs)

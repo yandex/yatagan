@@ -89,6 +89,9 @@ class DynamicCompileTestDriver(
         }
     """.trimIndent())
 
+    override val checkGoldenOutput: Boolean
+        get() = false
+
     override fun generatedFilesSubDir(): String? = null
 
     override fun <V : Any> givenOption(option: Option<V>, value: V) {

@@ -92,7 +92,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
 
         if (target.node.qualifier != null) {
             target.node.getSpecificModel().accept(object : HasNodeModel.Visitor<Unit> {
-                override fun visitDefault() = Unit
+                override fun visitOther() = Unit
                 override fun visitConditionExpression(model: InjectedConditionExpressionModel) {
                     validator.reportError(Errors.manualBindingForConditionValue())
                 }

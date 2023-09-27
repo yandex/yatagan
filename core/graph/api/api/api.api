@@ -78,6 +78,7 @@ public abstract interface class com/yandex/yatagan/core/graph/bindings/Binding :
 	public abstract fun accept (Lcom/yandex/yatagan/core/graph/bindings/Binding$Visitor;)Ljava/lang/Object;
 	public abstract fun getConditionScope ()Lcom/yandex/yatagan/core/model/ConditionScope;
 	public abstract fun getDependencies ()Ljava/util/List;
+	public abstract fun getDependenciesOnConditions ()Ljava/util/List;
 	public abstract fun getNonStaticConditionProviders ()Ljava/util/Set;
 	public abstract fun getScopes ()Ljava/util/Set;
 }

@@ -163,6 +163,10 @@ public abstract interface class com/yandex/yatagan/ThreadAsserter {
 	public abstract fun assertThreadAccess ()V
 }
 
+public abstract interface annotation class com/yandex/yatagan/ValueOf : java/lang/annotation/Annotation {
+	public abstract fun value ()Lcom/yandex/yatagan/ConditionExpression;
+}
+
 public abstract interface annotation class com/yandex/yatagan/VariantApi : java/lang/annotation/Annotation {
 }
 

@@ -83,9 +83,11 @@ public operator fun Member.compareTo(other: Member): Int {
 
 public object MemberComparator : Comparator<Member> {
     override fun compare(one: Member, other: Member): Int = one.accept(object : Member.Visitor<Int> {
+        override fun visitOther(model: Member) = throw AssertionError()
         override fun visitMethod(model: Method): Int {
             val thisMethod = model
             return other.accept(object : Member.Visitor<Int> {
+                override fun visitOther(model: Member) = throw AssertionError()
                 override fun visitMethod(model: Method) = thisMethod.compareTo(model)
                 override fun visitField(model: Field) = +1  // Method is greater than field by convention
             })
@@ -94,6 +96,7 @@ public object MemberComparator : Comparator<Member> {
         override fun visitField(model: Field): Int {
             val thisField = model
             return other.accept(object : Member.Visitor<Int> {
+                override fun visitOther(model: Member) = throw AssertionError()
                 override fun visitMethod(model: Method) = -1  // Field is lesser than method by convention
                 override fun visitField(model: Field) = thisField.compareTo(model)
             })

@@ -97,6 +97,7 @@ public final class com/yandex/yatagan/lang/Constructor$DefaultImpls {
 }
 
 public final class com/yandex/yatagan/lang/ExtensionsKt {
+	public static final fun compareTo (Lcom/yandex/yatagan/lang/Member;Lcom/yandex/yatagan/lang/Member;)I
 	public static final fun getCollectionType (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;Z)Lcom/yandex/yatagan/lang/Type;
 	public static synthetic fun getCollectionType$default (Lcom/yandex/yatagan/lang/LangModelFactory;Lcom/yandex/yatagan/lang/Type;ZILjava/lang/Object;)Lcom/yandex/yatagan/lang/Type;
 	public static final fun getFunctionsWithCompanion (Lcom/yandex/yatagan/lang/TypeDeclaration;)Lkotlin/sequences/Sequence;
@@ -109,7 +110,7 @@ public final class com/yandex/yatagan/lang/ExtensionsKt {
 	public static final fun isKotlinObject (Lcom/yandex/yatagan/lang/TypeDeclaration;)Z
 }
 
-public abstract interface class com/yandex/yatagan/lang/Field : com/yandex/yatagan/lang/Member {
+public abstract interface class com/yandex/yatagan/lang/Field : com/yandex/yatagan/lang/Member, java/lang/Comparable {
 	public abstract fun getType ()Lcom/yandex/yatagan/lang/Type;
 }
 
@@ -171,6 +172,12 @@ public abstract interface class com/yandex/yatagan/lang/Member$Visitor {
 public final class com/yandex/yatagan/lang/Member$Visitor$DefaultImpls {
 	public static fun visitField (Lcom/yandex/yatagan/lang/Member$Visitor;Lcom/yandex/yatagan/lang/Field;)Ljava/lang/Object;
 	public static fun visitMethod (Lcom/yandex/yatagan/lang/Member$Visitor;Lcom/yandex/yatagan/lang/Method;)Ljava/lang/Object;
+}
+
+public final class com/yandex/yatagan/lang/MemberComparator : java/util/Comparator {
+	public static final field INSTANCE Lcom/yandex/yatagan/lang/MemberComparator;
+	public fun compare (Lcom/yandex/yatagan/lang/Member;Lcom/yandex/yatagan/lang/Member;)I
+	public synthetic fun compare (Ljava/lang/Object;Ljava/lang/Object;)I
 }
 
 public abstract interface class com/yandex/yatagan/lang/Method : com/yandex/yatagan/lang/Callable, com/yandex/yatagan/lang/Member, java/lang/Comparable {

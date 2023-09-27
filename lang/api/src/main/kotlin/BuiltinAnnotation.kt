@@ -58,6 +58,7 @@ public sealed interface BuiltinAnnotation {
         @Internal
         public sealed interface OnField<T : BuiltinAnnotation.OnField> : Target<T>
 
+        @Internal
         public sealed interface CanBeCastedOut<T : BuiltinAnnotation.CanBeCastedOut> : Target<T>
     }
 
@@ -85,6 +86,7 @@ public sealed interface BuiltinAnnotation {
     @Internal
     public sealed interface OnField : BuiltinAnnotation
 
+    @Internal
     public sealed interface CanBeCastedOut : BuiltinAnnotation
 
     /**
@@ -340,9 +342,11 @@ public sealed interface BuiltinAnnotation {
         }
     }
 
+    @Internal
     public interface ValueOf : CanBeCastedOut {
         public val value: ConditionExpression
 
+        @Internal
         public companion object : Target.CanBeCastedOut<ValueOf> {
             override val modelClass: Class<ValueOf> get() = ValueOf::class.java
         }

@@ -46,6 +46,7 @@ class LoaderCompatibilityTest(
     @Test
     fun `'create' is compatible with code generated with `() = with(JapCompileTestDriver(
         customProcessorClasspath = kaptClasspath,
+        checkGoldenOutput = false,
     )) {
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*
@@ -70,6 +71,7 @@ class LoaderCompatibilityTest(
     @Test
     fun `'builder' is compatible with code generated `() = with(JapCompileTestDriver(
         customProcessorClasspath = kaptClasspath,
+        checkGoldenOutput = false,
     )) {
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*
@@ -98,6 +100,7 @@ class LoaderCompatibilityTest(
     @Test
     fun `'autoBuilder' is compatible with code generated `() = with(JapCompileTestDriver(
         customProcessorClasspath = kaptClasspath,
+        checkGoldenOutput = false,
     )) {
         Assume.assumeTrue(version >= "1.2.0")  // Auto-builder was added in 1.2.0
 
