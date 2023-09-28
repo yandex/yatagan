@@ -34,5 +34,4 @@ yataganDogFood-ksp = { module = "com.yandex.yatagan:processor-ksp", version.ref 
 # Testing libraries
 testing-roomCompileTesting = "androidx.room:room-compiler-processing-testing:2.6.0-alpha01"
 testing-junit4 = "junit:junit:4.13.2"
-testing-mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:5.1.0"
 testing-assertj = "org.assertj:assertj-core:3.24.2"

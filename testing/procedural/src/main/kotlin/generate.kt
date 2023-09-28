@@ -566,8 +566,7 @@ fun generate(
                 val t = TypeVariableName("T", ClassNames.Any).copy(reified = true)
                 addTypeVariable(t)
                 returns(t)
-                addCode("return %M<%T>(stubOnly = true, defaultAnswer = %T.RETURNS_DEEP_STUBS)",
-                    ClassNames.mock, t, ClassNames.Answers)
+                addCode("return mock(T::class.java)")
             }
             .build())
         .addFunction(FunSpec.builder(testMethodName)
@@ -618,6 +617,32 @@ fun generate(
     output.givenKotlinSource(
         name = "test.TestCase",
         source = codeBuilder.toString(),
+        addPackageDirective = false,
+    )
+    output.givenKotlinSource(
+        name = "test.Mock",
+        source = """
+            package test
+            
+            import java.lang.reflect.InvocationHandler
+            import java.lang.reflect.Method
+            import java.lang.reflect.Proxy
+            import java.lang.Void
+            
+            class SimpleMock : InvocationHandler {
+                override fun invoke(thisRef: Any, method: Method, args: Array<out Any>?): Any? = when (method.name) {
+                    "equals" -> thisRef === args!!.first()
+                    "hashCode" -> System.identityHashCode(thisRef)
+                    "toString" -> "Mock" + System.identityHashCode(thisRef)
+                    else -> when(val type = method.returnType) {
+                        Void.TYPE -> null
+                        else -> mock(type)
+                    }
+                }
+            }
+            fun <T> mock(clazz: Class<T>): T =
+                clazz.cast(Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), SimpleMock()))
+        """.trimIndent(),
         addPackageDirective = false,
     )
 }

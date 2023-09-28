@@ -61,7 +61,6 @@ dependencies {
     // For strings
     testImplementation(project(":validation:format"))
 
-    baseTestRuntime(libs.testing.mockito.kotlin.get())  // required for heavy tests
     dynamicTestRuntime(project(":api:dynamic"))
     compiledTestRuntime(project(":api:public"))
 
