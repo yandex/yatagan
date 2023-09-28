@@ -458,6 +458,7 @@ class ConditionsTest(
 
             @Conditional(Conditions.FeatureA::class) class ClassA @Inject constructor()
             @Conditional(Conditions.FeatureA::class) class ClassB @Inject constructor()
+            @Conditional(Conditions.FeatureA::class) class ClassС @Inject constructor()
 
             @Component interface RootComponent {
                 val dummy: Optional<ClassA>
@@ -469,6 +470,20 @@ class ConditionsTest(
             }
 
             @Component(isRoot = false) interface Sub2Component {
+                val dummy: Optional<ClassB>
+            }
+
+            @Component interface RootComponent2 {
+                val dummy: Optional<ClassA>
+                fun createSub(): SubComponent2
+            }
+
+            @Component(isRoot = false) interface SubComponent2 {
+                val dummy: Optional<ClassС>
+                fun createSub2(): Sub2Component2
+            }
+
+            @Component(isRoot = false) interface Sub2Component2 {
                 val dummy: Optional<ClassB>
             }
         """.trimIndent())

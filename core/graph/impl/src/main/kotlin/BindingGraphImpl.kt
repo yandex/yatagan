@@ -238,6 +238,21 @@ internal class BindingGraphImpl(
                 }
             }
         }
+        if (isRoot) {
+            // Start from the root and go down to each child.
+            distributeLocalConditionsAndFactories()
+
+            // Propagate used parents up the hierarchy to close the gaps.
+            for (child in childrenSequence(includeThis = false).toList().asReversed()) {
+                (child as BindingGraphImpl).parent?.let { parent ->
+                    // Add every used parent to the parent (except itself, if present)
+                    parent.usedParents += child.usedParents - parent
+                }
+            }
+        }
+    }
+
+    private fun distributeLocalConditionsAndFactories() {
         // Remove all local condition literals/assisted inject factories from every child (in-depth).
         for (child in childrenSequence(includeThis = false)) {
             child as BindingGraphImpl
@@ -245,13 +260,10 @@ internal class BindingGraphImpl(
             val usesAssistedInjectFactories = child.localAssistedInjectFactories.removeAll(localAssistedInjectFactories)
             if (usesConditions || usesAssistedInjectFactories) {
                 // This will never be seen by materialization and that's okay, because no bindings are required here.
-
-                // Walk up until `this` adding `this` to used parents.
-                for (graph in child.parentsSequence(includeThis = true)) {
-                    if (graph === this) break
-                    (graph as BindingGraphImpl).usedParents += this
-                }
+                child.usedParents += this
             }
+
+            child.distributeLocalConditionsAndFactories()
         }
     }
 
