@@ -82,3 +82,96 @@ public final class Yatagan$RootComponent implements RootComponent {
 }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$RootComponent2.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$RootComponent2 implements RootComponent2 {
+  final boolean mFeaturesFooBar = Features.fooBar();
+
+  private Yatagan$RootComponent2() {
+  }
+
+  @Override
+  public SubComponent2 createSub() {
+    return new SubComponent2Impl(this);
+  }
+
+  @Override
+  public Optional<ClassA> getDummy() {
+    return this.optOfClassA();
+  }
+
+  Optional optOfClassA() {
+    return this.mFeaturesFooBar ? Optional.of(new ClassA()) : Optional.empty();
+  }
+
+  public static AutoBuilder<Yatagan$RootComponent2> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+  static final class SubComponent2Impl implements SubComponent2 {
+    final Yatagan$RootComponent2 mRootComponent2;
+
+    private SubComponent2Impl(Yatagan$RootComponent2 pRootComponent2) {
+      this.mRootComponent2 = pRootComponent2;
+    }
+
+    @Override
+    public Sub2Component2 createSub2() {
+      return new Sub2Component2Impl(this.mRootComponent2);
+    }
+
+    @Override
+    public Optional<ClassС> getDummy() {
+      return this.optOfClassС();
+    }
+
+    Optional optOfClassС() {
+      return this.mRootComponent2.mFeaturesFooBar ? Optional.of(new ClassС()) : Optional.empty();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+    static final class Sub2Component2Impl implements Sub2Component2 {
+      final Yatagan$RootComponent2 mRootComponent2;
+
+      private Sub2Component2Impl(Yatagan$RootComponent2 pRootComponent2) {
+        this.mRootComponent2 = pRootComponent2;
+      }
+
+      @Override
+      public Optional<ClassB> getDummy() {
+        return this.optOfClassB();
+      }
+
+      Optional optOfClassB() {
+        return this.mRootComponent2.mFeaturesFooBar ? Optional.of(new ClassB()) : Optional.empty();
+      }
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$RootComponent2> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$RootComponent2> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$RootComponent2 create() {
+      return new Yatagan$RootComponent2();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
