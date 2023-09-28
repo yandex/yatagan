@@ -17,7 +17,6 @@
 package com.yandex.yatagan.testing.procedural
 
 import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.MemberName
 
 internal object ClassNames {
     val BindsInstance = ClassName("com.yandex.yatagan", "BindsInstance")
@@ -35,9 +34,6 @@ internal object ClassNames {
     val Scope = ClassName("javax.inject", "Scope")
     val Inject = ClassName("javax.inject", "Inject")
     val Provider = ClassName("javax.inject", "Provider")
-
-    val mock = MemberName("org.mockito.kotlin", "mock")
-    val Answers = ClassName("org.mockito", "Answers")
 
     val Any = ClassName("kotlin", "Any")
     val Suppress = ClassName("kotlin", "Suppress")
