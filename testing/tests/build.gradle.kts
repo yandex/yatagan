@@ -112,7 +112,6 @@ val updateGoldenFiles by tasks.registering(Test::class) {
 
 tasks.test {
     // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
-    jvmArgs = listOf("-Xmx4G", "-Xms256m")
     shouldRunAfter(updateGoldenFiles)
 
     // Increasing this will likely get a negative effect on tests performance as kotlin-compilation seems to be shared
