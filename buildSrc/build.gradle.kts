@@ -14,6 +14,7 @@ dependencies {
 
     implementation(libs.kotlin.gradle)
     implementation(libs.kotlin.binaryCompatibilityGradle)
+    implementation(libs.kotlin.koverGradle)
     implementation(libs.dokka.gradle)
     implementation(libs.nexusPublish.gradle)
     implementation(libs.ksp.gradle)

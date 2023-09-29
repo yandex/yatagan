@@ -35,3 +35,7 @@ val yataganVersion: String by extra(
     providers.fileContents(rootProject.layout.projectDirectory.file("yatagan.version"))
         .asText.get().trim()
 )
+
+val enableCoverage: Boolean by extra(
+    providers.gradleProperty("enable_coverage").orNull.toBoolean()
+)
