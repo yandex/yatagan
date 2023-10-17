@@ -73,6 +73,45 @@ class GraphLoopsFailureTest(
     }
 
     @Test
+    fun `dependency loop behind Provider`() {
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+            
+            class ClassA @Inject constructor(b: ClassB)
+            class ClassB @Inject constructor(a: ClassC)
+            class ClassC @Inject constructor(a: Optional<ClassD>)
+            class ClassD @Inject constructor(a: ClassA)
+            class Entry @Inject constructor(a: Provider<ClassA>)
+
+            class MyApi
+            @Module class MyModule {
+                @Provides @Named("X") fun provideX(@Named("Y") d: MyApi): MyApi = MyApi()
+                @Provides @Named("Y") fun provideY(@Named("Z") d: MyApi): MyApi = MyApi()
+                @Provides @Named("Z") fun provideZ(@Named("X") d1: MyApi, 
+                                                   @Named("Y") d2: MyApi): MyApi = MyApi()
+
+                @Provides @Named("E") fun provideE(@Named("Y") d1: Lazy<MyApi>,
+                                                   @Named("X") d2: Lazy<MyApi>): MyApi = MyApi()
+            }
+
+            @Component
+            interface RootComponent {
+                val c: Entry
+                fun sub(): SubComponent
+            }
+
+            @Component(isRoot = false, modules = [MyModule::class])
+            interface SubComponent {
+                val c: Entry
+                @get:Named("E") val z: MyApi
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
     fun `dependency loop with alias`() {
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*

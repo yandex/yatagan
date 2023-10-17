@@ -1,0 +1,32 @@
+error: Binding dependency loop detected:
+(*) `@javax.inject.Named(value="Y") test.MyApi` provided by `provision test.MyModule::provideY(.. 1 dependency)` depends on <-
+    `@javax.inject.Named(value="Z") test.MyApi` provided by `provision test.MyModule::provideZ(.. 2 dependencies)` depends on <-
+    `@javax.inject.Named(value="X") test.MyApi` provided by `provision test.MyModule::provideX(.. 1 dependency)` depends on <- (*)
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Binding dependency loop detected:
+(*) `@javax.inject.Named(value="Y") test.MyApi` provided by `provision test.MyModule::provideY(.. 1 dependency)` depends on <-
+    `@javax.inject.Named(value="Z") test.MyApi` provided by `provision test.MyModule::provideZ(.. 2 dependencies)` depends on <- (*)
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Binding dependency loop detected:
+(*) `test.ClassB` provided by `inject-constructor test.ClassB(.. 1 dependency)` depends on <-
+    `test.ClassC` provided by `inject-constructor test.ClassC(.. 1 dependency)` depends on <-
+    `test.ClassD` provided by `inject-constructor test.ClassD(.. 1 dependency)` depends on <-
+    `test.ClassA` provided by `inject-constructor test.ClassA(.. 1 dependency)` depends on <- (*)
+Encountered:
+  here: graph for root-component test.RootComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
