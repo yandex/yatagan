@@ -28,9 +28,11 @@ fun <T : Any> loadImplementationByBuilderClass(builderClass: Class<T>): T {
     require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
         "$builderClass is not a builder for a Yatagan component"
     }
-    val componentClass = requireNotNull(builderClass.enclosingClass) {
+    val componentClassName = builderClass.name.substringBeforeLast("$")
+    require(componentClassName != builderClass.name) {
         "No enclosing component class found for $builderClass"
     }
+    val componentClass = builderClass.classLoader.loadClass(componentClassName)
     val yataganComponentClass = loadImplementationClass(componentClass)
     return builderClass.cast(yataganComponentClass.getDeclaredMethod("builder").invoke(null))
 }
