@@ -5,7 +5,7 @@ kotlin = "1.9.10"
 # Must be in sync with 'kotlin'. Asserted in buildscript
 ksp = "1.9.10-1.0.13"
 # Must be compatible with 'kotlin'
-dokka = "1.9.0"
+dokka = "1.9.10"
 
 # Yatagan version used to build Yatagan
 yataganDogFood = "1.4.1"
