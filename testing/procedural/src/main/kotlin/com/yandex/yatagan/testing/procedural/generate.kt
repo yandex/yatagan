@@ -199,6 +199,7 @@ fun generate(
             }
         }
         run {
+            // Break the loops
             fun Binding.withoutDependencies(nodes: Collection<LogicalNode>): Binding {
                 fun replaceWithLazy(): Map<LogicalNode, DependencyKind> {
                     return buildMap {
@@ -225,41 +226,55 @@ fun generate(
                 }
             }
 
-            // Break the loops
+            // Nodes currently being visited (entered)
             val markedGray = hashSetOf<LogicalNode>()
+            // Already visited nodes (entered and exited)
             val markedBlack = hashSetOf<LogicalNode>()
+            // Local eager-edge connectivity sub-graph
             val stack = arrayListOf<LogicalNode>()
+            // Pending nodes behind non-eager edges.
+            val pendingQueue = arrayListOf<LogicalNode>()
 
-            stack += component.entryPoints.keys
+            pendingQueue += component.entryPoints.keys
             for (memberInjector in component.memberInjectors) {
-                stack += memberInjector.members
+                pendingQueue += memberInjector.members
             }
 
-            while (stack.isNotEmpty()) {
-                when (val node = stack.last()) {
-                    in markedBlack -> {
-                        stack.removeLast()
-                    }
-                    in markedGray -> {
-                        stack.removeLast()
-                        markedBlack += node
-                        markedGray -= node
-                    }
-                    else -> {
-                        markedGray += node
-                        var binding = componentTree.resolveBinding(node)
-                        // Check if this binding introduces a loop into the graph
-                        val formsLoopBy = binding.dependencies.mapNotNull { (depNode, depKind) ->
-                            depNode.takeIf { depKind == DependencyKind.Direct && depNode in markedGray }
+            while (pendingQueue.isNotEmpty()) {
+                check(markedGray.isEmpty())
+
+                stack += pendingQueue
+                pendingQueue.clear()
+
+                while (stack.isNotEmpty()) {
+                    when (val node = stack.last()) {
+                        in markedBlack -> {
+                            stack.removeLast()
                         }
-                        if (formsLoopBy.isNotEmpty()) {
-                            // Need to break the loop
-                            binding = binding.withoutDependencies(formsLoopBy)
-                            componentTree.updateBinding(node, binding)
+
+                        in markedGray -> {
+                            stack.removeLast()
+                            markedBlack += node
+                            markedGray -= node
                         }
-                        for ((depNode, depKind) in binding.dependencies) {
-                            if (depKind == DependencyKind.Direct) {
-                                stack += depNode
+
+                        else -> {
+                            markedGray += node
+                            var binding = componentTree.resolveBinding(node)
+                            // Check if this binding introduces a loop into the graph
+                            val formsLoopBy = binding.dependencies.mapNotNull { (depNode, depKind) ->
+                                depNode.takeIf { depKind == DependencyKind.Direct && depNode in markedGray }
+                            }
+                            if (formsLoopBy.isNotEmpty()) {
+                                // Need to break the loop
+                                binding = binding.withoutDependencies(formsLoopBy)
+                                componentTree.updateBinding(node, binding)
+                            }
+                            for ((depNode, depKind) in binding.dependencies) {
+                                when (depKind) {
+                                    DependencyKind.Direct -> stack += depNode
+                                    else -> pendingQueue += depNode
+                                }
                             }
                         }
                     }
