@@ -5,12 +5,16 @@ package test;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$Component_317 implements Component_317 {
   private Object mNode_17Instance;
 
@@ -344,13 +348,17 @@ package test;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$Component_318 implements Component_318 {
   private Object mNode_30Instance;
 
@@ -667,7 +675,6 @@ public final class Yatagan$Component_318 implements Component_318 {
     return new ComponentFactoryImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class Component_319Impl implements Component_319 {
     private Object mNode_37Instance;
 
@@ -1074,7 +1081,6 @@ public final class Yatagan$Component_318 implements Component_318 {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class Component_320Impl implements Component_320 {
     private Object mNode_277Instance;
 
@@ -1321,7 +1327,6 @@ public final class Yatagan$Component_318 implements Component_318 {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class Component_321Impl implements Component_321 {
     private Object mNode_175Instance;
 
@@ -1581,7 +1586,6 @@ public final class Yatagan$Component_318 implements Component_318 {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class Component_322Impl implements Component_322 {
     private Object mNode_175Instance;
 
@@ -1904,13 +1908,17 @@ package test;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$Component_323 implements Component_323 {
   private Object mNode_102Instance;
 
@@ -2200,7 +2208,6 @@ public final class Yatagan$Component_323 implements Component_323 {
     return new ComponentFactoryImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class Component_324Impl implements Component_324 {
     private Object mNode_173Instance;
 
@@ -2578,7 +2585,6 @@ public final class Yatagan$Component_323 implements Component_323 {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class Component_325Impl implements Component_325 {
     private Object mNode_171Instance;
 
@@ -2962,7 +2968,6 @@ public final class Yatagan$Component_323 implements Component_323 {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class Component_326Impl implements Component_326 {
     private Object mNode_52Instance;
 
@@ -3215,7 +3220,6 @@ public final class Yatagan$Component_323 implements Component_323 {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class Component_327Impl implements Component_327 {
     private Object mNode_16Instance;
 
@@ -3500,7 +3504,6 @@ public final class Yatagan$Component_323 implements Component_323 {
       return (Node_33) local;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
     static final class Component_328Impl implements Component_328 {
       private Object mNode_259Instance;
 
@@ -3846,7 +3849,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         return (Node_88) local;
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_332Impl implements Component_332 {
         private Object mNode_39Instance;
 
@@ -4252,7 +4254,6 @@ public final class Yatagan$Component_323 implements Component_323 {
       }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
     static final class Component_329Impl implements Component_329 {
       private Object mNode_28Instance;
 
@@ -4588,7 +4589,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         return new Node_83(this.mComponent_323.cacheNode_257(), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 5), this.mComponent_323.mSet_2, this.mComponent_323.cacheNode_17(), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 9), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 19), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 11), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 0), new Yatagan$Component_323.CachingProviderImpl(this.mComponent_323, 10), this.mComponent_323.mDependency_310.ep_1(), new CachingProviderImpl(this, 17));
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_333Impl implements Component_333 {
         final Component_329Impl mComponent_329;
 
@@ -4690,7 +4690,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         }
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_334Impl implements Component_334 {
         final Component_327Impl mComponent_327;
 
@@ -4784,7 +4783,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         }
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_335Impl implements Component_335 {
         private Object mNode_284Instance;
 
@@ -5110,7 +5108,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         }
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_336Impl implements Component_336 {
         private Object mNode_186Instance;
 
@@ -5269,7 +5266,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         }
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_337Impl implements Component_337 {
         private Object mNode_234Instance;
 
@@ -5683,7 +5679,6 @@ public final class Yatagan$Component_323 implements Component_323 {
       }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
     static final class Component_330Impl implements Component_330 {
       private Object mNode_251Instance;
 
@@ -6031,7 +6026,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         return new Node_96(new CachingProviderImpl(this, 14), this.mComponent_323.cacheNode_257(), this.mComponent_327.cacheNode_293(), this.accessNode_105(), this.mComponent_327.cacheNode_16(), new CachingProviderImpl(this, 12), this.cacheNode_230(), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 10), this.accessNode_142(), this.accessNode_132(), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 10), this.mComponent_327.cacheNode_260(), this.accessNode_263(), this.mComponent_323.mSet_0);
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_338Impl implements Component_338 {
         private Object mNode_284Instance;
 
@@ -6439,7 +6433,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         }
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_339Impl implements Component_339 {
         private Object mNode_194Instance;
 
@@ -6788,7 +6781,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         }
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_340Impl implements Component_340 {
         private Object mNode_234Instance;
 
@@ -7125,7 +7117,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         }
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_341Impl implements Component_341 {
         private Object mNode_222Instance;
 
@@ -7590,7 +7581,6 @@ public final class Yatagan$Component_323 implements Component_323 {
       }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
     static final class Component_331Impl implements Component_331 {
       private Object mNode_23Instance;
 
@@ -7952,7 +7942,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         return (Node_88) local;
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_342Impl implements Component_342 {
         private Object mNode_86Instance;
 
@@ -8293,7 +8282,6 @@ public final class Yatagan$Component_323 implements Component_323 {
         }
       }
 
-      @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
       static final class Component_343Impl implements Component_343 {
         private Object mNode_43Instance;
 
@@ -8542,7 +8530,6 @@ public final class Yatagan$Component_323 implements Component_323 {
           return new Node_83(this.mComponent_323.cacheNode_257(), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 5), this.mComponent_323.mSet_2, this.mComponent_323.cacheNode_17(), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 9), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 19), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 11), new Yatagan$Component_323.ProviderImpl(this.mComponent_323, 0), new Yatagan$Component_323.CachingProviderImpl(this.mComponent_323, 10), this.mComponent_323.mDependency_310.ep_1(), new CachingProviderImpl(this, 10));
         }
 
-        @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
         static final class Component_344Impl implements Component_344 {
           private Object mNode_150Instance;
 
@@ -8927,7 +8914,6 @@ public final class Yatagan$Component_323 implements Component_323 {
           }
         }
 
-        @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
         static final class Component_345Impl implements Component_345 {
           private Object mNode_203Instance;
 
@@ -9275,7 +9261,6 @@ public final class Yatagan$Component_323 implements Component_323 {
           }
         }
 
-        @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
         static final class Component_346Impl implements Component_346 {
           private Object mNode_89Instance;
 

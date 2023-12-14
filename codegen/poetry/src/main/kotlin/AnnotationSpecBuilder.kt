@@ -21,11 +21,12 @@ import com.squareup.javapoet.ClassName
 import kotlin.reflect.KClass
 
 @JavaPoetry
-class AnnotationSpecBuilder(
-    clazz: KClass<out Annotation>
-) {
+class AnnotationSpecBuilder private constructor(
     @PublishedApi
-    internal val impl: AnnotationSpec.Builder = AnnotationSpec.builder(clazz.java)
+    internal val impl: AnnotationSpec.Builder,
+) {
+    constructor(clazz: KClass<out Annotation>) : this(AnnotationSpec.builder(clazz.java))
+    constructor(className: ClassName) : this(AnnotationSpec.builder(className))
 
     inline fun <reified E : Enum<E>> enumValue(value: E, name: String = "value") {
         impl.addMember(name, "\$T.\$N", E::class.java, value.name)

@@ -4,12 +4,16 @@ package test;
 
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$RootComponent2 implements RootComponent2 {
   private Yatagan$RootComponent2() {
   }
@@ -23,7 +27,6 @@ public final class Yatagan$RootComponent2 implements RootComponent2 {
     return new AutoBuilderImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class SubComponent1Impl implements SubComponent1 {
     final MyDependencies mMyDependencies;
 

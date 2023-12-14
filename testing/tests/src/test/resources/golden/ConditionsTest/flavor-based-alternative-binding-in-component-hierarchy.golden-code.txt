@@ -6,15 +6,19 @@ import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Class;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$MyBrowserComponent implements MyBrowserComponent {
   private Yatagan$MyBrowserComponent() {
   }
@@ -47,7 +51,6 @@ public final class Yatagan$MyBrowserComponent implements MyBrowserComponent {
     return new AutoBuilderImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class MyApiComponentImpl implements MyApiComponent {
     final Yatagan$MyBrowserComponent mMyBrowserComponent;
 
@@ -118,15 +121,19 @@ import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Class;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$MySearchAppComponent implements MySearchAppComponent {
   private Yatagan$MySearchAppComponent() {
   }
@@ -159,7 +166,6 @@ public final class Yatagan$MySearchAppComponent implements MySearchAppComponent 
     return new AutoBuilderImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class MyApiComponentImpl implements MyApiComponent {
     final Yatagan$MySearchAppComponent mMySearchAppComponent;
 
@@ -229,13 +235,17 @@ package test;
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$MyProductComponent implements MyProductComponent {
   private Yatagan$MyProductComponent() {
   }
@@ -249,7 +259,6 @@ public final class Yatagan$MyProductComponent implements MyProductComponent {
     return new AutoBuilderImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class MyApiComponentImpl implements MyApiComponent {
     final Yatagan$MyProductComponent mMyProductComponent;
 

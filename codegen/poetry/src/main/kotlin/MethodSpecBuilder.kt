@@ -66,6 +66,10 @@ abstract class MethodSpecBuilder : CodeBuilder(), AnnotatibleBuilder {
         impl.addAnnotation(AnnotationSpecBuilder(clazz).apply(block).impl.build())
     }
 
+    override fun annotation(className: ClassName, block: AnnotationSpecBuilder.() -> Unit) {
+        impl.addAnnotation(AnnotationSpecBuilder(className).apply(block).impl.build())
+    }
+
     fun returnType(type: TypeName) {
         impl.returns(type)
     }
