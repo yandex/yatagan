@@ -16,9 +16,11 @@
 
 package com.yandex.yatagan.codegen.impl
 
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.yandex.yatagan.Yatagan
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.lang.LangModelFactory
 
 class ComponentGeneratorFacade(
     graph: BindingGraph,
@@ -34,6 +36,7 @@ class ComponentGeneratorFacade(
             enableProvisionNullChecks = enableProvisionNullChecks,
             enableThreadChecks = enableThreadChecks,
             sortMethodsForTesting = sortMethodsForTesting,
+            generatedAnnotationClassName = generatedAnnotationClassName(),
         ),
     )
 
@@ -47,5 +50,13 @@ class ComponentGeneratorFacade(
         JavaFile.builder(targetPackageName, component.generator.generate())
             .build()
             .writeTo(out)
+    }
+
+    private fun generatedAnnotationClassName(): ClassName? {
+        return Names.GeneratedJava8.takeIf { it.exists() } ?: Names.GeneratedJava9Plus.takeIf { it.exists() }
+    }
+
+    private fun ClassName.exists(): Boolean {
+        return LangModelFactory.getTypeDeclaration(packageName(), simpleName()) != null
     }
 }

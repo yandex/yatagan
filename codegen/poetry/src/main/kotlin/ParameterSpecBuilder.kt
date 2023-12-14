@@ -17,6 +17,7 @@
 package com.yandex.yatagan.codegen.poetry
 
 import com.squareup.javapoet.AnnotationSpec
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeName
 import javax.lang.model.element.AnnotationMirror
@@ -42,5 +43,12 @@ class ParameterSpecBuilder constructor(type: TypeName, name: String) : Annotatib
         block: AnnotationSpecBuilder.() -> Unit,
     ) {
         impl.addAnnotation(AnnotationSpecBuilder(clazz).apply(block).impl.build())
+    }
+
+    override fun annotation(
+        className: ClassName,
+        block: AnnotationSpecBuilder.() -> Unit,
+    ) {
+        impl.addAnnotation(AnnotationSpecBuilder(className).apply(block).impl.build())
     }
 }

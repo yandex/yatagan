@@ -4,13 +4,17 @@ package test;
 
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$MyApplicationComponent implements MyApplicationComponent {
   Yatagan$MyApplicationComponent() {
   }
@@ -26,7 +30,6 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
     return new ComponentFactoryImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class MyActivityComponentImpl implements MyActivityComponent {
     final Yatagan$MyApplicationComponent mMyApplicationComponent;
 

@@ -4,12 +4,16 @@ package test;
 
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$TestComponent implements TestComponent {
   private Object mScopedDepInstance;
 
@@ -38,7 +42,6 @@ public final class Yatagan$TestComponent implements TestComponent {
     return new ComponentFactoryImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class SubComponentImpl implements SubComponent {
     final Yatagan$TestComponent mTestComponent;
 

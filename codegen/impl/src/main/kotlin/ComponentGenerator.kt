@@ -53,6 +53,7 @@ internal class ComponentGenerator @Inject constructor(
         val enableProvisionNullChecks: Boolean,
         val enableThreadChecks: Boolean,
         val sortMethodsForTesting: Boolean,
+        val generatedAnnotationClassName: ClassName?,
     )
 
     init {
@@ -69,12 +70,19 @@ internal class ComponentGenerator @Inject constructor(
     fun generate(): TypeSpec = buildClass(generatedClassName) {
         val componentInterface = graph.model.typeName()
 
-        annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
         modifiers(FINAL)
         if (!graph.isRoot) {
             modifiers(/*package-private*/ STATIC)
         } else {
             modifiers(PUBLIC)
+            annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
+            annotation(Names.YataganGenerated)
+            options.generatedAnnotationClassName?.let {
+                annotation(it) {
+                    // We don't use the actual processor name here, as we want the code to be the same across backends.
+                    stringValue(value = "com.yandex.yatagan.codegen.impl.ComponentGenerator")
+                }
+            }
         }
         implements(componentInterface)
 

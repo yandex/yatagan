@@ -4,12 +4,16 @@ package test;
 
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Arrays;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$ComponentFoo implements ComponentFoo {
   final MyModule mMyModule;
 
@@ -52,12 +56,16 @@ package test;
 
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Arrays;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$ComponentBar implements ComponentBar {
   final MyDependency1 mMyDependency1;
 
@@ -122,10 +130,14 @@ public final class Yatagan$ComponentBar implements ComponentBar {
 Name: test/Yatagan$ComponentBaz.java
 package test;
 
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$ComponentBaz implements ComponentBaz {
   Yatagan$ComponentBaz() {
   }

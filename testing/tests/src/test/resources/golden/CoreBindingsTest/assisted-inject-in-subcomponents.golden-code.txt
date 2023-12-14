@@ -5,12 +5,16 @@ package test;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$RootComponent implements RootComponent {
   private Object mClassBInstance;
 
@@ -49,7 +53,6 @@ public final class Yatagan$RootComponent implements RootComponent {
     return new ComponentFactoryImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class SubComponentImpl implements SubComponent {
     private Object mClassAInstance;
 

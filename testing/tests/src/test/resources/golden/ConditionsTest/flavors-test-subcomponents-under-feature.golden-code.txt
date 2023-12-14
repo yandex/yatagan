@@ -5,12 +5,16 @@ package test;
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$TestPhoneComponent implements TestPhoneComponent {
   private Yatagan$TestPhoneComponent() {
   }
@@ -46,12 +50,16 @@ package test;
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$TestTabletComponent implements TestTabletComponent {
   final boolean mFeaturesIsEnabledB = Features.isEnabledB();
 
@@ -71,7 +79,6 @@ public final class Yatagan$TestTabletComponent implements TestTabletComponent {
     return new AutoBuilderImpl();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
   static final class MyFeatureActivityComponentImpl implements MyFeatureActivityComponent {
     MyFeatureActivityComponentImpl() {
     }

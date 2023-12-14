@@ -5,13 +5,17 @@ package test;
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$MyComponentA implements MyComponentA {
   private Object mClassAInstance;
 
@@ -58,13 +62,17 @@ package test;
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$MyComponentB implements MyComponentB {
   private Object mClassAInstance;
 
@@ -111,13 +119,17 @@ package test;
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Class;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$MyComponentC implements MyComponentC {
   private Object mClassAInstance;
 
