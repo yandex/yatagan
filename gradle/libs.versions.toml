@@ -26,7 +26,7 @@ ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.
 
 autoCommon = "com.google.auto:auto-common:1.2.2"
 poets-java = "com.squareup:javapoet:1.13.0"
-poets-kotlin = "com.squareup:kotlinpoet:1.15.2"
+poets-kotlin = "com.squareup:kotlinpoet:1.16.0"
 
 logicng = "org.logicng:logicng-j11:2.4.2"
 
@@ -36,4 +36,4 @@ yataganDogFood-ksp = { module = "com.yandex.yatagan:processor-ksp", version.ref 
 # Testing libraries
 testing-roomCompileTesting = "androidx.room:room-compiler-processing-testing:2.6.0"
 testing-junit4 = "junit:junit:4.13.2"
-testing-assertj = "org.assertj:assertj-core:3.24.2"
+testing-assertj = "org.assertj:assertj-core:3.25.2"
