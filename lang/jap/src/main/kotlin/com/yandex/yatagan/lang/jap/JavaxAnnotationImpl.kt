@@ -35,9 +35,9 @@ import javax.lang.model.util.AbstractAnnotationValueVisitor8
 import javax.lang.model.util.ElementFilter
 
 internal class JavaxAnnotationImpl private constructor(
-    private val impl: AnnotationMirror,
+    val impl: AnnotationMirror,
 ) : CtAnnotationBase() {
-    override val annotationClass: AnnotationDeclaration by lazy {
+    override val annotationClass: AnnotationClassImpl by lazy {
         AnnotationClassImpl(impl.annotationType.asTypeElement())
     }
 
@@ -50,7 +50,7 @@ internal class JavaxAnnotationImpl private constructor(
         checkNotNull(value) { "Attribute missing/invalid" }
         return ValueImpl(
             value = value,
-            type = attribute.impl.returnType,
+            typeImpl = attribute.impl.returnType,
         )
     }
 
@@ -60,9 +60,9 @@ internal class JavaxAnnotationImpl private constructor(
         }
     }
 
-    private class ValueImpl(
-        private val value: AnnotationValue,
-        private val type: TypeMirror,
+    internal class ValueImpl(
+        internal val value: AnnotationValue,
+        internal val typeImpl: TypeMirror,
     ) : ValueBase() {
         private val equivalence = AnnotationValueEquivalence(value)
 
@@ -81,7 +81,7 @@ internal class JavaxAnnotationImpl private constructor(
                 override fun visitShort(s: Short, p: Unit?): R = visitor.visitShort(s)
                 override fun visitString(s: String, p: Unit?): R {
                     return if (s == "<error>" &&
-                        (type.kind != TypeKind.DECLARED || type.asTypeElement() != Utils.stringType)) {
+                        (typeImpl.kind != TypeKind.DECLARED || typeImpl.asTypeElement() != Utils.stringType)) {
                         // If the type is not string, yet the value is the "<error>" string, then it actually
                         //  represents an unresolved type.
                         visitor.visitType(JavaxTypeImpl(Utils.types.nullType))
@@ -96,9 +96,9 @@ internal class JavaxAnnotationImpl private constructor(
                     return visitor.visitEnumConstant(enum, c.simpleName.toString())
                 }
                 override fun visitArray(vals: List<AnnotationValue>, p: Unit?): R {
-                    val arrayType = type.asArrayType()
+                    val arrayType = typeImpl.asArrayType()
                     return visitor.visitArray(vals.map {
-                        ValueImpl(value = it, type = arrayType.componentType)
+                        ValueImpl(value = it, typeImpl = arrayType.componentType)
                     })
                 }
                 override fun visitUnknown(av: AnnotationValue?, p: Unit?): R = visitor.visitUnresolved()
@@ -109,7 +109,7 @@ internal class JavaxAnnotationImpl private constructor(
         override fun equals(other: Any?) = this === other || (other is ValueImpl && equivalence == other.equivalence)
     }
 
-    private class AttributeImpl(
+    internal class AttributeImpl(
         val impl: ExecutableElement,
     ) : AnnotationDeclaration.Attribute {
         override val name: String
@@ -118,8 +118,8 @@ internal class JavaxAnnotationImpl private constructor(
             get() = JavaxTypeImpl(impl.returnType)
     }
 
-    private class AnnotationClassImpl private constructor(
-        private val impl: TypeElement,
+    internal class AnnotationClassImpl private constructor(
+        val impl: TypeElement,
     ) : CtAnnotationDeclarationBase(), CtAnnotated by JavaxAnnotatedImpl(impl) {
 
         override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {

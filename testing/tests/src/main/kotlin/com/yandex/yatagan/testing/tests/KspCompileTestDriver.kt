@@ -16,12 +16,16 @@
 
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.processor.ksp.KspYataganProcessorProvider
+import com.google.devtools.ksp.processing.SymbolProcessorProvider
+import com.yandex.yatagan.generated.KspProcessorClasspath
 import java.io.File
+import java.net.URLClassLoader
 
-class KspCompileTestDriver : CompileTestDriverBase() {
+class KspCompileTestDriver(
+    private val processorClasspath: String = KspProcessorClasspath,
+) : CompileTestDriverBase() {
     override fun createCompilationArguments() = super.createCompilationArguments().copy(
-        symbolProcessorProviders = listOf(KspYataganProcessorProvider()),
+        symbolProcessorProviders = listOf(loadProcessor()),
     )
 
     override fun generatedFilesSubDir(): String {
@@ -30,4 +34,20 @@ class KspCompileTestDriver : CompileTestDriverBase() {
 
     override val backendUnderTest: Backend
         get() = Backend.Ksp
+
+    private fun loadProcessor(): SymbolProcessorProvider {
+        val classpath = buildList {
+            processorClasspath.splitToSequence(File.pathSeparatorChar).mapTo(this, ::File)
+            // Include plugins classpath into processor classpath, if any present
+            pluginsModuleOutputDirs?.let(::addAll)
+        }
+
+        val kspClassloader = URLClassLoader(
+            "test-classloader",
+            classpath.map { it.toURI().toURL() }.toTypedArray(), SymbolProcessorProvider::class.java.classLoader)
+        val clazz = kspClassloader.loadClass("com.yandex.yatagan.processor.ksp.KspYataganProcessorProvider")
+        return clazz.getConstructor().newInstance() as SymbolProcessorProvider
+    }
+
+    private class Child
 }

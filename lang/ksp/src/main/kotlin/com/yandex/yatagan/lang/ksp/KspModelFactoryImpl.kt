@@ -19,12 +19,17 @@ package com.yandex.yatagan.lang.ksp
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.Variance
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.AnnotationDeclaration
+import com.yandex.yatagan.lang.AnnotationValueFactory
 import com.yandex.yatagan.lang.LangModelFactory
+import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.TypeDeclarationKind
 import com.yandex.yatagan.lang.compiled.CtLangModelFactoryBase
 
-class KspModelFactoryImpl : CtLangModelFactoryBase() {
+class KspModelFactoryImpl : CtLangModelFactoryBase(), AnnotationValueFactory {
     private val listDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
         checkNotNull(Utils.resolver.getClassDeclarationByName("java.util.List")) {
             "FATAL: Unable to define `java.util.List`, check classpath"
@@ -117,6 +122,50 @@ class KspModelFactoryImpl : CtLangModelFactoryBase() {
         return KspTypeImpl(declaration.asType(emptyList())).declaration
     }
 
+    override fun getAnnotation(
+        declaration: AnnotationDeclaration,
+        argumentsSupplier: (AnnotationDeclaration.Attribute) -> Annotation.Value,
+    ): Annotation {
+        require(declaration is KspAnnotationImpl.AnnotationClassImpl) { "declaration" }
+        return KspSyntheticAnnotationImpl(
+            annotationClass = declaration,
+            values = declaration.attributes.associateWith(argumentsSupplier),
+        )
+    }
+
     override val isInRuntimeEnvironment: Boolean
         get() = false
+
+    override val annotationValueFactory: AnnotationValueFactory
+        get() = this
+
+    override fun valueOf(value: Boolean): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: Byte): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: Short): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: Int): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: Long): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: Char): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: Float): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: Double): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: String): Annotation.Value = KspAnnotationImpl.ValueImpl(value)
+    override fun valueOf(value: Type): Annotation.Value {
+        require(value is KspTypeImpl) { "value" }
+        return KspAnnotationImpl.ValueImpl(value.impl)
+    }
+
+    override fun valueOf(value: Annotation): Annotation.Value {
+        require(value is KspAnnotationBase) { "value" }
+        return KspAnnotationImpl.ValueImpl(value)
+    }
+
+    override fun valueOf(enum: Type, constant: String): Annotation.Value {
+        require(enum.declaration.kind == TypeDeclarationKind.Enum) { "enum" }
+        // TODO: Check `constant` belong to the `enum`.
+        return KspAnnotationImpl.ValueImpl(enum to constant)
+    }
+
+    override fun valueOf(value: List<Annotation.Value>): Annotation.Value {
+        require(value.all { it is KspAnnotationImpl.ValueImpl }) { "value" }
+        return KspAnnotationImpl.ValueImpl(value.map { it.platformModel })
+    }
 }

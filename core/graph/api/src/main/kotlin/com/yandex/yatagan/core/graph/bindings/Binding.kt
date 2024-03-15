@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.bindings
 
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.base.api.Incubating
 import com.yandex.yatagan.base.api.StableForImplementation
 import com.yandex.yatagan.core.model.ConditionModel
@@ -27,7 +28,7 @@ import com.yandex.yatagan.core.model.ScopeModel
 /**
  * A base class for all concrete binding implementations, apart from [AliasBinding].
  */
-public interface Binding : BaseBinding {
+public interface Binding : BaseBinding, Extensible {
     /**
      * A condition scope of this binding. Part of the *Conditions API*.
      *

@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.core.graph.impl
 
+import com.yandex.yatagan.instrumentation.spi.InstrumentationPlugin
+
 /**
  * Options, customizing graph building behavior in various ways.
  */
@@ -24,4 +26,6 @@ data class Options(
      * Whether to generate all conditions with lazy evaluation.
      */
     val allConditionsLazy: Boolean,
+
+    val instrumentationPlugins: List<InstrumentationPlugin>,
 )

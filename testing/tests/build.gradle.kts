@@ -20,6 +20,13 @@ val dynamicTestRuntime: Configuration by configurations.creating {
 val compiledTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
+val pluginsSpi: Configuration by configurations.creating
+
+val kaptProcessorClasspath: Configuration by configurations.creating
+val kspProcessorClasspath: Configuration by configurations.creating {
+    // Exclude KSP API, so it doesn't cause the classloader clash.
+    exclude(group = "com.google.devtools.ksp", module = "symbol-processing-api")
+}
 
 versionsToCheckLoaderCompatibility.forEach { version ->
     configurations.register("kaptForCompatCheck$version")
@@ -39,20 +46,16 @@ dependencies {
     implementation(libs.testing.roomCompileTesting)
 
     // Base test dependencies
-    implementation(project(":processor:common"))
-    implementation(project(":core:model:impl"))
-    implementation(project(":core:graph:impl"))
     implementation(project(":api:public"))
     implementation(project(":base:impl"))
 
     // KSP dependencies
     implementation(project(":lang:ksp"))
-    implementation(project(":processor:ksp"))
+    implementation(libs.ksp.api)
 
     // JAP dependencies
-    implementation(project(":lang:jap"))
-    implementation(project(":processor:jap"))
-
+    implementation(libs.autoCommon)
+    
     // RT dependencies
     implementation(project(":lang:rt"))
     implementation(libs.poets.java)
@@ -60,15 +63,18 @@ dependencies {
     // Heavy test dependencies
     testImplementation(project(":testing:procedural"))
 
-    // For strings
-    testImplementation(project(":validation:format"))
-
     dynamicTestRuntime(project(":api:dynamic"))
     compiledTestRuntime(project(":api:public"))
 
     versionsToCheckLoaderCompatibility.forEach { version ->
         add("kaptForCompatCheck$version", "com.yandex.yatagan:processor-jap:$version")
     }
+
+    kaptProcessorClasspath(project(":processor:jap"))
+    kspProcessorClasspath(project(":processor:ksp"))
+
+    pluginsSpi(project(":validation:spi"))
+    pluginsSpi(project(":instrumentation:spi"))
 }
 
 val genKaptClasspathForCompatCheckTasks = versionsToCheckLoaderCompatibility.map { version ->
@@ -89,12 +95,33 @@ val generateCompiledApiClasspath by tasks.registering(ClasspathSourceGeneratorTa
     classpath.set(compiledTestRuntime)
 }
 
+val generateKaptProcessorClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
+    propertyName.set("KaptProcessorClasspath")
+    classpath.set(kaptProcessorClasspath)
+}
+
+val generateKspProcessorClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
+    val gradleUserHome = gradle.gradleUserHomeDir
+    propertyName.set("KspProcessorClasspath")
+    classpath.set(kspProcessorClasspath.filter { !it.startsWith(gradleUserHome) })
+}
+
+val generatePluginsSpiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
+    propertyName.set("PluginsSpiClasspath")
+    classpath.set(pluginsSpi)
+}
+
 tasks.withType<ClasspathSourceGeneratorTask>().configureEach {
     packageName.set("com.yandex.yatagan.generated")
 }
 
+val generateSources by tasks.registering {
+    dependsOn(generateDynamicApiClasspath, generateCompiledApiClasspath, genKaptClasspathForCompatCheckTasks,
+        generateKaptProcessorClasspath, generateKspProcessorClasspath, generatePluginsSpiClasspath)
+}
+
 tasks.named("compileKotlin") {
-    dependsOn(generateDynamicApiClasspath, generateCompiledApiClasspath, genKaptClasspathForCompatCheckTasks)
+    dependsOn(generateSources)
 }
 
 val updateGoldenFiles by tasks.registering(Test::class) {

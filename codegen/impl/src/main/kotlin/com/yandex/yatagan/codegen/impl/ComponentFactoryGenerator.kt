@@ -31,6 +31,7 @@ import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.SubComponentFactoryMethodModel
+import com.yandex.yatagan.instrumentation.impl.instrumentedCreation
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.lang.model.element.Modifier.FINAL
@@ -153,6 +154,11 @@ internal class ComponentFactoryGenerator @Inject constructor(
                     }
                 }
             }
+            doInstrument(
+                graph = thisGraph,
+                statements = thisGraph.instrumentedCreation.after,
+                instrumentedInstance = "this" to thisGraph.model.typeName(),
+            )
         }
     }
 

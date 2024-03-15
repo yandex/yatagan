@@ -18,6 +18,7 @@ package com.yandex.yatagan.lang.jap
 
 import java.io.Closeable
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 
@@ -39,6 +40,9 @@ class ProcessingUtils(
     }
     val stringType : TypeElement by lazy {
         elements.getTypeElement("java.lang.String")
+    }
+    val classType : TypeElement by lazy {
+        elements.getTypeElement("java.lang.Class")
     }
 
     init {

@@ -29,6 +29,10 @@ import com.yandex.yatagan.base.api.Internal
 public interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<TypeDeclaration> {
     /**
      * Declaration kind.
+     *
+     * WARNING: As of now, if the `kind` is [TypeDeclarationKind.Annotation], then the behavior of this object is
+     * not clearly defined across backends, and may change in the future. To consistently define an annotation class,
+     * use [asAnnotationDeclaration].
      */
     public val kind: TypeDeclarationKind
 
@@ -97,6 +101,14 @@ public interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comp
      * Returns an underlying [Type].
      */
     public fun asType(): Type
+
+    /**
+     * Returns [AnnotationDeclaration] representation for this type declaration.
+     *
+     * @return corresponding [AnnotationDeclaration] instance.
+     * @throws IllegalArgumentException if this declaration's [kind] is not [TypeDeclarationKind.Annotation].
+     */
+    public fun asAnnotationDeclaration(): AnnotationDeclaration
 
     /**
      * Obtains framework annotation of the given kind.

@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ConditionExpressionValueBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
@@ -30,7 +31,7 @@ import com.yandex.yatagan.validation.Validator
 internal class ConditionExpressionValueBindingImpl(
     override val owner: BindingGraph,
     override val model: InjectedConditionExpressionModel,
-) : ConditionExpressionValueBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin {
+) : ConditionExpressionValueBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin, ExtensibleImpl() {
     override val target: NodeModel
         get() = model.asNode()
 

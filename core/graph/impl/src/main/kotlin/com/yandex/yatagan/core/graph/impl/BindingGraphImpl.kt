@@ -40,6 +40,8 @@ import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.core.model.accept
+import com.yandex.yatagan.instrumentation.impl.Instrumentation
+import com.yandex.yatagan.instrumentation.impl.instrumentedDependencies
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -125,6 +127,8 @@ internal class BindingGraphImpl(
     override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
 
+    private val instrumentedEntryPoints = mutableListOf<NodeModel>()
+
     private val aliasResolveVisitor = object : BaseBinding.Visitor<Binding> {
         override fun visitAlias(alias: AliasBinding) = resolveBindingRaw(alias.source).accept(this)
         override fun visitBinding(binding: Binding) = binding
@@ -172,6 +176,43 @@ internal class BindingGraphImpl(
             }
         }
 
+        doMaterialization()
+
+        // |=> At this point we presume that this BindingGraph object is in a valid state.
+        // Instrumentation plugins can now safely perform introspections on it.
+        val applicablePlugins = options.instrumentationPlugins.filter { it.shouldInstrument(this) }
+        if (applicablePlugins.isNotEmpty()) {
+            for (plugin in applicablePlugins) {
+                val instrumentation = Instrumentation(plugin)
+                instrumentation.instrument(this)
+                instrumentation.newDependencies.mapTo(instrumentedEntryPoints, NodeDependency::node)
+                materializationQueue += instrumentation.newDependencies
+            }
+
+            val instrumentedBindings = hashSetOf<Binding>()
+            while (materializationQueue.isNotEmpty()) {
+                doMaterialization()
+
+                if (instrumentedBindings.size == localBindings.size) {
+                    // Early bail - no new bindings
+                    break
+                }
+
+                for (plugin in applicablePlugins) {
+                    val instrumentation = Instrumentation(plugin)
+                    for (binding in localBindings.keys) {
+                        if (instrumentedBindings.add(binding)) {
+                            // Not-yet-instrumented binding
+                            instrumentation.instrument(binding)
+                        }
+                    }
+                    materializationQueue += instrumentation.newDependencies
+                }
+            }
+        }
+    }
+
+    private fun doMaterialization() {
         val seenBindings = hashSetOf<Binding>()
         while (materializationQueue.isNotEmpty()) {
             val dependency = materializationQueue.removeFirst()
@@ -199,9 +240,8 @@ internal class BindingGraphImpl(
                     continue
                 }
                 materializationQueue += nonAlias.dependencies
-
-                // Add all non-static condition receivers
                 materializationQueue += nonAlias.nonStaticConditionProviders
+                materializationQueue += nonAlias.instrumentedDependencies()
             }
         }
 
@@ -342,6 +382,8 @@ internal class BindingGraphImpl(
         entryPoints.forEach(validator::child)
         // Reachable via members-inject.
         memberInjectors.forEach(validator::child)
+        // Reachable via component constructor instrumentation.
+        instrumentedEntryPoints.map(::resolveBindingRaw).forEach(validator::child)
 
         subComponentFactoryMethods.forEach(validator::child)
 

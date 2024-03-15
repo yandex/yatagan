@@ -44,3 +44,7 @@ include(":codegen:poetry")
 include(":testing:tests")
 include(":testing:procedural")
 include(":testing:source-set")
+
+include(":instrumentation:api")
+include(":instrumentation:spi")
+include(":instrumentation:impl")

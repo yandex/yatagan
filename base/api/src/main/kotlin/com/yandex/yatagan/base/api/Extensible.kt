@@ -38,6 +38,14 @@ public interface Extensible {
     public operator fun <V : Any> get(key: Key<V>): V
 
     /**
+     * Obtains previously set value for the key, if any available
+     *
+     * @param key the typed key
+     * @return the associated value if available, `null` otherwise.
+     */
+    public fun <V : Any> getOrNull(key: Key<V>): V?
+
+    /**
      * Associates the key with the value.
      * The value can only be associated once to prevent strange mutability-driven errors.
      *

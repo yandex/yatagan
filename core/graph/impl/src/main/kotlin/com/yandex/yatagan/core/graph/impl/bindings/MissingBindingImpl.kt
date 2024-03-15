@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.EmptyBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
 import com.yandex.yatagan.core.model.ComponentModel
@@ -37,7 +38,7 @@ import com.yandex.yatagan.validation.format.reportError
 internal data class MissingBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraph,
-) : EmptyBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin {
+) : EmptyBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin, ExtensibleImpl() {
 
     override fun validate(validator: Validator) {
         target.getSpecificModel().accept(ModelBasedHint(validator))

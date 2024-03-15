@@ -74,7 +74,6 @@ public interface Annotation : HasPlatformModel {
             public fun visitArray(value: List<Value>): R = visitDefault(value)
             public fun visitUnresolved(): R = visitDefault(null)
         }
-
         public fun <R> accept(visitor: Visitor<R>): R
     }
 }

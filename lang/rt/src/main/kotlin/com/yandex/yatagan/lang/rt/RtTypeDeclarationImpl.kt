@@ -37,6 +37,7 @@ import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.ifOrElseNull
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.AnnotationDeclaration
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Constructor
 import com.yandex.yatagan.lang.Field
@@ -100,6 +101,11 @@ internal class RtTypeDeclarationImpl private constructor(
 
     override fun asType(): Type {
         return type
+    }
+
+    override fun asAnnotationDeclaration(): AnnotationDeclaration {
+        check(impl.isAnnotation) { "Not an annotation declaration: $kind" }
+        return RtAnnotationImpl.AnnotationClassImpl(impl)
     }
 
     override val nestedClasses: Sequence<TypeDeclaration> by lazy {

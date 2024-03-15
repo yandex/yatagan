@@ -18,6 +18,7 @@ package com.yandex.yatagan.codegen.impl
 
 import com.yandex.yatagan.AssistedFactory
 import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.base.concatOrThis
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -26,6 +27,11 @@ import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
+import com.yandex.yatagan.instrumentation.impl.InstrumentedAround
+import com.yandex.yatagan.instrumentation.impl.instrumentedAccess
+import com.yandex.yatagan.instrumentation.impl.instrumentedCreation
+import com.yandex.yatagan.instrumentation.impl.instrumentedDependencies
+import com.yandex.yatagan.instrumentation.impl.isEmpty
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -69,7 +75,11 @@ internal class AccessStrategyManager @Inject constructor(
 
     @AssistedFactory
     interface WrappingAccessorStrategyFactory {
-        fun create(binding: Binding, underlying: AccessStrategy): WrappingAccessorStrategy
+        fun create(
+            binding: Binding,
+            underlying: AccessStrategy,
+            instrumentationInfo: InstrumentedAround,
+        ): WrappingAccessorStrategy
     }
 
     @AssistedFactory
@@ -88,9 +98,9 @@ internal class AccessStrategyManager @Inject constructor(
     private val singleLocalDependentBindingCache: Map<Binding, Binding?> =
         buildMap(thisGraph.localBindings.size) {
             for (binding in thisGraph.localBindings.keys) {
-                val dependencies = if (binding.nonStaticConditionProviders.isNotEmpty()) {
-                    binding.dependencies + binding.nonStaticConditionProviders
-                } else binding.dependencies
+                val dependencies = binding.dependencies
+                    .concatOrThis(binding.nonStaticConditionProviders)
+                    .concatOrThis(binding.instrumentedDependencies())
 
                 for ((node, _) in dependencies) {
                     val dependencyBinding = thisGraph.resolveBinding(node)
@@ -113,10 +123,10 @@ internal class AccessStrategyManager @Inject constructor(
             if (binding.conditionScope == ConditionScope.Never) {
                 return EmptyAccessStrategy
             }
-            val strategy = if (binding.scopes.isNotEmpty()) {
+            var strategy = if (binding.scopes.isNotEmpty()) {
                 when(detectDegenerateUsage(binding)) {
                     DegenerateBindingUsage.SingleLocalDirect -> {
-                        inlineStrategy(
+                        inlineOrWrapperStrategy(
                             binding = binding,
                             usage = usage,
                         )
@@ -124,7 +134,7 @@ internal class AccessStrategyManager @Inject constructor(
                     DegenerateBindingUsage.SingleLocalProvider,
                     DegenerateBindingUsage.SingleLocalLazy -> {
                         CompositeStrategy(
-                            directStrategy = inlineStrategy(
+                            directStrategy = inlineOrWrapperStrategy(
                                 binding = binding,
                                 usage = usage,
                             ),
@@ -149,13 +159,13 @@ internal class AccessStrategyManager @Inject constructor(
             } else {
                 if (usage.lazy + usage.provider == 0) {
                     // Inline instance creation does the trick.
-                    inlineStrategy(
+                    inlineOrWrapperStrategy(
                         binding = binding,
                         usage = usage,
                     )
                 } else {
                     CompositeStrategy(
-                        directStrategy = inlineStrategy(
+                        directStrategy = inlineOrWrapperStrategy(
                             binding = binding,
                             usage = usage,
                         ),
@@ -168,7 +178,7 @@ internal class AccessStrategyManager @Inject constructor(
                     )
                 }
             }
-            return if (usage.optional > 0) {
+            strategy = if (usage.optional > 0) {
                 fun conditionalStrategy(kind: DependencyKind): ConditionalAccessStrategy {
                     return conditionalAccessStrategyFactory.create(
                         underlying = strategy,
@@ -185,6 +195,16 @@ internal class AccessStrategyManager @Inject constructor(
                         conditionalStrategy(DependencyKind.Provider) else null,
                 )
             } else strategy
+
+            if (!binding.instrumentedAccess.isEmpty()) {
+                strategy = wrappingAccessorStrategyFactory.create(
+                    binding = binding,
+                    underlying = strategy,
+                    instrumentationInfo = binding.instrumentedAccess,
+                )
+            }
+
+            return strategy
         },
     )
 
@@ -263,7 +283,7 @@ internal class AccessStrategyManager @Inject constructor(
         }
     }
 
-    private fun inlineStrategy(
+    private fun inlineOrWrapperStrategy(
         binding: Binding,
         usage: BindingGraph.BindingUsage,
     ): AccessStrategy {
@@ -271,21 +291,24 @@ internal class AccessStrategyManager @Inject constructor(
             binding = binding,
         )
 
-        if (binding.dependencies.isEmpty())
-            return inline
-        if (usage.provider + usage.lazy == 0) {
-            if (usage.direct == 1) {
+        if (binding.instrumentedCreation.isEmpty()) {
+            if (binding.dependencies.isEmpty())
                 return inline
-            }
-        } else {
-            if (usage.direct == 0) {
-                return inline
+            if (usage.provider + usage.lazy == 0) {
+                if (usage.direct == 1) {
+                    return inline
+                }
+            } else {
+                if (usage.direct == 0) {
+                    return inline
+                }
             }
         }
 
         return wrappingAccessorStrategyFactory.create(
             underlying = inline,
             binding = binding,
+            instrumentationInfo = binding.instrumentedCreation,
         )
     }
 }

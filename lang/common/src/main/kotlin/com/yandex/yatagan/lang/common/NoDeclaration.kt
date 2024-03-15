@@ -58,6 +58,7 @@ class NoDeclaration(
     ): List<T> = emptyList()
 
     override fun asType(): Type = type
+    override fun asAnnotationDeclaration(): Nothing = throw IllegalStateException("Not an annotation declaration")
 
     override fun hashCode(): Int = type.hashCode()
     override fun equals(other: Any?): Boolean {

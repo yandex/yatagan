@@ -184,6 +184,7 @@ class RuntimeEngine(
 
     private fun createGraphOptions() = Options(
         allConditionsLazy = params.allConditionsLazy,
+        instrumentationPlugins = emptyList(),  // TODO: Implement
     )
 
     private companion object {

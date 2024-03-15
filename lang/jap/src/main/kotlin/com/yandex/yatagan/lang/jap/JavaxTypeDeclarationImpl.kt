@@ -20,6 +20,7 @@ import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.mapToArray
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.AnnotationDeclaration
 import com.yandex.yatagan.lang.Constructor
 import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Method
@@ -151,6 +152,11 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     override fun asType(): Type {
         return JavaxTypeImpl(type)
+    }
+
+    override fun asAnnotationDeclaration(): AnnotationDeclaration {
+        check(impl.kind == ElementKind.ANNOTATION_TYPE) { "Not an annotation declaration: $kind" }
+        return JavaxAnnotationImpl.AnnotationClassImpl(impl)
     }
 
     override val platformModel: TypeElement get() = impl
