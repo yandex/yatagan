@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.impl
 
+import com.yandex.yatagan.base.concatOrThis
 import com.yandex.yatagan.base.traverseDepthFirstWithPath
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
@@ -28,6 +29,7 @@ import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import com.yandex.yatagan.core.model.isEager
+import com.yandex.yatagan.instrumentation.impl.instrumentedDependencies
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.reportError
@@ -49,7 +51,9 @@ internal fun validateNoLoops(graph: BindingGraph, validator: Validator) {
                 override fun visitOther(other: BaseBinding) = throw AssertionError()
                 override fun visitAlias(alias: AliasBinding) = listOf(alias.source)
                 override fun visitBinding(binding: Binding) =
-                    binding.dependencies + binding.nonStaticConditionProviders
+                    binding.dependencies
+                        .concatOrThis(binding.nonStaticConditionProviders)
+                        .concatOrThis(binding.instrumentedDependencies())
             }
             binding.accept(DependenciesVisitor()).map { (node, kind) ->
                 kind to binding.owner.resolveBindingRaw(node)

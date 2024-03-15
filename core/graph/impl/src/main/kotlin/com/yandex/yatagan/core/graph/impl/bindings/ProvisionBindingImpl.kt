@@ -17,8 +17,10 @@
 package com.yandex.yatagan.core.graph.impl.bindings
 
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
 import com.yandex.yatagan.core.model.ConditionScope
@@ -30,7 +32,7 @@ import com.yandex.yatagan.validation.format.bindingModelRepresentation
 internal class ProvisionBindingImpl(
     override val impl: ProvidesBindingModel,
     override val owner: BindingGraph,
-) : ProvisionBinding, ConditionalBindingMixin, ModuleHostedBindingMixin() {
+) : ProvisionBinding, ConditionalBindingMixin, ModuleHostedBindingMixin(), Extensible by ExtensibleImpl()  {
 
     override val scopes get() = impl.scopes
     override val provision get() = impl.method

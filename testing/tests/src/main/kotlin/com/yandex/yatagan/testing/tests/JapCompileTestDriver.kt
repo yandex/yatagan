@@ -16,17 +16,17 @@
 
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.processor.jap.JapYataganProcessor
+import com.yandex.yatagan.generated.KaptProcessorClasspath
 import java.io.File
 import java.net.URLClassLoader
 import javax.annotation.processing.Processor
 
 class JapCompileTestDriver(
-    private val customProcessorClasspath: String? = null,
+    private val processorClasspath: String = KaptProcessorClasspath,
     override val checkGoldenOutput: Boolean = true,
-): CompileTestDriverBase() {
+) : CompileTestDriverBase() {
     override fun createCompilationArguments() = super.createCompilationArguments().copy(
-        kaptProcessors = listOf(loadProcessorFromCustomClasspath() ?: JapYataganProcessor()),
+        kaptProcessors = listOf(loadProcessor()),
     )
 
     override fun generatedFilesSubDir(): String {
@@ -36,10 +36,15 @@ class JapCompileTestDriver(
     override val backendUnderTest: Backend
         get() = Backend.Kapt
 
-    private fun loadProcessorFromCustomClasspath(): Processor? {
-        customProcessorClasspath ?: return null
-        val kaptClassloader = URLClassLoader(customProcessorClasspath.split(File.pathSeparatorChar)
-            .map { File(it).toURI().toURL() }.toTypedArray(), ClassLoader.getPlatformClassLoader())
+    private fun loadProcessor(): Processor {
+        val classpath = buildList {
+            processorClasspath.split(File.pathSeparatorChar).mapTo(this, ::File)
+            // Include plugins classpath into processor classpath, if any present
+            pluginsModuleOutputDirs?.let(::addAll)
+        }
+
+        val kaptClassloader = URLClassLoader(
+            classpath.map { it.toURI().toURL() }.toTypedArray(), ClassLoader.getPlatformClassLoader())
         val clazz = kaptClassloader.loadClass("com.yandex.yatagan.processor.jap.JapYataganProcessor")
         return clazz.getConstructor().newInstance() as Processor
     }

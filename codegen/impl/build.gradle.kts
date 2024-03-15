@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":base:impl"))
     implementation(project(":codegen:poetry"))
     implementation(project(":lang:compiled"))
+    implementation(project(":instrumentation:impl"))
 
     implementation(libs.yataganDogFood.api)
     ksp(libs.yataganDogFood.ksp)

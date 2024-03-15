@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.core.graph.impl.bindings
 
+import com.yandex.yatagan.base.ExtensibleImpl
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AlternativesBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -28,7 +30,7 @@ import com.yandex.yatagan.validation.format.bindingModelRepresentation
 internal class AlternativesBindingImpl(
     override val impl: BindsBindingModel,
     override val owner: BindingGraph,
-) : AlternativesBinding, BindingDefaultsMixin, ModuleHostedBindingMixin() {
+) : AlternativesBinding, BindingDefaultsMixin, ModuleHostedBindingMixin(), Extensible by ExtensibleImpl() {
     override val scopes get() = impl.scopes
     override val alternatives get() = impl.sources
 

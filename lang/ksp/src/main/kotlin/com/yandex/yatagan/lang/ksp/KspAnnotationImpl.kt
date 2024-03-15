@@ -35,11 +35,7 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspAnnotationImpl(
     private val impl: KSAnnotation,
-) : CtAnnotationBase() {
-    private val descriptor by lazy {
-        this@KspAnnotationImpl.toString()
-    }
-
+) : KspAnnotationBase() {
     override val annotationClass: AnnotationDeclaration by lazy {
         AnnotationClassImpl(
             declaration = checkNotNull(impl.annotationType.resolve().classDeclaration()),
@@ -58,13 +54,7 @@ internal class KspAnnotationImpl(
         return ValueImpl(arg.value)
     }
 
-    override fun hashCode(): Int = descriptor.hashCode()
-
-    override fun equals(other: Any?): Boolean {
-        return this === other || (other is KspAnnotationImpl && descriptor == other.descriptor)
-    }
-
-    private class ValueImpl(
+    internal class ValueImpl(
         private val value: Any?,
     ) : ValueBase() {
         private val identity by lazy(PUBLICATION) {
@@ -127,6 +117,13 @@ internal class KspAnnotationImpl(
                         enum = enumClass,
                         constant = value.name,
                     )
+                }
+                is KspAnnotationBase -> visitor.visitAnnotation(value)
+                is Pair<*, *> -> {
+                    val (first, second) = value
+                    if (first is Type && second is String)
+                        visitor.visitEnumConstant(first, second)
+                    else throw AssertionError("Not reached")
                 }
                 null -> visitor.visitUnresolved()
                 else -> throw AssertionError("Unexpected value type: $value with class ${value.javaClass}")

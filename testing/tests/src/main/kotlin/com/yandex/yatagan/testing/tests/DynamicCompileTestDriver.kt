@@ -16,14 +16,9 @@
 
 package com.yandex.yatagan.testing.tests
 
+import com.google.auto.common.MoreElements
 import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.Component
-import com.yandex.yatagan.lang.jap.asTypeElement
-import com.yandex.yatagan.lang.jap.isAnnotatedWith
-import com.yandex.yatagan.processor.common.IntOption
-import com.yandex.yatagan.processor.common.Logger
-import com.yandex.yatagan.processor.common.LoggerDecorator
-import com.yandex.yatagan.processor.common.Option
 import com.yandex.yatagan.testing.source_set.SourceFile
 import org.intellij.lang.annotations.Language
 import java.io.File
@@ -44,8 +39,8 @@ class DynamicCompileTestDriver(
     apiType: ApiType = ApiType.Dynamic,
 ) : CompileTestDriverBase(apiType) {
     private val accumulator = ComponentBootstrapperGenerator()
-    private val options = mutableMapOf<Option<*>, Any>(
-        IntOption.MaxIssueEncounterPaths to 100,
+    private val options = mutableMapOf(
+        "yatagan.maxIssueEncounterPaths" to "100",
     )
 
     private val runnerSource = SourceFile.java(TEST_RUNNER, """
@@ -94,7 +89,7 @@ class DynamicCompileTestDriver(
 
     override fun generatedFilesSubDir(): String? = null
 
-    override fun <V : Any> givenOption(option: Option<V>, value: V) {
+    override fun givenOption(option: String, value: String) {
         options[option] = value
     }
 
@@ -149,25 +144,13 @@ class DynamicCompileTestDriver(
             Properties().apply {
                 put("validationDelegateClass", TEST_DELEGATE)
                 for ((option, value) in options) {
-                    put(option.key.substringAfterLast('.'), value.toString())
+                    put(option.removePrefix("yatagan."), value)
                 }
             }.store(it, "Generated test properties")
         }
 
         val classLoader = makeClassLoader(runtimeClasspath + resourcesDir)
         var success = true
-        val logger = LoggerDecorator(object : Logger {
-            override fun error(message: String) {
-                success = false
-                log.appendLine(message)
-                println(message)
-            }
-
-            override fun warning(message: String) {
-                log.appendLine(message)
-                println(message)
-            }
-        })
         for (bootstrapperName in componentBootstrapperNames) {
             val bootstrapper = classLoader.loadClass(bootstrapperName.reflectionName())
                 .getDeclaredConstructor()
@@ -183,8 +166,15 @@ class DynamicCompileTestDriver(
         @Suppress("UNCHECKED_CAST")
         for ((kind, message) in delegateLog as List<Array<String>>) {
             when (kind) {
-                "e" -> logger.error(message)
-                "w" -> logger.warning(message)
+                "e" -> {
+                    success = false
+                    log.appendLine(">>>[error]\n$message\n>>>")
+                    println(message)
+                }
+                "w" -> {
+                    log.appendLine(">>>[warning]\n$message\n>>>")
+                    println(message)
+                }
                 else -> throw AssertionError("not reached")
             }
         }
@@ -199,14 +189,15 @@ class DynamicCompileTestDriver(
 
         override fun getSupportedSourceVersion() = SourceVersion.RELEASE_8
 
+        @Suppress("UnstableApiUsage")
         override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
             for (element: Element in roundEnv.getElementsAnnotatedWith(Component::class.java)) {
-                val type = element.asTypeElement()
+                val type = MoreElements.asType(element)
                 if (!type.getAnnotation(Component::class.java).isRoot) continue
 
                 val componentName = ClassName.get(type)
                 val builderName = type.enclosedElements.find {
-                    it.isAnnotatedWith<Component.Builder>()
+                    it.getAnnotation(Component.Builder::class.java) != null
                 }?.let {
                     componentName.simpleNames().joinToString(".") + '.' + it.simpleName
                 }

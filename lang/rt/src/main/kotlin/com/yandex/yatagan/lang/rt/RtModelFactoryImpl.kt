@@ -16,6 +16,9 @@
 
 package com.yandex.yatagan.lang.rt
 
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.AnnotationDeclaration
+import com.yandex.yatagan.lang.AnnotationValueFactory
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
@@ -77,8 +80,18 @@ class RtModelFactoryImpl(
         }
     }
 
+    override fun getAnnotation(
+        declaration: AnnotationDeclaration,
+        argumentsSupplier: (AnnotationDeclaration.Attribute) -> Annotation.Value,
+    ): Annotation {
+        TODO("Not yet implemented")
+    }
+
     override val isInRuntimeEnvironment: Boolean
         get() = true
+
+    override val annotationValueFactory: AnnotationValueFactory
+        get() = TODO("Not yet implemented")
 
     private class WildcardTypeImpl(
         private val upperBound: ReflectType,

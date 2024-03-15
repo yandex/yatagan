@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.InstanceBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.validation.MayBeInvalid
@@ -28,7 +29,7 @@ internal class InstanceBindingImpl(
     override val target: NodeModel,
     override val owner: BindingGraph,
     private val origin: ComponentFactoryModel.InputModel,
-) : InstanceBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin {
+) : InstanceBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin, ExtensibleImpl() {
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitInstance(this)

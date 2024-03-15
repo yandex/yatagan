@@ -21,6 +21,7 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.MapBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.graph.impl.mergeMultiMapsForDuplicateCheck
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel
 import com.yandex.yatagan.core.model.NodeDependency
@@ -45,7 +46,7 @@ internal class MapBindingImpl(
     override val mapValue: Type,
     override val upstream: MapBindingImpl?,
     override val targetForDownstream: NodeModel,
-) : MapBinding, BindingDefaultsMixin, ComparableBindingMixin<MapBindingImpl> {
+) : MapBinding, BindingDefaultsMixin, ComparableBindingMixin<MapBindingImpl>, ExtensibleImpl() {
 
     data class Contribution(
         override val keyValue: Annotation.Value,

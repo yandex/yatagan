@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.graph.impl.bindings
 
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -33,7 +34,7 @@ internal class AliasLoopStubBinding(
     override val owner: BindingGraph,
     override val target: NodeModel,
     private val aliasLoop: Collection<AliasBinding>,
-) : EmptyBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin {
+) : EmptyBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin, ExtensibleImpl() {
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)
     }

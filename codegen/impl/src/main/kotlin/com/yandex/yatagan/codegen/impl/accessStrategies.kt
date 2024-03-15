@@ -27,6 +27,8 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.isOptional
+import com.yandex.yatagan.instrumentation.impl.InstrumentedAround
+import com.yandex.yatagan.instrumentation.impl.instrumentedCreation
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.VOLATILE
 
@@ -85,11 +87,21 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
                 if (options.enableThreadChecks) {
                     +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
                 }
+                val instrumented = binding.instrumentedCreation
+                doInstrument(
+                    graph = binding.owner,
+                    statements = instrumented.before,
+                )
                 +buildExpression {
                     +"local = "
                     binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)
                 }
                 +"this.%N = local".formatCode(instanceFieldName)
+                doInstrument(
+                    graph = binding.owner,
+                    statements = instrumented.after,
+                    instrumentedInstance = "local" to targetType,
+                )
             }
             +"return (%T) local".formatCode(targetType)
         }
@@ -120,11 +132,21 @@ internal class CachingStrategyMultiThread @AssistedInject constructor(
                 controlFlow("synchronized (local)") {
                     +"local = this.%N".formatCode(instanceFieldName)
                     controlFlow("if (local instanceof %T)".formatCode(lockName)) {
+                        val instrumented = binding.instrumentedCreation
+                        doInstrument(
+                            graph = binding.owner,
+                            statements = instrumented.before,
+                        )
                         +buildExpression {
                             +"local = "
                             binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)
                         }
                         +"this.%N = local".formatCode(instanceFieldName)
+                        doInstrument(
+                            graph = binding.owner,
+                            statements = instrumented.after,
+                            instrumentedInstance = "local" to targetType,
+                        )
                     }
                 }
             }
@@ -179,6 +201,7 @@ internal class InlineCreationStrategy(
 internal class WrappingAccessorStrategy @AssistedInject constructor(
     @Assisted private val binding: Binding,
     @Assisted private val underlying: AccessStrategy,
+    @Assisted private val instrumented: InstrumentedAround,
     @MethodsNamespace methodsNs: Namespace,
 ) : AccessStrategy {
     private val accessorName: String
@@ -191,15 +214,29 @@ internal class WrappingAccessorStrategy @AssistedInject constructor(
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         method(accessorName) {
             modifiers(/*package-private*/)
-            returnType(binding.target.typeName())
-            +buildExpression {
-                +"return "
-                underlying.generateAccess(
-                    builder = this,
-                    kind = DependencyKind.Direct,
-                    inside = binding.owner,
-                    isInsideInnerClass = false,
+            val resultType = binding.target.typeName()
+            returnType(resultType)
+            doInstrument(graph = binding.owner, statements = instrumented.before)
+            if (instrumented.after.isEmpty()) {
+                +buildExpression {
+                    +"return "
+                    generateThisBindingAccess()
+                }
+            } else {
+                val name = "instance$"
+                +buildExpression {
+                    "%T %N = ".format(
+                        resultType,
+                        name,
+                    )
+                    generateThisBindingAccess()
+                }
+                doInstrument(
+                    graph = binding.owner,
+                    statements = instrumented.after,
+                    instrumentedInstance = name to resultType,
                 )
+                +"return %N".formatCode(name)
             }
         }
     }
@@ -215,6 +252,15 @@ internal class WrappingAccessorStrategy @AssistedInject constructor(
         builder.apply {
             +"%L.%N()".formatCode(component, accessorName)
         }
+    }
+
+    private fun ExpressionBuilder.generateThisBindingAccess() {
+        underlying.generateAccess(
+            builder = this,
+            kind = DependencyKind.Direct,
+            inside = binding.owner,
+            isInsideInnerClass = false,
+        )
     }
 }
 

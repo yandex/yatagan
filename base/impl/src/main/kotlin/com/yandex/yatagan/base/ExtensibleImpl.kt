@@ -12,6 +12,10 @@ open class ExtensibleImpl : Extensible {
         return key.keyType.cast(value)
     }
 
+    override fun <V : Any> getOrNull(key: Extensible.Key<V>): V? {
+        return key.keyType.cast(data[key])
+    }
+
     override fun <V : Any> set(key: Extensible.Key<V>, value: V) {
         check(key !in data) {
             "Value already present for key $key"

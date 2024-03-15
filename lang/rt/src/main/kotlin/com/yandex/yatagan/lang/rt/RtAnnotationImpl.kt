@@ -102,7 +102,7 @@ internal class RtAnnotationImpl(
         override fun equals(other: Any?) = this === other || (other is ValueImpl && value == other.value)
     }
 
-    private class AnnotationClassImpl private constructor(
+    internal class AnnotationClassImpl private constructor(
         private val impl: Class<*>,
     ) : AnnotationDeclarationBase(), Annotated by RtAnnotatedImpl(impl) {
 

@@ -28,6 +28,7 @@ internal object Names {
 
     val AssertionError: ClassName = ClassName.get(java.lang.AssertionError::class.java)
     val Class: ClassName = ClassName.get(java.lang.Class::class.java)
+    val String: ClassName = ClassName.get(java.lang.String::class.java)
     val Collections: ClassName = ClassName.get(java.util.Collections::class.java)
     val Arrays: ClassName = ClassName.get(java.util.Arrays::class.java)
     val ArrayList: ClassName = ClassName.get(java.util.ArrayList::class.java)

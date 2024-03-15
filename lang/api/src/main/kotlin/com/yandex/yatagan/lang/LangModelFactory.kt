@@ -75,9 +75,9 @@ public interface LangModelFactory {
     ): Type
 
     /**
-     * Gets a type declaration by the fully qualified name ('.'-separated).
+     * Gets a type declaration by the fully qualified name.
      *
-     * @return a type declaration model by the given name. If kotlin-platform type is requested, e. g. `kotlin.String`,
+     * @return a type declaration model by the given name. If kotlin-platform type is requested, e.g. `kotlin.String`,
      * Java counterpart is returned, e.g. `java.lang.String`. `null` is returned when no such type can be found.
      *
      * @param packageName package name where the class is located.
@@ -91,6 +91,23 @@ public interface LangModelFactory {
     ): TypeDeclaration?
 
     /**
+     * Constructs an annotation of the given type and with the given parameters.
+     * NOTE: In order to obtain a valid [declaration], one may inspect existing annotations using
+     * [Annotation.annotationClass] or locate a type by name using [getTypeDeclaration] and then calling
+     * [TypeDeclaration.asAnnotationDeclaration] on it.
+     *
+     * @param declaration annotation type.
+     * @param arguments annotation arguments in the order of declaration. The value MUST be specified for each declared
+     *  parameter, default values are not honored.
+     * @return constructed annotation object.
+     * @throws IllegalArgumentException if any argument is of unexpected class or otherwise not applicable.
+     */
+    public fun getAnnotation(
+        declaration: AnnotationDeclaration,
+        argumentsSupplier: (AnnotationDeclaration.Attribute) -> Annotation.Value,
+    ): Annotation
+
+    /**
      * Creates a synthetic "no"-type which can be used when type object is required but no actual type is present.
      */
     @Internal
@@ -100,6 +117,8 @@ public interface LangModelFactory {
      * `true` if the code runs in RT mode (using reflection). `false` if codegen mode.
      */
     public val isInRuntimeEnvironment: Boolean
+
+    public val annotationValueFactory: AnnotationValueFactory
 
     @OptIn(Internal::class)
     public companion object : LangModelFactory {
@@ -124,9 +143,17 @@ public interface LangModelFactory {
             vararg simpleNames: String
         ): TypeDeclaration? = checkNotNull(delegate.get()).getTypeDeclaration(packageName, simpleName, *simpleNames)
 
+        override fun getAnnotation(
+            declaration: AnnotationDeclaration,
+            argumentsSupplier: (AnnotationDeclaration.Attribute) -> Annotation.Value,
+        ): Annotation = checkNotNull(delegate.get()).getAnnotation(declaration, argumentsSupplier)
+
         @Internal
         override fun createNoType(name: String): Type = checkNotNull(delegate.get()).createNoType(name)
 
         override val isInRuntimeEnvironment: Boolean get() = checkNotNull(delegate.get()).isInRuntimeEnvironment
+
+        override val annotationValueFactory: AnnotationValueFactory
+            get() = checkNotNull(delegate.get()).annotationValueFactory
     }
 }

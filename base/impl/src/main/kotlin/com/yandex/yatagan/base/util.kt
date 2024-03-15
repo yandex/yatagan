@@ -40,6 +40,10 @@ inline fun <T, reified R> List<T>.mapToArray(map: (T) -> R): Array<R> {
     return Array(size) { map(get(it)) }
 }
 
+fun <T> List<T>.concatOrThis(
+    another: Collection<T>,
+): List<T> = if (another.isEmpty()) this else this + another
+
 fun <T1, T2> Sequence<T1>.zipOrNull(another: Sequence<T2>): Sequence<Pair<T1?, T2?>> {
     return Sequence {
         object : Iterator<Pair<T1?, T2?>> {

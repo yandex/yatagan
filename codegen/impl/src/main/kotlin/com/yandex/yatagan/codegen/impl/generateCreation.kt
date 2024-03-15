@@ -269,7 +269,7 @@ private class CreationGeneratorVisitor(
     }
 
     override fun visitEmpty(binding: EmptyBinding) {
-        throw AssertionError("Not reached: unreported empty/missing binding: `$binding`")
+        throw AssertionError("Not reached: unreported empty/missing binding: `${binding.target.toString(null)}`")
     }
 
     private fun componentForBinding(binding: Binding): CodeBlock {

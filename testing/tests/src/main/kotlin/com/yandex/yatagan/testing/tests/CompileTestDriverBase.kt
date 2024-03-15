@@ -20,10 +20,7 @@ import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
 import androidx.room.compiler.processing.util.compiler.compile
 import com.yandex.yatagan.generated.CompiledApiClasspath
 import com.yandex.yatagan.generated.DynamicApiClasspath
-import com.yandex.yatagan.processor.common.BooleanOption
-import com.yandex.yatagan.processor.common.IntOption
-import com.yandex.yatagan.processor.common.LoggerDecorator
-import com.yandex.yatagan.processor.common.Option
+import com.yandex.yatagan.generated.PluginsSpiClasspath
 import com.yandex.yatagan.testing.source_set.SourceFile
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assert
@@ -41,10 +38,12 @@ abstract class CompileTestDriverBase private constructor(
     private val mainSourceSet: SourceSet,
 ) : CompileTestDriver, SourceSet by mainSourceSet {
     private var precompiledModuleOutputDirs: List<File>? = null
+    protected var pluginsModuleOutputDirs: List<File>? = null
+        private set
     private val options = mutableMapOf(
-        IntOption.MaxIssueEncounterPaths.key to "100",
-        IntOption.MaxSlotsPerSwitch.key to "100",
-        BooleanOption.SortMethodsForTesting.key to "true",
+        "yatagan.maxIssueEncounterPaths" to "100",
+        "yatagan.experimental.maxSlotsPerSwitch" to "100",
+        "yatagan.internal.testing.sortMethods" to "true",
     )
 
     protected constructor(
@@ -73,6 +72,34 @@ abstract class CompileTestDriverBase private constructor(
         }
 
         precompiledModuleOutputDirs = result.outputClasspath
+    }
+
+    final override fun givenPlugins(sources: SourceSet, services: Map<String, List<String>>) {
+        check(pluginsModuleOutputDirs == null) { "Multiple plugin modules are not supported" }
+
+        val compilation = TestCompilationArguments(
+            sources = sources.sourceFiles,
+            classpath = buildList {
+                PluginsSpiClasspath.split(':').forEach { add(File(it)) }
+                precompiledModuleOutputDirs?.let<List<File>, Unit> { addAll(it) }
+            },
+            inheritClasspath = false,
+            kotlincArguments = listOf(
+                "-opt-in=com.yandex.yatagan.ConditionsApi",
+                "-opt-in=com.yandex.yatagan.VariantApi",
+            ),
+        )
+        val result = compile(
+            workingDir = createTempDirectory(prefix = "ytc").toFile(),
+            arguments = compilation,
+        )
+        check(result.success) { "Plugins compilation failed, check the code: " + result.diagnostics }
+        pluginsModuleOutputDirs = result.outputClasspath
+
+        val resourceDir = result.outputClasspath.first().resolve("META-INF/services").also { it.mkdirs() }
+        for ((file, lines) in services) {
+            resourceDir.resolve(file).writeText(lines.joinToString("\n"))
+        }
     }
 
     data class TestCompilationResult(
@@ -105,8 +132,8 @@ abstract class CompileTestDriverBase private constructor(
 
     abstract fun generatedFilesSubDir(): String?
 
-    override fun <V : Any> givenOption(option: Option<V>, value: V) {
-        options[option.key] = value.toString()
+    override fun givenOption(option: String, value: String) {
+        options[option] = value
     }
 
     override fun compileRunAndValidate() {
@@ -240,7 +267,7 @@ abstract class CompileTestDriverBase private constructor(
      */
     private fun normalizeMessages(log: String): String {
         return buildList {
-            for (messageMatch in LoggerDecorator.MessageRegex.findAll(log)) {
+            for (messageMatch in MessageRegex.findAll(log)) {
                 val (kind, message) = messageMatch.destructured
                 add("$kind: ${message.trimIndent().stripColor().trim()}")
             }
@@ -266,6 +293,8 @@ abstract class CompileTestDriverBase private constructor(
 
         private val GoldenSourceRegex = """$MessageSeparator\nName: (.*?)\n(.*?)(?=$MessageSeparator)"""
             .toRegex(RegexOption.DOT_MATCHES_ALL)
+
+        private val MessageRegex = """>>>\[(warning|error)]\n(.*?)>>>""".toRegex(RegexOption.DOT_MATCHES_ALL)
 
         val goldenSourceDirForUpdate: String? = System.getProperty("com.yandex.yatagan.updateGoldenFiles")
 

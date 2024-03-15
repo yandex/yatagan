@@ -1,5 +1,7 @@
 package com.yandex.yatagan.lang.common
 
+import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.AnnotationDeclaration
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 

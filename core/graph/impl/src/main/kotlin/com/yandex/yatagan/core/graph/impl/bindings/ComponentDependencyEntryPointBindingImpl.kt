@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ComponentDependencyEntryPointBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.lang.Method
@@ -31,7 +32,7 @@ internal class ComponentDependencyEntryPointBindingImpl(
     override val getter: Method,
     override val target: NodeModel,
 ) : ComponentDependencyEntryPointBinding, BindingDefaultsMixin,
-    ComparableBindingMixin<ComponentDependencyEntryPointBindingImpl> {
+    ComparableBindingMixin<ComponentDependencyEntryPointBindingImpl>, ExtensibleImpl() {
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitComponentDependencyEntryPoint(this)

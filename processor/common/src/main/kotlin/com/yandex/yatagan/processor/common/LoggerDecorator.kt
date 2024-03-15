@@ -41,7 +41,5 @@ class LoggerDecorator(
         fun decorateWarning(message: String): String {
             return ">>>[warning]\n$message\n>>>"
         }
-
-        val MessageRegex = """>>>\[(warning|error)]\n(.*?)>>>""".toRegex(RegexOption.DOT_MATCHES_ALL)
     }
 }

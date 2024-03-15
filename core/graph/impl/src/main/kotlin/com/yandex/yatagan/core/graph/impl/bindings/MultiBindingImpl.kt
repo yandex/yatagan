@@ -20,6 +20,7 @@ import com.yandex.yatagan.base.MapComparator
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.graph.impl.topologicalSort
 import com.yandex.yatagan.core.model.CollectionTargetKind
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel
@@ -38,7 +39,7 @@ internal class MultiBindingImpl(
     override val targetForDownstream: NodeModel,
     override val kind: CollectionTargetKind,
     contributions: Map<Contribution, MultiBinding.ContributionType>,
-) : MultiBinding, BindingDefaultsMixin, ComparableBindingMixin<MultiBindingImpl> {
+) : MultiBinding, BindingDefaultsMixin, ComparableBindingMixin<MultiBindingImpl>, ExtensibleImpl() {
     private val _contributions = contributions
 
     data class Contribution(

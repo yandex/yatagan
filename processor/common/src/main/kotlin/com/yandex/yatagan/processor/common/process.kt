@@ -24,6 +24,7 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
+import com.yandex.yatagan.instrumentation.spi.InstrumentationPlugin
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Error
 import com.yandex.yatagan.validation.ValidationMessage.Kind.MandatoryWarning
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Warning
@@ -48,11 +49,13 @@ fun <Source> process(
 
         val logger = LoggerDecorator(delegate.logger)
         val plugins = loadServices<ValidationPluginProvider>()
+        val instrumentationPlugins = loadServices<InstrumentationPlugin>()
         for (rootModel in rootModels) {
             val graphRoot = BindingGraph(
                 root = rootModel,
                 options = Options(
                     allConditionsLazy = delegate.options[BooleanOption.AllConditionsLazy],
+                    instrumentationPlugins = instrumentationPlugins,
                 )
             )
             val allMessages = buildList {

@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
 import com.yandex.yatagan.core.model.ComponentModel
@@ -30,7 +31,8 @@ import com.yandex.yatagan.validation.format.modelRepresentation
 internal class SubComponentBindingImpl(
     override val owner: BindingGraph,
     private val targetComponent: ComponentModel,
-) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker {
+) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker,
+    ExtensibleImpl() {
     init {
         require(targetComponent.factory == null)
     }

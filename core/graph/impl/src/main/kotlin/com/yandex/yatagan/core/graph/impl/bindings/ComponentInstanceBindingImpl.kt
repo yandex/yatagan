@@ -19,12 +19,14 @@ package com.yandex.yatagan.core.graph.impl.bindings
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ComponentInstanceBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.format.modelRepresentation
 
 internal class ComponentInstanceBindingImpl(
     graph: BindingGraph,
-) : ComponentInstanceBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker {
+) : ComponentInstanceBinding, BindingDefaultsMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker,
+    ExtensibleImpl() {
     override val owner: BindingGraph = graph
     override val target get() = owner.model.asNode()
 

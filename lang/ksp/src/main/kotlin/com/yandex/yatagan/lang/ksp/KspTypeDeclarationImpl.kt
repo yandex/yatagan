@@ -35,6 +35,7 @@ import com.google.devtools.ksp.symbol.Origin
 import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.Annotated
+import com.yandex.yatagan.lang.AnnotationDeclaration
 import com.yandex.yatagan.lang.Constructor
 import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Method
@@ -350,6 +351,11 @@ internal class KspTypeDeclarationImpl private constructor(
 
     override fun asType(): Type {
         return type
+    }
+
+    override fun asAnnotationDeclaration(): AnnotationDeclaration {
+        check(impl.classKind == ClassKind.ANNOTATION_CLASS) { "Not an annotation declaration: $kind" }
+        return KspAnnotationImpl.AnnotationClassImpl(impl)
     }
 
     override val platformModel: KSClassDeclaration

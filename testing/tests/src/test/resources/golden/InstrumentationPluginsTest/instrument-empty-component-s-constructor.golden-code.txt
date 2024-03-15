@@ -1,0 +1,139 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponentFoo.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Arrays;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponentFoo implements MyComponentFoo {
+  final MyModule mMyModule;
+
+  private Yatagan$MyComponentFoo(MyModule pMyModule) {
+    this.mMyModule = pMyModule != null ? pMyModule : new MyModule();
+    long i$timeMs = HooksObject.INSTANCE.beginTrack();
+    InstrumentedHooks.log("graph for root-component test.MyComponentFoo was created");
+    HooksClass.Companion.log("graph for root-component test.MyComponentFoo was created");
+    (Checks.checkProvisionNotNull(this.mMyModule.provideApiB())).onCreate('W');
+    HooksObject.INSTANCE.endTrack(this, i$timeMs);
+  }
+
+  public static AutoBuilder<Yatagan$MyComponentFoo> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponentFoo> {
+    private MyModule mMyModule;
+
+    @Override
+    public final <I> AutoBuilder<Yatagan$MyComponentFoo> provideInput(I input,
+        Class<I> inputClass) {
+      if (inputClass == MyModule.class) {
+        this.mMyModule = (MyModule) input;
+      } else {
+        Checks.reportUnexpectedAutoBuilderInput(inputClass, Arrays.asList(MyModule.class));
+      }
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MyComponentFoo create() {
+      return new Yatagan$MyComponentFoo(this.mMyModule);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponentBar.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponentBar implements MyComponentBar {
+  private Yatagan$MyComponentBar() {
+  }
+
+  public static AutoBuilder<Yatagan$MyComponentBar> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponentBar> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$MyComponentBar> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MyComponentBar create() {
+      return new Yatagan$MyComponentBar();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$MyComponent2Foo.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+public final class Yatagan$MyComponent2Foo implements MyComponent2Foo {
+  private Object mClassAInstance;
+
+  private Yatagan$MyComponent2Foo() {
+    long i$timeMs = HooksObject.INSTANCE.beginTrack();
+    InstrumentedHooks.log("graph for root-component test.MyComponent2Foo was created");
+    HooksClass.Companion.log("graph for root-component test.MyComponent2Foo was created");
+    (this.cacheClassA()).onCreate();
+    HooksObject.INSTANCE.endTrack(this, i$timeMs);
+  }
+
+  ClassA cacheClassA() {
+    Object local = this.mClassAInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ClassA();
+      this.mClassAInstance = local;
+    }
+    return (ClassA) local;
+  }
+
+  public static AutoBuilder<Yatagan$MyComponent2Foo> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent2Foo> {
+    @Override
+    public final <I> AutoBuilder<Yatagan$MyComponent2Foo> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final Yatagan$MyComponent2Foo create() {
+      return new Yatagan$MyComponent2Foo();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

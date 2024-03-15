@@ -17,8 +17,10 @@
 package com.yandex.yatagan.core.graph.impl.bindings
 
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.EmptyBinding
+import com.yandex.yatagan.base.ExtensibleImpl
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
@@ -31,7 +33,7 @@ import com.yandex.yatagan.validation.format.reportError
 internal class SelfDependentInvalidBinding(
     override val impl: ModuleHostedBindingModel,
     override val owner: BindingGraph,
-) : EmptyBinding, BindingDefaultsMixin, ModuleHostedBindingMixin() {
+) : EmptyBinding, BindingDefaultsMixin, ModuleHostedBindingMixin(), Extensible by ExtensibleImpl()  {
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
         return visitor.visitEmpty(this)
     }

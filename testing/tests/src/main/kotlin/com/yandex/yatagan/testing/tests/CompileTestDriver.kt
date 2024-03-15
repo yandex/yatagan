@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.processor.common.Option
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Rule
 import org.junit.rules.TestWatcher
@@ -30,7 +29,19 @@ interface CompileTestDriver : SourceSet {
         sources: SourceSet,
     )
 
-    fun <V : Any> givenOption(option: Option<V>, value: V)
+    /**
+     * Specifies source for plugins to compile and provide.
+     * `:validation:spi` and `:instrumentation:spi` modules are available.
+     *
+     * @param sources plugins sources.
+     * @param services contents of `resources/META-INF/services` in the following format: filename -> lines.
+     */
+    fun givenPlugins(
+        sources: SourceSet,
+        services: Map<String, List<String>>,
+    )
+
+    fun givenOption(option: String, value: String)
 
     /**
      * Runs the test and validates the output against the golden output file.
