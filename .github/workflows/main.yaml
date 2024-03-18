@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Setup Java
-        uses: actions/setup-java@v4.0.0
+        uses: actions/setup-java@v4.2.1
         with:
           java-version: '11'
           distribution: 'temurin'
@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check
-        uses: gradle/gradle-build-action@v2.11.1
+        uses: gradle/gradle-build-action@v3.1.0
         with:
           arguments: check -Penable_coverage=${{ matrix.os == 'ubuntu-latest' }} --no-configuration-cache --stacktrace
 
@@ -43,7 +43,7 @@ jobs:
             core/model/impl/build/reports/tests
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.4
+        uses: codecov/codecov-action@v4.1.0
         if: matrix.os == 'ubuntu-latest'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
