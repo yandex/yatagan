@@ -42,7 +42,8 @@ import com.yandex.yatagan.validation.MayBeInvalid
  * Each [BindingGraph] is built around [ComponentModel]. For each given [ComponentModel] multiple different
  * [BindingGraph]s may exist if [ComponentModel.isRoot] is `false`, because the model may have different parents.
  */
-public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGraph>, WithChildren<BindingGraph> {
+public interface BindingGraph : MayBeInvalid, Extensible<BindingGraph>,
+    WithParents<BindingGraph>, WithChildren<BindingGraph> {
     /**
      * A model behind this graph.
      */

@@ -57,7 +57,7 @@ internal interface GeneratorComponent {
         ): GeneratorComponent
     }
 
-    companion object Key : Extensible.Key<GeneratorComponent> {
+    companion object Key : Extensible.Key<GeneratorComponent, BindingGraph> {
         override val keyType get() = GeneratorComponent::class.java
     }
 
