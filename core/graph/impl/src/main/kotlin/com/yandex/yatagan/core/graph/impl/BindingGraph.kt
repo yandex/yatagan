@@ -24,11 +24,7 @@ import com.yandex.yatagan.core.model.ComponentModel
  */
 fun BindingGraph(
     root: ComponentModel,
-    options: Options,
 ): BindingGraph {
     require(root.isRoot) { "Not reached: can't use non-root component as a root of a binding graph" }
-    return BindingGraphImpl(
-        component = root,
-        options = options,
-    )
+    return with(root.type) { BindingGraphImpl(root) }
 }

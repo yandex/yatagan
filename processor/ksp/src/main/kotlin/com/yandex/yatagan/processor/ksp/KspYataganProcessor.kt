@@ -28,6 +28,7 @@ import com.yandex.yatagan.lang.ksp.KspLexicalScope
 import com.yandex.yatagan.processor.common.Logger
 import com.yandex.yatagan.processor.common.Options
 import com.yandex.yatagan.processor.common.ProcessorDelegate
+import com.yandex.yatagan.processor.common.initScopedOptions
 import com.yandex.yatagan.processor.common.process
 import java.io.Writer
 
@@ -36,10 +37,11 @@ internal class KspYataganProcessor(
 ) : SymbolProcessor, ProcessorDelegate<KSClassDeclaration> {
     override val logger: Logger = KspLogger(environment.logger)
     override val options: Options = Options(environment.options)
-    private lateinit var scope: KspLexicalScope
+    override lateinit var lexicalScope: KspLexicalScope
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        scope = KspLexicalScope(resolver)
+        lexicalScope = KspLexicalScope(resolver)
+        initScopedOptions(lexicalScope, this)
         process(
             sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
                 .filterIsInstance<KSClassDeclaration>(),
@@ -48,7 +50,7 @@ internal class KspYataganProcessor(
         return emptyList()
     }
 
-    override fun createDeclaration(source: KSClassDeclaration) = scope.getTypeDeclaration(source)
+    override fun createDeclaration(source: KSClassDeclaration) = lexicalScope.getTypeDeclaration(source)
 
     override fun getSourceFor(declaration: TypeDeclaration): KSClassDeclaration {
         return declaration.platformModel as KSClassDeclaration

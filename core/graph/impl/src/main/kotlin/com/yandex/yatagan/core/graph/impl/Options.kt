@@ -16,6 +16,9 @@
 
 package com.yandex.yatagan.core.graph.impl
 
+import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.lang.scope.LexicalScope
+
 /**
  * Options, customizing graph building behavior in various ways.
  */
@@ -24,4 +27,6 @@ data class Options(
      * Whether to generate all conditions with lazy evaluation.
      */
     val allConditionsLazy: Boolean,
-)
+) {
+    companion object : Extensible.Key<Options, LexicalScope.Extensions>
+}

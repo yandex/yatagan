@@ -65,6 +65,9 @@ class RuntimeEngine(
         val classLoader = clazz.classLoader
         return lexicalScopeCache[classLoader]?.get() ?: run {
             RtLexicalScope(classLoader).also {
+                it.ext[Options] = Options(
+                    allConditionsLazy = params.allConditionsLazy,
+                )
                 lexicalScopeCache[classLoader] = SoftReference(it)
             }
         }
@@ -88,7 +91,6 @@ class RuntimeEngine(
             }
             val graph = BindingGraph(
                 root = componentModel,
-                options = createGraphOptions(),
             )
             val promise = doValidate(graph)
             val factory = promise.awaitOnError {
@@ -124,7 +126,6 @@ class RuntimeEngine(
 
             val graph = BindingGraph(
                 root = componentModel,
-                options = createGraphOptions(),
             )
             val promise = doValidate(graph)
             builder = RuntimeAutoBuilder(
@@ -172,10 +173,6 @@ class RuntimeEngine(
             }
         }
     }
-
-    private fun createGraphOptions() = Options(
-        allConditionsLazy = params.allConditionsLazy,
-    )
 
     private companion object {
         val pluginProviders: List<ValidationPluginProvider> = loadServices()

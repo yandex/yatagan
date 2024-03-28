@@ -23,6 +23,7 @@ import com.yandex.yatagan.lang.jap.asTypeElement
 import com.yandex.yatagan.processor.common.Logger
 import com.yandex.yatagan.processor.common.Options
 import com.yandex.yatagan.processor.common.ProcessorDelegate
+import com.yandex.yatagan.processor.common.initScopedOptions
 import com.yandex.yatagan.processor.common.process
 import java.io.Writer
 import javax.annotation.processing.AbstractProcessor
@@ -37,9 +38,9 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
         private set
     override lateinit var options: Options
         private set
-    private lateinit var scope: JavaxLexicalScope
+    override lateinit var lexicalScope: JavaxLexicalScope
 
-    override fun createDeclaration(source: TypeElement) = scope.getTypeDeclaration(source)
+    override fun createDeclaration(source: TypeElement) = lexicalScope.getTypeDeclaration(source)
 
     override fun getSourceFor(declaration: TypeDeclaration): TypeElement {
         return declaration.platformModel as TypeElement
@@ -59,7 +60,8 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
         super.init(processingEnv)
         logger = JapLogger(processingEnv.messager)
         options = Options(processingEnv.options)
-        scope = JavaxLexicalScope(processingEnv.typeUtils, processingEnv.elementUtils)
+        lexicalScope = JavaxLexicalScope(processingEnv.typeUtils, processingEnv.elementUtils)
+        initScopedOptions(lexicalScope, this)
     }
 
     override fun openFileForGenerating(

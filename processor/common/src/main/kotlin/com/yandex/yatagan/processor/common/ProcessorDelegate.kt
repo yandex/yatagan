@@ -17,6 +17,7 @@
 package com.yandex.yatagan.processor.common
 
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.scope.LexicalScope
 import java.io.Writer
 
 /**
@@ -28,6 +29,16 @@ import java.io.Writer
  */
 interface ProcessorDelegate<Source> {
     val logger: Logger
+
+    /**
+     * Constructed options container.
+     */
+    val options: Options
+
+    /**
+     * Initialized lexical scope.
+     */
+    val lexicalScope: LexicalScope
 
     /**
      * Get a [type declaration][TypeDeclaration] from a source
@@ -54,9 +65,4 @@ interface ProcessorDelegate<Source> {
         packageName: String,
         className: String,
     ): Writer
-
-    /**
-     * Constructed options container.
-     */
-    val options: Options
 }

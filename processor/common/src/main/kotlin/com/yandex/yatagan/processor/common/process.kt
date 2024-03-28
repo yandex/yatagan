@@ -23,6 +23,7 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
+import com.yandex.yatagan.lang.scope.LexicalScope
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Error
 import com.yandex.yatagan.validation.ValidationMessage.Kind.MandatoryWarning
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Warning
@@ -50,9 +51,6 @@ fun <Source> process(
         for (rootModel in rootModels) {
             val graphRoot = BindingGraph(
                 root = rootModel,
-                options = Options(
-                    allConditionsLazy = delegate.options[BooleanOption.AllConditionsLazy],
-                )
             )
             val allMessages = buildList {
                 addAll(validate(graphRoot))
@@ -111,6 +109,18 @@ fun <Source> process(
             }
         }
     }
+}
+
+/**
+ * A hook to be called by processor once per [LexicalScope].
+ */
+fun initScopedOptions(
+    lexicalScope: LexicalScope,
+    delegate: ProcessorDelegate<*>,
+) {
+    lexicalScope.ext[Options] = Options(
+        allConditionsLazy = delegate.options[BooleanOption.AllConditionsLazy],
+    )
 }
 
 private fun <Source> allSourcesSequence(
