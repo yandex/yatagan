@@ -20,10 +20,12 @@ import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.common.LangModelFactoryFallback
+import com.yandex.yatagan.lang.scope.LexicalScope
 
-class RtModelFactoryImpl(
+internal class RtModelFactoryImpl(
+    lexicalScope: LexicalScope,
     private val classLoader: ClassLoader,
-) : LangModelFactoryFallback() {
+) : LangModelFactoryFallback(), LexicalScope by lexicalScope {
     private val listClass = classLoader.loadClass("java.util.List")
     private val setClass = classLoader.loadClass("java.util.Set")
     private val mapClass = classLoader.loadClass("java.util.Map")

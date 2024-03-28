@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.HasNodeModel
@@ -24,15 +23,17 @@ import com.yandex.yatagan.core.model.InjectConstructorModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ScopeModel
-import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Constructor
-import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.getListType
 import com.yandex.yatagan.lang.getProviderType
 import com.yandex.yatagan.lang.getSetType
+import com.yandex.yatagan.lang.langFactory
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -45,15 +46,10 @@ import com.yandex.yatagan.validation.format.modelRepresentation
 import com.yandex.yatagan.validation.format.reportError
 
 internal class NodeModelImpl private constructor(
-    override val type: Type,
-    override val qualifier: Annotation?,
-) : NodeModel, NodeDependency {
-
-    init {
-        assert(!type.isVoid) {
-            "Not reached: void can't be represented as NodeModel"
-        }
-    }
+    nodeData: Pair<Type, Annotation?>,
+) : NodeModel, NodeDependency, LexicalScope by nodeData.first {
+    override val type: Type = nodeData.first
+    override val qualifier: Annotation? = nodeData.second
 
     private inner class InjectConstructorImpl(
         override val constructor: Constructor,
@@ -117,6 +113,11 @@ internal class NodeModelImpl private constructor(
     }
 
     override fun toString(childContext: MayBeInvalid?) = buildRichString {
+        if (type.isVoid) {
+            color = TextColor.Red
+            append("<invalid node: void>")
+            return@buildRichString
+        }
         color = TextColor.Inherit
         qualifier?.let {
             appendRichString {
@@ -129,25 +130,28 @@ internal class NodeModelImpl private constructor(
     }
 
     override fun multiBoundListNodes(): Array<NodeModel> {
+        val factory = type.ext.langFactory
         return arrayOf(
-            Factory(type = LangModelFactory.getListType(type, isCovariant = false), qualifier = qualifier),
-            Factory(type = LangModelFactory.getListType(type, isCovariant = true), qualifier = qualifier),
+            NodeModelImpl(type = factory.getListType(type, isCovariant = false), qualifier = qualifier),
+            NodeModelImpl(type = factory.getListType(type, isCovariant = true), qualifier = qualifier),
         )
     }
 
     override fun multiBoundSetNodes(): Array<NodeModel> {
+        val factory = type.ext.langFactory
         return arrayOf(
-            Factory(type = LangModelFactory.getSetType(type, isCovariant = false), qualifier = qualifier),
-            Factory(type = LangModelFactory.getSetType(type, isCovariant = true), qualifier = qualifier),
+            NodeModelImpl(type = factory.getSetType(type, isCovariant = false), qualifier = qualifier),
+            NodeModelImpl(type = factory.getSetType(type, isCovariant = true), qualifier = qualifier),
         )
     }
 
     override fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel> {
+        val factory = type.ext.langFactory
         val keyType = key.asBoxed()  // Need to use box as key may be a primitive type
-        val valueType = if (asProviders) LangModelFactory.getProviderType(type) else type
+        val valueType = if (asProviders) factory.getProviderType(type) else type
         return arrayOf(
-            Factory(type = LangModelFactory.getMapType(keyType, valueType, isCovariant = false), qualifier = qualifier),
-            Factory(type = LangModelFactory.getMapType(keyType, valueType, isCovariant = true), qualifier = qualifier),
+            NodeModelImpl(type = factory.getMapType(keyType, valueType, isCovariant = false), qualifier = qualifier),
+            NodeModelImpl(type = factory.getMapType(keyType, valueType, isCovariant = true), qualifier = qualifier),
         )
     }
 
@@ -155,6 +159,9 @@ internal class NodeModelImpl private constructor(
         get() = isFrameworkType(type)
 
     override fun validate(validator: Validator) {
+        if (type.isVoid) {
+            validator.reportError(Strings.Errors.voidBinding())
+        }
         if (isFrameworkType(type)) {
             validator.reportError(Strings.Errors.manualFrameworkType())
         }
@@ -184,7 +191,7 @@ internal class NodeModelImpl private constructor(
 
     override fun dropQualifier(): NodeModel {
         if (qualifier == null) return this
-        return Factory(type = type, qualifier = null)
+        return NodeModelImpl(type = type, qualifier = null)
     }
 
     override fun compareTo(other: NodeModel): Int {
@@ -202,49 +209,17 @@ internal class NodeModelImpl private constructor(
         else -> NodeDependencyImpl(node = node, kind = kind)
     }
 
-    companion object Factory : ObjectCache<Any, NodeModelImpl>() {
-        class VoidNode : NodeModel {
-            override val type = LangModelFactory.createNoType("void")
-            override val qualifier: Nothing? get() = null
-            override fun getSpecificModel(): Nothing? = null
-            override fun dropQualifier(): NodeModel = this
-            override fun multiBoundListNodes(): Array<NodeModel> = emptyArray()
-            override fun multiBoundSetNodes(): Array<NodeModel> = emptyArray()
-            override fun multiBoundMapNodes(key: Type, asProviders: Boolean): Array<NodeModel> = emptyArray()
-            override fun validate(validator: Validator) {
-                validator.reportError(Strings.Errors.voidBinding())
-            }
-            override val hintIsFrameworkType: Boolean get() = false
-            override fun compareTo(other: NodeModel): Int = hashCode() - other.hashCode()
-            override val node: NodeModel get() = this
-            override val kind: DependencyKind get() = DependencyKind.Direct
-            override fun copyDependency(node: NodeModel, kind: DependencyKind) = when(kind) {
-                DependencyKind.Direct -> node
-                else -> NodeDependencyImpl(node = node, kind = kind)
-            }
-            override fun toString(childContext: MayBeInvalid?) = buildRichString {
-                color = TextColor.Red
-                append("<invalid node: void>")
-            }
+    companion object Factory : FactoryKey<Pair<Type, Annotation?>, NodeModelImpl> {
+        private object Caching : FactoryKey<Pair<Type, Annotation?>, NodeModelImpl> {
+            override fun LexicalScope.factory() = caching(::NodeModelImpl)
         }
 
-        operator fun invoke(
-            type: Type,
-            forQualifier: Annotated?,
-        ) = this(type, forQualifier?.annotations?.find(Annotation::isQualifier))
-
-        operator fun invoke(
-            type: Type,
-            qualifier: Annotation? = null,
-        ): NodeModelImpl {
-            val boxed = type.asBoxed()
-            val key: Any = if (qualifier != null) boxed to qualifier else boxed
-            return createCached(key) {
-                NodeModelImpl(
-                    type = boxed,
-                    qualifier = qualifier,
-                )
-            }
+        override fun LexicalScope.factory() = fun LexicalScope.(it: Pair<Type, Annotation?>): NodeModelImpl {
+            val (type, qualifier) = it
+            return if (type.isVoid) {
+                // Every void node is invalid and unique to enhance error reporting
+                NodeModelImpl(it)
+            } else Caching(type.asBoxed() to qualifier)
         }
     }
 }

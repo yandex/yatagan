@@ -20,6 +20,7 @@ import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.core.model.Variant.DimensionModel
 import com.yandex.yatagan.core.model.Variant.FlavorModel
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.invoke
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings

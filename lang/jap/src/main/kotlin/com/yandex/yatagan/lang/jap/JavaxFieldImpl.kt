@@ -19,19 +19,20 @@ package com.yandex.yatagan.lang.jap
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtFieldBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.lang.model.element.VariableElement
 
 internal class JavaxFieldImpl (
     override val owner: JavaxTypeDeclarationImpl,
     private val impl: VariableElement,
-) : CtFieldBase(), CtAnnotated by JavaxAnnotatedImpl(impl) {
+) : CtFieldBase(), CtAnnotated by JavaxAnnotatedImpl(owner, impl), LexicalScope by owner {
     override val isStatic: Boolean get() = impl.isStatic
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublic
 
     override val type: Type by lazy {
-        JavaxTypeImpl(impl.asMemberOf(owner.type))
+        JavaxTypeImpl(asMemberOf(owner.type, impl))
     }
 
     override val name: String get() = impl.simpleName.toString()

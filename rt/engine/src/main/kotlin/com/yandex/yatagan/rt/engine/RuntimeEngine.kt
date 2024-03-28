@@ -18,15 +18,12 @@ package com.yandex.yatagan.rt.engine
 
 import com.yandex.yatagan.AutoBuilder
 import com.yandex.yatagan.Component
-import com.yandex.yatagan.base.ObjectCacheRegistry
 import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
-import com.yandex.yatagan.lang.LangModelFactory
-import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
-import com.yandex.yatagan.lang.rt.TypeDeclaration
+import com.yandex.yatagan.lang.rt.RtLexicalScope
 import com.yandex.yatagan.rt.support.DynamicValidationDelegate
 import com.yandex.yatagan.rt.support.Logger
 import com.yandex.yatagan.rt.support.SimpleDynamicValidationDelegate
@@ -37,6 +34,7 @@ import com.yandex.yatagan.validation.format.format
 import com.yandex.yatagan.validation.impl.GraphValidationExtension
 import com.yandex.yatagan.validation.impl.validate
 import com.yandex.yatagan.validation.spi.ValidationPluginProvider
+import java.lang.ref.SoftReference
 import java.lang.reflect.Proxy
 import java.util.concurrent.Future
 import kotlin.system.measureTimeMillis
@@ -61,33 +59,26 @@ class RuntimeEngine(
         var allConditionsLazy: Boolean = false,
     )
 
-    init {
-        initIfNeeded()
-    }
+    private val lexicalScopeCache = hashMapOf<ClassLoader, SoftReference<RtLexicalScope>>()
 
-    private fun initIfNeeded() {
-        with(LangModelFactory) {
-            if (delegate.get() == null) {
-                // RtModelFactoryImpl may be created multiple times, but only single value is published
-                delegate.compareAndSet(null, RtModelFactoryImpl(this@RuntimeEngine.javaClass.classLoader))
+    private fun obtainLexicalScopeFor(clazz: Class<*>): RtLexicalScope = synchronized(lexicalScopeCache) {
+        val classLoader = clazz.classLoader
+        return lexicalScopeCache[classLoader]?.get() ?: run {
+            RtLexicalScope(classLoader).also {
+                lexicalScopeCache[classLoader] = SoftReference(it)
             }
         }
     }
 
-    fun reset() {
-        LangModelFactory.delegate.set(null)
-        ObjectCacheRegistry.close()
-    }
-
     fun <T : Any> builder(builderClass: Class<T>): T {
-        initIfNeeded()
         val builder: T
         val time = measureTimeMillis {
             require(builderClass.isAnnotationPresent(Component.Builder::class.java)) {
                 "$builderClass is not a builder for a Yatagan component"
             }
 
-            val builderDeclaration = TypeDeclaration(builderClass)
+            val lexicalScope = obtainLexicalScopeFor(builderClass)
+            val builderDeclaration = lexicalScope.getTypeDeclaration(builderClass)
             val componentClass = requireNotNull(builderDeclaration.enclosingType) {
                 "No enclosing component class found for $builderClass"
             }
@@ -116,14 +107,14 @@ class RuntimeEngine(
     }
 
     fun <T : Any> autoBuilder(componentClass: Class<T>): AutoBuilder<T> {
-        initIfNeeded()
         val builder: AutoBuilder<T>
         val time = measureTimeMillis {
             require(componentClass.getAnnotation(Component::class.java)?.isRoot == true) {
                 "$componentClass is not a root Yatagan component"
             }
 
-            val componentModel = ComponentModel(TypeDeclaration(componentClass))
+            val lexicalScope = obtainLexicalScopeFor(componentClass)
+            val componentModel = ComponentModel(lexicalScope.getTypeDeclaration(componentClass))
             if (componentModel.factory != null) {
                 throw IllegalArgumentException(
                     "Auto-builder can't be used for $componentClass, because it declares an explicit builder. " +

@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.MembersInjectorModel
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
@@ -25,6 +24,9 @@ import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -103,8 +105,8 @@ internal class MembersInjectorModelImpl private constructor(
         },
     )
 
-    companion object Factory : ObjectCache<Method, MembersInjectorModelImpl>() {
-        operator fun invoke(injector: Method) = createCached(injector, ::MembersInjectorModelImpl)
+    companion object Factory : FactoryKey<Method, MembersInjectorModelImpl> {
+        override fun LexicalScope.factory() = caching(::MembersInjectorModelImpl)
 
         fun canRepresent(impl: Method): Boolean {
             return impl.isAbstract && impl.parameters.count() == 1

@@ -19,13 +19,13 @@ package com.yandex.yatagan.core.graph.impl
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.model.ModuleHostedBindingModel.BindingTargetModel
 import com.yandex.yatagan.lang.AnnotationDeclaration
-import com.yandex.yatagan.lang.LangModelFactory
+import com.yandex.yatagan.lang.langFactory
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.reportError
 
 fun validateAnnotationsRetention(graph: BindingGraph, validator: Validator) {
-    if (LangModelFactory.isInRuntimeEnvironment) {
+    if (graph.model.type.ext.langFactory.isInRuntimeEnvironment) {
         // No need to check retention in RT - non-runtime will not be visible anyway.
         return
     }

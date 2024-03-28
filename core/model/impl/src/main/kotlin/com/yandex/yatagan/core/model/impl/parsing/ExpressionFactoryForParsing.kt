@@ -24,6 +24,7 @@ import com.yandex.yatagan.core.model.impl.FeatureModelImpl
 import com.yandex.yatagan.core.model.impl.OrExpressionImpl
 import com.yandex.yatagan.core.model.impl.parsing.BooleanExpressionParser.Factory.ParseResult
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.invoke
 
 internal class ExpressionFactoryForParsing(
     private val imports: Map<String, Type>,

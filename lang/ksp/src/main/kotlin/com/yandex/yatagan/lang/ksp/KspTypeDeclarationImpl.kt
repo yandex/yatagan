@@ -32,7 +32,6 @@ import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Constructor
@@ -46,13 +45,16 @@ import com.yandex.yatagan.lang.compiled.CtAnnotationBase
 import com.yandex.yatagan.lang.compiled.CtConstructorBase
 import com.yandex.yatagan.lang.compiled.CtFieldBase
 import com.yandex.yatagan.lang.compiled.CtTypeDeclarationBase
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeDeclarationImpl private constructor(
     val type: KspTypeImpl,
-) : CtTypeDeclarationBase() {
+) : CtTypeDeclarationBase(), LexicalScope by type {
     private val impl: KSClassDeclaration = type.impl.declaration as KSClassDeclaration
-    private val annotated = KspAnnotatedImpl(impl)
+    private val annotated = KspAnnotatedImpl(type, impl)
 
     override val annotations: Sequence<CtAnnotationBase> = annotated.annotations
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>) = annotated.isAnnotatedWith(type)
@@ -179,7 +181,7 @@ internal class KspTypeDeclarationImpl private constructor(
         filter: FunctionFilter,
         isStatic: (KSAnnotated) -> Boolean,
     ) {
-        for (method in declaration.allNonPrivateFunctions()) {
+        for (method in allNonPrivateFunctions(declaration)) {
             if (!filter.filterFunction(method)) continue
             yield(KspMethodImpl(
                 owner = this@KspTypeDeclarationImpl,
@@ -188,7 +190,7 @@ internal class KspTypeDeclarationImpl private constructor(
             ))
         }
 
-        for (property in declaration.allNonPrivateProperties()) {
+        for (property in allNonPrivateProperties(declaration)) {
             if (!filter.filterProperty(property)) continue
             explodeProperty(
                 property = property,
@@ -386,14 +388,13 @@ internal class KspTypeDeclarationImpl private constructor(
         }
     }
 
-    companion object Factory : ObjectCache<KspTypeImpl, KspTypeDeclarationImpl>() {
-        operator fun invoke(impl: KspTypeImpl) =
-            createCached(impl, ::KspTypeDeclarationImpl)
+    companion object Factory : FactoryKey<KspTypeImpl, KspTypeDeclarationImpl> {
+        override fun LexicalScope.factory() = caching(::KspTypeDeclarationImpl)
     }
 
     private inner class ConstructorImpl(
         override val platformModel: KSFunctionDeclaration,
-    ) : CtConstructorBase(), Annotated by KspAnnotatedImpl(platformModel) {
+    ) : CtConstructorBase(), Annotated by KspAnnotatedImpl(this, platformModel) {
         private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean

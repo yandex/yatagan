@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.processor.common
 
-import com.yandex.yatagan.base.ObjectCacheRegistry
 import com.yandex.yatagan.base.api.childrenSequence
 import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.codegen.impl.ComponentGeneratorFacade
@@ -41,7 +40,7 @@ fun <Source> process(
 ) {
     val usePlainOutput = delegate.options[BooleanOption.UsePlainOutput]
     val strictMode = delegate.options[BooleanOption.StrictMode]
-    ObjectCacheRegistry.use {
+    run {
         val rootModels = sources.mapNotNull { source ->
             ComponentModel(delegate.createDeclaration(source))
         }.filter { it.isRoot }.toList()

@@ -19,7 +19,6 @@ package com.yandex.yatagan.lang.rt
 import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.IntoMap
 import com.yandex.yatagan.ValueOf
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation.Value
 import com.yandex.yatagan.lang.AnnotationDeclaration
@@ -27,12 +26,16 @@ import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.common.AnnotationBase
 import com.yandex.yatagan.lang.common.AnnotationDeclarationBase
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import javax.inject.Qualifier
 import javax.inject.Scope
 
-internal class RtAnnotationImpl(
+internal class RtAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     private val impl: Annotation,
-) : AnnotationBase() {
+) : AnnotationBase(), LexicalScope by lexicalScope {
 
     override val annotationClass: AnnotationDeclaration
         get() = AnnotationClassImpl(impl.javaAnnotationClass)
@@ -62,7 +65,11 @@ internal class RtAnnotationImpl(
 
     override fun hashCode(): Int = impl.hashCode()
 
-    private class ValueImpl(
+    companion object Factory : FactoryKey<Annotation, RtAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtAnnotationImpl
+    }
+
+    private inner class ValueImpl(
         private val value: Any?,
     ) : ValueBase() {
         override val platformModel: Any?
@@ -103,14 +110,15 @@ internal class RtAnnotationImpl(
     }
 
     private class AnnotationClassImpl private constructor(
+        lexicalScope: LexicalScope,
         private val impl: Class<*>,
-    ) : AnnotationDeclarationBase(), Annotated by RtAnnotatedImpl(impl) {
+    ) : AnnotationDeclarationBase(), Annotated by RtAnnotatedImpl(lexicalScope, impl), LexicalScope by lexicalScope {
 
         override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             impl.declaredMethods.asSequence()
                 .filter { it.isAbstract }
                 .map {
-                    AttributeImpl(impl = it)
+                    AttributeImpl(it)
                 }
         }
 
@@ -138,18 +146,23 @@ internal class RtAnnotationImpl(
 
         override fun getRetention(): AnnotationRetention = AnnotationRetention.RUNTIME
 
-        companion object Factory : ObjectCache<Class<*>, AnnotationClassImpl>() {
-            operator fun invoke(clazz: Class<*>) = createCached(clazz) { AnnotationClassImpl(clazz) }
+        companion object Factory : FactoryKey<Class<*>, AnnotationClassImpl> {
+            override fun LexicalScope.factory() = caching(::AnnotationClassImpl)
         }
     }
 
-    private class AttributeImpl(
+    private class AttributeImpl private constructor(
+        lexicalScope: LexicalScope,
         val impl: ReflectMethod,
-    ) : AnnotationDeclaration.Attribute {
+    ) : AnnotationDeclaration.Attribute, LexicalScope by lexicalScope {
         override val name: String
             get() = impl.name
 
         override val type: Type
             get() = RtTypeImpl(impl.genericReturnType)
+
+        companion object Factory : FactoryKey<ReflectMethod, AttributeImpl> {
+            override fun LexicalScope.factory() = ::AttributeImpl
+        }
     }
 }

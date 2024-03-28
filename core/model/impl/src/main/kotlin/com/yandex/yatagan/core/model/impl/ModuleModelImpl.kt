@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.core.model.BindsBindingModel
 import com.yandex.yatagan.core.model.ComponentModel
@@ -28,6 +27,10 @@ import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.functionsWithCompanion
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
+import com.yandex.yatagan.lang.scope.invoke
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -44,7 +47,7 @@ internal class ModuleModelImpl private constructor(
         get() = declaration.asType()
 
     override val includes: Collection<ModuleModel> by lazy {
-        impl?.includes?.map(Type::declaration)?.map(Factory::invoke)?.toSet() ?: emptySet()
+        impl?.includes?.map(Type::declaration)?.map { Factory(it) }?.toSet() ?: emptySet()
     }
 
     override val subcomponents: Collection<ComponentModel> by lazy {
@@ -116,8 +119,8 @@ internal class ModuleModelImpl private constructor(
         override fun visitProvides(model: ProvidesBindingModel) = model
     }
 
-    companion object Factory : ObjectCache<TypeDeclaration, ModuleModelImpl>() {
-        operator fun invoke(key: TypeDeclaration) = createCached(key, ::ModuleModelImpl)
+    companion object Factory : FactoryKey<TypeDeclaration, ModuleModelImpl> {
+        override fun LexicalScope.factory() = caching(::ModuleModelImpl)
 
         fun canRepresent(declaration: TypeDeclaration): Boolean {
             return declaration.getAnnotation(BuiltinAnnotation.Module) != null

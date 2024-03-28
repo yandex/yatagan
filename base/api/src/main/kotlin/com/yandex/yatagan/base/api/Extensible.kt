@@ -21,7 +21,7 @@ package com.yandex.yatagan.base.api
  *
  * Eliminates the need to manage external mappings.
  *
- * Implementations are not required to be thread-safe.
+ * Implementations are required to be thread-safe.
  *
  * @param E the implementor type itself
  */
@@ -31,7 +31,6 @@ public interface Extensible<E : Extensible<E>> {
      * @param E an extensible type that the extension belongs to
      */
     public interface Key<V : Any, E : Extensible<E>> {
-        public val keyType: Class<V>
     }
 
     /**
@@ -42,6 +41,15 @@ public interface Extensible<E : Extensible<E>> {
      * @throws IllegalStateException if there's no value for the key present
      */
     public operator fun <V : Any> get(key: Key<V, E>): V
+
+    /**
+     * Obtains previously set value for the [key] if was set, otherwise invokes [provider] to create and set the
+     * value.
+     *
+     * @param key the typed key
+     * @return previously or currently created value for the key
+     */
+    public fun <V : Any> getOrPut(key: Key<V, E>, provider: () -> V): V
 
     /**
      * Associates the key with the value.

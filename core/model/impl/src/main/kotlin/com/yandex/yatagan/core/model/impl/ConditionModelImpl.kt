@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.BiObjectCache
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Member
@@ -24,6 +23,9 @@ import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.isKotlinObject
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.ErrorMessage
@@ -63,9 +65,10 @@ private object MemberTypeVisitor : Member.Visitor<Type> {
 }
 
 internal class ConditionModelImpl private constructor(
-    private val type: Type,
-    override val pathSource: String,
-) : VariableBaseImpl() {
+    data: Pair<Type, String>,
+) : VariableBaseImpl(), LexicalScope by data.first {
+    private val type = data.first
+    override val pathSource: String = data.second
     private var validationReport: ValidationReport? = null
     private var _nonStatic = false
 
@@ -155,7 +158,7 @@ internal class ConditionModelImpl private constructor(
     class Invalid(
         private val type: Type,
         private val invalidExpression: String,
-    ) : VariableBaseImpl() {
+    ) : VariableBaseImpl(), LexicalScope by type {
 
         override val pathSource: String
             get() = invalidExpression
@@ -179,12 +182,16 @@ internal class ConditionModelImpl private constructor(
         }
     }
 
-    companion object Factory : BiObjectCache<Type, String, ConditionModelImpl>() {
-        operator fun invoke(type: Type, pathSource: String): VariableBaseImpl {
-            if (!pathSource.matches(ConditionRegex)) {
-                return Invalid(type, pathSource)
-            }
-            return createCached(type, pathSource) { ConditionModelImpl(type, pathSource) }
+    companion object Factory : FactoryKey<Pair<Type, String>, VariableBaseImpl> {
+        private object Caching : FactoryKey<Pair<Type, String>, ConditionModelImpl> {
+            override fun LexicalScope.factory() = caching(::ConditionModelImpl)
+        }
+
+        override fun LexicalScope.factory() = fun LexicalScope.(data: Pair<Type, String>): VariableBaseImpl {
+            val (type, pathSource) = data
+            return if (!pathSource.matches(ConditionRegex)) {
+                Invalid(type, pathSource)
+            } else Caching(data)
         }
 
         private fun findAccessor(type: TypeDeclaration, name: String): Member? {

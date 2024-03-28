@@ -20,7 +20,6 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
-import com.yandex.yatagan.base.BiObjectCache
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.common.NoDeclaration
@@ -28,12 +27,17 @@ import com.yandex.yatagan.lang.compiled.CtErrorType
 import com.yandex.yatagan.lang.compiled.CtTypeBase
 import com.yandex.yatagan.lang.compiled.CtTypeNameModel
 import com.yandex.yatagan.lang.compiled.InvalidNameModel
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspTypeImpl private constructor(
-    val impl: KSType,
-    private val jvmType: JvmTypeInfo,
-) : CtTypeBase() {
+    lexicalScope: LexicalScope,
+    resolvedTypeInfo: Pair<JvmTypeInfo, KSType>,
+) : CtTypeBase(), LexicalScope by lexicalScope {
+    val impl: KSType = resolvedTypeInfo.second
+    private val jvmType: JvmTypeInfo = resolvedTypeInfo.first
 
     override val nameModel: CtTypeNameModel by lazy {
         CtTypeNameModel(type = impl, jvmTypeKind = jvmType)
@@ -48,7 +52,7 @@ internal class KspTypeImpl private constructor(
     override val typeArguments: List<Type> by lazy {
         when (jvmType) {
             JvmTypeInfo.Declared -> impl.arguments.map { arg ->
-                Factory(arg.type ?: Utils.objectType.asStarProjectedType().asReference())
+                KspTypeImpl(reference = arg.type ?: asReference(Utils.objectType.asStarProjectedType()))
             }
             else -> emptyList()
         }
@@ -57,13 +61,13 @@ internal class KspTypeImpl private constructor(
     override val isVoid: Boolean
         get() = jvmType == JvmTypeInfo.Void || impl == Utils.resolver.builtIns.unitType
 
-    override fun isAssignableFrom(another: Type): Boolean {
+    override fun isAssignableFrom(another: Type): Boolean = with(TypeMap) {
         return when (another) {
             // `mapToKotlinType` is required as `isAssignableFrom` doesn't work properly
             // with related Java platform types.
             // https://github.com/google/ksp/issues/890
-            is KspTypeImpl -> TypeMapCache.mapToKotlinType(impl)
-                .isAssignableFrom(TypeMapCache.mapToKotlinType(another.impl))
+            is KspTypeImpl -> mapToKotlinType(impl)
+                .isAssignableFrom(mapToKotlinType(another.impl))
             else -> false
         }
     }
@@ -74,51 +78,40 @@ internal class KspTypeImpl private constructor(
             JvmTypeInfo.Float, JvmTypeInfo.Int, JvmTypeInfo.Long, JvmTypeInfo.Short,
             JvmTypeInfo.Declared,
             -> {
-                // Use direct factory function, as type mapping is already done
                 // Discarding jvmType leads to boxing of primitive types.
-                obtainType(type = impl, jvmSignatureHint = null /* drop jvm info*/, nameHint = null)
+                KspTypeImpl(impl = impl)
             }
             JvmTypeInfo.Void, is JvmTypeInfo.Array -> this
         }
     }
 
-    companion object Factory : BiObjectCache<JvmTypeInfo, KSType, KspTypeImpl>() {
-        operator fun invoke(
-            reference: KSTypeReference?,
-            jvmSignatureHint: String? = null,
-            typePosition: TypeMapCache.Position = TypeMapCache.Position.Other,
-        ): Type = obtainType(
-            type = reference?.let {
-                TypeMapCache.normalizeType(
-                    reference = it,
-                    position = typePosition,
-                )
-            },
-            jvmSignatureHint = jvmSignatureHint,
-            nameHint = reference?.element?.toString(),
-        )
+    data class ResolveTypeInfo(
+        val type: KSType? = null,
+        val reference: KSTypeReference? = null,
+        val jvmSignatureHint: String? = null,
+        val typePosition: TypeMap.Position = TypeMap.Position.Other,
+    )
 
-        operator fun invoke(
-            impl: KSType?,
-            jvmSignatureHint: String? = null,
-        ): Type = obtainType(
-            type = impl?.let {
-                TypeMapCache.normalizeType(
-                    type = it,
-                )
-            },
-            jvmSignatureHint = jvmSignatureHint,
-            nameHint = null,
-        )
+    companion object Factory : FactoryKey<ResolveTypeInfo, Type> {
+        private object Caching : FactoryKey<Pair<JvmTypeInfo, KSType>, KspTypeImpl> {
+            override fun LexicalScope.factory() = caching(createWithScope = ::KspTypeImpl)
+        }
 
-        private fun obtainType(
-            type: KSType?,
-            jvmSignatureHint: String?,
-            nameHint: String?,
-        ): Type {
-            val jvmTypeInfo = JvmTypeInfo(jvmSignature = jvmSignatureHint, type = type)
+        override fun LexicalScope.factory() = fun LexicalScope.(info: ResolveTypeInfo): Type {
+            val (unrefinedType, reference, jvmSignatureHint, typePosition) = info
+            val type: KSType? = with(TypeMap) {
+                reference?.let {
+                    normalizeType(
+                        reference = it,
+                        position = typePosition,
+                    )
+                } ?: unrefinedType?.let {
+                    normalizeType(type = it)
+                }
+            }
             return when {
                 type == null || type.isError -> {
+                    val nameHint = reference?.element?.toString()
                     CtErrorType(
                         nameModel = InvalidNameModel.Unresolved(hint = nameHint ?: jvmSignatureHint),
                     )
@@ -128,12 +121,7 @@ internal class KspTypeImpl private constructor(
                         nameModel = InvalidNameModel.TypeVariable(typeVar = type.declaration.simpleName.asString())
                     )
                 }
-                else -> createCached(jvmTypeInfo, type) {
-                    KspTypeImpl(
-                        impl = type,
-                        jvmType = jvmTypeInfo,
-                    )
-                }
+                else -> Caching(JvmTypeInfo(jvmSignature = jvmSignatureHint, type = type) to type)
             }
         }
     }

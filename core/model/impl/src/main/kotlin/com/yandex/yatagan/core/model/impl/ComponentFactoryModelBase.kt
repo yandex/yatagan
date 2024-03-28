@@ -26,6 +26,7 @@ import com.yandex.yatagan.core.model.allInputs
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Parameter
 import com.yandex.yatagan.lang.isKotlinObject
+import com.yandex.yatagan.lang.scope.invoke
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings

@@ -484,6 +484,5 @@ internal class GraphBindingsManager(
     }
 
     companion object Key : Extensible.Key<GraphBindingsManager, BindingGraph> {
-        override val keyType get() = GraphBindingsManager::class.java
     }
 }

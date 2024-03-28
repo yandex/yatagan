@@ -18,11 +18,12 @@ package com.yandex.yatagan.lang
 
 import com.yandex.yatagan.base.api.Internal
 import com.yandex.yatagan.base.api.StableForImplementation
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
  * Models annotation instance of any class.
  */
-public interface Annotation : HasPlatformModel {
+public interface Annotation : HasPlatformModel, LexicalScope {
     /**
      * Annotation class declaration.
      */

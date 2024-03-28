@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentEntryPoint
 import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
@@ -34,6 +33,10 @@ import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.TypeDeclarationKind
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
+import com.yandex.yatagan.lang.scope.invoke
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -106,7 +109,7 @@ internal class ComponentModelImpl private constructor(
             .filter { ComponentFactoryWithBuilderModelImpl.canRepresent(it) }
             .maxOrNull()
             ?.let {
-                ComponentFactoryWithBuilderModelImpl(factoryDeclaration = it)
+                ComponentFactoryWithBuilderModelImpl(it)
             }
     }
 
@@ -196,9 +199,7 @@ internal class ComponentModelImpl private constructor(
                         )
                     }
                     MembersInjectorModelImpl.canRepresent(method) -> {
-                        memberInjectors += MembersInjectorModelImpl(
-                            injector = method,
-                        )
+                        memberInjectors += MembersInjectorModelImpl(method)
                     }
                     ComponentEntryPointImpl.canRepresent(method) -> {
                         entryPoints += ComponentEntryPointImpl(
@@ -219,8 +220,8 @@ internal class ComponentModelImpl private constructor(
         }
     }
 
-    companion object Factory : ObjectCache<TypeDeclaration, ComponentModelImpl>() {
-        operator fun invoke(key: TypeDeclaration) = createCached(key, ::ComponentModelImpl)
+    companion object Factory : FactoryKey<TypeDeclaration, ComponentModelImpl> {
+        override fun LexicalScope.factory() = caching(::ComponentModelImpl)
 
         fun canRepresent(declaration: TypeDeclaration): Boolean {
             return declaration.getAnnotation(BuiltinAnnotation.Component) != null

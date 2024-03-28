@@ -16,11 +16,13 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.lang.BuiltinAnnotation
-import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.langFactory
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -46,13 +48,13 @@ internal class DimensionImpl private constructor(
     override val isInvalid: Boolean
         get() = false
 
-    companion object Factory : ObjectCache<Type, DimensionImpl>() {
-        operator fun invoke(type: Type) = DimensionImpl.createCached(type, ::DimensionImpl)
+    companion object Factory : FactoryKey<Type, DimensionImpl> {
+        override fun LexicalScope.factory() = caching(::DimensionImpl)
     }
 }
 
 internal class MissingDimension(private val flavor: Variant.FlavorModel) : Variant.DimensionModel {
-    override val type: Type = LangModelFactory.createNoType("missing-dimension-type")
+    override val type: Type = flavor.type.ext.langFactory.createNoType("missing-dimension-type")
 
     override fun validate(validator: Validator) {
         // Do not report anything here, as not-a-flavor error will be reported for flavor.

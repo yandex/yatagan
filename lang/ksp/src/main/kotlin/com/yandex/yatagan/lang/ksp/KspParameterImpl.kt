@@ -21,12 +21,14 @@ import com.google.devtools.ksp.symbol.KSValueParameter
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtParameterBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal class KspParameterImpl(
+    lexicalScope: LexicalScope,
     private val impl: KSValueParameter,
     private val refinedTypeRef: KSTypeReference,
     private val jvmSignatureSupplier: () -> String?,
-) : CtParameterBase(), CtAnnotated by KspAnnotatedImpl(impl) {
+) : CtParameterBase(), CtAnnotated by KspAnnotatedImpl(lexicalScope, impl), LexicalScope by lexicalScope {
 
     override val name: String
         get() = impl.name?.asString() ?: "unnamed"
@@ -35,7 +37,7 @@ internal class KspParameterImpl(
         KspTypeImpl(
             reference = refinedTypeRef,
             jvmSignatureHint = jvmSignatureSupplier(),
-            typePosition = TypeMapCache.Position.Parameter,
+            typePosition = TypeMap.Position.Parameter,
         )
     }
 

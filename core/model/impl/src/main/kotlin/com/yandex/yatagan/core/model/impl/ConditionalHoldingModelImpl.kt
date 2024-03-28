@@ -22,6 +22,7 @@ import com.yandex.yatagan.core.model.ConditionalHoldingModel.ConditionalWithFlav
 import com.yandex.yatagan.core.model.ConditionalHoldingModel.FeatureModel
 import com.yandex.yatagan.core.model.Variant.FlavorModel
 import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.scope.invoke
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings

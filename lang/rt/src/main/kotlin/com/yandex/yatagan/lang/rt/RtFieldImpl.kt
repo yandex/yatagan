@@ -20,12 +20,13 @@ import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.common.FieldBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.inject.Inject
 
 internal class RtFieldImpl(
     private val impl: ReflectField,
     override val owner: RtTypeDeclarationImpl,
-) : FieldBase(), Annotated by RtAnnotatedImpl(impl) {
+) : FieldBase(), Annotated by RtAnnotatedImpl(owner, impl), LexicalScope by owner {
     override val type: Type by lazy {
         RtTypeImpl(impl.genericType.resolveGenericsHierarchyAware(
             declaringClass = impl.declaringClass,

@@ -19,15 +19,18 @@ package com.yandex.yatagan.lang.ksp
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 /**
  * This is required to correctly distinguish between Java's primitive and wrapper types, as they all are
  * represented uniformly in Kotlin.
  */
-internal class JvmMethodSignature(
+internal class JvmMethodSignature private constructor(
+    lexicalScope: LexicalScope,
     declaration: KSFunctionDeclaration,
-) {
+) : LexicalScope by lexicalScope {
     private val match by lazy {
         Utils.resolver.mapToJvmSignature(declaration)?.let { descriptor ->
             checkNotNull(MethodSignatureRegex.matchEntire(descriptor)) {
@@ -50,6 +53,10 @@ internal class JvmMethodSignature(
         match?.groupValues?.get(1)?.let { params ->
             ParamSignatureRegex.findAll(params).map(MatchResult::value).toList()
         }
+    }
+
+    companion object Factory : FactoryKey<KSFunctionDeclaration, JvmMethodSignature> {
+        override fun LexicalScope.factory() = ::JvmMethodSignature
     }
 }
 

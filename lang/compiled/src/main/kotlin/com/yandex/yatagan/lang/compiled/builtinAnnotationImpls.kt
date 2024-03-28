@@ -18,10 +18,11 @@ package com.yandex.yatagan.lang.compiled
 
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal abstract class CtBuiltinAnnotationBase(
     protected val impl: CtAnnotationBase
-) {
+) : LexicalScope by impl {
     final override fun toString() = impl.toString()
     final override fun hashCode() = impl.hashCode()
     final override fun equals(other: Any?) = this === other || (other is CtBuiltinAnnotationBase && impl == other.impl)

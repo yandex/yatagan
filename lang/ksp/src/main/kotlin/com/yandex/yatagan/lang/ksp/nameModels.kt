@@ -27,16 +27,17 @@ import com.yandex.yatagan.lang.compiled.InvalidNameModel
 import com.yandex.yatagan.lang.compiled.KeywordTypeNameModel
 import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 import com.yandex.yatagan.lang.compiled.WildcardNameModel
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 
-internal fun CtTypeNameModel(
+internal fun LexicalScope.CtTypeNameModel(
     type: KSType?,
     jvmTypeKind: JvmTypeInfo? = type?.let(::JvmTypeInfo),
 ): CtTypeNameModel {
     return nameModelImpl(type = type, jvmTypeKind = jvmTypeKind)
 }
 
-private fun nameModelImpl(
+private fun LexicalScope.nameModelImpl(
     type: KSType?,
     jvmTypeKind: JvmTypeInfo?,
 ): CtTypeNameModel {

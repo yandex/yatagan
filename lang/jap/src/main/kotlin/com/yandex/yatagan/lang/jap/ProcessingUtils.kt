@@ -16,21 +16,16 @@
 
 package com.yandex.yatagan.lang.jap
 
-import java.io.Closeable
+import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 
-private var utils: ProcessingUtils? = null
-
-internal val Utils: ProcessingUtils get() = checkNotNull(utils) {
-    "Not reached: utils are used before set/after cleared"
-}
-
-class ProcessingUtils(
+internal class ProcessingUtils(
     val types: Types,
     val elements: Elements,
-) : Closeable {
+) {
     val booleanType: TypeElement by lazy {
         elements.getTypeElement("java.lang.Boolean")
     }
@@ -41,11 +36,5 @@ class ProcessingUtils(
         elements.getTypeElement("java.lang.String")
     }
 
-    init {
-        utils = this
-    }
-
-    override fun close() {
-        utils = null
-    }
+    companion object Key : Extensible.Key<ProcessingUtils, LexicalScope.Extensions>
 }

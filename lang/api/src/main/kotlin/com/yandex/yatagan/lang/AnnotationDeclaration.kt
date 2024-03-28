@@ -17,11 +17,12 @@
 package com.yandex.yatagan.lang
 
 import com.yandex.yatagan.base.api.Internal
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
  * An annotation class declaration.
  */
-public interface AnnotationDeclaration : Annotated {
+public interface AnnotationDeclaration : Annotated, LexicalScope {
     /**
      * Represents an annotation class' property/@interface's method.
      */

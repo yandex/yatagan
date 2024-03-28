@@ -18,15 +18,17 @@ package com.yandex.yatagan.lang.jap
 
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtAnnotationBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
 
 internal class JavaxAnnotatedImpl(
+    lexicalScope: LexicalScope,
     private val impl: Element,
 ) : CtAnnotated {
 
     override val annotations: Sequence<CtAnnotationBase> by lazy {
-        impl.annotationMirrors.map { JavaxAnnotationImpl(it) }.asSequence()
+        impl.annotationMirrors.map { with(lexicalScope) { JavaxAnnotationImpl(it) } }.asSequence()
     }
 
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {

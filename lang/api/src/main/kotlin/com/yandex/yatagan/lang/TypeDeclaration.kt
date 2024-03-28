@@ -17,6 +17,7 @@
 package com.yandex.yatagan.lang
 
 import com.yandex.yatagan.base.api.Internal
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
  * Models a type declaration. Can represent class/primitive/array/... types.
@@ -26,7 +27,7 @@ import com.yandex.yatagan.base.api.Internal
  * for a public API for `asMemberOf()` and the likes. This should be taken into account while comparing two type
  * declarations for equality - they may compare unequal for they have different underlying types.
  */
-public interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<TypeDeclaration> {
+public interface TypeDeclaration : Annotated, HasPlatformModel, Accessible, Comparable<TypeDeclaration>, LexicalScope {
     /**
      * Declaration kind.
      */

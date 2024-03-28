@@ -17,7 +17,7 @@ internal value class ScopeModelImpl private constructor(
 
     override fun toString() = impl.toString()
 
-    companion object Factory {
+    companion object {
         operator fun invoke(annotation: Annotation): ScopeModel = when (annotation.annotationClass.qualifiedName) {
             Names.Reusable -> ScopeModel.Reusable
             else -> ScopeModelImpl(annotation)

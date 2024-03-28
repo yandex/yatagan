@@ -28,12 +28,13 @@ import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Parameter
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.common.MethodBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.inject.Inject
 
 internal class RtMethodImpl(
     private val impl: ReflectMethod,
     override val owner: RtTypeDeclarationImpl,
-) : MethodBase(), Annotated by RtAnnotatedImpl(impl) {
+) : MethodBase(), Annotated by RtAnnotatedImpl(owner, impl), LexicalScope by owner {
     private val parametersAnnotations by lazy { impl.parameterAnnotations }
     private val parametersTypes by lazy { impl.genericParameterTypes }
     private val parameterNames by lazy { impl.parameterNamesCompat() }
@@ -101,7 +102,7 @@ internal class RtMethodImpl(
 
     private inner class ParameterImpl(
         val index: Int,
-    ) : RtParameterBase() {
+    ) : RtParameterBase(), LexicalScope by this {
         override val parameterAnnotations: Array<kotlin.Annotation>
             get() = parametersAnnotations[index]
 

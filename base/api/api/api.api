@@ -1,10 +1,10 @@
 public abstract interface class com/yandex/yatagan/base/api/Extensible {
 	public abstract fun get (Lcom/yandex/yatagan/base/api/Extensible$Key;)Ljava/lang/Object;
+	public abstract fun getOrPut (Lcom/yandex/yatagan/base/api/Extensible$Key;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public abstract fun set (Lcom/yandex/yatagan/base/api/Extensible$Key;Ljava/lang/Object;)V
 }
 
 public abstract interface class com/yandex/yatagan/base/api/Extensible$Key {
-	public abstract fun getKeyType ()Ljava/lang/Class;
 }
 
 public final class com/yandex/yatagan/base/api/ExtensionsKt {

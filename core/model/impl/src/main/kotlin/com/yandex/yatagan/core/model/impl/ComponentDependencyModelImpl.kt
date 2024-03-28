@@ -16,13 +16,15 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.NodeDependency
 import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -76,9 +78,7 @@ internal class ComponentDependencyModelImpl private constructor(
         representation = type,
     )
 
-    companion object Factory : ObjectCache<Type, ComponentDependencyModelImpl>() {
-        operator fun invoke(type: Type) = createCached(type) {
-            ComponentDependencyModelImpl(type)
-        }
+    companion object Factory : FactoryKey<Type, ComponentDependencyModelImpl> {
+        override fun LexicalScope.factory() = caching(::ComponentDependencyModelImpl)
     }
 }

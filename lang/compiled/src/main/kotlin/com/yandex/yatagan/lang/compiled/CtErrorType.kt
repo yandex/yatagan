@@ -17,11 +17,25 @@
 package com.yandex.yatagan.lang.compiled
 
 import com.yandex.yatagan.lang.common.ErrorType
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 class CtErrorType(
+    lexicalScope: LexicalScope,
     override val nameModel: InvalidNameModel,
-    isUnresolved: Boolean = true,
+    isUnresolved: Boolean,
 ) : ErrorType(
+    lexicalScope = lexicalScope,
     nameHint = nameModel.toString(),
     isUnresolved = isUnresolved,
 ), CtNamedType
+
+fun LexicalScope.CtErrorType(
+    nameModel: InvalidNameModel,
+    isUnresolved: Boolean = true,
+) : CtErrorType {
+    return CtErrorType(
+        lexicalScope = this,
+        nameModel = nameModel,
+        isUnresolved = isUnresolved,
+    )
+}

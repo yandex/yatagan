@@ -8,4 +8,5 @@ dependencies {
     implementation(project(":api:public"))
     implementation(project(":processor:common"))
     implementation(project(":lang:ksp"))
+    implementation(project(":base:impl"))
 }

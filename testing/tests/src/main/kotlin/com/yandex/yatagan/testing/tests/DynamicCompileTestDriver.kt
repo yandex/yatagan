@@ -27,10 +27,8 @@ import com.yandex.yatagan.processor.common.Option
 import com.yandex.yatagan.testing.source_set.SourceFile
 import org.intellij.lang.annotations.Language
 import java.io.File
-import java.lang.reflect.Method
 import java.util.Properties
 import java.util.TreeSet
-import java.util.function.Consumer
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
@@ -38,7 +36,6 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 
 private const val TEST_DELEGATE = "test.TestValidationDelegate"
-private const val TEST_RUNNER = "test.RuntimeTestRunner"
 
 class DynamicCompileTestDriver(
     apiType: ApiType = ApiType.Dynamic,
@@ -47,23 +44,6 @@ class DynamicCompileTestDriver(
     private val options = mutableMapOf<Option<*>, Any>(
         IntOption.MaxIssueEncounterPaths to 100,
     )
-
-    private val runnerSource = SourceFile.java(TEST_RUNNER, """
-        package test;
-        import com.yandex.yatagan.dynamic.YataganReflection;
-        import java.util.function.Consumer;
-        
-        public class RuntimeTestRunner implements Consumer<Runnable> {
-            @Override
-            public void accept(Runnable block) {
-                try {
-                    block.run();
-                } finally {
-                    YataganReflection.resetGlobalState();
-                }
-            }
-        }
-    """.trimIndent())
 
     private val validationDelegateSource = SourceFile.java(TEST_DELEGATE, """
         package test;
@@ -116,19 +96,9 @@ class DynamicCompileTestDriver(
         )
     }
 
-    override fun runRuntimeTest(test: Method) {
-        @Suppress("UNCHECKED_CAST")
-        val runner = test.declaringClass.classLoader.loadClass(TEST_RUNNER)
-            .getDeclaredConstructor()
-            .newInstance() as Consumer<Runnable>
-        runner.accept {
-            super.runRuntimeTest(test)
-        }
-    }
-
     override fun createCompilationArguments() = super.createCompilationArguments().let {
         it.copy(
-            sources = it.sources + arrayOf(runnerSource, validationDelegateSource),
+            sources = it.sources + validationDelegateSource,
             kaptProcessors = listOf(accumulator),
         )
     }
@@ -226,7 +196,6 @@ class DynamicCompileTestDriver(
                 val code = """
                     package ${componentName.packageName()};
                     import com.yandex.yatagan.Yatagan;
-                    import com.yandex.yatagan.dynamic.YataganReflection;
                     import com.yandex.yatagan.validation.RichString;
                     import com.yandex.yatagan.rt.support.*;
                     import java.util.*;
@@ -237,8 +206,6 @@ class DynamicCompileTestDriver(
                                 Yatagan.$bootstrapInvocation;
                             } catch (SimpleDynamicValidationDelegate.InvalidGraphException e) {
                                 // nothing here
-                            } finally {
-                                YataganReflection.resetGlobalState();
                             }
                         }
                     }

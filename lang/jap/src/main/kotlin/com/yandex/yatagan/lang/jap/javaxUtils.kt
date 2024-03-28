@@ -32,6 +32,7 @@ import com.yandex.yatagan.lang.compiled.InvalidNameModel
 import com.yandex.yatagan.lang.compiled.KeywordTypeNameModel
 import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 import com.yandex.yatagan.lang.compiled.WildcardNameModel
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Element
@@ -53,6 +54,8 @@ import javax.lang.model.type.WildcardType
 import javax.lang.model.util.AbstractAnnotationValueVisitor8
 import javax.lang.model.util.ElementFilter
 import javax.lang.model.util.SimpleElementVisitor8
+
+internal val LexicalScope.Utils: ProcessingUtils get() = ext[ProcessingUtils]
 
 inline fun <reified T : Annotation> Element.isAnnotatedWith() = annotationMirrors.any {
     it.annotationType.asTypeElement().qualifiedName.contentEquals(T::class.java.canonicalName)
@@ -149,7 +152,7 @@ internal tailrec fun Element.isFromKotlin(): Boolean {
     return asTypeElementOrNull()?.isFromKotlin() ?: (enclosingElement ?: return false).isFromKotlin()
 }
 
-internal fun TypeElement.allNonPrivateFields(): Sequence<VariableElement> = sequence {
+internal fun LexicalScope.allNonPrivateFieldsIn(element: TypeElement): Sequence<VariableElement> = sequence {
     suspend fun SequenceScope<VariableElement>.addFieldsFrom(declaration: TypeElement) {
         if (declaration == Utils.objectType) {
             return
@@ -164,12 +167,12 @@ internal fun TypeElement.allNonPrivateFields(): Sequence<VariableElement> = sequ
             addFieldsFrom(superclass.asTypeElement())
         }
     }
-    addFieldsFrom(this@allNonPrivateFields)
+    addFieldsFrom(element)
 }
 
-internal fun TypeElement.allNonPrivateMethods(): Sequence<ExecutableElement> =
+internal fun LexicalScope.allNonPrivateMethodsIn(element: TypeElement): Sequence<ExecutableElement> =
     sequenceOf(
-        MoreElements.getLocalAndInheritedMethods(this, Utils.types, Utils.elements)
+        MoreElements.getLocalAndInheritedMethods(element, Utils.types, Utils.elements)
             .asSequence()
             .filter {
                 // Skip methods from Object.
@@ -177,7 +180,7 @@ internal fun TypeElement.allNonPrivateMethods(): Sequence<ExecutableElement> =
             }.distinctBy {
                 TypeMirrorEquivalence(it.asType()) to it.simpleName
             },
-        enclosedElements
+        element.enclosedElements
             .asSequence()
             .filter {
                 it.kind == ElementKind.METHOD && it.isStatic && !it.isPrivate
@@ -230,18 +233,18 @@ internal fun ClassNameModel(type: TypeElement): ClassNameModel {
     return ClassNameModel(packageName, simpleNames)
 }
 
-internal fun Element.asMemberOf(type: DeclaredType): TypeMirror {
-    return Utils.types.asMemberOf(type, this)
+internal fun LexicalScope.asMemberOf(type: DeclaredType, element: Element): TypeMirror {
+    return Utils.types.asMemberOf(type, element)
 }
 
-internal fun parametersSequenceFor(
+internal fun LexicalScope.parametersSequenceFor(
     element: ExecutableElement,
     asMemberOf: DeclaredType,
 ) = sequence<Parameter> {
     val parameters = element.parameters
-    val types = element.asMemberOf(asMemberOf).asExecutableType().parameterTypes
+    val types = asMemberOf(asMemberOf, element).asExecutableType().parameterTypes
     for (i in parameters.indices) {
-        yield(JavaxParameterImpl(impl = parameters[i], refinedType = types[i]))
+        yield(JavaxParameterImpl(lexicalScope = this@parametersSequenceFor, impl = parameters[i], refinedType = types[i]))
     }
 }.memoize()
 

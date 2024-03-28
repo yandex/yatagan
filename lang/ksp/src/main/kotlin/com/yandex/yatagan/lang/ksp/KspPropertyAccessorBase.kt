@@ -20,14 +20,16 @@ import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.symbol.KSPropertyAccessor
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtMethodBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal abstract class KspPropertyAccessorBase<T : KSPropertyAccessor>(
+    lexicalScope: LexicalScope,
     private val accessor: T,
     final override val isStatic: Boolean,
 ) : CtMethodBase(),
     // NOTE: We can't use annotations from |property| as they aren't properly accessible from Kapt.
     //  See https://youtrack.jetbrains.com/issue/KT-34684
-    CtAnnotated by KspAnnotatedImpl(accessor) {
+    CtAnnotated by KspAnnotatedImpl(lexicalScope, accessor), LexicalScope by lexicalScope {
 
     protected val property = accessor.receiver
 

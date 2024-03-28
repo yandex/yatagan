@@ -115,6 +115,9 @@ sealed interface InvalidNameModel : CtTypeNameModel {
     }
 
     class TypeVariable(private val typeVar: String) : InvalidNameModel {
+        init {
+            print("dsd")
+        }
         override fun toString() = "<unresolved-type-var: $typeVar>"
     }
 }

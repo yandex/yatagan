@@ -25,7 +25,7 @@ internal class KspPropertySetterImpl(
     private val setter: KSPropertySetter,
     override val owner: KspTypeDeclarationImpl,
     isStatic: Boolean,
-) : KspPropertyAccessorBase<KSPropertySetter>(setter, isStatic) {
+) : KspPropertyAccessorBase<KSPropertySetter>(owner, setter, isStatic) {
 
     override val isEffectivelyPublic: Boolean
         get() = super.isEffectivelyPublic && setter.modifiers.let {
@@ -41,6 +41,7 @@ internal class KspPropertySetterImpl(
 
     override val parameters: Sequence<Parameter> = sequence {
         yield(KspParameterImpl(
+            lexicalScope = owner,
             impl = setter.parameter,
             refinedTypeRef = property.type.replaceType(property.asMemberOf(owner.type.impl)),
             jvmSignatureSupplier = { jvmSignature },
