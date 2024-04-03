@@ -34,6 +34,8 @@ import com.yandex.yatagan.ValueOf
 import com.yandex.yatagan.VariantApi
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal open class RtAnnotationImplBase<A : Annotation>(
     protected val impl: A,
@@ -43,37 +45,57 @@ internal open class RtAnnotationImplBase<A : Annotation>(
     final override fun toString() = impl.toString()
 }
 
-internal class RtComponentAnnotationImpl(
+internal class RtComponentAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     impl: Component,
-) : RtAnnotationImplBase<Component>(impl), BuiltinAnnotation.Component {
+) : RtAnnotationImplBase<Component>(impl), BuiltinAnnotation.Component, LexicalScope by lexicalScope {
     override val isRoot: Boolean get() = impl.isRoot
     override val modules get() = impl.modules.map { RtTypeImpl(it.java) }
     override val dependencies get() = impl.dependencies.map { RtTypeImpl(it.java) }
     override val variant get() = impl.variant.map { RtTypeImpl(it.java) }
     override val multiThreadAccess: Boolean get() = impl.multiThreadAccess
+
+    companion object Factory : FactoryKey<Component, RtComponentAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtComponentAnnotationImpl
+    }
 }
 
-internal class RtModuleAnnotationImpl(
+internal class RtModuleAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     impl: Module,
-) : RtAnnotationImplBase<Module>(impl), BuiltinAnnotation.Module {
+) : RtAnnotationImplBase<Module>(impl), BuiltinAnnotation.Module, LexicalScope by lexicalScope {
     override val includes
         get() = impl.includes.map { RtTypeImpl(it.java) }
     override val subcomponents
         get() = impl.subcomponents.map { RtTypeImpl(it.java) }
+
+    companion object Factory : FactoryKey<Module, RtModuleAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtModuleAnnotationImpl
+    }
 }
 
-internal class RtConditionalAnnotationImpl(
+internal class RtConditionalAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     impl: Conditional,
-) : RtAnnotationImplBase<Conditional>(impl), BuiltinAnnotation.Conditional {
+) : RtAnnotationImplBase<Conditional>(impl), BuiltinAnnotation.Conditional, LexicalScope by lexicalScope {
     override val featureTypes get() = impl.value.map { RtTypeImpl(it.java) }
     override val onlyIn get() = impl.onlyIn.map { RtTypeImpl(it.java) }
+
+    companion object Factory : FactoryKey<Conditional, RtConditionalAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtConditionalAnnotationImpl
+    }
 }
 
-internal class RtProvidesAnnotationImpl(
+internal class RtProvidesAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     impl: Provides,
-) : RtAnnotationImplBase<Provides>(impl), BuiltinAnnotation.Provides {
+) : RtAnnotationImplBase<Provides>(impl), BuiltinAnnotation.Provides, LexicalScope by lexicalScope {
     override val conditionals get() = impl.value.map {
         RtConditionalAnnotationImpl(it)
+    }
+
+    companion object Factory : FactoryKey<Provides, RtProvidesAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtProvidesAnnotationImpl
     }
 }
 
@@ -91,54 +113,87 @@ internal class RtIntoSetAnnotationImpl(
         get() = impl.flatten
 }
 
-internal class RtConditionAnnotationImpl(
+internal class RtConditionAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     impl: Condition,
-) : RtAnnotationImplBase<Condition>(impl), BuiltinAnnotation.ConditionFamily.One {
+) : RtAnnotationImplBase<Condition>(impl), BuiltinAnnotation.ConditionFamily.One, LexicalScope by lexicalScope {
     override val target: Type
         get() = RtTypeImpl(impl.value.java)
     override val condition: String
         get() = impl.condition
-}
 
-internal class RtAnyConditionAnnotationImpl(
-    impl: AnyCondition,
-) : RtAnnotationImplBase<AnyCondition>(impl), BuiltinAnnotation.ConditionFamily.Any {
-    override val conditions get() = impl.value.map {
-        RtConditionAnnotationImpl(it)
+    companion object Factory : FactoryKey<Condition, RtConditionAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtConditionAnnotationImpl
     }
 }
 
-internal class RtConditionExpressionAnnotationImpl(
+internal class RtAnyConditionAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
+    impl: AnyCondition,
+) : RtAnnotationImplBase<AnyCondition>(impl), BuiltinAnnotation.ConditionFamily.Any, LexicalScope by lexicalScope {
+    override val conditions get() = impl.value.map {
+        RtConditionAnnotationImpl(it)
+    }
+
+    companion object Factory : FactoryKey<AnyCondition, RtAnyConditionAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtAnyConditionAnnotationImpl
+    }
+}
+
+internal class RtConditionExpressionAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     impl: ConditionExpression,
-) : RtAnnotationImplBase<ConditionExpression>(impl), BuiltinAnnotation.ConditionExpression {
+) : RtAnnotationImplBase<ConditionExpression>(impl), BuiltinAnnotation.ConditionExpression, LexicalScope by lexicalScope {
     override val value: String
         get() = impl.value
     override val imports: List<Type>
         get() = impl.imports.map { RtTypeImpl(it.java) }
     override val importAs: List<BuiltinAnnotation.ConditionExpression.ImportAs> by lazy {
-        impl.importAs.map { ImportAsImpl(it) }
+        impl.importAs.map { ImportAsImpl(this, it) }
     }
 
-    private data class ImportAsImpl(
-        private val impl: ConditionExpression.ImportAs,
-    ) : BuiltinAnnotation.ConditionExpression.ImportAs {
+    companion object Factory : FactoryKey<ConditionExpression, RtConditionExpressionAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtConditionExpressionAnnotationImpl
+    }
+
+    private class ImportAsImpl(
+        lexicalScope: LexicalScope,
+        impl: ConditionExpression.ImportAs,
+    ) : BuiltinAnnotation.ConditionExpression.ImportAs, LexicalScope by lexicalScope {
         override val value: Type = RtTypeImpl(impl.value.java)
         override val alias: String = impl.alias
+
+        override fun equals(other: Any?) =
+            this === other || other is ImportAsImpl &&
+                    other.value == value &&
+                    other.alias == alias
+
+        override fun hashCode(): Int = 31 * value.hashCode() + alias.hashCode()
     }
 }
 
-internal class RtValueOfAnnotationImpl(
+internal class RtValueOfAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     impl: ValueOf,
-) : RtAnnotationImplBase<ValueOf>(impl), BuiltinAnnotation.ValueOf {
+) : RtAnnotationImplBase<ValueOf>(impl), BuiltinAnnotation.ValueOf, LexicalScope by lexicalScope {
     override val value: BuiltinAnnotation.ConditionExpression
         get() = RtConditionExpressionAnnotationImpl(impl.value)
+
+    companion object Factory : FactoryKey<ValueOf, RtValueOfAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtValueOfAnnotationImpl
+    }
 }
 
-internal class RtComponentFlavorAnnotationImpl(
+internal class RtComponentFlavorAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
     impl: ComponentFlavor,
-) : RtAnnotationImplBase<ComponentFlavor>(impl), BuiltinAnnotation.ComponentFlavor {
+) : RtAnnotationImplBase<ComponentFlavor>(impl), BuiltinAnnotation.ComponentFlavor, LexicalScope by lexicalScope {
     override val dimension: Type
         get() = RtTypeImpl(impl.dimension.java)
+
+    companion object Factory : FactoryKey<ComponentFlavor, RtComponentFlavorAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtComponentFlavorAnnotationImpl
+    }
 }
 
 internal class RtAssistedAnnotationImpl(

@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.processor.common
 
-import com.yandex.yatagan.base.ObjectCacheRegistry
 import com.yandex.yatagan.base.api.childrenSequence
 import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.codegen.impl.ComponentGeneratorFacade
@@ -24,6 +23,7 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
+import com.yandex.yatagan.lang.scope.LexicalScope
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Error
 import com.yandex.yatagan.validation.ValidationMessage.Kind.MandatoryWarning
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Warning
@@ -41,7 +41,7 @@ fun <Source> process(
 ) {
     val usePlainOutput = delegate.options[BooleanOption.UsePlainOutput]
     val strictMode = delegate.options[BooleanOption.StrictMode]
-    ObjectCacheRegistry.use {
+    run {
         val rootModels = sources.mapNotNull { source ->
             ComponentModel(delegate.createDeclaration(source))
         }.filter { it.isRoot }.toList()
@@ -51,9 +51,6 @@ fun <Source> process(
         for (rootModel in rootModels) {
             val graphRoot = BindingGraph(
                 root = rootModel,
-                options = Options(
-                    allConditionsLazy = delegate.options[BooleanOption.AllConditionsLazy],
-                )
             )
             val allMessages = buildList {
                 addAll(validate(graphRoot))
@@ -112,6 +109,18 @@ fun <Source> process(
             }
         }
     }
+}
+
+/**
+ * A hook to be called by processor once per [LexicalScope].
+ */
+fun initScopedOptions(
+    lexicalScope: LexicalScope,
+    delegate: ProcessorDelegate<*>,
+) {
+    lexicalScope.ext[Options] = Options(
+        allConditionsLazy = delegate.options[BooleanOption.AllConditionsLazy],
+    )
 }
 
 private fun <Source> allSourcesSequence(

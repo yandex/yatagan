@@ -16,10 +16,13 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
+import com.yandex.yatagan.lang.scope.invoke
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -60,7 +63,7 @@ internal class FlavorImpl private constructor(
         },
     )
 
-    companion object Factory : ObjectCache<Type, FlavorImpl>() {
-        operator fun invoke(type: Type) = createCached(type, ::FlavorImpl)
+    companion object Factory : FactoryKey<Type, FlavorImpl> {
+        override fun LexicalScope.factory() = caching(::FlavorImpl)
     }
 }

@@ -22,12 +22,13 @@ import com.yandex.yatagan.lang.Parameter
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtMethodBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal class KspMethodImpl(
     private val impl: KSFunctionDeclaration,
     override val owner: KspTypeDeclarationImpl,
     override val isStatic: Boolean,
-) : CtMethodBase(), CtAnnotated by KspAnnotatedImpl(impl) {
+) : CtMethodBase(), CtAnnotated by KspAnnotatedImpl(owner, impl), LexicalScope by owner {
     private val jvmSignature = JvmMethodSignature(impl)
 
     override val isEffectivelyPublic: Boolean

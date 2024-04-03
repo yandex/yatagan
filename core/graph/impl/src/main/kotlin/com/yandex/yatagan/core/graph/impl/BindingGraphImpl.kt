@@ -40,19 +40,21 @@ import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.Variant
 import com.yandex.yatagan.core.model.accept
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.modelRepresentation
 import com.yandex.yatagan.validation.format.reportError
 
-internal class BindingGraphImpl(
+internal class BindingGraphImpl private constructor(
     private val component: ComponentModel,
-    internal val options: Options,
     override val parent: BindingGraphImpl? = null,
     override val conditionScope: ConditionScope = ConditionScope.Always,
     private val factoryMethodInParent: ComponentFactoryModel? = null,
-) : BindingGraph, ExtensibleImpl() {
+) : BindingGraph, ExtensibleImpl<BindingGraph>() {
     override val model: ComponentModel
         get() = component
 
@@ -153,7 +155,6 @@ internal class BindingGraphImpl(
             .map { (childComponent, childConditionScope) ->
                 BindingGraphImpl(
                     component = childComponent,
-                    options = options,
                     parent = this,
                     conditionScope = conditionScope and childConditionScope,
                     factoryMethodInParent = component.subComponentFactoryMethods.find {
@@ -216,8 +217,9 @@ internal class BindingGraphImpl(
         }
 
         // Add all condition literals from all local bindings.
+        val allConditionsLazy = model.type.ext[Options].allConditionsLazy
         for (binding in localBindings.keys) {
-            if (options.allConditionsLazy) {
+            if (allConditionsLazy) {
                 for (condition in binding.dependenciesOnConditions) {
                     localConditionLiterals[condition] = LiteralUsage.Lazy
                 }
@@ -382,5 +384,9 @@ internal class BindingGraphImpl(
 
         validateNoLoops(this, validator)
         validateAnnotationsRetention(this, validator)
+    }
+
+    companion object Factory : FactoryKey<ComponentModel, BindingGraphImpl> {
+        override fun LexicalScope.factory() = caching(::BindingGraphImpl)
     }
 }

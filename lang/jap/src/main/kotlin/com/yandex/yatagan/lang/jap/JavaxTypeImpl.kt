@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.lang.jap
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.common.NoDeclaration
@@ -24,12 +23,18 @@ import com.yandex.yatagan.lang.compiled.CtErrorType
 import com.yandex.yatagan.lang.compiled.CtTypeBase
 import com.yandex.yatagan.lang.compiled.CtTypeNameModel
 import com.yandex.yatagan.lang.compiled.InvalidNameModel
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 
 internal class JavaxTypeImpl private constructor(
-    val impl: TypeMirror,
-) : CtTypeBase() {
+    lexicalScope: LexicalScope,
+    wrapped: TypeMirrorEquivalence,
+) : CtTypeBase(), LexicalScope by lexicalScope {
+    val impl: TypeMirror = wrapped.get()
+
     override val nameModel: CtTypeNameModel by lazy { CtTypeNameModel(impl) }
 
     override val declaration: TypeDeclaration by lazy {
@@ -68,9 +73,13 @@ internal class JavaxTypeImpl private constructor(
         }
     }
 
-    companion object Factory : ObjectCache<TypeMirrorEquivalence, JavaxTypeImpl>() {
-        operator fun invoke(impl: TypeMirror): Type {
-            return when(impl.kind) {
+    companion object Factory : FactoryKey<TypeMirror, Type> {
+        private object Caching : FactoryKey<TypeMirrorEquivalence, JavaxTypeImpl> {
+            override fun LexicalScope.factory() = caching(::JavaxTypeImpl)
+        }
+
+        override fun LexicalScope.factory() = fun LexicalScope.(impl: TypeMirror): Type {
+            return when (impl.kind) {
                 TypeKind.ERROR -> CtErrorType(
                     nameModel = InvalidNameModel.Unresolved(hint = impl.toString())
                 )
@@ -82,9 +91,10 @@ internal class JavaxTypeImpl private constructor(
                 TypeKind.DECLARED -> {
                     if (impl.asTypeElement().qualifiedName.contentEquals("error.NonExistentClass"))
                         CtErrorType(nameModel = InvalidNameModel.Unresolved(hint = "error.NonExistentClass"))
-                    else createCached(TypeMirrorEquivalence(impl)) { JavaxTypeImpl(impl = impl) }
+                    else Caching(TypeMirrorEquivalence(impl))
                 }
-                else -> createCached(TypeMirrorEquivalence(impl)) { JavaxTypeImpl(impl = impl) }
+
+                else -> Caching(TypeMirrorEquivalence(impl))
             }
         }
     }

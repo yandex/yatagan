@@ -16,11 +16,11 @@
 
 package com.yandex.yatagan.lang.rt
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.TypeDeclarationKind
-
-internal fun ReflectType.equivalence() = TypeEquivalenceWrapper(this)
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 
 internal val ReflectMember.isStatic get() = ReflectModifier.isStatic(modifiers)
 
@@ -385,14 +385,14 @@ private fun equals(one: ReflectType, other: ReflectType): Boolean = with(one) {
 /**
  * This is required as [ReflectType.equals] works only with its internal implementations on some platforms.
  */
-internal class TypeEquivalenceWrapper private constructor(private val type: ReflectType) {
+internal class TypeEquivalenceWrapper private constructor(val type: ReflectType) {
     override fun hashCode(): Int = hashCode(type)
     override fun equals(other: Any?): Boolean {
         if (other !is TypeEquivalenceWrapper) return false
-        return equals(type, other.type)
+        return this === other || equals(type, other.type)
     }
 
-    companion object Cache : ObjectCache<ReflectType, TypeEquivalenceWrapper>() {
-        operator fun invoke(type: ReflectType) = createCached(type, ::TypeEquivalenceWrapper)
+    companion object Factory : FactoryKey<ReflectType, TypeEquivalenceWrapper> {
+        override fun LexicalScope.factory() = caching(::TypeEquivalenceWrapper)
     }
 }

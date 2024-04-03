@@ -20,12 +20,13 @@ import com.yandex.yatagan.lang.Parameter
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtMethodBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.lang.model.element.ExecutableElement
 
-internal class JavaxMethodImpl (
+internal class JavaxMethodImpl(
     override val owner: JavaxTypeDeclarationImpl,
     private val impl: ExecutableElement,
-) : CtMethodBase(), CtAnnotated by JavaxAnnotatedImpl(impl) {
+) : CtMethodBase(), CtAnnotated by JavaxAnnotatedImpl(owner, impl), LexicalScope by owner {
 
     override val isAbstract: Boolean get() = impl.isAbstract
 
@@ -35,7 +36,7 @@ internal class JavaxMethodImpl (
         get() = impl.isPublic
 
     override val returnType: Type by lazy {
-        JavaxTypeImpl(impl.asMemberOf(owner.type).asExecutableType().returnType)
+        JavaxTypeImpl(asMemberOf(owner.type, impl).asExecutableType().returnType)
     }
     override val name: String get() = impl.simpleName.toString()
 

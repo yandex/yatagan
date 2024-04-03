@@ -37,7 +37,9 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
 import com.yandex.yatagan.lang.Parameter
+import com.yandex.yatagan.lang.scope.LexicalScope
 
+internal val LexicalScope.Utils: ProcessingUtils get() = ext[ProcessingUtils]
 
 internal fun <A : Annotation> KSAnnotation.hasType(clazz: Class<A>): Boolean {
     return shortName.getShortName() == clazz.simpleName &&
@@ -90,40 +92,40 @@ internal fun KSType.classDeclaration(): KSClassDeclaration? = when (val declarat
     else -> declaration as? KSClassDeclaration
 }
 
-internal fun KSType.isRaw(): Boolean {
-    return Utils.resolver.isJavaRawType(this)
+internal fun LexicalScope.isRaw(type: KSType): Boolean {
+    return Utils.resolver.isJavaRawType(type)
 }
 
 internal fun KSClassDeclaration.getCompanionObject(): KSClassDeclaration? =
     declarations.filterIsInstance<KSClassDeclaration>().find(KSClassDeclaration::isCompanionObject)
 
-private fun KSFunctionDeclaration.isFromObject(): Boolean = when(simpleName.asString()) {
-    "clone" -> Utils.resolver.mapToJvmSignature(this) == "()Ljava/lang/Object;"
-    "equals" -> Utils.resolver.mapToJvmSignature(this) == "(Ljava/lang/Object;)Z"
-    "finalize" -> Utils.resolver.mapToJvmSignature(this) == "()V"
-    "getClass" -> Utils.resolver.mapToJvmSignature(this) == "()Ljava/lang/Class;"
-    "hashCode" -> Utils.resolver.mapToJvmSignature(this) == "()I"
-    "notify" -> Utils.resolver.mapToJvmSignature(this) == "()V"
-    "notifyAll" -> Utils.resolver.mapToJvmSignature(this) == "()V"
-    "toString" -> Utils.resolver.mapToJvmSignature(this) == "()Ljava/lang/String;"
-    "wait" -> when(Utils.resolver.mapToJvmSignature(this)) {
+private fun LexicalScope.isFromObject(function: KSFunctionDeclaration): Boolean = when(function.simpleName.asString()) {
+    "clone" -> Utils.resolver.mapToJvmSignature(function) == "()Ljava/lang/Object;"
+    "equals" -> Utils.resolver.mapToJvmSignature(function) == "(Ljava/lang/Object;)Z"
+    "finalize" -> Utils.resolver.mapToJvmSignature(function) == "()V"
+    "getClass" -> Utils.resolver.mapToJvmSignature(function) == "()Ljava/lang/Class;"
+    "hashCode" -> Utils.resolver.mapToJvmSignature(function) == "()I"
+    "notify" -> Utils.resolver.mapToJvmSignature(function) == "()V"
+    "notifyAll" -> Utils.resolver.mapToJvmSignature(function) == "()V"
+    "toString" -> Utils.resolver.mapToJvmSignature(function) == "()Ljava/lang/String;"
+    "wait" -> when(Utils.resolver.mapToJvmSignature(function)) {
        "()V", "(J)V", "(JI)V" -> true
        else -> false
     }
     else -> false
 }
 
-internal fun KSClassDeclaration.allNonPrivateFunctions(): Sequence<KSFunctionDeclaration> =
-    getAllFunctions()
+internal fun LexicalScope.allNonPrivateFunctions(declaration: KSClassDeclaration): Sequence<KSFunctionDeclaration> =
+    declaration.getAllFunctions()
         .filter {
-            !it.isConstructor() && !it.isPrivate() && !it.isFromObject()
-        } + getDeclaredFunctions().filter {
+            !it.isConstructor() && !it.isPrivate() && !isFromObject(it)
+        } + declaration.getDeclaredFunctions().filter {
         // Include static functions.
         it.functionKind == FunctionKind.STATIC && !it.isPrivate()
     }
 
-internal fun KSClassDeclaration.allNonPrivateProperties(): Sequence<KSPropertyDeclaration> {
-    return getAllProperties().filter { !it.isPrivate() && !it.isKotlinFieldInObject() }
+internal fun allNonPrivateProperties(declaration: KSClassDeclaration): Sequence<KSPropertyDeclaration> {
+    return declaration.getAllProperties().filter { !it.isPrivate() && !it.isKotlinFieldInObject() }
 }
 
 internal fun KSClassDeclaration.getSuperclass(): KSType? {
@@ -132,7 +134,7 @@ internal fun KSClassDeclaration.getSuperclass(): KSType? {
         .find { (it.declaration as? KSClassDeclaration)?.classKind == ClassKind.CLASS }
 }
 
-internal fun parametersSequenceFor(
+internal fun LexicalScope.parametersSequenceFor(
     declaration: KSFunctionDeclaration,
     jvmMethodSignature: JvmMethodSignature,
     containing: KSType?,
@@ -143,6 +145,7 @@ internal fun parametersSequenceFor(
         val parameter = parameters[i]
         yield(
             KspParameterImpl(
+                lexicalScope = this@parametersSequenceFor,
                 impl = parameter,
                 jvmSignatureSupplier = { jvmMethodSignature.parameterTypesSignatures?.get(i) },
                 refinedTypeRef = parameter.type.run {

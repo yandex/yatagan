@@ -18,9 +18,13 @@
 
 package com.yandex.yatagan.lang
 
-import com.yandex.yatagan.base.api.Internal
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+import com.yandex.yatagan.lang.scope.LexicalScope
+
+/**
+ * An accessor for the [LangModelFactory] tied to the lexical scope.
+ */
+public val LexicalScope.Extensions.langFactory: LangModelFactory
+    get() = get(LangModelFactory)
 
 public val TypeDeclaration.isKotlinObject: Boolean
     get() = when (kind) {
@@ -33,17 +37,6 @@ public val TypeDeclaration.functionsWithCompanion: Sequence<Method>
         null -> methods
         else -> methods + companion.methods
     }
-
-@Internal
-public inline fun LangModelFactory.Companion.use(factory: LangModelFactory, block: () -> Unit) {
-    contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
-    check(delegate.compareAndSet(null, factory))
-    try {
-        block()
-    } finally {
-        check(delegate.compareAndSet(factory, null))
-    }
-}
 
 public inline fun LangModelFactory.getListType(parameter: Type, isCovariant: Boolean = false): Type {
     return getParameterizedType(

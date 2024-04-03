@@ -17,16 +17,13 @@
 package com.yandex.yatagan.processor.jap
 
 import com.yandex.yatagan.Component
-import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.TypeDeclaration
-import com.yandex.yatagan.lang.jap.JavaxModelFactoryImpl
-import com.yandex.yatagan.lang.jap.ProcessingUtils
-import com.yandex.yatagan.lang.jap.TypeDeclaration
+import com.yandex.yatagan.lang.jap.JavaxLexicalScope
 import com.yandex.yatagan.lang.jap.asTypeElement
-import com.yandex.yatagan.lang.use
 import com.yandex.yatagan.processor.common.Logger
 import com.yandex.yatagan.processor.common.Options
 import com.yandex.yatagan.processor.common.ProcessorDelegate
+import com.yandex.yatagan.processor.common.initScopedOptions
 import com.yandex.yatagan.processor.common.process
 import java.io.Writer
 import javax.annotation.processing.AbstractProcessor
@@ -41,8 +38,9 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
         private set
     override lateinit var options: Options
         private set
+    override lateinit var lexicalScope: JavaxLexicalScope
 
-    override fun createDeclaration(source: TypeElement) = TypeDeclaration(source)
+    override fun createDeclaration(source: TypeElement) = lexicalScope.getTypeDeclaration(source)
 
     override fun getSourceFor(declaration: TypeDeclaration): TypeElement {
         return declaration.platformModel as TypeElement
@@ -62,6 +60,8 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
         super.init(processingEnv)
         logger = JapLogger(processingEnv.messager)
         options = Options(processingEnv.options)
+        lexicalScope = JavaxLexicalScope(processingEnv.typeUtils, processingEnv.elementUtils)
+        initScopedOptions(lexicalScope, this)
     }
 
     override fun openFileForGenerating(
@@ -75,16 +75,12 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
         val elementsByAnnotation = roundEnv.getElementsAnnotatedWith(Component::class.java)
-        ProcessingUtils(processingEnv.typeUtils, processingEnv.elementUtils).use {
-            LangModelFactory.use(JavaxModelFactoryImpl()) {
-                process(
-                    sources = elementsByAnnotation
-                        .map(Element::asTypeElement)
-                        .asSequence(),
-                    delegate = this,
-                )
-            }
-        }
+        process(
+            sources = elementsByAnnotation
+                .map(Element::asTypeElement)
+                .asSequence(),
+            delegate = this,
+        )
         return true
     }
 }

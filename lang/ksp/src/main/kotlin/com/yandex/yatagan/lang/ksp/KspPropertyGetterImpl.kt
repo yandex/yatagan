@@ -24,7 +24,7 @@ internal class KspPropertyGetterImpl(
     getter: KSPropertyGetter,
     override val owner: KspTypeDeclarationImpl,
     isStatic: Boolean,
-) : KspPropertyAccessorBase<KSPropertyGetter>(getter, isStatic) {
+) : KspPropertyAccessorBase<KSPropertyGetter>(owner, getter, isStatic) {
 
     override val returnType: Type by lazy {
         var typeReference = property.type

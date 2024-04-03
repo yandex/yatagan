@@ -16,8 +16,9 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.base.api.Internal
-import java.util.concurrent.atomic.AtomicReference
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
  * An interface that provides an API to create `lang`-level model objects.
@@ -101,32 +102,5 @@ public interface LangModelFactory {
      */
     public val isInRuntimeEnvironment: Boolean
 
-    @OptIn(Internal::class)
-    public companion object : LangModelFactory {
-        @Internal
-        public val delegate: AtomicReference<LangModelFactory> = AtomicReference()
-
-        override fun getParameterizedType(
-            type: ParameterizedType,
-            parameter: Type,
-            isCovariant: Boolean,
-        ): Type {
-            return checkNotNull(delegate.get()).getParameterizedType(type, parameter, isCovariant)
-        }
-
-        override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
-            return checkNotNull(delegate.get()).getMapType(keyType, valueType, isCovariant)
-        }
-
-        override fun getTypeDeclaration(
-            packageName: String,
-            simpleName: String,
-            vararg simpleNames: String
-        ): TypeDeclaration? = checkNotNull(delegate.get()).getTypeDeclaration(packageName, simpleName, *simpleNames)
-
-        @Internal
-        override fun createNoType(name: String): Type = checkNotNull(delegate.get()).createNoType(name)
-
-        override val isInRuntimeEnvironment: Boolean get() = checkNotNull(delegate.get()).isInRuntimeEnvironment
-    }
+    public companion object Key : Extensible.Key<LangModelFactory, LexicalScope.Extensions>
 }

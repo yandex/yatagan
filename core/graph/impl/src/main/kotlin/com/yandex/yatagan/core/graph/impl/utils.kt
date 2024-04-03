@@ -46,8 +46,8 @@ internal fun <K, V> mergeMultiMapsForDuplicateCheck(
  */
 internal fun <C, P> hierarchyExtension(
     delegate: P,
-    key: Extensible.Key<C>,
-): WithParents<C> where C : WithParents<C>, P : WithParents<P>, P : Extensible {
+    key: Extensible.Key<C, P>,
+): WithParents<C> where C : WithParents<C>, P : WithParents<P>, P : Extensible<P> {
     return object : WithParents<C> {
         override val parent: C?
             get() = delegate.parent?.let { it[key] }

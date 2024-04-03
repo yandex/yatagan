@@ -17,6 +17,7 @@
 package com.yandex.yatagan.lang
 
 import com.yandex.yatagan.base.api.Internal
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
  * Represents a function/method associated with a class from **the Java point of view**.
@@ -24,7 +25,7 @@ import com.yandex.yatagan.base.api.Internal
  * - Top-level kotlin functions are not covered.
  * - Kotlin properties (setters and getters) are also represented by this.
  */
-public interface Method : Member, Callable, Comparable<Method> {
+public interface Method : Member, Callable, Comparable<Method>, LexicalScope {
     /**
      * Whether the function is abstract.
      */

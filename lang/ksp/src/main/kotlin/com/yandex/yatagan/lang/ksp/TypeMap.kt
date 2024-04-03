@@ -27,15 +27,12 @@ import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Variance
-import com.yandex.yatagan.base.ObjectCache
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 
-/**
- * Object cache for type normalization mapping.
- *
- * @see [TypeMapCache.normalizeType].
- */
-internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSType>() {
-    private fun mapDeclarationToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
+internal object TypeMap {
+    private fun LexicalScope.mapDeclarationToJavaPlatformIfNeeded(declaration: KSClassDeclaration): KSClassDeclaration {
         if (!declaration.packageName.asString().startsWith("kotlin")) {
             // Heuristic: only types from `kotlin` package can have different java counterparts.
             return declaration
@@ -80,7 +77,7 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
         return forNature.replaceType(forType)
     }
 
-    private fun doNormalizeType(
+    private fun LexicalScope.doNormalizeType(
         typeReference: KSTypeReference,
         bakeVarianceAsWildcard: Boolean,
     ): KSType {
@@ -150,15 +147,13 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
         return mappedDeclaration.asType(mappedArguments).makeNotNullable()
     }
 
-    private fun normalizeTypeImpl(
+    private fun LexicalScope.normalizeTypeImpl(
         typeReference: KSTypeReference,
         bakeVarianceAsWildcard: Boolean,
-    ): KSType = createCached(bakeVarianceAsWildcard to typeReference) {
-        doNormalizeType(
-            typeReference = typeReference,
-            bakeVarianceAsWildcard = bakeVarianceAsWildcard,
-        )
-    }
+    ): KSType = doNormalizeType(
+        typeReference = typeReference,
+        bakeVarianceAsWildcard = bakeVarianceAsWildcard,
+    )
 
     private fun KSTypeReference.shouldSuppressWildcards(): Boolean {
         val suppress = getAnnotationsByType(JvmSuppressWildcards::class)
@@ -189,7 +184,7 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
      * may alter wildcard mapping process.
      * @param position type position to control whether wildcard mapping is required.
      */
-    fun normalizeType(
+    fun LexicalScope.normalizeType(
         reference: KSTypeReference,
         position: Position,
     ): KSType {
@@ -204,9 +199,9 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
             // Optimize for java code - no need to go through full normalize routine - no kotlin type could be
             // referenced from java
 
-            if (reference.resolve().isRaw()) {
+            if (isRaw(reference.resolve())) {
                 // Raw type detected - remove synthetic arguments, that were "conveniently" added by KSP.
-                return RawType.of(type)
+                return RawType(type)
             }
         }
         return type
@@ -216,10 +211,10 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
      * A version of [normalizeType] for cases where no context info ([KSTypeReference]/[Position]) is available.
      * See [normalizeType].
      */
-    fun normalizeType(
+    fun LexicalScope.normalizeType(
         type: KSType,
     ): KSType = normalizeTypeImpl(
-        typeReference = type.asReference(),
+        typeReference = asReference(type),
         bakeVarianceAsWildcard = false,
     )
 
@@ -228,7 +223,7 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
      *
      * @return Kotlin-specific counterpart of the given type.
      */
-    fun mapToKotlinType(
+    fun LexicalScope.mapToKotlinType(
         type: KSType,
     ): KSType {
         val declaration = type.classDeclaration()
@@ -279,8 +274,8 @@ internal object TypeMapCache : ObjectCache<Pair<Boolean, KSTypeReference>, KSTyp
         override fun makeNotNullable(): KSType = this
         override fun makeNullable(): KSType = throw UnsupportedOperationException()
 
-        companion object Factory : ObjectCache<KSType, KSType>() {
-            fun of(type: KSType) = createCached(type, ::RawType)
+        companion object Factory : FactoryKey<KSType, RawType> {
+            override fun LexicalScope.factory() = caching(::RawType)
 
             fun unwrap(type: KSType): KSType = when (type) {
                 is RawType -> type.underlying

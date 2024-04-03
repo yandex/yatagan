@@ -33,7 +33,6 @@ import com.yandex.yatagan.Conditionals
 import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.Module
 import com.yandex.yatagan.VariantApi
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.ifOrElseNull
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.Annotated
@@ -47,12 +46,15 @@ import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.TypeDeclarationKind
 import com.yandex.yatagan.lang.common.ConstructorBase
 import com.yandex.yatagan.lang.common.TypeDeclarationBase
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class RtTypeDeclarationImpl private constructor(
     val type: RtTypeImpl,
-) : TypeDeclarationBase(), Annotated by RtAnnotatedImpl(type.impl.asClass()) {
+) : TypeDeclarationBase(), Annotated by RtAnnotatedImpl(type, type.impl.asClass()), LexicalScope by type {
     private val impl = type.impl.asClass()
 
     override val isEffectivelyPublic: Boolean
@@ -218,7 +220,7 @@ internal class RtTypeDeclarationImpl private constructor(
     private inner class ConstructorImpl(
         override val platformModel: ReflectConstructor,
         override val constructee: TypeDeclaration,
-    ) : ConstructorBase(), Annotated by RtAnnotatedImpl(platformModel) {
+    ) : ConstructorBase(), Annotated by RtAnnotatedImpl(constructee, platformModel) {
         private val parametersAnnotations by lazy { platformModel.parameterAnnotations }
         private val parametersTypes by lazy { platformModel.genericParameterTypes }
         private val parametersNames by lazy { platformModel.parameterNamesCompat() }
@@ -244,7 +246,7 @@ internal class RtTypeDeclarationImpl private constructor(
 
         private inner class ParameterImpl(
             private val index: Int,
-        ) : RtParameterBase() {
+        ) : RtParameterBase(), LexicalScope by constructee {
             override val parameterAnnotations: Array<kotlin.Annotation>
                 get() = parametersAnnotations[index]
 
@@ -284,7 +286,7 @@ internal class RtTypeDeclarationImpl private constructor(
         else -> null
     }
 
-    companion object Factory : ObjectCache<RtTypeImpl, RtTypeDeclarationImpl>() {
-        operator fun invoke(type: RtTypeImpl) = createCached(type, ::RtTypeDeclarationImpl)
+    companion object Factory : FactoryKey<RtTypeImpl, RtTypeDeclarationImpl> {
+        override fun LexicalScope.factory() = caching(::RtTypeDeclarationImpl)
     }
 }

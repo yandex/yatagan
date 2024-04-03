@@ -104,9 +104,5 @@ internal class ReflectionLoader : ImplementationLoader by ReflectionLoader {
         override fun <T : Any> autoBuilder(componentClass: Class<T>): Result<AutoBuilder<T>> {
             return Result.success(engine.autoBuilder(componentClass))
         }
-
-        internal fun reset() {
-            engine.reset()
-        }
     }
 }

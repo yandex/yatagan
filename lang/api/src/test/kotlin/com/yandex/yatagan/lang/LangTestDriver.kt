@@ -22,12 +22,10 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.yandex.yatagan.base.ObjectCacheRegistry
-import com.yandex.yatagan.base.api.Internal
 import com.yandex.yatagan.base.mapToArray
-import com.yandex.yatagan.lang.jap.JavaxModelFactoryImpl
-import com.yandex.yatagan.lang.ksp.KspModelFactoryImpl
-import com.yandex.yatagan.lang.rt.RtModelFactoryImpl
+import com.yandex.yatagan.lang.jap.JavaxLexicalScope
+import com.yandex.yatagan.lang.ksp.KspLexicalScope
+import com.yandex.yatagan.lang.rt.RtLexicalScope
 import com.yandex.yatagan.testing.source_set.SourceSet
 import java.io.File
 import java.net.URLClassLoader
@@ -42,9 +40,6 @@ import javax.lang.model.util.Types
 import kotlin.io.path.createTempDirectory
 
 typealias InspectBlock = LangModelFactory.() -> Unit
-
-private typealias JapProcessingUtils = com.yandex.yatagan.lang.jap.ProcessingUtils
-private typealias KspProcessingUtils = com.yandex.yatagan.lang.ksp.ProcessingUtils
 
 interface LangTestDriver : SourceSet {
     /**
@@ -91,7 +86,7 @@ interface LangTestDriver : SourceSet {
             ) = compilation
 
             override fun inspect(block: InspectBlock) {
-                ObjectCacheRegistry.use {
+                run {
                     var error: Throwable? = null
                     val safeBlock: InspectBlock = {
                         try {
@@ -132,15 +127,13 @@ interface LangTestDriver : SourceSet {
                     workingDir = tmpDir,
                     arguments = arguments,
                 )
-                ObjectCacheRegistry.use {
+                run {
                     val classLoader = URLClassLoader(
                         (arguments.classpath + result.outputClasspath)
                             .mapToArray { it.toURI().toURL() }
                     )
-                    @OptIn(Internal::class)
-                    LangModelFactory.use(RtModelFactoryImpl(classLoader)) {
-                        block(LangModelFactory)
-                    }
+                    val lexicalScope = RtLexicalScope(classLoader)
+                    block(lexicalScope.ext.langFactory)
                 }
             }
         }
@@ -157,12 +150,8 @@ interface LangTestDriver : SourceSet {
                 private val inspectBlock: InspectBlock,
             ) : SymbolProcessor {
                 override fun process(resolver: Resolver): List<KSAnnotated> {
-                    KspProcessingUtils(resolver).use {
-                        @OptIn(Internal::class)
-                        LangModelFactory.use(KspModelFactoryImpl()) {
-                            inspectBlock(LangModelFactory)
-                        }
-                    }
+                    val lexicalScope = KspLexicalScope(resolver)
+                    inspectBlock(lexicalScope.ext.langFactory)
                     return emptyList()
                 }
             }
@@ -192,13 +181,9 @@ interface LangTestDriver : SourceSet {
                 }
 
                 override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-                    JapProcessingUtils(types, elements).use {
-                        @OptIn(Internal::class)
-                        LangModelFactory.use(JavaxModelFactoryImpl()) {
-                            inspectBlock(LangModelFactory)
-                        }
-                        return false
-                    }
+                    val lexicalScope = JavaxLexicalScope(types, elements)
+                    inspectBlock(lexicalScope.ext.langFactory)
+                    return false
                 }
             }
         }

@@ -31,10 +31,10 @@ import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.core.model.accept
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
-import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.getCollectionType
 import com.yandex.yatagan.lang.isKotlinObject
+import com.yandex.yatagan.lang.langFactory
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings.Errors
@@ -50,7 +50,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
 
     override val target: BindingTargetModel by lazy {
         if (method.returnType.isVoid) {
-            BindingTargetModel.Plain(NodeModelImpl.Factory.VoidNode())
+            BindingTargetModel.Plain(NodeModelImpl(type = method.returnType))
         } else {
             val target = NodeModelImpl(type = method.returnType, forQualifier = method)
             val intoCollection = method.getAnnotations(BuiltinAnnotation.IntoCollectionFamily).firstOrNull()
@@ -102,7 +102,7 @@ internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
         when (target) {
             is BindingTargetModel.FlattenMultiContribution -> {
                 val firstArg = method.returnType.typeArguments.firstOrNull()
-                if (firstArg == null || !LangModelFactory.getCollectionType(firstArg)
+                if (firstArg == null || !method.ext.langFactory.getCollectionType(firstArg)
                         .isAssignableFrom(method.returnType)) {
                     validator.reportError(Errors.invalidFlatteningMultibinding(insteadOf = method.returnType))
                 }

@@ -2,17 +2,23 @@ package com.yandex.yatagan.base
 
 import com.yandex.yatagan.base.api.Extensible
 
-open class ExtensibleImpl : Extensible {
-    private val data = hashMapOf<Extensible.Key<*>, Any>()
+open class ExtensibleImpl<E : Extensible<E>> : Extensible<E> {
+    private val data = hashMapOf<Extensible.Key<*, E>, Any>()
 
-    override fun <V: Any> get(key: Extensible.Key<V>): V {
+    @Suppress("UNCHECKED_CAST")
+    override fun <V: Any> get(key: Extensible.Key<V, E>): V = synchronized(data) {
         val value = checkNotNull(data[key]) {
             "No value present for key $key"
         }
-        return key.keyType.cast(value)
+        value as V
     }
 
-    override fun <V : Any> set(key: Extensible.Key<V>, value: V) {
+    @Suppress("UNCHECKED_CAST")
+    override fun <V : Any> getOrPut(key: Extensible.Key<V, E>, provider: () -> V): V = synchronized(data) {
+        data.getOrPut(key, provider) as V
+    }
+
+    override fun <V : Any> set(key: Extensible.Key<V, E>, value: V): Unit = synchronized(data) {
         check(key !in data) {
             "Value already present for key $key"
         }

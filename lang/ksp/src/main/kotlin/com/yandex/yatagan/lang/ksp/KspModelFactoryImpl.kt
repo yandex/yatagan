@@ -23,8 +23,11 @@ import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.compiled.CtLangModelFactoryBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 
-class KspModelFactoryImpl : CtLangModelFactoryBase() {
+internal class KspModelFactoryImpl(
+    lexicalScope: LexicalScope,
+) : CtLangModelFactoryBase(), LexicalScope by lexicalScope {
     private val listDeclaration by lazy(LazyThreadSafetyMode.PUBLICATION) {
         checkNotNull(Utils.resolver.getClassDeclarationByName("java.util.List")) {
             "FATAL: Unable to define `java.util.List`, check classpath"
@@ -67,12 +70,12 @@ class KspModelFactoryImpl : CtLangModelFactoryBase() {
         }
         with(Utils.resolver) {
             val argument = getTypeArgument(
-                typeRef = parameter.impl.asReference(),
+                typeRef = asReference(parameter.impl),
                 variance = if (isCovariant) Variance.COVARIANT else Variance.INVARIANT,
             )
             return KspTypeImpl(
-                reference = declaration.asType(listOf(argument)).asReference(),
-                typePosition = TypeMapCache.Position.Parameter,
+                reference = asReference(declaration.asType(listOf(argument))),
+                typePosition = TypeMap.Position.Parameter,
             )
         }
     }
@@ -83,16 +86,16 @@ class KspModelFactoryImpl : CtLangModelFactoryBase() {
         }
         with(Utils.resolver) {
             val keyTypeArgument = getTypeArgument(
-                typeRef = keyType.impl.asReference(),
+                typeRef = asReference(keyType.impl),
                 variance = Variance.INVARIANT,
             )
             val valueTypeArgument = getTypeArgument(
-                typeRef = valueType.impl.asReference(),
+                typeRef = asReference(valueType.impl),
                 variance = if (isCovariant) Variance.COVARIANT else Variance.INVARIANT,
             )
             return KspTypeImpl(
-                reference = mapDeclaration.asType(listOf(keyTypeArgument, valueTypeArgument)).asReference(),
-                typePosition = TypeMapCache.Position.Parameter,
+                reference = asReference(mapDeclaration.asType(listOf(keyTypeArgument, valueTypeArgument))),
+                typePosition = TypeMap.Position.Parameter,
             )
         }
     }

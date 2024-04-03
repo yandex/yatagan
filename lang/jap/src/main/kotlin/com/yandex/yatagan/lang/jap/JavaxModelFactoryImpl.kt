@@ -20,9 +20,12 @@ import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.compiled.CtLangModelFactoryBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.lang.model.element.TypeElement
 
-class JavaxModelFactoryImpl : CtLangModelFactoryBase() {
+internal class JavaxModelFactoryImpl(
+    context: LexicalScope,
+) : CtLangModelFactoryBase(), LexicalScope by context {
     private val listElement: TypeElement by lazy {
         Utils.elements.getTypeElement("java.util.List")
     }

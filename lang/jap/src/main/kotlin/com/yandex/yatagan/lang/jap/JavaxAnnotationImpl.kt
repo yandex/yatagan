@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.lang.jap
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.Annotation.Value
 import com.yandex.yatagan.lang.AnnotationDeclaration
@@ -24,6 +23,9 @@ import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtAnnotationBase
 import com.yandex.yatagan.lang.compiled.CtAnnotationDeclarationBase
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ExecutableElement
@@ -35,8 +37,11 @@ import javax.lang.model.util.AbstractAnnotationValueVisitor8
 import javax.lang.model.util.ElementFilter
 
 internal class JavaxAnnotationImpl private constructor(
-    private val impl: AnnotationMirror,
-) : CtAnnotationBase() {
+    lexicalScope: LexicalScope,
+    wrapped: AnnotationMirrorEquivalence,
+) : CtAnnotationBase(), LexicalScope by lexicalScope {
+    private val impl: AnnotationMirror = wrapped.get()
+
     override val annotationClass: AnnotationDeclaration by lazy {
         AnnotationClassImpl(impl.annotationType.asTypeElement())
     }
@@ -54,13 +59,17 @@ internal class JavaxAnnotationImpl private constructor(
         )
     }
 
-    companion object Factory : ObjectCache<AnnotationMirrorEquivalence, JavaxAnnotationImpl>() {
-        operator fun invoke(impl: AnnotationMirror) = createCached(AnnotationMirrorEquivalence(impl)) {
-            JavaxAnnotationImpl(impl)
+    companion object Factory : FactoryKey<AnnotationMirror, JavaxAnnotationImpl> {
+        private object Caching : FactoryKey<AnnotationMirrorEquivalence, JavaxAnnotationImpl> {
+            override fun LexicalScope.factory() = caching(::JavaxAnnotationImpl)
+        }
+
+        override fun LexicalScope.factory() = fun LexicalScope.(it: AnnotationMirror): JavaxAnnotationImpl {
+            return Caching(AnnotationMirrorEquivalence(it))
         }
     }
 
-    private class ValueImpl(
+    private inner class ValueImpl(
         private val value: AnnotationValue,
         private val type: TypeMirror,
     ) : ValueBase() {
@@ -109,18 +118,24 @@ internal class JavaxAnnotationImpl private constructor(
         override fun equals(other: Any?) = this === other || (other is ValueImpl && equivalence == other.equivalence)
     }
 
-    private class AttributeImpl(
+    private class AttributeImpl private constructor(
+        lexicalScope: LexicalScope,
         val impl: ExecutableElement,
-    ) : AnnotationDeclaration.Attribute {
+    ) : AnnotationDeclaration.Attribute, LexicalScope by lexicalScope {
         override val name: String
             get() = impl.simpleName.toString()
         override val type: Type
             get() = JavaxTypeImpl(impl.returnType)
+
+        companion object Factory : FactoryKey<ExecutableElement, AttributeImpl> {
+            override fun LexicalScope.factory() = ::AttributeImpl
+        }
     }
 
     private class AnnotationClassImpl private constructor(
+        lexicalScope: LexicalScope,
         private val impl: TypeElement,
-    ) : CtAnnotationDeclarationBase(), CtAnnotated by JavaxAnnotatedImpl(impl) {
+    ) : CtAnnotationDeclarationBase(), CtAnnotated by JavaxAnnotatedImpl(lexicalScope, impl), LexicalScope by lexicalScope {
 
         override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             ElementFilter.methodsIn(impl.enclosedElements)
@@ -155,8 +170,8 @@ internal class JavaxAnnotationImpl private constructor(
             ) ?: AnnotationRetention.BINARY  // Default java retention
         }
 
-        companion object Factory : ObjectCache<TypeElement, AnnotationClassImpl>() {
-            operator fun invoke(type: TypeElement) = createCached(type) { AnnotationClassImpl(type) }
+        companion object Factory : FactoryKey<TypeElement, AnnotationClassImpl> {
+            override fun LexicalScope.factory() = caching(::AnnotationClassImpl)
         }
     }
 }

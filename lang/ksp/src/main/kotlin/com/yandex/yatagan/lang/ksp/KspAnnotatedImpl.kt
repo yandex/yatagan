@@ -20,12 +20,14 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtAnnotationBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal class KspAnnotatedImpl<T : KSAnnotated>(
-     val impl: T
+    private val lexicalScope: LexicalScope,
+    val impl: T
 ) : CtAnnotated {
     override val annotations: Sequence<CtAnnotationBase> by lazy {
-        impl.annotations.map { KspAnnotationImpl(it) }.memoize()
+        impl.annotations.map { KspAnnotationImpl(lexicalScope, it) }.memoize()
     }
 
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {

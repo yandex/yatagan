@@ -21,8 +21,9 @@ import com.yandex.yatagan.BindsInstance
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.common.ParameterBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 
-abstract class RtParameterBase : ParameterBase() {
+internal abstract class RtParameterBase : ParameterBase(), LexicalScope {
     protected abstract val parameterAnnotations: Array<kotlin.Annotation>
 
     final override val annotations: Sequence<Annotation> by lazy {

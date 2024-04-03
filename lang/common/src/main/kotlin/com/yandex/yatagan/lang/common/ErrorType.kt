@@ -17,11 +17,13 @@
 package com.yandex.yatagan.lang.common
 
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 open class ErrorType(
+    lexicalScope: LexicalScope,
     private val nameHint: String,
     final override val isUnresolved: Boolean = true,
-) : TypeBase() {
+) : TypeBase(), LexicalScope by lexicalScope {
     final override val declaration: NoDeclaration
         get() = NoDeclaration(this)
 
@@ -41,3 +43,12 @@ open class ErrorType(
 
     final override fun toString() = nameHint
 }
+
+fun LexicalScope.ErrorType(
+    nameHint: String,
+    isUnresolved: Boolean = true,
+): ErrorType = ErrorType(
+    lexicalScope = this,
+    nameHint = nameHint,
+    isUnresolved = isUnresolved,
+)

@@ -18,6 +18,7 @@ package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal fun KSTypeReference.replaceType(type: KSType): KSTypeReference {
     data class MappedReference1(
@@ -47,4 +48,5 @@ internal fun KSTypeReference.replaceType(typeReference: KSTypeReference): KSType
     }
 }
 
-internal fun KSType.asReference(): KSTypeReference = Utils.resolver.createKSTypeReferenceFromKSType(this)
+internal fun LexicalScope.asReference(type: KSType): KSTypeReference =
+    Utils.resolver.createKSTypeReferenceFromKSType(type)

@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel.Parameter
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
@@ -27,6 +26,9 @@ import com.yandex.yatagan.lang.Method
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.TypeDeclarationKind
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -153,10 +155,8 @@ internal class AssistedInjectFactoryModelImpl private constructor(
         representation = impl,
     )
 
-    companion object Factory : ObjectCache<TypeDeclaration, AssistedInjectFactoryModelImpl>() {
-        operator fun invoke(declaration: TypeDeclaration): AssistedInjectFactoryModelImpl {
-            return createCached(declaration, ::AssistedInjectFactoryModelImpl)
-        }
+    companion object Factory : FactoryKey<TypeDeclaration, AssistedInjectFactoryModelImpl> {
+        override fun LexicalScope.factory() = caching(::AssistedInjectFactoryModelImpl)
 
         fun canRepresent(declaration: TypeDeclaration): Boolean {
             return declaration.getAnnotation(BuiltinAnnotation.AssistedFactory) != null

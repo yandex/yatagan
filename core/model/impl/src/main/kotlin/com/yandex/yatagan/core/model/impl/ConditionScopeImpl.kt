@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.model.impl
 import com.yandex.yatagan.core.model.BooleanExpression
 import com.yandex.yatagan.core.model.ConditionModel
 import com.yandex.yatagan.core.model.ConditionScope
+import com.yandex.yatagan.lang.scope.invoke
 
 internal class ConditionScopeImpl(
     override val expression: BooleanExpressionInternal,

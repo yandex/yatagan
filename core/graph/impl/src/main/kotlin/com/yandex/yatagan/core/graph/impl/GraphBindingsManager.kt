@@ -19,6 +19,7 @@ package com.yandex.yatagan.core.graph.impl
 import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.base.api.WithParents
 import com.yandex.yatagan.base.api.parentsSequence
+import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AliasBinding
 import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
@@ -482,7 +483,6 @@ internal class GraphBindingsManager(
         override fun visitBinding(binding: Binding) = binding
     }
 
-    companion object Key : Extensible.Key<GraphBindingsManager> {
-        override val keyType get() = GraphBindingsManager::class.java
+    companion object Key : Extensible.Key<GraphBindingsManager, BindingGraph> {
     }
 }

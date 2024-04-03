@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.lang.jap
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.mapToArray
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.Annotated
@@ -30,6 +29,9 @@ import com.yandex.yatagan.lang.TypeDeclarationKind
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtConstructorBase
 import com.yandex.yatagan.lang.compiled.CtTypeDeclarationBase
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.NestingKind
@@ -45,8 +47,10 @@ import javax.lang.model.util.TypeKindVisitor7
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class JavaxTypeDeclarationImpl private constructor(
+    lexicalScope: LexicalScope,
     val type: DeclaredType,
-) : CtAnnotated by JavaxAnnotatedImpl(type.asTypeElement()), CtTypeDeclarationBase() {
+) : CtAnnotated by JavaxAnnotatedImpl(lexicalScope, type.asTypeElement()), CtTypeDeclarationBase(),
+    LexicalScope by lexicalScope {
     private val impl = type.asTypeElement()
 
     override val isEffectivelyPublic: Boolean
@@ -102,7 +106,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
     }
 
     override val methods: Sequence<Method> by lazy {
-        impl.allNonPrivateMethods()
+        allNonPrivateMethodsIn(impl)
         .run {
             when (kind) {
                 TypeDeclarationKind.KotlinCompanion -> filterNot {
@@ -121,7 +125,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
     }
 
     override val fields: Sequence<Field> by lazy {
-        impl.allNonPrivateFields()
+        allNonPrivateFieldsIn(impl)
         .map { JavaxFieldImpl(owner = this, impl = it) }
         .memoize()
     }
@@ -191,19 +195,13 @@ internal class JavaxTypeDeclarationImpl private constructor(
         }, null)
     }
 
-    companion object Factory : ObjectCache<TypeMirrorEquivalence, JavaxTypeDeclarationImpl>() {
-        operator fun invoke(
-            impl: DeclaredType,
-        ): JavaxTypeDeclarationImpl {
-            return createCached(TypeMirrorEquivalence(impl)) {
-                JavaxTypeDeclarationImpl(type = impl)
-            }
-        }
+    companion object Factory : FactoryKey<DeclaredType, JavaxTypeDeclarationImpl> {
+        override fun LexicalScope.factory() = caching(::JavaxTypeDeclarationImpl)
     }
 
     private inner class ConstructorImpl(
         override val platformModel: ExecutableElement,
-    ) : CtConstructorBase(), Annotated by JavaxAnnotatedImpl(platformModel) {
+    ) : CtConstructorBase(), Annotated by JavaxAnnotatedImpl(this, platformModel) {
         override val isEffectivelyPublic: Boolean get() = platformModel.isPublic
         override val constructee: TypeDeclaration get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<Parameter> = parametersSequenceFor(platformModel, type)

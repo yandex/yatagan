@@ -21,13 +21,14 @@ import com.google.devtools.ksp.symbol.KSType
 import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.CtFieldBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal class KspFieldImpl(
     private val impl: KSPropertyDeclaration,
     override val owner: KspTypeDeclarationImpl,
     override val isStatic: Boolean,
     private val refinedOwner: KSType? = null,
-) : CtFieldBase(), Annotated by KspAnnotatedImpl(impl) {
+) : CtFieldBase(), Annotated by KspAnnotatedImpl(owner, impl), LexicalScope by owner {
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isPublicOrInternal()

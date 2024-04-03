@@ -22,7 +22,6 @@ import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.base.memoize
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.Annotation.Value
@@ -30,19 +29,23 @@ import com.yandex.yatagan.lang.AnnotationDeclaration
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.CtAnnotationBase
 import com.yandex.yatagan.lang.compiled.CtAnnotationDeclarationBase
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import java.lang.annotation.RetentionPolicy
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class KspAnnotationImpl(
+    lexicalScope: LexicalScope,
     private val impl: KSAnnotation,
-) : CtAnnotationBase() {
+) : CtAnnotationBase(), LexicalScope by lexicalScope {
     private val descriptor by lazy {
         this@KspAnnotationImpl.toString()
     }
 
     override val annotationClass: AnnotationDeclaration by lazy {
         AnnotationClassImpl(
-            declaration = checkNotNull(impl.annotationType.resolve().classDeclaration()),
+            checkNotNull(impl.annotationType.resolve().classDeclaration()),
         )
     }
 
@@ -64,7 +67,7 @@ internal class KspAnnotationImpl(
         return this === other || (other is KspAnnotationImpl && descriptor == other.descriptor)
     }
 
-    private class ValueImpl(
+    private inner class ValueImpl(
         private val value: Any?,
     ) : ValueBase() {
         private val identity by lazy(PUBLICATION) {
@@ -113,7 +116,7 @@ internal class KspAnnotationImpl(
                         visitor.visitType(KspTypeImpl(impl = value))
                     }
                 }
-                is KSAnnotation -> visitor.visitAnnotation(KspAnnotationImpl(value))
+                is KSAnnotation -> visitor.visitAnnotation(KspAnnotationImpl(this@KspAnnotationImpl, value))
                 is List<*> -> visitor.visitArray(value.map { ValueImpl(it ?: "<error>") })
                 is Enum<*> -> {
                     // Sometimes KSP yields enums (of platform types?) literally.
@@ -139,9 +142,10 @@ internal class KspAnnotationImpl(
         override fun hashCode() = identity.hashCode()
     }
 
-    private class AttributeImpl(
+    private class AttributeImpl private constructor(
+        lexicalScope: LexicalScope,
         val impl: KSPropertyDeclaration,
-    ) : AnnotationDeclaration.Attribute {
+    ) : AnnotationDeclaration.Attribute, LexicalScope by lexicalScope {
 
         override val name: String
             get() = impl.simpleName.asString()
@@ -161,12 +165,17 @@ internal class KspAnnotationImpl(
                 )
             }
         }
+
+        companion object Factory : FactoryKey<KSPropertyDeclaration, AttributeImpl> {
+            override fun LexicalScope.factory() = ::AttributeImpl
+        }
     }
 
     internal class AnnotationClassImpl private constructor(
-        declaration: KSClassDeclaration,
-    ) : CtAnnotationDeclarationBase() {
-        private val annotated = KspAnnotatedImpl(declaration)
+        lexicalScope: LexicalScope,
+        private val declaration: KSClassDeclaration,
+    ) : CtAnnotationDeclarationBase(), LexicalScope by lexicalScope {
+        private val annotated = KspAnnotatedImpl(lexicalScope, declaration)
 
         override val annotations: Sequence<CtAnnotationBase>
             get() = annotated.annotations
@@ -177,7 +186,7 @@ internal class KspAnnotationImpl(
 
         override val attributes: Sequence<AnnotationDeclaration.Attribute> by lazy {
             annotated.impl.getAllProperties().map {
-                AttributeImpl(impl = it)
+                AttributeImpl(it)
             }.memoize()
         }
 
@@ -216,7 +225,7 @@ internal class KspAnnotationImpl(
             }
 
             // Defaults:
-            return if (annotated.impl.isFromKotlin) {
+            return if (declaration.isFromKotlin) {
                 // Kotlin default
                 AnnotationRetention.RUNTIME
             } else {
@@ -225,12 +234,8 @@ internal class KspAnnotationImpl(
             }
         }
 
-        companion object Factory : ObjectCache<KSClassDeclaration, AnnotationClassImpl>() {
-            operator fun invoke(
-                declaration: KSClassDeclaration,
-            ): AnnotationClassImpl {
-                return createCached(declaration, ::AnnotationClassImpl)
-            }
+        companion object Factory : FactoryKey<KSClassDeclaration, AnnotationClassImpl> {
+            override fun LexicalScope.factory() = caching(::AnnotationClassImpl)
         }
     }
 }

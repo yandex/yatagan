@@ -16,12 +16,14 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.BooleanExpression
 import com.yandex.yatagan.core.model.ConditionModel
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import org.logicng.formulas.Formula
 
-internal interface BooleanExpressionInternal : BooleanExpression {
+internal interface BooleanExpressionInternal : BooleanExpression, LexicalScope {
     val formula: Formula
 
     fun <R> accept(visitor: Visitor<R>): R
@@ -51,7 +53,7 @@ internal interface BooleanExpressionInternal : BooleanExpression {
 
 internal class NotExpressionImpl private constructor(
     override val underlying: BooleanExpressionInternal,
-) : BooleanExpressionInternal.Not {
+) : BooleanExpressionInternal.Not, LexicalScope by underlying {
     override val formula: Formula
         // factory caches things itself, so no need to cache here
         get() = underlying.formula.negate()
@@ -61,17 +63,16 @@ internal class NotExpressionImpl private constructor(
     override fun <R> accept(visitor: BooleanExpression.Visitor<R>) = visitor.visitNot(this)
     override fun <R> accept(visitor: BooleanExpressionInternal.Visitor<R>) = visitor.visitNot(this)
 
-    companion object Factory : ObjectCache<BooleanExpression, NotExpressionImpl>() {
-        operator fun invoke(underlying: BooleanExpressionInternal): NotExpressionImpl {
-            return createCached(underlying) { NotExpressionImpl(underlying) }
-        }
+    companion object Factory : FactoryKey<BooleanExpressionInternal, NotExpressionImpl> {
+        override fun LexicalScope.factory() = caching(::NotExpressionImpl)
     }
 }
 
 internal class AndExpressionImpl private constructor(
-    override val lhs: BooleanExpressionInternal,
-    override val rhs: BooleanExpressionInternal,
-) : BooleanExpressionInternal.And {
+    operands: Pair<BooleanExpressionInternal, BooleanExpressionInternal>,
+) : BooleanExpressionInternal.And, LexicalScope by operands.first {
+    override val lhs: BooleanExpressionInternal = operands.first
+    override val rhs: BooleanExpressionInternal = operands.second
     override val formula: Formula by lazy {
         val conjuncts = ArrayList<BooleanExpressionInternal>(4)
         // (...((a && b) && c) && d) && ...) => a && b && c && d && ...
@@ -89,17 +90,16 @@ internal class AndExpressionImpl private constructor(
     override fun <R> accept(visitor: BooleanExpression.Visitor<R>) = visitor.visitAnd(this)
     override fun <R> accept(visitor: BooleanExpressionInternal.Visitor<R>) = visitor.visitAnd(this)
 
-    companion object Factory : ObjectCache<Pair<BooleanExpression, BooleanExpression>, AndExpressionImpl>() {
-        operator fun invoke(lhs: BooleanExpressionInternal, rhs: BooleanExpressionInternal): AndExpressionImpl {
-            return createCached(lhs to rhs) { AndExpressionImpl(lhs, rhs) }
-        }
+    companion object Factory : FactoryKey<Pair<BooleanExpressionInternal, BooleanExpressionInternal>, AndExpressionImpl> {
+        override fun LexicalScope.factory() = caching(::AndExpressionImpl)
     }
 }
 
 internal class OrExpressionImpl private constructor(
-    override val lhs: BooleanExpressionInternal,
-    override val rhs: BooleanExpressionInternal,
-) : BooleanExpressionInternal.Or {
+    operands: Pair<BooleanExpressionInternal, BooleanExpressionInternal>,
+) : BooleanExpressionInternal.Or, LexicalScope by operands.first {
+    override val lhs: BooleanExpressionInternal = operands.first
+    override val rhs: BooleanExpressionInternal = operands.second
 
     override val formula: Formula by lazy {
         val disjuncts = ArrayList<BooleanExpressionInternal>(4)
@@ -118,10 +118,8 @@ internal class OrExpressionImpl private constructor(
     override fun <R> accept(visitor: BooleanExpression.Visitor<R>) = visitor.visitOr(this)
     override fun <R> accept(visitor: BooleanExpressionInternal.Visitor<R>) = visitor.visitOr(this)
 
-    companion object Factory : ObjectCache<Pair<BooleanExpression, BooleanExpression>, OrExpressionImpl>() {
-        operator fun invoke(lhs: BooleanExpressionInternal, rhs: BooleanExpressionInternal): OrExpressionImpl {
-            return createCached(lhs to rhs) { OrExpressionImpl(lhs, rhs) }
-        }
+    companion object Factory : FactoryKey<Pair<BooleanExpressionInternal, BooleanExpressionInternal>, OrExpressionImpl> {
+        override fun LexicalScope.factory() = caching(::OrExpressionImpl)
     }
 }
 

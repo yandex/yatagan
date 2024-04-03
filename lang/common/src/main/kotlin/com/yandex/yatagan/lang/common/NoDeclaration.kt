@@ -20,6 +20,7 @@ import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.TypeDeclarationKind
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
  * A [TypeDeclaration] implementation, that is convenient to return when no declaration makes sense at all,
@@ -27,7 +28,7 @@ import com.yandex.yatagan.lang.TypeDeclarationKind
  */
 class NoDeclaration(
     private val type: Type,
-) : TypeDeclarationBase() {
+) : TypeDeclarationBase(), LexicalScope by type {
     override val isAbstract get() = false
     override val isEffectivelyPublic get() = false
 

@@ -16,19 +16,23 @@
 
 package com.yandex.yatagan.lang.rt
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.common.ErrorType
 import com.yandex.yatagan.lang.common.NoDeclaration
 import com.yandex.yatagan.lang.common.TypeBase
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.TypeVariable
 import java.lang.reflect.WildcardType
 
 internal class RtTypeImpl private constructor(
-    val impl: ReflectType,
-) : TypeBase() {
+    lexicalScope: LexicalScope,
+    wrapper: TypeEquivalenceWrapper,
+) : TypeBase(), LexicalScope by lexicalScope {
+    val impl: ReflectType = wrapper.type
 
     override val declaration: TypeDeclaration by lazy {
         if (impl.tryAsClass() != null) RtTypeDeclarationImpl(this) else NoDeclaration(this)
@@ -70,12 +74,17 @@ internal class RtTypeImpl private constructor(
 
     override fun toString(): String = impl.formatString()
 
-    companion object Factory : ObjectCache<TypeEquivalenceWrapper, RtTypeImpl>() {
-        operator fun invoke(type: ReflectType): Type {
-            if (type is TypeVariable<*>) {
-                return ErrorType(nameHint = "<unresolved-type-var: ${type.name}>")
+    companion object Factory : FactoryKey<ReflectType, Type> {
+        private object Caching : FactoryKey<TypeEquivalenceWrapper, RtTypeImpl> {
+            override fun LexicalScope.factory() = caching(::RtTypeImpl)
+        }
+
+        override fun LexicalScope.factory() = fun LexicalScope.(type: ReflectType): Type {
+            return if (type is TypeVariable<*>) {
+                ErrorType(nameHint = "<unresolved-type-var: ${type.name}>")
+            } else {
+                Caching(TypeEquivalenceWrapper(type))
             }
-            return createCached(type.equivalence()) { RtTypeImpl(type) }
         }
     }
 }

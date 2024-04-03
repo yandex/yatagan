@@ -16,12 +16,14 @@
 
 package com.yandex.yatagan.core.model.impl
 
-import com.yandex.yatagan.base.ObjectCache
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.scope.FactoryKey
+import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -140,7 +142,7 @@ internal class FeatureModelImpl private constructor(
     private fun hasConditionExpression(): Boolean =
         conditionExpressionHolder != null
 
-    companion object Factory : ObjectCache<TypeDeclaration, FeatureModelImpl>() {
-        operator fun invoke(impl: TypeDeclaration) = createCached(impl, ::FeatureModelImpl)
+    companion object Factory : FactoryKey<TypeDeclaration, FeatureModelImpl> {
+        override fun LexicalScope.factory() = caching(::FeatureModelImpl)
     }
 }

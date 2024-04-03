@@ -23,15 +23,12 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.yatagan.Component
-import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.TypeDeclaration
-import com.yandex.yatagan.lang.ksp.KspModelFactoryImpl
-import com.yandex.yatagan.lang.ksp.ProcessingUtils
-import com.yandex.yatagan.lang.ksp.TypeDeclaration
-import com.yandex.yatagan.lang.use
+import com.yandex.yatagan.lang.ksp.KspLexicalScope
 import com.yandex.yatagan.processor.common.Logger
 import com.yandex.yatagan.processor.common.Options
 import com.yandex.yatagan.processor.common.ProcessorDelegate
+import com.yandex.yatagan.processor.common.initScopedOptions
 import com.yandex.yatagan.processor.common.process
 import java.io.Writer
 
@@ -40,21 +37,20 @@ internal class KspYataganProcessor(
 ) : SymbolProcessor, ProcessorDelegate<KSClassDeclaration> {
     override val logger: Logger = KspLogger(environment.logger)
     override val options: Options = Options(environment.options)
+    override lateinit var lexicalScope: KspLexicalScope
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        ProcessingUtils(resolver).use {
-            LangModelFactory.use(KspModelFactoryImpl()) {
-                process(
-                    sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
-                        .filterIsInstance<KSClassDeclaration>(),
-                    delegate = this,
-                )
-                return emptyList()
-            }
-        }
+        lexicalScope = KspLexicalScope(resolver)
+        initScopedOptions(lexicalScope, this)
+        process(
+            sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
+                .filterIsInstance<KSClassDeclaration>(),
+            delegate = this,
+        )
+        return emptyList()
     }
 
-    override fun createDeclaration(source: KSClassDeclaration) = TypeDeclaration(source)
+    override fun createDeclaration(source: KSClassDeclaration) = lexicalScope.getTypeDeclaration(source)
 
     override fun getSourceFor(declaration: TypeDeclaration): KSClassDeclaration {
         return declaration.platformModel as KSClassDeclaration

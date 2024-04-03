@@ -18,6 +18,7 @@ package com.yandex.yatagan.core.model.impl
 
 import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.scope.invoke
 
 fun ComponentModel(declaration: TypeDeclaration): ComponentModel {
     return ComponentModelImpl(declaration)

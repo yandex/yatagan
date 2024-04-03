@@ -19,14 +19,16 @@ package com.yandex.yatagan.lang.jap
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.compiled.CtAnnotated
 import com.yandex.yatagan.lang.compiled.CtParameterBase
+import com.yandex.yatagan.lang.scope.LexicalScope
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.TypeMirror
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class JavaxParameterImpl(
+    lexicalScope: LexicalScope,
     private val impl: VariableElement,
     refinedType: TypeMirror,
-) : CtParameterBase(), CtAnnotated by JavaxAnnotatedImpl(impl) {
+) : CtParameterBase(), CtAnnotated by JavaxAnnotatedImpl(lexicalScope, impl), LexicalScope by lexicalScope {
     override val name: String get() = impl.simpleName.toString()
     override val type: Type by lazy(PUBLICATION) { JavaxTypeImpl(refinedType) }
 

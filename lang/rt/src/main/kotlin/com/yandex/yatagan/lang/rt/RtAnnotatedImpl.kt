@@ -18,12 +18,14 @@ package com.yandex.yatagan.lang.rt
 
 import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal class RtAnnotatedImpl(
+    lexicalScope: LexicalScope,
     private val impl: ReflectAnnotatedElement,
 ) : Annotated {
     override val annotations: Sequence<Annotation> by lazy {
-        impl.declaredAnnotations.map { RtAnnotationImpl(it) }.asSequence()
+        impl.declaredAnnotations.map { with(lexicalScope) { RtAnnotationImpl(it) } }.asSequence()
     }
 
     override fun <A : kotlin.Annotation> isAnnotatedWith(type: Class<A>): Boolean {

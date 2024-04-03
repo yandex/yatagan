@@ -19,18 +19,12 @@ package com.yandex.yatagan.lang.ksp
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.getJavaClassByName
 import com.google.devtools.ksp.processing.Resolver
-import java.io.Closeable
+import com.yandex.yatagan.base.api.Extensible
+import com.yandex.yatagan.lang.scope.LexicalScope
 
-private var utils: ProcessingUtils? = null
-
-internal val Utils: ProcessingUtils get() = checkNotNull(utils) {
-    "Not reached: utils are used before set/after cleared"
-}
-
-class ProcessingUtils(
+internal class ProcessingUtils(
     val resolver: Resolver,
-) : Closeable {
-
+) {
     val classType by lazy {
         resolver.getClassDeclarationByName("java.lang.Class")!!
     }
@@ -44,18 +38,12 @@ class ProcessingUtils(
     }
 
     val kotlinRetentionClass by lazy {
-        Utils.resolver.getClassDeclarationByName("kotlin.annotation.Retention")!!
+        resolver.getClassDeclarationByName("kotlin.annotation.Retention")!!
     }
 
     val javaRetentionClass by lazy {
-        Utils.resolver.getJavaClassByName("java.lang.annotation.Retention")!!
+        resolver.getJavaClassByName("java.lang.annotation.Retention")!!
     }
 
-    init {
-        utils = this
-    }
-
-    override fun close() {
-        utils = null
-    }
+    companion object : Extensible.Key<ProcessingUtils, LexicalScope.Extensions>
 }

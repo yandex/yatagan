@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.lang
 
+import com.yandex.yatagan.lang.scope.LexicalScope
+
 /**
  * Models a concrete [TypeDeclaration] usage.
  * Contains additional information, like type arguments.
@@ -30,7 +32,7 @@ package com.yandex.yatagan.lang
  * [Type] only provides [typeArguments]; variance, projection and type variables are not exposed as of now.
  *
  */
-public interface Type : Comparable<Type> {
+public interface Type : Comparable<Type>, LexicalScope {
     /**
      * The corresponding type declaration.
      */

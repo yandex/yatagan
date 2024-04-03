@@ -2,8 +2,9 @@ package com.yandex.yatagan.lang.common
 
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.LexicalScope
 
-abstract class LangModelFactoryFallback : LangModelFactory {
+abstract class LangModelFactoryFallback : LangModelFactory, LexicalScope {
     override fun getMapType(keyType: Type, valueType: Type, isCovariant: Boolean): Type {
         val covariance = if (isCovariant) "? extends " else ""
         return createNoType(name = "Map<$keyType, ${covariance}$valueType>")
