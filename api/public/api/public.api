@@ -131,6 +131,8 @@ public final class com/yandex/yatagan/Optional {
 	public static final fun of (Ljava/lang/Object;)Lcom/yandex/yatagan/Optional;
 	public static final fun ofNullable (Ljava/lang/Object;)Lcom/yandex/yatagan/Optional;
 	public final fun orElse (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun orElse (Ljavax/inject/Provider;)Ljava/lang/Object;
+	public final synthetic fun orElse (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public final fun orNull ()Ljava/lang/Object;
 }
 

@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan
 
+import javax.inject.Provider
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
@@ -101,6 +102,14 @@ public class Optional<out T : Any> private constructor(
     @JvmName("map")
     public fun <U : Any> mapJava(mapper: Function<T, U?>): Optional<U> = map(mapper::apply)
 
+    /**
+     * @see [orElse]
+     */
+    @JvmName("orElse")
+    public fun orElseJava(alternative: Provider<@UnsafeVariance T>): T {
+        return value ?: alternative.get()
+    }
+
     // endregion Java API
 
     // region Kotlin API
@@ -138,6 +147,17 @@ public class Optional<out T : Any> private constructor(
     public inline fun <U : Any> map(mapper: (T) -> (U?)): Optional<U> {
         contract { callsInPlace(mapper, InvocationKind.AT_MOST_ONCE) }
         return if (value != null) ofNullable(mapper(value)) else empty()
+    }
+
+    /**
+     * Stored value access with alternative.
+     *
+     * @return stored value if present. Otherwise, returns [alternative].
+     */
+    @JvmSynthetic
+    public inline fun orElse(alternative: () -> @UnsafeVariance T): T {
+        contract { callsInPlace(alternative, InvocationKind.AT_MOST_ONCE) }
+        return value ?: alternative()
     }
 
     // endregion Kotlin API

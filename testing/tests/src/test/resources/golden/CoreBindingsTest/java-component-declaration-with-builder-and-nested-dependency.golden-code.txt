@@ -3,10 +3,14 @@ Name: test/Yatagan$TestComponent.java
 package test;
 
 import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$TestComponent implements TestComponent {
   final TestComponent.Dependency mTestComponentDependency;
 

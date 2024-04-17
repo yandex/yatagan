@@ -6,6 +6,7 @@ import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Class;
 import java.lang.Integer;
@@ -16,9 +17,12 @@ import java.lang.SuppressWarnings;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class Yatagan$TestComponent implements TestComponent {
   private Yatagan$TestComponent() {
   }
