@@ -28,7 +28,7 @@ autoCommon = "com.google.auto:auto-common:1.2.2"
 poets-java = "com.squareup:javapoet:1.13.0"
 poets-kotlin = "com.squareup:kotlinpoet:1.16.0"
 
-logicng = "org.logicng:logicng-j11:2.4.3"
+logicng = "org.logicng:logicng:2.5.0"
 
 yataganDogFood-api = { module = "com.yandex.yatagan:api-compiled", version.ref = "yataganDogFood" }
 yataganDogFood-ksp = { module = "com.yandex.yatagan:processor-ksp", version.ref = "yataganDogFood" }
