@@ -17,6 +17,7 @@
 package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
+import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
@@ -54,62 +55,47 @@ internal class SlotSwitchingGenerator @Inject constructor(
 
     override fun generate(builder: TypeSpecBuilder) {
         if (!isUsed) return
+
         builder.method(FactoryMethodName) {
             modifiers(/*package-private*/)
             returnType(ClassName.OBJECT)
             parameter(ClassName.INT, "slot")
-            if (maxSlotsPerSwitch > 1 && bindings.size > maxSlotsPerSwitch) {
-                // Strategy with two-level-nested switches
 
-                val outerSlotsCount = bindings.size / maxSlotsPerSwitch
-                controlFlow("switch(slot / $maxSlotsPerSwitch)") {
-                    for(outerSlot in 0 .. outerSlotsCount) {
-                        val nestedFactoryName = "$FactoryMethodName\$$outerSlot"
-                        builder.method(nestedFactoryName) {
+            val chunks = bindings.chunked(if (maxSlotsPerSwitch > 1) maxSlotsPerSwitch else Int.MAX_VALUE)
+            when(val singleChunk = chunks.singleOrNull()) {
+                null -> controlFlow("switch(slot / $maxSlotsPerSwitch)") {
+                    // Strategy with two-level-nested switches
+                    chunks.forEachIndexed { chunkIndex, chunk ->
+                        val nestedFactoryFunctionName =  "$FactoryMethodName\$$chunkIndex"
+                        builder.method(nestedFactoryFunctionName) {
                             modifiers(Modifier.PRIVATE)
                             returnType(ClassName.OBJECT)
                             parameter(ClassName.INT, "slot")
-                            controlFlow("switch(slot)") {
-                                val startIndex = outerSlot * maxSlotsPerSwitch
-                                var nestedSlot = 0
-                                while((startIndex + nestedSlot) < bindings.size && nestedSlot < maxSlotsPerSwitch) {
-                                    val binding = bindings[startIndex + nestedSlot]
-                                    +buildExpression {
-                                        +"case $nestedSlot: return "
-                                        binding.generateAccess(
-                                            builder = this,
-                                            inside = thisGraph,
-                                            isInsideInnerClass = false,
-                                        )
-                                    }
-                                    ++nestedSlot
-                                }
-                                +"default: throw new %T()".formatCode(Names.AssertionError)
-                            }
+                            generateSwitchForChunk(chunk)
                         }
-                        +buildExpression {
-                            +"case $outerSlot: return %N(slot %L 100)".formatCode(nestedFactoryName, "%")
-                        }
+                        +"case $chunkIndex: return %N(slot %L $maxSlotsPerSwitch)"
+                            .formatCode(nestedFactoryFunctionName, "%")
                     }
                     +"default: throw new %T()".formatCode(Names.AssertionError)
                 }
-            } else {
-                // Single switch statement
+                else -> generateSwitchForChunk(singleChunk)
+            }
+        }
+    }
 
-                controlFlow("switch(slot)") {
-                    bindings.forEachIndexed { slot, binding ->
-                        +buildExpression {
-                            +"case $slot: return "
-                            binding.generateAccess(
-                                builder = this,
-                                inside = thisGraph,
-                                isInsideInnerClass = false,
-                            )
-                        }
-                    }
-                    +"default: throw new %T()".formatCode(Names.AssertionError)
+    private fun CodeBuilder.generateSwitchForChunk(chunk: List<Binding>) {
+        controlFlow("switch(slot)") {
+            chunk.forEachIndexed { slot, binding ->
+                +buildExpression {
+                    +"case $slot: return "
+                    binding.generateAccess(
+                        builder = this,
+                        inside = thisGraph,
+                        isInsideInnerClass = false,
+                    )
                 }
             }
+            +"default: throw new %T()".formatCode(Names.AssertionError)
         }
     }
 
