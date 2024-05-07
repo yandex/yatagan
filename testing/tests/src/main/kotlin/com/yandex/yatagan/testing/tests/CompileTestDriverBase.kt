@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.testing.tests
 
+import androidx.room.compiler.processing.util.DiagnosticMessage
 import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
 import androidx.room.compiler.processing.util.compiler.compile
 import com.yandex.yatagan.generated.CompiledApiClasspath
@@ -93,7 +94,7 @@ abstract class CompileTestDriverBase private constructor(
         return TestCompilationResult(
             workingDir = workingDir,
             runtimeClasspath = compilation.classpath + result.outputClasspath,
-            messageLog = result.diagnostics.values.flatten().joinToString(separator = "\n") { it.msg },
+            messageLog = result.diagnostics.values.flatten().joinToString(separator = "\n", transform = ::asString),
             success = result.success,
             generatedFiles = result.generatedSources,
         )
@@ -152,6 +153,24 @@ abstract class CompileTestDriverBase private constructor(
                 ?.bufferedReader()?.readText()?.ensureLineEndings() ?: ""
             Assert.assertEquals(goldenOutput, strippedLog)
 
+            generatedFilesSubDir().takeIf { checkGoldenOutput }?.let {
+                val goldenFiles = GoldenSourceRegex.findAll(
+                    javaClass.getResourceAsStream("/$goldenCodeResourcePath")
+                        ?.bufferedReader()?.readText()?.ensureLineEndings() ?: ""
+                ).associateByTo(
+                    destination = mutableMapOf(),
+                    keySelector = { it.groupValues[1] },
+                    valueTransform = { it.groupValues[2].trim() },
+                )
+
+                for (generatedFile in generatedFiles) {
+                    val filePath = generatedFile.relativePath.replace(File.separatorChar, '/')
+                    val goldenContents = goldenFiles.remove(filePath) ?: "<unexpected file>"
+                    Assert.assertEquals("Generated file '${generatedFile.relativePath}' doesn't match the golden",
+                        goldenContents, generatedFile.contents.trim())
+                }
+            }
+
             if (success) {
                 // find runtime test
                 val classLoader = makeClassLoader(runtimeClasspath)
@@ -166,24 +185,6 @@ abstract class CompileTestDriverBase private constructor(
             } else {
                 System.err.println(messageLog)
                 Assert.assertTrue("Compilation failed, yet expected output is blank", goldenOutput.isNotBlank())
-            }
-
-            generatedFilesSubDir().takeIf { checkGoldenOutput }?.let {
-                val goldenFiles = GoldenSourceRegex.findAll(
-                        javaClass.getResourceAsStream("/$goldenCodeResourcePath")
-                                ?.bufferedReader()?.readText()?.ensureLineEndings() ?: ""
-                ).associateByTo(
-                        destination = mutableMapOf(),
-                        keySelector = { it.groupValues[1] },
-                        valueTransform = { it.groupValues[2].trim() },
-                )
-
-                for (generatedFile in generatedFiles) {
-                    val filePath = generatedFile.relativePath.replace(File.separatorChar, '/')
-                    val goldenContents = goldenFiles.remove(filePath) ?: "<unexpected file>"
-                    Assert.assertEquals("Generated file '${generatedFile.relativePath}' doesn't match the golden",
-                            goldenContents, generatedFile.contents.trim())
-                }
             }
         } finally {
             generatedFilesSubDir()?.let { generatedFilesSubDir ->
@@ -271,5 +272,14 @@ abstract class CompileTestDriverBase private constructor(
 
         val isInUpdateGoldenMode: Boolean
             get() = goldenSourceDirForUpdate != null
+
+        private fun asString(message: DiagnosticMessage): String = buildString {
+            append('[').append(message.kind.name.lowercase()).append(']')
+            append(' ')
+            message.location?.let {
+                append(it.source?.relativePath ?: "<unknown-source>").append(':').append(it.line).append(' ')
+            }
+            append(message.msg)
+        }
     }
 }
