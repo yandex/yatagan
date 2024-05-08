@@ -27,10 +27,4 @@ package com.yandex.yatagan
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY_GETTER,
 )
-@OptIn(ConditionsApi::class)
-public annotation class Provides(
-    /**
-     * One or more [Conditional] specifiers for this provision.
-     */
-    vararg val value: Conditional = [],
-)
+public annotation class Provides

@@ -64,6 +64,11 @@ import kotlin.reflect.KClass
  *   val a: UnderA,
  *   val b: UnderB,
  * )
+ *
+ * // Can be specified on a provision also.
+ * @Provides
+ * @Conditional(FeatureA::class)
+ * fun someProvision(): SomeClass
  * ```
  *
  * @see value
@@ -75,7 +80,7 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 @JvmRepeatable(Conditionals::class)
 @Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.CLASS)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER)
 public annotation class Conditional(
     /**
      * A list of **feature declarations** - annotation types, annotated with

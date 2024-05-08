@@ -295,7 +295,7 @@ class CoreBindingsFailureTest(
                 fun provideObject(c: UnderA): Any = c
                 @Provides @Named("ok1")
                 fun provideObject2(c: Optional<Provider<UnderA>>): Any = c
-                @Provides(Conditional(A::class)) @Named("ok2")
+                @Provides @Conditional(A::class) @Named("ok2")
                 fun provideObject3(c: UnderA): Any = c
             }
             

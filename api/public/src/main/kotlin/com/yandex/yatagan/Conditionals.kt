@@ -22,7 +22,7 @@ package com.yandex.yatagan
 @ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.CLASS)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER)
 public annotation class Conditionals(
     vararg val value: Conditional,
 )
