@@ -504,19 +504,16 @@ class ConditionsTest(
             
             @Module
             object MyModule {
-                @Provides(
-                    Conditional(Conditions.FeatureA::class, onlyIn = [ActivityType.Main::class]),
-                    Conditional(Conditions.FeatureB::class), // in the rest
-                )
+                @Conditional(Conditions.FeatureA::class, onlyIn = [ActivityType.Main::class])
+                @Conditional(Conditions.FeatureB::class) // in the rest
+                @Provides
                 fun provideApi(): Api {
                     return Impl()
                 }
                 
                 @Named
-                @Provides(
-                    Conditional(onlyIn = [ActivityType.Main::class]),
-                    // Nowhere else
-                )
+                @Conditional(onlyIn = [ActivityType.Main::class]) // Nowhere else
+                @Provides
                 fun provideNamedApi(): Api {
                     return Impl()
                 }

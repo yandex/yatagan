@@ -16,10 +16,16 @@
 
 package com.yandex.yatagan.testing.tests
 
+import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_0_0
+import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_1_0
+import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_2_0
+import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_3_0
+import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_5_0
 import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_0_0
 import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_1_0
 import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_2_0
 import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_3_0
+import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_5_0
 import org.junit.Assume
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,24 +34,30 @@ import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
 class LoaderCompatibilityTest(
-    @Suppress("unused")
-    private val version: String,
-    private val kaptClasspath: String,
+    private val version: Version,
 ) {
+    @Suppress("EnumEntryName")
+    enum class Version(
+        val kaptClasspath: String,
+        val apiClasspath: String,
+    ) {
+        v1_0_0(KaptClasspathForCompatCheck1_0_0, ApiClasspathForCompatCheck1_0_0),
+        v1_1_0(KaptClasspathForCompatCheck1_1_0, ApiClasspathForCompatCheck1_1_0),
+        v1_2_0(KaptClasspathForCompatCheck1_2_0, ApiClasspathForCompatCheck1_2_0),
+        v1_3_0(KaptClasspathForCompatCheck1_3_0, ApiClasspathForCompatCheck1_3_0),
+        v1_5_0(KaptClasspathForCompatCheck1_5_0, ApiClasspathForCompatCheck1_5_0),
+    }
+
     companion object {
         @JvmStatic
         @Parameters(name = "with {0}")
-        fun parameters() = listOf(
-            arrayOf("1.0.0", KaptClasspathForCompatCheck1_0_0),
-            arrayOf("1.1.0", KaptClasspathForCompatCheck1_1_0),
-            arrayOf("1.2.0", KaptClasspathForCompatCheck1_2_0),
-            arrayOf("1.3.0", KaptClasspathForCompatCheck1_3_0),
-        )
+        fun parameters() = Version.entries
     }
 
     @Test
     fun `'create' is compatible with code generated with `() = with(JapCompileTestDriver(
-        customProcessorClasspath = kaptClasspath,
+        customProcessorClasspath = version.kaptClasspath,
+        apiClasspath = version.apiClasspath,
         checkGoldenOutput = false,
     )) {
         givenKotlinSource("test.TestCase", """
@@ -70,7 +82,8 @@ class LoaderCompatibilityTest(
 
     @Test
     fun `'builder' is compatible with code generated `() = with(JapCompileTestDriver(
-        customProcessorClasspath = kaptClasspath,
+        customProcessorClasspath = version.kaptClasspath,
+        apiClasspath = version.apiClasspath,
         checkGoldenOutput = false,
     )) {
         givenKotlinSource("test.TestCase", """
@@ -99,10 +112,11 @@ class LoaderCompatibilityTest(
 
     @Test
     fun `'autoBuilder' is compatible with code generated `() = with(JapCompileTestDriver(
-        customProcessorClasspath = kaptClasspath,
+        customProcessorClasspath = version.kaptClasspath,
+        apiClasspath = version.apiClasspath,
         checkGoldenOutput = false,
     )) {
-        Assume.assumeTrue(version >= "1.2.0")  // Auto-builder was added in 1.2.0
+        Assume.assumeTrue(version >= Version.v1_2_0)  // Auto-builder was added in 1.2.0
 
         givenKotlinSource("test.TestCase", """
             import com.yandex.yatagan.*

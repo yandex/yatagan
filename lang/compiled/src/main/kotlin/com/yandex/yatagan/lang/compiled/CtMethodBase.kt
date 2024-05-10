@@ -18,6 +18,9 @@ package com.yandex.yatagan.lang.compiled
 
 import com.yandex.yatagan.Binds
 import com.yandex.yatagan.BindsInstance
+import com.yandex.yatagan.Conditional
+import com.yandex.yatagan.Conditionals
+import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.IntoList
 import com.yandex.yatagan.IntoMap
 import com.yandex.yatagan.IntoSet
@@ -38,8 +41,8 @@ abstract class CtMethodBase : MethodBase() {
                 .takeIf { annotations.any { it.hasType<Binds>() } }
             BuiltinAnnotation.BindsInstance -> (which as BuiltinAnnotation.BindsInstance)
                 .takeIf { annotations.any { it.hasType<BindsInstance>() } }
-            BuiltinAnnotation.Provides ->
-                annotations.find { it.hasType<Provides>() }?.let { CtProvidesAnnotationImpl(it) }
+            BuiltinAnnotation.Provides -> (which as BuiltinAnnotation.Provides)
+                .takeIf { annotations.any { it.hasType<Provides>() } }
             BuiltinAnnotation.IntoMap -> (which as BuiltinAnnotation.IntoMap)
                 .takeIf { annotations.any { it.hasType<IntoMap>() } }
             BuiltinAnnotation.Multibinds -> (which as BuiltinAnnotation.Multibinds)
@@ -50,6 +53,7 @@ abstract class CtMethodBase : MethodBase() {
         return which.modelClass.cast(annotation)
     }
 
+    @OptIn(ConditionsApi::class)
     override fun <T : BuiltinAnnotation.OnMethodRepeatable> getAnnotations(
         which: BuiltinAnnotation.Target.OnMethodRepeatable<T>
     ): List<T> {
@@ -61,6 +65,16 @@ abstract class CtMethodBase : MethodBase() {
                             add(which.modelClass.cast(CtIntoListAnnotationImpl(annotation)))
                         annotation.hasType<IntoSet>() ->
                             add(which.modelClass.cast(CtIntoSetAnnotationImpl(annotation)))
+                    }
+                }
+            }
+            BuiltinAnnotation.Conditional -> buildList {
+                for (annotation in annotations) {
+                    when {
+                        annotation.hasType<Conditional>() ->
+                            add(which.modelClass.cast(CtConditionalAnnotationImpl(annotation)))
+                        annotation.hasType<Conditionals>() -> for (contained in annotation.getAnnotations("value"))
+                            add(which.modelClass.cast(CtConditionalAnnotationImpl(contained)))
                     }
                 }
             }

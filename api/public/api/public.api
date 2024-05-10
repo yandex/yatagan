@@ -151,7 +151,6 @@ public abstract interface class com/yandex/yatagan/Optional$Function {
 }
 
 public abstract interface annotation class com/yandex/yatagan/Provides : java/lang/annotation/Annotation {
-	public abstract fun value ()[Lcom/yandex/yatagan/Conditional;
 }
 
 public abstract interface annotation class com/yandex/yatagan/Reusable : java/lang/annotation/Annotation {

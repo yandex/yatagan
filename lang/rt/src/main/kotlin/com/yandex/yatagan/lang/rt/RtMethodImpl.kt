@@ -18,6 +18,9 @@ package com.yandex.yatagan.lang.rt
 
 import com.yandex.yatagan.Binds
 import com.yandex.yatagan.BindsInstance
+import com.yandex.yatagan.Conditional
+import com.yandex.yatagan.Conditionals
+import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.IntoList
 import com.yandex.yatagan.IntoMap
 import com.yandex.yatagan.IntoSet
@@ -72,8 +75,8 @@ internal class RtMethodImpl(
                 .takeIf { impl.isAnnotationPresent(Binds::class.java) }
             BuiltinAnnotation.BindsInstance -> (which as BuiltinAnnotation.BindsInstance)
                 .takeIf { impl.isAnnotationPresent(BindsInstance::class.java) }
-            BuiltinAnnotation.Provides ->
-                impl.getAnnotation(Provides::class.java)?.let { RtProvidesAnnotationImpl(it) }
+            BuiltinAnnotation.Provides -> (which as BuiltinAnnotation.Provides)
+                .takeIf { impl.isAnnotationPresent(Provides::class.java) }
             BuiltinAnnotation.IntoMap -> (which as BuiltinAnnotation.IntoMap)
                 .takeIf { impl.isAnnotationPresent(IntoMap::class.java) }
             BuiltinAnnotation.Multibinds -> (which as BuiltinAnnotation.Multibinds)
@@ -84,6 +87,7 @@ internal class RtMethodImpl(
         return which.modelClass.cast(annotation)
     }
 
+    @OptIn(ConditionsApi::class)
     override fun <T : BuiltinAnnotation.OnMethodRepeatable> getAnnotations(
         which: BuiltinAnnotation.Target.OnMethodRepeatable<T>,
     ): List<T> {
@@ -95,6 +99,13 @@ internal class RtMethodImpl(
                         is IntoSet -> which.modelClass.cast(RtIntoSetAnnotationImpl(it))
                         else -> null
                     }
+                }
+            }
+            BuiltinAnnotation.Conditional -> buildList {
+                for (annotation in impl.declaredAnnotations) when (annotation) {
+                    is Conditional -> add(which.modelClass.cast(RtConditionalAnnotationImpl(annotation)))
+                    is Conditionals -> for (contained in annotation.value)
+                        add(which.modelClass.cast(RtConditionalAnnotationImpl(contained)))
                 }
             }
         }

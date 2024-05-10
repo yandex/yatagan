@@ -20,7 +20,6 @@ import androidx.room.compiler.processing.util.DiagnosticMessage
 import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
 import androidx.room.compiler.processing.util.compiler.compile
 import com.yandex.yatagan.generated.CompiledApiClasspath
-import com.yandex.yatagan.generated.DynamicApiClasspath
 import com.yandex.yatagan.processor.common.BooleanOption
 import com.yandex.yatagan.processor.common.IntOption
 import com.yandex.yatagan.processor.common.LoggerDecorator
@@ -38,7 +37,7 @@ import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
 
 abstract class CompileTestDriverBase private constructor(
-    private val apiType: ApiType,
+    private val apiClasspath: String,
     private val mainSourceSet: SourceSet,
 ) : CompileTestDriver, SourceSet by mainSourceSet {
     private var precompiledModuleOutputDirs: List<File>? = null
@@ -49,8 +48,8 @@ abstract class CompileTestDriverBase private constructor(
     )
 
     protected constructor(
-        apiType: ApiType = ApiType.Compiled,
-    ) : this(apiType, SourceSet())
+        apiClasspath: String = CompiledApiClasspath,
+    ) : this(apiClasspath, SourceSet())
 
     override val testNameRule = TestNameRule()
 
@@ -201,10 +200,7 @@ abstract class CompileTestDriverBase private constructor(
     private fun createBaseCompilationArguments() = TestCompilationArguments(
         sources = sourceFiles,
         classpath = buildList {
-            when (apiType) {
-                ApiType.Compiled -> CompiledApiClasspath
-                ApiType.Dynamic -> DynamicApiClasspath
-            }.split(File.pathSeparatorChar).forEach { add(File(it)) }
+            apiClasspath.split(File.pathSeparatorChar).forEach { add(File(it)) }
             precompiledModuleOutputDirs?.let { addAll(it) }
         },
         inheritClasspath = false,

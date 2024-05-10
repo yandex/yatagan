@@ -86,19 +86,6 @@ internal class RtConditionalAnnotationImpl private constructor(
     }
 }
 
-internal class RtProvidesAnnotationImpl private constructor(
-    lexicalScope: LexicalScope,
-    impl: Provides,
-) : RtAnnotationImplBase<Provides>(impl), BuiltinAnnotation.Provides, LexicalScope by lexicalScope {
-    override val conditionals get() = impl.value.map {
-        RtConditionalAnnotationImpl(it)
-    }
-
-    companion object Factory : FactoryKey<Provides, RtProvidesAnnotationImpl> {
-        override fun LexicalScope.factory() = ::RtProvidesAnnotationImpl
-    }
-}
-
 internal class RtIntoListAnnotationImpl(
     impl: IntoList,
 ) : RtAnnotationImplBase<IntoList>(impl), BuiltinAnnotation.IntoCollectionFamily.IntoList {

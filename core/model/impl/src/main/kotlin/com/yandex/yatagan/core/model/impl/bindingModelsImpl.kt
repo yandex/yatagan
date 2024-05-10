@@ -238,7 +238,7 @@ internal class ProvidesImpl(
 
     private val conditionalsModel by lazy {
         ConditionalHoldingModelImpl(
-            checkNotNull(method.getAnnotation(BuiltinAnnotation.Provides)) { "Not reached" }.conditionals
+            method.getAnnotations(BuiltinAnnotation.Conditional)
         )
     }
 

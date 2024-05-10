@@ -142,13 +142,8 @@ public sealed interface BuiltinAnnotation {
      * Models `com.yandex.yatagan.Provides` annotation.
      */
     @Internal
-    public interface Provides : OnMethod {
-        public val conditionals: List<Conditional>
-
-        @Internal
-        public companion object : Target.OnMethod<Provides> {
-            override val modelClass: Class<Provides> get() = Provides::class.java
-        }
+    public object Provides : OnMethod, Target.OnMethod<Provides> {
+        override val modelClass: Class<Provides> get() = Provides::class.java
     }
 
     /**
@@ -236,12 +231,12 @@ public sealed interface BuiltinAnnotation {
      * Represents `com.yandex.yatagan.Conditional` annotation.
      */
     @Internal
-    public interface Conditional : OnClassRepeatable {
+    public interface Conditional : OnClassRepeatable, OnMethodRepeatable {
         public val featureTypes: List<Type>
         public val onlyIn: List<Type>
 
         @Internal
-        public companion object : Target.OnClassRepeatable<Conditional> {
+        public companion object : Target.OnClassRepeatable<Conditional>, Target.OnMethodRepeatable<Conditional> {
             override val modelClass: Class<Conditional> get() = Conditional::class.java
         }
     }

@@ -97,12 +97,6 @@ internal class CtComponentFlavorAnnotationImpl(
     override val dimension get() = impl.getType("dimension")
 }
 
-internal class CtProvidesAnnotationImpl(
-    impl: CtAnnotationBase,
-) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.Provides {
-    override val conditionals get() = impl.getAnnotations("value").map { CtConditionalAnnotationImpl(it) }
-}
-
 internal class CtIntoListAnnotationImpl(
     impl: CtAnnotationBase,
 ) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.IntoCollectionFamily.IntoList {

@@ -11,6 +11,7 @@ val versionsToCheckLoaderCompatibility = listOf(
     "1.1.0",
     "1.2.0",
     "1.3.0",
+    "1.5.0",
 )
 
 val baseTestRuntime: Configuration by configurations.creating
@@ -23,6 +24,7 @@ val compiledTestRuntime: Configuration by configurations.creating {
 
 versionsToCheckLoaderCompatibility.forEach { version ->
     configurations.register("kaptForCompatCheck$version")
+    configurations.register("apiForCompatCheck$version")
 }
 
 kotlin {
@@ -68,15 +70,22 @@ dependencies {
 
     versionsToCheckLoaderCompatibility.forEach { version ->
         add("kaptForCompatCheck$version", "com.yandex.yatagan:processor-jap:$version")
+        add("apiForCompatCheck$version", if (version < "2.0.0")
+            "com.yandex.yatagan:api-compiled:$version" else "com.yandex.yatagan:api-public:$version")
     }
 }
 
-val genKaptClasspathForCompatCheckTasks = versionsToCheckLoaderCompatibility.map { version ->
+val genKaptClasspathForCompatCheckTasks = versionsToCheckLoaderCompatibility.flatMap { version ->
     val versionId = version.replace("[.-]".toRegex(), "_")
-    tasks.register<ClasspathSourceGeneratorTask>("generateKaptClasspathForCompatCheck_$versionId") {
+    val kapt = tasks.register<ClasspathSourceGeneratorTask>("generateKaptClasspathForCompatCheck_$versionId") {
         propertyName.set("KaptClasspathForCompatCheck$versionId")
         classpath.set(configurations.named("kaptForCompatCheck$version"))
     }
+    val api = tasks.register<ClasspathSourceGeneratorTask>("generateApiClasspathForCompatCheck_$versionId") {
+        propertyName.set("ApiClasspathForCompatCheck$versionId")
+        classpath.set(configurations.named("apiForCompatCheck$version"))
+    }
+    listOf(kapt, api)
 }
 
 val generateDynamicApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
