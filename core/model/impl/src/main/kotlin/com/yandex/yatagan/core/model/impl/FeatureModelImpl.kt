@@ -38,65 +38,15 @@ internal class FeatureModelImpl private constructor(
     private val impl: TypeDeclaration,
 ) : ConditionalHoldingModel.FeatureModel {
     override val conditionScope: ConditionScope?
-        get() = conditionExpressionHolder?.conditionScope ?: legacyConditionScope
-
-    private val legacyConditionScope: ConditionScope? by lazy {
-        val annotations = impl.getAnnotations(BuiltinAnnotation.ConditionFamily)
-        if (annotations.isEmpty()) {
-            null
-        } else {
-            ConditionScopeImpl(annotations.map { conditionModel ->
-                when (conditionModel) {
-                    is BuiltinAnnotation.ConditionFamily.Any -> {
-                        val clause = conditionModel.conditions.map {
-                            parseOneCondition(it)
-                        }
-                        if (clause.isEmpty()) {
-                            // If at least one or-clause is empty, then it's a never-scope.
-                            // It's not a valid usage and will be reported, but we have to handle it here anyway.
-                            return@lazy ConditionScope.Never
-                        }
-                        clause.reduce { expression, variable ->
-                            OrExpressionImpl(
-                                lhs = expression,
-                                rhs = variable,
-                            )
-                        }
-                    }
-
-                    is BuiltinAnnotation.ConditionFamily.One ->
-                        parseOneCondition(conditionModel)
-                }
-            }.reduce { expression, clause ->
-                AndExpressionImpl(
-                    lhs = expression,
-                    rhs = clause,
-                )
-            })
-        }
-    }
+        get() = conditionExpressionHolder?.conditionScope
 
     private val conditionExpressionHolder: ConditionExpressionHolder? by lazy {
         impl.getAnnotation(BuiltinAnnotation.ConditionExpression)?.let { ConditionExpressionHolder(it) }
     }
 
-    private fun parseOneCondition(one: BuiltinAnnotation.ConditionFamily.One): BooleanExpressionInternal {
-        val condition = one.condition
-        return if (condition.firstOrNull() == '!') {
-            ConditionModelImpl(one.target, condition.substring(1)).negate()
-        } else {
-            ConditionModelImpl(one.target, condition)
-        }
-    }
-
     override fun validate(validator: Validator) {
-        val hasLegacyConditions = hasLegacyConditions()
-        val hasNewConditions = hasConditionExpression()
-        if (!hasLegacyConditions && !hasNewConditions) {
+        if (conditionExpressionHolder == null) {
             validator.reportError(Strings.Errors.noConditionsOnFeature())
-        }
-        if (hasLegacyConditions && hasNewConditions) {
-            validator.reportError(Strings.Errors.conflictingConditionsOnFeature())
         }
         conditionScope?.let { conditionScope ->
             for (model in conditionScope.allConditionModels().toSet()) {
@@ -114,7 +64,7 @@ internal class FeatureModelImpl private constructor(
             when(val conditionScope = conditionScope) {
                 null -> appendRichString {
                     color = TextColor.Red
-                    if (!hasLegacyConditions() && !hasConditionExpression()) {
+                    if (conditionExpressionHolder == null) {
                         append("<no-conditions-declared>")
                     } else {
                         append("<invalid-condition-expression>")
@@ -135,12 +85,6 @@ internal class FeatureModelImpl private constructor(
 
     override val type: Type
         get() = impl.asType()
-
-    private fun hasLegacyConditions(): Boolean =
-        impl.getAnnotations(BuiltinAnnotation.ConditionFamily).isNotEmpty()
-
-    private fun hasConditionExpression(): Boolean =
-        conditionExpressionHolder != null
 
     companion object Factory : FactoryKey<TypeDeclaration, FeatureModelImpl> {
         override fun LexicalScope.factory() = caching(::FeatureModelImpl)

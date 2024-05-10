@@ -18,14 +18,10 @@
 
 package com.yandex.yatagan.lang.compiled
 
-import com.yandex.yatagan.AllConditions
-import com.yandex.yatagan.AnyCondition
-import com.yandex.yatagan.AnyConditions
 import com.yandex.yatagan.AssistedFactory
 import com.yandex.yatagan.Component
 import com.yandex.yatagan.ComponentFlavor
 import com.yandex.yatagan.ComponentVariantDimension
-import com.yandex.yatagan.Condition
 import com.yandex.yatagan.ConditionExpression
 import com.yandex.yatagan.Conditional
 import com.yandex.yatagan.Conditionals
@@ -71,20 +67,6 @@ abstract class CtTypeDeclarationBase : TypeDeclarationBase() {
         which: BuiltinAnnotation.Target.OnClassRepeatable<T>
     ): List<T> {
         return when (which) {
-            BuiltinAnnotation.ConditionFamily -> buildList {
-                for (annotation in annotations) {
-                    when {
-                        annotation.hasType<Condition>() ->
-                            add(which.modelClass.cast(CtConditionAnnotationImpl(annotation)))
-                        annotation.hasType<AnyCondition>() ->
-                            add(which.modelClass.cast(CtAnyConditionAnnotationImpl(annotation)))
-                        annotation.hasType<AllConditions>() -> for (contained in annotation.getAnnotations("value"))
-                            add(which.modelClass.cast(CtConditionAnnotationImpl(contained)))
-                        annotation.hasType<AnyConditions>() -> for (contained in annotation.getAnnotations("value"))
-                            add(which.modelClass.cast(CtAnyConditionAnnotationImpl(contained)))
-                    }
-                }
-            }
             BuiltinAnnotation.Conditional -> buildList {
                 for (annotation in annotations) {
                     when {

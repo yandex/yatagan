@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 /**
  * Specifies that an associated entity (a class with [javax.inject.Inject] constructor/a [provision][Provides]/
  * a [child component][Module.subcomponents])
- * should be present in a graph **under certain runtime [conditions][Condition]**.
+ * should be present in a graph **under certain runtime [conditions][ConditionExpression]**.
  *
  * Types under condition are permitted to be directly injected only into the types
  *  under the same or *implying* condition.
@@ -37,13 +37,9 @@ import kotlin.reflect.KClass
  *
  * // Assume we have the following features declared:
  *
- * @Condition(Flags::class, "flagA") annotation class FeatureA
- * @Condition(Flags::class, "flagB") annotation class FeatureB
- * @AllConditions(
- *  Condition(Flags::class, "flagA"),
- *  Condition(Flags::class, "flagB"),
- * )
- * annotation class FeatureAB
+ * @ConditionExpression("flagA", Flags::class) annotation class FeatureA
+ * @ConditionExpression("flagB", Flags::class) annotation class FeatureB
+ * @ConditionExpression("flagA & flagB", Flags::class) annotation class FeatureAB
  *
  * // Then for a class under `A` it's only allowed to inject class under `B` wrapped in `Optional`:
  * @Conditional(FeatureA::class)
@@ -69,7 +65,8 @@ import kotlin.reflect.KClass
  * @see value
  * @see onlyIn
  * @see Binds
- * @see Provides.value
+ * @see Provides
+ * @see ConditionExpression
  */
 @ConditionsApi
 @MustBeDocumented
@@ -78,8 +75,7 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 public annotation class Conditional(
     /**
-     * A list of **feature declarations** - annotation types, annotated with
-     * [Condition]-family annotations to form an expression.
+     * A list of **feature declarations** - annotation types, annotated with [ConditionExpression].
      *
      * The features in this list are `&&`-ed together.
      */
@@ -94,9 +90,9 @@ public annotation class Conditional(
      * ## Examples:
      * ```kotlin
      * object Flags { var a = false; var b = false; var c = false  }
-     * @Condition(Flags::class, "a") annotation class FeatureA
-     * @Condition(Flags::class, "b") annotation class FeatureB
-     * @Condition(Flags::class, "c") annotation class FeatureC
+     * @ConditionExpression("a", Flags::class) annotation class FeatureA
+     * @ConditionExpression("b", Flags::class) annotation class FeatureB
+     * @ConditionExpression("c", Flags::class) annotation class FeatureC
      *
      * // Assume the following *flavors* and *dimensions* are declared:
      * @ComponentVariantDimension annotation class Product {

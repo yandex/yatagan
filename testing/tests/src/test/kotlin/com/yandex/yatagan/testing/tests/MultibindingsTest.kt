@@ -253,7 +253,7 @@ class MultibindingsTest(
                     var isEnabled = false
                 }
             
-                @Condition(Features::class, "Companion.isEnabled")
+                @ConditionExpression("Companion.isEnabled", Features::class)
                 annotation class Feature
             }
             
@@ -685,7 +685,7 @@ class MultibindingsTest(
             
             class Features {
                 companion object { var isEnabled = false }
-                @Condition(Features::class, "Companion.isEnabled")
+                @ConditionExpression("Companion.isEnabled", Features::class)
                 annotation class Feature
             }
             

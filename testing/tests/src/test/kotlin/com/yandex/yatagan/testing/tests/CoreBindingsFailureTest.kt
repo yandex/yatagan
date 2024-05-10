@@ -39,7 +39,7 @@ class CoreBindingsFailureTest(
     fun setUp() {
         features = SourceSet {
             givenKotlinSource("test.features", """
-                import com.yandex.yatagan.Condition                
+                import com.yandex.yatagan.ConditionExpression                
 
                 object Foo { 
                     val isEnabledA = true 
@@ -47,9 +47,9 @@ class CoreBindingsFailureTest(
                     val isEnabledC = true 
                 }
                 
-                @Condition(Foo::class, "INSTANCE.isEnabledA") annotation class A
-                @Condition(Foo::class, "INSTANCE.isEnabledB") annotation class B
-                @Condition(Foo::class, "INSTANCE.isEnabledC") annotation class C
+                @ConditionExpression("INSTANCE.isEnabledA", Foo::class) annotation class A
+                @ConditionExpression("INSTANCE.isEnabledB", Foo::class) annotation class B
+                @ConditionExpression("INSTANCE.isEnabledC", Foo::class) annotation class C
             """.trimIndent())
         }
     }
@@ -259,16 +259,10 @@ class CoreBindingsFailureTest(
             import com.yandex.yatagan.*
             import javax.inject.*
             
-            @AllConditions(
-                Condition(Foo::class, "INSTANCE.isEnabledA"),
-                Condition(Foo::class, "INSTANCE.isEnabledB"),
-            )
+            @ConditionExpression("INSTANCE.isEnabledA & INSTANCE.isEnabledB", Foo::class)
             annotation class AandB
             
-            @AnyCondition(
-                Condition(Foo::class, "INSTANCE.isEnabledA"),
-                Condition(Foo::class, "INSTANCE.isEnabledB"),
-            )
+            @ConditionExpression("INSTANCE.isEnabledA | INSTANCE.isEnabledB", Foo::class)
             annotation class AorB
             
             @Conditional(A::class, B::class)
@@ -394,7 +388,7 @@ class CoreBindingsFailureTest(
             import com.yandex.yatagan.*
             import javax.inject.*
 
-            @Condition(Foo::class, "!INSTANCE.isEnabledA")
+            @ConditionExpression("!INSTANCE.isEnabledA", Foo::class)
             annotation class NotA
             
             annotation class NotAFeature
@@ -406,26 +400,18 @@ class CoreBindingsFailureTest(
             @ComponentFlavor(dimension = NotADimension::class)
             annotation class InvalidFlavor2
 
-            @AnyCondition /*nothing here*/
-            annotation class Never
-
-            @AnyCondition(
-                Condition(Foo::class, "INSTANCE.isEnabledA"),
-                Condition(Foo::class, "!INSTANCE.isEnabledA"),
-            )
+            @ConditionExpression("INSTANCE.isEnabledA | !INSTANCE.isEnabledA", Foo::class)
             annotation class ComplexAlways
             
             @Conditional(NotAFeature::class, NotAFeature2::class,
                          onlyIn = [InvalidFlavor::class, NotAFlavor::class])
             class ClassA @Inject constructor()
-            @Conditional(Never::class) class ClassB @Inject constructor()
             @Conditional(A::class, NotA::class) class ClassC @Inject constructor()
             @Conditional(ComplexAlways::class) class ClassD @Inject constructor()
             @Module(subcomponents = [AnotherComponent::class]) interface RootModule
             @Component(variant = [InvalidFlavor::class], modules = [RootModule::class])
             interface RootComponent {
                 val a: Optional<ClassA>
-                val b: Optional<ClassB>
                 val c: Optional<ClassC>
                 val d: Optional<ClassD>
             }
@@ -446,15 +432,15 @@ class CoreBindingsFailureTest(
                 val foo: String = ""
             }
 
-            @Condition(Foo::class, "!hello")
+            @ConditionExpression("!hello", Foo::class)
             annotation class Invalid1
-            @Condition(Int::class, "#invalid")
+            @ConditionExpression("#invalid", Int::class)
             annotation class Invalid2
-            @Condition(Foo::class, "INSTANCE.getFoo")
+            @ConditionExpression("INSTANCE.getFoo", Foo::class)
             annotation class Invalid3
-            @Condition(Foo::class, "getFoo")
+            @ConditionExpression("getFoo", Foo::class)
             annotation class Invalid4
-            @Condition(Foo::class, "")
+            @ConditionExpression("", Foo::class)
             annotation class Invalid5
 
             @Conditional(
@@ -485,8 +471,8 @@ class CoreBindingsFailureTest(
                 val isEnabledA: Boolean,
                 val isEnabledC: Boolean,
             ) {
-                @Condition(FeatureProvider::class, "isEnabledA") annotation class A
-                @Condition(FeatureProvider::class, "isEnabledC") annotation class C
+                @ConditionExpression("isEnabledA", FeatureProvider::class) annotation class A
+                @ConditionExpression("isEnabledC", FeatureProvider::class) annotation class C
             }
 
             @Conditional(FeatureProvider.A::class /* error incompatible condition-under-condition */)
@@ -503,7 +489,7 @@ class CoreBindingsFailureTest(
             interface Conditions {
                 val isEnabledD: Boolean
                 
-                @Condition(Conditions::class, "isEnabledD") annotation class D
+                @ConditionExpression("isEnabledD", Conditions::class) annotation class D
             }
 
             @Module

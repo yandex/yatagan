@@ -186,31 +186,6 @@ public sealed interface BuiltinAnnotation {
         override val modelClass: Class<BindsInstance> get() = BindsInstance::class.java
     }
 
-    @Internal
-    public sealed interface ConditionFamily : OnClassRepeatable {
-        /**
-         * Represents `com.yandex.yatagan.Condition` annotation.
-         */
-        @Internal
-        public interface One : ConditionFamily {
-            public val target: Type
-            public val condition: String
-        }
-
-        /**
-         * Represents `com.yandex.yatagan.AnyCondition` annotation.
-         */
-        @Internal
-        public interface Any : ConditionFamily {
-            public val conditions: List<One>
-        }
-
-        @Internal
-        public companion object : Target.OnClassRepeatable<ConditionFamily> {
-            override val modelClass: Class<ConditionFamily> get() = ConditionFamily::class.java
-        }
-    }
-
     /**
      * Represents `com.yandex.yatagan.ConditionExpression` annotation.
      */
