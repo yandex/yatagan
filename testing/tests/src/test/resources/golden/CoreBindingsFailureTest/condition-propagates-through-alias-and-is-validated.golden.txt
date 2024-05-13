@@ -1,4 +1,4 @@
-error: Feature declaration has no `@Condition`-family annotations on it.
+error: Feature declaration has no `@ConditionExpression` annotation on it.
 Encountered:
   in graph for root-component test.TestComponent
   in entry-point getAny: java.util.List<java.lang.Object>

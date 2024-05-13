@@ -36,7 +36,7 @@ package com.yandex.yatagan
  * This is an _explicitly absent_ binding, which declares that `Api` is always absent (under "never"-condition).
  *
  * @see Optional
- * @see Condition
+ * @see ConditionExpression
  * @see Conditional
  */
 @MustBeDocumented

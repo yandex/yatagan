@@ -1,15 +1,3 @@
-public abstract interface annotation class com/yandex/yatagan/AllConditions : java/lang/annotation/Annotation {
-	public abstract fun value ()[Lcom/yandex/yatagan/Condition;
-}
-
-public abstract interface annotation class com/yandex/yatagan/AnyCondition : java/lang/annotation/Annotation {
-	public abstract fun value ()[Lcom/yandex/yatagan/Condition;
-}
-
-public abstract interface annotation class com/yandex/yatagan/AnyConditions : java/lang/annotation/Annotation {
-	public abstract fun value ()[Lcom/yandex/yatagan/AnyCondition;
-}
-
 public abstract interface annotation class com/yandex/yatagan/Assisted : java/lang/annotation/Annotation {
 	public abstract fun value ()Ljava/lang/String;
 }
@@ -56,11 +44,6 @@ public abstract interface annotation class com/yandex/yatagan/ComponentFlavor : 
 }
 
 public abstract interface annotation class com/yandex/yatagan/ComponentVariantDimension : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class com/yandex/yatagan/Condition : java/lang/annotation/Annotation {
-	public abstract fun condition ()Ljava/lang/String;
-	public abstract fun value ()Ljava/lang/Class;
 }
 
 public abstract interface annotation class com/yandex/yatagan/ConditionExpression : java/lang/annotation/Annotation {

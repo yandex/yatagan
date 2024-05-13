@@ -36,7 +36,7 @@ class AccessControlTest(
     @Test
     fun `@Binds declarations can be package-private`() {
         givenJavaSource("test.MyFeature", """
-            @com.yandex.yatagan.Condition(value = MyFeature.class, condition = "sEnabled")
+            @com.yandex.yatagan.ConditionExpression(value = "sEnabled", imports = MyFeature.class)
             public @interface MyFeature {
                 boolean sEnabled = false;
             }
@@ -160,10 +160,9 @@ class AccessControlTest(
             }
         """.trimIndent())
         givenJavaSource("test.Feature", """
-            import com.yandex.yatagan.Condition;
+            import com.yandex.yatagan.ConditionExpression;
 
-            @Condition(value = Flags.class, condition = "isEnabledA")
-            @Condition(value = Flags2.class, condition = "isEnabledB")
+            @ConditionExpression(value = "Flags::isEnabledA & Flags2::isEnabledB", imports = {Flags.class, Flags2.class})
             @interface Feature {}
         """.trimIndent())
 

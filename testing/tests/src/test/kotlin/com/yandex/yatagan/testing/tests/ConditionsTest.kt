@@ -76,7 +76,7 @@ class ConditionsTest(
     private val features by lazy {
         SourceSet {
             givenKotlinSource("test.Features", """
-                import com.yandex.yatagan.Condition
+                import com.yandex.yatagan.ConditionExpression
                 import javax.inject.Singleton
 
                 class FeatureC {
@@ -94,13 +94,13 @@ class ConditionsTest(
 
                 @Singleton
                 interface Conditions {
-                    @Condition(Features::class, condition = "fooBar")
+                    @ConditionExpression("fooBar", Features::class)
                     annotation class FeatureA
     
-                    @Condition(Features::class, condition = "isEnabledB")
+                    @ConditionExpression("isEnabledB", Features::class)
                     annotation class FeatureB
     
-                    @Condition(Features::class, condition = "getFeatureC.isEnabled")
+                    @ConditionExpression("getFeatureC.isEnabled", Features::class)
                     annotation class FeatureC
                 }
             """
@@ -162,7 +162,6 @@ class ConditionsTest(
             import javax.inject.Provider
             import javax.inject.Singleton
             import com.yandex.yatagan.Component
-            import com.yandex.yatagan.Condition
             import com.yandex.yatagan.Conditional
             import com.yandex.yatagan.Conditionals
             import com.yandex.yatagan.Optional
@@ -633,39 +632,17 @@ class ConditionsTest(
                 }
             }
             
-            @AllConditions(
-                Condition(Features::class, "fooBar"),
-                Condition(Features::class, "isEnabledB"),
-            )
-            @AnyCondition(
-                Condition(Features::class, "getFeatureC.isEnabled"),                                
-                Condition(Features::class, "isEnabledB"),
-                Condition(SomeClass::class, "Conditions.getSomeCondition1"),
-                Condition(SomeClass::class, "someCondition2"),
-                Condition(SomeClass::class, "getSomeCondition3"),
-                Condition(SomeClass::class, "getSomeCondition4"),
-                Condition(SomeClass::class, "someCondition5"),
-                Condition(SomeClass::class, "someCondition6"),
-                Condition(SomeClass::class, "Conditions.getSomeCondition6"),
+            @ConditionExpression(
+                "Features::fooBar & Features::isEnabledB & (Features::getFeatureC.isEnabled | Features::isEnabledB |" +
+                "SomeClass::Conditions.getSomeCondition1 | SomeClass::someCondition2 | SomeClass::getSomeCondition3 |" +
+                "SomeClass::getSomeCondition4 | SomeClass::someCondition5 |" +
+                "SomeClass::someCondition6 | SomeClass::Conditions.getSomeCondition6)",
+                Features::class, SomeClass::class,
             )
             annotation class ComplexFeature1
             
-            @AnyConditions(
-                AnyCondition(
-                    Condition(Features::class, "fooBar"),
-                ),
-                AnyCondition(
-                    Condition(Features::class, EnabledB),
-                ),
-                AnyCondition(
-                    Condition(Features::class, "getFeatureC.isEnabled"),                                
-                    Condition(Features::class, condition = EnabledB),                                
-                ),
-                AnyCondition(
-                    Condition(Features::class, "getFeatureC.isEnabled"),                                
-                    Condition(value = Features::class, condition = "isEnabledB"),                                
-                ),
-            )
+            @ConditionExpression("fooBar & ${'$'}EnabledB & (getFeatureC.isEnabled | ${'$'}EnabledB) & " +
+                "(getFeatureC.isEnabled | isEnabledB)", Features::class)
             annotation class ComplexFeature2
             
             @Conditional(ComplexFeature1::class)               
@@ -768,16 +745,10 @@ class ConditionsTest(
                 }
             }
 
-            @AllConditions(
-                Condition(Features::class, condition = "INSTANCE.getDisabled"),
-                Condition(Features::class, condition = "INSTANCE.getNotReached"),
-            )
+            @ConditionExpression("INSTANCE.getDisabled & INSTANCE.getNotReached", Features::class)
             annotation class A
 
-            @AllConditions(
-                Condition(Features::class, condition = "INSTANCE.getDisabled2"),
-                Condition(Features::class, condition = "INSTANCE.getNotReached2"),
-            )
+            @ConditionExpression("INSTANCE.getDisabled2 & INSTANCE.getNotReached2", Features::class)
             annotation class B
 
             
@@ -823,9 +794,9 @@ class ConditionsTest(
         })
 
         givenJavaSource("test.IsEnabled3", """
-            import com.yandex.yatagan.Condition;
+            import com.yandex.yatagan.ConditionExpression;
             
-            @Condition(value = CompiledConditionKt.class, condition = "FOO")
+            @ConditionExpression(value = "FOO", imports = CompiledConditionKt.class)
             @interface IsEnabled3 {}
         """.trimIndent())
 
@@ -837,10 +808,10 @@ class ConditionsTest(
                 const val IS_ENABLED = true
             }
             
-            @Condition(CompiledCondition::class, "HELLO")
+            @ConditionExpression("HELLO", CompiledCondition::class)
             annotation class IsEnabled
             
-            @Condition(Constants::class, "IS_ENABLED")
+            @ConditionExpression("IS_ENABLED", Constants::class)
             annotation class IsEnabled2
             
             @Conditional(IsEnabled::class, IsEnabled2::class, IsEnabled3::class)
@@ -865,21 +836,21 @@ class ConditionsTest(
                 var isEnabledB: Boolean,
                 var isEnabledC: Boolean,
             ) {
-                @Condition(FeatureProvider::class, "isEnabledA") annotation class A
-                @Condition(FeatureProvider::class, "isEnabledB") annotation class B
-                @Condition(FeatureProvider::class, "isEnabledC") annotation class C
+                @ConditionExpression("isEnabledA", FeatureProvider::class) annotation class A
+                @ConditionExpression("isEnabledB", FeatureProvider::class) annotation class B
+                @ConditionExpression("isEnabledC", FeatureProvider::class) annotation class C
             }
 
             class FeatureProvider2 @Inject constructor() {
                 val isEnabledD: Boolean get() = true
 
-                @Condition(FeatureProvider2::class, "isEnabledD") annotation class D
+                @ConditionExpression("isEnabledD", FeatureProvider2::class) annotation class D
             }
 
             interface F3 {
                 val isEnabledE: Boolean
                 
-                @Condition(F3::class, "isEnabledE") annotation class E
+                @ConditionExpression("isEnabledE", F3::class) annotation class E
             }
 
             @Singleton
@@ -1127,16 +1098,12 @@ class ConditionsTest(
             @ConditionExpression("|!f") annotation class A1
             @ConditionExpression("we(h2!347&32)\n89|32") annotation class A2
             
-            @ConditionExpression("getA", Helper::class)
-            @Condition(Helper::class, "getA")
-            annotation class A3
-
             @ConditionExpression("Helper::getA & Helper::", Helper::class) annotation class A4
 
             @Conditional(C1::class, C12::class, C13::class, C14::class, C15::class, C16::class)
             class ClassA @Inject constructor()
 
-            @Conditional(A0::class, A1::class, A2::class, A3::class, A4::class)
+            @Conditional(A0::class, A1::class, A2::class, A4::class)
             class ClassB @Inject constructor()
 
             @Conditional(C21::class, C22::class, C23::class, C24::class, C25::class)

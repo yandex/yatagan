@@ -50,18 +50,6 @@ Encountered:
              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Feature declaration has both `@Condition`-family annotations and `@ConditionExpression` present. Mixing these is not supported. Please, use either one way or the other to define a feature.`
-Encountered:
-  in graph for root-component test.TestComponent
-  in entry-point getB: [Optional] test.ClassB
-                       ^-[*1]----------------
-  in [1*] inject-constructor test.ClassB()
-  in its conditions declaration { runtime-conditions: [.., test.A3, ..] }
-                                                           ^-[*2]-
-  here: [2*] feature test.A3 [test.Helper.getA]
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 error: Import alias 'Sh&t' contains forbidden characters.
 Encountered:
   in graph for root-component test.TestComponent
