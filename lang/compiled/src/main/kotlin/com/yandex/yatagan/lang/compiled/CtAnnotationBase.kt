@@ -17,6 +17,7 @@
 package com.yandex.yatagan.lang.compiled
 
 import com.yandex.yatagan.ConditionsApi
+import com.yandex.yatagan.Reusable
 import com.yandex.yatagan.ValueOf
 import com.yandex.yatagan.base.ifOrElseNull
 import com.yandex.yatagan.lang.Annotation
@@ -24,6 +25,7 @@ import com.yandex.yatagan.lang.Annotation.Value
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.common.AnnotationBase
+import com.yandex.yatagan.lang.common.isDaggerCompat
 
 /**
  * An [Annotation] which supports getting typed attribute values by name efficiently.
@@ -57,6 +59,8 @@ abstract class CtAnnotationBase : AnnotationBase() {
     override fun <T : BuiltinAnnotation.CanBeCastedOut> asBuiltin(which: BuiltinAnnotation.Target.CanBeCastedOut<T>): T? {
         return which.modelClass.cast(when(which) {
             BuiltinAnnotation.ValueOf -> ifOrElseNull(hasType<ValueOf>()) { CtValueOfAnnotationImpl(this) }
+            BuiltinAnnotation.Reusable -> ifOrElseNull(
+                hasType<Reusable>() || isDaggerCompat() && hasType(DaggerNames.REUSABLE)) { BuiltinAnnotation.Reusable }
         })
     }
 

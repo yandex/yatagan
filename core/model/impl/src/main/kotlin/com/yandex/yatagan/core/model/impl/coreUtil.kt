@@ -31,6 +31,7 @@ import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.common.isDaggerCompat
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.TextColor
@@ -49,6 +50,9 @@ internal fun NodeDependency(
             Names.Lazy -> OptionalLazy
             Names.Provider -> OptionalProvider
             else -> Optional
+        }
+        Names.LazyCompat -> {
+            if (type.isDaggerCompat()) Lazy else Direct
         }
         else -> Direct
     }
@@ -71,15 +75,15 @@ internal fun NodeDependency(
 
 internal fun isFrameworkType(type: Type) = when (type.declaration.qualifiedName) {
     Names.Lazy, Names.Optional, Names.Provider -> true
+    Names.LazyCompat -> type.isDaggerCompat()
     else -> false
 }
 
 internal object Names {
     const val Lazy: String = "com.yandex.yatagan.Lazy"
+    const val LazyCompat: String = "dagger.Lazy"
     const val Provider: String = "javax.inject.Provider"
     const val Optional: String = "com.yandex.yatagan.Optional"
-
-    const val Reusable: String = "com.yandex.yatagan.Reusable"
 
     const val List: String = "java.util.List"
     const val Set: String = "java.util.Set"

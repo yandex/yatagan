@@ -17,11 +17,12 @@
 package com.yandex.yatagan.lang
 
 import com.yandex.yatagan.base.api.Internal
+import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
  * Models a [Callable] parameter.
  */
-public interface Parameter : Annotated {
+public interface Parameter : Annotated, LexicalScope {
     /**
      * Parameter name.
      *

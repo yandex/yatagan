@@ -201,7 +201,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: ExecutableElement,
-    ) : CtConstructorBase(), Annotated by JavaxAnnotatedImpl(this, platformModel) {
+    ) : CtConstructorBase(), Annotated by JavaxAnnotatedImpl(this, platformModel), LexicalScope by this {
         override val isEffectivelyPublic: Boolean get() = platformModel.isPublic
         override val constructee: TypeDeclaration get() = this@JavaxTypeDeclarationImpl
         override val parameters: Sequence<Parameter> = parametersSequenceFor(platformModel, type)

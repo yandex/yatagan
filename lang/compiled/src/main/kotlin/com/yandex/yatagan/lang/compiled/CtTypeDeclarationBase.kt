@@ -28,9 +28,11 @@ import com.yandex.yatagan.Conditionals
 import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.Module
 import com.yandex.yatagan.VariantApi
+import com.yandex.yatagan.base.ifOrElseNull
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.common.TypeDeclarationBase
+import com.yandex.yatagan.lang.common.isDaggerCompat
 
 /**
  * [TypeDeclaration] specialized for compile time implementations.
@@ -41,21 +43,29 @@ abstract class CtTypeDeclarationBase : TypeDeclarationBase() {
     override fun <T : BuiltinAnnotation.OnClass> getAnnotation(
         which: BuiltinAnnotation.Target.OnClass<T>
     ): T? {
+        val daggerCompat = isDaggerCompat()
         val value: BuiltinAnnotation.OnClass? = when (which) {
             BuiltinAnnotation.AssistedFactory -> (which as BuiltinAnnotation.AssistedFactory).takeIf {
-                annotations.any { it.hasType<AssistedFactory>() }
+                annotations.any { it.hasType<AssistedFactory>() || daggerCompat && it.hasType(DaggerNames.ASSISTED_FACTORY) }
             }
             BuiltinAnnotation.Module ->
-                annotations.find { it.hasType<Module>() }?.let(::CtModuleAnnotationImpl)
+                annotations.find { it.hasType<Module>() || daggerCompat && it.hasType(DaggerNames.MODULE) }
+                    ?.let(::CtModuleAnnotationImpl)
             BuiltinAnnotation.Component ->
                 annotations.find { it.hasType<Component>() }?.let(::CtComponentAnnotationImpl)
+                    ?: ifOrElseNull(daggerCompat) {
+                        annotations.find { it.hasType(DaggerNames.COMPONENT) }?.let(::CtComponentAnnotationDaggerCompatImpl)
+                            ?: annotations.find { it.hasType(DaggerNames.SUBCOMPONENT) }
+                                ?.let(::CtSubcomponentAnnotationDaggerCompatImpl)
+                    }
             BuiltinAnnotation.ComponentFlavor ->
                 annotations.find { it.hasType<ComponentFlavor>() }?.let { CtComponentFlavorAnnotationImpl(it) }
             BuiltinAnnotation.ComponentVariantDimension -> (which as BuiltinAnnotation.ComponentVariantDimension).takeIf {
                 annotations.any { it.hasType<ComponentVariantDimension>() }
             }
             BuiltinAnnotation.Component.Builder -> (which as BuiltinAnnotation.Component.Builder).takeIf {
-                annotations.any { it.hasType<Component.Builder>() }
+                annotations.any { it.hasType<Component.Builder>() ||
+                        daggerCompat && it.annotationClass.qualifiedName in DaggerNames.COMPONENT_BUILDERS }
             }
             BuiltinAnnotation.ConditionExpression ->
                 annotations.find { it.hasType<ConditionExpression>() }?.let { CtConditionExpressionAnnotationImpl(it) }

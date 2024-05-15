@@ -29,6 +29,7 @@ import javax.lang.model.element.Modifier.STATIC
 @Singleton
 internal class UnscopedProviderGenerator @Inject constructor(
     private val componentImplName: ClassName,
+    private val options: ComponentGenerator.Options,
 ) : ComponentGenerator.Contributor {
     private var isUsed = false
     val name: ClassName = componentImplName.nestedClass("ProviderImpl")
@@ -39,6 +40,10 @@ internal class UnscopedProviderGenerator @Inject constructor(
         builder.nestedType {
             buildClass(name) {
                 implements(Names.Lazy)
+                if (options.enableDaggerCompatMode) {
+                    implements(Names.Provider)
+                    implements(Names.LazyCompat)
+                }
                 modifiers(/*package-private*/ STATIC, FINAL)
                 field(componentImplName, "mDelegate") {
                     modifiers(PRIVATE, FINAL)

@@ -20,6 +20,7 @@ import com.squareup.javapoet.ClassName
 
 internal object Names {
     val Lazy: ClassName = ClassName.get("com.yandex.yatagan", "Lazy")
+    val LazyCompat: ClassName = ClassName.get("dagger", "Lazy")
     val Provider: ClassName = ClassName.get("javax.inject", "Provider")
     val Optional: ClassName = ClassName.get("com.yandex.yatagan", "Optional")
     val AutoBuilder: ClassName = ClassName.get("com.yandex.yatagan", "AutoBuilder")

@@ -18,6 +18,7 @@ package com.yandex.yatagan.lang.rt
 
 import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.IntoMap
+import com.yandex.yatagan.Reusable
 import com.yandex.yatagan.ValueOf
 import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation.Value
@@ -56,6 +57,7 @@ internal class RtAnnotationImpl private constructor(
     override fun <T : BuiltinAnnotation.CanBeCastedOut> asBuiltin(which: BuiltinAnnotation.Target.CanBeCastedOut<T>): T? {
         return which.modelClass.cast(when(which) {
             BuiltinAnnotation.ValueOf -> RtValueOfAnnotationImpl(impl as? ValueOf ?: return null)
+            BuiltinAnnotation.Reusable -> which.takeIf { impl is Reusable }
         })
     }
 

@@ -206,7 +206,7 @@ internal class RtTypeDeclarationImpl private constructor(
     private inner class ConstructorImpl(
         override val platformModel: ReflectConstructor,
         override val constructee: TypeDeclaration,
-    ) : ConstructorBase(), Annotated by RtAnnotatedImpl(constructee, platformModel) {
+    ) : ConstructorBase(), Annotated by RtAnnotatedImpl(constructee, platformModel), LexicalScope by this {
         private val parametersAnnotations by lazy { platformModel.parameterAnnotations }
         private val parametersTypes by lazy { platformModel.genericParameterTypes }
         private val parametersNames by lazy { platformModel.parameterNamesCompat() }

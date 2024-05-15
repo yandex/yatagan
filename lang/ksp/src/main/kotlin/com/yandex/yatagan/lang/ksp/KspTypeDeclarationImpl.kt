@@ -394,7 +394,7 @@ internal class KspTypeDeclarationImpl private constructor(
 
     private inner class ConstructorImpl(
         override val platformModel: KSFunctionDeclaration,
-    ) : CtConstructorBase(), Annotated by KspAnnotatedImpl(this, platformModel) {
+    ) : CtConstructorBase(), Annotated by KspAnnotatedImpl(this, platformModel), LexicalScope by this {
         private val jvmSignature = JvmMethodSignature(platformModel)
 
         override val isEffectivelyPublic: Boolean

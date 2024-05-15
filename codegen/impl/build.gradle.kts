@@ -12,3 +12,11 @@ dependencies {
     implementation(libs.yataganDogFood.api)
     ksp(libs.yataganDogFood.ksp)
 }
+
+kotlin {
+    sourceSets.configureEach {
+        languageSettings {
+            optIn("com.yandex.yatagan.ConditionsApi")
+        }
+    }
+}

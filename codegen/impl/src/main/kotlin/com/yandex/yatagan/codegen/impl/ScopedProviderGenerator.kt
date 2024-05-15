@@ -44,6 +44,10 @@ internal class ScopedProviderGenerator @Inject constructor(
         builder.nestedType {
             buildClass(name) {
                 implements(Names.Lazy)
+                if (options.enableDaggerCompatMode) {
+                    implements(Names.Provider)
+                    implements(Names.LazyCompat)
+                }
                 modifiers(PRIVATE, STATIC, FINAL)
                 field(componentImplName, "mDelegate") { modifiers(PRIVATE, FINAL) }
                 field(ClassName.INT, "mIndex") { modifiers(PRIVATE, FINAL) }

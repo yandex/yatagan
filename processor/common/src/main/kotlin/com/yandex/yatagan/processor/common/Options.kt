@@ -54,6 +54,7 @@ enum class BooleanOption(
     AllConditionsLazy("yatagan.experimental.allConditionsLazy", default = false),
     OmitThreadChecks("yatagan.experimental.omitThreadChecks", default = false),
     OmitProvisionNullChecks("yatagan.experimental.omitProvisionNullChecks", default = false),
+    DaggerCompatibilityMode("yatagan.experimental.enableDaggerCompatibility", default = false),
     SortMethodsForTesting("yatagan.internal.testing.sortMethods", default = false),
 
     ;

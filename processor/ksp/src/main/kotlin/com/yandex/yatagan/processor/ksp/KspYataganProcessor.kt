@@ -23,8 +23,10 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.yatagan.Component
+import com.yandex.yatagan.base.ifOrElseNull
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.ksp.KspLexicalScope
+import com.yandex.yatagan.processor.common.BooleanOption
 import com.yandex.yatagan.processor.common.Logger
 import com.yandex.yatagan.processor.common.Options
 import com.yandex.yatagan.processor.common.ProcessorDelegate
@@ -43,8 +45,12 @@ internal class KspYataganProcessor(
         lexicalScope = KspLexicalScope(resolver)
         initScopedOptions(lexicalScope, this)
         process(
-            sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
-                .filterIsInstance<KSClassDeclaration>(),
+            sources = sequenceOf(
+                resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName),
+                ifOrElseNull(options[BooleanOption.DaggerCompatibilityMode]) {
+                    resolver.getSymbolsWithAnnotation("dagger.Component")
+                }
+            ).filterNotNull().flatten().filterIsInstance<KSClassDeclaration>(),
             delegate = this,
         )
         return emptyList()

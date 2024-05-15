@@ -22,6 +22,11 @@ val compiledTestRuntime: Configuration by configurations.creating {
     extendsFrom(baseTestRuntime)
 }
 
+val daggerApi: Configuration by configurations.creating {
+    extendsFrom(compiledTestRuntime)
+}
+val daggerProcessor: Configuration by configurations.creating
+
 versionsToCheckLoaderCompatibility.forEach { version ->
     configurations.register("kaptForCompatCheck$version")
     configurations.register("apiForCompatCheck$version")
@@ -68,6 +73,10 @@ dependencies {
     dynamicTestRuntime(project(":api:dynamic"))
     compiledTestRuntime(project(":api:public"))
 
+    daggerApi(libs.testing.dagger.api)
+    daggerProcessor(libs.testing.dagger.processor)
+    daggerApi(kotlin("stdlib"))
+
     versionsToCheckLoaderCompatibility.forEach { version ->
         add("kaptForCompatCheck$version", "com.yandex.yatagan:processor-jap:$version")
         add("apiForCompatCheck$version", if (version < "2.0.0")
@@ -98,12 +107,28 @@ val generateCompiledApiClasspath by tasks.registering(ClasspathSourceGeneratorTa
     classpath.set(compiledTestRuntime)
 }
 
+val generateDaggerApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
+    propertyName.set("DaggerApiClasspath")
+    classpath.set(daggerApi)
+}
+
+val generateDaggerProcessorClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
+    propertyName.set("DaggerProcessorClasspath")
+    classpath.set(daggerProcessor)
+}
+
 tasks.withType<ClasspathSourceGeneratorTask>().configureEach {
     packageName.set("com.yandex.yatagan.generated")
 }
 
 tasks.named("compileKotlin") {
-    dependsOn(generateDynamicApiClasspath, generateCompiledApiClasspath, genKaptClasspathForCompatCheckTasks)
+    dependsOn(
+        generateDynamicApiClasspath,
+        generateCompiledApiClasspath,
+        generateDaggerApiClasspath,
+        generateDaggerProcessorClasspath,
+        genKaptClasspathForCompatCheckTasks,
+    )
 }
 
 val updateGoldenFiles by tasks.registering(Test::class) {

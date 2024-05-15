@@ -20,6 +20,7 @@ import com.yandex.yatagan.Assisted
 import com.yandex.yatagan.BindsInstance
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.common.ParameterBase
+import com.yandex.yatagan.lang.common.isDaggerCompat
 
 abstract class CtParameterBase : ParameterBase() {
     abstract override val annotations: Sequence<CtAnnotationBase>
@@ -27,12 +28,18 @@ abstract class CtParameterBase : ParameterBase() {
     final override fun <T : BuiltinAnnotation.OnParameter> getAnnotation(
         which: BuiltinAnnotation.Target.OnParameter<T>
     ): T? {
+        val daggerCompat = isDaggerCompat()
         val value: BuiltinAnnotation.OnParameter? = when (which) {
-            BuiltinAnnotation.BindsInstance -> BuiltinAnnotation.BindsInstance.takeIf {
-                annotations.any { it.hasType<BindsInstance>() }
+            BuiltinAnnotation.BindsInstance -> {
+                BuiltinAnnotation.BindsInstance.takeIf {
+                    annotations.any { it.hasType<BindsInstance>() ||
+                            daggerCompat && it.hasType(DaggerNames.BINDS_INSTANCE) }
+                }
             }
             BuiltinAnnotation.Assisted ->
-                annotations.find { it.hasType<Assisted>() }?.let { CtAssistedAnnotationImpl(it) }
+                annotations.find {
+                    it.hasType<Assisted>() || daggerCompat && it.hasType(DaggerNames.ASSISTED)
+                }?.let { CtAssistedAnnotationImpl(it) }
         }
         return which.modelClass.cast(value)
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2024 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.lang.compiled
+package com.yandex.yatagan.lang.common
 
-import com.yandex.yatagan.lang.Annotation
+import com.yandex.yatagan.lang.scope.LexicalScope
 
-internal inline fun <reified A : kotlin.Annotation> Annotation.hasType() = annotationClass.isClass(A::class.java)
-
-internal fun Annotation.hasType(qualifiedName: String) = annotationClass.qualifiedName == qualifiedName
+/**
+ * Whether dagger compatibility is enabled in this scope.
+ */
+fun LexicalScope.isDaggerCompat(): Boolean = ext[LangOptions].daggerCompatibilityMode
