@@ -163,7 +163,6 @@ internal sealed interface ComparableBindingMixin<B : ComparableBindingMixin<B>> 
             is ComponentDependencyEntryPointBindingImpl -> 60
             is ComponentInstanceBindingImpl -> 70
             is SubComponentFactoryBindingImpl -> 80
-            is SubComponentBindingImpl -> 81
             is InstanceBindingImpl -> 90
             is MapBindingImpl -> 100
             is MultiBindingImpl -> 110

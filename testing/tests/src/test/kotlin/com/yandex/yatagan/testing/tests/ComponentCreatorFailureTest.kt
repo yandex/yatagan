@@ -181,6 +181,8 @@ class ComponentCreatorFailureTest(
             import com.yandex.yatagan.*
             import javax.inject.*
 
+            class ClassA @Inject constructor(d: SubComponent2)
+
             @Component(isRoot = false)
             interface SubComponent1 {
                 @Component.Builder interface Builder { fun create(): SubComponent1 }
@@ -199,6 +201,7 @@ class ComponentCreatorFailureTest(
                 val sub1: SubComponent1
                 val sub2: SubComponent2
                 val fsub: FeatureComponent
+                val a: ClassA
             }
 
             @ConditionExpression("isEnabled", Features::class)
@@ -240,7 +243,6 @@ class ComponentCreatorFailureTest(
 
             @Component
             interface RootComponent1 {
-                fun sub1EP(): SubComponent1
                 fun sub1FactoryMethod(dep: MyDependencies): SubComponent1
 
                 fun sub2FactoryMethod1(foo: Any): SubComponent2

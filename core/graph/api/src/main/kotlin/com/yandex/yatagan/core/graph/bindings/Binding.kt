@@ -80,7 +80,7 @@ public interface Binding : BaseBinding {
         public fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding): R = visitOther(binding)
         public fun visitInstance(binding: InstanceBinding): R = visitOther(binding)
         @Incubating public fun visitAlternatives(binding: AlternativesBinding): R = visitOther(binding)
-        public fun visitSubComponent(binding: SubComponentBinding): R = visitOther(binding)
+        public fun visitSubComponentFactory(binding: SubComponentFactoryBinding): R = visitOther(binding)
         public fun visitComponentDependency(binding: ComponentDependencyBinding): R = visitOther(binding)
         public fun visitComponentInstance(binding: ComponentInstanceBinding): R = visitOther(binding)
         public fun visitComponentDependencyEntryPoint(binding: ComponentDependencyEntryPointBinding): R = visitOther(binding)

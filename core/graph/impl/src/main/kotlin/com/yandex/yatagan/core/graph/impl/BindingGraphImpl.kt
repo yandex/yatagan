@@ -97,7 +97,6 @@ internal class BindingGraphImpl private constructor(
         // Detect subcomponents (directly or via factories) and add them as children.
         val detector = object : HasNodeModel.Visitor<ComponentModel?> {
             override fun visitOther() = null
-            override fun visitComponent(model: ComponentModel) = model
             override fun visitComponentFactory(model: ComponentFactoryWithBuilderModel) = model.createdComponent
         }
         for (entryPoint in entryPoints) {
@@ -115,7 +114,7 @@ internal class BindingGraphImpl private constructor(
 
     private val bindings: GraphBindingsManager = GraphBindingsManager(
         graph = this,
-        subcomponents = childrenModels.associateWith { child ->
+        childComponentFactories = childrenModels.mapNotNullTo(hashSetOf()) { child ->
             child.factory ?: component.subComponentFactoryMethods.find { it.createdComponent == child }
         },
     )
@@ -378,6 +377,8 @@ internal class BindingGraphImpl private constructor(
         }
 
         // Report hierarchy loops
+        // NOTE: This effectively reports only the loops introduced with `Module.subcomponents`;
+        //  the other means to (implicitly) include a child component report the loops themselves.
         if (parents.find { parent -> parent.model == model } != null) {
             validator.reportError(Strings.Errors.componentLoop())
         }

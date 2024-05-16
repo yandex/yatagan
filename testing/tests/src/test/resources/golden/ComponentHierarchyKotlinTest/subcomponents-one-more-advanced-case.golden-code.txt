@@ -202,33 +202,6 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
       return (ActivityScopedClass) local;
     }
 
-    static final class ProfileSettingsFragmentComponentImpl implements ProfileSettingsFragmentComponent {
-      final SettingsActivityComponentImpl mSettingsActivityComponent;
-
-      ProfileSettingsFragmentComponentImpl(
-          SettingsActivityComponentImpl pSettingsActivityComponent) {
-        this.mSettingsActivityComponent = pSettingsActivityComponent;
-      }
-
-      @Override
-      public CameraSettings cameraSettings() {
-        return new CameraSettings(new DarkTheme());
-      }
-
-      private static final class ComponentFactoryImpl implements ProfileSettingsFragmentComponent.Factory {
-        SettingsActivityComponentImpl fSettingsActivityComponent;
-
-        ComponentFactoryImpl(SettingsActivityComponentImpl fSettingsActivityComponent) {
-          this.fSettingsActivityComponent = fSettingsActivityComponent;
-        }
-
-        @Override
-        public ProfileSettingsFragmentComponent create() {
-          return new ProfileSettingsFragmentComponentImpl(this.fSettingsActivityComponent);
-        }
-      }
-    }
-
     static final class ProfileFragmentComponentImpl implements ProfileFragmentComponent {
       final SettingsActivityComponentImpl mSettingsActivityComponent;
 
@@ -269,6 +242,33 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
         @Override
         public ProfileFragmentComponent create() {
           return new ProfileFragmentComponentImpl(this.fSettingsActivityComponent, this.fApplicationComponent);
+        }
+      }
+    }
+
+    static final class ProfileSettingsFragmentComponentImpl implements ProfileSettingsFragmentComponent {
+      final SettingsActivityComponentImpl mSettingsActivityComponent;
+
+      ProfileSettingsFragmentComponentImpl(
+          SettingsActivityComponentImpl pSettingsActivityComponent) {
+        this.mSettingsActivityComponent = pSettingsActivityComponent;
+      }
+
+      @Override
+      public CameraSettings cameraSettings() {
+        return new CameraSettings(new DarkTheme());
+      }
+
+      private static final class ComponentFactoryImpl implements ProfileSettingsFragmentComponent.Factory {
+        SettingsActivityComponentImpl fSettingsActivityComponent;
+
+        ComponentFactoryImpl(SettingsActivityComponentImpl fSettingsActivityComponent) {
+          this.fSettingsActivityComponent = fSettingsActivityComponent;
+        }
+
+        @Override
+        public ProfileSettingsFragmentComponent create() {
+          return new ProfileSettingsFragmentComponentImpl(this.fSettingsActivityComponent);
         }
       }
     }

@@ -33,24 +33,18 @@ public final class Yatagan$RootComponent implements RootComponent {
   }
 
   @Override
-  public Provider<SubComponent2> getSub2() {
-    return new ProviderImpl(this, 1);
-  }
-
-  @Override
-  public Lazy<SubComponent2> getSub2lazy() {
-    return new CachingProviderImpl(this, 1);
-  }
-
-  @Override
   public SubComponent3 createSubComponent3(MyDep dep, MyModule mod, double d) {
     return new SubComponent3Impl(this, dep, mod, d);
+  }
+
+  @Override
+  public SubComponent2 getSub2() {
+    return new SubComponent2Impl(this);
   }
 
   Object switch$$access(int slot) {
     switch(slot) {
       case 0: return this.cacheFoo();
-      case 1: return new SubComponent2Impl(this);
       default: throw new AssertionError();
     }
   }
@@ -79,12 +73,12 @@ public final class Yatagan$RootComponent implements RootComponent {
     }
 
     @Override
-    public Optional<FeatureComponent> getOpt() {
-      return this.optOfFeatureComponent();
+    public Optional<FeatureComponent.Factory> getOpt() {
+      return this.optOfFeatureComponentFactory();
     }
 
-    Optional optOfFeatureComponent() {
-      return this.featuresIsEnabled() ? Optional.of(new FeatureComponentImpl(this.mRootComponent)) : Optional.empty();
+    Optional optOfFeatureComponentFactory() {
+      return this.featuresIsEnabled() ? Optional.of(new FeatureComponentImpl.ComponentFactoryImpl(this.mRootComponent)) : Optional.empty();
     }
 
     boolean featuresIsEnabled() {
@@ -97,7 +91,7 @@ public final class Yatagan$RootComponent implements RootComponent {
     static final class FeatureComponentImpl implements FeatureComponent {
       final Yatagan$RootComponent mRootComponent;
 
-      private FeatureComponentImpl(Yatagan$RootComponent pRootComponent) {
+      FeatureComponentImpl(Yatagan$RootComponent pRootComponent) {
         this.mRootComponent = pRootComponent;
       }
 
@@ -123,6 +117,19 @@ public final class Yatagan$RootComponent implements RootComponent {
           return this.mMyDep;
         }
       }
+
+      private static final class ComponentFactoryImpl implements FeatureComponent.Factory {
+        Yatagan$RootComponent fRootComponent;
+
+        ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+          this.fRootComponent = fRootComponent;
+        }
+
+        @Override
+        public FeatureComponent create() {
+          return new FeatureComponentImpl(this.fRootComponent);
+        }
+      }
     }
 
     private static final class ComponentFactoryImpl implements SubComponent1.Builder {
@@ -135,91 +142,6 @@ public final class Yatagan$RootComponent implements RootComponent {
       @Override
       public SubComponent1 create() {
         return new SubComponent1Impl(this.fRootComponent);
-      }
-    }
-  }
-
-  static final class SubComponent2Impl implements SubComponent2 {
-    final Yatagan$RootComponent mRootComponent;
-
-    private SubComponent2Impl(Yatagan$RootComponent pRootComponent) {
-      this.mRootComponent = pRootComponent;
-    }
-
-    @Override
-    public Foo getFoo() {
-      return this.mRootComponent.cacheFoo();
-    }
-
-    @Override
-    public Sub2Component getSub2() {
-      return new Sub2ComponentImpl(this.mRootComponent);
-    }
-
-    static final class Sub2ComponentImpl implements Sub2Component {
-      final Yatagan$RootComponent mRootComponent;
-
-      private byte mFeaturesIsEnabled;
-
-      private Sub2ComponentImpl(Yatagan$RootComponent pRootComponent) {
-        this.mRootComponent = pRootComponent;
-      }
-
-      @Override
-      public Foo getFoo() {
-        return this.mRootComponent.cacheFoo();
-      }
-
-      @Override
-      public Optional<FeatureComponent> getOpt() {
-        return this.optOfFeatureComponent();
-      }
-
-      @Override
-      public Sub2Component getS() {
-        return this;
-      }
-
-      Optional optOfFeatureComponent() {
-        return this.featuresIsEnabled() ? Optional.of(new FeatureComponentImpl(this.mRootComponent)) : Optional.empty();
-      }
-
-      boolean featuresIsEnabled() {
-        if (this.mFeaturesIsEnabled == 0x0) {
-          this.mFeaturesIsEnabled = (byte) ((this.mRootComponent.mFeatures.isEnabled()) ? 0x1 : 0x2);
-        }
-        return this.mFeaturesIsEnabled == 0x1;
-      }
-
-      static final class FeatureComponentImpl implements FeatureComponent {
-        final Yatagan$RootComponent mRootComponent;
-
-        private FeatureComponentImpl(Yatagan$RootComponent pRootComponent) {
-          this.mRootComponent = pRootComponent;
-        }
-
-        @Override
-        public Provider<Foo> getFoo() {
-          return new ProviderImpl(this.mRootComponent, 0);
-        }
-
-        @Override
-        public FeatureComponent2 createFeatureComponent2(MyDep dep) {
-          return new FeatureComponent2Impl(dep);
-        }
-
-        static final class FeatureComponent2Impl implements FeatureComponent2 {
-          final MyDep mMyDep;
-
-          FeatureComponent2Impl(MyDep pDep) {
-            this.mMyDep = Checks.checkInputNotNull(pDep);
-          }
-
-          @Override
-          public MyDep getDep() {
-            return this.mMyDep;
-          }
-        }
       }
     }
   }
@@ -259,6 +181,117 @@ public final class Yatagan$RootComponent implements RootComponent {
     public int getI() {
       return Checks.checkProvisionNotNull(this.mMyModule.getI());
     }
+
+    @Override
+    public SubComponent4 getSub4() {
+      return new SubComponent4Impl();
+    }
+
+    static final class SubComponent4Impl implements SubComponent4 {
+      final MyImplicitModule mMyImplicitModule;
+
+      SubComponent4Impl() {
+        this.mMyImplicitModule = new MyImplicitModule();
+      }
+
+      @Override
+      public long getI() {
+        return Checks.checkProvisionNotNull(this.mMyImplicitModule.getI());
+      }
+    }
+  }
+
+  static final class SubComponent2Impl implements SubComponent2 {
+    final Yatagan$RootComponent mRootComponent;
+
+    SubComponent2Impl(Yatagan$RootComponent pRootComponent) {
+      this.mRootComponent = pRootComponent;
+    }
+
+    @Override
+    public Foo getFoo() {
+      return this.mRootComponent.cacheFoo();
+    }
+
+    @Override
+    public Sub2Component getSub2() {
+      return new Sub2ComponentImpl(this.mRootComponent);
+    }
+
+    static final class Sub2ComponentImpl implements Sub2Component {
+      final Yatagan$RootComponent mRootComponent;
+
+      private byte mFeaturesIsEnabled;
+
+      Sub2ComponentImpl(Yatagan$RootComponent pRootComponent) {
+        this.mRootComponent = pRootComponent;
+      }
+
+      @Override
+      public Foo getFoo() {
+        return this.mRootComponent.cacheFoo();
+      }
+
+      @Override
+      public Optional<FeatureComponent.Factory> getOpt() {
+        return this.optOfFeatureComponentFactory();
+      }
+
+      Optional optOfFeatureComponentFactory() {
+        return this.featuresIsEnabled() ? Optional.of(new FeatureComponentImpl.ComponentFactoryImpl(this.mRootComponent)) : Optional.empty();
+      }
+
+      boolean featuresIsEnabled() {
+        if (this.mFeaturesIsEnabled == 0x0) {
+          this.mFeaturesIsEnabled = (byte) ((this.mRootComponent.mFeatures.isEnabled()) ? 0x1 : 0x2);
+        }
+        return this.mFeaturesIsEnabled == 0x1;
+      }
+
+      static final class FeatureComponentImpl implements FeatureComponent {
+        final Yatagan$RootComponent mRootComponent;
+
+        FeatureComponentImpl(Yatagan$RootComponent pRootComponent) {
+          this.mRootComponent = pRootComponent;
+        }
+
+        @Override
+        public Provider<Foo> getFoo() {
+          return new ProviderImpl(this.mRootComponent, 0);
+        }
+
+        @Override
+        public FeatureComponent2 createFeatureComponent2(MyDep dep) {
+          return new FeatureComponent2Impl(dep);
+        }
+
+        static final class FeatureComponent2Impl implements FeatureComponent2 {
+          final MyDep mMyDep;
+
+          FeatureComponent2Impl(MyDep pDep) {
+            this.mMyDep = Checks.checkInputNotNull(pDep);
+          }
+
+          @Override
+          public MyDep getDep() {
+            return this.mMyDep;
+          }
+        }
+
+        private static final class ComponentFactoryImpl implements FeatureComponent.Factory {
+          Yatagan$RootComponent fRootComponent;
+
+          ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+            this.fRootComponent = fRootComponent;
+          }
+
+          @Override
+          public FeatureComponent create() {
+            return new FeatureComponentImpl(this.fRootComponent);
+          }
+        }
+      }
+    }
   }
 
   static final class ProviderImpl implements Lazy {
@@ -274,30 +307,6 @@ public final class Yatagan$RootComponent implements RootComponent {
     @Override
     public Object get() {
       return this.mDelegate.switch$$access(this.mIndex);
-    }
-  }
-
-  private static final class CachingProviderImpl implements Lazy {
-    private final Yatagan$RootComponent mDelegate;
-
-    private final int mIndex;
-
-    private Object mValue;
-
-    CachingProviderImpl(Yatagan$RootComponent factory, int index) {
-      mDelegate = factory;
-      mIndex = index;
-    }
-
-    @Override
-    public Object get() {
-      Object local = mValue;
-      if (local == null) {
-        ThreadAssertions.assertThreadAccess();
-        local = mDelegate.switch$$access(mIndex);
-        mValue = local;
-      }
-      return local;
     }
   }
 

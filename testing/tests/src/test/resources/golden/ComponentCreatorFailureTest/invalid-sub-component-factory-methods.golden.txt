@@ -31,16 +31,6 @@ Encountered:
              ^~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Missing binding for test.SubComponent1
-NOTE: A dependency seems to be a child component, try injecting its factory instead.
-Encountered:
-  in graph for root-component test.RootComponent1
-  in entry-point sub1EP: test.SubComponent1
-                         ^-[*1]------------
-  here: [1*] <missing>
-             ^~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 error: Multiple factory methods detected for a `component test.SubComponent2`
 NOTE: Duplicate declared as `component-factory-method test.RootComponent1::sub2FactoryMethod1(foo: java.lang.Object): test.SubComponent2`
 NOTE: Duplicate declared as `component-factory-method test.RootComponent1::sub2FactoryMethod2(dep: test.MyDependencies): test.SubComponent2`
@@ -70,11 +60,3 @@ Encountered:
   in graph for root-component test.RootComponent1
   here: component-factory-method test.RootComponent1::subUnderFeature(dep: test.MyDependencies): test.SubUnderFeature
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-warning: `component test.SubComponent1` has an explicitly declared `component-creator test.SubComponent1.Factory` so it can't be created directly.
-Changing the entry-point type to the `test.SubComponent1.Factory` would fix the problem and allow the component to be recognized as a child (if not included explicitly).
-Encountered:
-  in graph for root-component test.RootComponent1
-  here: entry-point sub1EP: test.SubComponent1
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -34,7 +34,7 @@ import com.yandex.yatagan.core.graph.bindings.InstanceBinding
 import com.yandex.yatagan.core.graph.bindings.MapBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding
 import com.yandex.yatagan.core.graph.bindings.ProvisionBinding
-import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
+import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
 import com.yandex.yatagan.core.graph.component1
 import com.yandex.yatagan.core.graph.component2
 import com.yandex.yatagan.core.model.BooleanExpression
@@ -263,7 +263,7 @@ internal class RuntimeComponent(
         throw AssertionError("Not reached")
     }
 
-    override fun visitSubComponent(binding: SubComponentBinding): Any {
+    override fun visitSubComponentFactory(binding: SubComponentFactoryBinding): Any {
         val creator = binding.targetGraph.model.factory
         val clazz = (creator ?: binding.targetGraph.model).type.declaration.rt
         return Proxy.newProxyInstance(
@@ -422,7 +422,7 @@ internal class RuntimeComponent(
                 }
             }
 
-            for ((input, arg) in factory.model.factoryInputs.zip(args!!)) {
+            for ((input, arg) in factory.model.factoryInputs.zip(args.orEmpty())) {
                 consumePayload(payload = input.payload, arg = arg!!)
             }
 

@@ -41,9 +41,6 @@ internal class SubComponentFactoryMethodImpl(
         fun canRepresent(method: Method): Boolean {
             if (!method.isAbstract) return false
 
-            // If no parameters, then it's rather an entry-point than factory.
-            if (method.parameters.none()) return false
-
             val returnType = method.returnType.declaration
             if (!ComponentModelImpl.canRepresent(returnType))
                 return false
