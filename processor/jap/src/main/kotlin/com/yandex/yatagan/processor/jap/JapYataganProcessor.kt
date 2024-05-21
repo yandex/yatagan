@@ -20,6 +20,7 @@ import com.yandex.yatagan.Component
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.jap.JavaxLexicalScope
 import com.yandex.yatagan.lang.jap.asTypeElement
+import com.yandex.yatagan.processor.common.BooleanOption
 import com.yandex.yatagan.processor.common.Logger
 import com.yandex.yatagan.processor.common.Options
 import com.yandex.yatagan.processor.common.ProcessorDelegate
@@ -50,7 +51,11 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
         return SourceVersion.latestSupported()
     }
 
-    override fun getSupportedAnnotationTypes(): Set<String> = setOf(Component::class.java.canonicalName)
+    override fun getSupportedAnnotationTypes(): Set<String> = buildSet {
+        add(Component::class.java.canonicalName)
+        if (options[BooleanOption.DaggerCompatibilityMode])
+            add("dagger.Component")
+    }
 
     override fun getSupportedOptions(): Set<String> {
         return Options.all().mapTo(mutableSetOf()) { it.key }
@@ -74,7 +79,11 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
     }
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-        val elementsByAnnotation = roundEnv.getElementsAnnotatedWith(Component::class.java)
+        val elementsByAnnotation = buildList {
+            for (annotation in annotations) {
+                addAll(roundEnv.getElementsAnnotatedWith(annotation))
+            }
+        }
         process(
             sources = elementsByAnnotation
                 .map(Element::asTypeElement)

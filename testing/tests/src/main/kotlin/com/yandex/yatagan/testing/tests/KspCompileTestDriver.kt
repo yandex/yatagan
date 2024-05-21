@@ -16,10 +16,16 @@
 
 package com.yandex.yatagan.testing.tests
 
+import com.yandex.yatagan.generated.CompiledApiClasspath
 import com.yandex.yatagan.processor.ksp.KspYataganProcessorProvider
 import java.io.File
 
-class KspCompileTestDriver : CompileTestDriverBase() {
+class KspCompileTestDriver(
+    override val checkGoldenOutput: Boolean = true,
+    apiClasspath: String = CompiledApiClasspath,
+) : CompileTestDriverBase(
+    apiClasspath = apiClasspath,
+) {
     override fun createCompilationArguments() = super.createCompilationArguments().copy(
         symbolProcessorProviders = listOf(KspYataganProcessorProvider()),
     )

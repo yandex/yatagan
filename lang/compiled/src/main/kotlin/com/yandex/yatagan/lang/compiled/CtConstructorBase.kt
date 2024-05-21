@@ -19,6 +19,7 @@ package com.yandex.yatagan.lang.compiled
 import com.yandex.yatagan.AssistedInject
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.common.ConstructorBase
+import com.yandex.yatagan.lang.common.isDaggerCompat
 import javax.inject.Inject
 
 abstract class CtConstructorBase : ConstructorBase() {
@@ -26,8 +27,14 @@ abstract class CtConstructorBase : ConstructorBase() {
         which: BuiltinAnnotation.Target.OnConstructor<T>,
     ): T? {
         val value: BuiltinAnnotation.OnConstructor? = when (which) {
-            BuiltinAnnotation.AssistedInject -> (which as BuiltinAnnotation.AssistedInject)
-                .takeIf { annotations.any { it.hasType<AssistedInject>() } }
+            BuiltinAnnotation.AssistedInject -> {
+                val daggerCompat = isDaggerCompat()
+                (which as BuiltinAnnotation.AssistedInject)
+                    .takeIf {
+                        annotations.any { it.hasType<AssistedInject>() ||
+                                daggerCompat && it.hasType(DaggerNames.ASSISTED_INJECT) }
+                    }
+            }
 
             BuiltinAnnotation.Inject -> (which as BuiltinAnnotation.Inject)
                 .takeIf { annotations.any { it.hasType<Inject>() } }

@@ -18,6 +18,7 @@ package com.yandex.yatagan.codegen.impl
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
+import com.squareup.javapoet.TypeSpec
 import com.yandex.yatagan.Yatagan
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.lang.langFactory
@@ -28,7 +29,14 @@ class ComponentGeneratorFacade(
     enableThreadChecks: Boolean,
     enableProvisionNullChecks: Boolean,
     sortMethodsForTesting: Boolean,
+    enableDaggerCompatMode: Boolean,
 ) {
+    interface GeneratedFile {
+        val targetPackageName: String
+        val targetClassName: String
+        fun generateTo(out: Appendable)
+    }
+
     private val langFactory = graph.model.type.ext.langFactory
     private val component = Yatagan.builder(GeneratorComponent.Factory::class.java).create(
         graph = graph,
@@ -38,19 +46,21 @@ class ComponentGeneratorFacade(
             enableThreadChecks = enableThreadChecks,
             sortMethodsForTesting = sortMethodsForTesting,
             generatedAnnotationClassName = generatedAnnotationClassName(),
+            enableDaggerCompatMode = enableDaggerCompatMode,
         ),
     )
 
-    val targetPackageName: String
-        get() = component.implementationClassName.packageName()
-
-    val targetClassName: String
-        get() = component.implementationClassName.simpleName()
-
-    fun generateTo(out: Appendable) {
-        JavaFile.builder(targetPackageName, component.generator.generate())
-            .build()
-            .writeTo(out)
+    fun generate(): List<GeneratedFile> = buildList {
+        add(GenerateFileImpl(
+            className = component.implementationClassName,
+            typeSpec = component.generator.generate(),
+        ))
+        component.daggerCompatGenerator.ifPresent {
+            add(GenerateFileImpl(
+                className = it.bridgeClassName,
+                typeSpec = it.generate(),
+            ))
+        }
     }
 
     private fun generatedAnnotationClassName(): ClassName? {
@@ -59,5 +69,19 @@ class ComponentGeneratorFacade(
 
     private fun ClassName.exists(): Boolean {
         return langFactory.getTypeDeclaration(packageName(), simpleName()) != null
+    }
+
+    private class GenerateFileImpl(
+        val className: ClassName,
+        val typeSpec: TypeSpec,
+    ) : GeneratedFile {
+        override val targetPackageName: String get() = className.packageName()
+        override val targetClassName: String get() = className.simpleName()
+
+        override fun generateTo(out: Appendable) {
+            JavaFile.builder(targetPackageName, typeSpec)
+                .build()
+                .writeTo(out)
+        }
     }
 }

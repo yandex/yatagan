@@ -19,6 +19,7 @@ package com.yandex.yatagan.lang.compiled
 import com.yandex.yatagan.IntoMap
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.common.AnnotationDeclarationBase
+import com.yandex.yatagan.lang.common.isDaggerCompat
 import javax.inject.Qualifier
 import javax.inject.Scope
 
@@ -30,7 +31,10 @@ abstract class CtAnnotationDeclarationBase : AnnotationDeclarationBase() {
     ): T? {
         val annotation: BuiltinAnnotation.OnAnnotationClass? = when(builtinAnnotation) {
             BuiltinAnnotation.IntoMap.Key -> (builtinAnnotation as BuiltinAnnotation.IntoMap.Key)
-                .takeIf { annotations.any { it.hasType<IntoMap.Key>() } }
+                .takeIf {
+                    annotations.any { it.hasType<IntoMap.Key>() } ||
+                            isDaggerCompat() && annotations.any { it.hasType(DaggerNames.MAP_KEY) }
+                }
             BuiltinAnnotation.Qualifier -> (builtinAnnotation as BuiltinAnnotation.Qualifier)
                 .takeIf { annotations.any { it.hasType<Qualifier>() } }
             BuiltinAnnotation.Scope -> (builtinAnnotation as BuiltinAnnotation.Scope)

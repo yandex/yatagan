@@ -88,7 +88,7 @@ public final class com/yandex/yatagan/lang/Callable$Visitor$DefaultImpls {
 	public static fun visitMethod (Lcom/yandex/yatagan/lang/Callable$Visitor;Lcom/yandex/yatagan/lang/Method;)Ljava/lang/Object;
 }
 
-public abstract interface class com/yandex/yatagan/lang/Constructor : com/yandex/yatagan/lang/Accessible, com/yandex/yatagan/lang/Annotated, com/yandex/yatagan/lang/Callable {
+public abstract interface class com/yandex/yatagan/lang/Constructor : com/yandex/yatagan/lang/Accessible, com/yandex/yatagan/lang/Annotated, com/yandex/yatagan/lang/Callable, com/yandex/yatagan/lang/scope/LexicalScope {
 	public abstract fun getConstructee ()Lcom/yandex/yatagan/lang/TypeDeclaration;
 }
 
@@ -186,7 +186,7 @@ public final class com/yandex/yatagan/lang/Method$DefaultImpls {
 	public static fun isAnnotatedWith (Lcom/yandex/yatagan/lang/Method;Ljava/lang/Class;)Z
 }
 
-public abstract interface class com/yandex/yatagan/lang/Parameter : com/yandex/yatagan/lang/Annotated {
+public abstract interface class com/yandex/yatagan/lang/Parameter : com/yandex/yatagan/lang/Annotated, com/yandex/yatagan/lang/scope/LexicalScope {
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getType ()Lcom/yandex/yatagan/lang/Type;
 }

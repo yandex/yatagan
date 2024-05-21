@@ -3,6 +3,7 @@ package com.yandex.yatagan.core.model.impl
 import com.yandex.yatagan.core.model.ScopeModel
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.AnnotationDeclaration
+import com.yandex.yatagan.lang.BuiltinAnnotation
 
 @JvmInline
 internal value class ScopeModelImpl private constructor(
@@ -18,9 +19,9 @@ internal value class ScopeModelImpl private constructor(
     override fun toString() = impl.toString()
 
     companion object {
-        operator fun invoke(annotation: Annotation): ScopeModel = when (annotation.annotationClass.qualifiedName) {
-            Names.Reusable -> ScopeModel.Reusable
-            else -> ScopeModelImpl(annotation)
-        }
+        operator fun invoke(annotation: Annotation): ScopeModel =
+            annotation.asBuiltin(BuiltinAnnotation.Reusable)?.let {
+                return ScopeModel.Reusable
+            } ?: ScopeModelImpl(annotation)
     }
 }

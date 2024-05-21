@@ -23,6 +23,7 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
+import com.yandex.yatagan.lang.common.LangOptions
 import com.yandex.yatagan.lang.scope.LexicalScope
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Error
 import com.yandex.yatagan.validation.ValidationMessage.Kind.MandatoryWarning
@@ -92,12 +93,15 @@ fun <Source> process(
                     enableThreadChecks = !delegate.options[BooleanOption.OmitThreadChecks],
                     enableProvisionNullChecks = !delegate.options[BooleanOption.OmitProvisionNullChecks],
                     sortMethodsForTesting = delegate.options[BooleanOption.SortMethodsForTesting],
+                    enableDaggerCompatMode = delegate.options[BooleanOption.DaggerCompatibilityMode],
                 )
-                delegate.openFileForGenerating(
-                    sources = allSourcesSequence(delegate, graphRoot),
-                    packageName = generator.targetPackageName,
-                    className = generator.targetClassName,
-                ).use(generator::generateTo)
+                generator.generate().forEach { generated ->
+                    delegate.openFileForGenerating(
+                        sources = allSourcesSequence(delegate, graphRoot),
+                        packageName = generated.targetPackageName,
+                        className = generated.targetClassName,
+                    ).use(generated::generateTo)
+                }
             } catch (e: Throwable) {
                 logger.error(buildString {
                     appendLine("Internal Processor Error while processing ${graphRoot.toString(null)}")
@@ -117,9 +121,12 @@ fun <Source> process(
 fun initScopedOptions(
     lexicalScope: LexicalScope,
     delegate: ProcessorDelegate<*>,
-) {
-    lexicalScope.ext[Options] = Options(
+) = with(lexicalScope) {
+    ext[Options] = Options(
         allConditionsLazy = delegate.options[BooleanOption.AllConditionsLazy],
+    )
+    ext[LangOptions] = LangOptions(
+        daggerCompatibilityMode = delegate.options[BooleanOption.DaggerCompatibilityMode],
     )
 }
 

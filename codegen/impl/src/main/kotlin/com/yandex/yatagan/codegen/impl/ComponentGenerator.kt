@@ -54,6 +54,7 @@ internal class ComponentGenerator @Inject constructor(
         val enableThreadChecks: Boolean,
         val sortMethodsForTesting: Boolean,
         val generatedAnnotationClassName: ClassName?,
+        val enableDaggerCompatMode: Boolean,
     )
 
     init {

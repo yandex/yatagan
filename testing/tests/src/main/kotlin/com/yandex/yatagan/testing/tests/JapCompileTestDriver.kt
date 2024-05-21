@@ -20,6 +20,7 @@ import com.yandex.yatagan.generated.CompiledApiClasspath
 import com.yandex.yatagan.processor.jap.JapYataganProcessor
 import java.io.File
 import java.net.URLClassLoader
+import java.util.ServiceLoader
 import javax.annotation.processing.Processor
 
 class JapCompileTestDriver(
@@ -44,7 +45,6 @@ class JapCompileTestDriver(
         customProcessorClasspath ?: return null
         val kaptClassloader = URLClassLoader(customProcessorClasspath.split(File.pathSeparatorChar)
             .map { File(it).toURI().toURL() }.toTypedArray(), ClassLoader.getPlatformClassLoader())
-        val clazz = kaptClassloader.loadClass("com.yandex.yatagan.processor.jap.JapYataganProcessor")
-        return clazz.getConstructor().newInstance() as Processor
+        return ServiceLoader.load(Processor::class.java, kaptClassloader).toList().single()
     }
 }

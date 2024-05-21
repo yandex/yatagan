@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.codegen.impl
 
-import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
@@ -87,7 +86,7 @@ internal class MapBindingGenerator @Inject constructor(
         override fun visitByte(value: Byte) = with(builder) { +value.toString() }
         override fun visitShort(value: Short) = with(builder) { +value.toString() }
         override fun visitInt(value: Int) = with(builder) { +value.toString() }
-        override fun visitLong(value: Long) = with(builder) { +value.toString() }
+        override fun visitLong(value: Long) = with(builder) { +"%LL".formatCode(value) }
         override fun visitChar(value: Char) = with(builder) { +"'%L'".formatCode(value) }
         override fun visitFloat(value: Float) = with(builder) { +value.toString() }
         override fun visitDouble(value: Double) = with(builder) { +value.toString() }

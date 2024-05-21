@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Yandex LLC
+ * Copyright 2024 Yandex LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-package com.yandex.yatagan.lang
+package com.yandex.yatagan.lang.common
 
-import com.yandex.yatagan.base.api.Internal
+import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
- * Models a type constructor.
+ * Options structure, that is visible to lang implementations.
  */
-public interface Constructor : Callable, Annotated, Accessible, LexicalScope {
+class LangOptions(
     /**
-     * An owner and a constructed type of the constructor.
+     * Enables best-effort dagger compatibility mode - dagger annotations and framework types will be recognized.
      */
-    public val constructee: TypeDeclaration
-
-    /**
-     * Obtains framework annotation of the given kind.
-     *
-     * @return the annotation model or `null` if no such annotation is present.
-     */
-    @Internal
-    public fun <T : BuiltinAnnotation.OnConstructor> getAnnotation(
-        which: BuiltinAnnotation.Target.OnConstructor<T>
-    ): T?
+    val daggerCompatibilityMode: Boolean,
+) {
+    companion object : Extensible.Key<LangOptions, LexicalScope.Extensions>
 }

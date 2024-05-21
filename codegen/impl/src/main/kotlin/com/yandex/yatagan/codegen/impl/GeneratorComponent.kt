@@ -4,9 +4,11 @@ import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.Binds
 import com.yandex.yatagan.BindsInstance
 import com.yandex.yatagan.Component
+import com.yandex.yatagan.ConditionExpression
 import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.IntoList
 import com.yandex.yatagan.Module
+import com.yandex.yatagan.Optional
 import com.yandex.yatagan.Provides
 import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.core.graph.BindingGraph
@@ -21,6 +23,9 @@ internal annotation class MethodsNamespace
 
 @Qualifier
 internal annotation class SubcomponentsNamespace
+
+@ConditionExpression("getEnableDaggerCompatMode", ComponentGenerator.Options::class)
+internal annotation class DaggerCompatEnabled
 
 @Singleton
 @Component(modules = [
@@ -48,6 +53,8 @@ internal interface GeneratorComponent {
 
     @get:SubcomponentsNamespace
     val subcomponentsNamespace: Namespace
+
+    val daggerCompatGenerator: Optional<DaggerCompatBridgeGenerator>
 
     @Component.Builder
     interface Factory {

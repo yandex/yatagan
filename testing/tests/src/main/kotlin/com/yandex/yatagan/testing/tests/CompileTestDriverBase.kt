@@ -53,8 +53,7 @@ abstract class CompileTestDriverBase private constructor(
 
     override val testNameRule = TestNameRule()
 
-    protected open val checkGoldenOutput: Boolean
-        get() = true
+    protected abstract val checkGoldenOutput: Boolean
 
     final override fun givenPrecompiledModule(sources: SourceSet) {
         if (precompiledModuleOutputDirs != null) {

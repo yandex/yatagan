@@ -7,6 +7,8 @@ ksp = "1.9.24-1.0.20"
 # Must be compatible with 'kotlin'
 dokka = "1.9.20"
 
+dagger = "2.51.1"
+
 # Yatagan version used to build Yatagan
 yataganDogFood = "1.5.0"
 
@@ -37,3 +39,5 @@ yataganDogFood-ksp = { module = "com.yandex.yatagan:processor-ksp", version.ref 
 testing-roomCompileTesting = "androidx.room:room-compiler-processing-testing:2.6.0"
 testing-junit4 = "junit:junit:4.13.2"
 testing-assertj = "org.assertj:assertj-core:3.25.3"
+testing-dagger-api =  { module = "com.google.dagger:dagger", version.ref = "dagger" }
+testing-dagger-processor =  { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }

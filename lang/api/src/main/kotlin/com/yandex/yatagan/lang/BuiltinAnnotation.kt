@@ -321,4 +321,9 @@ public sealed interface BuiltinAnnotation {
             override val modelClass: Class<ValueOf> get() = ValueOf::class.java
         }
     }
+
+    @Internal
+    public object Reusable : CanBeCastedOut, Target.CanBeCastedOut<Reusable> {
+        override val modelClass: Class<Reusable> get() = Reusable::class.java
+    }
 }
