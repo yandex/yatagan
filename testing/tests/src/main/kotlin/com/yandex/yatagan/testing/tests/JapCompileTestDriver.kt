@@ -16,7 +16,7 @@
 
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.generated.CompiledApiClasspath
+import com.yandex.yatagan.generated.CurrentClasspath
 import com.yandex.yatagan.processor.jap.JapYataganProcessor
 import java.io.File
 import java.net.URLClassLoader
@@ -26,7 +26,7 @@ import javax.annotation.processing.Processor
 class JapCompileTestDriver(
     private val customProcessorClasspath: String? = null,
     override val checkGoldenOutput: Boolean = true,
-    apiClasspath: String = CompiledApiClasspath,
+    apiClasspath: String = CurrentClasspath.ApiCompiled,
 ): CompileTestDriverBase(
     apiClasspath = apiClasspath,
 ) {

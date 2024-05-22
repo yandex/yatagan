@@ -14,18 +14,18 @@ val versionsToCheckLoaderCompatibility = listOf(
     "1.5.0",
 )
 
-val baseTestRuntime: Configuration by configurations.creating
-val dynamicTestRuntime: Configuration by configurations.creating {
-    extendsFrom(baseTestRuntime)
+val baseTestRuntime by configurations.registering
+val dynamicTestRuntime by configurations.registering {
+    extendsFrom(baseTestRuntime.get())
 }
-val compiledTestRuntime: Configuration by configurations.creating {
-    extendsFrom(baseTestRuntime)
+val compiledTestRuntime by configurations.registering {
+    extendsFrom(baseTestRuntime.get())
 }
 
-val daggerApi: Configuration by configurations.creating {
-    extendsFrom(compiledTestRuntime)
+val daggerApi by configurations.registering {
+    extendsFrom(compiledTestRuntime.get())
 }
-val daggerProcessor: Configuration by configurations.creating
+val daggerProcessor by configurations.registering
 
 versionsToCheckLoaderCompatibility.forEach { version ->
     configurations.register("kaptForCompatCheck$version")
@@ -38,6 +38,7 @@ kotlin {
     }
 }
 
+@Suppress("UnstableApiUsage")
 dependencies {
     api(project(":testing:source-set"))
 
@@ -84,51 +85,39 @@ dependencies {
     }
 }
 
-val genKaptClasspathForCompatCheckTasks = versionsToCheckLoaderCompatibility.flatMap { version ->
-    val versionId = version.replace("[.-]".toRegex(), "_")
-    val kapt = tasks.register<ClasspathSourceGeneratorTask>("generateKaptClasspathForCompatCheck_$versionId") {
-        propertyName.set("KaptClasspathForCompatCheck$versionId")
-        classpath.set(configurations.named("kaptForCompatCheck$version"))
-    }
-    val api = tasks.register<ClasspathSourceGeneratorTask>("generateApiClasspathForCompatCheck_$versionId") {
-        propertyName.set("ApiClasspathForCompatCheck$versionId")
-        classpath.set(configurations.named("apiForCompatCheck$version"))
-    }
-    listOf(kapt, api)
-}
-
-val generateDynamicApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    propertyName.set("DynamicApiClasspath")
-    classpath.set(dynamicTestRuntime)
-}
-
-val generateCompiledApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    propertyName.set("CompiledApiClasspath")
-    classpath.set(compiledTestRuntime)
-}
-
-val generateDaggerApiClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    propertyName.set("DaggerApiClasspath")
-    classpath.set(daggerApi)
-}
-
-val generateDaggerProcessorClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
-    propertyName.set("DaggerProcessorClasspath")
-    classpath.set(daggerProcessor)
-}
-
-tasks.withType<ClasspathSourceGeneratorTask>().configureEach {
+val generateClasspathProperties by tasks.registering(ClasspathSourceGeneratorTask::class) {
     packageName.set("com.yandex.yatagan.generated")
+    groups {
+        register("ClasspathForCompatCheck") {
+            properties {
+                versionsToCheckLoaderCompatibility.forEach { version ->
+                    val versionId = version.replace("[.-]".toRegex(), "_")
+                    register("Kapt$versionId") {
+                        classpath = configurations.named("kaptForCompatCheck$version")
+                    }
+                    register("Api$versionId") {
+                        classpath = configurations.named("apiForCompatCheck$version")
+                    }
+                }
+            }
+        }
+        register("CurrentClasspath") {
+            properties {
+                register("ApiDynamic") { classpath = dynamicTestRuntime }
+                register("ApiCompiled") { classpath = compiledTestRuntime }
+            }
+        }
+        register("DaggerClasspath") {
+            properties {
+                register("Api") { classpath = daggerApi }
+                register("Processor") { classpath = daggerProcessor }
+            }
+        }
+    }
 }
 
 tasks.named("compileKotlin") {
-    dependsOn(
-        generateDynamicApiClasspath,
-        generateCompiledApiClasspath,
-        generateDaggerApiClasspath,
-        generateDaggerProcessorClasspath,
-        genKaptClasspathForCompatCheckTasks,
-    )
+    dependsOn(generateClasspathProperties)
 }
 
 val updateGoldenFiles by tasks.registering(Test::class) {
@@ -156,11 +145,7 @@ tasks.test {
 kotlin {
     sourceSets {
         main {
-            kotlin.srcDir(generateDynamicApiClasspath.map { it.generatedSourceDir })
-            kotlin.srcDir(generateCompiledApiClasspath.map { it.generatedSourceDir })
-            genKaptClasspathForCompatCheckTasks.forEach { taskProvider ->
-                kotlin.srcDir(taskProvider.map { it.generatedSourceDir })
-            }
+            kotlin.srcDir(generateClasspathProperties.map { it.generatedSourceDir })
         }
     }
 }

@@ -25,8 +25,11 @@ dependencies {
 
 val generateStdLibClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
     packageName.set("com.yandex.yatagan.lang")
-    propertyName.set("StdLibClasspath")
-    classpath.set(stdLib)
+    groups.register("GeneratedClasspath") {
+        properties.register("StdLib") {
+            classpath = stdLib
+        }
+    }
 }
 
 kotlin {

@@ -16,8 +16,7 @@
 
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.generated.DaggerApiClasspath
-import com.yandex.yatagan.generated.DaggerProcessorClasspath
+import com.yandex.yatagan.generated.DaggerClasspath
 import com.yandex.yatagan.processor.common.BooleanOption
 import org.junit.Before
 import org.junit.Test
@@ -36,20 +35,20 @@ class DaggerCompatTest(
             object : Provider<CompileTestDriverBase> {
                 override fun toString() = "JAP"
                 override fun get() = JapCompileTestDriver(
-                    apiClasspath = DaggerApiClasspath,
+                    apiClasspath = DaggerClasspath.Api,
                 )
             },
             object : Provider<CompileTestDriverBase> {
                 override fun toString() = "KSP"
                 override fun get() = KspCompileTestDriver(
-                    apiClasspath = DaggerApiClasspath,
+                    apiClasspath = DaggerClasspath.Api,
                 )
             },
             object : Provider<CompileTestDriverBase> {
                 override fun toString() = "JAP(dagger-for-reference)"
                 override fun get() = JapCompileTestDriver(
-                    apiClasspath = DaggerApiClasspath,
-                    customProcessorClasspath = DaggerProcessorClasspath,
+                    apiClasspath = DaggerClasspath.Api,
+                    customProcessorClasspath = DaggerClasspath.Processor,
                     checkGoldenOutput = false,
                 )
             },

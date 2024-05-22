@@ -19,7 +19,7 @@ package com.yandex.yatagan.testing.tests
 import androidx.room.compiler.processing.util.DiagnosticMessage
 import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
 import androidx.room.compiler.processing.util.compiler.compile
-import com.yandex.yatagan.generated.CompiledApiClasspath
+import com.yandex.yatagan.generated.CurrentClasspath
 import com.yandex.yatagan.processor.common.BooleanOption
 import com.yandex.yatagan.processor.common.IntOption
 import com.yandex.yatagan.processor.common.LoggerDecorator
@@ -48,7 +48,7 @@ abstract class CompileTestDriverBase private constructor(
     )
 
     protected constructor(
-        apiClasspath: String = CompiledApiClasspath,
+        apiClasspath: String = CurrentClasspath.ApiCompiled,
     ) : this(apiClasspath, SourceSet())
 
     override val testNameRule = TestNameRule()
