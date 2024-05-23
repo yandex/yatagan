@@ -1,5 +1,6 @@
 import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
+import kotlinx.kover.gradle.plugin.dsl.tasks.KoverXmlReport
 
 plugins {
     id("yatagan.base-module")
@@ -41,24 +42,26 @@ tasks {
     }
 }
 
-koverReport {
-    filters {
-        includes {
-            classes("com.yandex.yatagan.**")
-        }
-        excludes {
-            classes(
-                // Do not cover internal stuff
-                "**.internal.**",
-                // Mostly inline utility code
-                "**.ExtensionsKt",
-                // Testing code
-                "com.yandex.yatagan.testing.**",
-                // Code generation utility code
-                "com.yandex.yatagan.codegen.poetry.**",
-                // Just in case some build code gets instrumented
-                "com.yandex.yatagan.gradle.**",
-            )
+kover {
+    reports {
+        filters {
+            includes {
+                classes("com.yandex.yatagan.**")
+            }
+            excludes {
+                classes(
+                    // Do not cover internal stuff
+                    "**.internal.**",
+                    // Mostly inline utility code
+                    "**.ExtensionsKt",
+                    // Testing code
+                    "com.yandex.yatagan.testing.**",
+                    // Code generation utility code
+                    "com.yandex.yatagan.codegen.poetry.**",
+                    // Just in case some build code gets instrumented
+                    "com.yandex.yatagan.gradle.**",
+                )
+            }
         }
     }
 }
@@ -148,11 +151,7 @@ if (enableCoverage) {
         }
     }
 
-    koverReport {
-        defaults {
-            xml {
-                onCheck = true
-            }
-        }
+    tasks.check {
+        dependsOn(tasks.withType<KoverXmlReport>())
     }
 }
