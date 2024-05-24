@@ -33,6 +33,7 @@ private const val VALIDATION_DELEGATE_CLASS_PROPERTY = "validationDelegateClass"
 private const val MAX_ISSUE_ENCOUNTER_PATHS_PROPERTY = "maxIssueEncounterPaths"
 private const val IS_STRICT_MODE_PROPERTY = "enableStrictMode"
 private const val USE_PLAIN_OUTPUT_PROPERTY = "usePlainOutput"
+private const val DAGGER_COMPATIBILITY = "enableDaggerCompatibility"
 
 /**
  * Instantiated reflectively.
@@ -84,6 +85,10 @@ internal class ReflectionLoader : ImplementationLoader by ReflectionLoader {
                         }
                         USE_PLAIN_OUTPUT_PROPERTY -> {
                             params.usePlainOutput = value.toString().toBooleanStrictOrNull()
+                                ?: throw IllegalStateException("Expected boolean for `$property`, got `$value`")
+                        }
+                        DAGGER_COMPATIBILITY -> {
+                            params.enableDaggerCompatibility = value.toString().toBooleanStrictOrNull()
                                 ?: throw IllegalStateException("Expected boolean for `$property`, got `$value`")
                         }
                         else -> {

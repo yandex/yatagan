@@ -57,8 +57,10 @@ import javax.lang.model.util.SimpleElementVisitor8
 
 internal val LexicalScope.Utils: ProcessingUtils get() = ext[ProcessingUtils]
 
-inline fun <reified T : Annotation> Element.isAnnotatedWith() = annotationMirrors.any {
-    it.annotationType.asTypeElement().qualifiedName.contentEquals(T::class.java.canonicalName)
+inline fun <reified T : Annotation> Element.isAnnotatedWith() = isAnnotatedWith(T::class.java.canonicalName)
+
+fun Element.isAnnotatedWith(qualifiedName: String) = annotationMirrors.any {
+    it.annotationType.asTypeElement().qualifiedName.contentEquals(qualifiedName)
 }
 
 @PublishedApi

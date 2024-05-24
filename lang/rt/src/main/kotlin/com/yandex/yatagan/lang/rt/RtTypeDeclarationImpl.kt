@@ -169,11 +169,14 @@ internal class RtTypeDeclarationImpl private constructor(
     ): T? {
         val value: BuiltinAnnotation.OnClass? = when (which) {
             BuiltinAnnotation.AssistedFactory -> (which as BuiltinAnnotation.AssistedFactory)
-                .takeIf { impl.isAnnotationPresent(AssistedFactory::class.java) }
+                .takeIf { impl.isAnnotationPresent(AssistedFactory::class.java)
+                        || daggerCompat().hasAssistedFactory(impl) }
             BuiltinAnnotation.Module ->
                 impl.getDeclaredAnnotation(Module::class.java)?.let { RtModuleAnnotationImpl(it) }
+                    ?: daggerCompat().getModule(impl)
             BuiltinAnnotation.Component ->
                 impl.getDeclaredAnnotation(Component::class.java)?.let { RtComponentAnnotationImpl(it) }
+                    ?: daggerCompat().getComponent(impl)
             BuiltinAnnotation.ComponentFlavor ->
                 impl.getDeclaredAnnotation(ComponentFlavor::class.java)?.let { RtComponentFlavorAnnotationImpl(it) }
             BuiltinAnnotation.ComponentVariantDimension -> (which as BuiltinAnnotation.ComponentVariantDimension)
@@ -181,7 +184,8 @@ internal class RtTypeDeclarationImpl private constructor(
                     impl.isAnnotationPresent(ComponentVariantDimension::class.java)
                 }
             BuiltinAnnotation.Component.Builder -> (which as BuiltinAnnotation.Component.Builder)
-                .takeIf { impl.isAnnotationPresent(Component.Builder::class.java) }
+                .takeIf { impl.isAnnotationPresent(Component.Builder::class.java)
+                        || daggerCompat().hasComponentBuilder(impl) }
             BuiltinAnnotation.ConditionExpression ->
                 impl.getAnnotation(ConditionExpression::class.java)?.let { RtConditionExpressionAnnotationImpl(it) }
         }
@@ -223,7 +227,8 @@ internal class RtTypeDeclarationImpl private constructor(
         ): T? {
             val value: BuiltinAnnotation.OnConstructor? = when(which) {
                 BuiltinAnnotation.AssistedInject -> (which as BuiltinAnnotation.AssistedInject)
-                    .takeIf { platformModel.isAnnotationPresent(AssistedInject::class.java) }
+                    .takeIf { platformModel.isAnnotationPresent(AssistedInject::class.java)
+                            || daggerCompat().hasAssistedInject(platformModel) }
                 BuiltinAnnotation.Inject -> (which as BuiltinAnnotation.Inject)
                     .takeIf { platformModel.isAnnotationPresent(Inject::class.java) }
             }

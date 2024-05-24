@@ -55,6 +55,7 @@ import com.yandex.yatagan.lang.Constructor
 import com.yandex.yatagan.lang.Field
 import com.yandex.yatagan.lang.Member
 import com.yandex.yatagan.lang.Method
+import com.yandex.yatagan.lang.common.isDaggerCompat
 import com.yandex.yatagan.lang.isKotlinObject
 import com.yandex.yatagan.lang.rt.kotlinObjectInstanceOrNull
 import com.yandex.yatagan.lang.rt.rawValue
@@ -71,50 +72,31 @@ internal class RuntimeComponent(
     private val givenDependencies: Map<ComponentDependencyModel, Any>,
     validationPromise: DynamicValidationDelegate.Promise?,
     givenModuleInstances: Map<ModuleModel, Any>,
-) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any>,
-    ConditionalAccessStrategy.ScopeEvaluator, WithParents<RuntimeComponent> {
+) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any>, WithParents<RuntimeComponent> {
     lateinit var thisProxy: Any
     private val parentsSequence = parentsSequence(includeThis = true).memoize()
 
     private val accessStrategies: Map<Binding, AccessStrategy> = buildMap(capacity = graph.localBindings.size) {
         val graphRequiresSynchronizedAccess = graph.requiresSynchronizedAccess
+        val accessStrategyFactory = if (graph.model.type.isDaggerCompat())
+            StrategyFactoryDaggerCompat(this@RuntimeComponent) else StrategyFactory(this@RuntimeComponent)
         for ((binding: Binding, usage) in graph.localBindings) {
             val requiresSynchronizedAccess = graphRequiresSynchronizedAccess && ScopeModel.Reusable !in binding.scopes
-            val strategy = run {
-                val provision: AccessStrategy = if (binding.scopes.isNotEmpty()) {
-                    if (requiresSynchronizedAccess) {
-                        SynchronizedCachingAccessStrategy(
-                            binding = binding,
-                            creationVisitor = this@RuntimeComponent,
-                        )
-                    } else {
-                        CachingAccessStrategy(
-                            binding = binding,
-                            creationVisitor = this@RuntimeComponent,
-                        )
-                    }
-                } else {
-                    if (requiresSynchronizedAccess) {
-                        SynchronizedCreatingAccessStrategy(
-                            binding = binding,
-                            creationVisitor = this@RuntimeComponent,
-                        )
-                    } else {
-                        CreatingAccessStrategy(
-                            binding = binding,
-                            creationVisitor = this@RuntimeComponent,
-                        )
-                    }
+            this[binding] = when {
+                binding.scopes.isNotEmpty() -> when {
+                    requiresSynchronizedAccess -> accessStrategyFactory.synchronizedCaching(binding)
+                    else -> accessStrategyFactory.caching(binding)
                 }
-                if (usage.hasOptionalUsage()) {
-                    ConditionalAccessStrategy(
-                        underlying = provision,
-                        evaluator = this@RuntimeComponent,
-                        conditionScopeHolder = binding,
-                    )
-                } else provision
+                else -> when {
+                    requiresSynchronizedAccess -> accessStrategyFactory.synchronizedCreating(binding)
+                    else -> accessStrategyFactory.creating(binding)
+                }
+            }.let {
+                if (usage.hasOptionalUsage()) accessStrategyFactory.optional(
+                    underlying = it,
+                    binding = binding,
+                ) else it
             }
-            put(binding, strategy)
         }
     }
 
@@ -215,7 +197,7 @@ internal class RuntimeComponent(
         return instance as Boolean
     }
 
-    override fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {
+    fun evaluateConditionScope(conditionScope: ConditionScope): Boolean {
         return when (conditionScope) {
             ConditionScope.Always -> true
             ConditionScope.Never -> false

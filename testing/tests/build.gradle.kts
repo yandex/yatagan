@@ -25,6 +25,9 @@ val compiledTestRuntime by configurations.registering {
 val daggerApi by configurations.registering {
     extendsFrom(compiledTestRuntime.get())
 }
+val daggerApiWithReflection by configurations.registering {
+    extendsFrom(daggerApi.get(), dynamicTestRuntime.get())
+}
 val daggerProcessor by configurations.registering
 
 versionsToCheckLoaderCompatibility.forEach { version ->
@@ -110,6 +113,7 @@ val generateClasspathProperties by tasks.registering(ClasspathSourceGeneratorTas
         register("DaggerClasspath") {
             properties {
                 register("Api") { classpath = daggerApi }
+                register("ApiWithReflection") { classpath = daggerApiWithReflection }
                 register("Processor") { classpath = daggerProcessor }
             }
         }

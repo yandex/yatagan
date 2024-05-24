@@ -38,8 +38,10 @@ import javax.lang.model.element.TypeElement
 
 private const val TEST_DELEGATE = "test.TestValidationDelegate"
 
-class DynamicCompileTestDriver() : CompileTestDriverBase(
-    apiClasspath = CurrentClasspath.ApiDynamic,
+class DynamicCompileTestDriver(
+    apiClasspath: String = CurrentClasspath.ApiDynamic,
+) : CompileTestDriverBase(
+    apiClasspath = apiClasspath,
 ) {
     private val accumulator = ComponentBootstrapperGenerator()
     private val options = mutableMapOf<Option<*>, Any>(
@@ -107,12 +109,7 @@ class DynamicCompileTestDriver() : CompileTestDriverBase(
     override val backendUnderTest: Backend
         get() = Backend.Rt
 
-    private fun validateRuntimeComponents(
-        workingDir: File,
-        componentBootstrapperNames: Set<ClassName>,
-        runtimeClasspath: List<File>,
-        log: StringBuilder,
-    ): Boolean {
+    override fun makeClassLoader(workingDir: File, classpath: List<File>): ClassLoader {
         val resourcesDir = workingDir.resolve("resources")
         val propertiesFile = resourcesDir.resolve("META-INF/com.yandex.yatagan.reflection/parameters.properties")
         propertiesFile.parentFile.mkdirs()
@@ -124,8 +121,19 @@ class DynamicCompileTestDriver() : CompileTestDriverBase(
                 }
             }.store(it, "Generated test properties")
         }
+        return super.makeClassLoader(
+            workingDir = workingDir,
+            classpath = classpath + resourcesDir,
+        )
+    }
 
-        val classLoader = makeClassLoader(runtimeClasspath + resourcesDir)
+    private fun validateRuntimeComponents(
+        workingDir: File,
+        componentBootstrapperNames: Set<ClassName>,
+        runtimeClasspath: List<File>,
+        log: StringBuilder,
+    ): Boolean {
+        val classLoader = makeClassLoader(workingDir, runtimeClasspath)
         var success = true
         val logger = LoggerDecorator(object : Logger {
             override fun error(message: String) {

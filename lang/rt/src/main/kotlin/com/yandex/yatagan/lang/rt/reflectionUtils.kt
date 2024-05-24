@@ -396,3 +396,5 @@ internal class TypeEquivalenceWrapper private constructor(val type: ReflectType)
         override fun LexicalScope.factory() = caching(::TypeEquivalenceWrapper)
     }
 }
+
+internal fun LexicalScope.daggerCompat() = ext[RtDaggerCompat]

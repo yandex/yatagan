@@ -73,16 +73,22 @@ abstract class CtMethodBase : MethodBase() {
     ): List<T> {
         return when (which) {
             BuiltinAnnotation.IntoCollectionFamily -> buildList {
+                var hasIntoSet = false
                 for (annotation in annotations) {
-                    val daggerCompat = isDaggerCompat()
                     when {
                         annotation.hasType<IntoList>() ->
                             add(which.modelClass.cast(CtIntoListAnnotationImpl(annotation)))
-                        annotation.hasType<IntoSet>() ->
+                        annotation.hasType<IntoSet>() -> {
+                            hasIntoSet = true
                             add(which.modelClass.cast(CtIntoSetAnnotationImpl(annotation)))
-                        daggerCompat && annotation.hasType(DaggerNames.INTO_SET) ->
+                        }
+                    }
+                }
+                if (!hasIntoSet && isDaggerCompat()) {
+                    for (annotation in annotations) when {
+                        annotation.hasType(DaggerNames.INTO_SET) ->
                             add(which.modelClass.cast(CtIntoSetAnnotationDaggerCompatImpl(annotation)))
-                        daggerCompat && annotation.hasType(DaggerNames.ELEMENTS_INTO_SET) ->
+                        annotation.hasType(DaggerNames.ELEMENTS_INTO_SET) ->
                             add(which.modelClass.cast(CtElementsIntoSetAnnotationDaggerCompatImpl(annotation)))
                     }
                 }

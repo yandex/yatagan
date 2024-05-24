@@ -48,7 +48,7 @@ Encountered:
         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Methods can't declare both @IntoList and @IntoSet modifier annotations
+error: Methods can't declare multiple @Into* modifier annotations
 Encountered:
   in graph for root-component test.TestComponent
   in module test.TestModule

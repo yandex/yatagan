@@ -57,7 +57,7 @@ internal class RtAnnotationImpl private constructor(
     override fun <T : BuiltinAnnotation.CanBeCastedOut> asBuiltin(which: BuiltinAnnotation.Target.CanBeCastedOut<T>): T? {
         return which.modelClass.cast(when(which) {
             BuiltinAnnotation.ValueOf -> RtValueOfAnnotationImpl(impl as? ValueOf ?: return null)
-            BuiltinAnnotation.Reusable -> which.takeIf { impl is Reusable }
+            BuiltinAnnotation.Reusable -> which.takeIf { impl is Reusable || daggerCompat().isReusable(impl) }
         })
     }
 
@@ -136,7 +136,7 @@ internal class RtAnnotationImpl private constructor(
         ): T? {
             val annotation: BuiltinAnnotation.OnAnnotationClass? = when(builtinAnnotation) {
                 BuiltinAnnotation.IntoMap.Key -> (builtinAnnotation as BuiltinAnnotation.IntoMap.Key)
-                    .takeIf { impl.isAnnotationPresent(IntoMap.Key::class.java) }
+                    .takeIf { impl.isAnnotationPresent(IntoMap.Key::class.java) || daggerCompat().hasMapKey(impl) }
                 BuiltinAnnotation.Qualifier -> (builtinAnnotation as BuiltinAnnotation.Qualifier)
                     .takeIf { impl.isAnnotationPresent(Qualifier::class.java) }
                 BuiltinAnnotation.Scope -> (builtinAnnotation as BuiltinAnnotation.Scope)

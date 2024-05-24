@@ -19,7 +19,6 @@ package com.yandex.yatagan.rt.engine
 import com.yandex.yatagan.Lazy
 import com.yandex.yatagan.Optional
 import com.yandex.yatagan.core.graph.bindings.Binding
-import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.internal.ThreadAssertions
 import com.yandex.yatagan.internal.YataganInternal
 import javax.inject.Provider
@@ -32,54 +31,54 @@ internal abstract class AccessStrategy : Provider<Any> {
     open fun getOptionalProvider(): Optional<Provider<*>> = Optional.of(this)
 }
 
-internal class SynchronizedCachingAccessStrategy(
+internal open class SynchronizedCachingAccessStrategy(
     private val binding: Binding,
     private val creationVisitor: Binding.Visitor<Any>,
 ) : AccessStrategy(), Lazy<Any> {
     @Volatile
     private var value: Any? = null
 
-    override fun get(): Any {
+    final override fun get(): Any {
         value?.let { local -> return local }
         return synchronized(this) {
             value?.let { local -> return local }
             binding.accept(creationVisitor).also { value = it }
         }
     }
-    override fun getLazy(): Lazy<*> = this
+    final override fun getLazy(): Lazy<*> = this
 }
 
-internal class CachingAccessStrategy(
+internal open class CachingAccessStrategy(
     private val binding: Binding,
     private val creationVisitor: Binding.Visitor<Any>,
 ) : AccessStrategy(), Lazy<Any> {
     private var value: Any? = null
 
     @OptIn(YataganInternal::class)
-    override fun get(): Any {
+    final override fun get(): Any {
         value?.let { local -> return local }
         ThreadAssertions.assertThreadAccess()
         return binding.accept(creationVisitor).also { value = it }
     }
-    override fun getLazy(): Lazy<*> = this
+    final override fun getLazy(): Lazy<*> = this
 }
 
-internal class SynchronizedCreatingAccessStrategy(
-    private val binding: Binding,
-    private val creationVisitor: Binding.Visitor<Any>,
+internal open class SynchronizedCreatingAccessStrategy(
+    protected val binding: Binding,
+    protected val creationVisitor: Binding.Visitor<Any>,
 ) : AccessStrategy() {
-    override fun get(): Any = binding.accept(creationVisitor)
+    final override fun get(): Any = binding.accept(creationVisitor)
     override fun getLazy(): Lazy<*> = SynchronizedCachingAccessStrategy(
         binding = binding,
         creationVisitor = creationVisitor,
     )
 }
 
-internal class CreatingAccessStrategy(
-    private val binding: Binding,
-    private val creationVisitor: Binding.Visitor<Any>,
+internal open class CreatingAccessStrategy(
+    protected val binding: Binding,
+    protected val creationVisitor: Binding.Visitor<Any>,
 ) : AccessStrategy() {
-    override fun get(): Any = binding.accept(creationVisitor)
+    final override fun get(): Any = binding.accept(creationVisitor)
     override fun getLazy(): Lazy<*> = CachingAccessStrategy(
         binding = binding,
         creationVisitor = creationVisitor,
@@ -89,12 +88,8 @@ internal class CreatingAccessStrategy(
 internal class ConditionalAccessStrategy(
     private val underlying: AccessStrategy,
     private val conditionScopeHolder: Binding,
-    private val evaluator: ScopeEvaluator,
+    private val evaluator: RuntimeComponent,
 ) : AccessStrategy() {
-    interface ScopeEvaluator {
-        fun evaluateConditionScope(conditionScope: ConditionScope): Boolean
-    }
-
     override fun get(): Any = underlying.get()
     override fun getLazy(): Lazy<*> = underlying.getLazy()
     
@@ -114,4 +109,28 @@ internal class ConditionalAccessStrategy(
         } else Optional.empty()
 }
 
+internal open class StrategyFactory(
+    protected val component: RuntimeComponent,
+) {
+    open fun synchronizedCaching(binding: Binding): AccessStrategy {
+        return SynchronizedCachingAccessStrategy(binding, component)
+    }
 
+    open fun caching(binding: Binding): AccessStrategy {
+        return CachingAccessStrategy(binding, component)
+    }
+
+    open fun synchronizedCreating(binding: Binding): AccessStrategy {
+        return SynchronizedCreatingAccessStrategy(binding, component)
+    }
+
+    open fun creating(binding: Binding): AccessStrategy {
+        return CreatingAccessStrategy(binding, component)
+    }
+
+    fun optional(underlying: AccessStrategy, binding: Binding) = ConditionalAccessStrategy(
+        underlying = underlying,
+        evaluator = component,
+        conditionScopeHolder = binding,
+    )
+}

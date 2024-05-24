@@ -23,7 +23,6 @@ import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
 import com.yandex.yatagan.core.model.impl.ComponentModel
-import com.yandex.yatagan.lang.common.LangOptions
 import com.yandex.yatagan.lang.rt.RtLexicalScope
 import com.yandex.yatagan.rt.support.DynamicValidationDelegate
 import com.yandex.yatagan.rt.support.Logger
@@ -58,6 +57,7 @@ class RuntimeEngine(
         var isStrictMode: Boolean = true,
         var usePlainOutput: Boolean = false,
         var allConditionsLazy: Boolean = false,
+        var enableDaggerCompatibility: Boolean = false,
     )
 
     private val lexicalScopeCache = hashMapOf<ClassLoader, SoftReference<RtLexicalScope>>()
@@ -65,13 +65,12 @@ class RuntimeEngine(
     private fun obtainLexicalScopeFor(clazz: Class<*>): RtLexicalScope = synchronized(lexicalScopeCache) {
         val classLoader = clazz.classLoader
         return lexicalScopeCache[classLoader]?.get() ?: run {
-            RtLexicalScope(classLoader).also {
+            RtLexicalScope(
+                classLoader = classLoader,
+                daggerCompatibilityMode = params.enableDaggerCompatibility,
+            ).also {
                 it.ext[Options] = Options(
                     allConditionsLazy = params.allConditionsLazy,
-                )
-                it.ext[LangOptions] = LangOptions(
-                    // TODO: Support compat mode in RT
-                    daggerCompatibilityMode = false,
                 )
                 lexicalScopeCache[classLoader] = SoftReference(it)
             }

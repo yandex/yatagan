@@ -72,15 +72,15 @@ internal class RtMethodImpl(
     ): T? {
         val annotation: BuiltinAnnotation.OnMethod? = when (which) {
             BuiltinAnnotation.Binds -> (which as BuiltinAnnotation.Binds)
-                .takeIf { impl.isAnnotationPresent(Binds::class.java) }
+                .takeIf { impl.isAnnotationPresent(Binds::class.java) || daggerCompat().hasBinds(impl) }
             BuiltinAnnotation.BindsInstance -> (which as BuiltinAnnotation.BindsInstance)
-                .takeIf { impl.isAnnotationPresent(BindsInstance::class.java) }
+                .takeIf { impl.isAnnotationPresent(BindsInstance::class.java) || daggerCompat().hasBindsInstance(impl) }
             BuiltinAnnotation.Provides -> (which as BuiltinAnnotation.Provides)
-                .takeIf { impl.isAnnotationPresent(Provides::class.java) }
+                .takeIf { impl.isAnnotationPresent(Provides::class.java) || daggerCompat().hasProvides(impl) }
             BuiltinAnnotation.IntoMap -> (which as BuiltinAnnotation.IntoMap)
-                .takeIf { impl.isAnnotationPresent(IntoMap::class.java) }
+                .takeIf { impl.isAnnotationPresent(IntoMap::class.java) || daggerCompat().hasIntoMap(impl) }
             BuiltinAnnotation.Multibinds -> (which as BuiltinAnnotation.Multibinds)
-                .takeIf { impl.isAnnotationPresent(Multibinds::class.java) }
+                .takeIf { impl.isAnnotationPresent(Multibinds::class.java) || daggerCompat().hasMultibinds(impl) }
             BuiltinAnnotation.Inject -> (which as BuiltinAnnotation.Inject)
                 .takeIf { impl.isAnnotationPresent(Inject::class.java) }
         }
@@ -92,13 +92,19 @@ internal class RtMethodImpl(
         which: BuiltinAnnotation.Target.OnMethodRepeatable<T>,
     ): List<T> {
         return when (which) {
-            BuiltinAnnotation.IntoCollectionFamily -> {
-                impl.declaredAnnotations.mapNotNull {
-                    when (it) {
-                        is IntoList -> which.modelClass.cast(RtIntoListAnnotationImpl(it))
-                        is IntoSet -> which.modelClass.cast(RtIntoSetAnnotationImpl(it))
-                        else -> null
+            BuiltinAnnotation.IntoCollectionFamily -> buildList {
+                var hasIntoSet = false
+                for (annotation in impl.declaredAnnotations) {
+                    when(annotation) {
+                        is IntoList -> add(which.modelClass.cast(RtIntoListAnnotationImpl(annotation)))
+                        is IntoSet -> {
+                            hasIntoSet = true
+                            add(which.modelClass.cast(RtIntoSetAnnotationImpl(annotation)))
+                        }
                     }
+                }
+                if (!hasIntoSet) {
+                    daggerCompat().getIntoSet(impl)?.let { add(which.modelClass.cast(it)) }
                 }
             }
             BuiltinAnnotation.Conditional -> buildList {
@@ -114,7 +120,7 @@ internal class RtMethodImpl(
     private inner class ParameterImpl(
         val index: Int,
     ) : RtParameterBase(), LexicalScope by this {
-        override val parameterAnnotations: Array<kotlin.Annotation>
+        override val parameterAnnotations: Array<ReflectAnnotation>
             get() = parametersAnnotations[index]
 
         override val name: String

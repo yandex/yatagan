@@ -132,7 +132,10 @@ interface LangTestDriver : SourceSet {
                         (arguments.classpath + result.outputClasspath)
                             .mapToArray { it.toURI().toURL() }
                     )
-                    val lexicalScope = RtLexicalScope(classLoader)
+                    val lexicalScope = RtLexicalScope(
+                        classLoader = classLoader,
+                        daggerCompatibilityMode = false,
+                    )
                     block(lexicalScope.ext.langFactory)
                 }
             }

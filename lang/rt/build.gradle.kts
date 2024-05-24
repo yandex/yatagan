@@ -7,4 +7,7 @@ dependencies {
 
     implementation(project(":api:public"))
     implementation(project(":base:impl"))
+
+    // optional dependency, detected at runtime for compat mode
+    compileOnly(libs.testing.dagger.api)
 }
