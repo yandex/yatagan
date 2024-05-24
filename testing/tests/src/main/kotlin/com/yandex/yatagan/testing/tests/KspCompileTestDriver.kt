@@ -16,13 +16,13 @@
 
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.generated.CompiledApiClasspath
+import com.yandex.yatagan.generated.CurrentClasspath
 import com.yandex.yatagan.processor.ksp.KspYataganProcessorProvider
 import java.io.File
 
 class KspCompileTestDriver(
     override val checkGoldenOutput: Boolean = true,
-    apiClasspath: String = CompiledApiClasspath,
+    apiClasspath: String = CurrentClasspath.ApiCompiled,
 ) : CompileTestDriverBase(
     apiClasspath = apiClasspath,
 ) {

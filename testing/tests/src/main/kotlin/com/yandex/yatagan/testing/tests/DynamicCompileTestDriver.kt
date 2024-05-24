@@ -18,7 +18,7 @@ package com.yandex.yatagan.testing.tests
 
 import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.Component
-import com.yandex.yatagan.generated.DynamicApiClasspath
+import com.yandex.yatagan.generated.CurrentClasspath
 import com.yandex.yatagan.lang.jap.asTypeElement
 import com.yandex.yatagan.lang.jap.isAnnotatedWith
 import com.yandex.yatagan.processor.common.IntOption
@@ -38,7 +38,9 @@ import javax.lang.model.element.TypeElement
 
 private const val TEST_DELEGATE = "test.TestValidationDelegate"
 
-class DynamicCompileTestDriver() : CompileTestDriverBase(DynamicApiClasspath) {
+class DynamicCompileTestDriver() : CompileTestDriverBase(
+    apiClasspath = CurrentClasspath.ApiDynamic,
+) {
     private val accumulator = ComponentBootstrapperGenerator()
     private val options = mutableMapOf<Option<*>, Any>(
         IntOption.MaxIssueEncounterPaths to 100,

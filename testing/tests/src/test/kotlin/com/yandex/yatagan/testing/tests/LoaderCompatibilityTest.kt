@@ -16,16 +16,7 @@
 
 package com.yandex.yatagan.testing.tests
 
-import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_0_0
-import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_1_0
-import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_2_0
-import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_3_0
-import com.yandex.yatagan.generated.ApiClasspathForCompatCheck1_5_0
-import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_0_0
-import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_1_0
-import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_2_0
-import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_3_0
-import com.yandex.yatagan.generated.KaptClasspathForCompatCheck1_5_0
+import com.yandex.yatagan.generated.ClasspathForCompatCheck
 import org.junit.Assume
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,11 +32,11 @@ class LoaderCompatibilityTest(
         val kaptClasspath: String,
         val apiClasspath: String,
     ) {
-        v1_0_0(KaptClasspathForCompatCheck1_0_0, ApiClasspathForCompatCheck1_0_0),
-        v1_1_0(KaptClasspathForCompatCheck1_1_0, ApiClasspathForCompatCheck1_1_0),
-        v1_2_0(KaptClasspathForCompatCheck1_2_0, ApiClasspathForCompatCheck1_2_0),
-        v1_3_0(KaptClasspathForCompatCheck1_3_0, ApiClasspathForCompatCheck1_3_0),
-        v1_5_0(KaptClasspathForCompatCheck1_5_0, ApiClasspathForCompatCheck1_5_0),
+        v1_0_0(ClasspathForCompatCheck.Kapt1_0_0, ClasspathForCompatCheck.Api1_0_0),
+        v1_1_0(ClasspathForCompatCheck.Kapt1_1_0, ClasspathForCompatCheck.Api1_1_0),
+        v1_2_0(ClasspathForCompatCheck.Kapt1_2_0, ClasspathForCompatCheck.Api1_2_0),
+        v1_3_0(ClasspathForCompatCheck.Kapt1_3_0, ClasspathForCompatCheck.Api1_3_0),
+        v1_5_0(ClasspathForCompatCheck.Kapt1_5_0, ClasspathForCompatCheck.Api1_5_0),
     }
 
     companion object {

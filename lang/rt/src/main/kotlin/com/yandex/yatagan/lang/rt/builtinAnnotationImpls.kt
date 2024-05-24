@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ConditionsApi::class, VariantApi::class)
-
 package com.yandex.yatagan.lang.rt
 
 import com.yandex.yatagan.Assisted
@@ -27,7 +25,6 @@ import com.yandex.yatagan.ConditionsApi
 import com.yandex.yatagan.IntoList
 import com.yandex.yatagan.IntoSet
 import com.yandex.yatagan.Module
-import com.yandex.yatagan.Provides
 import com.yandex.yatagan.ValueOf
 import com.yandex.yatagan.VariantApi
 import com.yandex.yatagan.lang.BuiltinAnnotation
@@ -72,6 +69,7 @@ internal class RtModuleAnnotationImpl private constructor(
     }
 }
 
+@OptIn(ConditionsApi::class)
 internal class RtConditionalAnnotationImpl private constructor(
     lexicalScope: LexicalScope,
     impl: Conditional,
@@ -98,6 +96,7 @@ internal class RtIntoSetAnnotationImpl(
         get() = impl.flatten
 }
 
+@OptIn(ConditionsApi::class)
 internal class RtConditionExpressionAnnotationImpl private constructor(
     lexicalScope: LexicalScope,
     impl: ConditionExpression,
@@ -130,6 +129,7 @@ internal class RtConditionExpressionAnnotationImpl private constructor(
     }
 }
 
+@OptIn(ConditionsApi::class)
 internal class RtValueOfAnnotationImpl private constructor(
     lexicalScope: LexicalScope,
     impl: ValueOf,
@@ -142,6 +142,7 @@ internal class RtValueOfAnnotationImpl private constructor(
     }
 }
 
+@OptIn(VariantApi::class)
 internal class RtComponentFlavorAnnotationImpl private constructor(
     lexicalScope: LexicalScope,
     impl: ComponentFlavor,

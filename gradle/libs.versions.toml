@@ -21,7 +21,7 @@ kotlin-binaryCompatibilityGradle.group = "org.jetbrains.kotlinx.binary-compatibi
 kotlin-binaryCompatibilityGradle.name = "org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin"
 kotlin-binaryCompatibilityGradle.version = "0.13.2"
 
-kotlin-koverGradle = "org.jetbrains.kotlinx:kover-gradle-plugin:0.7.6"
+kotlin-koverGradle = "org.jetbrains.kotlinx:kover-gradle-plugin:0.8.0"
 
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }

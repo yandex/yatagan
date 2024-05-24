@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ConditionsApi::class, VariantApi::class)
-
 package com.yandex.yatagan.lang.compiled
 
 import com.yandex.yatagan.AssistedFactory
@@ -40,6 +38,7 @@ import com.yandex.yatagan.lang.common.isDaggerCompat
 abstract class CtTypeDeclarationBase : TypeDeclarationBase() {
     abstract override val annotations: Sequence<CtAnnotationBase>
 
+    @OptIn(ConditionsApi::class, VariantApi::class)
     override fun <T : BuiltinAnnotation.OnClass> getAnnotation(
         which: BuiltinAnnotation.Target.OnClass<T>
     ): T? {
@@ -73,6 +72,7 @@ abstract class CtTypeDeclarationBase : TypeDeclarationBase() {
         return which.modelClass.cast(value)
     }
 
+    @OptIn(ConditionsApi::class)
     override fun <T : BuiltinAnnotation.OnClassRepeatable> getAnnotations(
         which: BuiltinAnnotation.Target.OnClassRepeatable<T>
     ): List<T> {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ConditionsApi::class, VariantApi::class)
-
 package com.yandex.yatagan.lang.rt
 
 import com.yandex.yatagan.AssistedFactory
@@ -165,6 +163,7 @@ internal class RtTypeDeclarationImpl private constructor(
     override val platformModel: Class<*>
         get() = impl
 
+    @OptIn(ConditionsApi::class, VariantApi::class)
     override fun <T : BuiltinAnnotation.OnClass> getAnnotation(
         which: BuiltinAnnotation.Target.OnClass<T>
     ): T? {
@@ -189,6 +188,7 @@ internal class RtTypeDeclarationImpl private constructor(
         return which.modelClass.cast(value)
     }
 
+    @OptIn(ConditionsApi::class)
     override fun <T : BuiltinAnnotation.OnClassRepeatable> getAnnotations(
         which: BuiltinAnnotation.Target.OnClassRepeatable<T>
     ): List<T> {
