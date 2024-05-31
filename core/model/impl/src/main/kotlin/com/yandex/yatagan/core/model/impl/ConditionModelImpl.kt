@@ -28,35 +28,13 @@ import com.yandex.yatagan.lang.scope.LexicalScope
 import com.yandex.yatagan.lang.scope.caching
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
-import com.yandex.yatagan.validation.format.ErrorMessage
 import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.TextColor
-import com.yandex.yatagan.validation.format.WarningMessage
 import com.yandex.yatagan.validation.format.append
 import com.yandex.yatagan.validation.format.appendRichString
 import com.yandex.yatagan.validation.format.buildRichString
 import com.yandex.yatagan.validation.format.reportError
 import com.yandex.yatagan.validation.format.reportWarning
-
-private typealias ValidationReport = (Validator) -> Unit
-
-private class SimpleErrorReport(val error: ErrorMessage): ValidationReport {
-    override fun invoke(validator: Validator) = validator.reportError(error)
-}
-
-private class SimpleWarningReport(val warning: WarningMessage): ValidationReport {
-    override fun invoke(validator: Validator) = validator.reportWarning(warning)
-}
-
-private class CompositeErrorReport(
-    val base: ValidationReport?,
-    val added: ValidationReport,
-) : ValidationReport {
-    override fun invoke(validator: Validator) {
-        base?.invoke(validator)
-        added.invoke(validator)
-    }
-}
 
 private object MemberTypeVisitor : Member.Visitor<Type> {
     override fun visitOther(model: Member) = throw AssertionError()
@@ -69,8 +47,6 @@ internal class ConditionModelImpl private constructor(
 ) : VariableBaseImpl(), LexicalScope by data.first {
     private val type = data.first
     override val pathSource: String = data.second
-    private var validationReport: ValidationReport? = null
-    private var _nonStatic = false
 
     override val root: NodeModel
         get() = NodeModelImpl(
@@ -80,71 +56,46 @@ internal class ConditionModelImpl private constructor(
 
     override val path: List<Member> by lazy {
         buildList {
-            var currentType = type
-            var finished = false
-
-            var isFirst = true
-            pathSource.split('.').forEach { name ->
-                if (finished) {
-                    validationReport = SimpleErrorReport(Strings.Errors.invalidConditionNoBoolean())
-                    return@forEach
-                }
-
-                val currentDeclaration = currentType.declaration
-                if (!currentDeclaration.isEffectivelyPublic) {
-                    validationReport = SimpleErrorReport(
-                        Strings.Errors.invalidAccessForConditionClass(`class` = currentDeclaration))
-                    return@buildList
-                }
-
-                val member = findAccessor(currentDeclaration, name)
-                if (member == null) {
-                    validationReport = SimpleErrorReport(
-                        Strings.Errors.invalidConditionMissingMember(name = name, type = currentType))
-                    return@buildList
-                }
-                if (isFirst) {
-                    if (!member.isStatic) {
-                        if (currentType.declaration.isKotlinObject) {
-                            // Issue warning
-                            validationReport = SimpleWarningReport(Strings.Warnings.nonStaticConditionOnKotlinObject())
-                        }
-                        _nonStatic = true
-                    }
-                    isFirst = false
-                }
-                if (!member.isEffectivelyPublic) {
-                    validationReport = SimpleErrorReport(
-                        Strings.Errors.invalidAccessForConditionMember(member = member))
-                    return@buildList
-                }
-                add(member)
-
-                val type = member.accept(MemberTypeVisitor)
-                if (type.asBoxed().declaration.qualifiedName == Names.Boolean) {
-                    finished = true
-                } else {
-                    currentType = type
-                }
-            }
-            if (!finished) {
-                validationReport = CompositeErrorReport(
-                    base = validationReport,
-                    added = SimpleErrorReport(Strings.Errors.invalidConditionNoBoolean()),
-                )
+            pathSource.splitToSequence('.').foldIndexed(type) { index, currentType, name ->
+                val resolvedAccessor = findAccessor(
+                    type = currentType.declaration,
+                    name = name,
+                    allowStatic = index == 0,
+                ) ?: return@buildList
+                add(resolvedAccessor)
+                resolvedAccessor.accept(MemberTypeVisitor)
             }
         }
     }
 
     override val requiresInstance: Boolean
-        get() {
-            path  // Ensure path is parsed
-            return _nonStatic
-        }
+        get() = path.firstOrNull()?.isStatic == false
 
     override fun validate(validator: Validator) {
-        path  // Ensure path is parsed
-        validationReport?.invoke(validator)
+        pathSource.split('.').let { memberNames ->
+            if (memberNames.size > path.size) {
+                validator.reportError(Strings.Errors.invalidConditionMissingMember(
+                    name = memberNames[path.size],
+                    type = path.lastOrNull()?.accept(MemberTypeVisitor) ?: type,
+                ))
+            }
+        }
+        if (path.isNotEmpty()) {
+            if (path.last().accept(MemberTypeVisitor).asBoxed().declaration.qualifiedName != Names.Boolean) {
+                validator.reportError(Strings.Errors.invalidConditionNoBoolean())
+            }
+            if (!path.first().isStatic && type.declaration.isKotlinObject) {
+                validator.reportWarning(Strings.Warnings.nonStaticConditionOnKotlinObject())
+            }
+            path.forEach { member ->
+                if (!member.owner.isEffectivelyPublic) {
+                    validator.reportError(Strings.Errors.invalidAccessForConditionClass(`class` = member.owner))
+                }
+                if (!member.isEffectivelyPublic) {
+                    validator.reportError(Strings.Errors.invalidAccessForConditionMember(member = member))
+                }
+            }
+        }
     }
 
     override fun toString(childContext: MayBeInvalid?) = buildRichString {
@@ -194,19 +145,9 @@ internal class ConditionModelImpl private constructor(
             } else Caching(data)
         }
 
-        private fun findAccessor(type: TypeDeclaration, name: String): Member? {
-            val field = type.fields.find { it.name == name }
-            if (field != null) {
-                return field
-            }
-
-            val method = type.methods.find { method ->
-                method.name == name
-            }
-            if (method != null) {
-                return method
-            }
-            return null
+        private fun findAccessor(type: TypeDeclaration, name: String, allowStatic: Boolean): Member? {
+            return (type.fields.find { it.name == name && (allowStatic || !it.isStatic) }
+                ?: type.methods.find { it.name == name && it.parameters.none() && (allowStatic || !it.isStatic) })
         }
 
         private val ConditionRegex = "^(?:[A-Za-z_][A-Za-z0-9_]*\\.)*[A-Za-z_][A-Za-z0-9_]*\$".toRegex()
