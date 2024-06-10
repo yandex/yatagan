@@ -26,6 +26,9 @@ internal typealias ReflectMethod = java.lang.reflect.Method
 internal typealias ReflectField = java.lang.reflect.Field
 internal typealias ReflectConstructor = java.lang.reflect.Constructor<*>
 
+@Suppress("RemoveRedundantQualifierName")
+internal typealias ReflectAnnotation = kotlin.Annotation
+
 // Types:
 
 internal typealias ReflectAnnotatedElement = java.lang.reflect.AnnotatedElement

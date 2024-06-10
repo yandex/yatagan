@@ -33,15 +33,18 @@ internal abstract class RtParameterBase : ParameterBase(), LexicalScope {
     final override fun <T : BuiltinAnnotation.OnParameter> getAnnotation(
         which: BuiltinAnnotation.Target.OnParameter<T>,
     ): T? {
+        val daggerCompat = daggerCompat()
         val annotation: BuiltinAnnotation.OnParameter? = when (which) {
             BuiltinAnnotation.BindsInstance -> BuiltinAnnotation.BindsInstance.takeIf {
-                parameterAnnotations.any { it is BindsInstance }
+                parameterAnnotations.any { it is BindsInstance || daggerCompat.isBindsInstance(it) }
             }
 
             BuiltinAnnotation.Assisted -> run {
-                for (annotation in parameterAnnotations)
+                for (annotation in parameterAnnotations) {
                     if (annotation is Assisted)
                         return@run RtAssistedAnnotationImpl(annotation)
+                    daggerCompat.asAssisted(annotation)?.let { return@run it }
+                }
                 null
             }
         }

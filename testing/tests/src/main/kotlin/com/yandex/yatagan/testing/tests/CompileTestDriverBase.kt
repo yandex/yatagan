@@ -174,7 +174,7 @@ abstract class CompileTestDriverBase private constructor(
 
             if (success) {
                 // find runtime test
-                val classLoader = makeClassLoader(runtimeClasspath)
+                val classLoader = makeClassLoader(workingDir, runtimeClasspath)
                 try {
                     runRuntimeTest(classLoader.loadClass("test.TestCaseKt").getDeclaredMethod("test"))
                 } catch (e: ClassNotFoundException) {
@@ -222,16 +222,14 @@ abstract class CompileTestDriverBase private constructor(
 
     protected open fun createCompilationArguments() = createBaseCompilationArguments()
 
-    protected fun makeClassLoader(classpaths: List<File>): ClassLoader {
+    protected open fun makeClassLoader(
+        workingDir: File,
+        classpath: List<File>,
+    ): ClassLoader {
         return URLClassLoader(
-            classpaths.map { it.toURI().toURL() }.toTypedArray(),
+            classpath.map { it.toURI().toURL() }.toTypedArray(),
             null,
         )
-    }
-
-    enum class ApiType {
-        Compiled,
-        Dynamic,
     }
 
     /**

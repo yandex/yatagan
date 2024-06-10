@@ -79,7 +79,7 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
     }
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-        val elementsByAnnotation = buildList {
+        val elementsByAnnotation = buildSet {
             for (annotation in annotations) {
                 addAll(roundEnv.getElementsAnnotatedWith(annotation))
             }

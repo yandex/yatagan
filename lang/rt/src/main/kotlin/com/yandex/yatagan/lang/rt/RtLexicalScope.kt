@@ -2,6 +2,7 @@ package com.yandex.yatagan.lang.rt
 
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.LangOptions
 import com.yandex.yatagan.lang.common.scope.LexicalScopeBase
 import com.yandex.yatagan.lang.scope.CachingMetaFactory
 import com.yandex.yatagan.lang.scope.LexicalScope
@@ -14,6 +15,7 @@ import java.lang.ref.SoftReference
  */
 class RtLexicalScope(
     classLoader: ClassLoader,
+    daggerCompatibilityMode: Boolean,
 ) : LexicalScopeBase() {
     init {
         ext[CachingMetaFactory] = SoftReferenceCachingFactory
@@ -21,6 +23,18 @@ class RtLexicalScope(
             lexicalScope = this,
             classLoader = classLoader,
         )
+
+        val useDaggerCompat = daggerCompatibilityMode && try {
+            // Do not use compat mechanism if the dagger api is missing
+            classLoader.loadClass("dagger.Component"); true
+        } catch (e: ClassNotFoundException) {
+            false
+        }
+
+        ext[LangOptions] = LangOptions(
+            daggerCompatibilityMode = useDaggerCompat,
+        )
+        ext[RtDaggerCompat] = if (useDaggerCompat) RtDaggerCompat.Impl(this) else RtDaggerCompat.Stub()
     }
 
     fun getTypeDeclaration(clazz: Class<*>): TypeDeclaration {

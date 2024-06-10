@@ -50,7 +50,7 @@ internal class KspYataganProcessor(
                 ifOrElseNull(options[BooleanOption.DaggerCompatibilityMode]) {
                     resolver.getSymbolsWithAnnotation("dagger.Component")
                 }
-            ).filterNotNull().flatten().filterIsInstance<KSClassDeclaration>(),
+            ).filterNotNull().flatten().filterIsInstance<KSClassDeclaration>().distinct(),
             delegate = this,
         )
         return emptyList()

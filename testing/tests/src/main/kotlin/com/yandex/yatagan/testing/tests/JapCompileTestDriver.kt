@@ -26,6 +26,7 @@ import javax.annotation.processing.Processor
 class JapCompileTestDriver(
     private val customProcessorClasspath: String? = null,
     override val checkGoldenOutput: Boolean = true,
+    override val backendUnderTest: Backend = Backend.Kapt,
     apiClasspath: String = CurrentClasspath.ApiCompiled,
 ): CompileTestDriverBase(
     apiClasspath = apiClasspath,
@@ -37,9 +38,6 @@ class JapCompileTestDriver(
     override fun generatedFilesSubDir(): String {
         return "kapt${File.separatorChar}kapt-java-src-out"
     }
-
-    override val backendUnderTest: Backend
-        get() = Backend.Kapt
 
     private fun loadProcessorFromCustomClasspath(): Processor? {
         customProcessorClasspath ?: return null

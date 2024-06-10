@@ -49,6 +49,7 @@ internal fun NodeDependency(
         Names.Optional -> when (type.typeArguments.first().declaration.qualifiedName) {
             Names.Lazy -> OptionalLazy
             Names.Provider -> OptionalProvider
+            Names.LazyCompat -> if (type.isDaggerCompat()) OptionalLazy else Optional
             else -> Optional
         }
         Names.LazyCompat -> {

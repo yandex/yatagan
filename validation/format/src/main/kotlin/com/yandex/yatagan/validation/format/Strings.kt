@@ -86,7 +86,7 @@ object Strings {
 
         @Covered
         fun conflictingCollectionBindingAnnotations() =
-            ("Methods can't declare both @IntoList and @IntoSet modifier annotations").toError()
+            ("Methods can't declare multiple @Into* modifier annotations").toError()
 
         @Covered
         fun voidBinding() =

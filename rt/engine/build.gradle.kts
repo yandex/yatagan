@@ -12,4 +12,7 @@ dependencies {
     implementation(project(":core:graph:impl"))
     implementation(project(":core:model:impl"))
     implementation(project(":lang:rt"))
+
+    // optional dependency, detected at runtime for compat mode
+    compileOnly(libs.testing.dagger.api)
 }
