@@ -25,7 +25,7 @@ import com.yandex.yatagan.core.graph.bindings.BaseBinding
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.graph.bindings.ExtensibleBinding
 import com.yandex.yatagan.core.graph.bindings.MultiBinding.ContributionType
-import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
+import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
 import com.yandex.yatagan.core.graph.impl.bindings.AliasBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.AliasLoopStubBinding
 import com.yandex.yatagan.core.graph.impl.bindings.AlternativesBindingImpl
@@ -43,7 +43,6 @@ import com.yandex.yatagan.core.graph.impl.bindings.MissingBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.MultiBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.ProvisionBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SelfDependentInvalidBinding
-import com.yandex.yatagan.core.graph.impl.bindings.SubComponentBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SubComponentFactoryBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.SyntheticAliasBindingImpl
 import com.yandex.yatagan.core.graph.impl.bindings.canHost
@@ -55,7 +54,6 @@ import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel.InputPayload
 import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
-import com.yandex.yatagan.core.model.ComponentModel
 import com.yandex.yatagan.core.model.DependencyKind
 import com.yandex.yatagan.core.model.HasNodeModel
 import com.yandex.yatagan.core.model.InjectConstructorModel
@@ -81,7 +79,7 @@ import com.yandex.yatagan.validation.format.reportError
 
 internal class GraphBindingsManager(
     private val graph: BindingGraphImpl,
-    subcomponents: Map<ComponentModel, ComponentFactoryModel?>,
+    childComponentFactories: Set<ComponentFactoryModel>,
 ) : MayBeInvalid, WithParents<GraphBindingsManager> by hierarchyExtension(graph, GraphBindingsManager) {
     init {
         graph[GraphBindingsManager] = this
@@ -145,8 +143,8 @@ internal class GraphBindingsManager(
         }
 
         // Subcomponent factories (distinct).
-        for ((subcomponent, factory) in subcomponents.entries) {
-            factory.accept(SubComponentBindingCreator(subcomponent))?.let(::add)
+        for (factory in childComponentFactories) {
+            factory.accept(SubComponentBindingCreator())?.let(::add)
         }
         // Gather dependencies
         for (dependency: ComponentDependencyModel in graph.dependencies) {
@@ -430,23 +428,13 @@ internal class GraphBindingsManager(
         }
     }
 
-    private inner class SubComponentBindingCreator(
-        private val subcomponent: ComponentModel,
-    ) : ComponentFactoryVisitor<SubComponentBinding?> {
-        override fun visitNull(): SubComponentBinding {
-            // No factory at all, bind a factory to an instance
-            return SubComponentBindingImpl(
-                owner = graph,
-                targetComponent = subcomponent,
-            )
-        }
-
+    private inner class SubComponentBindingCreator : ComponentFactoryModel.Visitor<SubComponentFactoryBinding?> {
         override fun visitSubComponentFactoryMethod(model: SubComponentFactoryMethodModel): Nothing? {
             // Factory method, no factory object or child component instance can be bound
             return null
         }
 
-        override fun visitWithBuilder(model: ComponentFactoryWithBuilderModel): SubComponentBinding {
+        override fun visitWithBuilder(model: ComponentFactoryWithBuilderModel): SubComponentFactoryBinding {
             // Explicit @Component.Builder, create a binding for it
             return SubComponentFactoryBindingImpl(
                 owner = graph,

@@ -20,13 +20,13 @@ public final class Yatagan$TestComponent implements TestComponent {
   }
 
   @Override
-  public SubComponent createSub() {
-    return new SubComponentImpl();
+  public Object getObj() {
+    return new TestClass();
   }
 
   @Override
-  public Object getObj() {
-    return new TestClass();
+  public SubComponent createSub() {
+    return new SubComponentImpl();
   }
 
   public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
@@ -34,7 +34,7 @@ public final class Yatagan$TestComponent implements TestComponent {
   }
 
   static final class SubComponentImpl implements SubComponent {
-    private SubComponentImpl() {
+    SubComponentImpl() {
     }
 
     @Override

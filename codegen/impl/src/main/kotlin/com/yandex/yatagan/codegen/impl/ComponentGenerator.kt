@@ -172,7 +172,9 @@ internal class ComponentGenerator @Inject constructor(
             }
         }
 
-        childGenerators.forEach { childGenerator ->
+        childGenerators.let {
+            if (options.sortMethodsForTesting) it.sortedBy { it.graph.creator?.factoryMethod } else it
+        }.forEach { childGenerator ->
             nestedType {
                 childGenerator.generate()
             }

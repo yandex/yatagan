@@ -22,13 +22,13 @@ public final class Yatagan$RootComponent implements RootComponent {
   }
 
   @Override
-  public SubComponent createSub() {
-    return new SubComponentImpl(this);
+  public Optional<ClassA> getDummy() {
+    return this.optOfClassA();
   }
 
   @Override
-  public Optional<ClassA> getDummy() {
-    return this.optOfClassA();
+  public SubComponent createSub() {
+    return new SubComponentImpl(this);
   }
 
   Optional optOfClassA() {
@@ -42,7 +42,7 @@ public final class Yatagan$RootComponent implements RootComponent {
   static final class SubComponentImpl implements SubComponent {
     final Yatagan$RootComponent mRootComponent;
 
-    private SubComponentImpl(Yatagan$RootComponent pRootComponent) {
+    SubComponentImpl(Yatagan$RootComponent pRootComponent) {
       this.mRootComponent = pRootComponent;
     }
 
@@ -54,7 +54,7 @@ public final class Yatagan$RootComponent implements RootComponent {
     static final class Sub2ComponentImpl implements Sub2Component {
       final Yatagan$RootComponent mRootComponent;
 
-      private Sub2ComponentImpl(Yatagan$RootComponent pRootComponent) {
+      Sub2ComponentImpl(Yatagan$RootComponent pRootComponent) {
         this.mRootComponent = pRootComponent;
       }
 
@@ -107,13 +107,13 @@ public final class Yatagan$RootComponent2 implements RootComponent2 {
   }
 
   @Override
-  public SubComponent2 createSub() {
-    return new SubComponent2Impl(this);
+  public Optional<ClassA> getDummy() {
+    return this.optOfClassA();
   }
 
   @Override
-  public Optional<ClassA> getDummy() {
-    return this.optOfClassA();
+  public SubComponent2 createSub() {
+    return new SubComponent2Impl(this);
   }
 
   Optional optOfClassA() {
@@ -127,18 +127,18 @@ public final class Yatagan$RootComponent2 implements RootComponent2 {
   static final class SubComponent2Impl implements SubComponent2 {
     final Yatagan$RootComponent2 mRootComponent2;
 
-    private SubComponent2Impl(Yatagan$RootComponent2 pRootComponent2) {
+    SubComponent2Impl(Yatagan$RootComponent2 pRootComponent2) {
       this.mRootComponent2 = pRootComponent2;
-    }
-
-    @Override
-    public Sub2Component2 createSub2() {
-      return new Sub2Component2Impl(this.mRootComponent2);
     }
 
     @Override
     public Optional<ClassС> getDummy() {
       return this.optOfClassС();
+    }
+
+    @Override
+    public Sub2Component2 createSub2() {
+      return new Sub2Component2Impl(this.mRootComponent2);
     }
 
     Optional optOfClassС() {
@@ -148,7 +148,7 @@ public final class Yatagan$RootComponent2 implements RootComponent2 {
     static final class Sub2Component2Impl implements Sub2Component2 {
       final Yatagan$RootComponent2 mRootComponent2;
 
-      private Sub2Component2Impl(Yatagan$RootComponent2 pRootComponent2) {
+      Sub2Component2Impl(Yatagan$RootComponent2 pRootComponent2) {
         this.mRootComponent2 = pRootComponent2;
       }
 

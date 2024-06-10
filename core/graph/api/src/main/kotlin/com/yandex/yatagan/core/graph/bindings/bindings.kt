@@ -169,10 +169,9 @@ public interface ProvisionBinding : Binding {
 }
 
 /**
- * A binding for a child component instance or its creator.
- * The first case is valid only when a child component doesn't have a declared creator.
+ * A binding for a child component's declared creator.
  */
-public interface SubComponentBinding : Binding {
+public interface SubComponentFactoryBinding : Binding {
     public val targetGraph: BindingGraph
 }
 

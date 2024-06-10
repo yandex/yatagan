@@ -419,17 +419,17 @@ class ComponentHierarchyKotlinTest(
             @Singleton class Foo @Inject constructor()
             interface MyDep
             @Module class MyModule(@get:Provides val i: Int)
+            @Module class MyImplicitModule { @get:Provides val i: Long get() = 1L }
 
             @Sub2 @Component(isRoot = false)
             interface Sub2Component {
                 val foo: Foo
-                val opt: Optional<FeatureComponent>
-                val s: Sub2Component
+                val opt: Optional<FeatureComponent.Factory>
             }
 
             @Sub @Component(isRoot = false)
             interface SubComponent1 {
-                val opt: Optional<FeatureComponent>
+                val opt: Optional<FeatureComponent.Factory>
 
                 @Component.Builder
                 interface Builder { fun create(): SubComponent1 }
@@ -447,13 +447,17 @@ class ComponentHierarchyKotlinTest(
                 val d: MyDep
                 val d2: Double
                 val foo: Foo
+                val sub4: SubComponent4
+            }
+            @Component(isRoot = false, modules = [MyImplicitModule::class])
+            interface SubComponent4 {
+                val i: Long
             }
 
             @Singleton @Component
             interface RootComponent {
                 val sub1: SubComponent1.Builder
-                val sub2: Provider<SubComponent2>
-                val sub2lazy: Lazy<SubComponent2>
+                val sub2: SubComponent2
                 fun createSubComponent3(dep: MyDep, mod: MyModule, @BindsInstance d: Double): SubComponent3
                 
                 @Component.Builder
@@ -473,6 +477,11 @@ class ComponentHierarchyKotlinTest(
                 val foo: Provider<Foo>
                 
                 fun createFeatureComponent2(dep: MyDep): FeatureComponent2
+                
+                @Component.Builder
+                interface Factory {
+                    fun create(): FeatureComponent
+                }
             }
 
             @Component(isRoot = false, dependencies = [MyDep::class])
@@ -483,9 +492,8 @@ class ComponentHierarchyKotlinTest(
 
             fun test() {
                 val root: RootComponent = Yatagan.builder(RootComponent.Factory::class.java).create(Features(true))
-                val foo: Foo = root.sub1.create().opt.get().foo.get()
-                root.sub2.get().sub2.foo
-                root.sub2lazy.get().sub2.foo
+                val foo: Foo = root.sub1.create().opt.get().create().foo.get()
+                root.sub2.foo
 
                 val dep = object : MyDep {}
                 val mod = MyModule(740)
@@ -495,11 +503,11 @@ class ComponentHierarchyKotlinTest(
                 assert(sub3.d2 == 0.5)
                 assert(sub3.i == 740)
 
-                root.sub1.create().opt.get().createFeatureComponent2(dep)
+                root.sub1.create().opt.get().create().createFeatureComponent2(dep)
 
                 val root2: RootComponent = Yatagan.builder(RootComponent.Factory::class.java).create(Features(false))
                 assert(!root2.sub1.create().opt.isPresent)
-                assert(!root2.sub2.get().sub2.opt.isPresent)
+                assert(!root2.sub2.sub2.opt.isPresent)
             }
         """.trimIndent())
 

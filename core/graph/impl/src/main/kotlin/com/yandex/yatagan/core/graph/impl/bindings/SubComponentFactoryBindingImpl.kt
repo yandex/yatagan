@@ -18,7 +18,7 @@ package com.yandex.yatagan.core.graph.impl.bindings
 
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.Binding
-import com.yandex.yatagan.core.graph.bindings.SubComponentBinding
+import com.yandex.yatagan.core.graph.bindings.SubComponentFactoryBinding
 import com.yandex.yatagan.core.graph.impl.NonStaticConditionDependencies
 import com.yandex.yatagan.core.graph.impl.VariantMatch
 import com.yandex.yatagan.core.model.ComponentFactoryWithBuilderModel
@@ -30,7 +30,7 @@ import com.yandex.yatagan.validation.format.modelRepresentation
 internal class SubComponentFactoryBindingImpl(
     override val owner: BindingGraph,
     private val factory: ComponentFactoryWithBuilderModel,
-) : SubComponentBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker {
+) : SubComponentFactoryBinding, ConditionalBindingMixin, ComparableByTargetBindingMixin, IntrinsicBindingMarker {
     override val target: NodeModel
         get() = factory.asNode()
 
@@ -60,6 +60,6 @@ internal class SubComponentFactoryBindingImpl(
     )
 
     override fun <R> accept(visitor: Binding.Visitor<R>): R {
-        return visitor.visitSubComponent(this)
+        return visitor.visitSubComponentFactory(this)
     }
 }

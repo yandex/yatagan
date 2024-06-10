@@ -1,45 +1,37 @@
-error: Missing binding for test.SubComponent1
-NOTE: A dependency seems to be a child component, try injecting its factory instead.
+error: Child components can't have a factory methods declared for them in their parents, if they have an explicit @Component.Builder declared.
+NOTE: Factory method declared here: component-factory-method test.RootComponent::getSub1(): test.SubComponent1
 Encountered:
   in graph for root-component test.RootComponent
-  in entry-point getSub1: test.SubComponent1
-                          ^-[*1]------------
-  here: [1*] <missing>
-             ^~~~~~~~~
+  here: graph for component test.SubComponent1
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Child components can't have a factory methods declared for them in their parents, if they have an explicit @Component.Builder declared.
+NOTE: Factory method declared here: component-factory-method test.RootComponent::getSub2(): test.SubComponent2
+Encountered:
+  in graph for root-component test.RootComponent
+  here: graph for component test.SubComponent2
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Missing binding for test.SubComponent2
 NOTE: A dependency seems to be a child component, try injecting its factory instead.
 Encountered:
   in graph for root-component test.RootComponent
-  in entry-point getSub2: test.SubComponent2
-                          ^-[*1]------------
-  here: [1*] <missing>
+  in entry-point getA: test.ClassA
+                       ^-[*1]-----
+  in [1*] inject-constructor test.ClassA(test.SubComponent2)
+                                         ^-[*2]------------
+  here: [2*] <missing>
              ^~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: `child component test.FeatureComponent` with a condition:
+error: `graph for component test.FeatureComponent` with a condition:
     (1) [test.Features.isEnabled]
-cannot be directly exposed from an entry-point of `graph for root-component test.RootComponent` under condition:
+cannot be created via component factory method `component-factory-method test.RootComponent::getFsub(): test.FeatureComponent` of component under condition:`
     (2) [always-present]
-without Optional<..> wrapper, because component condition (2) does not imply condition (1)
+because component condition (2) does not imply condition (1)
 Encountered:
   in graph for root-component test.RootComponent
-  here: entry-point getFsub: test.FeatureComponent
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-warning: `component test.SubComponent1` has an explicitly declared `component-creator test.SubComponent1.Builder` so it can't be created directly.
-Changing the entry-point type to the `test.SubComponent1.Builder` would fix the problem and allow the component to be recognized as a child (if not included explicitly).
-Encountered:
-  in graph for root-component test.RootComponent
-  here: entry-point getSub1: test.SubComponent1
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-warning: `component test.SubComponent2` has an explicitly declared `component-creator test.SubComponent2.Builder` so it can't be created directly.
-Changing the entry-point type to the `test.SubComponent2.Builder` would fix the problem and allow the component to be recognized as a child (if not included explicitly).
-Encountered:
-  in graph for root-component test.RootComponent
-  here: entry-point getSub2: test.SubComponent2
-        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  here: component-factory-method test.RootComponent::getFsub(): test.FeatureComponent
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

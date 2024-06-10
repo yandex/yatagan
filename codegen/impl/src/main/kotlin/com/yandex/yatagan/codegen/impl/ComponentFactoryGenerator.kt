@@ -74,10 +74,9 @@ internal class ComponentFactoryGenerator @Inject constructor(
             fieldsNs.name(graph.model.name)
         }
 
-    val implName: ClassName = componentImplName.run {
-        // If no factory is present, use the component name itself (constructor).
-        if (thisGraph.model.factory != null) nestedClass("ComponentFactoryImpl") else this
-    }
+    val factoryClassImplName: ClassName
+        get() = componentImplName.nestedClass("ComponentFactoryImpl")
+            .also { checkNotNull(thisGraph.model.factory) }
 
     fun fieldNameFor(boundInstance: NodeModel) = checkNotNull(inputsWithFieldNames[boundInstance])
     fun fieldNameFor(dependency: ComponentDependencyModel) = checkNotNull(inputsWithFieldNames[dependency])
@@ -158,7 +157,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
 
     private fun TypeSpecBuilder.generateBuilder(factory: ComponentFactoryWithBuilderModel) {
         nestedType {
-            buildClass(implName) {
+            buildClass(factoryClassImplName) {
                 modifiers(PRIVATE, FINAL, STATIC)
                 implements(factory.typeName())
 
@@ -211,7 +210,7 @@ internal class ComponentFactoryGenerator @Inject constructor(
             method("builder") {
                 modifiers(PUBLIC, STATIC)
                 returnType(factory.typeName())
-                +"return new %T()".formatCode(implName)
+                +"return new %T()".formatCode(factoryClassImplName)
             }
         }
     }
