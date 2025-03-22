@@ -1,10 +1,10 @@
 import com.yandex.yatagan.gradle.isValidSemVerString
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.gradle.kotlin.dsl.registering
 
 plugins {
     id("yatagan.base-module")
     id("org.jetbrains.dokka")
+    id("org.jetbrains.dokka-javadoc")
     `maven-publish`
     signing
 }
@@ -42,14 +42,13 @@ java {
 
 val artifactName = path.trim(':').replace(':', '-')
 
-tasks.withType<DokkaTask>().configureEach {
+dokka {
     moduleName.set(artifactName)
 }
 
 val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
-    from(tasks.dokkaJavadoc.map { it.outputDirectory })
-    dependsOn(tasks.dokkaJavadoc)
+    from(tasks.dokkaGeneratePublicationJavadoc.map { it.outputDirectory })
 }
 
 artifacts {
