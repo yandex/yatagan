@@ -112,6 +112,18 @@ internal class KspAnnotationImpl(
                         visitor.visitType(KspTypeImpl(impl = value))
                     }
                 }
+                is KSClassDeclaration -> {
+                    val declaration = value
+                    if (declaration.classKind == ClassKind.ENUM_ENTRY) {
+                        val enumDeclaration = declaration.parentDeclaration as KSClassDeclaration
+                        visitor.visitEnumConstant(
+                            enum = KspTypeImpl(impl = enumDeclaration.asType(emptyList())),
+                            constant = declaration.simpleName.asString(),
+                        )
+                    } else {
+                        visitor.visitType(KspTypeImpl(value.asStarProjectedType()))
+                    }
+                }
                 is KSAnnotation -> visitor.visitAnnotation(KspAnnotationImpl(value))
                 is List<*> -> visitor.visitArray(value.map { ValueImpl(it ?: "<error>") })
                 is Enum<*> -> {
@@ -196,6 +208,12 @@ internal class KspAnnotationImpl(
                             "RUNTIME" -> AnnotationRetention.RUNTIME
                             else -> throw AssertionError("Unexpected retention")
                         }
+                        is KSClassDeclaration -> when (value.simpleName.getShortName()) {
+                            "SOURCE" -> AnnotationRetention.SOURCE
+                            "BINARY" -> AnnotationRetention.BINARY
+                            "RUNTIME" -> AnnotationRetention.RUNTIME
+                            else -> throw AssertionError("Unexpected retention")
+                        }
                         else -> throw AssertionError("Unexpected retention")
                     }
                     Utils.javaRetentionClass -> when (val value = annotation["value"]) {
@@ -207,6 +225,12 @@ internal class KspAnnotationImpl(
                         is KSType -> when (value.declaration.simpleName.getShortName()) {
                             "SOURCE" -> AnnotationRetention.SOURCE
                             "CLASS" -> AnnotationRetention.BINARY
+                            "RUNTIME" -> AnnotationRetention.RUNTIME
+                            else -> throw AssertionError("Unexpected retention")
+                        }
+                        is KSClassDeclaration -> when (value.simpleName.getShortName()) {
+                            "SOURCE" -> AnnotationRetention.SOURCE
+                            "BINARY" -> AnnotationRetention.BINARY
                             "RUNTIME" -> AnnotationRetention.RUNTIME
                             else -> throw AssertionError("Unexpected retention")
                         }
