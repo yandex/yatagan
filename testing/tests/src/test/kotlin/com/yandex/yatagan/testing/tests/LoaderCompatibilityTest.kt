@@ -17,6 +17,7 @@
 package com.yandex.yatagan.testing.tests
 
 import com.yandex.yatagan.generated.ClasspathForCompatCheck
+import com.yandex.yatagan.generated.CurrentClasspath
 import org.junit.Assume
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,6 +50,7 @@ class LoaderCompatibilityTest(
     fun `'create' is compatible with code generated with `() = with(JapCompileTestDriver(
         customProcessorClasspath = version.kaptClasspath,
         apiClasspath = version.apiClasspath,
+        runtimeApiClasspath = CurrentClasspath.ApiCompiled,
         checkGoldenOutput = false,
     )) {
         givenKotlinSource("test.TestCase", """
@@ -75,6 +77,7 @@ class LoaderCompatibilityTest(
     fun `'builder' is compatible with code generated `() = with(JapCompileTestDriver(
         customProcessorClasspath = version.kaptClasspath,
         apiClasspath = version.apiClasspath,
+        runtimeApiClasspath = CurrentClasspath.ApiCompiled,
         checkGoldenOutput = false,
     )) {
         givenKotlinSource("test.TestCase", """
@@ -105,6 +108,7 @@ class LoaderCompatibilityTest(
     fun `'autoBuilder' is compatible with code generated `() = with(JapCompileTestDriver(
         customProcessorClasspath = version.kaptClasspath,
         apiClasspath = version.apiClasspath,
+        runtimeApiClasspath = CurrentClasspath.ApiCompiled,
         checkGoldenOutput = false,
     )) {
         Assume.assumeTrue(version >= Version.v1_2_0)  // Auto-builder was added in 1.2.0
