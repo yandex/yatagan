@@ -121,7 +121,7 @@ internal fun LexicalScope.allNonPrivateFunctions(declaration: KSClassDeclaration
             !it.isConstructor() && !it.isPrivate() && !isFromObject(it)
         } + declaration.getDeclaredFunctions().filter {
         // Include static functions.
-        it.functionKind == FunctionKind.STATIC && !it.isPrivate()
+        (it.functionKind == FunctionKind.STATIC || it.modifiers.contains(Modifier.JAVA_STATIC)) && !it.isPrivate()
     }
 
 internal fun allNonPrivateProperties(declaration: KSClassDeclaration): Sequence<KSPropertyDeclaration> {
