@@ -38,6 +38,7 @@ import kotlin.io.path.writeText
 
 abstract class CompileTestDriverBase private constructor(
     private val apiClasspath: String,
+    private val runtimeApiClasspath: String,
     private val mainSourceSet: SourceSet,
 ) : CompileTestDriver, SourceSet by mainSourceSet {
     private var precompiledModuleOutputDirs: List<File>? = null
@@ -49,7 +50,8 @@ abstract class CompileTestDriverBase private constructor(
 
     protected constructor(
         apiClasspath: String = CurrentClasspath.ApiCompiled,
-    ) : this(apiClasspath, SourceSet())
+        runtimeApiClasspath: String = apiClasspath,
+    ) : this(apiClasspath, runtimeApiClasspath, SourceSet())
 
     override val testNameRule = TestNameRule()
 
@@ -91,7 +93,11 @@ abstract class CompileTestDriverBase private constructor(
         )
         return TestCompilationResult(
             workingDir = workingDir,
-            runtimeClasspath = compilation.classpath + result.outputClasspath,
+            runtimeClasspath = buildList {
+                addAll(runtimeApiClasspath.split(File.pathSeparatorChar).map(::File))
+                addAll(precompiledModuleOutputDirs.orEmpty())
+                addAll(result.outputClasspath)
+            },
             messageLog = result.diagnostics.values.flatten().joinToString(separator = "\n", transform = ::asString),
             success = result.success,
             generatedFiles = result.generatedSources,

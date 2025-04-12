@@ -28,8 +28,10 @@ class JapCompileTestDriver(
     override val checkGoldenOutput: Boolean = true,
     override val backendUnderTest: Backend = Backend.Kapt,
     apiClasspath: String = CurrentClasspath.ApiCompiled,
+    runtimeApiClasspath: String = apiClasspath,
 ): CompileTestDriverBase(
     apiClasspath = apiClasspath,
+    runtimeApiClasspath = runtimeApiClasspath,
 ) {
     override fun createCompilationArguments() = super.createCompilationArguments().copy(
         kaptProcessors = listOf(loadProcessorFromCustomClasspath() ?: JapYataganProcessor()),
