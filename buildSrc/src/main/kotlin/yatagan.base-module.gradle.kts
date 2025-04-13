@@ -1,5 +1,7 @@
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     kotlin("jvm")
@@ -39,6 +41,17 @@ kotlin {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.withType<KotlinJvmCompile>().named { it.contains("Test") }.configureEach {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+    }
+}
+
+tasks.withType<JavaCompile>().named { it.contains("Test") }.configureEach {
+    sourceCompatibility = JavaVersion.VERSION_11.toString()
+    targetCompatibility = JavaVersion.VERSION_11.toString()
 }
 
 val yataganVersion: String by extra(

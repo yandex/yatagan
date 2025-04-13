@@ -1,6 +1,4 @@
 import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     id("yatagan.stable-api-artifact")
@@ -23,17 +21,6 @@ dependencies {
     testImplementation(libs.testing.assertj)
 
     stdLib(kotlin("stdlib"))
-}
-
-tasks.withType<KotlinJvmCompile>().named { it.contains("Test") }.configureEach {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
-    }
-}
-
-tasks.withType<JavaCompile>().named { it.contains("Test") }.configureEach {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()
-    targetCompatibility = JavaVersion.VERSION_11.toString()
 }
 
 val generateStdLibClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {

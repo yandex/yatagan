@@ -1,8 +1,7 @@
 import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("yatagan.base-module")
+    id("yatagan.test-only-module")
 }
 
 val enableCoverage: Boolean by extra
@@ -142,17 +141,9 @@ tasks.test {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
-    }
     sourceSets {
         main {
             kotlin.srcDir(generateClasspathProperties.map { it.generatedSourceDir })
         }
     }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
 }
