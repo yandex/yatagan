@@ -222,6 +222,9 @@ abstract class CompileTestDriverBase private constructor(
             "-P", "plugin:org.jetbrains.kotlin.kapt3:correctErrorTypes=true",
             "-jvm-target=11",
             "-java-parameters",
+            "-Xjvm-default=all",
+            "-language-version=1.9",
+            "-api-version=1.9",
         ),
         processorOptions = options,
     )

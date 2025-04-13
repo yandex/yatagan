@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -20,7 +21,11 @@ tasks.withType<KotlinCompile> {
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_1_8)
     }
 
     sourceSets.configureEach {
@@ -29,6 +34,11 @@ kotlin {
             optIn("kotlin.contracts.ExperimentalContracts")
         }
     }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 val yataganVersion: String by extra(
