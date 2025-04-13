@@ -43,6 +43,14 @@ class DaggerCompatTest(
                 override fun toString() = "KSP"
                 override fun get() = KspCompileTestDriver(
                     apiClasspath = DaggerClasspath.Api,
+                    useK2 = false,
+                )
+            },
+            object : Provider<CompileTestDriverBase> {
+                override fun toString() = "KSP2"
+                override fun get() = KspCompileTestDriver(
+                    apiClasspath = DaggerClasspath.Api,
+                    useK2 = true,
                 )
             },
             object : Provider<CompileTestDriverBase> {
