@@ -914,5 +914,61 @@ class CoreBindingsKotlinTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `reproduce 184 issue`() {
+        givenKotlinSource("test.TestCase", """
+import com.yandex.yatagan.*
+import com.yandex.yatagan.Module
+import javax.inject.*
+import kotlin.Suppress
+
+@Component(
+  modules = [Module_12::class],
+  dependencies = [],
+)
+public interface Component_6 {
+  public val get_0: Lazy<Node_4>
+
+  @Component.Builder
+  public interface Creator {
+    public fun create(): Component_6
+  }
+}
+
+@Component(
+  modules = [Module_12::class,],
+  dependencies = [],
+)
+public interface Component_7 {
+  public val get_0: Lazy<Node_4>
+  public val get_2: Lazy<Node_1>
+
+  @Component.Builder
+  public interface Creator {
+    public fun create(): Component_7
+  }
+}
+
+@Module(
+  includes = [],
+  subcomponents = [],
+)
+public interface Module_12 {
+  public companion object {
+    @Provides
+    public fun provides_Node_1(): Node_1 = Node_1 {}
+  }
+}
+
+public fun interface Node_1 { fun provide() }
+
+public class Node_4 @Inject constructor(
+  p0: Lazy<Node_1>,
+)
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }
 

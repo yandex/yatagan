@@ -1,0 +1,146 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$Component_6.java
+package test;
+
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.AssertionError;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class Yatagan$Component_6 implements Component_6 {
+  Yatagan$Component_6() {
+  }
+
+  @Override
+  public Lazy<Node_4> getGet_0() {
+    return new CachingProviderImpl(this, 0);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return new Node_4(new CachingProviderImpl(this, 1));
+      case 1: return Checks.checkProvisionNotNull(Module_12.Companion.provides_Node_1());
+      default: throw new AssertionError();
+    }
+  }
+
+  public static Component_6.Creator builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$Component_6 mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$Component_6 factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements Component_6.Creator {
+    @Override
+    public Component_6 create() {
+      return new Yatagan$Component_6();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$Component_7.java
+package test;
+
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.ThreadAssertions;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.AssertionError;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class Yatagan$Component_7 implements Component_7 {
+  Yatagan$Component_7() {
+  }
+
+  @Override
+  public Lazy<Node_4> getGet_0() {
+    return new CachingProviderImpl(this, 0);
+  }
+
+  @Override
+  public Lazy<Node_1> getGet_2() {
+    return new CachingProviderImpl(this, 1);
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return new Node_4(new CachingProviderImpl(this, 1));
+      case 1: return Checks.checkProvisionNotNull(Module_12.Companion.provides_Node_1());
+      default: throw new AssertionError();
+    }
+  }
+
+  public static Component_7.Creator builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class CachingProviderImpl implements Lazy {
+    private final Yatagan$Component_7 mDelegate;
+
+    private final int mIndex;
+
+    private Object mValue;
+
+    CachingProviderImpl(Yatagan$Component_7 factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        ThreadAssertions.assertThreadAccess();
+        local = mDelegate.switch$$access(mIndex);
+        mValue = local;
+      }
+      return local;
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements Component_7.Creator {
+    @Override
+    public Component_7 create() {
+      return new Yatagan$Component_7();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
