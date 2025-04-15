@@ -24,6 +24,7 @@ import com.yandex.yatagan.lang.scope.LexicalScope
 
 internal class ProcessingUtils(
     val resolver: Resolver,
+    val isKsp2: Boolean,
 ) {
     val classType by lazy {
         resolver.getClassDeclarationByName("java.lang.Class")!!
