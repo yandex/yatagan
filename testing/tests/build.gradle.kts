@@ -1,7 +1,7 @@
 import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
 
 plugins {
-    id("yatagan.base-module")
+    id("yatagan.test-only-module")
 }
 
 val enableCoverage: Boolean by extra
@@ -33,12 +33,6 @@ val daggerProcessor by configurations.registering
 versionsToCheckLoaderCompatibility.forEach { version ->
     configurations.register("kaptForCompatCheck$version")
     configurations.register("apiForCompatCheck$version")
-}
-
-kotlin {
-    jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
 }
 
 @Suppress("UnstableApiUsage")

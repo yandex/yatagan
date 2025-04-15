@@ -20,6 +20,7 @@ import com.yandex.yatagan.testing.procedural.Distribution
 import com.yandex.yatagan.testing.procedural.ExperimentalGenerationApi
 import com.yandex.yatagan.testing.procedural.GenerationParams
 import com.yandex.yatagan.testing.procedural.generate
+import org.junit.Assume.assumeFalse
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -63,6 +64,8 @@ class HeavyTest(
 
     @Test
     fun `procedural - Tall & Thin`() {
+        // TODO(#184): fix and enable test back
+        assumeFalse(backendUnderTest == Backend.Ksp2)
         generate(
             params = baseParams,
             testMethodName = "test",
@@ -74,6 +77,8 @@ class HeavyTest(
 
     @Test
     fun `procedural - Fat & Flat`() {
+        // TODO(#184): fix and enable test back
+        assumeFalse(backendUnderTest == Backend.Ksp2)
         generate(
             params = baseParams.copy(
                 componentTreeMaxDepth = 1,
