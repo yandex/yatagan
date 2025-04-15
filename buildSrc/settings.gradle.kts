@@ -29,7 +29,7 @@ dependencyResolutionManagement {
         }
 
         create("testingLibs") {
-            library("roomCompileTesting", "androidx.room:room-compiler-processing-testing:2.6.0-alpha01")
+            library("roomCompileTesting", "androidx.room:room-compiler-processing-testing:2.7.0")
             library("junit4", "junit:junit:4.13.2")
             library("mockito-kotlin", "org.mockito.kotlin:mockito-kotlin:4.0.0")
             library("assertj", "org.assertj:assertj-core:3.23.1")

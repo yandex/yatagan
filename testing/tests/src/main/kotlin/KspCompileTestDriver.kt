@@ -18,7 +18,11 @@ package com.yandex.yatagan.testing.tests
 
 import com.yandex.yatagan.processor.ksp.KspYataganProcessorProvider
 
-class KspCompileTestDriver : CompileTestDriverBase() {
+class KspCompileTestDriver(
+    private val useK2: Boolean,
+) : CompileTestDriverBase(
+    useK2 = useK2,
+) {
     override fun createCompilationArguments() = super.createCompilationArguments().copy(
         symbolProcessorProviders = listOf(KspYataganProcessorProvider()),
     )
@@ -28,5 +32,5 @@ class KspCompileTestDriver : CompileTestDriverBase() {
     }
 
     override val backendUnderTest: Backend
-        get() = Backend.Ksp
+        get() = if (useK2) Backend.Ksp2 else Backend.Ksp
 }

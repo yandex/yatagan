@@ -1,5 +1,5 @@
 plugins {
-    id("yatagan.base-module")
+    id("yatagan.test-only-module")
     application
 }
 
