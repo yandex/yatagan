@@ -68,13 +68,13 @@ Encountered:
              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Invalid/unresolved type: kotlin.collections.List<<unresolved: ???>>
+error: Invalid/unresolved type: java.util.List<<unresolved: UnresolvedEp>>
 NOTE: Types can be unresolved due to actually non-existent/misspelled/un-imported class; or the compilation classpath may be inconsistent: if the type is from the library, make sure the library is present in compilation classpath of the current module.
 Encountered:
   in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  in entry-point getEpList(): kotlin.collections.List<<unresolved: ???>>
+  in entry-point getEpList(): java.util.List<<unresolved: UnresolvedEp>>
                               ^-[*1]------------------------------------
-  here: [1*] kotlin.collections.List<<unresolved: ???>>
+  here: [1*] java.util.List<<unresolved: UnresolvedEp>>
              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -119,11 +119,11 @@ Encountered:
              ^~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-error: Missing binding for kotlin.collections.List<<unresolved: ???>>
+error: Missing binding for java.util.List<<unresolved: UnresolvedEp>>
 NOTE: No known way to infer the binding
 Encountered:
   in graph for root-component test.TestComponent<<unresolved-type-var: T>>
-  in entry-point getEpList: kotlin.collections.List<<unresolved: ???>>
+  in entry-point getEpList: java.util.List<<unresolved: UnresolvedEp>>
                             ^-[*1]------------------------------------
   here: [1*] <missing>
              ^~~~~~~~~

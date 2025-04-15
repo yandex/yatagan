@@ -61,7 +61,7 @@ class UnresolvedTypeTest {
     fun `unresolved types (KSP)`() = with(KspCompileTestDriver(useK2 = false)) {
         testNameRule.assignFrom(this@UnresolvedTypeTest.testNameRule)
 
-        // FIXME: Implement fully-qualified error types when KSP is ready.
+        // KSP1 still has some cases for error-types not covered.
         includeFromSourceSet(sources)
         compileRunAndValidate()
     }
@@ -70,7 +70,6 @@ class UnresolvedTypeTest {
     fun `unresolved types (KSP2)`() = with(KspCompileTestDriver(useK2 = true)) {
         testNameRule.assignFrom(this@UnresolvedTypeTest.testNameRule)
 
-        // FIXME: Implement fully-qualified error types when KSP is ready.
         includeFromSourceSet(sources)
         compileRunAndValidate()
     }

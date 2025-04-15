@@ -52,8 +52,13 @@ private fun LexicalScope.nameModelImpl(
         JvmTypeInfo.Short -> KeywordTypeNameModel.Short
         JvmTypeInfo.Boolean -> KeywordTypeNameModel.Boolean
         JvmTypeInfo.Declared -> {
-            if (type == null || type.isError) {
+            if (type == null) {
                 return InvalidNameModel.Unresolved(null)
+            }
+            if (type.isError) {
+                return InvalidNameModel.Unresolved(
+                    hint = KspErrorTypeRegex.matchEntire(type.toString())?.groupValues?.get(1) ?: type.toString(),
+                )
             }
             val classDeclaration = type.classDeclaration()
                 ?: return if (type.declaration is KSTypeParameter) {
@@ -105,3 +110,5 @@ private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
             ?.split('.') ?: listOf("<unnamed>"),
     )
 }
+
+private val KspErrorTypeRegex = "<ERROR TYPE: (.*)>".toRegex()
