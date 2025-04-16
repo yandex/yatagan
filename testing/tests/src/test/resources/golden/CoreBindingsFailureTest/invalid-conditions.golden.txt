@@ -12,6 +12,34 @@ Encountered:
              ^~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+error: Invalid condition expression '#invalid'
+Encountered:
+  in graph for root-component test.MyComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.Invalid2, ..] }
+                                                           ^-[*2]-------
+  in [2*] feature test.Invalid2 [<invalid-condition>]
+                                 ^-[*3]-------------
+  here: [3*] <invalid-condition>
+             ^~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid condition expression ''
+Encountered:
+  in graph for root-component test.MyComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.Invalid5, ..] }
+                                                           ^-[*2]-------
+  in [2*] feature test.Invalid5 [<invalid-condition>]
+                                 ^-[*3]-------------
+  here: [3*] <invalid-condition>
+             ^~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 error: Missing binding for test.Foo
 NOTE: No known way to infer the binding
 Encountered:
@@ -23,36 +51,6 @@ Encountered:
                                  ^-[*2]---------
   here: [2*] <missing>
              ^~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-error: Unable to parse condition expression:
-""
- ^~~~ Unexpected <end-of-expression>. Expected one of: '(', '!', <variable>
-
-Encountered:
-  in graph for root-component test.MyComponent
-  in entry-point getA: [Optional] test.ClassA
-                       ^-[*1]----------------
-  in [1*] inject-constructor test.ClassA()
-  in its conditions declaration { runtime-conditions: [.., test.Invalid5, ..] }
-                                                           ^-[*2]-------
-  here: [2*] feature test.Invalid5 <invalid-condition-expression>
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-error: Unable to parse condition expression:
-"#invalid"
- ^~~~ Unexpected character '#'
-
-Encountered:
-  in graph for root-component test.MyComponent
-  in entry-point getA: [Optional] test.ClassA
-                       ^-[*1]----------------
-  in [1*] inject-constructor test.ClassA()
-  in its conditions declaration { runtime-conditions: [.., test.Invalid2, ..] }
-                                                           ^-[*2]-------
-  here: [2*] feature test.Invalid2 <invalid-condition-expression>
-             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 error: Unable to reach boolean result in the given expression

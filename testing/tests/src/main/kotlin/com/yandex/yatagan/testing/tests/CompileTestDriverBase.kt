@@ -141,7 +141,7 @@ abstract class CompileTestDriverBase private constructor(
                 } else {
                     goldenCodeSourcePath.parent.createDirectories()
                     goldenCodeSourcePath.writeText(buildString {
-                        for (generatedFile in generatedFiles.sortedBy { it.relativePath }) {
+                        for (generatedFile in generatedFiles) {
                             appendLine(MessageSeparator)
                             append("Name: ").appendLine(generatedFile.relativePath.replace(File.separatorChar, '/'))
                             appendLine(generatedFile.contents)
@@ -157,10 +157,7 @@ abstract class CompileTestDriverBase private constructor(
         try {
             val goldenOutput = javaClass.getResourceAsStream("/$goldenResourcePath")
                 ?.bufferedReader()?.readText()?.ensureLineEndings() ?: ""
-            if (goldenOutput != strippedLog) {
-                println("Full log:\n$messageLog")
-                Assert.assertEquals(goldenOutput, strippedLog)
-            }
+            Assert.assertEquals(goldenOutput, strippedLog)
 
             generatedFilesSubDir().takeIf { checkGoldenOutput }?.let {
                 val goldenFiles = GoldenSourceRegex.findAll(

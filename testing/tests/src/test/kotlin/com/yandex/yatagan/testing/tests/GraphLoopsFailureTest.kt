@@ -39,7 +39,7 @@ class GraphLoopsFailureTest(
     fun setUp() {
         features = SourceSet {
             givenKotlinSource("test.features", """
-                import com.yandex.yatagan.ConditionExpression                
+                import com.yandex.yatagan.Condition                
 
                 object Foo { 
                     val isEnabledA = true 
@@ -47,9 +47,9 @@ class GraphLoopsFailureTest(
                     val isEnabledC = true 
                 }
                 
-                @ConditionExpression("isEnabledA", Foo::class) annotation class A
-                @ConditionExpression("isEnabledB", Foo::class) annotation class B
-                @ConditionExpression("isEnabledC", Foo::class) annotation class C
+                @Condition(Foo::class, "isEnabledA") annotation class A
+                @Condition(Foo::class, "isEnabledB") annotation class B
+                @Condition(Foo::class, "isEnabledC") annotation class C
             """.trimIndent())
         }
     }

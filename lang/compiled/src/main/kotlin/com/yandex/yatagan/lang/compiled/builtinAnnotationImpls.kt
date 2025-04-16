@@ -45,6 +45,19 @@ internal class CtModuleAnnotationImpl(
     override val subcomponents get() = impl.getTypes("subcomponents")
 }
 
+internal class CtConditionAnnotationImpl(
+    impl: CtAnnotationBase,
+) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.ConditionFamily.One {
+    override val target get() = impl.getType("value")
+    override val condition get() = impl.getString("condition")
+}
+
+internal class CtAnyConditionAnnotationImpl(
+    impl: CtAnnotationBase,
+) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.ConditionFamily.Any {
+    override val conditions get() = impl.getAnnotations("value").map { CtConditionAnnotationImpl(it) }
+}
+
 internal class CtConditionExpressionAnnotationImpl(
     impl: CtAnnotationBase,
 ) : CtBuiltinAnnotationBase(impl), BuiltinAnnotation.ConditionExpression {
