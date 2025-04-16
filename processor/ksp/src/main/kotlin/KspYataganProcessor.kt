@@ -42,7 +42,7 @@ internal class KspYataganProcessor(
     override val options: Options = Options(environment.options)
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        ProcessingUtils(resolver).use {
+        ProcessingUtils(resolver, environment).use {
             LangModelFactory.use(KspModelFactoryImpl()) {
                 process(
                     sources = resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName)
