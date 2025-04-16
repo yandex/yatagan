@@ -27,6 +27,7 @@ import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Variance
+import com.yandex.yatagan.lang.ksp.TypeMap.normalizeType
 import com.yandex.yatagan.lang.scope.FactoryKey
 import com.yandex.yatagan.lang.scope.LexicalScope
 import com.yandex.yatagan.lang.scope.caching
@@ -83,8 +84,8 @@ internal object TypeMap {
     ): KSType {
         val originalType = typeReference.resolve()
 
-        // Early bail out for error types, as the following code is likely to fail with them
-        if (originalType.isError) return originalType
+        // Early bail out for error types, as the following code is likely to fail for KSP1 with them
+        if (originalType.isError && !Utils.isKsp2) return originalType
 
         // TODO: Support parameterized type-aliases, now broken
         val type = originalType.resolveAliasIfNeeded()
@@ -120,7 +121,7 @@ internal object TypeMap {
                     typeReference = argTypeReference,
                     bakeVarianceAsWildcard = false,  // Doesn't propagate for type parameters
                 )
-                if (mappedArgType.isError) {
+                if (mappedArgType.isError && !Utils.isKsp2) {
                     // Bail out of the mapping, as error type is present - it's known to cause crashes inside
                     // KSClassDeclaration.asType() invocation
                     return type
