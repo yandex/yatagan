@@ -42,7 +42,7 @@ internal class KspYataganProcessor(
     override lateinit var lexicalScope: KspLexicalScope
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        lexicalScope = KspLexicalScope(resolver)
+        lexicalScope = KspLexicalScope(resolver, environment)
         initScopedOptions(lexicalScope, this)
         process(
             sources = sequenceOf(

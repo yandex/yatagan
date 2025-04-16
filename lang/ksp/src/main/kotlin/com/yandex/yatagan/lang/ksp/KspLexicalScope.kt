@@ -1,6 +1,7 @@
 package com.yandex.yatagan.lang.ksp
 
 import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.yandex.yatagan.lang.LangModelFactory
 import com.yandex.yatagan.lang.TypeDeclaration
@@ -15,10 +16,14 @@ import com.yandex.yatagan.lang.scope.CachingMetaFactory
  */
 class KspLexicalScope(
     resolver: Resolver,
+    environment: SymbolProcessorEnvironment,
 ) : LexicalScopeBase() {
     init {
         ext[CachingMetaFactory] = CachingFactorySimple
-        ext[ProcessingUtils] = ProcessingUtils(resolver)
+        ext[ProcessingUtils] = ProcessingUtils(
+            resolver = resolver,
+            isKsp2 = environment.kspVersion >= KotlinVersion(2, 0),
+        )
         ext[LangModelFactory] = KspModelFactoryImpl(this)
     }
 
