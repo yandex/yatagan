@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")  // For legacy conditions
+
 package com.yandex.yatagan.lang.rt
 
 import com.yandex.yatagan.AllConditions

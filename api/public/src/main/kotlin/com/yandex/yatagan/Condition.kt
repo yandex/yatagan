@@ -39,6 +39,8 @@ import kotlin.reflect.KClass
  * The computation may occur either at component creation or on demand when immediately required - this depends
  * on a condition usage. *Non-static* conditions are always computed on-demand.
  */
+@Suppress("DEPRECATION")
+@Deprecated("Legacy Conditions API, use @ConditionExpression instead")
 @ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)

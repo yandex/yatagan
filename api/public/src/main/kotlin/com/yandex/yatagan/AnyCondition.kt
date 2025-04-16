@@ -19,6 +19,8 @@ package com.yandex.yatagan
 /**
  * Logical `||` operator for [Conditions][Condition].
  */
+@Suppress("DEPRECATION")
+@Deprecated("Legacy Conditions API, use @ConditionExpression instead")
 @ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)

@@ -19,6 +19,8 @@ package com.yandex.yatagan
 /**
  * Container annotation for [Condition].
  */
+@Suppress("DEPRECATION")
+@Deprecated("Legacy Conditions API, use @ConditionExpression instead")
 @ConditionsApi
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
