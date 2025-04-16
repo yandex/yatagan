@@ -16,11 +16,15 @@
 
 package com.yandex.yatagan.lang.rt
 
+import com.yandex.yatagan.AllConditions
+import com.yandex.yatagan.AnyCondition
+import com.yandex.yatagan.AnyConditions
 import com.yandex.yatagan.AssistedFactory
 import com.yandex.yatagan.AssistedInject
 import com.yandex.yatagan.Component
 import com.yandex.yatagan.ComponentFlavor
 import com.yandex.yatagan.ComponentVariantDimension
+import com.yandex.yatagan.Condition
 import com.yandex.yatagan.ConditionExpression
 import com.yandex.yatagan.Conditional
 import com.yandex.yatagan.Conditionals
@@ -197,6 +201,16 @@ internal class RtTypeDeclarationImpl private constructor(
         which: BuiltinAnnotation.Target.OnClassRepeatable<T>
     ): List<T> {
         return when (which) {
+            BuiltinAnnotation.ConditionFamily -> buildList {
+                for (annotation in impl.declaredAnnotations) when (annotation) {
+                    is Condition -> add(which.modelClass.cast(RtConditionAnnotationImpl(annotation)))
+                    is AnyCondition -> add(which.modelClass.cast(RtAnyConditionAnnotationImpl(annotation)))
+                    is AllConditions -> for (contained in annotation.value)
+                        add(which.modelClass.cast(RtConditionAnnotationImpl(contained)))
+                    is AnyConditions -> for (contained in annotation.value)
+                        add(which.modelClass.cast(RtAnyConditionAnnotationImpl(contained)))
+                }
+            }
             BuiltinAnnotation.Conditional -> buildList {
                 for (annotation in impl.declaredAnnotations) when (annotation) {
                     is Conditional -> add(which.modelClass.cast(RtConditionalAnnotationImpl(annotation)))

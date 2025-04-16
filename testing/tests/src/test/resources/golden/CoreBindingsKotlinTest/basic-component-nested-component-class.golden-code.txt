@@ -1,32 +1,4 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TopLevelClass$Component2.java
-package test;
-
-import com.yandex.yatagan.internal.YataganGenerated;
-import java.lang.Override;
-import java.lang.SuppressWarnings;
-import javax.annotation.processing.Generated;
-
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
-@YataganGenerated
-@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TopLevelClass$Component2 implements TopLevelClass.Component2 {
-  Yatagan$TopLevelClass$Component2() {
-  }
-
-  public static TopLevelClass.Component2.Builder builder() {
-    return new ComponentFactoryImpl();
-  }
-
-  private static final class ComponentFactoryImpl implements TopLevelClass.Component2.Builder {
-    @Override
-    public TopLevelClass.Component2 c() {
-      return new Yatagan$TopLevelClass$Component2();
-    }
-  }
-}
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Name: test/Yatagan$TopLevelClass$NestedClass$Component1.java
 package test;
 
@@ -61,6 +33,34 @@ public final class Yatagan$TopLevelClass$NestedClass$Component1 implements TopLe
     @Override
     public final Yatagan$TopLevelClass$NestedClass$Component1 create() {
       return new Yatagan$TopLevelClass$NestedClass$Component1();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/Yatagan$TopLevelClass$Component2.java
+package test;
+
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class Yatagan$TopLevelClass$Component2 implements TopLevelClass.Component2 {
+  Yatagan$TopLevelClass$Component2() {
+  }
+
+  public static TopLevelClass.Component2.Builder builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private static final class ComponentFactoryImpl implements TopLevelClass.Component2.Builder {
+    @Override
+    public TopLevelClass.Component2 c() {
+      return new Yatagan$TopLevelClass$Component2();
     }
   }
 }

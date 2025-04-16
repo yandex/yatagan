@@ -467,7 +467,7 @@ class ComponentHierarchyKotlinTest(
             class Features(
                 val isEnabled: Boolean,
             ) {
-                @ConditionExpression("isEnabled", Features::class)
+                @Condition(Features::class, "isEnabled")
                 annotation class IsEnabled
             }
             

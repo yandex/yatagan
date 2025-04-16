@@ -16,9 +16,11 @@
 
 package com.yandex.yatagan.lang.rt
 
+import com.yandex.yatagan.AnyCondition
 import com.yandex.yatagan.Assisted
 import com.yandex.yatagan.Component
 import com.yandex.yatagan.ComponentFlavor
+import com.yandex.yatagan.Condition
 import com.yandex.yatagan.ConditionExpression
 import com.yandex.yatagan.Conditional
 import com.yandex.yatagan.ConditionsApi
@@ -94,6 +96,35 @@ internal class RtIntoSetAnnotationImpl(
 ) : RtAnnotationImplBase<IntoSet>(impl), BuiltinAnnotation.IntoCollectionFamily.IntoSet {
     override val flatten: Boolean
         get() = impl.flatten
+}
+
+@OptIn(ConditionsApi::class)
+internal class RtConditionAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
+    impl: Condition,
+) : RtAnnotationImplBase<Condition>(impl), BuiltinAnnotation.ConditionFamily.One, LexicalScope by lexicalScope {
+    override val target: Type
+        get() = RtTypeImpl(impl.value.java)
+    override val condition: String
+        get() = impl.condition
+
+    companion object Factory : FactoryKey<Condition, RtConditionAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtConditionAnnotationImpl
+    }
+}
+
+@OptIn(ConditionsApi::class)
+internal class RtAnyConditionAnnotationImpl private constructor(
+    lexicalScope: LexicalScope,
+    impl: AnyCondition,
+) : RtAnnotationImplBase<AnyCondition>(impl), BuiltinAnnotation.ConditionFamily.Any, LexicalScope by lexicalScope {
+    override val conditions get() = impl.value.map {
+        RtConditionAnnotationImpl(it)
+    }
+
+    companion object Factory : FactoryKey<AnyCondition, RtAnyConditionAnnotationImpl> {
+        override fun LexicalScope.factory() = ::RtAnyConditionAnnotationImpl
+    }
 }
 
 @OptIn(ConditionsApi::class)

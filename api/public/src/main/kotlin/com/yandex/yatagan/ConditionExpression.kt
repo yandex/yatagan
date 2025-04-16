@@ -19,16 +19,16 @@ package com.yandex.yatagan
 import kotlin.reflect.KClass
 
 /**
- * A boolean expression in terms of [Conditional] system. The expression consists of operations on boolean variables
- * (conditions) and is evaluated at runtime.
- *
- * ### Features
- * A *feature* is an annotation class (`@interface`) declaration, annotated with [ConditionExpression].
- * Features are supplied into [Conditional] annotations and may be referenced in other [ConditionExpression]s.
+ * A boolean expression in terms of [Conditional] system.
+ * This API supersedes the old [Condition]/[AnyCondition] API based on repeatable annotations and
+ * allows specifying an entire boolean expression using a single annotation and in a much more readable form.
  *
  * See [value] on detailed info on how to write expressions.
  *
- * ### Quick examples
+ * Can not be used together with [Condition]/[AnyCondition] on the same _feature_,
+ * however different features are compatible with each other without regarding the API used.
+ *
+ * Examples:
  * - `@ConditionExpression("!@MyFeature", MyFeature::class)` - negate the other feature.
  * - `@ConditionExpression("FEATURE1.isEnabled & !FEATURE2.isEnabled", Features::class)` - single import, so the
  *  short form is used twice - `FEATURE1` and `FEATURE2` are evaluated on the `Features` class.
@@ -38,19 +38,6 @@ import kotlin.reflect.KClass
  *  IsDebug::class, Helper::class)` - qualified usages.
  *  - `@ConditionExpression("X::isEnabledA | X::isEnabledB & X::isRelease",
  *  importAs = [ImportAs(MyLongConditionsProviderName::class, "X")])` - [aliased import][importAs].
- *
- * ### Variable equality and caching
- *
- * Each boolean variable is computed only once per *its scope* and cached inside the corresponding component object.
- * The caching scope is the topmost component where the condition is used. This is done to prevent discrepancies if
- * the condition provider may return different results in different time.
- *
- * Variables in different [ConditionExpression]s are considered equal for caching purposes if and only if their resolved
- * *condition providers* and their *access paths* are equal correspondingly.
- * See [value] on the syntactic definitions.
- *
- * The moment where each variable is computed is currently not strictly defined. The framework may decide to compute
- * the condition as early as component instance initialization, or it may compute it directly before the first usage.
  */
 @ConditionsApi
 @MustBeDocumented
@@ -79,52 +66,7 @@ public annotation class ConditionExpression(
      * `@<imported-feature-name>`, e.g. `@ConditionExpression("@MyFeature", MyFeature::class)`.
      * This way the entire expression from the `@MyFeature` is embedded into the referencing one.
      *
-     * ### Access path
-     *
-     * Each identifier in chain represents a non-private field, method, resolved on a
-     * resulting type of previous identifier or the root class if this is the first identifier.
-     * The last identifier must resolve into a primitive boolean result.
-     *
-     * If the first member is static, then the resulting condition is a *plain (static) condition* - it can be evaluated
-     * anywhere from static context.
-     * If the first member is non-static, then, naturally, an instance of the imported class is required to compute
-     * the condition. The instance is resolved *as a regular binding dependency*. Thus, it can be provided in any way
-     * as a normal graph node could be - inject constructor, provision, binds, etc.
-     *
-     * Names are considered from Java point of view, not Kotlin! So property names are not a thing, getters should be
-     * used instead; Kotlin objects are accessed with `.INSTANCE' or `.Companion`.
-     *
-     * ### Examples
-     * ```kotlin
-     * object SomeObject { val isEnabled = false }
-     * object SomeClass {
-     *   @JvmStatic fun staticComputeCondition() = false
-     *   @JvmStatic fun staticGetSubObject() = AnotherClass()
-     * }
-     * class AnotherClass { val memberCondition = false }
-     * class WithCompanion { companion object { val prop = false } }
-     * class ConditionProviderWithInject @Inject constructor() { val memberCondition = true }
-     *
-     * // Kotlin's singletons require explicit INSTANCE identifier:
-     * @ConditionExpression("INSTANCE.isEnabled", SomeObject::class)
-     * annotation class A
-     *
-     * // Static function from a class:
-     * @ConditionExpression("staticComputeCondition", SomeClass::class)
-     * annotation class B
-     *
-     * // Calls can be chained. Properties are accessible through explicit getters:
-     * @ConditionExpression("staticGetSubObject.getMemberCondition", SomeClass::class)
-     * annotation class C
-     *
-     * // Companion object must be mentioned explicitly:
-     * @ConditionExpression("Companion.getProp", WithCompanion::class)
-     * annotation class D
-     *
-     * // Non-static condition - an injectable class with non-static member:
-     * @ConditionExpression("!getMemberCondition", ConditionProviderWithInject::class)
-     * annotation class E
-     * ```
+     * _Access path_ is interpreted in the same way, as in [Condition.value].
      */
     val value: String,
 
@@ -135,15 +77,11 @@ public annotation class ConditionExpression(
      * Conflicting/duplicated imports are not allowed. If one wishes to import two classes with the same simple name
      * or just shorten the long class name to avoid writing it multiple times,
      * one can use an [aliased import][importAs].
-     *
-     * @see value
      */
     vararg val imports: KClass<*>,
 
     /**
      * Works the same way as [imports], but allows to import a given class by a specified name.
-     *
-     * @see value
      */
     val importAs: Array<ImportAs> = [],
 ) {

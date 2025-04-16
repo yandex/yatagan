@@ -204,7 +204,7 @@ class ComponentCreatorFailureTest(
                 val a: ClassA
             }
 
-            @ConditionExpression("isEnabled", Features::class)
+            @Condition(Features::class, "isEnabled")
             annotation class Feature
 
             @Component(isRoot = false)
@@ -229,7 +229,7 @@ class ComponentCreatorFailureTest(
 
             class ConditionProvider @Inject constructor() {
                 var isEnabled: Boolean = false
-                @ConditionExpression("isEnabled", ConditionProvider::class) annotation class IsEnabled
+                @Condition(ConditionProvider::class, "isEnabled") annotation class IsEnabled
             }
             
             @Component

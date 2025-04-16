@@ -251,7 +251,14 @@ object Strings {
 
         @Covered
         fun noConditionsOnFeature() =
-            "Feature declaration has no `@ConditionExpression` annotation on it.".toError()
+            "Feature declaration has no `@Condition`-family annotations on it.".toError()
+
+        @Covered
+        fun conflictingConditionsOnFeature() =
+            ("Feature declaration has both `@Condition`-family annotations and `@ConditionExpression` present. " +
+                    "Mixing these is not supported. Please, use either one way or the other to define a feature.`"
+                    ).toError()
+
 
         @Covered
         fun nonComponentVariantDimension() =
