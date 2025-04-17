@@ -39,21 +39,21 @@ class RtOnlyTest : CompileTestDriver by DynamicCompileTestDriver() {
             const val ID1 = 1234567
             const val ID2 = 89101112
 
-            class `Yatagan${'$'}MyComponent` : MyComponent {
+            class YataganMyComponent : MyComponent {
                 override fun getInt(): Int = ID1
                 companion object {
                     @JvmStatic fun autoBuilder() = object : AutoBuilder<MyComponent> {
                         override fun <I : Any> provideInput(i: I, c: Class<I>) = throw AssertionError()
-                        override fun create() = `Yatagan${'$'}MyComponent`()
+                        override fun create() = YataganMyComponent()
                     }
                 }
             }
 
-            class `Yatagan${'$'}MyComponentWithBuilder` : MyComponentWithBuilder {
+            class YataganMyComponentWithBuilder : MyComponentWithBuilder {
                 override fun getInt(): Int = ID2
                 companion object {
                     @JvmStatic fun builder() = object : MyComponentWithBuilder.Builder {
-                        override fun create() = `Yatagan${'$'}MyComponentWithBuilder`()
+                        override fun create() = YataganMyComponentWithBuilder()
                     }
                 }
             }

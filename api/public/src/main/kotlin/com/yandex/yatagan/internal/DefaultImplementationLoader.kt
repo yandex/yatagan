@@ -81,9 +81,18 @@ internal class DefaultImplementationLoader : ImplementationLoader {
         val (packageName, binaryName) = splitComponentName(componentClass)
         // no need to parse and join simple names, as codegen joins them with '$' and
         // that's what JVM binary class name already is.
-        val implementationName = "$packageName.Yatagan\$$binaryName"
+        val implementationName = "$packageName.Yatagan${binaryName.replace('$', '_')}"
 
-        return componentClass.classLoader.loadClass(implementationName)
+        return try {
+            componentClass.classLoader.loadClass(implementationName)
+        } catch (e1: ClassNotFoundException) {
+            // fallback to the legacy loader name
+            try {
+                componentClass.classLoader.loadClass("$packageName.Yatagan\$$binaryName")
+            } catch (e2: ClassNotFoundException) {
+                throw e2.also { it.addSuppressed(e1) }
+            }
+        }
     }
 
     private fun splitComponentName(clazz: Class<*>): Pair<String, String> {

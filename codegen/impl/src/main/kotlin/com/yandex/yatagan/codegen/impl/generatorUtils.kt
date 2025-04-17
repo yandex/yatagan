@@ -108,7 +108,7 @@ internal fun formatImplementationClassName(graph: BindingGraph): ClassName {
                 else -> throw AssertionError("Unexpected component name: $it")
             }
             // Keep name mangling in sync with loader!
-            ClassName.get(name.packageName, "Yatagan$" + name.simpleNames.joinToString(separator = "$"))
+            ClassName.get(name.packageName, "Yatagan" + name.simpleNames.joinToString(separator = "_"))
         }
         else -> with(parent[GeneratorComponent]) {
             implementationClassName.nestedClass(
