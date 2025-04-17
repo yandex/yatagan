@@ -20,6 +20,7 @@ import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
 import androidx.room.compiler.processing.util.compiler.compile
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.yandex.yatagan.base.ObjectCacheRegistry
@@ -148,14 +149,15 @@ interface LangTestDriver : SourceSet {
                 compilation: TestCompilationArguments,
                 block: InspectBlock,
             ) = compilation.copy(
-                symbolProcessorProviders = listOf(SymbolProcessorProvider { Inspector(block) })
+                symbolProcessorProviders = listOf(SymbolProcessorProvider { Inspector(block, it) })
             )
 
             private class Inspector(
                 private val inspectBlock: InspectBlock,
+                private val environment: SymbolProcessorEnvironment,
             ) : SymbolProcessor {
                 override fun process(resolver: Resolver): List<KSAnnotated> {
-                    KspProcessingUtils(resolver).use {
+                    KspProcessingUtils(resolver, environment).use {
                         LangModelFactory.use(KspModelFactoryImpl()) {
                             inspectBlock(LangModelFactory)
                         }

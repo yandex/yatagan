@@ -36,7 +36,8 @@ internal fun compileTestDrivers(
             add(NamedProvider(::JapCompileTestDriver, name = "JAP"))
         }
         if (includeKsp) {
-            add(NamedProvider(::KspCompileTestDriver, name = "KSP"))
+            add(NamedProvider(initializer = { KspCompileTestDriver(useK2 = false) }, name = "KSP"))
+            add(NamedProvider(initializer = { KspCompileTestDriver(useK2 = true) }, name = "KSP2"))
         }
         if (includeRt) {
             add(NamedProvider(::DynamicCompileTestDriver, name = "RT"))

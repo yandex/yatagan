@@ -1,7 +1,7 @@
 import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
 
 plugins {
-    id("yatagan.base-module")
+    id("yatagan.test-only-module")
 }
 
 val baseTestRuntime: Configuration by configurations.creating

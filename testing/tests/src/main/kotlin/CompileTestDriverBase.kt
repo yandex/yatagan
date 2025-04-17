@@ -39,6 +39,7 @@ import kotlin.io.path.writeText
 abstract class CompileTestDriverBase private constructor(
     private val apiType: ApiType,
     private val mainSourceSet: SourceSet,
+    private val useK2: Boolean = true,
 ) : CompileTestDriver, SourceSet by mainSourceSet {
     private var precompiledModuleOutputDirs: List<File>? = null
     private val options = mutableMapOf(
@@ -49,7 +50,8 @@ abstract class CompileTestDriverBase private constructor(
 
     protected constructor(
         apiType: ApiType = ApiType.Compiled,
-    ) : this(apiType, SourceSet())
+        useK2: Boolean = true,
+    ) : this(apiType, SourceSet(), useK2)
 
     override val testNameRule = TestNameRule()
 
@@ -206,12 +208,22 @@ abstract class CompileTestDriverBase private constructor(
             "-Xdiags:verbose",
             "-parameters",
         ),
-        kotlincArguments = listOf(
-            "-opt-in=com.yandex.yatagan.ConditionsApi",
-            "-opt-in=com.yandex.yatagan.VariantApi",
-            "-P", "plugin:org.jetbrains.kotlin.kapt3:correctErrorTypes=true",
-            "-java-parameters",
-        ),
+        kotlincArguments = buildList {
+            addAll(listOf(
+                "-opt-in=com.yandex.yatagan.ConditionsApi",
+                "-opt-in=com.yandex.yatagan.VariantApi",
+                "-P", "plugin:org.jetbrains.kotlin.kapt3:correctErrorTypes=true",
+                "-jvm-target=11",
+                "-java-parameters",
+                "-Xjvm-default=all",
+            ))
+            if (!useK2) { // room 2.7.0+ by default uses K2
+                addAll(listOf(
+                    "-language-version=1.9",
+                    "-api-version=1.9",
+                ))
+            }
+        },
         processorOptions = options,
     )
 

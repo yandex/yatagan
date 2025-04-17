@@ -67,7 +67,7 @@ public sealed interface ConditionScope {
      * Denotes a special *explicit* "Always" scope, that is effectively a `true` constant.
      * E.g. every binding without any specified condition has this condition scope.
      */
-    public object Always : ConditionScope {
+    public data object Always : ConditionScope {
         override fun isTautology(): Boolean = true
         override fun isContradiction(): Boolean = false
         override fun implies(another: ConditionScope): Boolean = another.isTautology()
@@ -81,7 +81,7 @@ public sealed interface ConditionScope {
      * Denotes a special *explicit* "Never" scope, that is effectively a `false` constant.
      * E.g. explicitly
      */
-    public object Never : ConditionScope {
+    public data object Never : ConditionScope {
         override fun isTautology(): Boolean = false
         override fun isContradiction(): Boolean = true
         override fun implies(another: ConditionScope): Boolean = true

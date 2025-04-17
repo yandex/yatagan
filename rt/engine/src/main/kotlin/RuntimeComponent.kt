@@ -323,7 +323,7 @@ internal class RuntimeComponent(
     }
 
     override fun visitMap(binding: MapBinding): Any {
-        return buildMap(capacity = binding.contents.size) {
+        return buildMap<Any?, Any?>(capacity = binding.contents.size) {
             binding.upstream?.let { upstream ->
                 putAll(componentForGraph(upstream.owner).access(upstream, DependencyKind.Direct) as Map<*, *>)
             }

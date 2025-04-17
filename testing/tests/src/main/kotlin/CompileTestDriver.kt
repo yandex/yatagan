@@ -61,5 +61,6 @@ class TestNameRule : TestWatcher() {
 enum class Backend {
     Kapt,
     Ksp,
+    Ksp2,
     Rt,
 }

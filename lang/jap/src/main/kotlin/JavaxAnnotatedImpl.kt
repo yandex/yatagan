@@ -26,13 +26,7 @@ internal class JavaxAnnotatedImpl(
 ) : CtAnnotated {
 
     override val annotations: Sequence<CtAnnotationBase> by lazy {
-        val annotations = impl.annotationMirrors.map { JavaxAnnotationImpl(it) }
-        if (impl.isFromKotlin()) {
-            // Means this is from KAPT, and it's known to be reversing annotations order.
-            annotations.asReversed()
-        } else {
-            annotations
-        }.asSequence()
+        impl.annotationMirrors.map { JavaxAnnotationImpl(it) }.asSequence()
     }
 
     override fun <A : Annotation> isAnnotatedWith(type: Class<A>): Boolean {

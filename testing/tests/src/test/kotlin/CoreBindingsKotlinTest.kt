@@ -914,5 +914,28 @@ class CoreBindingsKotlinTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `reproduce #189`() {
+        givenKotlinSource("test.TestCase", """
+          import com.yandex.yatagan.*
+          import javax.inject.*
+
+          class TestClass @Inject constructor()
+
+          interface Deps1 {
+              val testClass: TestClass
+          }
+          
+          interface Deps2 {   
+              val testClass: TestClass
+          }
+
+          @Component
+          interface RootComponent: Deps1, Deps2
+      """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }
 

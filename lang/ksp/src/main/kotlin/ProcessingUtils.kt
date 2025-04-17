@@ -19,6 +19,7 @@ package com.yandex.yatagan.lang.ksp
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.getJavaClassByName
 import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import java.io.Closeable
 
 private var utils: ProcessingUtils? = null
@@ -29,6 +30,7 @@ internal val Utils: ProcessingUtils get() = checkNotNull(utils) {
 
 class ProcessingUtils(
     val resolver: Resolver,
+    val environment: SymbolProcessorEnvironment,
 ) : Closeable {
 
     val classType by lazy {
@@ -49,6 +51,10 @@ class ProcessingUtils(
 
     val javaRetentionClass by lazy {
         Utils.resolver.getJavaClassByName("java.lang.annotation.Retention")!!
+    }
+
+    val isKsp2 by lazy {
+        environment.kspVersion >= KotlinVersion(2, 0)
     }
 
     init {
