@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestPhoneComponent.java
+Name: test/YataganTestTabletComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -19,102 +19,10 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestPhoneComponent implements TestPhoneComponent {
-  final boolean mFeaturesFooBar = Features.fooBar();
-
-  private Yatagan$TestPhoneComponent() {
-  }
-
-  @Override
-  public Optional<MyClass> getDirect() {
-    return this.optOfMyClass();
-  }
-
-  @Override
-  public Optional<MyClass> getOpt() {
-    return this.optOfMyClass();
-  }
-
-  @Override
-  public Optional<Provider<MyClass>> getProvider() {
-    return this.optOfTestMyClass();
-  }
-
-  Object switch$$access(int slot) {
-    switch(slot) {
-      case 0: return new MyClass();
-      default: throw new AssertionError();
-    }
-  }
-
-  Optional optOfMyClass() {
-    return this.mFeaturesFooBar ? Optional.of(new MyClass()) : Optional.empty();
-  }
-
-  Optional optOfTestMyClass() {
-    return this.mFeaturesFooBar ? Optional.of(new ProviderImpl(this, 0)) : Optional.empty();
-  }
-
-  public static AutoBuilder<Yatagan$TestPhoneComponent> autoBuilder() {
-    return new AutoBuilderImpl();
-  }
-
-  static final class ProviderImpl implements Lazy {
-    private final Yatagan$TestPhoneComponent mDelegate;
-
-    private final int mIndex;
-
-    ProviderImpl(Yatagan$TestPhoneComponent delegate, int index) {
-      this.mDelegate = delegate;
-      this.mIndex = index;
-    }
-
-    @Override
-    public Object get() {
-      return this.mDelegate.switch$$access(this.mIndex);
-    }
-  }
-
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestPhoneComponent> {
-    @Override
-    public final <I> AutoBuilder<Yatagan$TestPhoneComponent> provideInput(I input,
-        Class<I> inputClass) {
-      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
-      return this;
-    }
-
-    @Override
-    public final Yatagan$TestPhoneComponent create() {
-      return new Yatagan$TestPhoneComponent();
-    }
-  }
-}
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestTabletComponent.java
-package test;
-
-import com.yandex.yatagan.AutoBuilder;
-import com.yandex.yatagan.Lazy;
-import com.yandex.yatagan.Optional;
-import com.yandex.yatagan.internal.Checks;
-import com.yandex.yatagan.internal.YataganGenerated;
-import java.lang.AssertionError;
-import java.lang.Class;
-import java.lang.Object;
-import java.lang.Override;
-import java.lang.SuppressWarnings;
-import java.util.Collections;
-import javax.annotation.processing.Generated;
-import javax.inject.Provider;
-
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
-@YataganGenerated
-@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestTabletComponent implements TestTabletComponent {
+public final class YataganTestTabletComponent implements TestTabletComponent {
   final boolean mFeaturesIsEnabledB = Features.isEnabledB();
 
-  private Yatagan$TestTabletComponent() {
+  private YataganTestTabletComponent() {
   }
 
   @Override
@@ -147,16 +55,16 @@ public final class Yatagan$TestTabletComponent implements TestTabletComponent {
     return this.mFeaturesIsEnabledB ? Optional.of(new ProviderImpl(this, 0)) : Optional.empty();
   }
 
-  public static AutoBuilder<Yatagan$TestTabletComponent> autoBuilder() {
+  public static AutoBuilder<YataganTestTabletComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$TestTabletComponent mDelegate;
+    private final YataganTestTabletComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$TestTabletComponent delegate, int index) {
+    ProviderImpl(YataganTestTabletComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -167,17 +75,109 @@ public final class Yatagan$TestTabletComponent implements TestTabletComponent {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestTabletComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTestTabletComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$TestTabletComponent> provideInput(I input,
+    public final <I> AutoBuilder<YataganTestTabletComponent> provideInput(I input,
         Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$TestTabletComponent create() {
-      return new Yatagan$TestTabletComponent();
+    public final YataganTestTabletComponent create() {
+      return new YataganTestTabletComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganTestPhoneComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.annotation.processing.Generated;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganTestPhoneComponent implements TestPhoneComponent {
+  final boolean mFeaturesFooBar = Features.fooBar();
+
+  private YataganTestPhoneComponent() {
+  }
+
+  @Override
+  public Optional<MyClass> getDirect() {
+    return this.optOfMyClass();
+  }
+
+  @Override
+  public Optional<MyClass> getOpt() {
+    return this.optOfMyClass();
+  }
+
+  @Override
+  public Optional<Provider<MyClass>> getProvider() {
+    return this.optOfTestMyClass();
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return new MyClass();
+      default: throw new AssertionError();
+    }
+  }
+
+  Optional optOfMyClass() {
+    return this.mFeaturesFooBar ? Optional.of(new MyClass()) : Optional.empty();
+  }
+
+  Optional optOfTestMyClass() {
+    return this.mFeaturesFooBar ? Optional.of(new ProviderImpl(this, 0)) : Optional.empty();
+  }
+
+  public static AutoBuilder<YataganTestPhoneComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final YataganTestPhoneComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(YataganTestPhoneComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTestPhoneComponent> {
+    @Override
+    public final <I> AutoBuilder<YataganTestPhoneComponent> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final YataganTestPhoneComponent create() {
+      return new YataganTestPhoneComponent();
     }
   }
 }

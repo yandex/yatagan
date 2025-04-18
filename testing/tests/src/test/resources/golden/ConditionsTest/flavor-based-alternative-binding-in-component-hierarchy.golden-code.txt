@@ -1,15 +1,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyBrowserComponent.java
+Name: test/YataganMyProductComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
-import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.YataganGenerated;
-import java.lang.AssertionError;
 import java.lang.Class;
-import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
@@ -19,8 +16,8 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyBrowserComponent implements MyBrowserComponent {
-  private Yatagan$MyBrowserComponent() {
+public final class YataganMyProductComponent implements MyProductComponent {
+  private YataganMyProductComponent() {
   }
 
   @Override
@@ -28,93 +25,58 @@ public final class Yatagan$MyBrowserComponent implements MyBrowserComponent {
     return new MyApiComponentImpl.ComponentFactoryImpl(this);
   }
 
-  Object switch$$access(int slot) {
-    switch(slot) {
-      case 0: return this.accessApi();
-      default: throw new AssertionError();
-    }
-  }
-
-  Api accessApi() {
-    return new ImplA();
-  }
-
-  Optional optOfApi() {
-    return Optional.of(this.accessApi());
-  }
-
-  Optional optOfTestApi() {
-    return Optional.of(new ProviderImpl(this, 0));
-  }
-
-  public static AutoBuilder<Yatagan$MyBrowserComponent> autoBuilder() {
+  public static AutoBuilder<YataganMyProductComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class MyApiComponentImpl implements MyApiComponent {
-    final Yatagan$MyBrowserComponent mMyBrowserComponent;
+    final YataganMyProductComponent mMyProductComponent;
 
-    MyApiComponentImpl(Yatagan$MyBrowserComponent pMyBrowserComponent) {
-      this.mMyBrowserComponent = pMyBrowserComponent;
+    MyApiComponentImpl(YataganMyProductComponent pMyProductComponent) {
+      this.mMyProductComponent = pMyProductComponent;
     }
 
     @Override
     public Optional<Api> getApi() {
-      return this.mMyBrowserComponent.optOfApi();
+      return Optional.empty();
     }
 
     @Override
     public Optional<Provider<Api>> getApiProvider() {
-      return this.mMyBrowserComponent.optOfTestApi();
+      return Optional.empty();
     }
 
     private static final class ComponentFactoryImpl implements MyApiComponent.Factory {
-      Yatagan$MyBrowserComponent fMyBrowserComponent;
+      YataganMyProductComponent fMyProductComponent;
 
-      ComponentFactoryImpl(Yatagan$MyBrowserComponent fMyBrowserComponent) {
-        this.fMyBrowserComponent = fMyBrowserComponent;
+      ComponentFactoryImpl(YataganMyProductComponent fMyProductComponent) {
+        this.fMyProductComponent = fMyProductComponent;
       }
 
       @Override
       public MyApiComponent create() {
-        return new MyApiComponentImpl(this.fMyBrowserComponent);
+        return new MyApiComponentImpl(this.fMyProductComponent);
       }
     }
   }
 
-  static final class ProviderImpl implements Lazy {
-    private final Yatagan$MyBrowserComponent mDelegate;
-
-    private final int mIndex;
-
-    ProviderImpl(Yatagan$MyBrowserComponent delegate, int index) {
-      this.mDelegate = delegate;
-      this.mIndex = index;
-    }
-
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMyProductComponent> {
     @Override
-    public Object get() {
-      return this.mDelegate.switch$$access(this.mIndex);
-    }
-  }
-
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyBrowserComponent> {
-    @Override
-    public final <I> AutoBuilder<Yatagan$MyBrowserComponent> provideInput(I input,
+    public final <I> AutoBuilder<YataganMyProductComponent> provideInput(I input,
         Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$MyBrowserComponent create() {
-      return new Yatagan$MyBrowserComponent();
+    public final YataganMyProductComponent create() {
+      return new YataganMyProductComponent();
     }
   }
 }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MySearchAppComponent.java
+Name: test/YataganMySearchAppComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -134,8 +96,8 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MySearchAppComponent implements MySearchAppComponent {
-  private Yatagan$MySearchAppComponent() {
+public final class YataganMySearchAppComponent implements MySearchAppComponent {
+  private YataganMySearchAppComponent() {
   }
 
   @Override
@@ -162,14 +124,14 @@ public final class Yatagan$MySearchAppComponent implements MySearchAppComponent 
     return Optional.of(new ProviderImpl(this, 0));
   }
 
-  public static AutoBuilder<Yatagan$MySearchAppComponent> autoBuilder() {
+  public static AutoBuilder<YataganMySearchAppComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class MyApiComponentImpl implements MyApiComponent {
-    final Yatagan$MySearchAppComponent mMySearchAppComponent;
+    final YataganMySearchAppComponent mMySearchAppComponent;
 
-    MyApiComponentImpl(Yatagan$MySearchAppComponent pMySearchAppComponent) {
+    MyApiComponentImpl(YataganMySearchAppComponent pMySearchAppComponent) {
       this.mMySearchAppComponent = pMySearchAppComponent;
     }
 
@@ -184,9 +146,9 @@ public final class Yatagan$MySearchAppComponent implements MySearchAppComponent 
     }
 
     private static final class ComponentFactoryImpl implements MyApiComponent.Factory {
-      Yatagan$MySearchAppComponent fMySearchAppComponent;
+      YataganMySearchAppComponent fMySearchAppComponent;
 
-      ComponentFactoryImpl(Yatagan$MySearchAppComponent fMySearchAppComponent) {
+      ComponentFactoryImpl(YataganMySearchAppComponent fMySearchAppComponent) {
         this.fMySearchAppComponent = fMySearchAppComponent;
       }
 
@@ -198,11 +160,11 @@ public final class Yatagan$MySearchAppComponent implements MySearchAppComponent 
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$MySearchAppComponent mDelegate;
+    private final YataganMySearchAppComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$MySearchAppComponent delegate, int index) {
+    ProviderImpl(YataganMySearchAppComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -213,30 +175,33 @@ public final class Yatagan$MySearchAppComponent implements MySearchAppComponent 
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MySearchAppComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMySearchAppComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$MySearchAppComponent> provideInput(I input,
+    public final <I> AutoBuilder<YataganMySearchAppComponent> provideInput(I input,
         Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$MySearchAppComponent create() {
-      return new Yatagan$MySearchAppComponent();
+    public final YataganMySearchAppComponent create() {
+      return new YataganMySearchAppComponent();
     }
   }
 }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyProductComponent.java
+Name: test/YataganMyBrowserComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
 import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.AssertionError;
 import java.lang.Class;
+import java.lang.Object;
 import java.lang.Override;
 import java.lang.SuppressWarnings;
 import java.util.Collections;
@@ -246,8 +211,8 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyProductComponent implements MyProductComponent {
-  private Yatagan$MyProductComponent() {
+public final class YataganMyBrowserComponent implements MyBrowserComponent {
+  private YataganMyBrowserComponent() {
   }
 
   @Override
@@ -255,52 +220,87 @@ public final class Yatagan$MyProductComponent implements MyProductComponent {
     return new MyApiComponentImpl.ComponentFactoryImpl(this);
   }
 
-  public static AutoBuilder<Yatagan$MyProductComponent> autoBuilder() {
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.accessApi();
+      default: throw new AssertionError();
+    }
+  }
+
+  Api accessApi() {
+    return new ImplA();
+  }
+
+  Optional optOfApi() {
+    return Optional.of(this.accessApi());
+  }
+
+  Optional optOfTestApi() {
+    return Optional.of(new ProviderImpl(this, 0));
+  }
+
+  public static AutoBuilder<YataganMyBrowserComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class MyApiComponentImpl implements MyApiComponent {
-    final Yatagan$MyProductComponent mMyProductComponent;
+    final YataganMyBrowserComponent mMyBrowserComponent;
 
-    MyApiComponentImpl(Yatagan$MyProductComponent pMyProductComponent) {
-      this.mMyProductComponent = pMyProductComponent;
+    MyApiComponentImpl(YataganMyBrowserComponent pMyBrowserComponent) {
+      this.mMyBrowserComponent = pMyBrowserComponent;
     }
 
     @Override
     public Optional<Api> getApi() {
-      return Optional.empty();
+      return this.mMyBrowserComponent.optOfApi();
     }
 
     @Override
     public Optional<Provider<Api>> getApiProvider() {
-      return Optional.empty();
+      return this.mMyBrowserComponent.optOfTestApi();
     }
 
     private static final class ComponentFactoryImpl implements MyApiComponent.Factory {
-      Yatagan$MyProductComponent fMyProductComponent;
+      YataganMyBrowserComponent fMyBrowserComponent;
 
-      ComponentFactoryImpl(Yatagan$MyProductComponent fMyProductComponent) {
-        this.fMyProductComponent = fMyProductComponent;
+      ComponentFactoryImpl(YataganMyBrowserComponent fMyBrowserComponent) {
+        this.fMyBrowserComponent = fMyBrowserComponent;
       }
 
       @Override
       public MyApiComponent create() {
-        return new MyApiComponentImpl(this.fMyProductComponent);
+        return new MyApiComponentImpl(this.fMyBrowserComponent);
       }
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyProductComponent> {
+  static final class ProviderImpl implements Lazy {
+    private final YataganMyBrowserComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(YataganMyBrowserComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
     @Override
-    public final <I> AutoBuilder<Yatagan$MyProductComponent> provideInput(I input,
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMyBrowserComponent> {
+    @Override
+    public final <I> AutoBuilder<YataganMyBrowserComponent> provideInput(I input,
         Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$MyProductComponent create() {
-      return new Yatagan$MyProductComponent();
+    public final YataganMyBrowserComponent create() {
+      return new YataganMyBrowserComponent();
     }
   }
 }

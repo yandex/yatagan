@@ -1,4 +1,62 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganTop_MyDaggerNested.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganTop_MyDaggerNested implements Top.MyDaggerNested {
+  final Integer mI;
+
+  final MyDep mMyDep;
+
+  YataganTop_MyDaggerNested(Integer pI, MyDep pDep) {
+    this.mI = Checks.checkInputNotNull(pI);
+    this.mMyDep = Checks.checkInputNotNull(pDep);
+  }
+
+  @Override
+  public MyAssistedFactory getAf() {
+    return this.new MyAssistedFactoryImpl();
+  }
+
+  @Override
+  public Foo getFoo() {
+    return this.mMyDep.getFoo();
+  }
+
+  @Override
+  public int getI() {
+    return this.mI;
+  }
+
+  public static Top.MyDaggerNested.Factory builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  private final class MyAssistedFactoryImpl implements MyAssistedFactory {
+    @Override
+    public AssistedClass create(int i, int j) {
+      return new AssistedClass(i, j, YataganTop_MyDaggerNested.this.mMyDep.getFoo());
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements Top.MyDaggerNested.Factory {
+    @Override
+    public Top.MyDaggerNested create(int i, MyDep dep) {
+      return new YataganTop_MyDaggerNested(i, dep);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Name: test/DaggerMyDagger.java
 package test;
 
@@ -9,7 +67,7 @@ import javax.annotation.processing.Generated;
 @Generated("com.yandex.yatagan.codegen.impl.DaggerCompatBridgeGenerator")
 public final class DaggerMyDagger {
   public static MyDagger create() {
-    return Yatagan$MyDagger.autoBuilder().create();
+    return YataganMyDagger.autoBuilder().create();
   }
 }
 
@@ -24,7 +82,7 @@ import javax.annotation.processing.Generated;
 @Generated("com.yandex.yatagan.codegen.impl.DaggerCompatBridgeGenerator")
 public final class DaggerTop_MyDaggerNested {
   public static Top.MyDaggerNested.Factory builder() {
-    return Yatagan$Top$MyDaggerNested.builder();
+    return YataganTop_MyDaggerNested.builder();
   }
 
   public static Top.MyDaggerNested.Factory factory() {
@@ -33,7 +91,7 @@ public final class DaggerTop_MyDaggerNested {
 }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyDagger.java
+Name: test/YataganMyDagger.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -65,12 +123,12 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyDagger implements MyDagger {
+public final class YataganMyDagger implements MyDagger {
   private volatile Object mBarInstance = new UninitializedLock();
 
   private Object mFooInstance;
 
-  private Yatagan$MyDagger() {
+  private YataganMyDagger() {
   }
 
   @Override
@@ -147,7 +205,7 @@ public final class Yatagan$MyDagger implements MyDagger {
     return Optional.of(new ProviderImpl(this, 0));
   }
 
-  public static AutoBuilder<Yatagan$MyDagger> autoBuilder() {
+  public static AutoBuilder<YataganMyDagger> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
@@ -294,11 +352,11 @@ public final class Yatagan$MyDagger implements MyDagger {
   }
 
   static final class ProviderImpl implements com.yandex.yatagan.Lazy, Provider, Lazy {
-    private final Yatagan$MyDagger mDelegate;
+    private final YataganMyDagger mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$MyDagger delegate, int index) {
+    ProviderImpl(YataganMyDagger delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -309,74 +367,16 @@ public final class Yatagan$MyDagger implements MyDagger {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyDagger> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMyDagger> {
     @Override
-    public final <I> AutoBuilder<Yatagan$MyDagger> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganMyDagger> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$MyDagger create() {
-      return new Yatagan$MyDagger();
-    }
-  }
-}
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$Top$MyDaggerNested.java
-package test;
-
-import com.yandex.yatagan.internal.Checks;
-import com.yandex.yatagan.internal.YataganGenerated;
-import java.lang.Integer;
-import java.lang.Override;
-import java.lang.SuppressWarnings;
-import javax.annotation.processing.Generated;
-
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
-@YataganGenerated
-@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$Top$MyDaggerNested implements Top.MyDaggerNested {
-  final Integer mI;
-
-  final MyDep mMyDep;
-
-  Yatagan$Top$MyDaggerNested(Integer pI, MyDep pDep) {
-    this.mI = Checks.checkInputNotNull(pI);
-    this.mMyDep = Checks.checkInputNotNull(pDep);
-  }
-
-  @Override
-  public MyAssistedFactory getAf() {
-    return this.new MyAssistedFactoryImpl();
-  }
-
-  @Override
-  public Foo getFoo() {
-    return this.mMyDep.getFoo();
-  }
-
-  @Override
-  public int getI() {
-    return this.mI;
-  }
-
-  public static Top.MyDaggerNested.Factory builder() {
-    return new ComponentFactoryImpl();
-  }
-
-  private final class MyAssistedFactoryImpl implements MyAssistedFactory {
-    @Override
-    public AssistedClass create(int i, int j) {
-      return new AssistedClass(i, j, Yatagan$Top$MyDaggerNested.this.mMyDep.getFoo());
-    }
-  }
-
-  private static final class ComponentFactoryImpl implements Top.MyDaggerNested.Factory {
-    @Override
-    public Top.MyDaggerNested create(int i, MyDep dep) {
-      return new Yatagan$Top$MyDaggerNested(i, dep);
+    public final YataganMyDagger create() {
+      return new YataganMyDagger();
     }
   }
 }

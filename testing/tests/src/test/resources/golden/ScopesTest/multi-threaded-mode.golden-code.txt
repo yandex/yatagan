@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestComponent.java
+Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -18,14 +18,14 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestComponent implements TestComponent {
+public final class YataganTestComponent implements TestComponent {
   private volatile Object mClassAInstance = new UninitializedLock();
 
   private volatile Object mClassBInstance = new UninitializedLock();
 
   private volatile Object mClassCInstance = new UninitializedLock();
 
-  private Yatagan$TestComponent() {
+  private YataganTestComponent() {
   }
 
   @Override
@@ -105,7 +105,7 @@ public final class Yatagan$TestComponent implements TestComponent {
     return (ClassC) local;
   }
 
-  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+  public static AutoBuilder<YataganTestComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
@@ -113,11 +113,11 @@ public final class Yatagan$TestComponent implements TestComponent {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$TestComponent mDelegate;
+    private final YataganTestComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+    ProviderImpl(YataganTestComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -129,13 +129,13 @@ public final class Yatagan$TestComponent implements TestComponent {
   }
 
   private static final class DoubleCheck implements Lazy {
-    private final Yatagan$TestComponent mDelegate;
+    private final YataganTestComponent mDelegate;
 
     private final int mIndex;
 
     private volatile Object mValue;
 
-    DoubleCheck(Yatagan$TestComponent factory, int index) {
+    DoubleCheck(YataganTestComponent factory, int index) {
       mDelegate = factory;
       mIndex = index;
     }
@@ -156,16 +156,16 @@ public final class Yatagan$TestComponent implements TestComponent {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTestComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganTestComponent> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$TestComponent create() {
-      return new Yatagan$TestComponent();
+    public final YataganTestComponent create() {
+      return new YataganTestComponent();
     }
   }
 }

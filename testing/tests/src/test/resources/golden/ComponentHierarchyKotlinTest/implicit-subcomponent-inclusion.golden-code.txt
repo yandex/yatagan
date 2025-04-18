@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$RootComponent.java
+Name: test/YataganRootComponent.java
 package test;
 
 import com.yandex.yatagan.Lazy;
@@ -18,12 +18,12 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$RootComponent implements RootComponent {
+public final class YataganRootComponent implements RootComponent {
   private Object mFooInstance;
 
   final Features mFeatures;
 
-  Yatagan$RootComponent(Features pFeatures) {
+  YataganRootComponent(Features pFeatures) {
     this.mFeatures = Checks.checkInputNotNull(pFeatures);
   }
 
@@ -64,11 +64,11 @@ public final class Yatagan$RootComponent implements RootComponent {
   }
 
   static final class SubComponent1Impl implements SubComponent1 {
-    final Yatagan$RootComponent mRootComponent;
+    final YataganRootComponent mRootComponent;
 
     private byte mFeaturesIsEnabled;
 
-    SubComponent1Impl(Yatagan$RootComponent pRootComponent) {
+    SubComponent1Impl(YataganRootComponent pRootComponent) {
       this.mRootComponent = pRootComponent;
     }
 
@@ -89,9 +89,9 @@ public final class Yatagan$RootComponent implements RootComponent {
     }
 
     static final class FeatureComponentImpl implements FeatureComponent {
-      final Yatagan$RootComponent mRootComponent;
+      final YataganRootComponent mRootComponent;
 
-      FeatureComponentImpl(Yatagan$RootComponent pRootComponent) {
+      FeatureComponentImpl(YataganRootComponent pRootComponent) {
         this.mRootComponent = pRootComponent;
       }
 
@@ -119,9 +119,9 @@ public final class Yatagan$RootComponent implements RootComponent {
       }
 
       private static final class ComponentFactoryImpl implements FeatureComponent.Factory {
-        Yatagan$RootComponent fRootComponent;
+        YataganRootComponent fRootComponent;
 
-        ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+        ComponentFactoryImpl(YataganRootComponent fRootComponent) {
           this.fRootComponent = fRootComponent;
         }
 
@@ -133,9 +133,9 @@ public final class Yatagan$RootComponent implements RootComponent {
     }
 
     private static final class ComponentFactoryImpl implements SubComponent1.Builder {
-      Yatagan$RootComponent fRootComponent;
+      YataganRootComponent fRootComponent;
 
-      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+      ComponentFactoryImpl(YataganRootComponent fRootComponent) {
         this.fRootComponent = fRootComponent;
       }
 
@@ -153,9 +153,9 @@ public final class Yatagan$RootComponent implements RootComponent {
 
     final MyModule mMyModule;
 
-    final Yatagan$RootComponent mRootComponent;
+    final YataganRootComponent mRootComponent;
 
-    SubComponent3Impl(Yatagan$RootComponent pRootComponent, MyDep pDep, MyModule pMod, Double pD) {
+    SubComponent3Impl(YataganRootComponent pRootComponent, MyDep pDep, MyModule pMod, Double pD) {
       this.mRootComponent = pRootComponent;
       this.mMyDep = Checks.checkInputNotNull(pDep);
       this.mMyModule = Checks.checkInputNotNull(pMod);
@@ -202,9 +202,9 @@ public final class Yatagan$RootComponent implements RootComponent {
   }
 
   static final class SubComponent2Impl implements SubComponent2 {
-    final Yatagan$RootComponent mRootComponent;
+    final YataganRootComponent mRootComponent;
 
-    SubComponent2Impl(Yatagan$RootComponent pRootComponent) {
+    SubComponent2Impl(YataganRootComponent pRootComponent) {
       this.mRootComponent = pRootComponent;
     }
 
@@ -219,11 +219,11 @@ public final class Yatagan$RootComponent implements RootComponent {
     }
 
     static final class Sub2ComponentImpl implements Sub2Component {
-      final Yatagan$RootComponent mRootComponent;
+      final YataganRootComponent mRootComponent;
 
       private byte mFeaturesIsEnabled;
 
-      Sub2ComponentImpl(Yatagan$RootComponent pRootComponent) {
+      Sub2ComponentImpl(YataganRootComponent pRootComponent) {
         this.mRootComponent = pRootComponent;
       }
 
@@ -249,9 +249,9 @@ public final class Yatagan$RootComponent implements RootComponent {
       }
 
       static final class FeatureComponentImpl implements FeatureComponent {
-        final Yatagan$RootComponent mRootComponent;
+        final YataganRootComponent mRootComponent;
 
-        FeatureComponentImpl(Yatagan$RootComponent pRootComponent) {
+        FeatureComponentImpl(YataganRootComponent pRootComponent) {
           this.mRootComponent = pRootComponent;
         }
 
@@ -279,9 +279,9 @@ public final class Yatagan$RootComponent implements RootComponent {
         }
 
         private static final class ComponentFactoryImpl implements FeatureComponent.Factory {
-          Yatagan$RootComponent fRootComponent;
+          YataganRootComponent fRootComponent;
 
-          ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+          ComponentFactoryImpl(YataganRootComponent fRootComponent) {
             this.fRootComponent = fRootComponent;
           }
 
@@ -295,11 +295,11 @@ public final class Yatagan$RootComponent implements RootComponent {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$RootComponent mDelegate;
+    private final YataganRootComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$RootComponent delegate, int index) {
+    ProviderImpl(YataganRootComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -313,7 +313,7 @@ public final class Yatagan$RootComponent implements RootComponent {
   private static final class ComponentFactoryImpl implements RootComponent.Factory {
     @Override
     public RootComponent create(Features features) {
-      return new Yatagan$RootComponent(features);
+      return new YataganRootComponent(features);
     }
   }
 }

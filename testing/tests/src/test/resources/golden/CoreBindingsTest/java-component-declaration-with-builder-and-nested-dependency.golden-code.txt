@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestComponent.java
+Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.internal.Checks;
@@ -11,10 +11,10 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestComponent implements TestComponent {
+public final class YataganTestComponent implements TestComponent {
   final TestComponent.Dependency mTestComponentDependency;
 
-  Yatagan$TestComponent(TestComponent.Dependency pDep) {
+  YataganTestComponent(TestComponent.Dependency pDep) {
     this.mTestComponentDependency = Checks.checkInputNotNull(pDep);
   }
 
@@ -25,7 +25,7 @@ public final class Yatagan$TestComponent implements TestComponent {
   private static final class ComponentFactoryImpl implements TestComponent.Builder {
     @Override
     public TestComponent create(TestComponent.Dependency dep) {
-      return new Yatagan$TestComponent(dep);
+      return new YataganTestComponent(dep);
     }
   }
 }

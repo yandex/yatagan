@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestComponent.java
+Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.Optional;
@@ -14,7 +14,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestComponent implements TestComponent {
+public final class YataganTestComponent implements TestComponent {
   private Object mFeatureProvider3Instance;
 
   final FeatureProvider mFeatures;
@@ -29,7 +29,7 @@ public final class Yatagan$TestComponent implements TestComponent {
 
   private byte mF3IsEnabledE;
 
-  Yatagan$TestComponent(FeatureProvider pFeatures) {
+  YataganTestComponent(FeatureProvider pFeatures) {
     this.mFeatures = Checks.checkInputNotNull(pFeatures);
   }
 
@@ -121,7 +121,7 @@ public final class Yatagan$TestComponent implements TestComponent {
   private static final class ComponentFactoryImpl implements TestComponent.Builder {
     @Override
     public TestComponent create(FeatureProvider features) {
-      return new Yatagan$TestComponent(features);
+      return new YataganTestComponent(features);
     }
   }
 }

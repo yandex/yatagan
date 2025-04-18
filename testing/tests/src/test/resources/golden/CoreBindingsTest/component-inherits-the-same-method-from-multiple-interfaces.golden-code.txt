@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyComponent.java
+Name: test/YataganMyComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -14,8 +14,8 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyComponent implements MyComponent {
-  private Yatagan$MyComponent() {
+public final class YataganMyComponent implements MyComponent {
+  private YataganMyComponent() {
   }
 
   @Override
@@ -23,20 +23,20 @@ public final class Yatagan$MyComponent implements MyComponent {
     return new ClassA();
   }
 
-  public static AutoBuilder<Yatagan$MyComponent> autoBuilder() {
+  public static AutoBuilder<YataganMyComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMyComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$MyComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganMyComponent> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$MyComponent create() {
-      return new Yatagan$MyComponent();
+    public final YataganMyComponent create() {
+      return new YataganMyComponent();
     }
   }
 }

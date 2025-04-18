@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyComponent.java
+Name: test/YataganMyComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -15,10 +15,10 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyComponent implements MyComponent {
+public final class YataganMyComponent implements MyComponent {
   final MyModule mMyModule;
 
-  private Yatagan$MyComponent(MyModule pMyModule) {
+  private YataganMyComponent(MyModule pMyModule) {
     this.mMyModule = pMyModule != null ? pMyModule : new MyModule();
   }
 
@@ -27,15 +27,15 @@ public final class Yatagan$MyComponent implements MyComponent {
     return Checks.checkProvisionNotNull(this.mMyModule.provides());
   }
 
-  public static AutoBuilder<Yatagan$MyComponent> autoBuilder() {
+  public static AutoBuilder<YataganMyComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMyComponent> {
     private MyModule mMyModule;
 
     @Override
-    public final <I> AutoBuilder<Yatagan$MyComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganMyComponent> provideInput(I input, Class<I> inputClass) {
       if (inputClass == MyModule.class) {
         this.mMyModule = (MyModule) input;
       } else {
@@ -45,8 +45,8 @@ public final class Yatagan$MyComponent implements MyComponent {
     }
 
     @Override
-    public final Yatagan$MyComponent create() {
-      return new Yatagan$MyComponent(this.mMyModule);
+    public final YataganMyComponent create() {
+      return new YataganMyComponent(this.mMyModule);
     }
   }
 }

@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestComponent.java
+Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -15,10 +15,10 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestComponent implements TestComponent {
+public final class YataganTestComponent implements TestComponent {
   final boolean mFeaturesFooBar = Features.fooBar();
 
-  private Yatagan$TestComponent() {
+  private YataganTestComponent() {
   }
 
   @Override
@@ -35,16 +35,16 @@ public final class Yatagan$TestComponent implements TestComponent {
     return this.mFeaturesFooBar ? Optional.of(new ClassA()) : Optional.empty();
   }
 
-  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+  public static AutoBuilder<YataganTestComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class TestSubComponentImpl implements TestSubComponent {
-    final Yatagan$TestComponent mTestComponent;
+    final YataganTestComponent mTestComponent;
 
     final boolean mFeaturesIsEnabledB = Features.isEnabledB();
 
-    TestSubComponentImpl(Yatagan$TestComponent pTestComponent) {
+    TestSubComponentImpl(YataganTestComponent pTestComponent) {
       this.mTestComponent = pTestComponent;
     }
 
@@ -62,9 +62,9 @@ public final class Yatagan$TestComponent implements TestComponent {
     }
 
     private static final class ComponentFactoryImpl implements TestSubComponent.Factory {
-      Yatagan$TestComponent fTestComponent;
+      YataganTestComponent fTestComponent;
 
-      ComponentFactoryImpl(Yatagan$TestComponent fTestComponent) {
+      ComponentFactoryImpl(YataganTestComponent fTestComponent) {
         this.fTestComponent = fTestComponent;
       }
 
@@ -75,16 +75,16 @@ public final class Yatagan$TestComponent implements TestComponent {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTestComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganTestComponent> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$TestComponent create() {
-      return new Yatagan$TestComponent();
+    public final YataganTestComponent create() {
+      return new YataganTestComponent();
     }
   }
 }

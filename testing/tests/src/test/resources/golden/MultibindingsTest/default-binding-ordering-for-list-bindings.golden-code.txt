@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyComponent.java
+Name: test/YataganMyComponent.java
 package test;
 
 import com.yandex.yatagan.internal.Checks;
@@ -15,7 +15,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyComponent implements MyComponent {
+public final class YataganMyComponent implements MyComponent {
   private Object mCreateBInstance;
 
   private Object mCreateDestroyAInstance;
@@ -30,7 +30,7 @@ public final class Yatagan$MyComponent implements MyComponent {
 
   final MyDependency mMyDependency;
 
-  Yatagan$MyComponent(CreateX pX, MyDependency pDep) {
+  YataganMyComponent(CreateX pX, MyDependency pDep) {
     this.mX = Checks.checkInputNotNull(pX);
     this.mMyDependency = Checks.checkInputNotNull(pDep);
   }
@@ -149,7 +149,7 @@ public final class Yatagan$MyComponent implements MyComponent {
   private static final class ComponentFactoryImpl implements MyComponent.Builder {
     @Override
     public MyComponent create(CreateX x, MyDependency dep) {
-      return new Yatagan$MyComponent(x, dep);
+      return new YataganMyComponent(x, dep);
     }
   }
 }

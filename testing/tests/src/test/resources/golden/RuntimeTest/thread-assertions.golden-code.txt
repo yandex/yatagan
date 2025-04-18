@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MySTComponent.java
+Name: test/YataganMySTComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -18,14 +18,14 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MySTComponent implements MySTComponent {
+public final class YataganMySTComponent implements MySTComponent {
   private Object mMyClassAInstance;
 
   private Object mMyClassBInstance;
 
   private Object mMyClassCInstance;
 
-  private Yatagan$MySTComponent() {
+  private YataganMySTComponent() {
   }
 
   @Override
@@ -86,16 +86,16 @@ public final class Yatagan$MySTComponent implements MySTComponent {
     return (MyClassC) local;
   }
 
-  public static AutoBuilder<Yatagan$MySTComponent> autoBuilder() {
+  public static AutoBuilder<YataganMySTComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$MySTComponent mDelegate;
+    private final YataganMySTComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$MySTComponent delegate, int index) {
+    ProviderImpl(YataganMySTComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -107,13 +107,13 @@ public final class Yatagan$MySTComponent implements MySTComponent {
   }
 
   private static final class CachingProviderImpl implements Lazy {
-    private final Yatagan$MySTComponent mDelegate;
+    private final YataganMySTComponent mDelegate;
 
     private final int mIndex;
 
     private Object mValue;
 
-    CachingProviderImpl(Yatagan$MySTComponent factory, int index) {
+    CachingProviderImpl(YataganMySTComponent factory, int index) {
       mDelegate = factory;
       mIndex = index;
     }
@@ -130,16 +130,16 @@ public final class Yatagan$MySTComponent implements MySTComponent {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MySTComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMySTComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$MySTComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganMySTComponent> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$MySTComponent create() {
-      return new Yatagan$MySTComponent();
+    public final YataganMySTComponent create() {
+      return new YataganMySTComponent();
     }
   }
 }

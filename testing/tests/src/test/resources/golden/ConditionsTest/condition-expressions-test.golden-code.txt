@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestComponent.java
+Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -15,7 +15,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestComponent implements TestComponent {
+public final class YataganTestComponent implements TestComponent {
   final boolean mFeaturesFooBar = Features.fooBar();
 
   final boolean mFeaturesIsEnabledB = Features.isEnabledB();
@@ -26,7 +26,7 @@ public final class Yatagan$TestComponent implements TestComponent {
 
   private byte mC3Companion_c1CompanionEnabled;
 
-  private Yatagan$TestComponent() {
+  private YataganTestComponent() {
   }
 
   @Override
@@ -83,7 +83,7 @@ public final class Yatagan$TestComponent implements TestComponent {
     return this.mFeaturesIsEnabledB || (this.mFeaturesFooBar || !this.helperGetA()) && !this.mFeaturesFooBar && this.mFeaturesFooBar ? Optional.of(new ClassF()) : Optional.empty();
   }
 
-  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+  public static AutoBuilder<YataganTestComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
@@ -108,16 +108,16 @@ public final class Yatagan$TestComponent implements TestComponent {
     return this.mC3Companion_c1CompanionEnabled == 0x1;
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTestComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganTestComponent> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$TestComponent create() {
-      return new Yatagan$TestComponent();
+    public final YataganTestComponent create() {
+      return new YataganTestComponent();
     }
   }
 }

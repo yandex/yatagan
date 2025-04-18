@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$RootComponent.java
+Name: test/YataganRootComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -18,8 +18,8 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$RootComponent implements RootComponent {
-  private Yatagan$RootComponent() {
+public final class YataganRootComponent implements RootComponent {
+  private YataganRootComponent() {
   }
 
   @Override
@@ -45,7 +45,7 @@ public final class Yatagan$RootComponent implements RootComponent {
     return this.mapOfMapIntegerInteger();
   }
 
-  public static AutoBuilder<Yatagan$RootComponent> autoBuilder() {
+  public static AutoBuilder<YataganRootComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
@@ -64,9 +64,9 @@ public final class Yatagan$RootComponent implements RootComponent {
   }
 
   static final class SubComponentImpl implements SubComponent {
-    final Yatagan$RootComponent mRootComponent;
+    final YataganRootComponent mRootComponent;
 
-    SubComponentImpl(Yatagan$RootComponent pRootComponent) {
+    SubComponentImpl(YataganRootComponent pRootComponent) {
       this.mRootComponent = pRootComponent;
     }
 
@@ -93,9 +93,9 @@ public final class Yatagan$RootComponent implements RootComponent {
     }
 
     private static final class ComponentFactoryImpl implements SubComponent.Builder {
-      Yatagan$RootComponent fRootComponent;
+      YataganRootComponent fRootComponent;
 
-      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+      ComponentFactoryImpl(YataganRootComponent fRootComponent) {
         this.fRootComponent = fRootComponent;
       }
 
@@ -107,9 +107,9 @@ public final class Yatagan$RootComponent implements RootComponent {
   }
 
   static final class SubComponent2Impl implements SubComponent2 {
-    final Yatagan$RootComponent mRootComponent;
+    final YataganRootComponent mRootComponent;
 
-    SubComponent2Impl(Yatagan$RootComponent pRootComponent) {
+    SubComponent2Impl(YataganRootComponent pRootComponent) {
       this.mRootComponent = pRootComponent;
     }
 
@@ -147,9 +147,9 @@ public final class Yatagan$RootComponent implements RootComponent {
     }
 
     private static final class ComponentFactoryImpl implements SubComponent2.Builder {
-      Yatagan$RootComponent fRootComponent;
+      YataganRootComponent fRootComponent;
 
-      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+      ComponentFactoryImpl(YataganRootComponent fRootComponent) {
         this.fRootComponent = fRootComponent;
       }
 
@@ -160,16 +160,16 @@ public final class Yatagan$RootComponent implements RootComponent {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$RootComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganRootComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$RootComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganRootComponent> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$RootComponent create() {
-      return new Yatagan$RootComponent();
+    public final YataganRootComponent create() {
+      return new YataganRootComponent();
     }
   }
 }

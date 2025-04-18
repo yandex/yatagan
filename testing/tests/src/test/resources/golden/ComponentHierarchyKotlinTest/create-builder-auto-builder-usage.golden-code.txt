@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$ComponentFoo.java
+Name: test/YataganComponentBar.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -14,66 +14,14 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$ComponentFoo implements ComponentFoo {
-  final MyModule mMyModule;
-
-  private Yatagan$ComponentFoo(MyModule pMyModule) {
-    this.mMyModule = pMyModule != null ? pMyModule : new MyModule();
-  }
-
-  @Override
-  public int getI() {
-    return Checks.checkProvisionNotNull(this.mMyModule.getI());
-  }
-
-  public static AutoBuilder<Yatagan$ComponentFoo> autoBuilder() {
-    return new AutoBuilderImpl();
-  }
-
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$ComponentFoo> {
-    private MyModule mMyModule;
-
-    @Override
-    public final <I> AutoBuilder<Yatagan$ComponentFoo> provideInput(I input, Class<I> inputClass) {
-      if (inputClass == MyModule.class) {
-        this.mMyModule = (MyModule) input;
-      } else {
-        Checks.reportUnexpectedAutoBuilderInput(inputClass, Arrays.asList(MyModule.class));
-      }
-      return this;
-    }
-
-    @Override
-    public final Yatagan$ComponentFoo create() {
-      return new Yatagan$ComponentFoo(this.mMyModule);
-    }
-  }
-}
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$ComponentBar.java
-package test;
-
-import com.yandex.yatagan.AutoBuilder;
-import com.yandex.yatagan.internal.Checks;
-import com.yandex.yatagan.internal.YataganGenerated;
-import java.lang.Class;
-import java.lang.Override;
-import java.lang.SuppressWarnings;
-import java.util.Arrays;
-import javax.annotation.processing.Generated;
-
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
-@YataganGenerated
-@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$ComponentBar implements ComponentBar {
+public final class YataganComponentBar implements ComponentBar {
   final MyDependency1 mMyDependency1;
 
   final MyDependency2 mMyDependency2;
 
   final MyModule2 mMyModule2;
 
-  private Yatagan$ComponentBar(MyDependency1 pMyDependency1, MyDependency2 pMyDependency2,
+  private YataganComponentBar(MyDependency1 pMyDependency1, MyDependency2 pMyDependency2,
       MyModule2 pMyModule2) {
     this.mMyDependency1 = pMyDependency1;
     this.mMyDependency2 = pMyDependency2;
@@ -85,11 +33,11 @@ public final class Yatagan$ComponentBar implements ComponentBar {
     return Checks.checkProvisionNotNull(this.mMyModule2.getI());
   }
 
-  public static AutoBuilder<Yatagan$ComponentBar> autoBuilder() {
+  public static AutoBuilder<YataganComponentBar> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$ComponentBar> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganComponentBar> {
     private MyDependency1 mMyDependency1;
 
     private MyDependency2 mMyDependency2;
@@ -97,7 +45,7 @@ public final class Yatagan$ComponentBar implements ComponentBar {
     private MyModule2 mMyModule2;
 
     @Override
-    public final <I> AutoBuilder<Yatagan$ComponentBar> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganComponentBar> provideInput(I input, Class<I> inputClass) {
       if (inputClass == MyDependency1.class) {
         this.mMyDependency1 = (MyDependency1) input;
       } else if (inputClass == MyDependency2.class) {
@@ -111,7 +59,7 @@ public final class Yatagan$ComponentBar implements ComponentBar {
     }
 
     @Override
-    public final Yatagan$ComponentBar create() {
+    public final YataganComponentBar create() {
       if (this.mMyDependency1 == null) {
         Checks.reportMissingAutoBuilderInput(MyDependency1.class);
       }
@@ -121,13 +69,65 @@ public final class Yatagan$ComponentBar implements ComponentBar {
       if (this.mMyModule2 == null) {
         Checks.reportMissingAutoBuilderInput(MyModule2.class);
       }
-      return new Yatagan$ComponentBar(this.mMyDependency1, this.mMyDependency2, this.mMyModule2);
+      return new YataganComponentBar(this.mMyDependency1, this.mMyDependency2, this.mMyModule2);
     }
   }
 }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$ComponentBaz.java
+Name: test/YataganComponentFoo.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Arrays;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganComponentFoo implements ComponentFoo {
+  final MyModule mMyModule;
+
+  private YataganComponentFoo(MyModule pMyModule) {
+    this.mMyModule = pMyModule != null ? pMyModule : new MyModule();
+  }
+
+  @Override
+  public int getI() {
+    return Checks.checkProvisionNotNull(this.mMyModule.getI());
+  }
+
+  public static AutoBuilder<YataganComponentFoo> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganComponentFoo> {
+    private MyModule mMyModule;
+
+    @Override
+    public final <I> AutoBuilder<YataganComponentFoo> provideInput(I input, Class<I> inputClass) {
+      if (inputClass == MyModule.class) {
+        this.mMyModule = (MyModule) input;
+      } else {
+        Checks.reportUnexpectedAutoBuilderInput(inputClass, Arrays.asList(MyModule.class));
+      }
+      return this;
+    }
+
+    @Override
+    public final YataganComponentFoo create() {
+      return new YataganComponentFoo(this.mMyModule);
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganComponentBaz.java
 package test;
 
 import com.yandex.yatagan.internal.YataganGenerated;
@@ -138,8 +138,8 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$ComponentBaz implements ComponentBaz {
-  Yatagan$ComponentBaz() {
+public final class YataganComponentBaz implements ComponentBaz {
+  YataganComponentBaz() {
   }
 
   public static ComponentBaz.Builder builder() {
@@ -149,7 +149,7 @@ public final class Yatagan$ComponentBaz implements ComponentBaz {
   private static final class ComponentFactoryImpl implements ComponentBaz.Builder {
     @Override
     public ComponentBase create() {
-      return new Yatagan$ComponentBaz();
+      return new YataganComponentBaz();
     }
   }
 }

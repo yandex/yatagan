@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$AnotherRootComponent.java
+Name: test/YataganAnotherRootComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -14,25 +14,25 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$AnotherRootComponent implements AnotherRootComponent {
-  private Yatagan$AnotherRootComponent() {
+public final class YataganAnotherRootComponent implements AnotherRootComponent {
+  private YataganAnotherRootComponent() {
   }
 
-  public static AutoBuilder<Yatagan$AnotherRootComponent> autoBuilder() {
+  public static AutoBuilder<YataganAnotherRootComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$AnotherRootComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganAnotherRootComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$AnotherRootComponent> provideInput(I input,
+    public final <I> AutoBuilder<YataganAnotherRootComponent> provideInput(I input,
         Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$AnotherRootComponent create() {
-      return new Yatagan$AnotherRootComponent();
+    public final YataganAnotherRootComponent create() {
+      return new YataganAnotherRootComponent();
     }
   }
 }

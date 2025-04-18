@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$ComponentA.java
+Name: test/YataganComponentA.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -19,10 +19,10 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$ComponentA implements ComponentA {
+public final class YataganComponentA implements ComponentA {
   private Object mMyClassInstance;
 
-  private Yatagan$ComponentA() {
+  private YataganComponentA() {
   }
 
   @Override
@@ -47,16 +47,16 @@ public final class Yatagan$ComponentA implements ComponentA {
     return (MyClass) local;
   }
 
-  public static AutoBuilder<Yatagan$ComponentA> autoBuilder() {
+  public static AutoBuilder<YataganComponentA> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$ComponentA mDelegate;
+    private final YataganComponentA mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$ComponentA delegate, int index) {
+    ProviderImpl(YataganComponentA delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -67,22 +67,22 @@ public final class Yatagan$ComponentA implements ComponentA {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$ComponentA> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganComponentA> {
     @Override
-    public final <I> AutoBuilder<Yatagan$ComponentA> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganComponentA> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$ComponentA create() {
-      return new Yatagan$ComponentA();
+    public final YataganComponentA create() {
+      return new YataganComponentA();
     }
   }
 }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$ComponentB.java
+Name: test/YataganComponentB.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -102,12 +102,12 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$ComponentB implements ComponentB {
+public final class YataganComponentB implements ComponentB {
   private Object mObjectInstance;
 
   private Object mMyClassInstance;
 
-  private Yatagan$ComponentB() {
+  private YataganComponentB() {
   }
 
   @Override
@@ -153,14 +153,14 @@ public final class Yatagan$ComponentB implements ComponentB {
     return (MyClass) local;
   }
 
-  public static AutoBuilder<Yatagan$ComponentB> autoBuilder() {
+  public static AutoBuilder<YataganComponentB> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class SubcomponentImpl implements Subcomponent {
-    final Yatagan$ComponentB mComponentB;
+    final YataganComponentB mComponentB;
 
-    SubcomponentImpl(Yatagan$ComponentB pComponentB) {
+    SubcomponentImpl(YataganComponentB pComponentB) {
       this.mComponentB = pComponentB;
     }
 
@@ -170,9 +170,9 @@ public final class Yatagan$ComponentB implements ComponentB {
     }
 
     private static final class ComponentFactoryImpl implements Subcomponent.Builder {
-      Yatagan$ComponentB fComponentB;
+      YataganComponentB fComponentB;
 
-      ComponentFactoryImpl(Yatagan$ComponentB fComponentB) {
+      ComponentFactoryImpl(YataganComponentB fComponentB) {
         this.fComponentB = fComponentB;
       }
 
@@ -184,11 +184,11 @@ public final class Yatagan$ComponentB implements ComponentB {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$ComponentB mDelegate;
+    private final YataganComponentB mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$ComponentB delegate, int index) {
+    ProviderImpl(YataganComponentB delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -199,16 +199,16 @@ public final class Yatagan$ComponentB implements ComponentB {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$ComponentB> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganComponentB> {
     @Override
-    public final <I> AutoBuilder<Yatagan$ComponentB> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganComponentB> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$ComponentB create() {
-      return new Yatagan$ComponentB();
+    public final YataganComponentB create() {
+      return new YataganComponentB();
     }
   }
 }
