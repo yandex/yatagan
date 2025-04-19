@@ -7,7 +7,7 @@ import java.lang.Override;
 import java.lang.SuppressWarnings;
 import javax.annotation.processing.Generated;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganTopLevelClass_Component2 implements TopLevelClass.Component2 {
@@ -39,7 +39,7 @@ import java.lang.SuppressWarnings;
 import java.util.Collections;
 import javax.annotation.processing.Generated;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganTopLevelClass_NestedClass_Component1 implements TopLevelClass.NestedClass.Component1 {

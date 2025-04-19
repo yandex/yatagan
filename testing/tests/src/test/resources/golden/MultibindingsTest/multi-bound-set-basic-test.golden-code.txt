@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.processing.Generated;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganTestComponent implements TestComponent {

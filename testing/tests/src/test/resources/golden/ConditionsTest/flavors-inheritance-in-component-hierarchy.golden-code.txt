@@ -12,7 +12,7 @@ import java.lang.SuppressWarnings;
 import java.util.Collections;
 import javax.annotation.processing.Generated;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganMySearchAppComponent implements MySearchAppComponent {
@@ -77,7 +77,7 @@ import java.lang.SuppressWarnings;
 import java.util.Collections;
 import javax.annotation.processing.Generated;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganMyBrowserComponent implements MyBrowserComponent {

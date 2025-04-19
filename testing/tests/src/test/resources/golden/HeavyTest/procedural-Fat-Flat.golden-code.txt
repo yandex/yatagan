@@ -13,7 +13,7 @@ import java.lang.SuppressWarnings;
 import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganComponent_602 implements Component_602 {
@@ -4816,7 +4816,7 @@ import java.lang.SuppressWarnings;
 import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganComponent_603 implements Component_603 {

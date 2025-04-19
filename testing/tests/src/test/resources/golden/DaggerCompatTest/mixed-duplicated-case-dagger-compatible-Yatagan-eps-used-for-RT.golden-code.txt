@@ -9,7 +9,7 @@ import java.lang.Override;
 import java.lang.SuppressWarnings;
 import javax.annotation.processing.Generated;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganTop_MyDaggerNested implements Top.MyDaggerNested {
@@ -117,7 +117,7 @@ import java.util.Set;
 import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganMyDagger implements MyDagger {

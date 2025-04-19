@@ -12,7 +12,7 @@ import java.lang.SuppressWarnings;
 import java.util.Arrays;
 import javax.annotation.processing.Generated;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganMyComponent implements MyComponent {
