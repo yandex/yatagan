@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$Component_602.java
+Name: test/YataganComponent_602.java
 package test;
 
 import com.yandex.yatagan.Lazy;
@@ -16,7 +16,7 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$Component_602 implements Component_602 {
+public final class YataganComponent_602 implements Component_602 {
   private Object mNode_306Instance;
 
   private Object mNode_139Instance;
@@ -531,7 +531,7 @@ public final class Yatagan$Component_602 implements Component_602 {
 
   final Dependency_601 mDependency_601;
 
-  Yatagan$Component_602(Dependency_601 pSetDep_0, Node_88 pSet_0, Node_278 pSet_1, Node_545 pSet_10,
+  YataganComponent_602(Dependency_601 pSetDep_0, Node_88 pSet_0, Node_278 pSet_1, Node_545 pSet_10,
       Node_471 pSet_11, Node_170 pSet_12, Node_412 pSet_13, Node_52 pSet_14, Node_442 pSet_15,
       Node_370 pSet_16, Node_259 pSet_17, Node_382 pSet_18, Node_276 pSet_19, Node_9 pSet_2,
       Node_357 pSet_20, Node_326 pSet_21, Node_94 pSet_22, Node_493 pSet_23, Node_321 pSet_24,
@@ -4330,11 +4330,11 @@ public final class Yatagan$Component_602 implements Component_602 {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$Component_602 mDelegate;
+    private final YataganComponent_602 mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$Component_602 delegate, int index) {
+    ProviderImpl(YataganComponent_602 delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -4346,13 +4346,13 @@ public final class Yatagan$Component_602 implements Component_602 {
   }
 
   private static final class CachingProviderImpl implements Lazy {
-    private final Yatagan$Component_602 mDelegate;
+    private final YataganComponent_602 mDelegate;
 
     private final int mIndex;
 
     private Object mValue;
 
-    CachingProviderImpl(Yatagan$Component_602 factory, int index) {
+    CachingProviderImpl(YataganComponent_602 factory, int index) {
       mDelegate = factory;
       mIndex = index;
     }
@@ -4796,13 +4796,13 @@ public final class Yatagan$Component_602 implements Component_602 {
 
     @Override
     public Component_602 create() {
-      return new Yatagan$Component_602(this.mSetDep_0, this.mSet_0, this.mSet_1, this.mSet_10, this.mSet_11, this.mSet_12, this.mSet_13, this.mSet_14, this.mSet_15, this.mSet_16, this.mSet_17, this.mSet_18, this.mSet_19, this.mSet_2, this.mSet_20, this.mSet_21, this.mSet_22, this.mSet_23, this.mSet_24, this.mSet_25, this.mSet_26, this.mSet_27, this.mSet_28, this.mSet_29, this.mSet_3, this.mSet_30, this.mSet_31, this.mSet_32, this.mSet_33, this.mSet_34, this.mSet_35, this.mSet_36, this.mSet_37, this.mSet_38, this.mSet_39, this.mSet_4, this.mSet_40, this.mSet_41, this.mSet_42, this.mSet_43, this.mSet_44, this.mSet_45, this.mSet_46, this.mSet_47, this.mSet_48, this.mSet_49, this.mSet_5, this.mSet_50, this.mSet_51, this.mSet_6, this.mSet_7, this.mSet_8, this.mSet_9);
+      return new YataganComponent_602(this.mSetDep_0, this.mSet_0, this.mSet_1, this.mSet_10, this.mSet_11, this.mSet_12, this.mSet_13, this.mSet_14, this.mSet_15, this.mSet_16, this.mSet_17, this.mSet_18, this.mSet_19, this.mSet_2, this.mSet_20, this.mSet_21, this.mSet_22, this.mSet_23, this.mSet_24, this.mSet_25, this.mSet_26, this.mSet_27, this.mSet_28, this.mSet_29, this.mSet_3, this.mSet_30, this.mSet_31, this.mSet_32, this.mSet_33, this.mSet_34, this.mSet_35, this.mSet_36, this.mSet_37, this.mSet_38, this.mSet_39, this.mSet_4, this.mSet_40, this.mSet_41, this.mSet_42, this.mSet_43, this.mSet_44, this.mSet_45, this.mSet_46, this.mSet_47, this.mSet_48, this.mSet_49, this.mSet_5, this.mSet_50, this.mSet_51, this.mSet_6, this.mSet_7, this.mSet_8, this.mSet_9);
     }
   }
 }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$Component_603.java
+Name: test/YataganComponent_603.java
 package test;
 
 import com.yandex.yatagan.Lazy;
@@ -4819,7 +4819,7 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$Component_603 implements Component_603 {
+public final class YataganComponent_603 implements Component_603 {
   private Object mNode_273Instance;
 
   private Object mNode_440Instance;
@@ -5328,17 +5328,17 @@ public final class Yatagan$Component_603 implements Component_603 {
 
   final Dependency_601 mDependency_601;
 
-  Yatagan$Component_603(Dependency_601 pSetDep_0, Node_183 pSet_0, Node_272 pSet_1,
-      Node_237 pSet_10, Node_545 pSet_11, Node_471 pSet_12, Node_357 pSet_13, Node_9 pSet_14,
-      Node_287 pSet_15, Node_255 pSet_16, Node_94 pSet_17, Node_516 pSet_18, Node_369 pSet_19,
-      Node_125 pSet_2, Node_321 pSet_20, Node_75 pSet_21, Node_88 pSet_22, Node_412 pSet_23,
-      Node_400 pSet_24, Node_283 pSet_25, Node_276 pSet_26, Node_525 pSet_27, Node_493 pSet_28,
-      Node_110 pSet_29, Node_326 pSet_3, Node_526 pSet_30, Node_52 pSet_31, Node_294 pSet_32,
-      Node_452 pSet_33, Node_17 pSet_34, Node_382 pSet_35, Node_378 pSet_36, Node_277 pSet_37,
-      Node_554 pSet_38, Node_196 pSet_39, Node_442 pSet_4, Node_522 pSet_40, Node_35 pSet_41,
-      Node_204 pSet_42, Node_259 pSet_43, Node_392 pSet_44, Node_39 pSet_45, Node_486 pSet_46,
-      Node_68 pSet_47, Node_145 pSet_48, Node_370 pSet_49, Node_335 pSet_5, Node_117 pSet_50,
-      Node_278 pSet_51, Node_24 pSet_6, Node_129 pSet_7, Node_170 pSet_8, Node_523 pSet_9) {
+  YataganComponent_603(Dependency_601 pSetDep_0, Node_183 pSet_0, Node_272 pSet_1, Node_237 pSet_10,
+      Node_545 pSet_11, Node_471 pSet_12, Node_357 pSet_13, Node_9 pSet_14, Node_287 pSet_15,
+      Node_255 pSet_16, Node_94 pSet_17, Node_516 pSet_18, Node_369 pSet_19, Node_125 pSet_2,
+      Node_321 pSet_20, Node_75 pSet_21, Node_88 pSet_22, Node_412 pSet_23, Node_400 pSet_24,
+      Node_283 pSet_25, Node_276 pSet_26, Node_525 pSet_27, Node_493 pSet_28, Node_110 pSet_29,
+      Node_326 pSet_3, Node_526 pSet_30, Node_52 pSet_31, Node_294 pSet_32, Node_452 pSet_33,
+      Node_17 pSet_34, Node_382 pSet_35, Node_378 pSet_36, Node_277 pSet_37, Node_554 pSet_38,
+      Node_196 pSet_39, Node_442 pSet_4, Node_522 pSet_40, Node_35 pSet_41, Node_204 pSet_42,
+      Node_259 pSet_43, Node_392 pSet_44, Node_39 pSet_45, Node_486 pSet_46, Node_68 pSet_47,
+      Node_145 pSet_48, Node_370 pSet_49, Node_335 pSet_5, Node_117 pSet_50, Node_278 pSet_51,
+      Node_24 pSet_6, Node_129 pSet_7, Node_170 pSet_8, Node_523 pSet_9) {
     this.mDependency_601 = Checks.checkInputNotNull(pSetDep_0);
     this.mSet_0 = Checks.checkInputNotNull(pSet_0);
     this.mSet_1 = Checks.checkInputNotNull(pSet_1);
@@ -9185,11 +9185,11 @@ public final class Yatagan$Component_603 implements Component_603 {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$Component_603 mDelegate;
+    private final YataganComponent_603 mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$Component_603 delegate, int index) {
+    ProviderImpl(YataganComponent_603 delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -9201,13 +9201,13 @@ public final class Yatagan$Component_603 implements Component_603 {
   }
 
   private static final class CachingProviderImpl implements Lazy {
-    private final Yatagan$Component_603 mDelegate;
+    private final YataganComponent_603 mDelegate;
 
     private final int mIndex;
 
     private Object mValue;
 
-    CachingProviderImpl(Yatagan$Component_603 factory, int index) {
+    CachingProviderImpl(YataganComponent_603 factory, int index) {
       mDelegate = factory;
       mIndex = index;
     }
@@ -9651,7 +9651,7 @@ public final class Yatagan$Component_603 implements Component_603 {
 
     @Override
     public Component_603 create() {
-      return new Yatagan$Component_603(this.mSetDep_0, this.mSet_0, this.mSet_1, this.mSet_10, this.mSet_11, this.mSet_12, this.mSet_13, this.mSet_14, this.mSet_15, this.mSet_16, this.mSet_17, this.mSet_18, this.mSet_19, this.mSet_2, this.mSet_20, this.mSet_21, this.mSet_22, this.mSet_23, this.mSet_24, this.mSet_25, this.mSet_26, this.mSet_27, this.mSet_28, this.mSet_29, this.mSet_3, this.mSet_30, this.mSet_31, this.mSet_32, this.mSet_33, this.mSet_34, this.mSet_35, this.mSet_36, this.mSet_37, this.mSet_38, this.mSet_39, this.mSet_4, this.mSet_40, this.mSet_41, this.mSet_42, this.mSet_43, this.mSet_44, this.mSet_45, this.mSet_46, this.mSet_47, this.mSet_48, this.mSet_49, this.mSet_5, this.mSet_50, this.mSet_51, this.mSet_6, this.mSet_7, this.mSet_8, this.mSet_9);
+      return new YataganComponent_603(this.mSetDep_0, this.mSet_0, this.mSet_1, this.mSet_10, this.mSet_11, this.mSet_12, this.mSet_13, this.mSet_14, this.mSet_15, this.mSet_16, this.mSet_17, this.mSet_18, this.mSet_19, this.mSet_2, this.mSet_20, this.mSet_21, this.mSet_22, this.mSet_23, this.mSet_24, this.mSet_25, this.mSet_26, this.mSet_27, this.mSet_28, this.mSet_29, this.mSet_3, this.mSet_30, this.mSet_31, this.mSet_32, this.mSet_33, this.mSet_34, this.mSet_35, this.mSet_36, this.mSet_37, this.mSet_38, this.mSet_39, this.mSet_4, this.mSet_40, this.mSet_41, this.mSet_42, this.mSet_43, this.mSet_44, this.mSet_45, this.mSet_46, this.mSet_47, this.mSet_48, this.mSet_49, this.mSet_5, this.mSet_50, this.mSet_51, this.mSet_6, this.mSet_7, this.mSet_8, this.mSet_9);
     }
   }
 }

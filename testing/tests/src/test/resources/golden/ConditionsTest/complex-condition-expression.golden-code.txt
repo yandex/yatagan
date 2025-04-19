@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyComponent.java
+Name: test/YataganMyComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -18,7 +18,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyComponent implements MyComponent {
+public final class YataganMyComponent implements MyComponent {
   final boolean mFeaturesFooBar = Features.fooBar();
 
   private byte mFeaturesIsEnabledB;
@@ -39,7 +39,7 @@ public final class Yatagan$MyComponent implements MyComponent {
 
   private byte mSomeClassConditions_getSomeCondition6;
 
-  private Yatagan$MyComponent() {
+  private YataganMyComponent() {
   }
 
   @Override
@@ -62,7 +62,7 @@ public final class Yatagan$MyComponent implements MyComponent {
     return this.mFeaturesFooBar && this.featuresIsEnabledB() && (this.featuresGetFeatureC_isEnabled() || this.featuresIsEnabledB() || this.someClassConditions_getSomeCondition1() || this.someClassSomeCondition2() || this.someClassGetSomeCondition3() || this.someClassGetSomeCondition4() || this.someClassSomeCondition5() || this.someClassSomeCondition6() || this.someClassConditions_getSomeCondition6()) ? Optional.of(this.accessClassA()) : Optional.empty();
   }
 
-  public static AutoBuilder<Yatagan$MyComponent> autoBuilder() {
+  public static AutoBuilder<YataganMyComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
@@ -130,11 +130,11 @@ public final class Yatagan$MyComponent implements MyComponent {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$MyComponent mDelegate;
+    private final YataganMyComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$MyComponent delegate, int index) {
+    ProviderImpl(YataganMyComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -145,16 +145,16 @@ public final class Yatagan$MyComponent implements MyComponent {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMyComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$MyComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganMyComponent> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$MyComponent create() {
-      return new Yatagan$MyComponent();
+    public final YataganMyComponent create() {
+      return new YataganMyComponent();
     }
   }
 }

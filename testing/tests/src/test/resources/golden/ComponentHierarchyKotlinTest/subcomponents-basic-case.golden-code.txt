@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyApplicationComponent.java
+Name: test/YataganMyApplicationComponent.java
 package test;
 
 import com.yandex.yatagan.Lazy;
@@ -15,8 +15,8 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyApplicationComponent implements MyApplicationComponent {
-  Yatagan$MyApplicationComponent() {
+public final class YataganMyApplicationComponent implements MyApplicationComponent {
+  YataganMyApplicationComponent() {
   }
 
   Object switch$$access(int slot) {
@@ -31,9 +31,9 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   }
 
   static final class MyActivityComponentImpl implements MyActivityComponent {
-    final Yatagan$MyApplicationComponent mMyApplicationComponent;
+    final YataganMyApplicationComponent mMyApplicationComponent;
 
-    MyActivityComponentImpl(Yatagan$MyApplicationComponent pMyApplicationComponent) {
+    MyActivityComponentImpl(YataganMyApplicationComponent pMyApplicationComponent) {
       this.mMyApplicationComponent = pMyApplicationComponent;
     }
 
@@ -100,9 +100,9 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
     }
 
     private static final class ComponentFactoryImpl implements MyActivityComponent.Factory {
-      Yatagan$MyApplicationComponent fMyApplicationComponent;
+      YataganMyApplicationComponent fMyApplicationComponent;
 
-      ComponentFactoryImpl(Yatagan$MyApplicationComponent fMyApplicationComponent) {
+      ComponentFactoryImpl(YataganMyApplicationComponent fMyApplicationComponent) {
         this.fMyApplicationComponent = fMyApplicationComponent;
       }
 
@@ -114,11 +114,11 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$MyApplicationComponent mDelegate;
+    private final YataganMyApplicationComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$MyApplicationComponent delegate, int index) {
+    ProviderImpl(YataganMyApplicationComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -130,13 +130,13 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   }
 
   private static final class CachingProviderImpl implements Lazy {
-    private final Yatagan$MyApplicationComponent mDelegate;
+    private final YataganMyApplicationComponent mDelegate;
 
     private final int mIndex;
 
     private Object mValue;
 
-    CachingProviderImpl(Yatagan$MyApplicationComponent factory, int index) {
+    CachingProviderImpl(YataganMyApplicationComponent factory, int index) {
       mDelegate = factory;
       mIndex = index;
     }
@@ -156,7 +156,7 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   private static final class ComponentFactoryImpl implements MyApplicationComponent.Factory {
     @Override
     public MyApplicationComponent create() {
-      return new Yatagan$MyApplicationComponent();
+      return new YataganMyApplicationComponent();
     }
   }
 }

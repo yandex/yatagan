@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$ApplicationComponent.java
+Name: test/YataganApplicationComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -16,10 +16,10 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$ApplicationComponent implements ApplicationComponent {
+public final class YataganApplicationComponent implements ApplicationComponent {
   private Object mSingletonClassInstance;
 
-  private Yatagan$ApplicationComponent() {
+  private YataganApplicationComponent() {
   }
 
   @Override
@@ -42,16 +42,16 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
     return (SingletonClass) local;
   }
 
-  public static AutoBuilder<Yatagan$ApplicationComponent> autoBuilder() {
+  public static AutoBuilder<YataganApplicationComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class MainActivityComponentImpl implements MainActivityComponent {
     private Object mActivityScopedClassInstance;
 
-    final Yatagan$ApplicationComponent mApplicationComponent;
+    final YataganApplicationComponent mApplicationComponent;
 
-    MainActivityComponentImpl(Yatagan$ApplicationComponent pApplicationComponent) {
+    MainActivityComponentImpl(YataganApplicationComponent pApplicationComponent) {
       this.mApplicationComponent = pApplicationComponent;
     }
 
@@ -109,10 +109,10 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
     static final class ProfileFragmentComponentImpl implements ProfileFragmentComponent {
       final MainActivityComponentImpl mMainActivityComponent;
 
-      final Yatagan$ApplicationComponent mApplicationComponent;
+      final YataganApplicationComponent mApplicationComponent;
 
       ProfileFragmentComponentImpl(MainActivityComponentImpl pMainActivityComponent,
-          Yatagan$ApplicationComponent pApplicationComponent) {
+          YataganApplicationComponent pApplicationComponent) {
         this.mMainActivityComponent = pMainActivityComponent;
         this.mApplicationComponent = pApplicationComponent;
       }
@@ -135,10 +135,10 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
       private static final class ComponentFactoryImpl implements ProfileFragmentComponent.Factory {
         MainActivityComponentImpl fMainActivityComponent;
 
-        Yatagan$ApplicationComponent fApplicationComponent;
+        YataganApplicationComponent fApplicationComponent;
 
         ComponentFactoryImpl(MainActivityComponentImpl fMainActivityComponent,
-            Yatagan$ApplicationComponent fApplicationComponent) {
+            YataganApplicationComponent fApplicationComponent) {
           this.fMainActivityComponent = fMainActivityComponent;
           this.fApplicationComponent = fApplicationComponent;
         }
@@ -151,9 +151,9 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
     }
 
     private static final class ComponentFactoryImpl implements MainActivityComponent.Factory {
-      Yatagan$ApplicationComponent fApplicationComponent;
+      YataganApplicationComponent fApplicationComponent;
 
-      ComponentFactoryImpl(Yatagan$ApplicationComponent fApplicationComponent) {
+      ComponentFactoryImpl(YataganApplicationComponent fApplicationComponent) {
         this.fApplicationComponent = fApplicationComponent;
       }
 
@@ -169,9 +169,9 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
 
     final SettingsActivityFragmentModule mSettingsActivityFragmentModule;
 
-    final Yatagan$ApplicationComponent mApplicationComponent;
+    final YataganApplicationComponent mApplicationComponent;
 
-    SettingsActivityComponentImpl(Yatagan$ApplicationComponent pApplicationComponent,
+    SettingsActivityComponentImpl(YataganApplicationComponent pApplicationComponent,
         SettingsActivityFragmentModule pSettingsActivityFragmentModule) {
       this.mApplicationComponent = pApplicationComponent;
       this.mSettingsActivityFragmentModule = Checks.checkInputNotNull(pSettingsActivityFragmentModule);
@@ -205,10 +205,10 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
     static final class ProfileFragmentComponentImpl implements ProfileFragmentComponent {
       final SettingsActivityComponentImpl mSettingsActivityComponent;
 
-      final Yatagan$ApplicationComponent mApplicationComponent;
+      final YataganApplicationComponent mApplicationComponent;
 
       ProfileFragmentComponentImpl(SettingsActivityComponentImpl pSettingsActivityComponent,
-          Yatagan$ApplicationComponent pApplicationComponent) {
+          YataganApplicationComponent pApplicationComponent) {
         this.mSettingsActivityComponent = pSettingsActivityComponent;
         this.mApplicationComponent = pApplicationComponent;
       }
@@ -231,10 +231,10 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
       private static final class ComponentFactoryImpl implements ProfileFragmentComponent.Factory {
         SettingsActivityComponentImpl fSettingsActivityComponent;
 
-        Yatagan$ApplicationComponent fApplicationComponent;
+        YataganApplicationComponent fApplicationComponent;
 
         ComponentFactoryImpl(SettingsActivityComponentImpl fSettingsActivityComponent,
-            Yatagan$ApplicationComponent fApplicationComponent) {
+            YataganApplicationComponent fApplicationComponent) {
           this.fSettingsActivityComponent = fSettingsActivityComponent;
           this.fApplicationComponent = fApplicationComponent;
         }
@@ -274,9 +274,9 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
     }
 
     private static final class ComponentFactoryImpl implements SettingsActivityComponent.Factory {
-      Yatagan$ApplicationComponent fApplicationComponent;
+      YataganApplicationComponent fApplicationComponent;
 
-      ComponentFactoryImpl(Yatagan$ApplicationComponent fApplicationComponent) {
+      ComponentFactoryImpl(YataganApplicationComponent fApplicationComponent) {
         this.fApplicationComponent = fApplicationComponent;
       }
 
@@ -288,17 +288,17 @@ public final class Yatagan$ApplicationComponent implements ApplicationComponent 
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$ApplicationComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganApplicationComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$ApplicationComponent> provideInput(I input,
+    public final <I> AutoBuilder<YataganApplicationComponent> provideInput(I input,
         Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$ApplicationComponent create() {
-      return new Yatagan$ApplicationComponent();
+    public final YataganApplicationComponent create() {
+      return new YataganApplicationComponent();
     }
   }
 }

@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestComponent.java
+Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.Lazy;
@@ -15,12 +15,12 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestComponent implements TestComponent {
+public final class YataganTestComponent implements TestComponent {
   final Integer mArg;
 
   final MyModule mMyModule;
 
-  Yatagan$TestComponent(MyModule pModule, Integer pArg) {
+  YataganTestComponent(MyModule pModule, Integer pArg) {
     this.mMyModule = Checks.checkInputNotNull(pModule);
     this.mArg = Checks.checkInputNotNull(pArg);
   }
@@ -48,11 +48,11 @@ public final class Yatagan$TestComponent implements TestComponent {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$TestComponent mDelegate;
+    private final YataganTestComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+    ProviderImpl(YataganTestComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -66,7 +66,7 @@ public final class Yatagan$TestComponent implements TestComponent {
   private static final class ComponentFactoryImpl implements TestComponent.Creator {
     @Override
     public TestComponent create(MyModule module, int arg) {
-      return new Yatagan$TestComponent(module, arg);
+      return new YataganTestComponent(module, arg);
     }
   }
 }

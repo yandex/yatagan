@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyComponent.java
+Name: test/YataganMyComponent.java
 package test;
 
 import com.yandex.yatagan.internal.Checks;
@@ -15,7 +15,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyComponent implements MyComponent {
+public final class YataganMyComponent implements MyComponent {
   final Integer mI1;
 
   final Long mI2;
@@ -24,7 +24,7 @@ public final class Yatagan$MyComponent implements MyComponent {
 
   final Double mSetDouble;
 
-  Yatagan$MyComponent(Integer pI1, Long pI2, Character pSetChar, Double pSetDouble) {
+  YataganMyComponent(Integer pI1, Long pI2, Character pSetChar, Double pSetDouble) {
     this.mI1 = Checks.checkInputNotNull(pI1);
     this.mI2 = Checks.checkInputNotNull(pI2);
     this.mSetChar = Checks.checkInputNotNull(pSetChar);
@@ -72,7 +72,7 @@ public final class Yatagan$MyComponent implements MyComponent {
 
     @Override
     public MyComponent create(int i1, long i2) {
-      return new Yatagan$MyComponent(i1, i2, this.mSetChar, this.mSetDouble);
+      return new YataganMyComponent(i1, i2, this.mSetChar, this.mSetDouble);
     }
   }
 }

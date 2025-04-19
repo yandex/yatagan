@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$RootComponent.java
+Name: test/YataganRootComponent.java
 package test;
 
 import com.yandex.yatagan.Lazy;
@@ -15,14 +15,14 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$RootComponent implements RootComponent {
+public final class YataganRootComponent implements RootComponent {
   private Object mClassBInstance;
 
   final Dep mDep;
 
   final RootModule mRootModule;
 
-  Yatagan$RootComponent(Dep pDep) {
+  YataganRootComponent(Dep pDep) {
     this.mDep = Checks.checkInputNotNull(pDep);
     this.mRootModule = new RootModule();
   }
@@ -56,9 +56,9 @@ public final class Yatagan$RootComponent implements RootComponent {
   static final class SubComponentImpl implements SubComponent {
     private Object mClassAInstance;
 
-    final Yatagan$RootComponent mRootComponent;
+    final YataganRootComponent mRootComponent;
 
-    SubComponentImpl(Yatagan$RootComponent pRootComponent) {
+    SubComponentImpl(YataganRootComponent pRootComponent) {
       this.mRootComponent = pRootComponent;
     }
 
@@ -79,7 +79,7 @@ public final class Yatagan$RootComponent implements RootComponent {
       Object local = this.mClassAInstance;
       if (local == null) {
         ThreadAssertions.assertThreadAccess();
-        local = new ClassA(new Yatagan$RootComponent.ProviderImpl(this.mRootComponent, 0), new CachingProviderImpl(this, 1));
+        local = new ClassA(new YataganRootComponent.ProviderImpl(this.mRootComponent, 0), new CachingProviderImpl(this, 1));
         this.mClassAInstance = local;
       }
       return (ClassA) local;
@@ -133,9 +133,9 @@ public final class Yatagan$RootComponent implements RootComponent {
     }
 
     private static final class ComponentFactoryImpl implements SubComponent.Creator {
-      Yatagan$RootComponent fRootComponent;
+      YataganRootComponent fRootComponent;
 
-      ComponentFactoryImpl(Yatagan$RootComponent fRootComponent) {
+      ComponentFactoryImpl(YataganRootComponent fRootComponent) {
         this.fRootComponent = fRootComponent;
       }
 
@@ -147,11 +147,11 @@ public final class Yatagan$RootComponent implements RootComponent {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$RootComponent mDelegate;
+    private final YataganRootComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$RootComponent delegate, int index) {
+    ProviderImpl(YataganRootComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -165,7 +165,7 @@ public final class Yatagan$RootComponent implements RootComponent {
   private static final class ComponentFactoryImpl implements RootComponent.Creator {
     @Override
     public RootComponent create(Dep dep) {
-      return new Yatagan$RootComponent(dep);
+      return new YataganRootComponent(dep);
     }
   }
 }

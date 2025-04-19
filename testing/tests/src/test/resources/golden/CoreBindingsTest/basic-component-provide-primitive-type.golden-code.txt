@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestComponent.java
+Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -20,8 +20,8 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestComponent implements TestComponent {
-  private Yatagan$TestComponent() {
+public final class YataganTestComponent implements TestComponent {
+  private YataganTestComponent() {
   }
 
   @Override
@@ -46,16 +46,16 @@ public final class Yatagan$TestComponent implements TestComponent {
     }
   }
 
-  public static AutoBuilder<Yatagan$TestComponent> autoBuilder() {
+  public static AutoBuilder<YataganTestComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$TestComponent mDelegate;
+    private final YataganTestComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$TestComponent delegate, int index) {
+    ProviderImpl(YataganTestComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -67,13 +67,13 @@ public final class Yatagan$TestComponent implements TestComponent {
   }
 
   private static final class CachingProviderImpl implements Lazy {
-    private final Yatagan$TestComponent mDelegate;
+    private final YataganTestComponent mDelegate;
 
     private final int mIndex;
 
     private Object mValue;
 
-    CachingProviderImpl(Yatagan$TestComponent factory, int index) {
+    CachingProviderImpl(YataganTestComponent factory, int index) {
       mDelegate = factory;
       mIndex = index;
     }
@@ -90,16 +90,16 @@ public final class Yatagan$TestComponent implements TestComponent {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$TestComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTestComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$TestComponent> provideInput(I input, Class<I> inputClass) {
+    public final <I> AutoBuilder<YataganTestComponent> provideInput(I input, Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$TestComponent create() {
-      return new Yatagan$TestComponent();
+    public final YataganTestComponent create() {
+      return new YataganTestComponent();
     }
   }
 }

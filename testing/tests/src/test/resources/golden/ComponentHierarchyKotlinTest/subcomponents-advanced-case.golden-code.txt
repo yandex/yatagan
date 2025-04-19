@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyApplicationComponent.java
+Name: test/YataganMyApplicationComponent.java
 package test;
 
 import com.yandex.yatagan.Lazy;
@@ -17,12 +17,12 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyApplicationComponent implements MyApplicationComponent {
+public final class YataganMyApplicationComponent implements MyApplicationComponent {
   private Object mMyApplicationControllerImplInstance;
 
   final String mAppId;
 
-  Yatagan$MyApplicationComponent(String pAppId) {
+  YataganMyApplicationComponent(String pAppId) {
     this.mAppId = Checks.checkInputNotNull(pAppId);
   }
 
@@ -60,9 +60,9 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   static final class MyActivityComponentImpl implements MyActivityComponent {
     final String mId;
 
-    final Yatagan$MyApplicationComponent mMyApplicationComponent;
+    final YataganMyApplicationComponent mMyApplicationComponent;
 
-    MyActivityComponentImpl(Yatagan$MyApplicationComponent pMyApplicationComponent, String pId) {
+    MyActivityComponentImpl(YataganMyApplicationComponent pMyApplicationComponent, String pId) {
       this.mMyApplicationComponent = pMyApplicationComponent;
       this.mId = Checks.checkInputNotNull(pId);
     }
@@ -102,11 +102,11 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
     static final class MyFragmentComponentImpl implements MyFragmentComponent {
       private Object mFragmentControllerInstance;
 
-      final Yatagan$MyApplicationComponent mMyApplicationComponent;
+      final YataganMyApplicationComponent mMyApplicationComponent;
 
       final MyActivityComponentImpl mMyActivityComponent;
 
-      MyFragmentComponentImpl(Yatagan$MyApplicationComponent pMyApplicationComponent,
+      MyFragmentComponentImpl(YataganMyApplicationComponent pMyApplicationComponent,
           MyActivityComponentImpl pMyActivityComponent) {
         this.mMyApplicationComponent = pMyApplicationComponent;
         this.mMyActivityComponent = pMyActivityComponent;
@@ -143,7 +143,7 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
         Object local = this.mFragmentControllerInstance;
         if (local == null) {
           ThreadAssertions.assertThreadAccess();
-          local = new FragmentController(new MyActivityController(this.mMyApplicationComponent, new Yatagan$MyApplicationComponent.CachingProviderImpl(this.mMyApplicationComponent, 1), new MyActivityComponentImpl.ProviderImpl(this.mMyActivityComponent, 0)));
+          local = new FragmentController(new MyActivityController(this.mMyApplicationComponent, new YataganMyApplicationComponent.CachingProviderImpl(this.mMyApplicationComponent, 1), new MyActivityComponentImpl.ProviderImpl(this.mMyActivityComponent, 0)));
           this.mFragmentControllerInstance = local;
         }
         return (FragmentController) local;
@@ -194,11 +194,11 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
       }
 
       private static final class ComponentFactoryImpl implements MyFragmentComponent.Factory {
-        Yatagan$MyApplicationComponent fMyApplicationComponent;
+        YataganMyApplicationComponent fMyApplicationComponent;
 
         MyActivityComponentImpl fMyActivityComponent;
 
-        ComponentFactoryImpl(Yatagan$MyApplicationComponent fMyApplicationComponent,
+        ComponentFactoryImpl(YataganMyApplicationComponent fMyApplicationComponent,
             MyActivityComponentImpl fMyActivityComponent) {
           this.fMyApplicationComponent = fMyApplicationComponent;
           this.fMyActivityComponent = fMyActivityComponent;
@@ -252,9 +252,9 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
     }
 
     private static final class ComponentFactoryImpl implements MyActivityComponent.Factory {
-      Yatagan$MyApplicationComponent fMyApplicationComponent;
+      YataganMyApplicationComponent fMyApplicationComponent;
 
-      ComponentFactoryImpl(Yatagan$MyApplicationComponent fMyApplicationComponent) {
+      ComponentFactoryImpl(YataganMyApplicationComponent fMyApplicationComponent) {
         this.fMyApplicationComponent = fMyApplicationComponent;
       }
 
@@ -266,11 +266,11 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$MyApplicationComponent mDelegate;
+    private final YataganMyApplicationComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$MyApplicationComponent delegate, int index) {
+    ProviderImpl(YataganMyApplicationComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -282,13 +282,13 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   }
 
   private static final class CachingProviderImpl implements Lazy {
-    private final Yatagan$MyApplicationComponent mDelegate;
+    private final YataganMyApplicationComponent mDelegate;
 
     private final int mIndex;
 
     private Object mValue;
 
-    CachingProviderImpl(Yatagan$MyApplicationComponent factory, int index) {
+    CachingProviderImpl(YataganMyApplicationComponent factory, int index) {
       mDelegate = factory;
       mIndex = index;
     }
@@ -308,7 +308,7 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   private static final class ComponentFactoryImpl implements MyApplicationComponent.Factory {
     @Override
     public MyApplicationComponent create(String appId) {
-      return new Yatagan$MyApplicationComponent(appId);
+      return new YataganMyApplicationComponent(appId);
     }
   }
 }

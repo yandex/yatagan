@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyApplicationComponent.java
+Name: test/YataganMyApplicationComponent.java
 package test;
 
 import com.yandex.yatagan.internal.YataganGenerated;
@@ -10,8 +10,8 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyApplicationComponent implements MyApplicationComponent {
-  Yatagan$MyApplicationComponent() {
+public final class YataganMyApplicationComponent implements MyApplicationComponent {
+  YataganMyApplicationComponent() {
   }
 
   public static MyApplicationComponent.Factory builder() {
@@ -21,13 +21,13 @@ public final class Yatagan$MyApplicationComponent implements MyApplicationCompon
   private static final class ComponentFactoryImpl implements MyApplicationComponent.Factory {
     @Override
     public MyApplicationComponent create() {
-      return new Yatagan$MyApplicationComponent();
+      return new YataganMyApplicationComponent();
     }
   }
 }
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyActivityComponent.java
+Name: test/YataganMyActivityComponent.java
 package test;
 
 import com.yandex.yatagan.Lazy;
@@ -44,10 +44,10 @@ import javax.inject.Provider;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyActivityComponent implements MyActivityComponent {
+public final class YataganMyActivityComponent implements MyActivityComponent {
   final MyApplicationComponent mMyApplicationComponent;
 
-  Yatagan$MyActivityComponent(MyApplicationComponent pApp) {
+  YataganMyActivityComponent(MyApplicationComponent pApp) {
     this.mMyApplicationComponent = Checks.checkInputNotNull(pApp);
   }
 
@@ -78,11 +78,11 @@ public final class Yatagan$MyActivityComponent implements MyActivityComponent {
   }
 
   static final class ProviderImpl implements Lazy {
-    private final Yatagan$MyActivityComponent mDelegate;
+    private final YataganMyActivityComponent mDelegate;
 
     private final int mIndex;
 
-    ProviderImpl(Yatagan$MyActivityComponent delegate, int index) {
+    ProviderImpl(YataganMyActivityComponent delegate, int index) {
       this.mDelegate = delegate;
       this.mIndex = index;
     }
@@ -94,13 +94,13 @@ public final class Yatagan$MyActivityComponent implements MyActivityComponent {
   }
 
   private static final class CachingProviderImpl implements Lazy {
-    private final Yatagan$MyActivityComponent mDelegate;
+    private final YataganMyActivityComponent mDelegate;
 
     private final int mIndex;
 
     private Object mValue;
 
-    CachingProviderImpl(Yatagan$MyActivityComponent factory, int index) {
+    CachingProviderImpl(YataganMyActivityComponent factory, int index) {
       mDelegate = factory;
       mIndex = index;
     }
@@ -120,7 +120,7 @@ public final class Yatagan$MyActivityComponent implements MyActivityComponent {
   private static final class ComponentFactoryImpl implements MyActivityComponent.Factory {
     @Override
     public MyActivityComponent create(MyApplicationComponent app) {
-      return new Yatagan$MyActivityComponent(app);
+      return new YataganMyActivityComponent(app);
     }
   }
 }

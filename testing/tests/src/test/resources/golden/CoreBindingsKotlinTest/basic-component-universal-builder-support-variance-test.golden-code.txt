@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$TestComponent.java
+Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.internal.Checks;
@@ -13,7 +13,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$TestComponent implements TestComponent {
+public final class YataganTestComponent implements TestComponent {
   final Consumer<? super Foo> mFooConsumer;
 
   final Consumer<? super Baz> mBazConsumer;
@@ -32,7 +32,7 @@ public final class Yatagan$TestComponent implements TestComponent {
 
   final Dependency mDependency;
 
-  Yatagan$TestComponent(Dependency pDep, Consumer<? super Foo> pFooConsumer,
+  YataganTestComponent(Dependency pDep, Consumer<? super Foo> pFooConsumer,
       Consumer<? super Baz> pBazConsumer, Object pObj, Object pSetBar, Set<Baz> pSetBazs,
       Object pSetFoo, Set<Bar> pSetSetOfBar, Set<? extends Foo> pSetSetOfFoo) {
     this.mDependency = Checks.checkInputNotNull(pDep);
@@ -117,7 +117,7 @@ public final class Yatagan$TestComponent implements TestComponent {
     @Override
     public TestComponent create(Dependency dep, Consumer<? super Foo> fooConsumer,
         Consumer<? super Baz> bazConsumer, Object obj) {
-      return new Yatagan$TestComponent(dep, fooConsumer, bazConsumer, obj, this.mSetBar, this.mSetBazs, this.mSetFoo, this.mSetSetOfBar, this.mSetSetOfFoo);
+      return new YataganTestComponent(dep, fooConsumer, bazConsumer, obj, this.mSetBar, this.mSetBazs, this.mSetFoo, this.mSetSetOfBar, this.mSetSetOfFoo);
     }
   }
 }

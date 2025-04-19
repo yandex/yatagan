@@ -1,5 +1,5 @@
 # Keep generated components, as they are accessed with a reflection call.
--keep class **.Yatagan$* {
+-keep class **.Yatagan* {
     # Keep creating methods - called via reflection.
     public * autoBuilder();
     public * builder();

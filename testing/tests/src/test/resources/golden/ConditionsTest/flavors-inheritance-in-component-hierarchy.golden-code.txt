@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MyBrowserComponent.java
+Name: test/YataganMySearchAppComponent.java
 package test;
 
 import com.yandex.yatagan.AutoBuilder;
@@ -15,8 +15,8 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MyBrowserComponent implements MyBrowserComponent {
-  private Yatagan$MyBrowserComponent() {
+public final class YataganMySearchAppComponent implements MySearchAppComponent {
+  private YataganMySearchAppComponent() {
   }
 
   @Override
@@ -24,7 +24,72 @@ public final class Yatagan$MyBrowserComponent implements MyBrowserComponent {
     return new MyComponentImpl.ComponentFactoryImpl();
   }
 
-  public static AutoBuilder<Yatagan$MyBrowserComponent> autoBuilder() {
+  public static AutoBuilder<YataganMySearchAppComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class MyComponentImpl implements MyComponent {
+    MyComponentImpl() {
+    }
+
+    @Override
+    public Optional<Impl> getImpl() {
+      return Optional.empty();
+    }
+
+    private static final class ComponentFactoryImpl implements MyComponent.Factory {
+      ComponentFactoryImpl() {
+      }
+
+      @Override
+      public MyComponent create() {
+        return new MyComponentImpl();
+      }
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMySearchAppComponent> {
+    @Override
+    public final <I> AutoBuilder<YataganMySearchAppComponent> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final YataganMySearchAppComponent create() {
+      return new YataganMySearchAppComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganMyBrowserComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganMyBrowserComponent implements MyBrowserComponent {
+  private YataganMyBrowserComponent() {
+  }
+
+  @Override
+  public MyComponent.Factory getMyC() {
+    return new MyComponentImpl.ComponentFactoryImpl();
+  }
+
+  public static AutoBuilder<YataganMyBrowserComponent> autoBuilder() {
     return new AutoBuilderImpl();
   }
 
@@ -52,82 +117,17 @@ public final class Yatagan$MyBrowserComponent implements MyBrowserComponent {
     }
   }
 
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MyBrowserComponent> {
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganMyBrowserComponent> {
     @Override
-    public final <I> AutoBuilder<Yatagan$MyBrowserComponent> provideInput(I input,
+    public final <I> AutoBuilder<YataganMyBrowserComponent> provideInput(I input,
         Class<I> inputClass) {
       Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
       return this;
     }
 
     @Override
-    public final Yatagan$MyBrowserComponent create() {
-      return new Yatagan$MyBrowserComponent();
-    }
-  }
-}
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name: test/Yatagan$MySearchAppComponent.java
-package test;
-
-import com.yandex.yatagan.AutoBuilder;
-import com.yandex.yatagan.Optional;
-import com.yandex.yatagan.internal.Checks;
-import com.yandex.yatagan.internal.YataganGenerated;
-import java.lang.Class;
-import java.lang.Override;
-import java.lang.SuppressWarnings;
-import java.util.Collections;
-import javax.annotation.processing.Generated;
-
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
-@YataganGenerated
-@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
-public final class Yatagan$MySearchAppComponent implements MySearchAppComponent {
-  private Yatagan$MySearchAppComponent() {
-  }
-
-  @Override
-  public MyComponent.Factory getMyC() {
-    return new MyComponentImpl.ComponentFactoryImpl();
-  }
-
-  public static AutoBuilder<Yatagan$MySearchAppComponent> autoBuilder() {
-    return new AutoBuilderImpl();
-  }
-
-  static final class MyComponentImpl implements MyComponent {
-    MyComponentImpl() {
-    }
-
-    @Override
-    public Optional<Impl> getImpl() {
-      return Optional.empty();
-    }
-
-    private static final class ComponentFactoryImpl implements MyComponent.Factory {
-      ComponentFactoryImpl() {
-      }
-
-      @Override
-      public MyComponent create() {
-        return new MyComponentImpl();
-      }
-    }
-  }
-
-  private static final class AutoBuilderImpl implements AutoBuilder<Yatagan$MySearchAppComponent> {
-    @Override
-    public final <I> AutoBuilder<Yatagan$MySearchAppComponent> provideInput(I input,
-        Class<I> inputClass) {
-      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
-      return this;
-    }
-
-    @Override
-    public final Yatagan$MySearchAppComponent create() {
-      return new Yatagan$MySearchAppComponent();
+    public final YataganMyBrowserComponent create() {
+      return new YataganMyBrowserComponent();
     }
   }
 }
