@@ -205,8 +205,19 @@ internal class KspTypeDeclarationImpl private constructor(
         filter: FunctionFilter,
         isStatic: (KSAnnotated) -> Boolean,
     ) {
-        val isPropertyStatic = isStatic(property)
-        property.getter?.let { getter ->
+        val refinedProperty = if (
+            property.getter == null && property.setter == null &&
+            /* not a java field */ property.isFromKotlin && Utils.isKsp2
+        ) {
+            // In the cases where the property is overriding multiple identical properties from the supertypes,
+            // KSP2 returns a property without getter and setter.
+            // We detect it and try to use `findOverridee()` instead,
+            // which returns the actual property from one of the bases
+            property.findOverridee() ?: property
+        } else property
+
+        val isPropertyStatic = isStatic(refinedProperty)
+        refinedProperty.getter?.let { getter ->
             if (filter.filterAccessor(getter)) {
                 yield(KspPropertyGetterImpl(
                     owner = owner, getter = getter,
@@ -214,7 +225,7 @@ internal class KspTypeDeclarationImpl private constructor(
                 ))
             }
         }
-        property.setter?.let { setter ->
+        refinedProperty.setter?.let { setter ->
             val modifiers = setter.modifiers
             if (Modifier.PRIVATE !in modifiers && Modifier.PROTECTED !in modifiers && filter.filterAccessor(setter)) {
                 yield(KspPropertySetterImpl(
