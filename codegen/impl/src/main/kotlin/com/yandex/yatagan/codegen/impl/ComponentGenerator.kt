@@ -76,7 +76,7 @@ internal class ComponentGenerator @Inject constructor(
             modifiers(/*package-private*/ STATIC)
         } else {
             modifiers(PUBLIC)
-            annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems") }
+            annotation<SuppressWarnings> { stringValues("unchecked", "rawtypes", "NullableProblems", "deprecation") }
             annotation(Names.YataganGenerated)
             options.generatedAnnotationClassName?.let {
                 annotation(it) {

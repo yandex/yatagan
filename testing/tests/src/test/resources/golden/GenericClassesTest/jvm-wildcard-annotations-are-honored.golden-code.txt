@@ -15,7 +15,7 @@ import javax.annotation.processing.Generated;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
 @YataganGenerated
 @Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
 public final class YataganTestComponent implements TestComponent {
