@@ -5,6 +5,13 @@
     public * builder();
 }
 
+# Keep legacy generated components as well.
+-keep class **.Yatagan$* {
+    public * autoBuilder();
+    public * create();
+    public * builder();
+}
+
 # Keep component interfaces, as their names must be be preserved to find correspondent implementation.
 -keep @com.yandex.yatagan.Component interface *
 
