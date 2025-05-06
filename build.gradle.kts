@@ -1,4 +1,3 @@
-import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import kotlinx.kover.gradle.plugin.dsl.tasks.KoverXmlReport
 
@@ -11,26 +10,6 @@ val yataganVersion: String by extra
 val enableCoverage: Boolean by extra
 
 val isUnderTeamcity = providers.environmentVariable("TEAMCITY_VERSION").isPresent
-
-val nexusUsername: Provider<String> = providers.environmentVariable("NEXUS_USERNAME")
-val nexusPassword: Provider<String> = providers.environmentVariable("NEXUS_PASSWORD")
-
-if (nexusUsername.isPresent && nexusPassword.isPresent) {
-    apply(plugin = "io.github.gradle-nexus.publish-plugin")
-    extensions.configure<NexusPublishExtension> {
-        this.repositories {
-            sonatype {
-                nexusUrl.set(uri("https://oss.sonatype.org/service/local/"))
-                snapshotRepositoryUrl.set(uri("https://oss.sonatype.org/content/repositories/snapshots/"))
-
-                username.set(nexusUsername)
-                password.set(nexusPassword)
-
-                packageGroup.set("com.yandex.yatagan")
-            }
-        }
-    }
-}
 
 tasks {
     if (isUnderTeamcity) {
