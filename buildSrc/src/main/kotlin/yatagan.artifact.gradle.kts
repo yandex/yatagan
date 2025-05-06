@@ -1,5 +1,6 @@
 import com.yandex.yatagan.gradle.isValidSemVerString
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.gradle.kotlin.dsl.registering
 
 plugins {
     id("yatagan.base-module")
@@ -45,7 +46,7 @@ tasks.withType<DokkaTask>().configureEach {
     moduleName.set(artifactName)
 }
 
-val javadocJar by tasks.creating(Jar::class) {
+val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
     from(tasks.dokkaJavadoc.map { it.outputDirectory })
     dependsOn(tasks.dokkaJavadoc)
@@ -59,9 +60,7 @@ publishing {
     publications {
         create<MavenPublication>("main") {
             from(components["java"])
-            tasks.findByName("javadocJar")?.let {
-                artifact(it)
-            }
+            artifact(javadocJar)
 
             this.version = yataganVersion
             this.groupId = "com.yandex.yatagan"

@@ -47,3 +47,6 @@
 
 # Local config files
 /local.properties
+
+# Koltin
+.kotlin
