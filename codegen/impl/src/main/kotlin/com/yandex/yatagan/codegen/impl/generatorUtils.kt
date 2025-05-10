@@ -22,9 +22,11 @@ import com.yandex.yatagan.codegen.poetry.CodeBuilder
 import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.ThreadChecker
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.DependencyKind
+import com.yandex.yatagan.lang.TypeDeclarationKind
 import com.yandex.yatagan.lang.compiled.ClassNameModel
 import com.yandex.yatagan.lang.compiled.ParameterizedNameModel
 
@@ -115,5 +117,17 @@ internal fun formatImplementationClassName(graph: BindingGraph): ClassName {
                 subcomponentsNamespace.name(graph.model.name, suffix = "Impl", firstCapital = true)
             )
         }
+    }
+}
+
+internal fun ThreadChecker.generateThreadAssertion(
+    builder: CodeBuilder,
+) {
+    val method = assertThreadAccessMethod ?: return
+    val ownerObject = if (!method.isStatic && method.owner.kind == TypeDeclarationKind.KotlinObject) {
+        ".INSTANCE"
+    } else ""
+    with(builder) {
+        +"%T%L.%N()".formatCode(method.ownerName.asTypeName(), ownerObject, method.name)
     }
 }

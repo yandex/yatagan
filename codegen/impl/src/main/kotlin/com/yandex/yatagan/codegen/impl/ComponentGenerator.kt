@@ -24,6 +24,7 @@ import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildClass
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.ThreadChecker
 import com.yandex.yatagan.core.graph.component1
 import com.yandex.yatagan.core.graph.component2
 import com.yandex.yatagan.lang.Field
@@ -39,6 +40,7 @@ import javax.lang.model.element.Modifier.STATIC
 @Singleton
 internal class ComponentGenerator @Inject constructor(
     component: GeneratorComponent,
+    threadChecker: ThreadChecker,
     private val options: Options,
     private val graph: BindingGraph,
     private val contributors: List<Contributor>,
@@ -51,7 +53,6 @@ internal class ComponentGenerator @Inject constructor(
     data class Options(
         val maxSlotsPerSwitch: Int,
         val enableProvisionNullChecks: Boolean,
-        val enableThreadChecks: Boolean,
         val sortMethodsForTesting: Boolean,
         val generatedAnnotationClassName: ClassName?,
         val enableDaggerCompatMode: Boolean,
@@ -65,6 +66,7 @@ internal class ComponentGenerator @Inject constructor(
         Yatagan.builder(GeneratorComponent.Factory::class.java).create(
             graph = childGraph,
             options = options,
+            threadChecker = threadChecker,
         ).generator
     }
 

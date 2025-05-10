@@ -23,6 +23,7 @@ import com.yandex.yatagan.codegen.poetry.ExpressionBuilder
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.ThreadChecker
 import com.yandex.yatagan.core.graph.bindings.Binding
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.DependencyKind
@@ -70,7 +71,7 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
     @Assisted binding: Binding,
     @FieldsNamespace fieldsNs: Namespace,
     @MethodsNamespace methodsNs: Namespace,
-    private val options: ComponentGenerator.Options,
+    private val threadChecker: ThreadChecker,
 ) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
     override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
         val targetType = binding.target.typeName()
@@ -82,9 +83,7 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
             returnType(targetType)
             +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
             controlFlow("if (local == null)") {
-                if (options.enableThreadChecks) {
-                    +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
-                }
+                threadChecker.generateThreadAssertion(this)
                 +buildExpression {
                     +"local = "
                     binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)

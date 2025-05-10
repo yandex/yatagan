@@ -514,6 +514,9 @@ object Strings {
 
         @Covered
         fun manualBindingForConditionValue() = ("Manual bindings with `@ValueOf` qualifier are not allowed.").toError()
+
+        @Covered
+        fun invalidOptionValue(message: String) = ("Invalid value: $message").toError()
     }
 
     object Warnings {

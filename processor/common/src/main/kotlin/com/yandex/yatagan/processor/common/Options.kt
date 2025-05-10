@@ -16,6 +16,8 @@
 
 package com.yandex.yatagan.processor.common
 
+import com.yandex.yatagan.core.graph.impl.ThreadChecker
+
 /**
  * A wrapper around a simple options map that provides safe option accessing API.
  */
@@ -44,6 +46,16 @@ sealed interface Option<out T> {
     fun parse(rawValue: String): T
 }
 
+enum class StringOption(
+    override val key: String,
+    override val default: String? = null,
+) : Option<String?> {
+    ThreadCheckerClassName(ThreadChecker.OPTION_NAME),
+    ;
+
+    override fun parse(rawValue: String) = rawValue
+}
+
 enum class BooleanOption(
     override val key: String,
     override val default: Boolean,
@@ -51,8 +63,8 @@ enum class BooleanOption(
 
     StrictMode("yatagan.enableStrictMode", default = true),
     UsePlainOutput("yatagan.usePlainOutput", default = false),
+    // Experimental options:
     AllConditionsLazy("yatagan.experimental.allConditionsLazy", default = false),
-    OmitThreadChecks("yatagan.experimental.omitThreadChecks", default = false),
     OmitProvisionNullChecks("yatagan.experimental.omitProvisionNullChecks", default = false),
     DaggerCompatibilityMode("yatagan.experimental.enableDaggerCompatibility", default = false),
     SortMethodsForTesting("yatagan.internal.testing.sortMethods", default = false),

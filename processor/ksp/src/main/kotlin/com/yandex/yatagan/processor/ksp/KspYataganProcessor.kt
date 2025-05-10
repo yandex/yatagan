@@ -43,7 +43,7 @@ internal class KspYataganProcessor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         lexicalScope = KspLexicalScope(resolver, environment)
-        initScopedOptions(lexicalScope, this)
+        initScopedOptions(this)
         process(
             sources = sequenceOf(
                 resolver.getSymbolsWithAnnotation(Component::class.java.canonicalName),

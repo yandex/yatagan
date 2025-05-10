@@ -1,0 +1,16 @@
+error: Invalid value: Method `assertThreadAccess` in class `test.InvalidThreadChecker5` must be public/internal
+Encountered:
+  here: Option yatagan.threadCheckerClassName = test.InvalidThreadChecker5
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid value: Method `assertThreadAccess` in class `test.InvalidThreadChecker5` must be static or be in a Kotlin object
+Encountered:
+  here: Option yatagan.threadCheckerClassName = test.InvalidThreadChecker5
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Invalid value: Method `assertThreadAccess` in class `test.InvalidThreadChecker5` must have no parameters
+Encountered:
+  here: Option yatagan.threadCheckerClassName = test.InvalidThreadChecker5
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

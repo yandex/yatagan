@@ -1,0 +1,4 @@
+error: Invalid value: Unable to find class test.NonExistentThreadChecker
+Encountered:
+  here: Option yatagan.threadCheckerClassName = test.NonExistentThreadChecker
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

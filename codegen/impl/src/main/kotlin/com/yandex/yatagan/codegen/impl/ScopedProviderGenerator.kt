@@ -20,6 +20,7 @@ import com.squareup.javapoet.ClassName
 import com.yandex.yatagan.codegen.poetry.TypeSpecBuilder
 import com.yandex.yatagan.codegen.poetry.buildClass
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.ThreadChecker
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.lang.model.element.Modifier.FINAL
@@ -32,6 +33,7 @@ import javax.lang.model.element.Modifier.VOLATILE
 internal class ScopedProviderGenerator @Inject constructor(
     private val componentImplName: ClassName,
     private val options: ComponentGenerator.Options,
+    private val threadChecker: ThreadChecker,
     graph: BindingGraph,
 ) : ComponentGenerator.Contributor {
     private var isUsed = false
@@ -79,9 +81,7 @@ internal class ScopedProviderGenerator @Inject constructor(
                                 }
                             }
                         } else {
-                            if (options.enableThreadChecks) {
-                                +"%T.assertThreadAccess()".formatCode(Names.ThreadAssertions)
-                            }
+                            threadChecker.generateThreadAssertion(this)
                             +"local = mDelegate.%N(mIndex)".formatCode(SlotSwitchingGenerator.FactoryMethodName)
                             +"mValue = local"
                         }

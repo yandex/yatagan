@@ -24,9 +24,8 @@ internal object Names {
     val Provider: ClassName = ClassName.get("javax.inject", "Provider")
     val Optional: ClassName = ClassName.get("com.yandex.yatagan", "Optional")
     val AutoBuilder: ClassName = ClassName.get("com.yandex.yatagan", "AutoBuilder")
-    val ThreadAssertions: ClassName = ClassName.get("com.yandex.yatagan.internal", "ThreadAssertions")
     val Checks: ClassName = ClassName.get("com.yandex.yatagan.internal", "Checks")
-    val YataganGenerated = ClassName.get("com.yandex.yatagan.internal", "YataganGenerated")
+    val YataganGenerated: ClassName = ClassName.get("com.yandex.yatagan.internal", "YataganGenerated")
 
     val AssertionError: ClassName = ClassName.get(java.lang.AssertionError::class.java)
     val Class: ClassName = ClassName.get(java.lang.Class::class.java)

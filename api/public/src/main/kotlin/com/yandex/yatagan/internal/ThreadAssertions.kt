@@ -16,13 +16,14 @@
 
 package com.yandex.yatagan.internal
 
-import com.yandex.yatagan.Yatagan
-
+@Deprecated(
+    message = "May be used by components generated with earlier versions of the framework",
+    level = DeprecationLevel.HIDDEN,
+)
 @YataganInternal
 public object ThreadAssertions {
     @JvmStatic
     public fun assertThreadAccess() {
-        // TODO(#44): Remove this and use `Yatagan.threadAsserter` directly.
-        Yatagan.threadAsserter?.assertThreadAccess()
+        // No-op
     }
 }

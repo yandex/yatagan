@@ -62,6 +62,7 @@ import com.yandex.yatagan.lang.rt.rawValue
 import com.yandex.yatagan.lang.rt.rt
 import com.yandex.yatagan.rt.support.DynamicValidationDelegate
 import com.yandex.yatagan.rt.support.Logger
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
 
 internal class RuntimeComponent(
@@ -70,9 +71,10 @@ internal class RuntimeComponent(
     private val graph: BindingGraph,
     private val givenInstances: Map<NodeModel, Any>,
     private val givenDependencies: Map<ComponentDependencyModel, Any>,
+    private val threadChecker: RuntimeThreadChecker,
     validationPromise: DynamicValidationDelegate.Promise?,
     givenModuleInstances: Map<ModuleModel, Any>,
-) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any>, WithParents<RuntimeComponent> {
+) : InvocationHandlerBase(validationPromise), Binding.Visitor<Any>, BindingAccessDelegate, WithParents<RuntimeComponent> {
     lateinit var thisProxy: Any
     private val parentsSequence = parentsSequence(includeThis = true).memoize()
 
@@ -207,6 +209,19 @@ internal class RuntimeComponent(
 
     override fun toString(): String = graph.toString(childContext = null).toString()
 
+    override fun createBinding(binding: Binding): Any {
+        return binding.accept(this)
+    }
+
+    override fun assertThreadAccessIfNeeded() {
+        try {
+            threadChecker.assertThreadAccess()
+        } catch (e: InvocationTargetException) {
+            // Unwrap the exception
+            throw e.targetException
+        }
+    }
+
     override fun visitProvision(binding: ProvisionBinding): Any {
         val instance: Any? = binding.provision.accept(ProvisionEvaluator(binding))
         return checkNotNull(instance) {
@@ -256,6 +271,7 @@ internal class RuntimeComponent(
                 graph = binding.targetGraph,
                 parent = this@RuntimeComponent,
                 validationPromise = validationPromise,  // The same validation session for children.
+                threadChecker = threadChecker,
             ) else RuntimeComponent(
                 logger = logger,
                 parent = this@RuntimeComponent,
@@ -264,6 +280,7 @@ internal class RuntimeComponent(
                 givenDependencies = emptyMap(),
                 givenModuleInstances = emptyMap(),
                 validationPromise = validationPromise,
+                threadChecker = threadChecker,
             )
         )
     }
@@ -417,6 +434,7 @@ internal class RuntimeComponent(
                 givenDependencies = givenDependencies,
                 givenModuleInstances = givenModuleInstances,
                 validationPromise = validationPromise,
+                threadChecker = threadChecker,
             )
             return Proxy.newProxyInstance(
                 componentClass.classLoader,

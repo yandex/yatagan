@@ -176,7 +176,6 @@ public final class com/yandex/yatagan/Yatagan {
 	public static final fun autoBuilder (Ljava/lang/Class;)Lcom/yandex/yatagan/AutoBuilder;
 	public static final fun builder (Ljava/lang/Class;)Ljava/lang/Object;
 	public static final fun create (Ljava/lang/Class;)Ljava/lang/Object;
-	public static final fun getThreadAsserter ()Lcom/yandex/yatagan/ThreadAsserter;
 	public static final fun setThreadAsserter (Lcom/yandex/yatagan/ThreadAsserter;)V
 }
 
