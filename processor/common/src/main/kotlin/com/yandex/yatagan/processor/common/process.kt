@@ -22,9 +22,11 @@ import com.yandex.yatagan.codegen.impl.ComponentGeneratorFacade
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
+import com.yandex.yatagan.core.graph.impl.ThreadChecker
 import com.yandex.yatagan.core.model.impl.ComponentModel
 import com.yandex.yatagan.lang.common.LangOptions
 import com.yandex.yatagan.lang.scope.LexicalScope
+import com.yandex.yatagan.validation.LocatedMessage
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Error
 import com.yandex.yatagan.validation.ValidationMessage.Kind.MandatoryWarning
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Warning
@@ -40,15 +42,31 @@ fun <Source> process(
     sources: Sequence<Source>,
     delegate: ProcessorDelegate<Source>,
 ) {
-    val usePlainOutput = delegate.options[BooleanOption.UsePlainOutput]
-    val strictMode = delegate.options[BooleanOption.StrictMode]
     run {
         val rootModels = sources.mapNotNull { source ->
             ComponentModel(delegate.createDeclaration(source))
         }.filter { it.isRoot }.toList()
 
+        if (rootModels.isEmpty()) {
+            return
+        }
+
         val logger = LoggerDecorator(delegate.logger)
         val plugins = loadServices<ValidationPluginProvider>()
+
+        val threadChecker = ThreadChecker(
+            delegate.lexicalScope,
+            delegate.options[StringOption.ThreadCheckerClassName],
+        )
+        if (!reportAndCheckSuccess(
+                logger = logger,
+                delegate = delegate,
+                messages = validate(threadChecker),
+            )
+        ) {
+            return
+        }
+
         for (rootModel in rootModels) {
             val graphRoot = BindingGraph(
                 root = rootModel,
@@ -64,24 +82,12 @@ fun <Source> process(
                 }
             }
 
-            allMessages.forEach { locatedMessage ->
-                val message = locatedMessage.format(
-                    maxEncounterPaths = delegate.options[IntOption.MaxIssueEncounterPaths],
-                ).run {
-                    if (usePlainOutput) toString() else toAnsiEscapedString()
-                }
-                when (locatedMessage.message.kind) {
-                    Error -> logger.error(message)
-                    MandatoryWarning -> if (strictMode) {
-                        logger.error(message)
-                    } else {
-                        logger.warning(message)
-                    }
-
-                    Warning -> logger.warning(message)
-                }
-            }
-            if (allMessages.any { it.message.kind == Error }) {
+            if (!reportAndCheckSuccess(
+                    logger = logger,
+                    delegate = delegate,
+                    messages = allMessages,
+                )
+            ) {
                 // If the graph is not valid, bail out
                 continue
             }
@@ -90,10 +96,10 @@ fun <Source> process(
                 val generator = ComponentGeneratorFacade(
                     graph = graphRoot,
                     maxSlotsPerSwitch = delegate.options[IntOption.MaxSlotsPerSwitch],
-                    enableThreadChecks = !delegate.options[BooleanOption.OmitThreadChecks],
                     enableProvisionNullChecks = !delegate.options[BooleanOption.OmitProvisionNullChecks],
                     sortMethodsForTesting = delegate.options[BooleanOption.SortMethodsForTesting],
                     enableDaggerCompatMode = delegate.options[BooleanOption.DaggerCompatibilityMode],
+                    threadChecker = threadChecker,
                 )
                 generator.generate().forEach { generated ->
                     delegate.openFileForGenerating(
@@ -115,13 +121,42 @@ fun <Source> process(
     }
 }
 
+private fun reportAndCheckSuccess(
+    logger: Logger,
+    delegate: ProcessorDelegate<*>,
+    messages: Collection<LocatedMessage>,
+) : Boolean {
+    val options = delegate.options
+    val usePlainOutput = options[BooleanOption.UsePlainOutput]
+    val strictMode = options[BooleanOption.StrictMode]
+    var hasErrors = false
+    messages.forEach { locatedMessage ->
+        val message = locatedMessage.format(
+            maxEncounterPaths = options[IntOption.MaxIssueEncounterPaths],
+        ).run {
+            if (usePlainOutput) toString() else toAnsiEscapedString()
+        }
+        when (locatedMessage.message.kind) {
+            Error -> logger.error(message).also { hasErrors = true }
+            MandatoryWarning -> if (strictMode) {
+                hasErrors = true
+                logger.error(message)
+            } else {
+                logger.warning(message)
+            }
+
+            Warning -> logger.warning(message)
+        }
+    }
+    return !hasErrors
+}
+
 /**
  * A hook to be called by processor once per [LexicalScope].
  */
 fun initScopedOptions(
-    lexicalScope: LexicalScope,
     delegate: ProcessorDelegate<*>,
-) = with(lexicalScope) {
+) = with(delegate.lexicalScope) {
     ext[Options] = Options(
         allConditionsLazy = delegate.options[BooleanOption.AllConditionsLazy],
     )

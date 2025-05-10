@@ -47,12 +47,15 @@ public object Yatagan {
         null
     }
 
-    /**
-     * [ThreadAsserter] object to be used in Single Thread component implementations.
-     */
-    @Volatile
     @JvmStatic
-    public var threadAsserter: ThreadAsserter? = null
+    @Deprecated(
+        "Use `yatagan.threadCheckerClassName` option instead.",
+        level = DeprecationLevel.ERROR,
+    )
+    @Suppress("UNUSED_PARAMETER")
+    public fun setThreadAsserter(threadAsserter: ThreadAsserter?) {
+        // NOP
+    }
 
     /**
      * Use this to create a component builder instance for root components that declare it.

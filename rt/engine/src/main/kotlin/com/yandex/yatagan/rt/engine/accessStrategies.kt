@@ -19,7 +19,6 @@ package com.yandex.yatagan.rt.engine
 import com.yandex.yatagan.Lazy
 import com.yandex.yatagan.Optional
 import com.yandex.yatagan.core.graph.bindings.Binding
-import com.yandex.yatagan.internal.ThreadAssertions
 import com.yandex.yatagan.internal.YataganInternal
 import javax.inject.Provider
 
@@ -33,7 +32,7 @@ internal abstract class AccessStrategy : Provider<Any> {
 
 internal open class SynchronizedCachingAccessStrategy(
     private val binding: Binding,
-    private val creationVisitor: Binding.Visitor<Any>,
+    private val accessDelegate: BindingAccessDelegate,
 ) : AccessStrategy(), Lazy<Any> {
     @Volatile
     private var value: Any? = null
@@ -42,7 +41,7 @@ internal open class SynchronizedCachingAccessStrategy(
         value?.let { local -> return local }
         return synchronized(this) {
             value?.let { local -> return local }
-            binding.accept(creationVisitor).also { value = it }
+            accessDelegate.createBinding(binding).also { value = it }
         }
     }
     final override fun getLazy(): Lazy<*> = this
@@ -50,38 +49,38 @@ internal open class SynchronizedCachingAccessStrategy(
 
 internal open class CachingAccessStrategy(
     private val binding: Binding,
-    private val creationVisitor: Binding.Visitor<Any>,
+    private val accessDelegate: BindingAccessDelegate,
 ) : AccessStrategy(), Lazy<Any> {
     private var value: Any? = null
 
     @OptIn(YataganInternal::class)
     final override fun get(): Any {
         value?.let { local -> return local }
-        ThreadAssertions.assertThreadAccess()
-        return binding.accept(creationVisitor).also { value = it }
+        accessDelegate.assertThreadAccessIfNeeded()
+        return accessDelegate.createBinding(binding).also { value = it }
     }
     final override fun getLazy(): Lazy<*> = this
 }
 
 internal open class SynchronizedCreatingAccessStrategy(
     protected val binding: Binding,
-    protected val creationVisitor: Binding.Visitor<Any>,
+    protected val accessDelegate: BindingAccessDelegate,
 ) : AccessStrategy() {
-    final override fun get(): Any = binding.accept(creationVisitor)
+    final override fun get(): Any = accessDelegate.createBinding(binding)
     override fun getLazy(): Lazy<*> = SynchronizedCachingAccessStrategy(
         binding = binding,
-        creationVisitor = creationVisitor,
+        accessDelegate = accessDelegate,
     )
 }
 
 internal open class CreatingAccessStrategy(
     protected val binding: Binding,
-    protected val creationVisitor: Binding.Visitor<Any>,
+    protected val accessDelegate: BindingAccessDelegate,
 ) : AccessStrategy() {
-    final override fun get(): Any = binding.accept(creationVisitor)
+    final override fun get(): Any = accessDelegate.createBinding(binding)
     override fun getLazy(): Lazy<*> = CachingAccessStrategy(
         binding = binding,
-        creationVisitor = creationVisitor,
+        accessDelegate = accessDelegate,
     )
 }
 
@@ -92,7 +91,7 @@ internal class ConditionalAccessStrategy(
 ) : AccessStrategy() {
     override fun get(): Any = underlying.get()
     override fun getLazy(): Lazy<*> = underlying.getLazy()
-    
+
     override fun getOptionalLazy(): Optional<Lazy<*>> =
         if (evaluator.evaluateConditionScope(conditionScopeHolder.conditionScope)) {
             underlying.getOptionalLazy()

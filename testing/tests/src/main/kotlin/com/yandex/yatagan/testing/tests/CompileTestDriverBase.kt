@@ -24,6 +24,7 @@ import com.yandex.yatagan.processor.common.BooleanOption
 import com.yandex.yatagan.processor.common.IntOption
 import com.yandex.yatagan.processor.common.LoggerDecorator
 import com.yandex.yatagan.processor.common.Option
+import com.yandex.yatagan.processor.common.StringOption
 import com.yandex.yatagan.testing.source_set.SourceFile
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assert
@@ -47,6 +48,7 @@ abstract class CompileTestDriverBase private constructor(
         IntOption.MaxIssueEncounterPaths.key to "100",
         IntOption.MaxSlotsPerSwitch.key to "100",
         BooleanOption.SortMethodsForTesting.key to "true",
+        StringOption.ThreadCheckerClassName.key to "test.ThreadAssertions",
     )
 
     protected constructor(
@@ -112,8 +114,16 @@ abstract class CompileTestDriverBase private constructor(
 
     abstract fun generatedFilesSubDir(): String?
 
-    override fun <V : Any> givenOption(option: Option<V>, value: V) {
+    override fun <V> givenOption(option: Option<V>, value: V) {
         options[option.key] = value.toString()
+    }
+
+    override fun baseSetUp() {
+        givenKotlinSource("test.ThreadAssertions", """
+            class ThreadAssertions {
+                companion object { @JvmStatic fun assertThreadAccess() {} }
+            }
+        """.trimIndent())
     }
 
     override fun compileRunAndValidate() {

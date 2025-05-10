@@ -66,7 +66,7 @@ class JapYataganProcessor : AbstractProcessor(), ProcessorDelegate<TypeElement> 
         logger = JapLogger(processingEnv.messager)
         options = Options(processingEnv.options)
         lexicalScope = JavaxLexicalScope(processingEnv.typeUtils, processingEnv.elementUtils)
-        initScopedOptions(lexicalScope, this)
+        initScopedOptions(this)
     }
 
     override fun openFileForGenerating(

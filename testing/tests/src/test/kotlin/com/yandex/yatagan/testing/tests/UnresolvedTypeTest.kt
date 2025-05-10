@@ -59,6 +59,7 @@ class UnresolvedTypeTest {
 
     @Test
     fun `unresolved types (KSP)`() = with(KspCompileTestDriver(useK2 = false)) {
+        baseSetUp()
         testNameRule.assignFrom(this@UnresolvedTypeTest.testNameRule)
 
         // KSP1 still has some cases for error-types not covered.
@@ -68,6 +69,7 @@ class UnresolvedTypeTest {
 
     @Test
     fun `unresolved types (KSP2)`() = with(KspCompileTestDriver(useK2 = true)) {
+        baseSetUp()
         testNameRule.assignFrom(this@UnresolvedTypeTest.testNameRule)
 
         includeFromSourceSet(sources)
@@ -76,6 +78,7 @@ class UnresolvedTypeTest {
 
     @Test
     fun `unresolved types (JAP)`() = with(JapCompileTestDriver()) {
+        baseSetUp()
         testNameRule.assignFrom(this@UnresolvedTypeTest.testNameRule)
 
         includeFromSourceSet(sources)

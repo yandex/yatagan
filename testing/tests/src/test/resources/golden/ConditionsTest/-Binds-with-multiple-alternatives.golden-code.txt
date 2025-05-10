@@ -6,7 +6,6 @@ import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
-import com.yandex.yatagan.internal.ThreadAssertions;
 import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Class;
