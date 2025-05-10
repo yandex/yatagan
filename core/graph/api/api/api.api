@@ -48,6 +48,10 @@ public abstract interface class com/yandex/yatagan/core/graph/GraphSubComponentF
 	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/SubComponentFactoryMethodModel;
 }
 
+public abstract interface class com/yandex/yatagan/core/graph/ThreadChecker : com/yandex/yatagan/validation/MayBeInvalid {
+	public abstract fun getAssertThreadAccessMethod ()Lcom/yandex/yatagan/lang/Method;
+}
+
 public abstract interface class com/yandex/yatagan/core/graph/bindings/AliasBinding : com/yandex/yatagan/core/graph/bindings/BaseBinding {
 	public abstract fun getSource ()Lcom/yandex/yatagan/core/model/NodeModel;
 }

@@ -17,6 +17,7 @@
 package com.yandex.yatagan.rt.engine
 
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.ThreadChecker
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ComponentFactoryModel
 import com.yandex.yatagan.core.model.ModuleModel
@@ -33,6 +34,7 @@ internal class RuntimeFactory(
     private val parent: RuntimeComponent?,
     validationPromise: DynamicValidationDelegate.Promise?,
     private val logger: () -> Logger?,
+    private val threadChecker: ThreadChecker,
 ) : InvocationHandlerBase(validationPromise), InvocationHandlerBase.MethodHandler {
     private val creator = checkNotNull(graph.model.factory) {
         "Component $graph has no explicit creator (builder/factory)"
@@ -94,6 +96,7 @@ internal class RuntimeFactory(
                 givenDependencies = givenDependencies,
                 givenModuleInstances = givenModuleInstances,
                 validationPromise = validationPromise,
+                threadChecker = threadChecker,
             )
             componentProxy = Proxy.newProxyInstance(
                 componentClass.classLoader,

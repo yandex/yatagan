@@ -97,7 +97,6 @@ package test;
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Optional;
 import com.yandex.yatagan.internal.Checks;
-import com.yandex.yatagan.internal.ThreadAssertions;
 import com.yandex.yatagan.internal.YataganGenerated;
 import dagger.Lazy;
 import java.lang.AssertionError;
