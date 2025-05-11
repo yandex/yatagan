@@ -38,6 +38,7 @@ class LoaderCompatibilityTest(
         v1_2_0(ClasspathForCompatCheck.Kapt1_2_0, ClasspathForCompatCheck.Api1_2_0),
         v1_3_0(ClasspathForCompatCheck.Kapt1_3_0, ClasspathForCompatCheck.Api1_3_0),
         v1_5_0(ClasspathForCompatCheck.Kapt1_5_0, ClasspathForCompatCheck.Api1_5_0),
+        v1_6_0(ClasspathForCompatCheck.Kapt1_6_0, ClasspathForCompatCheck.Api1_6_0),
     }
 
     companion object {
