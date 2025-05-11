@@ -16,7 +16,6 @@
 
 package com.yandex.yatagan.rt.support
 
-import com.yandex.yatagan.rt.support.SimpleDynamicValidationDelegate.InvalidGraphException
 import kotlin.system.measureTimeMillis
 
 /**

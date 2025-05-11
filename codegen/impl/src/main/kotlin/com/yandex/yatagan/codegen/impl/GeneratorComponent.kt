@@ -12,6 +12,7 @@ import com.yandex.yatagan.Optional
 import com.yandex.yatagan.Provides
 import com.yandex.yatagan.base.api.Extensible
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.ThreadChecker
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -61,6 +62,7 @@ internal interface GeneratorComponent {
         fun create(
             @BindsInstance graph: BindingGraph,
             @BindsInstance options: ComponentGenerator.Options,
+            @BindsInstance threadChecker: ThreadChecker,
         ): GeneratorComponent
     }
 

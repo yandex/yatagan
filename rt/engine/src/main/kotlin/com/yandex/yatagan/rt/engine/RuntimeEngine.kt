@@ -22,6 +22,7 @@ import com.yandex.yatagan.base.loadServices
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.impl.BindingGraph
 import com.yandex.yatagan.core.graph.impl.Options
+import com.yandex.yatagan.core.graph.impl.ThreadChecker
 import com.yandex.yatagan.core.model.impl.ComponentModel
 import com.yandex.yatagan.lang.rt.RtLexicalScope
 import com.yandex.yatagan.rt.support.DynamicValidationDelegate
@@ -58,6 +59,7 @@ class RuntimeEngine(
         var usePlainOutput: Boolean = false,
         var allConditionsLazy: Boolean = false,
         var enableDaggerCompatibility: Boolean = false,
+        var threadCheckerClassName: String? = null,
     )
 
     private val lexicalScopeCache = hashMapOf<ClassLoader, SoftReference<RtLexicalScope>>()
@@ -75,6 +77,17 @@ class RuntimeEngine(
                 lexicalScopeCache[classLoader] = SoftReference(it)
             }
         }
+    }
+
+    private val threadChecker by lazy {
+        ThreadChecker(
+            lexicalScope = obtainLexicalScopeFor(javaClass),
+            threadCheckerClassName = params.threadCheckerClassName,
+        ).also { checker ->
+            params.validationDelegate.dispatchValidation(checker.toString(null).toString()) { reporting ->
+                reportMessages(messages = validate(checker), reporting = reporting)
+            }
+        }.let { RuntimeThreadChecker(it) }
     }
 
     fun <T : Any> builder(builderClass: Class<T>): T {
@@ -103,6 +116,7 @@ class RuntimeEngine(
                     parent = null,
                     validationPromise = promise,
                     logger = this::logger,
+                    threadChecker = threadChecker,
                 )
             }
             val proxy = Proxy.newProxyInstance(builderClass.classLoader, arrayOf(builderClass), factory)
@@ -137,6 +151,7 @@ class RuntimeEngine(
                 graph = graph,
                 validationPromise = promise,
                 logger = this::logger,
+                threadChecker = threadChecker,
             )
         }
         logger?.log("Dynamic auto-builder creation for `$componentClass` took $time ms")

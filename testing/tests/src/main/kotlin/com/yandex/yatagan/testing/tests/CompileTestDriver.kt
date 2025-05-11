@@ -18,6 +18,7 @@ package com.yandex.yatagan.testing.tests
 
 import com.yandex.yatagan.processor.common.Option
 import com.yandex.yatagan.testing.source_set.SourceSet
+import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -30,7 +31,7 @@ interface CompileTestDriver : SourceSet {
         sources: SourceSet,
     )
 
-    fun <V : Any> givenOption(option: Option<V>, value: V)
+    fun <V> givenOption(option: Option<V>, value: V)
 
     /**
      * Runs the test and validates the output against the golden output file.
@@ -39,6 +40,9 @@ interface CompileTestDriver : SourceSet {
     fun compileRunAndValidate()
 
     val backendUnderTest: Backend
+
+    @Before
+    fun baseSetUp() {}
 }
 
 class TestNameRule : TestWatcher() {

@@ -5,7 +5,6 @@ package test;
 import com.yandex.yatagan.AutoBuilder;
 import com.yandex.yatagan.Lazy;
 import com.yandex.yatagan.internal.Checks;
-import com.yandex.yatagan.internal.ThreadAssertions;
 import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.AssertionError;
 import java.lang.Class;
@@ -59,7 +58,7 @@ public final class YataganMySTComponent implements MySTComponent {
   MyClassA cacheMyClassA() {
     Object local = this.mMyClassAInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
+      MyThreadAssertions.INSTANCE.assertThreadAccess();
       local = new MyClassA();
       this.mMyClassAInstance = local;
     }
@@ -69,7 +68,7 @@ public final class YataganMySTComponent implements MySTComponent {
   MyClassB cacheMyClassB() {
     Object local = this.mMyClassBInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
+      MyThreadAssertions.INSTANCE.assertThreadAccess();
       local = new MyClassB();
       this.mMyClassBInstance = local;
     }
@@ -79,7 +78,7 @@ public final class YataganMySTComponent implements MySTComponent {
   MyClassC cacheMyClassC() {
     Object local = this.mMyClassCInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
+      MyThreadAssertions.INSTANCE.assertThreadAccess();
       local = new MyClassC();
       this.mMyClassCInstance = local;
     }
@@ -122,7 +121,7 @@ public final class YataganMySTComponent implements MySTComponent {
     public Object get() {
       Object local = mValue;
       if (local == null) {
-        ThreadAssertions.assertThreadAccess();
+        MyThreadAssertions.INSTANCE.assertThreadAccess();
         local = mDelegate.switch$$access(mIndex);
         mValue = local;
       }

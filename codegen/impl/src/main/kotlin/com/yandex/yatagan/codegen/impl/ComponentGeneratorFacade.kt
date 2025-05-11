@@ -21,15 +21,16 @@ import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec
 import com.yandex.yatagan.Yatagan
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.ThreadChecker
 import com.yandex.yatagan.lang.langFactory
 
 class ComponentGeneratorFacade(
     graph: BindingGraph,
     maxSlotsPerSwitch: Int,
-    enableThreadChecks: Boolean,
     enableProvisionNullChecks: Boolean,
     sortMethodsForTesting: Boolean,
     enableDaggerCompatMode: Boolean,
+    threadChecker: ThreadChecker,
 ) {
     interface GeneratedFile {
         val targetPackageName: String
@@ -43,11 +44,11 @@ class ComponentGeneratorFacade(
         options = ComponentGenerator.Options(
             maxSlotsPerSwitch = maxSlotsPerSwitch,
             enableProvisionNullChecks = enableProvisionNullChecks,
-            enableThreadChecks = enableThreadChecks,
             sortMethodsForTesting = sortMethodsForTesting,
             generatedAnnotationClassName = generatedAnnotationClassName(),
             enableDaggerCompatMode = enableDaggerCompatMode,
         ),
+        threadChecker = threadChecker,
     )
 
     fun generate(): List<GeneratedFile> = buildList {

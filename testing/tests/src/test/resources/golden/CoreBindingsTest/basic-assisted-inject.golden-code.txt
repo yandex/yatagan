@@ -3,7 +3,6 @@ Name: test/YataganTestComponent.java
 package test;
 
 import com.yandex.yatagan.internal.Checks;
-import com.yandex.yatagan.internal.ThreadAssertions;
 import com.yandex.yatagan.internal.YataganGenerated;
 import java.lang.Object;
 import java.lang.Override;

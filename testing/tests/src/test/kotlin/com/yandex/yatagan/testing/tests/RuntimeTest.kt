@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.testing.tests
 
+import com.yandex.yatagan.processor.common.StringOption
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -183,10 +184,21 @@ class RuntimeTest(
 
     @Test
     fun `thread assertions`() {
+        givenOption(StringOption.ThreadCheckerClassName, "test.MyThreadAssertions")
         givenKotlinSource("test.TestCase", """
-            import com.yandex.yatagan.*import java.lang.AssertionError
+            import com.yandex.yatagan.*
+            import java.lang.AssertionError
             import java.util.concurrent.*
             import javax.inject.*
+            
+            object MyThreadAssertions {
+                var mainTid: Long = 0
+                fun assertThreadAccess() {
+                    if (Thread.currentThread().id != mainTid) {
+                        throw AssertionError("Access on non-main thread")
+                    }
+                }
+            }
             
             @Singleton class MyClassA @Inject constructor()
             @Singleton class MyClassB @Inject constructor()
@@ -201,14 +213,9 @@ class RuntimeTest(
             }
 
             fun test() {
-                val c: MySTComponent = Yatagan.create(MySTComponent::class.java)
-                val mainTid = Thread.currentThread().id
-                Yatagan.threadAsserter = ThreadAsserter {
-                    if (Thread.currentThread().id != mainTid) {
-                        throw AssertionError("Access on non-main thread")
-                    }
-                }
-                try {
+                MyThreadAssertions.mainTid = Thread.currentThread().id
+                val c: MySTComponent = Yatagan.create(MySTComponent::class.java)            
+                run {
                     c.getC()  // Create ClassC ahead of time
                     val d1 = c.getD()
                     d1.get()  // Create ClassD inside d1 holder.
@@ -241,9 +248,87 @@ class RuntimeTest(
                     // On main:
                     c.getA().get()
                     c.getB()
-                } finally {
-                    Yatagan.threadAsserter = null
                 }
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `invalid thread checker - missing method`() {
+        givenOption(StringOption.ThreadCheckerClassName, "test.InvalidThreadChecker4")
+        givenKotlinSource("test.InvalidThreadChecker4", """
+            object InvalidThreadChecker4 {
+                // Missing assertThreadAccess method
+            }
+        """.trimIndent()
+        )
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Module
+            object TestModule {
+                @Provides fun provideString(): String = "test"
+            }
+
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                fun getString(): String
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `invalid thread checker - invalid method`() {
+        givenOption(StringOption.ThreadCheckerClassName, "test.InvalidThreadChecker5")
+        givenJavaSource("test.InvalidThreadChecker5", """
+            public class InvalidThreadChecker5 {
+                // Non-static method with parameter and package-private visibility
+                void assertThreadAccess(String param) {
+                    // This method is not static, has a parameter, and has package-private visibility
+                }
+            }
+        """.trimIndent())
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Module
+            object TestModule {
+                @Provides fun provideString(): String = "test"
+            }
+
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                fun getString(): String
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `invalid thread checker - missing class`() {
+        givenOption(StringOption.ThreadCheckerClassName, "test.NonExistentThreadChecker")
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @Module
+            object TestModule {
+                @Provides fun provideString(): String = "test"
+            }
+
+            @Component(modules = [TestModule::class])
+            interface TestComponent {
+                fun getString(): String
             }
         """.trimIndent())
 

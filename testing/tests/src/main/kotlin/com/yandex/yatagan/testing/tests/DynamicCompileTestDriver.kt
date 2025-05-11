@@ -44,7 +44,7 @@ class DynamicCompileTestDriver(
     apiClasspath = apiClasspath,
 ) {
     private val accumulator = ComponentBootstrapperGenerator()
-    private val options = mutableMapOf<Option<*>, Any>(
+    private val options = mutableMapOf<Option<*>, Any?>(
         IntOption.MaxIssueEncounterPaths to 100,
     )
 
@@ -77,7 +77,7 @@ class DynamicCompileTestDriver(
 
     override fun generatedFilesSubDir(): String? = null
 
-    override fun <V : Any> givenOption(option: Option<V>, value: V) {
+    override fun <V> givenOption(option: Option<V>, value: V) {
         options[option] = value
     }
 

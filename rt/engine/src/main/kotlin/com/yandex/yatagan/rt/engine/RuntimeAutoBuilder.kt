@@ -18,6 +18,7 @@ package com.yandex.yatagan.rt.engine
 
 import com.yandex.yatagan.AutoBuilder
 import com.yandex.yatagan.core.graph.BindingGraph
+import com.yandex.yatagan.core.graph.ThreadChecker
 import com.yandex.yatagan.core.model.ComponentDependencyModel
 import com.yandex.yatagan.core.model.ModuleModel
 import com.yandex.yatagan.internal.YataganInternal
@@ -34,6 +35,7 @@ internal class RuntimeAutoBuilder<T>(
     private val graph: BindingGraph,
     private val validationPromise: DynamicValidationDelegate.Promise?,
     private val logger: () -> Logger?,
+    private val threadChecker: RuntimeThreadChecker,
 ) : AutoBuilder<T> {
     init {
         assert(componentClass == graph.model.type.declaration.rt)
@@ -94,6 +96,7 @@ internal class RuntimeAutoBuilder<T>(
                     givenDependencies = givenDependencies,
                     givenModuleInstances = givenModuleInstances,
                     validationPromise = validationPromise,
+                    threadChecker = threadChecker,
                 )
             }
             componentProxy = Proxy.newProxyInstance(

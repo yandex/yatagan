@@ -33,6 +33,7 @@ internal class RuntimeFactory(
     private val parent: RuntimeComponent?,
     validationPromise: DynamicValidationDelegate.Promise?,
     private val logger: () -> Logger?,
+    private val threadChecker: RuntimeThreadChecker,
 ) : InvocationHandlerBase(validationPromise), InvocationHandlerBase.MethodHandler {
     private val creator = checkNotNull(graph.model.factory) {
         "Component $graph has no explicit creator (builder/factory)"
@@ -94,6 +95,7 @@ internal class RuntimeFactory(
                 givenDependencies = givenDependencies,
                 givenModuleInstances = givenModuleInstances,
                 validationPromise = validationPromise,
+                threadChecker = threadChecker,
             )
             componentProxy = Proxy.newProxyInstance(
                 componentClass.classLoader,

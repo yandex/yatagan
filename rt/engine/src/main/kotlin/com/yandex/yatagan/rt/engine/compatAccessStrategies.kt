@@ -23,31 +23,31 @@ import com.yandex.yatagan.core.graph.bindings.Binding
 
 internal class SynchronizedCachingAccessStrategyDaggerCompat(
     binding: Binding,
-    creationVisitor: Binding.Visitor<Any>,
-): SynchronizedCachingAccessStrategy(binding, creationVisitor), dagger.Lazy<Any>
+    accessDelegate: BindingAccessDelegate,
+): SynchronizedCachingAccessStrategy(binding, accessDelegate), dagger.Lazy<Any>
 
 internal class CachingAccessStrategyDaggerCompat(
     binding: Binding,
-    creationVisitor: Binding.Visitor<Any>,
-) : CachingAccessStrategy(binding, creationVisitor), dagger.Lazy<Any>
+    accessDelegate: BindingAccessDelegate,
+) : CachingAccessStrategy(binding, accessDelegate), dagger.Lazy<Any>
 
 internal class SynchronizedCreatingAccessStrategyDaggerCompat(
     binding: Binding,
-    creationVisitor: Binding.Visitor<Any>,
-) : SynchronizedCreatingAccessStrategy(binding, creationVisitor) {
+    accessDelegate: BindingAccessDelegate,
+) : SynchronizedCreatingAccessStrategy(binding, accessDelegate) {
     override fun getLazy(): Lazy<*> = SynchronizedCachingAccessStrategyDaggerCompat(
         binding = binding,
-        creationVisitor = creationVisitor,
+        accessDelegate = accessDelegate,
     )
 }
 
 internal class CreatingAccessStrategyDaggerCompat(
     binding: Binding,
-    creationVisitor: Binding.Visitor<Any>,
-) : CreatingAccessStrategy(binding, creationVisitor) {
+    accessDelegate: BindingAccessDelegate,
+) : CreatingAccessStrategy(binding, accessDelegate) {
     override fun getLazy(): Lazy<*> = CachingAccessStrategyDaggerCompat(
         binding = binding,
-        creationVisitor = creationVisitor,
+        accessDelegate = accessDelegate,
     )
 }
 

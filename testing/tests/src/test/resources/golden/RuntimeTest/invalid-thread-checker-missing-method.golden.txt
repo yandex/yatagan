@@ -1,0 +1,4 @@
+error: Invalid value: Unable to find method `assertThreadAccess` in class test.InvalidThreadChecker4
+Encountered:
+  here: Option yatagan.threadCheckerClassName = test.InvalidThreadChecker4
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
