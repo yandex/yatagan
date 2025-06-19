@@ -1069,5 +1069,55 @@ class CoreBindingsTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `reproduce 199`() {
+        givenKotlinSource("test.IClass", """
+            interface IClass {
+                val value: Long
+            }
+        """.trimIndent())
+        givenJavaSource("test.ClassImpl", """
+            import javax.inject.Inject;
+    
+            public class ClassImpl implements IClass {
+                @Inject
+                public int intValue;
+                
+                protected long value;
+                
+                @Override
+                public long getValue() { return value; }
+            }
+        """.trimIndent())
+        givenJavaSource("test.MyModule", """
+            import com.yandex.yatagan.Provides;
+            import com.yandex.yatagan.Module;
+            
+            @Module
+            public interface MyModule {
+                @Provides
+                static Integer provides() {
+                    return 1;
+                }
+            }
+        """.trimIndent())
+        givenJavaSource("test.TestComponent", """
+            import com.yandex.yatagan.Component;
+            
+            @Component(modules = {MyModule.class})
+            interface TestComponent {
+                void injectClass(ClassImpl iclass);
+            }
+        """.trimIndent())
+        givenKotlinSource("test.TestCase", """
+            fun test() {
+                val c = com.yandex.yatagan.Yatagan.create(TestComponent::class.java)
+                c.injectClass(ClassImpl())
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }
 

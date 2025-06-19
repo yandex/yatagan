@@ -1,0 +1,44 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganTestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganTestComponent implements TestComponent {
+  private YataganTestComponent() {
+  }
+
+  @Override
+  public void injectClass(ClassImpl iclass) {
+    iclass.intValue = Checks.checkProvisionNotNull(MyModule.provides());
+  }
+
+  public static AutoBuilder<YataganTestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTestComponent> {
+    @Override
+    public final <I> AutoBuilder<YataganTestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final YataganTestComponent create() {
+      return new YataganTestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
