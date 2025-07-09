@@ -207,7 +207,7 @@ internal class KspTypeDeclarationImpl private constructor(
     ) {
         val refinedProperty = if (
             property.getter == null && property.setter == null &&
-            /* not a java field */ property.isFromKotlin && Utils.isKsp2
+            /* not a java field */ (property.isFromKotlin || property.isSynthetic) && Utils.isKsp2
         ) {
             // In the cases where the property is overriding multiple identical properties from the supertypes,
             // KSP2 returns a property without getter and setter.
