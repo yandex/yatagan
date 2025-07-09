@@ -80,6 +80,9 @@ internal val KSNode.isFromKotlin
         else -> false
     }
 
+internal val KSNode.isSynthetic
+    get() = origin == Origin.SYNTHETIC
+
 internal fun KSType.resolveAliasIfNeeded(): KSType = when (val declaration = declaration) {
     is KSTypeAlias -> declaration.type.resolve().resolveAliasIfNeeded()
     else -> this
