@@ -15,7 +15,7 @@ yataganDogFood = "1.5.0"
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
-publish-gradle = "com.vanniktech:gradle-maven-publish-plugin:0.31.0"
+publish-gradle = "com.vanniktech:gradle-maven-publish-plugin:0.33.0"
 
 kotlin-binaryCompatibilityGradle.group = "org.jetbrains.kotlinx.binary-compatibility-validator"
 kotlin-binaryCompatibilityGradle.name = "org.jetbrains.kotlinx.binary-compatibility-validator.gradle.plugin"
