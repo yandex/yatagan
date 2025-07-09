@@ -23,7 +23,7 @@ dokka {
 }
 
 mavenPublishing {
-    publishToMavenCentral(host = SonatypeHost.DEFAULT)
+    publishToMavenCentral()
     configure(KotlinJvm(
         javadocJar = JavadocJar.Dokka(tasks.dokkaGeneratePublicationJavadoc.name),
         sourcesJar = true,
