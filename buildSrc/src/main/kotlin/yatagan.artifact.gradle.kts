@@ -23,7 +23,7 @@ tasks.withType<DokkaTask>().configureEach {
 }
 
 mavenPublishing {
-    publishToMavenCentral(host = SonatypeHost.DEFAULT)
+    publishToMavenCentral(host = SonatypeHost.CENTRAL_PORTAL)
     configure(KotlinJvm(
         javadocJar = JavadocJar.Dokka(tasks.dokkaJavadoc.name),
         sourcesJar = true,
