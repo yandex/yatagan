@@ -11,7 +11,7 @@ dependencyResolutionManagement {
 
             library("kotlin-gradle", "org.jetbrains.kotlin", "kotlin-gradle-plugin").versionRef("kotlin")
             library("dokka-gradle", "org.jetbrains.dokka", "dokka-gradle-plugin").version("1.9.20")
-            library("nexusPublish-gradle", "io.github.gradle-nexus:publish-plugin:1.3.0")
+            library("publish-gradle", "com.vanniktech:gradle-maven-publish-plugin:0.30.0")
 
             library("ksp-api", "com.google.devtools.ksp", "symbol-processing-api").versionRef("ksp")
             library("ksp-gradle", "com.google.devtools.ksp", "com.google.devtools.ksp.gradle.plugin").versionRef("ksp")
