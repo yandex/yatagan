@@ -1,0 +1,101 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganTabletComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganTabletComponent implements TabletComponent {
+  private YataganTabletComponent() {
+  }
+
+  @Override
+  public CommonClass getCommonClass() {
+    return new CommonClass(Optional.empty());
+  }
+
+  public static AutoBuilder<YataganTabletComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTabletComponent> {
+    @Override
+    public final <I> AutoBuilder<YataganTabletComponent> provideInput(I input,
+        Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final YataganTabletComponent create() {
+      return new YataganTabletComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganPhoneComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Optional;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.Class;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.annotation.processing.Generated;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganPhoneComponent implements PhoneComponent {
+  private YataganPhoneComponent() {
+  }
+
+  @Override
+  public CommonClass getCommonClass() {
+    return new CommonClass(this.optOfPhoneAssistedFactory());
+  }
+
+  Optional optOfPhoneAssistedFactory() {
+    return Optional.of(this.new PhoneAssistedFactoryImpl());
+  }
+
+  public static AutoBuilder<YataganPhoneComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  private final class PhoneAssistedFactoryImpl implements PhoneAssistedFactory {
+    @Override
+    public PhoneAssistedClass create(int i) {
+      return new PhoneAssistedClass(new PhoneDependency(), i);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganPhoneComponent> {
+    @Override
+    public final <I> AutoBuilder<YataganPhoneComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final YataganPhoneComponent create() {
+      return new YataganPhoneComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
