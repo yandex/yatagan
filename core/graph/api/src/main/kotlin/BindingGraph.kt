@@ -65,7 +65,7 @@ public interface BindingGraph : MayBeInvalid, Extensible, WithParents<BindingGra
     /**
      * [AssistedInjectFactoryModel]s that are hosted in this graph.
      */
-    public val localAssistedInjectFactories: Collection<AssistedInjectFactoryModel>
+    public val localAssistedInjectFactories: Map<AssistedInjectFactoryModel, ConditionScope>
 
     /**
      * A collection of parent (not necessarily direct) [BindingGraph]s, from which bindings and/or conditions are used
