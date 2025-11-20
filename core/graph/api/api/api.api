@@ -3,7 +3,7 @@ public abstract interface class com/yandex/yatagan/core/graph/BindingGraph : com
 	public abstract fun getCreator ()Lcom/yandex/yatagan/core/model/ComponentFactoryModel;
 	public abstract fun getDependencies ()Ljava/util/Collection;
 	public abstract fun getEntryPoints ()Ljava/util/Collection;
-	public abstract fun getLocalAssistedInjectFactories ()Ljava/util/Collection;
+	public abstract fun getLocalAssistedInjectFactories ()Ljava/util/Map;
 	public abstract fun getLocalBindings ()Ljava/util/Map;
 	public abstract fun getLocalConditionLiterals ()Ljava/util/Map;
 	public abstract fun getMemberInjectors ()Ljava/util/Collection;

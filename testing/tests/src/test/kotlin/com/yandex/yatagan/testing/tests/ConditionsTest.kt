@@ -1216,4 +1216,52 @@ class ConditionsTest(
 
         compileRunAndValidate()
     }
+
+    @Test
+    fun `issue #209 - assisted factory generated for unsupported variants`() {
+        includeFromSourceSet(flavors)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @AssistedFactory
+            interface PhoneAssistedFactory {
+                fun create(i: Int): PhoneAssistedClass
+            }
+
+            @Conditional(onlyIn = [DeviceType.Phone::class])
+            class PhoneAssistedClass @AssistedInject constructor(
+                phoneDependency: PhoneDependency,
+                @Assisted arg: Int,
+            )
+
+            @Conditional(onlyIn = [DeviceType.Phone::class])
+            class PhoneDependency @Inject constructor()
+
+            class CommonClass @Inject constructor(
+                phoneFactory: Optional<PhoneAssistedFactory>,
+            )
+
+            interface CommonComponent {
+                fun getCommonClass(): CommonClass
+            }
+
+            @Component(variant = [DeviceType.Phone::class])
+            interface PhoneComponent: CommonComponent
+
+            @Component(variant = [DeviceType.Tablet::class])
+            interface TabletComponent: CommonComponent
+
+            fun test() {
+                val phoneComponent = Yatagan.create(PhoneComponent::class.java)
+                val tabletComponent = Yatagan.create(TabletComponent::class.java)
+
+                val phoneCommon = phoneComponent.getCommonClass()
+                val tabletCommon = tabletComponent.getCommonClass()
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
 }
