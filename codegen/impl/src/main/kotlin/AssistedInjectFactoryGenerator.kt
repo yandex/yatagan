@@ -24,6 +24,7 @@ import com.yandex.yatagan.codegen.poetry.buildExpression
 import com.yandex.yatagan.core.graph.BindingGraph
 import com.yandex.yatagan.core.graph.bindings.AssistedInjectFactoryBinding
 import com.yandex.yatagan.core.model.AssistedInjectFactoryModel
+import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.component1
 import com.yandex.yatagan.core.model.component2
 import javax.inject.Inject
@@ -37,13 +38,15 @@ internal class AssistedInjectFactoryGenerator @Inject constructor(
 ) : ComponentGenerator.Contributor {
     private val modelToImpl: Map<AssistedInjectFactoryModel, ClassName> by lazy {
         val classNamespace = Namespace()
-        thisGraph.localAssistedInjectFactories.associateWith { model ->
-            componentImplName.nestedClass(classNamespace.name(
-                nameModel = model.name,
-                suffix = "Impl",
-                firstCapital = true,
-            ))
-        }
+        thisGraph.localAssistedInjectFactories
+            .filter { it.value != ConditionScope.Never }
+            .mapValues {
+                componentImplName.nestedClass(classNamespace.name(
+                    nameModel = it.key.name,
+                    suffix = "Impl",
+                    firstCapital = true,
+                ))
+            }
     }
 
     fun generateCreation(

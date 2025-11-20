@@ -121,7 +121,7 @@ internal class BindingGraphImpl(
     internal val localNodes = mutableSetOf<NodeModel>()
     override val localBindings = mutableMapOf<Binding, BindingUsageImpl>()
     override val localConditionLiterals = mutableMapOf<ConditionModel, LiteralUsage>()
-    override val localAssistedInjectFactories = mutableSetOf<AssistedInjectFactoryModel>()
+    override val localAssistedInjectFactories = mutableMapOf<AssistedInjectFactoryModel, ConditionScope>()
     override val usedParents = mutableSetOf<BindingGraph>()
     override val children: Collection<BindingGraphImpl>
 
@@ -208,7 +208,7 @@ internal class BindingGraphImpl(
             binding.accept(object : BindingVisitorAdapter<Unit>() {
                 override fun visitDefault() = Unit
                 override fun visitAssistedInjectFactory(binding: AssistedInjectFactoryBinding) {
-                    localAssistedInjectFactories += binding.model
+                    localAssistedInjectFactories[binding.model] = binding.conditionScope
                 }
             })
         }
@@ -256,7 +256,7 @@ internal class BindingGraphImpl(
         for (child in childrenSequence(includeThis = false)) {
             child as BindingGraphImpl
             val usesConditions = child.localConditionLiterals.keys.removeAll(localConditionLiterals.keys)
-            val usesAssistedInjectFactories = child.localAssistedInjectFactories.removeAll(localAssistedInjectFactories)
+            val usesAssistedInjectFactories = child.localAssistedInjectFactories.keys.removeAll(localAssistedInjectFactories.keys)
             if (usesConditions || usesAssistedInjectFactories) {
                 // This will never be seen by materialization and that's okay, because no bindings are required here.
                 child.usedParents += this
