@@ -21,7 +21,7 @@ import org.intellij.lang.annotations.Language
 /**
  * Source file for testing
  */
-typealias SourceFile = androidx.room.compiler.processing.util.Source
+typealias SourceFile = androidx.room3.compiler.processing.util.Source
 
 interface SourceSet {
     /**

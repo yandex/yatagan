@@ -16,9 +16,9 @@
 
 package com.yandex.yatagan.testing.tests
 
-import androidx.room.compiler.processing.util.DiagnosticMessage
-import androidx.room.compiler.processing.util.compiler.TestCompilationArguments
-import androidx.room.compiler.processing.util.compiler.compile
+import androidx.room3.compiler.processing.util.DiagnosticMessage
+import androidx.room3.compiler.processing.util.compiler.TestCompilationArguments
+import androidx.room3.compiler.processing.util.compiler.compile
 import com.yandex.yatagan.generated.CurrentClasspath
 import com.yandex.yatagan.processor.common.BooleanOption
 import com.yandex.yatagan.processor.common.IntOption
@@ -41,7 +41,6 @@ abstract class CompileTestDriverBase private constructor(
     private val apiClasspath: String,
     private val runtimeApiClasspath: String,
     private val mainSourceSet: SourceSet,
-    private val useK2: Boolean = true,
 ) : CompileTestDriver, SourceSet by mainSourceSet {
     private var precompiledModuleOutputDirs: List<File>? = null
     private val options = mutableMapOf(
@@ -54,8 +53,7 @@ abstract class CompileTestDriverBase private constructor(
     protected constructor(
         apiClasspath: String = CurrentClasspath.ApiCompiled,
         runtimeApiClasspath: String = apiClasspath,
-        useK2: Boolean = true,
-    ) : this(apiClasspath, runtimeApiClasspath, SourceSet(), useK2)
+    ) : this(apiClasspath, runtimeApiClasspath, SourceSet())
 
     override val testNameRule = TestNameRule()
 
@@ -234,12 +232,6 @@ abstract class CompileTestDriverBase private constructor(
                 "-java-parameters",
                 "-Xjvm-default=all",
             ))
-            if (!useK2) { // room 2.7.0+ by default uses K2
-                addAll(listOf(
-                    "-language-version=1.9",
-                    "-api-version=1.9",
-                ))
-            }
         },
         processorOptions = options,
     )

@@ -4,7 +4,7 @@ plugins {
     id("yatagan.stable-api-artifact")
 }
 
-val stdLib: Configuration by configurations.creating
+val stdLib: Configuration = configurations.create("stdLib")
 
 dependencies {
     api(project(":base:api"))
@@ -23,7 +23,7 @@ dependencies {
     stdLib(kotlin("stdlib"))
 }
 
-val generateStdLibClasspath by tasks.registering(ClasspathSourceGeneratorTask::class) {
+val generateStdLibClasspath = tasks.register<ClasspathSourceGeneratorTask>("generateStdLibClasspath") {
     packageName.set("com.yandex.yatagan.lang")
     groups.register("GeneratedClasspath") {
         properties.register("StdLib") {

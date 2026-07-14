@@ -211,7 +211,8 @@ internal class NodeModelImpl private constructor(
 
     companion object Factory : FactoryKey<Pair<Type, Annotation?>, NodeModelImpl> {
         private object Caching : FactoryKey<Pair<Type, Annotation?>, NodeModelImpl> {
-            override fun LexicalScope.factory() = caching(::NodeModelImpl)
+            // An explicit lambda, as `::NodeModelImpl` is ambiguous with the top-level factory functions
+            override fun LexicalScope.factory() = caching { it: Pair<Type, Annotation?> -> NodeModelImpl(it) }
         }
 
         override fun LexicalScope.factory() = fun LexicalScope.(it: Pair<Type, Annotation?>): NodeModelImpl {

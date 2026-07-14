@@ -78,14 +78,17 @@ public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryMo
 }
 
 public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload$Dependency : com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload {
+	public synthetic fun getModel ()Lcom/yandex/yatagan/core/model/ClassBackedModel;
 	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/ComponentDependencyModel;
 }
 
 public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload$Instance : com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload {
+	public synthetic fun getModel ()Lcom/yandex/yatagan/core/model/ClassBackedModel;
 	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/NodeModel;
 }
 
 public abstract interface class com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload$Module : com/yandex/yatagan/core/model/ComponentFactoryModel$InputPayload {
+	public synthetic fun getModel ()Lcom/yandex/yatagan/core/model/ClassBackedModel;
 	public abstract fun getModel ()Lcom/yandex/yatagan/core/model/ModuleModel;
 }
 

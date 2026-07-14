@@ -149,9 +149,14 @@ internal class KspTypeImpl private constructor(
             }
             return when {
                 type == null || type.isError -> {
+                    // KSP2 may not provide a source reference for some error types (e.g. parameter types),
+                    // then make a readable name out of the JVM signature: `Lcom/example/Foo;` -> `com.example.Foo`.
                     val nameHint = reference?.element?.toString()
+                        ?: jvmSignatureHint?.let { hint ->
+                            JvmObjectSignatureRegex.matchEntire(hint)?.groupValues?.get(1)?.replace('/', '.') ?: hint
+                        }
                     CtErrorType(
-                        nameModel = InvalidNameModel.Unresolved(hint = nameHint ?: jvmSignatureHint),
+                        nameModel = InvalidNameModel.Unresolved(hint = nameHint),
                     )
                 }
                 type.declaration is KSTypeParameter -> {
@@ -168,4 +173,6 @@ internal class KspTypeImpl private constructor(
         }
     }
 }
+
+private val JvmObjectSignatureRegex = "L(.*);".toRegex()
 

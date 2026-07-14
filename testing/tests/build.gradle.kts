@@ -4,7 +4,7 @@ plugins {
     id("yatagan.test-only-module")
 }
 
-val enableCoverage: Boolean by extra
+val enableCoverage = extra["enableCoverage"] as Boolean
 
 val versionsToCheckLoaderCompatibility = listOf(
     "1.0.0",
@@ -16,21 +16,21 @@ val versionsToCheckLoaderCompatibility = listOf(
     "1.6.1",
 )
 
-val baseTestRuntime by configurations.registering
-val dynamicTestRuntime by configurations.registering {
+val baseTestRuntime = configurations.register("baseTestRuntime")
+val dynamicTestRuntime = configurations.register("dynamicTestRuntime") {
     extendsFrom(baseTestRuntime.get())
 }
-val compiledTestRuntime by configurations.registering {
+val compiledTestRuntime = configurations.register("compiledTestRuntime") {
     extendsFrom(baseTestRuntime.get())
 }
 
-val daggerApi by configurations.registering {
+val daggerApi = configurations.register("daggerApi") {
     extendsFrom(compiledTestRuntime.get())
 }
-val daggerApiWithReflection by configurations.registering {
+val daggerApiWithReflection = configurations.register("daggerApiWithReflection") {
     extendsFrom(daggerApi.get(), dynamicTestRuntime.get())
 }
-val daggerProcessor by configurations.registering
+val daggerProcessor = configurations.register("daggerProcessor")
 
 versionsToCheckLoaderCompatibility.forEach { version ->
     configurations.register("kaptForCompatCheck$version")
@@ -84,7 +84,7 @@ dependencies {
     }
 }
 
-val generateClasspathProperties by tasks.registering(ClasspathSourceGeneratorTask::class) {
+val generateClasspathProperties = tasks.register<ClasspathSourceGeneratorTask>("generateClasspathProperties") {
     packageName.set("com.yandex.yatagan.generated")
     groups {
         register("ClasspathForCompatCheck") {
@@ -120,7 +120,7 @@ tasks.named("compileKotlin") {
     dependsOn(generateClasspathProperties)
 }
 
-val updateGoldenFiles by tasks.registering(Test::class) {
+val updateGoldenFiles = tasks.register<Test>("updateGoldenFiles") {
     group = "tools"
     description = "Launch tests in a special 'regenerate-golden' mode, where they are do not fail, " +
             "but write their *actual* results as *expected*. Use with care after you've changed some error-reporting " +

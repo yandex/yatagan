@@ -238,7 +238,7 @@ internal class KspAnnotationImpl(
                         }
                         is KSClassDeclaration -> when (value.simpleName.getShortName()) {
                             "SOURCE" -> AnnotationRetention.SOURCE
-                            "BINARY" -> AnnotationRetention.BINARY
+                            "CLASS" -> AnnotationRetention.BINARY
                             "RUNTIME" -> AnnotationRetention.RUNTIME
                             else -> throw AssertionError("Unexpected retention")
                         }
