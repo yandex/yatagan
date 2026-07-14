@@ -810,7 +810,7 @@ class ConditionsTest(
     fun `const val conditions`() {
         // Disable for KSP, because file facades can't be resolved for now
         // TODO: Enable for KSP once the issues are fixed.
-        assumeFalse(backendUnderTest == Backend.Ksp || backendUnderTest == Backend.Ksp2)
+        assumeFalse(backendUnderTest == Backend.Ksp2)
 
         givenPrecompiledModule(SourceSet {
             givenKotlinSource("test.CompiledCondition", """
