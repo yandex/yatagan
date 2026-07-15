@@ -1,4 +1,5 @@
 import com.yandex.yatagan.gradle.ClasspathSourceGeneratorTask
+import org.gradle.api.tasks.ClasspathNormalizer
 
 plugins {
     id("yatagan.test-only-module")
@@ -23,6 +24,8 @@ val dynamicTestRuntime = configurations.register("dynamicTestRuntime") {
 val compiledTestRuntime = configurations.register("compiledTestRuntime") {
     extendsFrom(baseTestRuntime.get())
 }
+val kcpCompiler = configurations.register("kcpCompiler")
+val kcpPlugin = configurations.register("kcpPlugin")
 
 val daggerApi = configurations.register("daggerApi") {
     extendsFrom(compiledTestRuntime.get())
@@ -55,6 +58,11 @@ dependencies {
     // KSP dependencies
     implementation(project(":lang:ksp"))
     implementation(project(":processor:ksp"))
+
+    // KCP dependencies are kept off the test runtime classpath. Room's compile-testing
+    // harness embeds an older compiler, so KCP compilations run in an isolated process.
+    kcpCompiler(kotlin("compiler-embeddable"))
+    kcpPlugin(project(":processor:kcp"))
 
     // JAP dependencies
     implementation(project(":lang:jap"))
@@ -104,6 +112,8 @@ val generateClasspathProperties = tasks.register<ClasspathSourceGeneratorTask>("
             properties {
                 register("ApiDynamic") { classpath = dynamicTestRuntime }
                 register("ApiCompiled") { classpath = compiledTestRuntime }
+                register("KcpCompiler") { classpath = kcpCompiler }
+                register("KcpPlugin") { classpath = kcpPlugin }
             }
         }
         register("DaggerClasspath") {
@@ -136,6 +146,9 @@ val updateGoldenFiles = tasks.register<Test>("updateGoldenFiles") {
 tasks.test {
     // Needed for "heavy" tests, as they compile a very large Kotlin project in-process.
     shouldRunAfter(updateGoldenFiles)
+
+    // The generated property contains paths only; track the actual compiler-plugin bundle as test input.
+    inputs.files(kcpPlugin).withNormalizer(ClasspathNormalizer::class.java)
 
     // Increasing this will likely get a negative effect on tests performance as kotlin-compilation seems to be shared
     // between compilation invocations and I still haven't found a way to make it in-process.

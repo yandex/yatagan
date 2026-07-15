@@ -55,14 +55,17 @@ val projectsToCover = setOf(
     ":lang:jap",
     ":lang:rt",
     ":lang:ksp",
+    ":lang:kcp",
     ":core:model:impl",
     ":core:graph:impl",
     ":processor:common",
     ":processor:jap",
     ":processor:ksp",
+    ":processor:kcp",
     ":rt:engine",
     ":rt:support",
     ":codegen:impl",
+    ":codegen:ir",
     ":testing:tests",
 )
 
@@ -85,6 +88,7 @@ val projectsNotToCover = setOf(
     // Do not cover testing harness
     ":testing:procedural",
     ":testing:source-set",
+    ":testing:kcp-consumer",
 )
 
 projectsNotToCover.intersect(projectsToCover).let { ambiguous ->

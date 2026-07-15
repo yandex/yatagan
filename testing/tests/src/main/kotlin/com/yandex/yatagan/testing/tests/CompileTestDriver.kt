@@ -66,5 +66,6 @@ enum class Backend {
     Kapt,
     KaptDagger,
     Ksp2,
+    Kcp,
     Rt,
 }

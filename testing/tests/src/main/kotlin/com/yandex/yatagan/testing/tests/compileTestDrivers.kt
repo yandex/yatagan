@@ -22,6 +22,7 @@ internal fun compileTestDrivers(
     includeKsp: Boolean = true,
     includeJap: Boolean = true,
     includeRt: Boolean = true,
+    includeKcp: Boolean = true,
 ): Collection<Provider<CompileTestDriverBase>> {
     class NamedProvider(
         private val initializer: () -> CompileTestDriverBase,
@@ -40,6 +41,9 @@ internal fun compileTestDrivers(
         }
         if (includeRt) {
             add(NamedProvider(::DynamicCompileTestDriver, name = "RT"))
+        }
+        if (includeKcp) {
+            add(NamedProvider(::KcpCompileTestDriver, name = "KCP"))
         }
     }
     return if (CompileTestDriverBase.isInUpdateGoldenMode) {
