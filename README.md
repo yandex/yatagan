@@ -25,6 +25,8 @@ Yatagan can work in multiple modes (use different _backends_):
 - With code generation
     - APT/KAPT - classic mode.
     - KSP - leverages Google [KSP][KSP] framework, see [KSP notes](#ksp-support).
+    - KCP - a Kotlin compiler plugin, generates components during `kotlinc`, see
+      [KCP notes](#kcp-support).
 - Via runtime Java reflection - a backend designed for fast local debug builds, see
   specific [notes](#reflection-support).
 
@@ -120,6 +122,14 @@ api("com.yandex.yatagan:api-public:${yataganVer}")
 ksp("com.yandex.yatagan:processor-ksp:${yataganVer}")
 ```
 
+For kotlin-only project using the **Kotlin compiler plugin** (KCP), see [KCP notes](#kcp-support):
+
+```kotlin
+// This is a plugins {} block, not a dependencies {} one.
+// The Yatagan Gradle plugin adds both `api-public` and the compiler plugin itself.
+id("com.yandex.yatagan") version yataganVer
+```
+
 To dramatically speed up build one can use **runtime reflection** instead of codegen:
 
 ```kotlin
@@ -173,6 +183,15 @@ code is at least inconsistent.
 
 Thus, KSP works best for Kotlin-only projects, or projects whose DI-code is mostly Kotlin.
 Additional care should be taken with Java projects.
+
+### KCP support
+
+The KCP backend is a Kotlin compiler plugin: component implementations are emitted as JVM IR while
+`kotlinc` compiles the module, so no separate annotation processing round runs at all.
+Root `@Component` interfaces must be written in Kotlin (everything else may stay Java), and the
+plugin has to be used with the Kotlin compiler version it was built against.
+
+Read more in [KCP backend specific notes](processor/kcp/README.md).
 
 ### Reflection support
 
@@ -344,7 +363,8 @@ This works, as for Dagger, via SPI. Read more [here](validation/spi/README.md).
 
 Yatagan has some options, that tweak its behavior. They are provided as normal annotation processor options.
 However, reflection backend requires a different approach in specifying them,
-as documented [here](rt/README.md#reflection-specific-api).
+as documented [here](rt/README.md#reflection-specific-api), and the KCP backend takes them as compiler plugin
+options, see [KCP notes](processor/kcp/README.md#consumer-setup).
 
 | Option key                                       | Default value | Description                                                                                    |
 |--------------------------------------------------|---------------|------------------------------------------------------------------------------------------------|

@@ -64,19 +64,24 @@ abstract class CompileTestDriverBase private constructor(
             throw UnsupportedOperationException("Multiple precompiled modules are not supported")
         }
 
-        val compilation = createBaseCompilationArguments().copy(
-            sources = sources.sourceFiles,
-        )
+        precompiledModuleOutputDirs = precompile(sources)
+    }
+
+    protected open fun precompile(sources: SourceSet): List<File> {
+        val compilation = createBaseCompilationArguments().copy(sources = sources.sourceFiles)
         val result = compile(
             workingDir = createTempDirectory(prefix = "ytc").toFile(),
             arguments = compilation,
         )
-        check(result.success) {
-            "Pre-compilation failed, check the code"
-        }
-
-        precompiledModuleOutputDirs = result.outputClasspath
+        check(result.success) { "Pre-compilation failed, check the code" }
+        return result.outputClasspath
     }
+
+    protected val precompiledModuleClasspath: List<File>
+        get() = precompiledModuleOutputDirs.orEmpty()
+
+    protected val configuredOptions: Map<String, String>
+        get() = options
 
     data class TestCompilationResult(
         val workingDir: File,

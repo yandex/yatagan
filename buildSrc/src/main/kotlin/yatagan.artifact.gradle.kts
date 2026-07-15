@@ -1,3 +1,4 @@
+import com.vanniktech.maven.publish.GradlePlugin
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.SourcesJar
@@ -24,10 +25,13 @@ dokka {
 
 mavenPublishing {
     publishToMavenCentral()
-    configure(KotlinJvm(
-        javadocJar = JavadocJar.Dokka(tasks.dokkaGeneratePublicationJavadoc.name),
-        sourcesJar = SourcesJar.Sources(),
-    ))
+    val javadocJar = JavadocJar.Dokka(tasks.dokkaGeneratePublicationJavadoc.name)
+    val sourcesJar = SourcesJar.Sources()
+    configure(if (pluginManager.hasPlugin("java-gradle-plugin")) {
+        GradlePlugin(javadocJar = javadocJar, sourcesJar = sourcesJar)
+    } else {
+        KotlinJvm(javadocJar = javadocJar, sourcesJar = sourcesJar)
+    })
 
     coordinates(
         groupId = "com.yandex.yatagan",

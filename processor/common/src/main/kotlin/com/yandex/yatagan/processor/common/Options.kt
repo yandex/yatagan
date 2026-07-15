@@ -63,6 +63,7 @@ enum class BooleanOption(
 
     StrictMode("yatagan.enableStrictMode", default = true),
     UsePlainOutput("yatagan.usePlainOutput", default = false),
+    KcpCodegen("yatagan.kcp.codegen", default = true),
     // Experimental options:
     AllConditionsLazy("yatagan.experimental.allConditionsLazy", default = false),
     OmitProvisionNullChecks("yatagan.experimental.omitProvisionNullChecks", default = false),

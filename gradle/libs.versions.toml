@@ -28,6 +28,9 @@ kotlin-koverGradle = "org.jetbrains.kotlinx:kover-gradle-plugin:0.9.8"
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 
+kotlin-gradlePluginApi = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
+shadow-gradle = "com.gradleup.shadow:shadow-gradle-plugin:9.5.1"
+
 autoCommon = "com.google.auto:auto-common:1.2.2"
 poets-java = "com.squareup:javapoet:1.13.0"
 poets-kotlin = "com.squareup:kotlinpoet:2.3.0"

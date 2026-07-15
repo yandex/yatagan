@@ -6,6 +6,8 @@ enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 rootProject.name = "yatagan"
 
+include(":gradle-plugin")
+
 include(":base:api")
 include(":base:impl")
 
@@ -24,6 +26,7 @@ include(":lang:compiled")
 include(":lang:jap")
 include(":lang:rt")
 include(":lang:ksp")
+include(":lang:kcp")
 
 include(":core:model:api")
 include(":core:model:impl")
@@ -34,13 +37,16 @@ include(":core:graph:impl")
 include(":processor:common")
 include(":processor:jap")
 include(":processor:ksp")
+include(":processor:kcp")
 
 include(":rt:engine")
 include(":rt:support")
 
 include(":codegen:impl")
+include(":codegen:ir")
 include(":codegen:poetry")
 
 include(":testing:tests")
 include(":testing:procedural")
 include(":testing:source-set")
+include(":testing:kcp-consumer")
