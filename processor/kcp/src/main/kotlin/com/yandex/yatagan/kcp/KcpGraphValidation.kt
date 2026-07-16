@@ -33,16 +33,35 @@ import com.yandex.yatagan.validation.ValidationMessage.Kind.Error
 import com.yandex.yatagan.validation.ValidationMessage.Kind.MandatoryWarning
 import com.yandex.yatagan.validation.ValidationMessage.Kind.Warning
 import com.yandex.yatagan.validation.format.format
+import com.yandex.yatagan.validation.impl.GraphValidationExtension
 import com.yandex.yatagan.validation.impl.validate
+import com.yandex.yatagan.validation.spi.ValidationPluginProvider
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import java.util.ServiceLoader
 
 internal class KcpGraphValidation(
     rawOptions: Map<String, String>,
-    messageCollector: MessageCollector,
+    private val messageCollector: MessageCollector,
 ) {
     private val options = ProcessorOptions(rawOptions)
+
+    // SPI validation plugins ride the compiler plugin classpath: kotlinc loads all -Xplugin jars
+    // into one classloader, so ServiceLoader sees providers from jars placed next to this one
+    // (e.g. via the `kotlinCompilerPluginClasspath` Gradle configuration).
+    private val validationPluginProviders: List<ValidationPluginProvider> by lazy {
+        val serviceClass = ValidationPluginProvider::class.java
+        ServiceLoader.load(serviceClass, serviceClass.classLoader).toList().also { providers ->
+            if (providers.isNotEmpty()) {
+                messageCollector.report(
+                    CompilerMessageSeverity.LOGGING,
+                    "[yatagan] loaded ${providers.size} validation plugin provider(s): " +
+                            providers.joinToString { it.javaClass.name },
+                )
+            }
+        }
+    }
     private val logger = LoggerDecorator(object : Logger {
         override fun error(message: String) {
             messageCollector.report(CompilerMessageSeverity.ERROR, message)
@@ -59,12 +78,17 @@ internal class KcpGraphValidation(
         )
     }
 
-    fun validateThreadChecker(scope: KcpLexicalScope): Boolean {
-        val threadChecker = ThreadChecker(
+    val enableProvisionNullChecks: Boolean
+        get() = !options[BooleanOption.OmitProvisionNullChecks]
+
+    fun createThreadChecker(scope: KcpLexicalScope): com.yandex.yatagan.core.graph.ThreadChecker =
+        ThreadChecker(
             lexicalScope = scope,
             threadCheckerClassName = options[StringOption.ThreadCheckerClassName],
         )
-        return report(validate(threadChecker))
+
+    fun validateThreadChecker(scope: KcpLexicalScope): Boolean {
+        return report(validate(createThreadChecker(scope)))
     }
 
     fun validateComponent(
@@ -73,6 +97,9 @@ internal class KcpGraphValidation(
     ): ComponentResult {
         var processingTarget = component.name.asString()
         return try {
+            val threadMx = java.lang.management.ManagementFactory.getThreadMXBean()
+            var start = System.nanoTime()
+            val cpuStart = threadMx.currentThreadCpuTime
             val model = ComponentModel(scope.getTypeDeclaration(component))
             if (!model.isRoot) {
                 return ComponentResult.NotRoot
@@ -80,7 +107,28 @@ internal class KcpGraphValidation(
 
             val graph = BindingGraph(root = model)
             processingTarget = graph.toString(null).toString()
-            if (report(validate(graph))) {
+            val graphMs = elapsedMs(start)
+            val graphCpuMs = (threadMx.currentThreadCpuTime - cpuStart) / 1_000_000
+
+            start = System.nanoTime()
+            val coreMessages = validate(graph)
+            val validateMs = elapsedMs(start)
+
+            start = System.nanoTime()
+            val pluginMessages = if (validationPluginProviders.isNotEmpty()) {
+                validate(GraphValidationExtension(
+                    validationPluginProviders = validationPluginProviders,
+                    graph = graph,
+                ))
+            } else emptyList()
+            val spiMs = elapsedMs(start)
+
+            messageCollector.report(
+                CompilerMessageSeverity.LOGGING,
+                "[yatagan] timing ${component.name}: graph=${graphMs}ms (cpu=${graphCpuMs}ms) " +
+                        "validate=${validateMs}ms spi=${spiMs}ms",
+            )
+            if (report(coreMessages + pluginMessages)) {
                 ComponentResult.Valid(graph)
             } else {
                 ComponentResult.Invalid
@@ -133,6 +181,8 @@ internal class KcpGraphValidation(
 
         return !hasErrors
     }
+
+    private fun elapsedMs(startNanos: Long): Long = (System.nanoTime() - startNanos) / 1_000_000
 
     sealed interface ComponentResult {
         data object NotRoot : ComponentResult

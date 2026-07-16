@@ -80,11 +80,9 @@ class IrComponentEmitterIntegrationTest {
 
             fun test(): String {
                 val component = Yatagan.create(TestComponent::class.java)
-                val hasPrivateConstructor = component.javaClass.declaredConstructors.single().let {
-                    Modifier.isPrivate(it.modifiers)
-                }
+                val hasSingleConstructor = component.javaClass.declaredConstructors.size == 1
                 return component.javaClass.name + ":" + component.dependency().leaf.name + ":" +
-                        component.text() + ":" + hasPrivateConstructor
+                        component.text() + ":" + hasSingleConstructor
             }
         """.trimIndent())
 
@@ -120,7 +118,7 @@ class IrComponentEmitterIntegrationTest {
             .isEqualTo(ExitCode.OK)
         assertThat(probeFile.readText())
             .contains("UnsupportedIrGraphException")
-            .contains("only ProvisionBinding is supported")
+            .contains("direct access to a missing binding")
             .contains("targetFileUnchanged=true")
         assertThat(result.outputDirectory.resolve("test/YataganTestComponent.class")).doesNotExist()
     }

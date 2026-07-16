@@ -53,8 +53,16 @@ internal class KcpTypeDeclarationImpl(
 ) : CtTypeDeclarationBase(), LexicalScope by type {
     internal val impl: IrClass = checkNotNull(type.impl.classOrNull).owner
 
-    override val annotations: Sequence<CtAnnotationBase>
-        get() = impl.annotations.asSequence().map { KcpAnnotationImpl(this, it) }
+    init {
+        // Feed IC lookup recording: the graph's shape depends on every class wrapped here.
+        kcpScope.resolvedClassesMutable.add(impl)
+    }
+
+    // Materialized once: annotations are queried constantly (scopes, qualifiers,
+    // conditionals) and re-wrapping on every access dominates graph construction time.
+    override val annotations: Sequence<CtAnnotationBase> by lazy {
+        impl.annotations.map { KcpAnnotationImpl(this, it) }.asSequence()
+    }
 
     override val platformModel: IrClassSymbol
         get() = impl.symbol
@@ -158,7 +166,7 @@ internal class KcpTypeDeclarationImpl(
                     }
                 }
             }
-        }.distinctBy { it.name }.asSequence()
+        }.distinctBy { field -> field.name to (field.platformModel ?: field) }.asSequence()
     }
 
     override val nestedClasses: Sequence<TypeDeclaration>
@@ -246,8 +254,16 @@ internal class KcpTypeDeclarationImpl(
             val forceStatic = rootIsObject && index == 0
             if (current.origin == IrDeclarationOrigin.IR_EXTERNAL_JAVA_DECLARATION_STUB) {
                 current.declarations.asSequence()
-                    .filterIsInstance<IrField>()
-                    .filter { it.isNonPrivate }
+                    .mapNotNull { member ->
+                        when (member) {
+                            is IrField -> member.takeIf { it.isNonPrivate }
+                            // Java fields surface as properties with a backing field.
+                            is IrProperty -> member.backingField
+                                ?.takeIf { member.isNonPrivate }
+
+                            else -> null
+                        }
+                    }
                     .mapTo(this) { field ->
                         KcpFieldImpl(
                             impl = field,

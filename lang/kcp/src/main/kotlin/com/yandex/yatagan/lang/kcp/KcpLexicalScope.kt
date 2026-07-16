@@ -42,6 +42,14 @@ public class KcpLexicalScope(
 ) : LexicalScopeBase() {
     internal val finder: DeclarationFinder = pluginContext.finderForSource(sourceFile)
 
+    /**
+     * Every class the lang model wrapped while this scope was in use — the graph closure of the
+     * components processed with it. Consumed by the processor to record incremental-compilation
+     * lookups from [sourceFile] to these classes.
+     */
+    public val resolvedClasses: Set<IrClass> get() = resolvedClassesMutable
+    internal val resolvedClassesMutable: MutableSet<IrClass> = LinkedHashSet()
+
     init {
         ext[KcpScopeKey] = this
         ext[CachingMetaFactory] = CachingFactorySimple

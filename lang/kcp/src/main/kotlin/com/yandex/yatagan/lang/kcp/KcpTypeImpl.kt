@@ -34,6 +34,9 @@ import com.yandex.yatagan.lang.compiled.WildcardNameModel
 import com.yandex.yatagan.lang.scope.FactoryKey
 import com.yandex.yatagan.lang.scope.LexicalScope
 import com.yandex.yatagan.lang.scope.caching
+import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
 import org.jetbrains.kotlin.ir.types.IrDynamicType
@@ -43,7 +46,8 @@ import org.jetbrains.kotlin.ir.types.IrStarProjection
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.IrTypeProjection
-import org.jetbrains.kotlin.ir.types.IrTypeSystemContextImpl
+import org.jetbrains.kotlin.ir.types.IrTypeSystemContext
+import org.jetbrains.kotlin.types.model.KotlinTypeMarker
 import org.jetbrains.kotlin.ir.types.SimpleTypeNullability
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
@@ -54,6 +58,9 @@ import org.jetbrains.kotlin.ir.types.impl.toBuilder
 import org.jetbrains.kotlin.ir.util.classId
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.isSubtypeOf
+import org.jetbrains.kotlin.ir.util.parentAsClass
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.types.Variance
 
 internal class KcpTypeImpl private constructor(
@@ -67,7 +74,7 @@ internal class KcpTypeImpl private constructor(
 
     override val nameModel: CtTypeNameModel by lazy {
         val arguments = impl.arguments
-        if (arguments.isEmpty() || rawNameModel !is ClassNameModel) {
+        if (arguments.isEmpty() || impl.isRawJavaType() || rawNameModel !is ClassNameModel) {
             rawNameModel
         } else {
             ParameterizedNameModel(
@@ -86,6 +93,7 @@ internal class KcpTypeImpl private constructor(
     }
 
     override val typeArguments: List<Type> by lazy {
+        if (impl.isRawJavaType()) return@lazy emptyList()
         impl.arguments.map { argument ->
             when (argument) {
                 is IrTypeProjection -> kcpType(argument.type, isTypeArgument = true)
@@ -99,8 +107,11 @@ internal class KcpTypeImpl private constructor(
 
     override fun isAssignableFrom(another: Type): Boolean {
         if (another !is KcpTypeImpl) return false
-        val typeSystem = IrTypeSystemContextImpl(lexicalScope.kcpScope.pluginContext.irBuiltIns)
-        return another.impl.makeNotNull().isSubtypeOf(impl.makeNotNull(), typeSystem)
+        val irBuiltIns = lexicalScope.kcpScope.pluginContext.irBuiltIns
+        // The Java view of types erases collection mutability (kotlin.collections.MutableX and X
+        // both surface as java.util.X and intern to one instance), so assignability must too.
+        return another.impl.eraseMutability(irBuiltIns).makeNotNull()
+            .isSubtypeOf(impl.eraseMutability(irBuiltIns).makeNotNull(), JavaViewTypeSystemContext(irBuiltIns))
     }
 
     override fun asBoxed(): Type {
@@ -130,13 +141,26 @@ internal class KcpTypeImpl private constructor(
     }
 }
 
-internal fun LexicalScope.kcpType(type: IrType, isTypeArgument: Boolean = false): Type {
+internal fun LexicalScope.kcpType(
+    type: IrType,
+    isTypeArgument: Boolean = false,
+    position: TypePosition = TypePosition.Other,
+): Type {
     return when (type) {
         is IrSimpleType -> when (val classifier = type.classifier) {
-            is IrClassSymbol -> KcpTypeImpl(KcpTypeKey(
-                type = type.normalizeNullabilityRecursively(),
-                jvmKind = if (isTypeArgument) JvmTypeKind.Declared else type.jvmTypeKind(),
-            ))
+            is IrClassSymbol -> {
+                // Mirrors `lang/ksp` TypeMap: parameter positions bake declaration-site variance into
+                // Java wildcards (unless suppressed), other positions keep use-site projections only.
+                val bakeVarianceAsWildcards =
+                    position == TypePosition.Parameter && !type.shouldSuppressWildcards()
+                KcpTypeImpl(KcpTypeKey(
+                    type = type.normalizeNullabilityRecursively().bakeVarianceAsWildcards(
+                        bake = bakeVarianceAsWildcards,
+                        dropRedundantProjections = position != TypePosition.Synthetic,
+                    ),
+                    jvmKind = if (isTypeArgument) JvmTypeKind.Declared else type.jvmTypeKind(),
+                ))
+            }
             is IrTypeParameterSymbol -> CtErrorType(
                 InvalidNameModel.TypeVariable(classifier.owner.name.asString()),
             )
@@ -144,6 +168,152 @@ internal fun LexicalScope.kcpType(type: IrType, isTypeArgument: Boolean = false)
         }
         is IrErrorType, is IrDynamicType -> CtErrorType(InvalidNameModel.Unresolved(type.toString()))
     }
+}
+
+/**
+ * The nature of a typed construct in a syntactic tree, see `lang/ksp`'s `TypeMap.Position`.
+ */
+internal enum class TypePosition {
+    Parameter,
+    Other,
+
+    /** Factory-constructed types: use-site projections are intentional, never normalized. */
+    Synthetic,
+}
+
+private fun IrSimpleType.bakeVarianceAsWildcards(
+    bake: Boolean,
+    dropRedundantProjections: Boolean,
+): IrSimpleType {
+    val declaration = (classifier as? IrClassSymbol)?.owner
+    if (arguments.isEmpty() || declaration == null) return this
+    val parameters = declaration.typeParameters
+    val bakedArguments = arguments.mapIndexed { index, argument ->
+        when (argument) {
+            is IrStarProjection -> argument
+            is IrTypeProjection -> {
+                val argumentType = argument.type
+                // Baking does not propagate into nested type arguments (only explicit @JvmWildcard does).
+                val bakedArgumentType = (argumentType as? IrSimpleType)
+                    ?.bakeVarianceAsWildcards(bake = false, dropRedundantProjections = dropRedundantProjections)
+                    ?: argumentType
+                val declarationSiteVariance = parameters.getOrNull(index)?.variance
+                val variance = when {
+                    (bake || argumentType.shouldForceWildcards()) && declarationSiteVariance != null ->
+                        computeWildcard(
+                            declarationSite = declarationSiteVariance,
+                            projection = argument.variance,
+                            forType = bakedArgumentType,
+                        )
+
+                    // Redundant explicit projection (e.g. `Set<out T>` where `T` is declared `out`)
+                    // is dropped in the Java view of the type.
+                    dropRedundantProjections && argument.variance != Variance.INVARIANT &&
+                            argument.variance == declarationSiteVariance -> Variance.INVARIANT
+
+                    else -> argument.variance
+                }
+                makeTypeProjection(bakedArgumentType, variance)
+            }
+        }
+    }
+    return toBuilder().apply { arguments = bakedArguments }.buildSimpleType()
+}
+
+private fun computeWildcard(
+    declarationSite: Variance,
+    projection: Variance,
+    forType: IrType,
+): Variance {
+    return when (declarationSite) {
+        Variance.INVARIANT -> projection
+        Variance.OUT_VARIANCE -> when (projection) {
+            Variance.INVARIANT, Variance.OUT_VARIANCE ->
+                if (forType.isOpenClassType()) Variance.OUT_VARIANCE else Variance.INVARIANT
+            // Malformed projection (only expressible from Java sources) - keep as is.
+            Variance.IN_VARIANCE -> projection
+        }
+        Variance.IN_VARIANCE -> when (projection) {
+            Variance.INVARIANT, Variance.IN_VARIANCE -> Variance.IN_VARIANCE
+            // Malformed projection (only expressible from Java sources) - keep as is.
+            Variance.OUT_VARIANCE -> projection
+        }
+    }
+}
+
+/**
+ * Nullability doesn't exist in the Java view of types: Java supertypes carry flexible arguments
+ * (`Supplier<String!>`, approximated in IR to `String?` + an annotation) that must stay
+ * assignable to Kotlin's `Supplier<String>` even in invariant positions - anywhere in the
+ * supertype chain, which erasing the compared types alone cannot reach. So the whole subtype
+ * check runs nullability-blind.
+ */
+private class JavaViewTypeSystemContext(
+    override val irBuiltIns: org.jetbrains.kotlin.ir.IrBuiltIns,
+) : IrTypeSystemContext {
+    override fun KotlinTypeMarker.isMarkedNullable(): Boolean = false
+}
+
+private fun IrType.isOpenClassType(): Boolean {
+    return when (val classifier = (this as? IrSimpleType)?.classifier) {
+        is IrClassSymbol -> classifier.owner.modality != Modality.FINAL
+        else -> true
+    }
+}
+
+private fun IrSimpleType.eraseMutability(irBuiltIns: org.jetbrains.kotlin.ir.IrBuiltIns): IrSimpleType {
+    val readonly = when (classifier) {
+        irBuiltIns.mutableCollectionClass -> irBuiltIns.collectionClass
+        irBuiltIns.mutableListClass -> irBuiltIns.listClass
+        irBuiltIns.mutableSetClass -> irBuiltIns.setClass
+        irBuiltIns.mutableMapClass -> irBuiltIns.mapClass
+        irBuiltIns.mutableIterableClass -> irBuiltIns.iterableClass
+        else -> null
+    }
+    val erasedArguments = arguments.map { argument ->
+        when (argument) {
+            is IrStarProjection -> argument
+            is IrTypeProjection -> {
+                // Nullability doesn't exist in the Java view either: a Java supertype like
+                // `Supplier<String!>` must stay assignable to Kotlin's `Supplier<String>`
+                // even in invariant argument positions.
+                val erased = ((argument.type as? IrSimpleType)?.eraseMutability(irBuiltIns)
+                    ?: argument.type).makeNotNull()
+                if (erased === argument.type) argument else makeTypeProjection(erased, argument.variance)
+            }
+        }
+    }
+    if (readonly == null && erasedArguments == arguments) return this
+    return toBuilder().apply {
+        readonly?.let { classifier = it }
+        arguments = erasedArguments
+    }.buildSimpleType()
+}
+
+private val RawTypeAnnotationFqName = StandardClassIds.Annotations.RawTypeAnnotation.asSingleFqName()
+
+internal fun IrSimpleType.isRawJavaType(): Boolean =
+    annotations.any { it.isAnnotation(RawTypeAnnotationFqName) }
+
+private val JvmSuppressWildcardsFqName = FqName("kotlin.jvm.JvmSuppressWildcards")
+private val JvmWildcardFqName = FqName("kotlin.jvm.JvmWildcard")
+
+private fun IrType.shouldSuppressWildcards(): Boolean {
+    val suppressedHere = annotations.any { annotation ->
+        annotation.isAnnotation(JvmSuppressWildcardsFqName) &&
+                ((annotation.arguments.getOrNull(0) as? IrConst)?.value as? Boolean ?: true)
+    }
+    return suppressedHere || (this as? IrSimpleType)?.arguments?.any { argument ->
+        (argument as? IrTypeProjection)?.type?.shouldSuppressWildcards() == true
+    } == true
+}
+
+private fun IrType.shouldForceWildcards(): Boolean {
+    return annotations.any { it.isAnnotation(JvmWildcardFqName) }
+}
+
+private fun IrConstructorCall.isAnnotation(fqName: FqName): Boolean {
+    return symbol.owner.parentAsClass.fqNameWhenAvailable == fqName
 }
 
 internal val LexicalScope.kcpScope: KcpLexicalScope
@@ -252,7 +422,7 @@ internal enum class JvmTypeKind {
 
 private fun IrSimpleType.canonicalJvmName(jvmKind: JvmTypeKind): String {
     val raw = rawNameModel(jvmKind)
-    if (arguments.isEmpty() || raw !is ClassNameModel) return raw.toString()
+    if (arguments.isEmpty() || isRawJavaType() || raw !is ClassNameModel) return raw.toString()
     return arguments.joinToString(prefix = "$raw<", postfix = ">") { argument ->
         when (argument) {
             is IrStarProjection -> "?"

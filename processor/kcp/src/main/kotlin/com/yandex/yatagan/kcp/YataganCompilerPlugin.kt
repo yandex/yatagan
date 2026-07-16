@@ -25,6 +25,8 @@ import com.yandex.yatagan.lang.kcp.KcpLexicalScope
 import com.yandex.yatagan.processor.common.Options
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.backend.jvm.ir.getIoFile
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
@@ -35,11 +37,19 @@ import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
+import org.jetbrains.kotlin.incremental.components.ExpectActualTracker
+import org.jetbrains.kotlin.incremental.components.LookupTracker
+import org.jetbrains.kotlin.incremental.components.Position
+import org.jetbrains.kotlin.incremental.components.ScopeKind
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationContainer
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationWithName
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.util.classId
+import org.jetbrains.kotlin.ir.util.fileOrNull
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.name.FqName
 
 private const val PLUGIN_ID = "com.yandex.yatagan"
@@ -107,6 +117,9 @@ public class YataganCompilerPluginRegistrar : CompilerPluginRegistrar() {
                 MessageCollector.NONE,
             ),
             processorOptions = configuration.get(ProcessorOptionsKey, emptyMap()),
+            // Present only in incremental builds; null makes IC recording a no-op.
+            lookupTracker = configuration.get(CommonConfigurationKeys.LOOKUP_TRACKER),
+            expectActualTracker = configuration.get(CommonConfigurationKeys.EXPECT_ACTUAL_TRACKER),
         ))
     }
 }
@@ -114,8 +127,11 @@ public class YataganCompilerPluginRegistrar : CompilerPluginRegistrar() {
 private class YataganIrGenerationExtension(
     private val messageCollector: MessageCollector,
     private val processorOptions: Map<String, String>,
+    private val lookupTracker: LookupTracker?,
+    private val expectActualTracker: ExpectActualTracker?,
 ) : IrGenerationExtension {
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
+        val extensionStart = System.nanoTime()
         val validation = KcpGraphValidation(
             rawOptions = processorOptions,
             messageCollector = messageCollector,
@@ -142,20 +158,29 @@ private class YataganIrGenerationExtension(
                 }
             }
 
+            var fileHasRootComponent = false
             for (component in components) {
                 when (val result = validation.validateComponent(scope, component)) {
                     KcpGraphValidation.ComponentResult.NotRoot -> Unit
-                    KcpGraphValidation.ComponentResult.Invalid -> canGenerate = false
+                    KcpGraphValidation.ComponentResult.Invalid -> {
+                        fileHasRootComponent = true
+                        canGenerate = false
+                    }
                     is KcpGraphValidation.ComponentResult.Valid -> {
+                        fileHasRootComponent = true
                         if (codegenEnabled) {
                             generationCandidates += GenerationCandidate(
                                 file = file,
                                 component = component,
                                 graph = result.graph,
+                                threadChecker = validation.createThreadChecker(scope),
                             )
                         }
                     }
                 }
+            }
+            if (fileHasRootComponent) {
+                recordIncrementalDependencies(file, scope)
             }
         }
 
@@ -163,12 +188,23 @@ private class YataganIrGenerationExtension(
         val generationFailures = AtomicIrGenerationCoordinator(
             candidates = generationCandidates,
             prepare = { candidate ->
+                val start = System.nanoTime()
                 val emitter = IrComponentEmitter(
                     pluginContext = pluginContext,
                     targetFile = candidate.file,
                     graph = candidate.graph,
+                    options = IrComponentEmitter.Options(
+                        enableProvisionNullChecks = validation.enableProvisionNullChecks,
+                        threadChecker = candidate.threadChecker,
+                    ),
                 )
-                emitter.prepare()
+                emitter.prepare().also {
+                    messageCollector.report(
+                        CompilerMessageSeverity.LOGGING,
+                        "[yatagan] timing emit-prepare ${candidate.component.name}: " +
+                                "${(System.nanoTime() - start) / 1_000_000}ms",
+                    )
+                }
             },
             emit = { _, prepared -> prepared.emit() },
             rollback = { candidate, implementation ->
@@ -191,12 +227,77 @@ private class YataganIrGenerationExtension(
                 }
             }
         }
+        messageCollector.report(
+            CompilerMessageSeverity.LOGGING,
+            "[yatagan] timing extension total (${moduleFragment.name}): " +
+                    "${(System.nanoTime() - extensionStart) / 1_000_000}ms",
+        )
+    }
+
+    /**
+     * Tells incremental compilation that this root component file depends on every class its
+     * graphs read. The generated implementation lives in the component's own file, yet the file's
+     * source references almost none of the graph closure — without these records, editing a
+     * binding elsewhere never re-triggers generation and the compiled component goes stale.
+     *
+     * Member-name lookups catch changes to declarations that exist now; the expect/actual
+     * file link additionally covers declarations *added* to a same-module class later (there is
+     * no name to look up in advance). Cross-module changes flow through classpath ABI diffing
+     * against the recorded lookups.
+     */
+    private fun recordIncrementalDependencies(file: IrFile, scope: KcpLexicalScope) {
+        if (lookupTracker == null && expectActualTracker == null) return
+        val start = System.nanoTime()
+        var lookups = 0
+        val rootIoFile = file.getIoFile()
+        val rootPath = rootIoFile?.path ?: file.fileEntry.name
+        for (clazz in scope.resolvedClasses) {
+            if (clazz.fileOrNull == file) continue
+            val classId = clazz.classId ?: continue
+            if (lookupTracker != null) {
+                lookupTracker.record(
+                    filePath = rootPath,
+                    position = Position.NO_POSITION,
+                    scopeFqName = (classId.outerClassId?.asSingleFqName() ?: classId.packageFqName).asString(),
+                    scopeKind = ScopeKind.PACKAGE,
+                    name = classId.shortClassName.asString(),
+                )
+                // The graph reads the whole member surface (annotations included), so any member
+                // change may change the graph.
+                val classFqName = clazz.kotlinFqName.asString()
+                for (declaration in clazz.declarations) {
+                    val name = (declaration as? IrDeclarationWithName)?.name ?: continue
+                    if (name.isSpecial) continue
+                    lookupTracker.record(
+                        filePath = rootPath,
+                        position = Position.NO_POSITION,
+                        scopeFqName = classFqName,
+                        scopeKind = ScopeKind.CLASSIFIER,
+                        name = name.asString(),
+                    )
+                    lookups++
+                }
+            }
+            if (expectActualTracker != null && rootIoFile != null) {
+                val classFile = clazz.fileOrNull?.getIoFile()
+                if (classFile != null && classFile != rootIoFile && classFile.isAbsolute) {
+                    expectActualTracker.report(expectedFile = classFile, actualFile = rootIoFile)
+                }
+            }
+        }
+        messageCollector.report(
+            org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.LOGGING,
+            "[yatagan] timing icRecord ${file.fileEntry.name.substringAfterLast('/')}: " +
+                    "${(System.nanoTime() - start) / 1_000_000}ms " +
+                    "(${scope.resolvedClasses.size} classes, $lookups member lookups)",
+        )
     }
 
     private data class GenerationCandidate(
         val file: IrFile,
         val component: IrClass,
         val graph: BindingGraph,
+        val threadChecker: com.yandex.yatagan.core.graph.ThreadChecker,
     )
 }
 

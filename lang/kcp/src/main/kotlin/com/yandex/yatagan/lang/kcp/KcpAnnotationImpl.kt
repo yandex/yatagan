@@ -151,8 +151,11 @@ internal class KcpAnnotationDeclarationImpl private constructor(
     private val declaration: IrClass
         get() = impl.owner
 
-    override val annotations: Sequence<CtAnnotationBase>
-        get() = declaration.annotations.asSequence().map { KcpAnnotationImpl(this, it) }
+    // Materialized once: annotations are queried constantly (scopes, qualifiers,
+    // conditionals) and re-wrapping on every access dominates graph construction time.
+    override val annotations: Sequence<CtAnnotationBase> by lazy {
+        declaration.annotations.map { KcpAnnotationImpl(this, it) }.asSequence()
+    }
 
     override val qualifiedName: String
         get() = kcpType(impl.defaultType).declaration.qualifiedName

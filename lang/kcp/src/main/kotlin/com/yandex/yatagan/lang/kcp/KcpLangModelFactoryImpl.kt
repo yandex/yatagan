@@ -64,7 +64,7 @@ internal class KcpLangModelFactoryImpl(
         return kcpType(map.typeWithArguments(listOf(
             makeTypeProjection(key, Variance.INVARIANT),
             makeTypeProjection(value, if (isCovariant) Variance.OUT_VARIANCE else Variance.INVARIANT),
-        )))
+        )), position = TypePosition.Synthetic)
     }
 
     override fun getTypeDeclaration(
@@ -91,7 +91,10 @@ internal class KcpLangModelFactoryImpl(
         isCovariant: Boolean,
     ): Type {
         val variance = if (isCovariant) Variance.OUT_VARIANCE else Variance.INVARIANT
-        return kcpType(declaration.typeWithArguments(arguments.map { makeTypeProjection(it, variance) }))
+        return kcpType(
+            declaration.typeWithArguments(arguments.map { makeTypeProjection(it, variance) }),
+            position = TypePosition.Synthetic,
+        )
     }
 
     private fun findClass(qualifiedName: String): IrClassSymbol {

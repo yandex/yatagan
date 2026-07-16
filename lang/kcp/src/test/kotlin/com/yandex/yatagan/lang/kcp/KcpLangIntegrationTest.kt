@@ -384,6 +384,7 @@ class KcpLangProbeRegistrar : CompilerPluginRegistrar() {
 @OptIn(Internal::class)
 private class KcpLangProbeExtension : IrGenerationExtension {
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
+        if (System.getProperty(ProbeFileProperty) == null) return
         val root = moduleFragment.files.asSequence()
             .flatMap { it.declarations.asSequence() }
             .filterIsInstance<IrClass>()

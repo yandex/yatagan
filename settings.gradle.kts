@@ -6,6 +6,8 @@ enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 rootProject.name = "yatagan"
 
+include(":gradle-plugin")
+
 include(":base:api")
 include(":base:impl")
 

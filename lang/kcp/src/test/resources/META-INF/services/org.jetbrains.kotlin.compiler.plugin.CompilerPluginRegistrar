@@ -1,1 +1,2 @@
 com.yandex.yatagan.lang.kcp.KcpLangProbeRegistrar
+com.yandex.yatagan.lang.kcp.KcpJavaSourceDebugRegistrar

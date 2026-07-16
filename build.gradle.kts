@@ -89,6 +89,9 @@ val projectsNotToCover = setOf(
     ":testing:procedural",
     ":testing:source-set",
     ":testing:kcp-consumer",
+
+    // Do not cover build tooling
+    ":gradle-plugin",
 )
 
 projectsNotToCover.intersect(projectsToCover).let { ambiguous ->

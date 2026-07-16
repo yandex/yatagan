@@ -44,8 +44,11 @@ internal class KcpConstructorImpl(
     private val impl: IrConstructor,
     override val constructee: KcpTypeDeclarationImpl,
 ) : CtConstructorBase(), LexicalScope by constructee {
-    override val annotations: Sequence<CtAnnotationBase>
-        get() = impl.annotations.asSequence().map { KcpAnnotationImpl(this, it) }
+    // Materialized once: annotations are queried constantly (scopes, qualifiers,
+    // conditionals) and re-wrapping on every access dominates graph construction time.
+    override val annotations: Sequence<CtAnnotationBase> by lazy {
+        impl.annotations.map { KcpAnnotationImpl(this, it) }.asSequence()
+    }
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isEffectivelyPublic
@@ -72,8 +75,11 @@ internal class KcpMethodImpl(
     private val declaredIn
         get() = impl.parentAsClass
 
-    override val annotations: Sequence<CtAnnotationBase>
-        get() = impl.annotations.asSequence().map { KcpAnnotationImpl(this, it) }
+    // Materialized once: annotations are queried constantly (scopes, qualifiers,
+    // conditionals) and re-wrapping on every access dominates graph construction time.
+    override val annotations: Sequence<CtAnnotationBase> by lazy {
+        impl.annotations.map { KcpAnnotationImpl(this, it) }.asSequence()
+    }
 
     override val isEffectivelyPublic: Boolean
         get() = impl.isEffectivelyPublic
@@ -103,13 +109,16 @@ internal class KcpParameterImpl(
     private val impl: IrValueParameter,
     private val implType: org.jetbrains.kotlin.ir.types.IrType,
 ) : CtParameterBase(), LexicalScope by lexicalScope {
-    override val annotations: Sequence<CtAnnotationBase>
-        get() = impl.annotations.asSequence().map { KcpAnnotationImpl(this, it) }
+    // Materialized once: annotations are queried constantly (scopes, qualifiers,
+    // conditionals) and re-wrapping on every access dominates graph construction time.
+    override val annotations: Sequence<CtAnnotationBase> by lazy {
+        impl.annotations.map { KcpAnnotationImpl(this, it) }.asSequence()
+    }
 
     override val name: String
         get() = impl.name.asString()
 
-    override val type: Type by lazy { kcpType(implType) }
+    override val type: Type by lazy { kcpType(implType, position = TypePosition.Parameter) }
 }
 
 internal class KcpFieldImpl(
@@ -119,8 +128,11 @@ internal class KcpFieldImpl(
     private val declaredIn: org.jetbrains.kotlin.ir.declarations.IrClass,
     private val effectivelyPublic: Boolean = impl.isEffectivelyPublic,
 ) : CtFieldBase(), LexicalScope by owner {
-    override val annotations: Sequence<CtAnnotationBase>
-        get() = impl.annotations.asSequence().map { KcpAnnotationImpl(this, it) }
+    // Materialized once: annotations are queried constantly (scopes, qualifiers,
+    // conditionals) and re-wrapping on every access dominates graph construction time.
+    override val annotations: Sequence<CtAnnotationBase> by lazy {
+        impl.annotations.map { KcpAnnotationImpl(this, it) }.asSequence()
+    }
 
     override val isEffectivelyPublic: Boolean
         get() = effectivelyPublic

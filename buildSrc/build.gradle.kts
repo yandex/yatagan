@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.dokka.gradle)
     implementation(libs.publish.gradle)
     implementation(libs.ksp.gradle)
+    implementation(libs.shadow.gradle)
 
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))

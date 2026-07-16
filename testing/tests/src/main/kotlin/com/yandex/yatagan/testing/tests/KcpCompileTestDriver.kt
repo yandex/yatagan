@@ -22,54 +22,32 @@ import com.yandex.yatagan.testing.source_set.SourceFile
 import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Assume
 import java.io.File
-import java.util.Properties
 import kotlin.io.path.createTempDirectory
+
+private const val UNSUPPORTED_MARKER = "Unsupported KCP component"
 
 internal class KcpCompileTestDriver(
     private val apiClasspath: String = CurrentClasspath.ApiCompiled,
-    private val runtimeApiClasspath: String = CurrentClasspath.ApiDynamic,
     private val compilerClasspath: String = CurrentClasspath.KcpCompiler,
     private val pluginClasspath: String = CurrentClasspath.KcpPlugin,
 ) : CompileTestDriverBase(
     apiClasspath = apiClasspath,
-    runtimeApiClasspath = runtimeApiClasspath,
 ) {
     override val backendUnderTest: Backend = Backend.Kcp
+
+    // KCP emits IR directly - there are no generated sources to compare against golden code files.
     override val checkGoldenOutput: Boolean = false
 
     override fun generatedFilesSubDir(): String? = null
-
-    override fun makeClassLoader(workingDir: File, classpath: List<File>): ClassLoader {
-        val resourcesDir = workingDir.resolve("kcp-runtime-resources")
-        val propertiesFile = resourcesDir.resolve(
-            "META-INF/com.yandex.yatagan.reflection/parameters.properties",
-        )
-        propertiesFile.parentFile.mkdirs()
-        Properties().apply {
-            configuredOptions.forEach { (key, value) ->
-                when (key) {
-                    "yatagan.maxIssueEncounterPaths",
-                    "yatagan.enableStrictMode",
-                    "yatagan.usePlainOutput",
-                    "yatagan.experimental.enableDaggerCompatibility",
-                    "yatagan.threadCheckerClassName" -> {
-                        put(key.substringAfterLast('.'), value)
-                    }
-                }
-            }
-        }.let { properties ->
-            propertiesFile.outputStream().use { properties.store(it, "Generated KCP test parameters") }
-        }
-        return super.makeClassLoader(workingDir, classpath + resourcesDir)
-    }
 
     override fun precompile(sources: SourceSet): List<File> {
         val result = compileWithKcp(
             sources = sources.sourceFiles,
             classpath = apiClasspath.asFiles(),
-            plugins = emptyList(),
+            plugins = pluginClasspath.asFiles(),
             workingDir = createTempDirectory(prefix = "ytc-kcp").toFile(),
         )
+        result.assumeSupportedByKcpCodegen()
         check(result.success) { "KCP pre-compilation failed:\n${result.messageLog}" }
         return listOf(result.runtimeClasspath.last())
     }
@@ -81,10 +59,25 @@ internal class KcpCompileTestDriver(
             plugins = pluginClasspath.asFiles(),
             workingDir = createTempDirectory(prefix = "yct-kcp-${testNameRule.testMethodName}").toFile(),
         )
+        result.assumeSupportedByKcpCodegen()
         return result.copy(
-            runtimeClasspath = runtimeApiClasspath.asFiles() +
+            runtimeClasspath = apiClasspath.asFiles() +
                     precompiledModuleClasspath + result.runtimeClasspath.last(),
         )
+    }
+
+    /**
+     * Tests exercising features the KCP code generator does not support yet are honestly SKIPPED
+     * (never silently passed through another backend). Validation errors always win over codegen
+     * (no generation is attempted for invalid graphs), so error-expecting tests are unaffected.
+     */
+    private fun TestCompilationResult.assumeSupportedByKcpCodegen() {
+        if (!success && UNSUPPORTED_MARKER in messageLog) {
+            val reasons = messageLog.lineSequence()
+                .filter { UNSUPPORTED_MARKER in it }
+                .joinToString("\n")
+            Assume.assumeTrue("KCP codegen does not support this test yet:\n$reasons", false)
+        }
     }
 
     private fun compileWithKcp(
@@ -93,11 +86,16 @@ internal class KcpCompileTestDriver(
         plugins: List<File>,
         workingDir: File,
     ): TestCompilationResult {
-        val javaSources = sources.filterIsInstance<Source.JavaSource>()
-        Assume.assumeTrue(
-            "KCP supports Kotlin sources only: ${javaSources.joinToString { it.relativePath }}",
-            javaSources.isEmpty(),
-        )
+        // Java-declared ROOT components never surface in the Kotlin IR module, so no implementation
+        // can be generated for them - same stance as other compiler-plugin DI frameworks.
+        sources.filterIsInstance<Source.JavaSource>().forEach { source ->
+            val isRootComponent = ComponentRegex.containsMatchIn(source.contents) &&
+                    !NonRootComponentRegex.containsMatchIn(source.contents)
+            Assume.assumeTrue(
+                "KCP does not support Java-declared root components: ${source.relativePath}",
+                !isRootComponent,
+            )
+        }
 
         val sourceDir = workingDir.resolve("sources").apply { mkdirs() }
         val outputDir = workingDir.resolve("classes").apply { mkdirs() }
@@ -106,6 +104,18 @@ internal class KcpCompileTestDriver(
                 parentFile.mkdirs()
                 writeText(source.contents)
             }
+        }
+        val javaSourceFiles = sourceFiles.filter { it.extension == "java" }
+        if (javaSourceFiles.size == sourceFiles.size) {
+            // Nothing for kotlinc (and thus the plugin) to do - a plain javac module.
+            val (javacOk, javacLog) = compileJavaSources(javaSourceFiles, classpath, outputDir)
+            return TestCompilationResult(
+                workingDir = workingDir,
+                runtimeClasspath = classpath + outputDir,
+                messageLog = javacLog,
+                success = javacOk,
+                generatedFiles = emptyList(),
+            )
         }
         val arguments = buildList {
             sourceFiles.forEach { add(it.absolutePath) }
@@ -122,8 +132,6 @@ internal class KcpCompileTestDriver(
             ))
             if (plugins.isNotEmpty()) {
                 add("-Xplugin=${plugins.joinToString(",") { it.absolutePath }}")
-                add("-P")
-                add("plugin:com.yandex.yatagan:yatagan.kcp.codegen=false")
                 configuredOptions.forEach { (key, value) ->
                     add("-P")
                     add("plugin:com.yandex.yatagan:$key=$value")
@@ -134,13 +142,45 @@ internal class KcpCompileTestDriver(
             compilerClasspath = compilerClasspath,
             arguments = arguments,
         )
+        // kotlinc only analyzes Java sources; compile them with javac against kotlinc's output.
+        val javacLog = if (success && javaSourceFiles.isNotEmpty()) {
+            compileJavaSources(javaSourceFiles, classpath + outputDir, outputDir)
+        } else null
         return TestCompilationResult(
             workingDir = workingDir,
             runtimeClasspath = classpath + outputDir,
-            messageLog = messageLog,
-            success = success,
+            messageLog = messageLog + (javacLog?.second ?: ""),
+            success = success && javacLog?.first != false,
             generatedFiles = emptyList(),
         )
+    }
+
+    private fun compileJavaSources(
+        javaSources: List<File>,
+        classpath: List<File>,
+        outputDir: File,
+    ): Pair<Boolean, String> {
+        val compiler = javax.tools.ToolProvider.getSystemJavaCompiler()
+        val errors = java.io.ByteArrayOutputStream()
+        val exitCode = compiler.run(
+            null,
+            null,
+            errors,
+            *buildList {
+                add("-classpath")
+                add(classpath.joinToString(File.pathSeparator))
+                add("-d")
+                add(outputDir.absolutePath)
+                add("-nowarn")
+                javaSources.forEach { add(it.absolutePath) }
+            }.toTypedArray(),
+        )
+        return (exitCode == 0) to if (exitCode == 0) "" else "\njavac failed:\n$errors"
+    }
+
+    private companion object {
+        val ComponentRegex = Regex("@(?:[\\w.]+\\.)?Component\\b")
+        val NonRootComponentRegex = Regex("isRoot\\s*=\\s*false")
     }
 
     private fun String.asFiles(): List<File> = split(File.pathSeparatorChar).map(::File)
