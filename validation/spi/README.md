@@ -3,7 +3,7 @@
 Yatagan provides an SPI for implementing and providing custom plugins, that can inspect Yatagan graphs.
 The interface, that needs to be implemented is [ValidationPluginProvider][VPP].
 To make Yatagan see your plugin(s), you must provide a necessary SPI locator resource file with the resource path
-`META-INF/services/com.yandex.daggerlite.spi.ValidationPluginProvider` with fully qualified provider class name(s):
+`META-INF/services/com.yandex.yatagan.validation.spi.ValidationPluginProvider` with fully qualified provider class name(s):
 ```
 com.example.MyClassImplementingValidationPluginProvider
 com.example.AnotherOneIfNeeded
@@ -45,7 +45,7 @@ dependencies {
 
 Read on how to specify a validation delegate [here][RT].
 
-[VPP]: src/main/kotlin/ValidationPluginProvider.kt
-[DVD]: ../../rt/support/src/main/kotlin/DynamicValidationDelegate.kt
-[ADVD]: ../../rt/support/src/main/kotlin/AsyncDynamicValidationDelegate.kt
+[VPP]: src/main/kotlin/com/yandex/yatagan/validation/spi/ValidationPluginProvider.kt
+[DVD]: ../../rt/support/src/main/kotlin/com/yandex/yatagan/rt/support/DynamicValidationDelegate.kt
+[ADVD]: ../../rt/support/src/main/kotlin/com/yandex/yatagan/rt/support/AsyncDynamicValidationDelegate.kt
 [RT]: ../../rt/README.md#validation
