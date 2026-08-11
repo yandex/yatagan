@@ -36,7 +36,7 @@ If you have any questions, please mail us at opensource@yandex-team.ru.
 ## Assembling Yatagan
 
 Yatagan uses [Gradle](https://docs.gradle.org/current/userguide/userguide.html) build system.
-Configuration cache is used by default; if something goes wrong with it, disable it with `--disable-configuration-cache`.
+Configuration cache is used by default; if something goes wrong with it, disable it with `--no-configuration-cache`.
 
 ```shell
 # To assemble everything:

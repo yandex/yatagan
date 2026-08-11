@@ -69,8 +69,7 @@ However, I found them unsafe/verbose/suboptimal.
 
 ## How Yatagan solves it
 
-Yatagan introduces a `@Condition` annotation (in fact, there are several related annotations like that,
-but we'll refer to them all as `@Condition` unless specified specifically otherwise). 
+Yatagan introduces a `@ConditionExpression` annotation.
 This annotation can be used to _declare_ a _feature_ - a conditional expression.
 
 To use declared _features_, Yatagan provides `@Conditional` marker - there one can specify under what _feature_ the
@@ -78,7 +77,7 @@ marked binding is.
 
 Let's see this in practice in terms of the example above:
 ```kotlin
-@Condition(Features::class, "getMyFeature.isEnabled")
+@ConditionExpression("getMyFeature.isEnabled", Features::class)
 annotation class MyFeature
 
 @Conditional(MyFeature::class)
@@ -92,36 +91,37 @@ Yatagan framework will validate all conditional dependencies and prove that no v
 
 ### More complex "features"
 
-We've seen a trivial _feature_ declaration - just one condition. In fact, Yatagan supports writing a boolean expression
-of arbitrary complexity in a form of CNF (Conjunctive Normal Form: `(a1 || a2 || ..) && (b1 || b2 || ..) && ...`).
+We've seen a trivial _feature_ declaration - just one condition. In fact, `@ConditionExpression` supports
+boolean expressions of arbitrary complexity - `&` (AND), `|` (OR), `!` (NOT) and parentheses.
 
 For example, to express 
 `(Features.isEnabledA || Features.isEnabledB) && Features.isEnabledC && Features.isEnabledD`
-one would write using `@Condition` and `@AnyCondition` annotations:
+one would write:
 ```kotlin
-@AnyCondition(
-    Condition(Features::class, "isEnabledA"),
-    Condition(Features::class, "isEnabledB"),
-)
-@Condition(Features::class, "isEnabledC")
-@Condition(Features::class, "isEnabledD")
+@ConditionExpression("(isEnabledA | isEnabledB) & isEnabledC & isEnabledD", Features::class)
 annotation class MyFeature
 ```
-Every condition annotation declared directly on the feature is &&-ed with each other in order of declaration.
+Expressions can also reference other _features_ with the `@` syntax and import multiple condition
+provider classes (with optional aliases via `importAs`):
+```kotlin
+@ConditionExpression("@MyFeature & Helper::isEnabledE", MyFeature::class, Helper::class)
+annotation class MyCombinedFeature
+```
 
 ### How "features" are evaluated
 
-Yatagan evaluates each unique `@Condition` only once per component hierarchy to avoid inconsistencies 
+Yatagan evaluates each unique condition (a boolean variable in a `@ConditionExpression`) only once
+per component hierarchy to avoid inconsistencies
 if conditions can be evaluated to different values when queried multiple times. 
 The value of each literal is cached and reused if needed.
 
-The "condition provider"-class, that is specified as the first argument to `@Condition` is queried from the graph
+The "condition provider"-class, that is imported by the `@ConditionExpression`, is queried from the graph
 as per usual dependency rules. If a class is used as condition provider in 
 multiple conditions across component hierarchy branch,
 then it's queried and cached in the highest (closest to root) component. 
 So, if it's not available there for some reason - the missing binding will be reported.
 
-There's a specific case when the condition path (the string argument for `@Condition`) leads to a value,
+There's a specific case when the access path of a condition leads to a value,
 that is accessible from _static context_. In this case, Yatagan doesn't try to inject the provider class,
 instead it indeed queries the condition from static context,
 and it may do so _upon component construction_ if it decides so.
@@ -172,10 +172,10 @@ One can explicitly declare a component dimension and its flavors, like this:
 ```
 Then, one can declare components with the required _variants_:
 ```kotlin
-@Component(variant = [Product.FooApp::class, Device.Tablet], /*..*/)
+@Component(variant = [Product.FooApp::class, Device.Tablet::class], /*..*/)
 interface FooAppTablet { /*..*/ }
 
-@Component(variant = [Product.BarApp::class, Device.Phone], /*..*/)
+@Component(variant = [Product.BarApp::class, Device.Phone::class], /*..*/)
 interface BarAppPhone { /*..*/ }
 
 // .. All required variants - combinations of flavors

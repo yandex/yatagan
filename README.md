@@ -1,6 +1,6 @@
 # Yatagan
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.yandex.yatagan/api-compiled/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.yandex.yatagan/api-compiled)
+[![Maven Central](https://img.shields.io/maven-central/v/com.yandex.yatagan/api-public)](https://central.sonatype.com/artifact/com.yandex.yatagan/api-public)
 [![CI](https://github.com/yandex/yatagan/actions/workflows/main.yaml/badge.svg)](https://github.com/yandex/yatagan/actions/workflows/main.yaml)
 [![codecov](https://codecov.io/gh/yandex/yatagan/graph/badge.svg?token=XW9AVMQWM0)](https://codecov.io/gh/yandex/yatagan)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -16,11 +16,15 @@ All core Dagger API is supported with little changes.
 Yet dagger-android, Hilt and a couple of less popular features are not supported.
 See comparative [API reference](#yatagan-vs-dagger-api-reference) for full info.
 
+Yatagan also has an experimental
+[Dagger compatibility mode](#dagger-compatibility-mode-experimental), which allows it to act as a drop-in
+replacement for Dagger with minimal migration work.
+
 Yatagan can work in multiple modes (use different _backends_):
 
 - With code generation
     - APT/KAPT - classic mode.
-    - KSP - leverages new Google [KSP][KSP] framework. Experimental, see [KSP support status](#ksp-support).
+    - KSP - leverages Google [KSP][KSP] framework, see [KSP notes](#ksp-support).
 - Via runtime Java reflection - a backend designed for fast local debug builds, see
   specific [notes](#reflection-support).
 
@@ -101,7 +105,7 @@ For kotlin-only/mixed project using **kapt**:
 
 ```kotlin
 // Ensure `kotlin-kapt` plugin is applied
-api("com.yandex.yatagan:api-compiled:${yataganVer}")
+api("com.yandex.yatagan:api-public:${yataganVer}")
 // kapt is slow but generally reliable for mixed projects.
 kapt("com.yandex.yatagan:processor-jap:${yataganVer}")
 ```
@@ -111,8 +115,8 @@ For kotlin-only/mixed project using **KSP** (use with caution for Java code):
 
 ```kotlin
 // Ensure `com.google.devtools.ksp` plugin is applied
-api("com.yandex.yatagan:api-compiled:${yataganVer}")
-// KSP implementation is unstable. Works best for pure-Kotlin projects.
+api("com.yandex.yatagan:api-public:${yataganVer}")
+// KSP works best for pure-Kotlin projects.
 ksp("com.yandex.yatagan:processor-ksp:${yataganVer}")
 ```
 
@@ -126,7 +130,7 @@ api("com.yandex.yatagan:api-dynamic:${yataganVer}")
 For **java-only** project:
 
 ```kotlin
-api("com.yandex.yatagan:api-compiled:${yataganVer}")
+api("com.yandex.yatagan:api-public:${yataganVer}")
 // best codegen backend for Java-only, no need to use kapt/ksp.
 annotationProcessor("com.yandex.yatagan:processor-jap:${yataganVer}")
 ```
@@ -140,7 +144,7 @@ An example of a recommended way to use Yatagan for Android projects:
 debugApi("com.yandex.yatagan:api-dynamic:${yataganVer}")
 
 // Use codegen in releases
-releaseApi("com.yandex.yatagan:api-compiled:${yataganVer}")
+releaseApi("com.yandex.yatagan:api-public:${yataganVer}")
 if (kspEnabled) {
     kspRelease("com.yandex.yatagan:processor-ksp:${yataganVer}")
 } else {
@@ -148,10 +152,9 @@ if (kspEnabled) {
 }
 ```
 
-One may want to create a shared library that exposes a piece of Yatagan graph, 
-yet doesn't create any root components itself. 
-In this case, the library can depend on `com.yandex.yatagan:api-public`,
-which provides pure Yatagan API and no backend-specific entry-points.
+The `com.yandex.yatagan.Yatagan` entry-point lives in `api-public` and works with both backends:
+it always tries the generated implementation first and falls back to reflection if `api-dynamic` is present
+on the runtime classpath.
 
 ## Backends
 
@@ -161,19 +164,15 @@ though it's stable and can be reliably used by default.
 
 ### KSP support
 
-Yatagan supports KSP in experimental mode.
-This is mostly due to the fact that Yatagan operates in terms of Java type system
+Note, that Yatagan operates in terms of Java type system
 and is very sensitive to type equality. In Kotlin, `Collection` and `MutableCollection` are different types, though in
 Java it's the same type. From the other hand, Kotlin's `Int` is represented in Java as `int` and `Integer`.
 Choosing Java types to maintain semantic compatibility with Dagger, Yatagan converts Kotlin types into Java ones.
 KSP API related to JVM is explicitly marked as `@KspExperimental`, and practice shows KSP support for modeling Java
 code is at least inconsistent.
 
-Thus, KSP can be adopted for Kotlin-only projects, or projects whose DI-code is mostly Kotlin.
+Thus, KSP works best for Kotlin-only projects, or projects whose DI-code is mostly Kotlin.
 Additional care should be taken with Java projects.
-
-Also, KSP strictly depends on Kotlin compiler version, used in your project, so using KSP may force you to keep updating
-Kotlin compiler version frequently.
 
 ### Reflection support
 
@@ -208,7 +207,7 @@ So consider using `minSdk = 24` at least for debug build type to safely use Yata
 | `@Module`                              | 🟢 as is          |                                               |
 | `@Binds`                               | 🟡 tweaked        | can bind zero/multiple alternatives           |
 | `@BindsInstance`                       | 🟢 as is          |                                               |
-| `@Provides`                            | 🟢 as is          | supports conditional provision                |
+| `@Provides`                            | 🟢 as is          | conditionals via separate `@Conditional`      |
 | `@BindsOptionalOf`                     | 🟡 replaced       | replaced with [Variants API](#added-apis)     |
 | `@Reusable`                            | 🟢 as is          |                                               |
 | `MembersInjector`                      | 🔴 unsupported    |                                               |
@@ -235,17 +234,21 @@ Other behavioral changes:
 - Yatagan requires components, builders, assisted inject factories to be declared as interfaces.
   Abstract classes are forbidden. This is due to the limitations of RT mode. Dagger-reflect has the same limitation.
 
-- If codegen is used, generated component implementations are not named `Dagger<component-name>`,
-  their names are mangled, and the access should be made via 
+- If codegen is used, generated component implementations are not named `Dagger<component-name>`
+  (`YataganMyComponent` is generated for `MyComponent`), and the access should be made via
   `Yatagan.builder()`/`Yatagan.create()` entry-point invocations.
   This is made to support reflection backend.
-  Actual `Yatagan` implementations are provided within `com.yandex.yatagan:api-dynamic` and 
-  `com.yandex.yatagan:api-compiled` artifacts. 
+  The `com.yandex.yatagan.Yatagan` entry-point is provided by the `com.yandex.yatagan:api-public` artifact
+  and works with both backends.
+  In [Dagger compatibility mode](#dagger-compatibility-mode-experimental) `Dagger<component-name>` facades
+  are generated as well.
 
 - Yatagan does not support `@Nullable` provisions. If a binding returns `null`, or a `@BindsInstance` is supplied with
   `null`, an error will be thrown at run-time. Currently, no compile-time validation is done in the matter.
 
-- Automatic component factory/builder generation is not supported - an explicit one must be written if required.
+- Automatic generation of a _typed_ component builder is not supported. Components without an explicit
+  `@Component.Builder` can still be created via `Yatagan.autoBuilder()`/`Yatagan.create()` entry-points,
+  though the auto-builder API is not type-safe - declare an explicit builder where possible.
 
 - Member inject in Kotlin code should be used with care:
   `@Inject lateinit var prop: SomeClass` will work as expected,
@@ -262,6 +265,10 @@ If you happen to discover one, please report it.
 
 ## Migration from Dagger
 
+The easiest way to try Yatagan on a Dagger project is the experimental
+[Dagger compatibility mode](#dagger-compatibility-mode-experimental) — it requires no source changes at all.
+The full migration described below removes the Dagger dependency entirely.
+
 Strictly speaking, Yatagan and Dagger are _not directly compatible_.
 Yatagan uses a separate binary-incompatible set of annotations and helpers
 to give it a degree of freedom to extend and enhance the API.
@@ -277,21 +284,47 @@ The general idea of steps one needs to take to migrate from Yatagan to Dagger:
 4. Replace `@Subcomponent` annotations with `@Component(isRoot = false)` ones.
 5. Replace `@Component.Factory` with `@Component.Builder`.
 6. Get rid of all nullable provisions. Yatagan does not support them.
-7. Replace `DaggerMyComponent.builder()` with `Yatagan.builder(MyComponent.Builder::class.java)` or similar.
+7. Replace `DaggerMyComponent.builder()` with `Yatagan.builder(MyComponent.Builder::class.java)`,
+   and `DaggerMyComponent.create()` with `Yatagan.create(MyComponent::class.java)` or
+   `Yatagan.autoBuilder(MyComponent::class.java)` for components without an explicit builder.
 8. Mark all components, that are accessed from multiple threads as `@Component(.., multiThreadAccess = true)`.
    If you are unsure, if a component is accessed from a single thread, but ideally it should be,
-   you can set up a check with `Yatagan.setThreadAsserter()`.
+   you can set up a check with the `yatagan.threadCheckerClassName` processor option
+   (see [Options](#options)).
 9. Run build and fix all remaining inconsistencies (like implicitly included subcomponents, etc..).
+
+## Dagger compatibility mode (experimental)
+
+Yatagan has an experimental mode, enabled with the
+`yatagan.experimental.enableDaggerCompatibility` processor option, in which:
+
+- Dagger annotations and types with supported functionality (`@dagger.Component`, `@dagger.Module`,
+  `@dagger.Provides`, `dagger.Lazy`, ...) are recognized alongside Yatagan ones,
+  and may be mixed in the same codebase;
+- a `Dagger<ComponentName>` facade class is generated for **every** root component —
+  Dagger- and Yatagan-annotated alike (e.g. `DaggerMyComponent.create()`,
+  `DaggerMyComponent.builder()`/`.factory()`; nested components use `_`: `DaggerOuter_Inner`),
+  so existing Dagger call sites keep compiling.
+
+Hilt, `dagger.android`, Dagger Producers, Dagger-gRPC and Dagger SPI plugins remain unsupported.
+
+For the reflection backend, use the `enableDaggerCompatibility` property in `parameters.properties`
+(see [reflection notes](rt/README.md#reflection-specific-api)); this additionally requires the Dagger API
+jar on the runtime classpath.
+
+The feature is experimental — validate your graph thoroughly before shipping.
 
 ## Added APIs
 
 Yatagan introduces the following new APIs, that can be utilized to work with **conditional bindings**
 
-The first one is [`@Condition`](api/public/src/main/kotlin/Condition.kt).
+The first one is
+[`@ConditionExpression`](api/public/src/main/kotlin/com/yandex/yatagan/ConditionExpression.kt).
 With this annotation, one can declare a **runtime condition** that can be evaluated and its value will
 determine the presence/absence of a binding under the condition.
 
-To put a binding under a given condition, one must use [`@Conditional`](api/public/src/main/kotlin/Conditional.kt)
+To put a binding under a given condition, one must use
+[`@Conditional`](api/public/src/main/kotlin/com/yandex/yatagan/Conditional.kt)
 annotation on a binding or a class with `@Inject`-annotated constructor.
 
 Variant API ideally replaces Dagger's `@BindsOptionalOf` and makes it more powerful.
@@ -313,11 +346,13 @@ Yatagan has some options, that tweak its behavior. They are provided as normal a
 However, reflection backend requires a different approach in specifying them,
 as documented [here](rt/README.md#reflection-specific-api).
 
-| Option key                       | Default value | Description                                                                   |
-|----------------------------------|---------------|-------------------------------------------------------------------------------|
-| `yatagan.enableStrictMode`       | true          | if enabled, every _mandatory warning_ is reported as an error                 |
-| `yatagan.maxIssueEncounterPaths` | 5             | the max number of places `Encountered in` in an error message to be mentioned |
-| `yatagan.usePlainOutput`         | false         | if enabled, reporting is done in plain text, without ANSI coloring            |
+| Option key                                       | Default value | Description                                                                                    |
+|--------------------------------------------------|---------------|------------------------------------------------------------------------------------------------|
+| `yatagan.enableStrictMode`                       | true          | if enabled, every _mandatory warning_ is reported as an error                                  |
+| `yatagan.maxIssueEncounterPaths`                 | 5             | the max number of places `Encountered in` in an error message to be mentioned                  |
+| `yatagan.usePlainOutput`                         | false         | if enabled, reporting is done in plain text, without ANSI coloring                             |
+| `yatagan.threadCheckerClassName`                 | —             | FQN of a class with a static parameterless `assertThreadAccess` method, used for thread checks |
+| `yatagan.experimental.enableDaggerCompatibility` | false         | enables [Dagger compatibility mode](#dagger-compatibility-mode-experimental)                   |
 
 [D2]: https://dagger.dev/
 [KSP]: https://kotlinlang.org/docs/ksp-quickstart.html
