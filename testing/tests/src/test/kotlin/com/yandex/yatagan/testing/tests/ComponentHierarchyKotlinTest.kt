@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.testing.tests
 
+import com.yandex.yatagan.testing.source_set.SourceSet
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -79,6 +80,61 @@ class ComponentHierarchyKotlinTest(
             }
         """
         )
+
+        compileRunAndValidate()
+    }
+
+    @Test
+    fun `subcomponents - declared in a precompiled module`() {
+        givenPrecompiledModule(SourceSet {
+            givenKotlinSource("mod.Precompiled", """
+                import com.yandex.yatagan.Component
+                import com.yandex.yatagan.Module
+                import com.yandex.yatagan.Provides
+                import javax.inject.Inject
+
+                class Payload @Inject constructor()
+
+                @Component(isRoot = false)
+                interface WrappingComponent {
+                    val payload: Payload
+
+                    @Component.Builder
+                    interface Factory {
+                        fun create(): WrappingComponent
+                    }
+                }
+
+                @Module(subcomponents = [WrappingComponent::class])
+                object GlobalModule {
+                    @Provides
+                    fun providePayload(factory: WrappingComponent.Factory): Any {
+                        return factory.create().payload
+                    }
+                }
+            """.trimIndent())
+        })
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.Component
+            import com.yandex.yatagan.Yatagan
+            import mod.GlobalModule
+
+            @Component(modules = [GlobalModule::class])
+            interface TestComponent {
+                val any: Any
+
+                @Component.Builder
+                interface Factory {
+                    fun create(): TestComponent
+                }
+            }
+
+            fun test() {
+                val component = Yatagan.builder(TestComponent.Factory::class.java).create()
+                assert(component.any is mod.Payload)
+            }
+        """.trimIndent())
 
         compileRunAndValidate()
     }
