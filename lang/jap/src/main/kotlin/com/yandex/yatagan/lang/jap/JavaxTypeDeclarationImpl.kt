@@ -48,9 +48,11 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class JavaxTypeDeclarationImpl private constructor(
     lexicalScope: LexicalScope,
-    val type: DeclaredType,
-) : CtAnnotated by JavaxAnnotatedImpl(lexicalScope, type.asTypeElement()), CtTypeDeclarationBase(),
-    LexicalScope by lexicalScope {
+    wrapped: TypeMirrorEquivalence,
+) : CtAnnotated by JavaxAnnotatedImpl(lexicalScope, wrapped.get().asDeclaredType().asTypeElement()),
+    CtTypeDeclarationBase(), LexicalScope by lexicalScope {
+    val type: DeclaredType = wrapped.get().asDeclaredType()
+
     private val impl = type.asTypeElement()
 
     override val isEffectivelyPublic: Boolean
@@ -196,7 +198,15 @@ internal class JavaxTypeDeclarationImpl private constructor(
     }
 
     companion object Factory : FactoryKey<DeclaredType, JavaxTypeDeclarationImpl> {
-        override fun LexicalScope.factory() = caching(::JavaxTypeDeclarationImpl)
+        private object Caching : FactoryKey<TypeMirrorEquivalence, JavaxTypeDeclarationImpl> {
+            override fun LexicalScope.factory() = caching(::JavaxTypeDeclarationImpl)
+        }
+
+        // NOTE: `DeclaredType` has no structural `equals()`, so cache by `TypeMirrorEquivalence`,
+        //  otherwise distinct mirror instances of the same type yield distinct declaration models.
+        override fun LexicalScope.factory() = fun LexicalScope.(impl: DeclaredType): JavaxTypeDeclarationImpl {
+            return Caching(TypeMirrorEquivalence(impl))
+        }
     }
 
     private inner class ConstructorImpl(

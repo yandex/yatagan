@@ -1,0 +1,59 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganTestComponent.java
+package test;
+
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import javax.annotation.processing.Generated;
+import mod.GlobalModule;
+import mod.Payload;
+import mod.WrappingComponent;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganTestComponent implements TestComponent {
+  YataganTestComponent() {
+  }
+
+  @Override
+  public Object getAny() {
+    return Checks.checkProvisionNotNull(GlobalModule.INSTANCE.providePayload(new WrappingComponentImpl.ComponentFactoryImpl()));
+  }
+
+  public static TestComponent.Factory builder() {
+    return new ComponentFactoryImpl();
+  }
+
+  static final class WrappingComponentImpl implements WrappingComponent {
+    WrappingComponentImpl() {
+    }
+
+    @Override
+    public Payload getPayload() {
+      return new Payload();
+    }
+
+    private static final class ComponentFactoryImpl implements WrappingComponent.Factory {
+      ComponentFactoryImpl() {
+      }
+
+      @Override
+      public WrappingComponent create() {
+        return new WrappingComponentImpl();
+      }
+    }
+  }
+
+  private static final class ComponentFactoryImpl implements TestComponent.Factory {
+    @Override
+    public TestComponent create() {
+      return new YataganTestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
