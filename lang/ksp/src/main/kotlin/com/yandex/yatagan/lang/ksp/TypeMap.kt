@@ -84,9 +84,6 @@ internal object TypeMap {
     ): KSType {
         val originalType = typeReference.resolve()
 
-        // Early bail out for error types, as the following code is likely to fail for KSP1 with them
-        if (originalType.isError && !Utils.isKsp2) return originalType
-
         // TODO: Support parameterized type-aliases, now broken
         val type = originalType.resolveAliasIfNeeded()
         val originalDeclaration = type.declaration as? KSClassDeclaration ?: return type
@@ -121,11 +118,6 @@ internal object TypeMap {
                     typeReference = argTypeReference,
                     bakeVarianceAsWildcard = false,  // Doesn't propagate for type parameters
                 )
-                if (mappedArgType.isError && !Utils.isKsp2) {
-                    // Bail out of the mapping, as error type is present - it's known to cause crashes inside
-                    // KSClassDeclaration.asType() invocation
-                    return type
-                }
                 val shouldComputeWildcard = bakeVarianceAsWildcard || argTypeReference.shouldForceWildcards()
                 Utils.resolver.getTypeArgument(
                     typeRef = argTypeReference.replaceType(mappedArgType),

@@ -34,8 +34,8 @@ import javax.lang.model.element.Modifier.PRIVATE
 
 @Singleton
 internal class ConditionGenerator @Inject constructor(
-    @FieldsNamespace private val fieldsNs: Namespace,
-    @MethodsNamespace private val methodsNs: Namespace,
+    @param:FieldsNamespace private val fieldsNs: Namespace,
+    @param:MethodsNamespace private val methodsNs: Namespace,
     private val thisGraph: BindingGraph,
 ) : ComponentGenerator.Contributor {
     private val literalAccess: Map<ConditionModel, ConditionAccessStrategy> = run {
