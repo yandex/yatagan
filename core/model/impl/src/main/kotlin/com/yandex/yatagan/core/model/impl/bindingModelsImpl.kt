@@ -38,9 +38,12 @@ import com.yandex.yatagan.lang.langFactory
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings.Errors
+import com.yandex.yatagan.validation.format.Strings.Notes
+import com.yandex.yatagan.validation.format.Strings.Warnings
 import com.yandex.yatagan.validation.format.appendChildContextReference
 import com.yandex.yatagan.validation.format.modelRepresentation
 import com.yandex.yatagan.validation.format.reportError
+import com.yandex.yatagan.validation.format.reportMandatoryWarning
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal abstract class ModuleHostedBindingBase : ModuleHostedBindingModel {
@@ -190,6 +193,12 @@ internal class BindsImpl(
 
         if (!method.isAbstract) {
             validator.reportError(Errors.nonAbstractBinds())
+        }
+
+        if (method.getAnnotations(BuiltinAnnotation.Conditional).isNotEmpty()) {
+            validator.reportMandatoryWarning(Warnings.conditionalOnBindsHasNoEffect()) {
+                addNote(Notes.infoOnConditionalOnBinds())
+            }
         }
     }
 
