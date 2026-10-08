@@ -524,6 +524,9 @@ object Strings {
         fun scopeRebindIsForbidden() = "Scope has no effect on 'alias' binding".toWarning()
 
         @Covered
+        fun conditionalOnBindsHasNoEffect() = "@Conditional has no effect on @Binds binding".toWarning()
+
+        @Covered
         fun ignoredDependencyOfFrameworkType(method: Any) = buildRichString {
             color = TextColor.Inherit
             appendLine("function")
@@ -588,6 +591,10 @@ object Strings {
         fun infoOnScopeRebind() = ("Scope is inherited from the source graph node and can not be overridden. " +
                 "Use multiple scopes on the source node to declare it compatible with another scope, " +
                 "if required.").toNote()
+
+        @Covered
+        fun infoOnConditionalOnBinds() = ("@Binds binding takes its condition from its source(s) " +
+                "and can not override it. Use @Provides to declare a binding under its own condition.").toNote()
 
         @Covered
         fun unknownBinding() =

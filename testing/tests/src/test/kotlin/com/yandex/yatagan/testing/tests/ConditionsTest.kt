@@ -450,6 +450,36 @@ class ConditionsTest(
     }
 
     @Test
+    fun `@Conditional on @Binds has no effect`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            interface Api
+            class Impl @Inject constructor() : Api
+            class Stub @Inject constructor() : Api
+
+            @Module interface TestModule {
+                @Binds @Named("alias") @Conditional(Conditions.FeatureA::class)
+                fun alias(i: Impl): Api
+
+                @Binds @Named("alternatives") @Conditional(Conditions.FeatureA::class)
+                fun alternatives(i: Impl, s: Stub): Api
+
+                @Binds @Named("absent") @Conditional(Conditions.FeatureA::class)
+                fun absent(): Api
+            }
+
+            @Component(modules = [TestModule::class])
+            interface TestComponent
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
     fun `issue #85 - conditions in component hierarchy with usage gaps`() {
         includeFromSourceSet(features)
         givenKotlinSource("test.TestCase", """

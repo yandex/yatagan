@@ -1,0 +1,19 @@
+error: @Conditional has no effect on @Binds binding
+NOTE: @Binds binding takes its condition from its source(s) and can not override it. Use @Provides to declare a binding under its own condition.
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::alias(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::absent(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in module test.TestModule
+  here: @binds test.TestModule::alternatives(...)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
