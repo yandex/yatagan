@@ -23,6 +23,7 @@ import com.yandex.yatagan.core.model.NodeModel
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.scope.invoke
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -36,7 +37,11 @@ internal class InjectedConditionExpressionModelImpl(
     private val node: NodeModel,
 ) : InjectedConditionExpressionModel {
     private val valueOf = checkNotNull(node.qualifier?.asBuiltin(BuiltinAnnotation.ValueOf))
-    private val conditionExpressionHolder by lazy { ConditionExpressionHolder(valueOf.value) }
+    private val conditionExpressionHolder by lazy {
+        val referenceLoop = ConditionExpressionHolder.referencedFeatures(valueOf.value)
+            .firstNotNullOfOrNull { FeatureModelImpl(it.declaration).referenceLoop }
+        ConditionExpressionHolder(valueOf.value, referenceLoop)
+    }
 
     override val type: Type
         get() = node.type
