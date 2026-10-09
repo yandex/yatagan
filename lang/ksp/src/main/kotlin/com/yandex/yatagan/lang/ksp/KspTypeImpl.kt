@@ -95,40 +95,30 @@ internal class KspTypeImpl private constructor(
 
     companion object Factory : FactoryKey<ResolveTypeInfo, Type> {
         /**
-         * A polymorphic wrapper over KSType required to correctly cache the KspTypeImpl instances.
+         * A wrapper over KSType required to correctly cache the KspTypeImpl instances.
+         *
+         * KSP2 uses semantic type equivalence, which ignores "wildcards" - redundant projections.
+         * Given `interface Lazy<out T> {}` and `interface Foo`,
+         * types `Lazy<Foo>` and `Lazy<out Foo>` are semantically equivalent,
+         * but we need to distinguish between them.
+         *
+         * So we capture type projections and compare them additionally.
          */
-        private sealed interface KSTypeEquivalence {
-            val type: KSType
-
-            /**
-             * Use KSType directly - its equals/hashcode suit us.
-             */
-            @JvmInline value class Ksp1(override val type: KSType) : KSTypeEquivalence
-
-            /**
-             * KSP2 uses semantic type equivalence, which ignores "wildcards" - redundant projections.
-             * Given `interface Lazy<out T> {}` and `interface Foo`,
-             * types `Lazy<Foo>` and `Lazy<out Foo>` are semantically equivalent,
-             * but we need to distinguish between them.
-             *
-             * So we capture type projections and compare them additionally.
-             */
-            class Ksp2(
-                override val type: KSType,
-            ) : KSTypeEquivalence {
-                private val flatProjections: List<Variance> = buildList { flatten(type) }
-                private val hashCode by lazy { type.hashCode() + 31 * flatProjections.hashCode() }
-                private fun MutableList<Variance>.flatten(type: KSType?) {
-                    type?.arguments?.forEach {
-                        add(it.variance)
-                        flatten(it.type?.resolve())
-                    }
+        private class KSTypeEquivalence(
+            val type: KSType,
+        ) {
+            private val flatProjections: List<Variance> = buildList { flatten(type) }
+            private val hashCode by lazy { type.hashCode() + 31 * flatProjections.hashCode() }
+            private fun MutableList<Variance>.flatten(type: KSType?) {
+                type?.arguments?.forEach {
+                    add(it.variance)
+                    flatten(it.type?.resolve())
                 }
-
-                override fun hashCode(): Int = hashCode
-                override fun equals(other: Any?) =
-                    other === this || other is Ksp2 && type == other.type && flatProjections == other.flatProjections
             }
+
+            override fun hashCode(): Int = hashCode
+            override fun equals(other: Any?) = other === this ||
+                    other is KSTypeEquivalence && type == other.type && flatProjections == other.flatProjections
         }
 
         private object Caching : FactoryKey<Pair<JvmTypeInfo, KSTypeEquivalence>, KspTypeImpl> {
@@ -150,6 +140,7 @@ internal class KspTypeImpl private constructor(
             return when {
                 type == null || type.isError -> {
                     val nameHint = reference?.element?.toString()
+                        ?: type?.let { KspErrorTypeRegex.matchEntire(it.toString())?.groupValues?.get(1) }
                     CtErrorType(
                         nameModel = InvalidNameModel.Unresolved(hint = nameHint ?: jvmSignatureHint),
                     )
@@ -160,9 +151,7 @@ internal class KspTypeImpl private constructor(
                     )
                 }
                 else -> {
-                    val equivalenceWrapped =
-                        if (Utils.isKsp2) KSTypeEquivalence.Ksp2(type) else KSTypeEquivalence.Ksp1(type)
-                    Caching(JvmTypeInfo(jvmSignature = jvmSignatureHint, type = type) to equivalenceWrapped)
+                    Caching(JvmTypeInfo(jvmSignature = jvmSignatureHint, type = type) to KSTypeEquivalence(type))
                 }
             }
         }
