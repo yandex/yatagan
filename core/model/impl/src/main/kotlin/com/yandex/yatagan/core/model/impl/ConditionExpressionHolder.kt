@@ -21,12 +21,14 @@ import com.yandex.yatagan.core.model.impl.parsing.BooleanExpressionParser
 import com.yandex.yatagan.core.model.impl.parsing.ExpressionFactoryForParsing
 import com.yandex.yatagan.core.model.impl.parsing.ParseException
 import com.yandex.yatagan.lang.BuiltinAnnotation
+import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.reportError
 
 internal class ConditionExpressionHolder(
     val impl: BuiltinAnnotation.ConditionExpression,
+    private val referenceLoop: List<Type>?,
 ) {
     private val parseError: CharSequence?
 
@@ -35,23 +37,10 @@ internal class ConditionExpressionHolder(
     init {
         var parseError: CharSequence? = null
 
-        val conditionScope = try {
+        val conditionScope = if (referenceLoop != null) null else try {
             val expression = BooleanExpressionParser(
                 expressionSource = impl.value,
-                factory = ExpressionFactoryForParsing(
-                    imports = buildMap {
-                        for (import in impl.imports) {
-                            put(import.declaration.qualifiedName.substringAfterLast('.'), import)
-                        }
-                        for (importAs in impl.importAs) {
-                            if (!importAs.alias.matches(AliasedImportRegex)) {
-                                // Skip invalid imports
-                                continue
-                            }
-                            put(importAs.alias, importAs.value)
-                        }
-                    }
-                ),
+                factory = ExpressionFactoryForParsing(imports = importsOf(impl)),
             ).parse()
             ConditionScopeImpl(expression)
         } catch (e: ParseException) {
@@ -64,6 +53,10 @@ internal class ConditionExpressionHolder(
     }
 
     fun validate(validator: Validator) {
+        referenceLoop?.let { referenceLoop ->
+            validator.reportError(Strings.Errors.featureReferenceLoop(chain = referenceLoop))
+        }
+
         parseError?.let { parseError ->
             validator.reportError(Strings.Errors.conditionExpressionParseErrors(parseError))
         }
@@ -93,5 +86,42 @@ internal class ConditionExpressionHolder(
 
     companion object {
         private val AliasedImportRegex = """[a-zA-Z0-9_]+""".toRegex()
+
+        private fun importsOf(impl: BuiltinAnnotation.ConditionExpression): Map<String, Type> = buildMap {
+            for (import in impl.imports) {
+                put(import.declaration.qualifiedName.substringAfterLast('.'), import)
+            }
+            for (importAs in impl.importAs) {
+                if (!importAs.alias.matches(AliasedImportRegex)) {
+                    // Skip invalid imports
+                    continue
+                }
+                put(importAs.alias, importAs.value)
+            }
+        }
+
+        fun referencedFeatures(impl: BuiltinAnnotation.ConditionExpression): List<Type> {
+            val imports = importsOf(impl)
+            val features = arrayListOf<Type>()
+            try {
+                BooleanExpressionParser(
+                    expressionSource = impl.value,
+                    factory = object : BooleanExpressionParser.Factory<Unit> {
+                        override fun createAnd(lhs: Unit, rhs: Unit) = Unit
+                        override fun createOr(lhs: Unit, rhs: Unit) = Unit
+                        override fun createNot(e: Unit) = Unit
+                        override fun parseVariable(text: String): BooleanExpressionParser.Factory.ParseResult<Unit> {
+                            if (text.startsWith("@")) {
+                                imports[text.substring(1)]?.let(features::add)
+                            }
+                            return BooleanExpressionParser.Factory.ParseResult.Ok(Unit)
+                        }
+                    },
+                ).parse()
+            } catch (e: ParseException) {
+                return emptyList()
+            }
+            return features
+        }
     }
 }
