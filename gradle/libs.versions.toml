@@ -1,11 +1,11 @@
 [versions]
 
 # Kotlin version used to build Yatagan
-kotlin = "1.9.24"
+kotlin = "2.4.21"
 # Must be in sync with 'kotlin'. Asserted in buildscript
-ksp = "1.9.24-1.0.20"
+ksp = "2.3.12"
 # Must be compatible with 'kotlin'
-dokka = "2.0.0"
+dokka = "2.2.0"
 
 dagger = "2.51.1"
 
