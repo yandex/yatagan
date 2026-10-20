@@ -1,0 +1,110 @@
+error: Feature reference loop detected:
+(*) `test.A` references ->
+    `test.B` references -> (*)
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getB: [Optional] test.ClassB
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassB()
+  in its conditions declaration { runtime-conditions: [.., test.A, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.A <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getD: [Optional] test.ClassD
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassD()
+  in its conditions declaration { runtime-conditions: [.., test.B, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.B <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getC: [Optional] test.ClassC
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassC()
+  in its conditions declaration { runtime-conditions: [.., test.C, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.C <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Feature reference loop detected:
+(*) `test.Aliased` references -> (*)
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getE: [Optional] test.ClassE
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassE()
+  in its conditions declaration { runtime-conditions: [.., test.Aliased, ..] }
+                                                           ^-[*2]------
+  here: [2*] feature test.Aliased <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Feature reference loop detected:
+(*) `test.OnlyValueOf` references -> (*)
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getH: test.ClassH
+                       ^-[*1]-----
+  in [1*] inject-constructor test.ClassH(@com.yandex.yatagan.ValueOf(value=@com.yandex.yatagan.ConditionExpression(importAs={}, imports={test.OnlyValueOf.class}, value="@OnlyValueOf")) java.lang.Boolean)
+                                         ^-[*2]-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  here: [2*] injectable condition expression value: java.lang.Boolean = <invalid-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Feature reference loop detected:
+(*) `test.P` references ->
+    `test.R` references ->
+    `test.Q` references -> (*)
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getG: [Optional] test.ClassG
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassG()
+  in its conditions declaration { runtime-conditions: [.., test.Q, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.Q <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getF: [Optional] test.ClassF
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassF()
+  in its conditions declaration { runtime-conditions: [.., test.R, ..] }
+                                                           ^-[*2]-
+  here: [2*] feature test.R <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Feature reference loop detected:
+(*) `test.Self` references -> (*)
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getA: [Optional] test.ClassA
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassA()
+  in its conditions declaration { runtime-conditions: [.., test.Self, ..] }
+                                                           ^-[*2]---
+  here: [2*] feature test.Self <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+error: Unable to parse condition expression:
+"!@Broken &"
+           ^~~~ Unexpected <end-of-expression>. Expected one of: '(', '!', <variable>
+
+Encountered:
+  in graph for root-component test.TestComponent
+  in entry-point getI: [Optional] test.ClassI
+                       ^-[*1]----------------
+  in [1*] inject-constructor test.ClassI()
+  in its conditions declaration { runtime-conditions: [.., test.Broken, ..] }
+                                                           ^-[*2]-----
+  here: [2*] feature test.Broken <invalid-condition-expression>
+             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

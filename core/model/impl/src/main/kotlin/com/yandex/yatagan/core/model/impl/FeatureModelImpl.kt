@@ -16,6 +16,7 @@
 
 package com.yandex.yatagan.core.model.impl
 
+import com.yandex.yatagan.base.traverseDepthFirstWithPath
 import com.yandex.yatagan.core.model.ConditionScope
 import com.yandex.yatagan.core.model.ConditionalHoldingModel
 import com.yandex.yatagan.lang.BuiltinAnnotation
@@ -24,6 +25,7 @@ import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.scope.FactoryKey
 import com.yandex.yatagan.lang.scope.LexicalScope
 import com.yandex.yatagan.lang.scope.caching
+import com.yandex.yatagan.lang.scope.invoke
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
 import com.yandex.yatagan.validation.format.Strings
@@ -76,8 +78,29 @@ internal class FeatureModelImpl private constructor(
         }
     }
 
+    private val referencedFeatures: List<FeatureModelImpl> by lazy {
+        val expression = impl.getAnnotation(BuiltinAnnotation.ConditionExpression) ?: return@lazy emptyList()
+        ConditionExpressionHolder.referencedFeatures(expression).map { Factory(it.declaration) }
+    }
+
+    internal val referenceLoop: List<Type>? by lazy {
+        var loop: List<Type>? = null
+        traverseDepthFirstWithPath(
+            roots = listOf(this),
+            childrenOf = { it.referencedFeatures },
+            onLoop = {
+                if (loop == null) {
+                    val types = it.map { feature -> feature.type }.toList()
+                    val start = types.indices.minBy { index -> types[index].toString() }
+                    loop = types.drop(start) + types.take(start)
+                }
+            },
+        )
+        loop
+    }
+
     private val conditionExpressionHolder: ConditionExpressionHolder? by lazy {
-        impl.getAnnotation(BuiltinAnnotation.ConditionExpression)?.let { ConditionExpressionHolder(it) }
+        impl.getAnnotation(BuiltinAnnotation.ConditionExpression)?.let { ConditionExpressionHolder(it, referenceLoop) }
     }
 
     private fun parseOneCondition(one: BuiltinAnnotation.ConditionFamily.One): BooleanExpressionInternal {

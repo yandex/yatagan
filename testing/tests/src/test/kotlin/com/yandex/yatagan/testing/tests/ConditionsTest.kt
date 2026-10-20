@@ -1183,6 +1183,67 @@ class ConditionsTest(
     }
 
     @Test
+    fun `feature reference loops`() {
+        includeFromSourceSet(features)
+
+        givenKotlinSource("test.TestCase", """
+            import com.yandex.yatagan.*
+            import javax.inject.*
+
+            @ConditionExpression("!@Self", Self::class) annotation class Self
+
+            @ConditionExpression("@B", B::class) annotation class A
+            @ConditionExpression("@A", A::class) annotation class B
+
+            @ConditionExpression("@A", A::class) annotation class C
+
+            @ConditionExpression("!@Alias", importAs = [ConditionExpression.ImportAs(Aliased::class, "Alias")])
+            annotation class Aliased
+
+            @ConditionExpression("@R", R::class) annotation class P
+            @ConditionExpression("@P", P::class) annotation class Q
+            @ConditionExpression("@Q", Q::class) annotation class R
+
+            @ConditionExpression("!@OnlyValueOf", OnlyValueOf::class) annotation class OnlyValueOf
+
+            @ConditionExpression("!@Broken &", Broken::class) annotation class Broken
+
+            @ConditionExpression("isEnabledB", Features::class) annotation class Leaf
+            @ConditionExpression("@Leaf", Leaf::class) annotation class Left
+            @ConditionExpression("@Leaf", Leaf::class) annotation class Right
+            @ConditionExpression("@Left & @Right", Left::class, Right::class) annotation class Diamond
+
+            @Conditional(Self::class) class ClassA @Inject constructor()
+            @Conditional(A::class) class ClassB @Inject constructor()
+            @Conditional(C::class) class ClassC @Inject constructor()
+            @Conditional(B::class) class ClassD @Inject constructor()
+            @Conditional(Aliased::class) class ClassE @Inject constructor()
+            @Conditional(R::class) class ClassF @Inject constructor()
+            @Conditional(Q::class) class ClassG @Inject constructor()
+            class ClassH @Inject constructor(
+                @ValueOf(ConditionExpression("@OnlyValueOf", OnlyValueOf::class)) val flag: Boolean,
+            )
+            @Conditional(Broken::class) class ClassI @Inject constructor()
+            @Conditional(Diamond::class) class ClassJ @Inject constructor()
+
+            @Component interface TestComponent {
+                val a: Optional<ClassA>
+                val b: Optional<ClassB>
+                val c: Optional<ClassC>
+                val d: Optional<ClassD>
+                val e: Optional<ClassE>
+                val f: Optional<ClassF>
+                val g: Optional<ClassG>
+                val h: ClassH
+                val i: Optional<ClassI>
+                val j: Optional<ClassJ>
+            }
+        """.trimIndent())
+
+        compileRunAndValidate()
+    }
+
+    @Test
     fun `injecting condition values`() {
         includeFromSourceSet(features)
 

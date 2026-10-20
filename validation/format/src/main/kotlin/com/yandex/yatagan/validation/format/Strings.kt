@@ -498,6 +498,20 @@ object Strings {
         }.toError()
 
         @Covered
+        fun featureReferenceLoop(chain: List<Type>) = buildRichString {
+            color = TextColor.Inherit
+            appendLine("Feature reference loop detected:")
+            chain.forEachIndexed { index, feature ->
+                if (index == 0) append("(*) ") else append("    ")
+                append('`').append(feature).append("` references ->")
+                if (index != chain.lastIndex) {
+                    appendLine()
+                }
+            }
+            append(" (*)")
+        }.toError()
+
+        @Covered
         fun conflictingConditionExpressionImport(name: String, types: List<Type>) = buildRichString {
             color = TextColor.Inherit
             append("Conflicting imports: types ")
