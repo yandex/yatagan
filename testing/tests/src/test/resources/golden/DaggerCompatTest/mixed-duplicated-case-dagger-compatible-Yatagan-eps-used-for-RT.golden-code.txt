@@ -122,7 +122,7 @@ import javax.inject.Provider;
 public final class YataganMyDagger implements MyDagger {
   private volatile Object mBarInstance = new UninitializedLock();
 
-  private Object mFooInstance;
+  private volatile Object mFooInstance;
 
   private YataganMyDagger() {
   }

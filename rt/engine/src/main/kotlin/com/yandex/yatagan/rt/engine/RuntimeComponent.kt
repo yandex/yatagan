@@ -87,6 +87,7 @@ internal class RuntimeComponent(
             this[binding] = when {
                 binding.scopes.isNotEmpty() -> when {
                     requiresSynchronizedAccess -> accessStrategyFactory.synchronizedCaching(binding)
+                    graphRequiresSynchronizedAccess -> accessStrategyFactory.singleCheckCaching(binding)
                     else -> accessStrategyFactory.caching(binding)
                 }
                 else -> when {

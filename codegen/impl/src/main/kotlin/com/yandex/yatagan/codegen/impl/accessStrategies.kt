@@ -77,6 +77,10 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
         val targetType = binding.target.typeName()
         field(ClassName.OBJECT, instanceFieldName) {
             modifiers(PRIVATE)  // PRIVATE: only accessed via its accessor.
+            if (binding.owner.requiresSynchronizedAccess) {
+                // Reusable permits duplicate creation, but still requires safe publication.
+                modifiers(VOLATILE)
+            }
         }
         method(instanceAccessorName) {
             modifiers(/*package-private*/)

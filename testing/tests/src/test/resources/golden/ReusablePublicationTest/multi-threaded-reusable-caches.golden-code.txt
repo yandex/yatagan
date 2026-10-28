@@ -1,0 +1,111 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Name: test/YataganTestComponent.java
+package test;
+
+import com.yandex.yatagan.AutoBuilder;
+import com.yandex.yatagan.Lazy;
+import com.yandex.yatagan.internal.Checks;
+import com.yandex.yatagan.internal.YataganGenerated;
+import java.lang.AssertionError;
+import java.lang.Class;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.SuppressWarnings;
+import java.util.Collections;
+import javax.annotation.processing.Generated;
+import javax.inject.Provider;
+
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "deprecation"})
+@YataganGenerated
+@Generated("com.yandex.yatagan.codegen.impl.ComponentGenerator")
+public final class YataganTestComponent implements TestComponent {
+  private volatile Object mProvidedValueInstance;
+
+  private volatile Object mConstructorValueInstance;
+
+  private YataganTestComponent() {
+  }
+
+  @Override
+  public Provider<ConstructorValue> constructorProvider() {
+    return new ProviderImpl(this, 0);
+  }
+
+  @Override
+  public ConstructorValue constructorValue() {
+    return this.cacheConstructorValue();
+  }
+
+  @Override
+  public Provider<ProvidedValue> providedProvider() {
+    return new ProviderImpl(this, 1);
+  }
+
+  @Override
+  public ProvidedValue providedValue() {
+    return this.cacheProvidedValue();
+  }
+
+  Object switch$$access(int slot) {
+    switch(slot) {
+      case 0: return this.cacheConstructorValue();
+      case 1: return this.cacheProvidedValue();
+      default: throw new AssertionError();
+    }
+  }
+
+  ProvidedValue cacheProvidedValue() {
+    Object local = this.mProvidedValueInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = Checks.checkProvisionNotNull(Bindings.INSTANCE.value());
+      this.mProvidedValueInstance = local;
+    }
+    return (ProvidedValue) local;
+  }
+
+  ConstructorValue cacheConstructorValue() {
+    Object local = this.mConstructorValueInstance;
+    if (local == null) {
+      ThreadAssertions.assertThreadAccess();
+      local = new ConstructorValue();
+      this.mConstructorValueInstance = local;
+    }
+    return (ConstructorValue) local;
+  }
+
+  public static AutoBuilder<YataganTestComponent> autoBuilder() {
+    return new AutoBuilderImpl();
+  }
+
+  static final class ProviderImpl implements Lazy {
+    private final YataganTestComponent mDelegate;
+
+    private final int mIndex;
+
+    ProviderImpl(YataganTestComponent delegate, int index) {
+      this.mDelegate = delegate;
+      this.mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class AutoBuilderImpl implements AutoBuilder<YataganTestComponent> {
+    @Override
+    public final <I> AutoBuilder<YataganTestComponent> provideInput(I input, Class<I> inputClass) {
+      Checks.reportUnexpectedAutoBuilderInput(input.getClass(), Collections.emptyList());
+      return this;
+    }
+
+    @Override
+    public final YataganTestComponent create() {
+      return new YataganTestComponent();
+    }
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
