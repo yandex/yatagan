@@ -18,6 +18,7 @@ package com.yandex.yatagan.rt.engine
 
 import com.yandex.yatagan.Lazy
 import com.yandex.yatagan.core.graph.bindings.Binding
+import javax.inject.Provider
 
 // WARNING: Do not use anything from the file, if `isDaggerCompat()` is not `true`!
 
@@ -29,7 +30,13 @@ internal class SynchronizedCachingAccessStrategyDaggerCompat(
 internal class SingleCheckCachingAccessStrategyDaggerCompat(
     binding: Binding,
     accessDelegate: BindingAccessDelegate,
-) : SingleCheckCachingAccessStrategy(binding, accessDelegate), dagger.Lazy<Any>
+) : SingleCheckCachingAccessStrategy(binding, accessDelegate) {
+    override fun getLazy(): Lazy<*> = SynchronizedLazyDaggerCompat(this)
+}
+
+internal class SynchronizedLazyDaggerCompat(
+    provider: Provider<Any>,
+) : SynchronizedLazy(provider), dagger.Lazy<Any>
 
 internal class CachingAccessStrategyDaggerCompat(
     binding: Binding,

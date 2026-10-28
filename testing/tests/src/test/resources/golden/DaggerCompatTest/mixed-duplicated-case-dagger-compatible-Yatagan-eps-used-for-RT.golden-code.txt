@@ -166,7 +166,6 @@ public final class YataganMyDagger implements MyDagger {
   Foo cacheFoo() {
     Object local = this.mFooInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
       local = new Foo();
       this.mFooInstance = local;
     }

@@ -34,6 +34,7 @@ internal class AccessStrategyManager @Inject constructor(
     private val thisGraph: BindingGraph,
     private val options: ComponentGenerator.Options,
     private val cachingStrategySingleThreadFactory: CachingStrategySingleThreadFactory,
+    private val cachingStrategyReusableMultiThreadFactory: CachingStrategyReusableMultiThreadFactory,
     private val cachingStrategyMultiThreadFactory: CachingStrategyMultiThreadFactory,
     private val slotProviderStrategyFactory: SlotProviderStrategyFactory,
     private val wrappingAccessorStrategyFactory: WrappingAccessorStrategyFactory,
@@ -45,6 +46,11 @@ internal class AccessStrategyManager @Inject constructor(
     @AssistedFactory
     interface CachingStrategySingleThreadFactory {
         fun create(binding: Binding): CachingStrategySingleThread
+    }
+
+    @AssistedFactory
+    interface CachingStrategyReusableMultiThreadFactory {
+        fun create(binding: Binding): CachingStrategyReusableMultiThread
     }
 
     @AssistedFactory
@@ -132,17 +138,24 @@ internal class AccessStrategyManager @Inject constructor(
                         )
                     }
                     null -> {
-                        val useMultiThreadCaching =
-                            thisGraph.requiresSynchronizedAccess && ScopeModel.Reusable !in binding.scopes
+                        val isReusable = ScopeModel.Reusable in binding.scopes
+                        val needsCachingLazy = thisGraph.requiresSynchronizedAccess && isReusable
+                        val providerStrategy = if (usage.provider > 0 || (usage.lazy > 0 && !needsCachingLazy)) {
+                            slotProviderStrategyFactory.create(binding)
+                        } else null
                         CompositeStrategy(
-                            directStrategy = if (useMultiThreadCaching) {
-                                cachingStrategyMultiThreadFactory.create(binding)
-                            } else {
-                                cachingStrategySingleThreadFactory.create(binding)
+                            directStrategy = when {
+                                !thisGraph.requiresSynchronizedAccess ->
+                                    cachingStrategySingleThreadFactory.create(binding)
+                                isReusable -> cachingStrategyReusableMultiThreadFactory.create(binding)
+                                else -> cachingStrategyMultiThreadFactory.create(binding)
                             },
-                            lazyStrategy = if (usage.lazy + usage.provider > 0) {
-                                slotProviderStrategyFactory.create(binding)
-                            } else null
+                            lazyStrategy = if (usage.lazy > 0 && needsCachingLazy) {
+                                // The Reusable cache can be overwritten by another creator;
+                                // each Lazy must retain its own first result.
+                                onTheFlyScopedProviderCreationStrategyFactory.create(binding)
+                            } else providerStrategy,
+                            providerStrategy = providerStrategy,
                         )
                     }
                 }
