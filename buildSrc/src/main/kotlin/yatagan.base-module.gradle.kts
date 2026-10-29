@@ -1,6 +1,7 @@
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
@@ -12,22 +13,15 @@ repositories {
     google()
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + listOf(
-            "-Xjvm-default=all-compatibility",
-            "-Werror",
-        )
-    }
-}
-
 kotlin {
-    jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
+    coreLibrariesVersion = "2.2.21"
 
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
+        languageVersion.set(KotlinVersion.KOTLIN_2_2)
+        apiVersion.set(KotlinVersion.KOTLIN_2_2)
+        jvmDefault.set(JvmDefaultMode.ENABLE)
+        allWarningsAsErrors.set(true)
     }
 
     sourceSets.configureEach {
@@ -54,11 +48,7 @@ tasks.withType<JavaCompile>().named { it.contains("Test") }.configureEach {
     targetCompatibility = JavaVersion.VERSION_11.toString()
 }
 
-val yataganVersion: String by extra(
-    providers.fileContents(rootProject.layout.projectDirectory.file("yatagan.version"))
-        .asText.get().trim()
-)
+extra["yataganVersion"] = providers.fileContents(rootProject.layout.projectDirectory.file("yatagan.version"))
+    .asText.get().trim()
 
-val enableCoverage: Boolean by extra(
-    providers.gradleProperty("enable_coverage").orNull.toBoolean()
-)
+extra["enableCoverage"] = providers.gradleProperty("enable_coverage").orNull.toBoolean()

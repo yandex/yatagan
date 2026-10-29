@@ -236,9 +236,6 @@ public final class com/yandex/yatagan/lang/TypeDeclarationKind : java/lang/Enum 
 	public static fun values ()[Lcom/yandex/yatagan/lang/TypeDeclarationKind;
 }
 
-public final class com/yandex/yatagan/lang/scope/ExtensionsKt {
-}
-
 public abstract interface class com/yandex/yatagan/lang/scope/LexicalScope {
 	public abstract fun getExt ()Lcom/yandex/yatagan/lang/scope/LexicalScope$Extensions;
 }

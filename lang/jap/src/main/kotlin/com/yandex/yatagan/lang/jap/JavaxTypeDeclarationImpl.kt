@@ -43,7 +43,7 @@ import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.type.TypeVariable
 import javax.lang.model.type.WildcardType
-import javax.lang.model.util.TypeKindVisitor7
+import javax.lang.model.util.TypeKindVisitor8
 import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class JavaxTypeDeclarationImpl private constructor(
@@ -168,7 +168,7 @@ internal class JavaxTypeDeclarationImpl private constructor(
     }
 
     private fun TypeMirror.asMemberOfThis(): TypeMirror {
-        return accept(object : TypeKindVisitor7<TypeMirror, Nothing?>(this) {
+        return accept(object : TypeKindVisitor8<TypeMirror, Nothing?>(this) {
             override fun visitTypeVariable(type: TypeVariable, p: Nothing?): TypeMirror {
                 // Actual resolution happens here
                 return genericsInfo[type.asElement().asTypeParameterElement()] ?: type

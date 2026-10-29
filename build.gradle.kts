@@ -6,8 +6,8 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
 }
 
-val yataganVersion: String by extra
-val enableCoverage: Boolean by extra
+val yataganVersion = extra["yataganVersion"] as String
+val enableCoverage = extra["enableCoverage"] as Boolean
 
 val isUnderTeamcity = providers.environmentVariable("TEAMCITY_VERSION").isPresent
 
