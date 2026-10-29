@@ -27,6 +27,11 @@ public final class YataganTestComponent implements TestComponent {
   }
 
   @Override
+  public Lazy<ConstructorValue> constructorLazy() {
+    return new ProviderImpl(this, 0);
+  }
+
+  @Override
   public Provider<ConstructorValue> constructorProvider() {
     return new ProviderImpl(this, 0);
   }
@@ -34,6 +39,11 @@ public final class YataganTestComponent implements TestComponent {
   @Override
   public ConstructorValue constructorValue() {
     return this.cacheConstructorValue();
+  }
+
+  @Override
+  public Lazy<ProvidedValue> providedLazy() {
+    return new ProviderImpl(this, 1);
   }
 
   @Override
@@ -57,7 +67,7 @@ public final class YataganTestComponent implements TestComponent {
   ProvidedValue cacheProvidedValue() {
     Object local = this.mProvidedValueInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
+      ThreadChecks.assertThreadAccess();
       local = Checks.checkProvisionNotNull(Bindings.INSTANCE.value());
       this.mProvidedValueInstance = local;
     }
@@ -67,7 +77,7 @@ public final class YataganTestComponent implements TestComponent {
   ConstructorValue cacheConstructorValue() {
     Object local = this.mConstructorValueInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
+      ThreadChecks.assertThreadAccess();
       local = new ConstructorValue();
       this.mConstructorValueInstance = local;
     }

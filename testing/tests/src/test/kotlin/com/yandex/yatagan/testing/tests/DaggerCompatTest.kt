@@ -429,6 +429,7 @@ class DaggerCompatTest(
 
             fun commonTest(md: MyDagger, n: Top.MyDaggerNested) {
                 md.foo; md.bar.get()
+                check(md.obar.get().get() === md.foo)
                 val sub = md.createSub(MyModule())
                 sub.foo; sub.a.get()
                 val sub2 = sub.s.setChar('X').setShort(0).build(Any(), 0.0)
