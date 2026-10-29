@@ -26,6 +26,11 @@ internal class SynchronizedCachingAccessStrategyDaggerCompat(
     accessDelegate: BindingAccessDelegate,
 ): SynchronizedCachingAccessStrategy(binding, accessDelegate), dagger.Lazy<Any>
 
+internal class SingleCheckCachingAccessStrategyDaggerCompat(
+    binding: Binding,
+    accessDelegate: BindingAccessDelegate,
+) : SingleCheckCachingAccessStrategy(binding, accessDelegate), dagger.Lazy<Any>
+
 internal class CachingAccessStrategyDaggerCompat(
     binding: Binding,
     accessDelegate: BindingAccessDelegate,
@@ -56,6 +61,9 @@ internal class StrategyFactoryDaggerCompat(
 ) : StrategyFactory(component) {
     override fun synchronizedCaching(binding: Binding): AccessStrategy {
         return SynchronizedCachingAccessStrategyDaggerCompat(binding, component)
+    }
+    override fun singleCheckCaching(binding: Binding): AccessStrategy {
+        return SingleCheckCachingAccessStrategyDaggerCompat(binding, component)
     }
     override fun caching(binding: Binding): AccessStrategy {
         return CachingAccessStrategyDaggerCompat(binding, component)
