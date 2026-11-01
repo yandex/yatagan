@@ -77,10 +77,6 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
         val targetType = binding.target.typeName()
         field(ClassName.OBJECT, instanceFieldName) {
             modifiers(PRIVATE)  // PRIVATE: only accessed via its accessor.
-            if (binding.owner.requiresSynchronizedAccess) {
-                // Reusable permits duplicate creation, but still requires safe publication.
-                modifiers(VOLATILE)
-            }
         }
         method(instanceAccessorName) {
             modifiers(/*package-private*/)
@@ -88,6 +84,33 @@ internal class CachingStrategySingleThread @AssistedInject constructor(
             +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
             controlFlow("if (local == null)") {
                 threadChecker.generateThreadAssertion(this)
+                +buildExpression {
+                    +"local = "
+                    binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)
+                }
+                +"this.%N = local".formatCode(instanceFieldName)
+            }
+            +"return (%T) local".formatCode(targetType)
+        }
+    }
+}
+
+// Reusable permits concurrent creation, but each result must be safely published.
+internal class CachingStrategyReusableMultiThread @AssistedInject constructor(
+    @Assisted binding: Binding,
+    @FieldsNamespace fieldsNs: Namespace,
+    @MethodsNamespace methodsNs: Namespace,
+) : CachingStrategyBase(binding, fieldsNs, methodsNs) {
+    override fun generateInComponent(builder: TypeSpecBuilder) = with(builder) {
+        val targetType = binding.target.typeName()
+        field(ClassName.OBJECT, instanceFieldName) {
+            modifiers(PRIVATE, VOLATILE)  // PRIVATE: only accessed via its accessor.
+        }
+        method(instanceAccessorName) {
+            modifiers(/*package-private*/)
+            returnType(targetType)
+            +"%T local = this.%N".formatCode(ClassName.OBJECT, instanceFieldName)
+            controlFlow("if (local == null)") {
                 +buildExpression {
                     +"local = "
                     binding.generateCreation(builder = this, inside = binding.owner, isInsideInnerClass = false)

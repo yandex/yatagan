@@ -27,6 +27,11 @@ public final class YataganTestComponent implements TestComponent {
   }
 
   @Override
+  public Lazy<ConstructorValue> constructorLazy() {
+    return new DoubleCheck(this, 0);
+  }
+
+  @Override
   public Provider<ConstructorValue> constructorProvider() {
     return new ProviderImpl(this, 0);
   }
@@ -34,6 +39,11 @@ public final class YataganTestComponent implements TestComponent {
   @Override
   public ConstructorValue constructorValue() {
     return this.cacheConstructorValue();
+  }
+
+  @Override
+  public Lazy<ProvidedValue> providedLazy() {
+    return new DoubleCheck(this, 1);
   }
 
   @Override
@@ -57,7 +67,6 @@ public final class YataganTestComponent implements TestComponent {
   ProvidedValue cacheProvidedValue() {
     Object local = this.mProvidedValueInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
       local = Checks.checkProvisionNotNull(Bindings.INSTANCE.value());
       this.mProvidedValueInstance = local;
     }
@@ -67,7 +76,6 @@ public final class YataganTestComponent implements TestComponent {
   ConstructorValue cacheConstructorValue() {
     Object local = this.mConstructorValueInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
       local = new ConstructorValue();
       this.mConstructorValueInstance = local;
     }
@@ -91,6 +99,34 @@ public final class YataganTestComponent implements TestComponent {
     @Override
     public Object get() {
       return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class DoubleCheck implements Lazy {
+    private final YataganTestComponent mDelegate;
+
+    private final int mIndex;
+
+    private volatile Object mValue;
+
+    DoubleCheck(YataganTestComponent factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        synchronized (this) {
+          local = mValue;
+          if (local == null) {
+            local = mDelegate.switch$$access(mIndex);
+            mValue = local;
+          }
+        }
+      }
+      return local;
     }
   }
 

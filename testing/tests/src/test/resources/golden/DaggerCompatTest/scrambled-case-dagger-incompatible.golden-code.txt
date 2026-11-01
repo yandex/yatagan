@@ -189,7 +189,6 @@ public final class YataganMyDagger implements MyDagger {
   Foo cacheFoo() {
     Object local = this.mFooInstance;
     if (local == null) {
-      ThreadAssertions.assertThreadAccess();
       local = new Foo();
       this.mFooInstance = local;
     }
@@ -201,7 +200,7 @@ public final class YataganMyDagger implements MyDagger {
   }
 
   Optional optOfTestFoo() {
-    return Optional.of(new ProviderImpl(this, 0));
+    return Optional.of(new DoubleCheck(this, 0));
   }
 
   public static AutoBuilder<YataganMyDagger> autoBuilder() {
@@ -242,7 +241,6 @@ public final class YataganMyDagger implements MyDagger {
     Foo cacheFoo() {
       Object local = this.mFooInstance;
       if (local == null) {
-        ThreadAssertions.assertThreadAccess();
         local = new Foo();
         this.mFooInstance = local;
       }
@@ -363,6 +361,34 @@ public final class YataganMyDagger implements MyDagger {
     @Override
     public Object get() {
       return this.mDelegate.switch$$access(this.mIndex);
+    }
+  }
+
+  private static final class DoubleCheck implements com.yandex.yatagan.Lazy, Provider, Lazy {
+    private final YataganMyDagger mDelegate;
+
+    private final int mIndex;
+
+    private volatile Object mValue;
+
+    DoubleCheck(YataganMyDagger factory, int index) {
+      mDelegate = factory;
+      mIndex = index;
+    }
+
+    @Override
+    public Object get() {
+      Object local = mValue;
+      if (local == null) {
+        synchronized (this) {
+          local = mValue;
+          if (local == null) {
+            local = mDelegate.switch$$access(mIndex);
+            mValue = local;
+          }
+        }
+      }
+      return local;
     }
   }
 
