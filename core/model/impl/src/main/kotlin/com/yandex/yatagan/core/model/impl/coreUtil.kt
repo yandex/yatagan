@@ -31,13 +31,17 @@ import com.yandex.yatagan.lang.Annotated
 import com.yandex.yatagan.lang.Annotation
 import com.yandex.yatagan.lang.BuiltinAnnotation
 import com.yandex.yatagan.lang.Type
+import com.yandex.yatagan.lang.TypeDeclaration
+import com.yandex.yatagan.lang.common.HasUnreadableMembers
 import com.yandex.yatagan.lang.common.isDaggerCompat
 import com.yandex.yatagan.validation.MayBeInvalid
 import com.yandex.yatagan.validation.Validator
+import com.yandex.yatagan.validation.format.Strings
 import com.yandex.yatagan.validation.format.TextColor
 import com.yandex.yatagan.validation.format.append
 import com.yandex.yatagan.validation.format.appendRichString
 import com.yandex.yatagan.validation.format.buildRichString
+import com.yandex.yatagan.validation.format.reportWarning
 
 internal fun NodeDependency(
     type: Type,
@@ -114,6 +118,13 @@ internal fun Annotation.isScope() = annotationClass.getAnnotation(BuiltinAnnotat
 internal fun Annotation.isQualifier() = annotationClass.getAnnotation(BuiltinAnnotation.Qualifier) != null
 
 internal fun Annotation.isMapKey() = annotationClass.getAnnotation(BuiltinAnnotation.IntoMap.Key) != null
+
+internal fun Validator.reportUnreadableMembers(declaration: TypeDeclaration) {
+    if (declaration !is HasUnreadableMembers) return
+    for ((type, reason) in declaration.typesWithUnreadableMembers) {
+        reportWarning(Strings.Warnings.unreadableMembers(type = type, reason = reason))
+    }
+}
 
 internal fun buildScopeModels(from: Annotated): Set<ScopeModel> {
     return from.annotations.mapNotNullTo(mutableSetOf()) {

@@ -16,9 +16,14 @@
 
 package com.yandex.yatagan.lang.common
 
+import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.scope.LexicalScope
 
 /**
  * Whether dagger compatibility is enabled in this scope.
  */
 fun LexicalScope.isDaggerCompat(): Boolean = ext[LangOptions].daggerCompatibilityMode
+
+interface HasUnreadableMembers {
+    val typesWithUnreadableMembers: Map<Type, String>
+}

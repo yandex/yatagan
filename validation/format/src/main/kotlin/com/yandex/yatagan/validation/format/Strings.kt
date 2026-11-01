@@ -598,6 +598,13 @@ object Strings {
             append("Specified condition ").append(conditionScope).append(" is always true (tautology), " +
                     "and can be removed entirely.")
         }.toWarning()
+
+        @Covered
+        fun unreadableMembers(type: Type, reason: String) = buildRichString {
+            color = TextColor.Inherit
+            append("Fields and methods declared in `").append(type).append("` are ignored, ")
+            append("because reflection failed to read them: ").append(reason)
+        }.toWarning()
     }
 
     object Notes {

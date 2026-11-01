@@ -88,6 +88,7 @@ internal class MembersInjectorModelImpl private constructor(
         if (!injectee.declaration.isEffectivelyPublic) {
             validator.reportError(Strings.Errors.invalidAccessForMemberInject())
         }
+        validator.reportUnreadableMembers(injectee.declaration)
     }
 
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(

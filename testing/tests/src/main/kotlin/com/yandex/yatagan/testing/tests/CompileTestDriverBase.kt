@@ -44,6 +44,7 @@ abstract class CompileTestDriverBase private constructor(
     private val useK2: Boolean = true,
 ) : CompileTestDriver, SourceSet by mainSourceSet {
     private var precompiledModuleOutputDirs: List<File>? = null
+    private val classesMissingAtRuntime = mutableSetOf<String>()
     private val options = mutableMapOf(
         IntOption.MaxIssueEncounterPaths.key to "100",
         IntOption.MaxSlotsPerSwitch.key to "100",
@@ -116,6 +117,10 @@ abstract class CompileTestDriverBase private constructor(
 
     override fun <V> givenOption(option: Option<V>, value: V) {
         options[option.key] = value.toString()
+    }
+
+    final override fun givenClassMissingAtRuntime(className: String) {
+        classesMissingAtRuntime += className
     }
 
     override fun baseSetUp() {
@@ -250,10 +255,12 @@ abstract class CompileTestDriverBase private constructor(
         workingDir: File,
         classpath: List<File>,
     ): ClassLoader {
-        return URLClassLoader(
-            classpath.map { it.toURI().toURL() }.toTypedArray(),
-            null,
-        )
+        return object : URLClassLoader(classpath.map { it.toURI().toURL() }.toTypedArray(), null) {
+            override fun findClass(name: String): Class<*> {
+                if (name in classesMissingAtRuntime) throw ClassNotFoundException(name)
+                return super.findClass(name)
+            }
+        }
     }
 
     /**

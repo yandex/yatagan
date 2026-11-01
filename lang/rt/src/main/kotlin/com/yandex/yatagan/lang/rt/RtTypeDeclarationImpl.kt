@@ -45,6 +45,7 @@ import com.yandex.yatagan.lang.Type
 import com.yandex.yatagan.lang.TypeDeclaration
 import com.yandex.yatagan.lang.TypeDeclarationKind
 import com.yandex.yatagan.lang.common.ConstructorBase
+import com.yandex.yatagan.lang.common.HasUnreadableMembers
 import com.yandex.yatagan.lang.common.TypeDeclarationBase
 import com.yandex.yatagan.lang.scope.FactoryKey
 import com.yandex.yatagan.lang.scope.LexicalScope
@@ -54,7 +55,8 @@ import kotlin.LazyThreadSafetyMode.PUBLICATION
 
 internal class RtTypeDeclarationImpl private constructor(
     val type: RtTypeImpl,
-) : TypeDeclarationBase(), Annotated by RtAnnotatedImpl(type, type.impl.asClass()), LexicalScope by type {
+) : TypeDeclarationBase(), Annotated by RtAnnotatedImpl(type, type.impl.asClass()), LexicalScope by type,
+    HasUnreadableMembers {
     private val impl = type.impl.asClass()
 
     override val isEffectivelyPublic: Boolean
@@ -124,8 +126,18 @@ internal class RtTypeDeclarationImpl private constructor(
             }.memoize()
     }
 
+    private val allMethodsAndUnreadableOwners by lazy {
+        val unreadableOwners = linkedMapOf<Class<*>, NoClassDefFoundError>()
+        impl.getMethodsOverrideAware(unreadableOwners) to unreadableOwners
+    }
+
+    private val allFieldsAndUnreadableOwners by lazy {
+        val unreadableOwners = linkedMapOf<Class<*>, NoClassDefFoundError>()
+        impl.getAllFields(unreadableOwners) to unreadableOwners
+    }
+
     override val methods: Sequence<Method> by lazy {
-        impl.getMethodsOverrideAware()
+        allMethodsAndUnreadableOwners.first
             .asSequence()
             .run {
                 when (kind) {
@@ -142,7 +154,7 @@ internal class RtTypeDeclarationImpl private constructor(
     }
 
     override val fields: Sequence<Field> by lazy {
-        impl.getAllFields()
+        allFieldsAndUnreadableOwners.first
             .asSequence()
             .filter { !it.isPrivate }
             .sortedBy { it.name }
@@ -152,6 +164,14 @@ internal class RtTypeDeclarationImpl private constructor(
                     owner = this,
                 )
             }.memoize()
+    }
+
+    override val typesWithUnreadableMembers: Map<Type, String> by lazy {
+        buildMap {
+            for ((owner, error) in allFieldsAndUnreadableOwners.second + allMethodsAndUnreadableOwners.second) {
+                put(RtTypeImpl(owner), error.toString())
+            }
+        }
     }
 
     override val defaultCompanionObjectDeclaration: TypeDeclaration? by lazy {
