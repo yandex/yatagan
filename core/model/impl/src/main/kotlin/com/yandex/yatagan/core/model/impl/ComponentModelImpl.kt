@@ -176,6 +176,7 @@ internal class ComponentModelImpl private constructor(
         if (declaration.kind != TypeDeclarationKind.Interface) {
             validator.reportError(Errors.nonInterfaceComponent())
         }
+        validator.reportUnreadableMembers(declaration)
     }
 
     override fun toString(childContext: MayBeInvalid?) = modelRepresentation(

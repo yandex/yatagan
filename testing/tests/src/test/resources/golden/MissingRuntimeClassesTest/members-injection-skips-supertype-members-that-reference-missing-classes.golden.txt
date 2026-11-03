@@ -1,0 +1,5 @@
+warning: Fields and methods declared in `test.Base` are ignored, because reflection failed to read them: java.lang.NoClassDefFoundError: test/Missing
+Encountered:
+  in graph for root-component test.TestComponent
+  here: injector-function inject(child: test.Child)
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

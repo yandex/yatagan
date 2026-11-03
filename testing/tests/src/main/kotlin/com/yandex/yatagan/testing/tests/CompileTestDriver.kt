@@ -33,6 +33,8 @@ interface CompileTestDriver : SourceSet {
 
     fun <V> givenOption(option: Option<V>, value: V)
 
+    fun givenClassMissingAtRuntime(className: String)
+
     /**
      * Runs the test and validates the output against the golden output file.
      * The golden output file resource path is computed from the junit test name.

@@ -297,13 +297,15 @@ fun Class<*>.boxed(): Class<*> {
 internal inline val <reified A : kotlin.Annotation> A.javaAnnotationClass: Class<A>
     get() = (this as java.lang.annotation.Annotation).annotationType() as Class<A>
 
-internal fun Class<*>.getAllFields(): List<ReflectField> = buildList {
+internal fun Class<*>.getAllFields(
+    unreadableOwners: MutableMap<Class<*>, NoClassDefFoundError>,
+): List<ReflectField> = buildList {
     tailrec fun handleClass(clazz: Class<*>, includeStatic: Boolean) {
         if (clazz === Any::class.java) {
             // Do not add fields from java.lang.Object.
             return
         }
-        for (declaredField in clazz.declaredFields) {
+        for (declaredField in clazz.declaredFieldsOrEmpty(unreadableOwners)) {
             if (declaredField.isPrivate || declaredField.isSynthetic) {
                 // Skip private/synthetic fields
                 continue
@@ -321,14 +323,16 @@ internal fun Class<*>.getAllFields(): List<ReflectField> = buildList {
     sortBy { it.name }
 }
 
-internal fun Class<*>.getMethodsOverrideAware(): List<ReflectMethod> = buildList {
+internal fun Class<*>.getMethodsOverrideAware(
+    unreadableOwners: MutableMap<Class<*>, NoClassDefFoundError>,
+): List<ReflectMethod> = buildList {
     val overrideControl = hashSetOf<MethodSignatureEquivalenceWrapper>()
     fun handleClass(clazz: Class<*>) {
         if (clazz === Any::class.java) {
             // Do not add methods from java.lang.Object.
             return
         }
-        for (declaredMethod in clazz.declaredMethods) {
+        for (declaredMethod in clazz.declaredMethodsOrEmpty(unreadableOwners)) {
             if (declaredMethod.isPrivate || declaredMethod.isSynthetic) {
                 // Skip private/synthetic methods
                 continue
@@ -342,6 +346,24 @@ internal fun Class<*>.getMethodsOverrideAware(): List<ReflectMethod> = buildList
     }
     handleClass(this@getMethodsOverrideAware)
     sortWith(MethodSignatureComparator)
+}
+
+private fun Class<*>.declaredFieldsOrEmpty(
+    unreadableOwners: MutableMap<Class<*>, NoClassDefFoundError>,
+): Array<ReflectField> = try {
+    declaredFields
+} catch (e: NoClassDefFoundError) {
+    unreadableOwners[this] = e
+    emptyArray()
+}
+
+private fun Class<*>.declaredMethodsOrEmpty(
+    unreadableOwners: MutableMap<Class<*>, NoClassDefFoundError>,
+): Array<ReflectMethod> = try {
+    declaredMethods
+} catch (e: NoClassDefFoundError) {
+    unreadableOwners[this] = e
+    emptyArray()
 }
 
 private fun arrayHashCode(types: Array<ReflectType>): Int = types.fold(1) { hash, type -> 31 * hash + hashCode(type) }

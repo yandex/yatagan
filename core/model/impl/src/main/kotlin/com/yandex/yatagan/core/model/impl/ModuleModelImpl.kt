@@ -111,6 +111,8 @@ internal class ModuleModelImpl private constructor(
         for (declaration in multiBindingDeclarations) {
             validator.child(declaration)
         }
+        validator.reportUnreadableMembers(declaration)
+        declaration.defaultCompanionObjectDeclaration?.let(validator::reportUnreadableMembers)
     }
 
     private object AsProvides : ModuleHostedBindingModel.Visitor<ProvidesBindingModel?> {
