@@ -280,14 +280,14 @@ private inline fun ReflectWildcardType.replaceBounds(transform: (ReflectType) ->
 fun Class<*>.boxed(): Class<*> {
     @Suppress("RemoveRedundantQualifierName")
     return if (!this.isPrimitive) this else when (this) {
-        java.lang.Boolean.TYPE -> java.lang.Boolean::class.java
-        java.lang.Byte.TYPE -> java.lang.Byte::class.java
-        java.lang.Short.TYPE -> java.lang.Short::class.java
-        java.lang.Character.TYPE -> java.lang.Character::class.java
-        java.lang.Integer.TYPE -> java.lang.Integer::class.java
-        java.lang.Long.TYPE -> java.lang.Long::class.java
-        java.lang.Float.TYPE -> java.lang.Float::class.java
-        java.lang.Double.TYPE -> java.lang.Double::class.java
+        java.lang.Boolean.TYPE -> Boolean::class.javaObjectType
+        java.lang.Byte.TYPE -> Byte::class.javaObjectType
+        java.lang.Short.TYPE -> Short::class.javaObjectType
+        java.lang.Character.TYPE -> Char::class.javaObjectType
+        java.lang.Integer.TYPE -> Int::class.javaObjectType
+        java.lang.Long.TYPE -> Long::class.javaObjectType
+        java.lang.Float.TYPE -> Float::class.javaObjectType
+        java.lang.Double.TYPE -> Double::class.javaObjectType
         java.lang.Void.TYPE -> java.lang.Void::class.java
         else -> throw AssertionError("Not reached")
     }

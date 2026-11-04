@@ -111,4 +111,4 @@ private fun ClassNameModel(declaration: KSClassDeclaration): ClassNameModel {
     )
 }
 
-private val KspErrorTypeRegex = "<ERROR TYPE: (.*)>".toRegex()
+internal val KspErrorTypeRegex = "<ERROR TYPE: (.*)>".toRegex()
