@@ -19,11 +19,11 @@ class KspLexicalScope(
     environment: SymbolProcessorEnvironment,
 ) : LexicalScopeBase() {
     init {
+        check(environment.kspVersion >= KotlinVersion(2, 0)) {
+            "KSP1 is not supported, use KSP2"
+        }
         ext[CachingMetaFactory] = CachingFactorySimple
-        ext[ProcessingUtils] = ProcessingUtils(
-            resolver = resolver,
-            isKsp2 = environment.kspVersion >= KotlinVersion(2, 0),
-        )
+        ext[ProcessingUtils] = ProcessingUtils(resolver = resolver)
         ext[LangModelFactory] = KspModelFactoryImpl(this)
     }
 
